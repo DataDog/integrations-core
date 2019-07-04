@@ -96,14 +96,12 @@ class IbmMqCheck(AgentCheck):
                         queue_tags.extend(q_tags)
 
                 try:
-                    queue = pymqi.Queue(queue_manager, ensure_bytes(queue_name))
-                    self.queue_stats(queue, queue_name, queue_tags)
+                    self.queue_stats(queue_manager, queue_name, queue_tags)
                     # some system queues don't have PCF metrics
                     # so we don't collect those metrics from those queues
                     if queue_name not in config.DISALLOWED_QUEUES:
                         self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
-                    queue.close()
                 except Exception as e:
                     self.warning('Cannot connect to queue {}: {}'.format(queue_name, e))
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags)
@@ -162,25 +160,36 @@ class IbmMqCheck(AgentCheck):
                 self.warning("Error getting queue manager stats: {}".format(e))
                 self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.CRITICAL, tags)
 
-    def queue_stats(self, queue, queue_name, tags):
+    def queue_stats(self, queue_manager, queue_name, tags):
         """
         Grab stats from queues
         """
-        for mname, pymqi_value in iteritems(metrics.queue_metrics()):
-            try:
-                mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
-                m = queue.inquire(pymqi_value)
-                self.gauge(mname, m, tags=tags)
-            except pymqi.Error as e:
-                self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
+        try:
+            args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
+            pcf = pymqi.PCFExecute(queue_manager)
+            response = pcf.MQCMD_INQUIRE_Q(args)
+        except pymqi.MQMIError as e:
+            self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
+        else:
+            # Response is a list. It likely has only one member in it.
+            for queue_info in response:
+                self._submit_queue_stats(queue_info, queue_name, tags)
 
-        for mname, func in iteritems(metrics.queue_metrics_functions()):
-            try:
-                mname = '{}.queue.{}'.format(self.METRIC_PREFIX, mname)
-                m = func(queue)
-                self.gauge(mname, m, tags=tags)
-            except pymqi.Error as e:
-                self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
+    def _submit_queue_stats(self, queue_info, queue_name, tags):
+        for metric_suffix, mq_attr in iteritems(metrics.queue_metrics()):
+            metric_name = '{}.queue.{}'.format(self.METRIC_PREFIX, metric_suffix)
+            if callable(mq_attr):
+                metric_value = mq_attr(queue_info)
+                if metric_value is not None:
+                    self.gauge(metric_name, metric_value, tags=tags)
+                else:
+                    self.log.debug("Date for attribute %s not found for queue %s", metric_suffix, queue_name)
+            else:
+                if mq_attr in queue_info:
+                    metric_value = queue_info[mq_attr]
+                    self.gauge(metric_name, metric_value, tags=tags)
+                else:
+                    self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
     def get_pcf_queue_metrics(self, queue_manager, queue_name, tags):
         try:
@@ -192,7 +201,7 @@ class IbmMqCheck(AgentCheck):
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
-            self.warning("Error getting queue metrics for {}: {}".format(queue_name, e))
+            self.warning("Error getting pcf queue stats for {}: {}".format(queue_name, e))
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
