@@ -9,6 +9,9 @@ Capture metrics from directories and files of your choosing. The Agent collects:
   * Age of the creation
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Directory check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.

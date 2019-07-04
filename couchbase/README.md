@@ -16,6 +16,8 @@ And many more.
 
 ## Setup
 
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Couchbase check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Couchbase nodes.
@@ -25,14 +27,14 @@ The Couchbase check is included in the [Datadog Agent][2] package, so you don't 
 1. Edit the `couchbase.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Couchbase performance data.
 	See the [sample couchbase.d/conf.yaml][4] for all available configuration options.
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - server: http://localhost:8091 # or wherever your Couchbase is listening
-    #user: <your_username>
-    #password: <your_password>
-```
+    instances:
+      - server: http://localhost:8091 # or wherever your Couchbase is listening
+        #user: <your_username>
+        #password: <your_password>
+    ```
 
 2. [Restart the Agent][5] to begin sending Couchbase metrics to Datadog.
 

@@ -6,10 +6,11 @@ This check monitors [Harbor][1] through the Datadog Agent.
 
 ## Setup
 
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
-The Harbor check is included in the [Datadog Agent][7] package.
-No additional installation is needed on your server.
+The Harbor check is included in the [Datadog Agent][7] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -34,10 +35,10 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 - `harbor.can_connect`
 Returns `OK` if the Harbor API is reachable and authentication is successful, otherwise returns `CRITICAL`.
 
-- `harbor.status`  
+- `harbor.status`
 Returns `OK` if the specified Harbor component is healthy, otherwise returns `CRITICAL`. Returns `UNKNOWN` with Harbor < 1.5.
 
-- `harbor.registry.status`  
+- `harbor.registry.status`
 Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Monitors the health of external registries used by Harbor for replication.
 
 

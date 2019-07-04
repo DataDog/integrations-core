@@ -5,6 +5,8 @@ This check monitors [Vault][1] cluster health and leader changes.
 
 ## Setup
 
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Vault check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
@@ -26,18 +28,18 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-`vault.leader_change`:  
+`vault.leader_change`:
 This event fires when the cluster leader changes.
 
 ### Service Checks
 
-`vault.can_connect`:  
+`vault.can_connect`:
 Returns CRITICAL if the Agent cannot connect to Vault, otherwise OK.
 
-`vault.unsealed`:  
+`vault.unsealed`:
 Returns CRITICAL if Vault is sealed, otherwise OK.
 
-`vault.initialized`:  
+`vault.initialized`:
 Returns CRITICAL if Vault is not yet initialized, otherwise OK.
 
 ## Troubleshooting

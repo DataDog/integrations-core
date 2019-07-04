@@ -18,6 +18,8 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 
 ## Setup
 
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The NGINX check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your NGINX servers.
@@ -40,7 +42,7 @@ http_stub_status_module
 
 If the command output does not include `http_stub_status_module`, you must install an NGINX package that includes the module. You _can_ compile your own NGINX-enabling the module as you compile it-but most modern Linux distributions provide alternative NGINX packages with various combinations of extra modules built in. Check your operating system's NGINX packages to find one that includes the stub status module.
 
-#### NGINX Plus 
+#### NGINX Plus
 
 NGINX Plus packages prior to release 13 include the http status module. For NGINX Plus release 13 and above, the status module is deprecated and you must use the new Plus API instead. See [the announcement][5] for more information.
 
@@ -77,13 +79,13 @@ server {
 NGINX Plus users can also utilize `stub_status`, but since that module provides fewer metrics, Datadog recommends using `status`.
 
 For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_api_module][15] instead. For example, enable the `/api` endpoint in your main NGINX configuration file (`/etc/nginx/conf.d/default.conf`):
-  
+
   ```
-  server { 
-    listen 8080; 
-    location /api { 
-    api write=on; 
-  } 
+  server {
+    listen 8080;
+    location /api {
+    api write=on;
+  }
   ```
 
 
@@ -100,7 +102,7 @@ sudo nginx -t && sudo nginx -s reload
 
 **NGINX Plus**
 
-* For NGINX Plus releases 13+, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file. 
+* For NGINX Plus releases 13+, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
 * If you are using `http_api_module`, set the parameter `nginx_status_url` to the server's `/api` location in your `nginx.d/conf.yaml` configuration file, for example:
 
   ```

@@ -7,6 +7,9 @@ Send events from your Nagios-monitored infrastructure to Datadog for richer aler
 This check watches your Nagios server's logs and sends events to your Datadog event stream: track service flaps, host state changes, passive service checks, host and service downtimes, and more. This check can also send Nagios performance data as metrics to Datadog.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Nagios check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Nagios servers.

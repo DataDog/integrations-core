@@ -9,6 +9,9 @@ This check lets you track the performance of your SQL Server instances. It colle
 You can also create your own metrics by having the check run custom queries.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The SQL Server check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your SQL Server instances.
@@ -43,7 +46,7 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 
     See the [example check configuration][4] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
-    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][5].  
+    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][5].
     **Note**: It is also possible to use the Windows Authentication and not specify the username/password with
     ```yaml
     connection_string: "Trusted_Connection=yes"

@@ -9,6 +9,9 @@ Track disk utilization and failed volumes on each of your HDFS DataNodes. This A
 Use this check (hdfs_datanode) and its counterpart check (hdfs_namenode), not the older two-in-one check (hdfs); that check is deprecated.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The HDFS DataNode check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your DataNodes.

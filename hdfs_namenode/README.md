@@ -9,6 +9,9 @@ Monitor your primary _and_ standby HDFS NameNodes to know when your cluster fall
 Use this check (hdfs_namenode) and its counterpart check (hdfs_datanode), not the older two-in-one check (hdfs); that check is deprecated.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The HDFS NameNode check is included in the [Datadog Agent][112] package, so you don't need to install anything else on your NameNodes.

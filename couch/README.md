@@ -12,6 +12,9 @@ Capture CouchDB data in Datadog to:
 For performance reasons, the CouchDB version you're using is cached, so you cannot monitor CouchDB instances with different versions with the same agent instance.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The CouchDB check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your CouchDB servers.

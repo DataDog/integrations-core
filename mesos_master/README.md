@@ -15,9 +15,9 @@ This check collects metrics from Mesos masters for:
 
 And many more.
 ## Setup
+
 ### Installation
-The installation is the same on Mesos with and without DC/OS.
-Run the datadog-agent container on each of your Mesos master nodes:
+The installation is the same on Mesos with and without DC/OS. Run the datadog-agent container on each of your Mesos master nodes:
 
 ```
 docker run -d --name datadog-agent \

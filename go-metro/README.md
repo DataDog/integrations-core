@@ -7,6 +7,9 @@ The TCP RTT check reports on roundtrip times between the host the agent is runni
 This check is only shipped in the 64-bit DEB and RPM Datadog Agent v5 packages. The check is currently _not_ available with Datadog Agent v6.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The TCP RTT check-also known as [go-metro][1]-is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.

@@ -14,6 +14,9 @@ This check collects metrics from your YARN ResourceManager, including (but not l
 `yarn.apps.<METRIC>` metrics have been deprecated in favor of `yarn.apps.<METRIC>_gauge` metrics, because `yarn.apps` metrics are incorrectly reported as a `RATE` instead of a `GAUGE`.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The YARN check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your YARN ResourceManager.

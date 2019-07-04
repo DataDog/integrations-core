@@ -8,6 +8,9 @@ The Agent's Marathon check lets you:
 * Monitor the number of queued applications and the number of deployments
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Marathon check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Marathon master.

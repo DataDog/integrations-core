@@ -12,6 +12,8 @@ Capture HAProxy activity in Datadog to:
 
 ## Setup
 
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The HAProxy check is packaged with the Agent. To start gathering your HAProxy metrics and logs, you need to:

@@ -7,6 +7,9 @@ This check watches for successful build-related events and sends them to Datadog
 Unlike most Agent checks, this one doesn't collect any metrics-just events.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Teamcity check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Teamcity servers.

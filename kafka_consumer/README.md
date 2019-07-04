@@ -9,6 +9,9 @@ This Agent check only collects metrics for message offsets. If you want to colle
 This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in kafka or zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Agent's Kafka consumer check is included in the [Datadog Agent][112] package, so you don't need to install anything else on your Kafka nodes.

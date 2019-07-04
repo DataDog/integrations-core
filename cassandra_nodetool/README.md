@@ -8,6 +8,9 @@ This check collects metrics for your Cassandra cluster that are not available th
 It uses the `nodetool` utility to collect them.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Cassandra Nodetool check is included in the [Datadog Agent][113] package, so you don't need to install anything else on your Cassandra nodes.

@@ -7,11 +7,15 @@ Get metrics from Dotnetclr service in real time to:
 * Visualize and monitor Dotnetclr states
 * Be notified about Dotnetclr failovers and events.
 
-## Installation
+## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
+### Installation
 
 The Dotnetclr check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
-## Configuration
+### Configuration
 
 1. Edit the `dotnetclr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Dotnetclr performance data.
     See the [sample dotnetclr.d/conf.yaml][3] for all available configuration options.

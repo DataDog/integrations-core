@@ -9,6 +9,9 @@ Track the memory usage of your Go services and collect metrics instrumented from
 If you prefer to instrument your Go code using only [dogstats-go][2], you can still use this integration to collect memory-related metrics.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Go Expvar check is packaged with the Agent, so [install the Agent][3] anywhere you run Go services to collect metrics.

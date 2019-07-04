@@ -6,6 +6,8 @@ Whether you use Redis as a database, cache, or message queue, this integration h
 
 ## Setup
 
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Redis check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Redis servers.

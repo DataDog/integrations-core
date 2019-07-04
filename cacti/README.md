@@ -8,6 +8,9 @@ Get metrics from cacti service in real time to:
 * Be notified about cacti failovers and events.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Cacti check is included in the [Datadog Agent][1] package, to start gathering metrics you first need to:
@@ -111,4 +114,3 @@ Need help? Contact [Datadog support][5].
 [5]: https://docs.datadoghq.com/help
 [6]: https://github.com/pbanaszkiewicz/python-rrdtool
 [7]: https://github.com/commx/python-rrdtool/issues/25
-

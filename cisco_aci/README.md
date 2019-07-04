@@ -9,6 +9,9 @@ The Cisco ACI Integration lets you:
 * Monitor the switches and controllers themselves
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Cisco ACI check is packaged with the Agent, so simply [install the Agent][1] on a server within your network.

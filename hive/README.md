@@ -6,6 +6,8 @@ This check monitors two parts of [Hive][1]: Hive Metastore and HiveServer2.
 
 ## Setup
 
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 The Hive check is included in the [Datadog Agent][2] package.
@@ -83,7 +85,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
- **hive.can_connect**:  
+ **hive.can_connect**:
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored HiveServer2/Hive Metastore instance, otherwise returns `OK`.
 
 ### Events

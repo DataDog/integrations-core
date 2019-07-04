@@ -10,6 +10,8 @@ Use the Datadog Agent to monitor how well Istio is performing.
 
 ## Setup
 
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
 Istio is included in the Datadog Agent. So, just [install the Agent][1] on your istio servers or in your cluster and point it at Istio.

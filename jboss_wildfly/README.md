@@ -6,10 +6,11 @@ This check monitors [JBoss][1] and [WildFly][2] applications.
 
 ## Setup
 
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+
 ### Installation
 
-The JBoss/WildFly check is included in the [Datadog Agent][3] package.
-No additional installation is needed on your server.
+The JBoss/WildFly check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -18,7 +19,7 @@ No additional installation is needed on your server.
    performance data. See the [sample jboss_wildfly.d/conf.yaml][4] for all available configuration options.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
-   You can specify the metrics you are interested in by editing the configuration below. 
+   You can specify the metrics you are interested in by editing the configuration below.
    To learn how to customize the collected metrics, visit the [JMX Checks documentation][5] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][6].
 
