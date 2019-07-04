@@ -82,7 +82,8 @@ For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_ap
   server { 
     listen 8080; 
     location /api { 
-    api write=on; 
+      api write=on;
+    }
   } 
   ```
 
