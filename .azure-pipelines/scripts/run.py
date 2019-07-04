@@ -30,7 +30,8 @@ def main():
         scripts = sorted(os.listdir(scripts_path))
         for script in scripts:
             script_file = os.path.join(scripts_path, script)
-            print(f'Running: {script_file}')
+            display_header = f'Running: {script_file}'
+            print(f'\n{display_header}\n{"-" * len(display_header)}\n')
 
             subprocess.run([script_file], shell=True, check=True)
 
