@@ -68,10 +68,10 @@ jobs:
 #     check: cassandra_nodetool
 #     display: Cassandra Nodetool
 
-- template: './test-single-linux.yml'
-  parameters:
-    check: ceph
-    display: Ceph
+# - template: './test-single-linux.yml'
+#   parameters:
+#     check: ceph
+#     display: Ceph
 
 # - template: './test-single-linux.yml'
 #   parameters:

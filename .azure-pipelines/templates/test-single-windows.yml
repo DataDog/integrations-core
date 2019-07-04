@@ -17,6 +17,9 @@ jobs:
   - template: './checkout-code.yml'
   - template: './set-up-windows.yml'
   - template: './install-deps-python.yml'
+  - template: './set-up-integrations.yml'
+    parameters:
+      check: ${{ parameters.check }}
 
   - ${{ if eq(parameters.validate, 'true') }}:
     - template: './run-validations.yml'
