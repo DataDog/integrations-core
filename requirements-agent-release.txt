@@ -79,7 +79,7 @@ datadog-openstack-controller==1.2.1
 datadog-openstack==1.8.1
 datadog-oracle==1.8.0
 datadog-pdh-check==1.6.1; sys_platform == 'win32'
-datadog-pgbouncer==1.6.0; sys_platform != 'win32'
+datadog-pgbouncer==1.7.0; sys_platform != 'win32'
 datadog-php-fpm==1.5.0
 datadog-postfix==1.4.0; sys_platform != 'win32'
 datadog-postgres==2.9.0
