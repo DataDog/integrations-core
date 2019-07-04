@@ -355,3 +355,16 @@ def test_get_keystone_url_from_datadog_config():
     )
     keystone_server_url = check._get_keystone_server_url(INSTANCES[0])
     assert keystone_server_url == 'http://10.0.2.15:5000'
+
+
+def test_get_keystone_url_from_implicit_openstack_config():
+    # This test is for documentation purposes because it is really testing OpenStackConfig
+    instances = copy.deepcopy(INSTANCES)
+    instances[0]['keystone_server_url'] = None
+    instances[0]['openstack_config_file_path'] = os.path.abspath('./tests/fixtures/openstack_config.yaml')
+    instances[0]['openstack_cloud_name'] = 'rackspace'
+    check = OpenStackControllerCheck(
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=instances
+    )
+    keystone_server_url = check._get_keystone_server_url(instances[0])
+    assert keystone_server_url == 'https://identity.api.rackspacecloud.com/v2.0/'
