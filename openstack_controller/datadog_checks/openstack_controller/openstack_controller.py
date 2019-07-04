@@ -840,6 +840,9 @@ class OpenStackControllerCheck(AgentCheck):
             return keystone_server_url
 
         openstack_config_file_path = instance_config.get("openstack_config_file_path")
+        if not openstack_config_file_path and not keystone_server_url:
+            raise IncompleteConfig("Either keystone_server_url or openstack_config_file_path need to be provided")
+
         openstack_cloud_name = instance_config.get("openstack_cloud_name")
         openstack_config = OpenStackConfig(config_files=[openstack_config_file_path])
         cloud = openstack_config.get_one(cloud=openstack_cloud_name)

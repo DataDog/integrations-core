@@ -2,25 +2,24 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import os
 
 import mock
+import pytest
 from mock import ANY
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 from datadog_checks.openstack_controller.api import AbstractApi
+from datadog_checks.openstack_controller.exceptions import IncompleteConfig
 
 from . import common
 
-INSTANCES = common.MOCK_CONFIG['instances']
-
 
 def test_parse_uptime_string(aggregator):
-    instances = copy.deepcopy(INSTANCES)
-    instances[0]['tags'] = ['optional:tag1']
+    instance = copy.deepcopy(common.KEYSTONE_INSTACE)
+    instance['tags'] = ['optional:tag1']
     init_config = common.MOCK_CONFIG['init_config']
-    check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=instances)
+    check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
     response = u' 16:53:48 up 1 day, 21:34,  3 users,  load average: 0.04, 0.14, 0.19\n'
     uptime_parsed = check._parse_uptime_string(response)
     assert uptime_parsed == [0.04, 0.14, 0.19]
@@ -35,7 +34,7 @@ def test_populate_servers_cache_between_runs(servers_detail, aggregator):
     Ensure the cache contains the expected VMs between check runs.
     """
 
-    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=INSTANCES)
+    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=[common.KEYSTONE_INSTACE])
 
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
@@ -63,7 +62,9 @@ def test_populate_servers_cache_with_project_name_none(servers_detail, aggregato
     """
     Ensure the cache contains the expected VMs between check runs.
     """
-    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=INSTANCES)
+    check = OpenStackControllerCheck(
+        "test", {'ssl_verify': False}, {}, instances=[copy.deepcopy(common.KEYSTONE_INSTACE)]
+    )
 
     # Start off with a list of servers
     check.servers_cache = copy.deepcopy(common.SERVERS_CACHE_MOCK)
@@ -85,33 +86,29 @@ def test_populate_servers_cache_with_project_name_none(servers_detail, aggregato
 
 @mock.patch('datadog_checks.openstack_controller.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi))
 def test_check(mock_api, aggregator):
-    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=INSTANCES)
+    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=[common.KEYSTONE_INSTACE])
 
-    check.check(INSTANCES[0])
+    check.check(common.KEYSTONE_INSTACE)
 
     aggregator.assert_service_check('openstack.keystone.api.up', AgentCheck.OK)
     aggregator.assert_service_check('openstack.nova.api.up', AgentCheck.OK)
     aggregator.assert_service_check('openstack.neutron.api.up', AgentCheck.OK)
-    mock_api.assert_called_with(ANY, ANY, INSTANCES[0])
+    mock_api.assert_called_with(ANY, ANY, common.KEYSTONE_INSTACE)
 
 
 @mock.patch('datadog_checks.openstack_controller.api.ApiFactory.create', return_value=mock.MagicMock(AbstractApi))
 def test_check_with_config_file(mock_api, aggregator):
-    instances = copy.deepcopy(INSTANCES)
-    del instances[0]['keystone_server_url']
-    instances[0]['openstack_config_file_path'] = os.path.abspath('./tests/fixtures/openstack_config.yaml')
-    instances[0]['openstack_cloud_name'] = 'test_cloud'
-    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=instances)
+    check = OpenStackControllerCheck("test", {'ssl_verify': False}, {}, instances=[common.CONFIG_FILE_INSTANCE])
 
-    check.check(instances[0])
+    check.check(common.CONFIG_FILE_INSTANCE)
 
     aggregator.assert_service_check('openstack.keystone.api.up', AgentCheck.OK)
     aggregator.assert_service_check('openstack.nova.api.up', AgentCheck.OK)
     aggregator.assert_service_check('openstack.neutron.api.up', AgentCheck.OK)
-    mock_api.assert_called_with(ANY, ANY, instances[0])
+    mock_api.assert_called_with(ANY, ANY, common.CONFIG_FILE_INSTANCE)
 
 
-def get_server_details_response(params, timeout=None):
+def get_server_details_response(params):
     if 'marker' not in params:
         return common.MOCK_NOVA_SERVERS_PAGINATED
     return common.EMPTY_NOVA_SERVERS
@@ -127,7 +124,7 @@ def test_get_paginated_server(servers_detail, aggregator):
     """
 
     check = OpenStackControllerCheck(
-        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=INSTANCES
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=[common.KEYSTONE_INSTACE]
     )
     check.populate_servers_cache({'testproj': {"id": "6f70656e737461636b20342065766572", "name": "testproj"}}, [])
     servers = check.servers_cache['servers']
@@ -190,7 +187,7 @@ def get_server_diagnostics_pre_2_48_response(server_id):
 )
 def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggregator):
     check = OpenStackControllerCheck(
-        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=INSTANCES
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=[common.KEYSTONE_INSTACE]
     )
 
     check.collect_server_diagnostic_metrics({})
@@ -338,33 +335,35 @@ def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggr
 
 
 def test_get_keystone_url_from_openstack_config():
-    instances = copy.deepcopy(INSTANCES)
-    instances[0]['keystone_server_url'] = None
-    instances[0]['openstack_config_file_path'] = os.path.abspath('./tests/fixtures/openstack_config.yaml')
-    instances[0]['openstack_cloud_name'] = 'test_cloud'
     check = OpenStackControllerCheck(
-        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=instances
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=[common.CONFIG_FILE_INSTANCE]
     )
-    keystone_server_url = check._get_keystone_server_url(instances[0])
+    keystone_server_url = check._get_keystone_server_url(common.CONFIG_FILE_INSTANCE)
     assert keystone_server_url == 'http://xxx.xxx.xxx.xxx:5000/v2.0/'
 
 
 def test_get_keystone_url_from_datadog_config():
     check = OpenStackControllerCheck(
-        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=INSTANCES
+        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=[common.KEYSTONE_INSTACE]
     )
-    keystone_server_url = check._get_keystone_server_url(INSTANCES[0])
+    keystone_server_url = check._get_keystone_server_url(common.KEYSTONE_INSTACE)
     assert keystone_server_url == 'http://10.0.2.15:5000'
 
 
 def test_get_keystone_url_from_implicit_openstack_config():
     # This test is for documentation purposes because it is really testing OpenStackConfig
-    instances = copy.deepcopy(INSTANCES)
-    instances[0]['keystone_server_url'] = None
-    instances[0]['openstack_config_file_path'] = os.path.abspath('./tests/fixtures/openstack_config.yaml')
-    instances[0]['openstack_cloud_name'] = 'rackspace'
-    check = OpenStackControllerCheck(
-        "test", {'ssl_verify': False, 'paginated_server_limit': 1}, {}, instances=instances
-    )
-    keystone_server_url = check._get_keystone_server_url(instances[0])
+    instance = copy.deepcopy(common.CONFIG_FILE_INSTANCE)
+    instance['openstack_cloud_name'] = 'rackspace'
+    check = OpenStackControllerCheck("test", {}, {}, instances=[instance])
+    keystone_server_url = check._get_keystone_server_url(instance)
     assert keystone_server_url == 'https://identity.api.rackspacecloud.com/v2.0/'
+
+
+def test_missing_keystone_server_url():
+    # This test is for documentation purposes because it is really testing OpenStackConfig
+    instance = copy.deepcopy(common.KEYSTONE_INSTACE)
+    instance['keystone_server_url'] = None
+    check = OpenStackControllerCheck("test", {}, {}, instances=[instance])
+
+    with pytest.raises(IncompleteConfig):
+        check._get_keystone_server_url(instance)
