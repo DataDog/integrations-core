@@ -8,24 +8,24 @@ This check watches your Nagios server's logs and sends events to your Datadog ev
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to transpose those instructions in a containerized environment.
 
 ### Installation
 
-The Nagios check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Nagios servers.
+The Nagios check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Nagios servers.
 
 ### Configuration
 
-Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample nagios.d/conf.yaml][3] for all available configuration options.
+Edit the `nagios.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample nagios.d/conf.yaml][4] for all available configuration options.
 
-[Restart the Agent][4] to start sending Nagios events and (optionally) performance data metrics to Datadog.
+[Restart the Agent][5] to start sending Nagios events and (optionally) performance data metrics to Datadog.
 
 #### Metrics collection
-The Nagios check can potentially emit [custom metrics][13], which may impact your [billing][14].
+The Nagios check can potentially emit [custom metrics][6], which may impact your [billing][7].
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `nagios` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `nagios` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -53,19 +53,20 @@ The check watches the Nagios events log for log lines containing these strings, 
 The Nagios check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-* [Understand your Nagios alerts with Datadog][7]
+* [Understand your Nagios alerts with Datadog][10]
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[3]: https://github.com/DataDog/integrations-core/blob/master/nagios/datadog_checks/nagios/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[6]: https://docs.datadoghq.com/help
-[7]: https://www.datadoghq.com/blog/nagios-monitoring
-[8]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[9]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
+[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/nagios/datadog_checks/nagios/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
+[7]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[9]: https://docs.datadoghq.com/help
+[10]: https://www.datadoghq.com/blog/nagios-monitoring

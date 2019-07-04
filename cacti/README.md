@@ -9,11 +9,11 @@ Get metrics from cacti service in real time to:
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to transpose those instructions in a containerized environment.
 
 ### Installation
 
-The Cacti check is included in the [Datadog Agent][1] package, to start gathering metrics you first need to:
+The Cacti check is included in the [Datadog Agent][2] package, to start gathering metrics you first need to:
 - Install librrd headers and libraries
 - Install python bindings to rrdtool
 
@@ -57,7 +57,7 @@ echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
 echo -e "\033[0;31mMissing SELECT grant\033[0m"
 ```
 
-Configure the Agent to connect to MySQL, edit your `cacti.d/conf.yaml` file. See the [sample cacti.d/conf.yaml][2] for all available configuration options:
+Configure the Agent to connect to MySQL, edit your `cacti.d/conf.yaml` file. See the [sample cacti.d/conf.yaml][3] for all available configuration options:
 
 ```yaml
 init_config:
@@ -87,11 +87,11 @@ fi'
 
 ### Validation
 
-[Run the Agent's `status` subcommand][3] and look for `cacti` under the Checks section.
+[Run the Agent's `status` subcommand][4] and look for `cacti` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][4] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The Cacti check does not include any events.
@@ -105,12 +105,13 @@ The Python library used by this integration leaks memory under certain circumsta
 
 A [Github issue][7] has been opened to track this memory leak.
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][8].
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/cacti/datadog_checks/cacti/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[4]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
-[5]: https://docs.datadoghq.com/help
+[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://github.com/DataDog/integrations-core/blob/master/cacti/datadog_checks/cacti/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
 [6]: https://github.com/pbanaszkiewicz/python-rrdtool
 [7]: https://github.com/commx/python-rrdtool/issues/25
+[8]: https://docs.datadoghq.com/help

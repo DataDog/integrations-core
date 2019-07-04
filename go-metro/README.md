@@ -8,11 +8,11 @@ This check is only shipped in the 64-bit DEB and RPM Datadog Agent v5 packages. 
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to transpose those instructions in a containerized environment.
 
 ### Installation
 
-The TCP RTT check-also known as [go-metro][1]-is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
+The TCP RTT check-also known as [go-metro][2]-is packaged with the Agent, but requires additional system libraries. The check uses timestamps provided by the PCAP library to compute the time between any outgoing packet and the corresponding TCP acknowledgement. As such, PCAP must be installed and configured.
 
 Debian-based systems should use one of the following:
 
@@ -36,7 +36,7 @@ $ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 
 ### Configuration
 
-Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See the [sample go-metro.yaml][2] for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
+Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See the [sample go-metro.yaml][3] for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
 
   ```yaml
     init_config:
@@ -59,7 +59,7 @@ Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See th
 
 ### Validation
 
-To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you [Run the Agent's `status` subcommand][3], you should see something similar to the following:
+To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you [Run the Agent's `status` subcommand][4], you should see something similar to the following:
 
 ```
 ● datadog-agent.service - "Datadog Agent"
@@ -83,7 +83,7 @@ If the TCP RTT check has started you should see something similar to the go-metr
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][4] for a list of metrics provided by this check.
+See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
 The Go-metro check does not include any events.
@@ -92,10 +92,11 @@ The Go-metro check does not include any events.
 The Go-metro check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][6].
 
-[1]: https://github.com/DataDog/go-metro
-[2]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[4]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
-[5]: https://docs.datadoghq.com/help
+[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://github.com/DataDog/go-metro
+[3]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
+[6]: https://docs.datadoghq.com/help

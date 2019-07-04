@@ -13,17 +13,17 @@ For performance reasons, the CouchDB version you're using is cached, so you cann
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation](https://docs.datadoghq.com/agent/autodiscovery/integrations/) to learn how to transpose those instructions in a containerized environment.
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to transpose those instructions in a containerized environment.
 
 ### Installation
 
-The CouchDB check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your CouchDB servers.
+The CouchDB check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your CouchDB servers.
 
 ### Configuration
 
 #### Metric Collection
 
-1. Edit the `couch.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your CouchDB performance data. See the [sample couch.d/conf.yaml][4] for all available configuration options.
+1. Edit the `couch.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your CouchDB performance data. See the [sample couch.d/conf.yaml][5] for all available configuration options.
 
 2. Add this configuration block to your `couch.d/conf.yaml` file to start gathering your [CouchDB Metrics](#metrics):
 
@@ -42,7 +42,7 @@ The CouchDB check is included in the [Datadog Agent][2] package, so you don't ne
 
     Optionally, provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
 
-3. [Restart the Agent][5] to begin sending CouchDB metrics to Datadog.
+3. [Restart the Agent][6] to begin sending CouchDB metrics to Datadog.
 
 #### Log Collection
 
@@ -65,18 +65,18 @@ The CouchDB check is included in the [Datadog Agent][2] package, so you don't ne
             service: couch
     ```
 
-    Change the `path` and `service` parameter values and configure them for your environment. See the [sample couch.d/conf.yaml][4] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample couch.d/conf.yaml][5] for all available configuration options.
 
-3. [Restart the Agent][5].
+3. [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `couch` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `couch` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -87,19 +87,20 @@ The Couch check does not include any events.
 `couchdb.can_connect`: Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-* [Monitoring CouchDB performance with Datadog][9]
+* [Monitoring CouchDB performance with Datadog][10]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/couch/images/couchdb_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/couch/datadog_checks/couch/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv
-[8]: https://docs.datadoghq.com/help
-[9]: https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/couch/datadog_checks/couch/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv
+[9]: https://docs.datadoghq.com/help
+[10]: https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog
