@@ -298,13 +298,16 @@ class AggregatorStub(object):
         Return formatted similar metrics received compared to an expected metric
         """
         max_metrics_to_display = 15
-        expected = MetricStub(name, metric_type, value, sorted(tags), hostname)
+        if tags:
+            tags = sorted(tags)
+        expected = MetricStub(name, metric_type, value, tags, hostname)
 
         similar_metrics = self._get_similar_metrics(expected)
         similar_metrics_to_print = []
 
         for score, metric_stub in similar_metrics[:max_metrics_to_display]:
-            metric_stub.tags.sort()
+            if metric_stub.tags:
+                metric_stub.tags.sort()
             similar_metrics_to_print.append("{:.2f}    {}".format(score, metric_stub))
 
         return (
