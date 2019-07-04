@@ -565,10 +565,10 @@ jobs:
 #     check: windows_service
 #     display: Windows Service
 
-- template: './test-single-windows.yml'
-  parameters:
-    check: wmi_check
-    display: WMI
+# - template: './test-single-windows.yml'
+#   parameters:
+#     check: wmi_check
+#     display: WMI
 
 # - template: './test-single-linux.yml'
 #   parameters:
