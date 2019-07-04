@@ -218,10 +218,10 @@ jobs:
 #     check: ibm_db2
 #     display: IBM Db2
 
-- template: './test-single-linux.yml'
-  parameters:
-    check: ibm_mq
-    display: IBM MQ
+# - template: './test-single-linux.yml'
+#   parameters:
+#     check: ibm_mq
+#     display: IBM MQ
 
 # - template: './test-single-linux.yml'
 #   parameters:
