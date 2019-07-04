@@ -1,9 +1,11 @@
 import os
+import platform
 import re
 import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+WINDOWS = platform.system() == 'Windows'
 
 
 def main():
@@ -24,6 +26,9 @@ def main():
 
         scripts = sorted(os.listdir(scripts_path))
         for script in scripts:
+            if WINDOWS and script.endswith('.sh'):
+                continue
+
             script_file = os.path.join(scripts_path, script)
             subprocess.run([script_file], shell=True, check=True)
 
