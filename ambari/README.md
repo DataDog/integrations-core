@@ -47,7 +47,7 @@ See [metadata.csv][7] for a list of all metrics provided by this integration.
 **ambari.can_connect**:<br>
 Returns OK if the cluster is reachable, CRITICAL otherwise.
 
-**ambari.state**:
+**ambari.state**:<br>
 Returns OK if the service is installed or running, WARNING if the service is stopping or uninstalling,
 or CRITICAL if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
 
