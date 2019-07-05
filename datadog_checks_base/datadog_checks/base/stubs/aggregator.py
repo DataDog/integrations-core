@@ -190,12 +190,7 @@ class AggregatorStub(object):
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
             condition = len(candidates) >= at_least
-        self._assert(
-            condition,
-            msg=msg,
-            expected_stub=expected_metric,
-            submitted_elements=self._metrics,
-        )
+        self._assert(condition, msg=msg, expected_stub=expected_metric, submitted_elements=self._metrics)
 
     def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None):
         """
@@ -229,10 +224,7 @@ class AggregatorStub(object):
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
             condition = len(candidates) >= at_least
         self._assert(
-            condition=condition,
-            msg=msg,
-            expected_stub=expected_service_check,
-            submitted_elements=self._service_checks,
+            condition=condition, msg=msg, expected_stub=expected_service_check, submitted_elements=self._service_checks
         )
 
     @staticmethod
