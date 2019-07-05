@@ -41,7 +41,7 @@ The Marathon check is included in the [Datadog Agent][1] package, so you don't n
     logs_enabled: true
     ```
 
- 2. Because Marathon uses logback, you can specify a custom log format. With Datadog, two formats are supported out of the box, the default one provided by Marathon, and the Datadog recommended format. Add a fileappender to your configuration as in the following example and replace `$PATTERN$` with either `[%date] %-5level %message \(%logger:%thread\)%n` for Marathon default format or `%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n` for Datadog recommended format.
+ 2. Because Marathon uses logback, you can specify a custom log format. With Datadog, two formats are supported out of the box: the default one provided by Marathon and the Datadog recommended format. Add a fileappender to your configuration as in the following example and replace `$PATTERN$` with either `[%date] %-5level %message \(%logger:%thread\)%n` for Marathon default format or `%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n` for Datadog recommended format.
 
     ```xml
     <?xml version="1.0" encoding="UTF-8"?>
