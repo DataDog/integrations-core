@@ -96,7 +96,7 @@ Score   Most similar
         assert similar_metrics[1][1].name == 'test.similar_metric2'
         assert similar_metrics[2][1].name == 'test.similar_metric3'
 
-    def test__get_similar_service_check__metric_name(self, aggregator):
+    def test__build_similar_elements__service_check_name(self, aggregator):
         check = AgentCheck()
 
         check.service_check('test.second_similar_service_check', AgentCheck.OK)
@@ -104,13 +104,79 @@ Score   Most similar
         check.service_check('test.most_similar_service_check', AgentCheck.OK)
         check.service_check('test.very_very_different', AgentCheck.OK)
 
-        expected_metric = ServiceCheckStub(
+        expected_service_check = ServiceCheckStub(
             None, "test.similar_service_check", status=AgentCheck.OK, tags=None, hostname=None, message=None
         )
-        similar_metrics = similar._build_similar_elements(expected_metric, aggregator._service_checks)
+        similar_service_checks = similar._build_similar_elements(expected_service_check, aggregator._service_checks)
 
         # expect similar metrics in a similarity order
-        assert similar_metrics[0][1].name == 'test.most_similar_service_check'
-        assert similar_metrics[1][1].name == 'test.second_similar_service_check'
-        assert similar_metrics[2][1].name == 'test.very_different_service_check'
-        assert similar_metrics[3][1].name == 'test.very_very_different'
+        assert similar_service_checks[0][1].name == 'test.most_similar_service_check'
+        assert similar_service_checks[1][1].name == 'test.second_similar_service_check'
+        assert similar_service_checks[2][1].name == 'test.very_different_service_check'
+        assert similar_service_checks[3][1].name == 'test.very_very_different'
+
+    def test__build_similar_elements__service_check_status(self, aggregator):
+        check = AgentCheck()
+
+        check.service_check('test.similar11', AgentCheck.OK)
+        check.service_check('test.similar22', AgentCheck.CRITICAL)
+        check.service_check('test.similar12', AgentCheck.WARNING)
+
+        expected_service_check = ServiceCheckStub(
+            None, "test.similar", status=AgentCheck.CRITICAL, tags=None, hostname=None, message=None
+        )
+        similar_service_checks = similar._build_similar_elements(expected_service_check, aggregator._service_checks)
+
+        # expect similar metrics in a similarity order
+        assert similar_service_checks[0][1].name == 'test.similar22'
+        assert similar_service_checks[1][1].name.startswith('test.similar1')
+        assert similar_service_checks[2][1].name.startswith('test.similar1')
+
+    def test__build_similar_elements__service_check_message(self, aggregator):
+        check = AgentCheck()
+
+        check.service_check('test.similar1', AgentCheck.OK, message="aa")
+        check.service_check('test.similar2', AgentCheck.OK, message="bb")
+        check.service_check('test.similar3', AgentCheck.OK, message="cc")
+        check.service_check('test.similar4', AgentCheck.OK, message="dd")
+
+        expected_service_check = ServiceCheckStub(
+            None, "test.similar", status=AgentCheck.OK, tags=None, hostname=None, message="cc"
+        )
+        similar_service_checks = similar._build_similar_elements(expected_service_check, aggregator._service_checks)
+
+        # expect similar metrics in a similarity order
+        assert similar_service_checks[0][1].name == 'test.similar3'
+
+    def test__build_similar_elements__service_check_tags(self, aggregator):
+        check = AgentCheck()
+
+        check.service_check('test.similar2', AgentCheck.OK, tags=['name:less_similar_tag'])
+        check.service_check('test.similar1', AgentCheck.OK, tags=['name:similar_tag'])
+        check.service_check('test.similar3', AgentCheck.OK, tags=['something:different'])
+
+        expected_service_check = ServiceCheckStub(
+            None, "test.similar", status=AgentCheck.OK, tags=['name:similar_tag'], hostname=None, message=None
+        )
+        similar_service_checks = similar._build_similar_elements(expected_service_check, aggregator._service_checks)
+
+        # expect similar metrics in a similarity order
+        assert similar_service_checks[0][1].name == 'test.similar1'
+        assert similar_service_checks[1][1].name == 'test.similar2'
+        assert similar_service_checks[2][1].name == 'test.similar3'
+
+    def test__build_similar_elements__service_check_hostname(self, aggregator):
+        check = AgentCheck()
+
+        check.service_check('test.similar1', AgentCheck.OK, hostname="aa")
+        check.service_check('test.similar2', AgentCheck.OK, hostname="bb")
+        check.service_check('test.similar3', AgentCheck.OK, hostname="cc")
+        check.service_check('test.similar4', AgentCheck.OK, hostname="dd")
+
+        expected_service_check = ServiceCheckStub(
+            None, "test.similar", status=AgentCheck.OK, tags=None, hostname="cc", message=None
+        )
+        similar_service_checks = similar._build_similar_elements(expected_service_check, aggregator._service_checks)
+
+        # expect similar metrics in a similarity order
+        assert similar_service_checks[0][1].name == 'test.similar3'
