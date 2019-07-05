@@ -37,10 +37,10 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
     :type env_vars: ``dict``
     :param wrapper: A context manager to use during execution.
     """
-    if not which("terraform"):
-        pytest.skip("Terraform not available")
+    if not which('terraform'):
+        pytest.skip('Terraform not available')
 
-    with TempDir() as temp_dir:
+    with TempDir('terraform') as temp_dir:
         terraform_dir = os.path.join(temp_dir, 'terraform')
         shutil.copytree(directory, terraform_dir)
         set_up = TerraformUp(terraform_dir)
