@@ -146,7 +146,8 @@ class WMISampler(object):
         self._runSampleEvent = Event()
         self._sampleCompleteEvent = Event()
 
-        thread = Thread(target=self._query_sample_loop, name=class_name, daemon=True)
+        thread = Thread(target=self._query_sample_loop, name=class_name)
+        thread.daemon = True
         thread.start()
 
     def _query_sample_loop(self):
