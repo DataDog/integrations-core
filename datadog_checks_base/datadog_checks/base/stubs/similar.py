@@ -6,7 +6,7 @@ from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
 
 
 '''
-Build similar message used in test assertion failure message.
+Build similar message for better test assertion failure message.
 '''
 
 
@@ -57,18 +57,20 @@ def _get_similarity_score_for_metric(expected_metric, candidate_metric):
     scores = [(_is_similar_text_score(expected_metric.name, candidate_metric.name), 2)]
 
     if expected_metric.type is not None:
-        scores.append((1 if expected_metric.type == candidate_metric.type else 0, 1))
+        score = 1 if expected_metric.type == candidate_metric.type else 0
+        scores.append((score, 1))
 
     if expected_metric.tags is not None:
-        scores.append(
-            (_is_similar_text_score(str(sorted(expected_metric.tags)), str(sorted(candidate_metric.tags))), 1)
-        )
+        score = _is_similar_text_score(str(sorted(expected_metric.tags)), str(sorted(candidate_metric.tags)))
+        scores.append((score, 1))
 
     if expected_metric.value is not None:
-        scores.append((1 if expected_metric.value == candidate_metric.value else 0, 1))
+        score = 1 if expected_metric.value == candidate_metric.value else 0
+        scores.append((score, 1))
 
     if expected_metric.hostname:
-        scores.append((_is_similar_text_score(expected_metric.hostname, candidate_metric.hostname), 1))
+        score = _is_similar_text_score(expected_metric.hostname, candidate_metric.hostname)
+        scores.append((score, 1))
 
     score_total = 0
     weight_total = 0
@@ -79,23 +81,27 @@ def _get_similarity_score_for_metric(expected_metric, candidate_metric):
     return score_total / weight_total
 
 
-def _get_similarity_score_for_service_check(expected_metric, candidate_metric):
+def _get_similarity_score_for_service_check(expected_service_check, candidate_service_check):
     # Tuple of (score, weight)
-    scores = [(_is_similar_text_score(expected_metric.name, candidate_metric.name), 2)]
+    scores = [(_is_similar_text_score(expected_service_check.name, candidate_service_check.name), 2)]
 
-    if expected_metric.status is not None:
-        scores.append((1 if expected_metric.status == candidate_metric.status else 0, 1))
+    if expected_service_check.status is not None:
+        score = 1 if expected_service_check.status == candidate_service_check.status else 0
+        scores.append((score, 1))
 
-    if expected_metric.tags is not None:
-        scores.append(
-            (_is_similar_text_score(str(sorted(expected_metric.tags)), str(sorted(candidate_metric.tags))), 1)
+    if expected_service_check.tags is not None:
+        score = _is_similar_text_score(
+            str(sorted(expected_service_check.tags)), str(sorted(candidate_service_check.tags))
         )
+        scores.append((score, 1))
 
-    if expected_metric.hostname:
-        scores.append((_is_similar_text_score(expected_metric.hostname, candidate_metric.hostname), 1))
+    if expected_service_check.hostname:
+        score = _is_similar_text_score(expected_service_check.hostname, candidate_service_check.hostname)
+        scores.append((score, 1))
 
-    if expected_metric.message:
-        scores.append((_is_similar_text_score(expected_metric.message, candidate_metric.message), 1))
+    if expected_service_check.message:
+        score = _is_similar_text_score(expected_service_check.message, candidate_service_check.message)
+        scores.append((score, 1))
 
     score_total = 0
     weight_total = 0

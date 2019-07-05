@@ -7,7 +7,7 @@ from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
 
 
 class TestSimilarAssertionMessages(object):
-    def test_message_output(self, aggregator):
+    def test_build_similar_elements_msg(self, aggregator):
         check = AgentCheck()
 
         check.gauge('test.most_similar_metric', 0)
@@ -30,7 +30,7 @@ Score   Most similar
         '''
         assert expected_msg.strip() == actual_msg.strip()
 
-    def test__get_similar_metrics__metric_name(self, aggregator):
+    def test__build_similar_elements__metric_name(self, aggregator):
         check = AgentCheck()
 
         check.gauge('test.most_similar_metric', 0)
@@ -47,7 +47,7 @@ Score   Most similar
         assert expected_most_similar_metric.name == 'test.most_similar_metric'
         assert expected_second_most_similar_metric.name == 'test.another_similar_metric'
 
-    def test__get_similar_metrics__metric_value(self, aggregator):
+    def test__build_similar_elements__metric_value(self, aggregator):
         check = AgentCheck()
 
         check.gauge('test.similar_metric1', 10)
@@ -62,7 +62,7 @@ Score   Most similar
 
         assert expected_most_similar_metric.name == 'test.similar_metric2'
 
-    def test__get_similar_metrics__metric_tags(self, aggregator):
+    def test__build_similar_elements__metric_tags(self, aggregator):
         check = AgentCheck()
 
         check.gauge('test.similar_metric1', 10, tags=['name:similar_tag'])
@@ -79,7 +79,7 @@ Score   Most similar
         assert similar_metrics[1][1].name == 'test.similar_metric2'
         assert similar_metrics[2][1].name == 'test.similar_metric3'
 
-    def test__get_similar_metrics__metric_hostname(self, aggregator):
+    def test__build_similar_elements__metric_hostname(self, aggregator):
         check = AgentCheck()
 
         check.gauge('test.similar_metric2', 10, hostname='less_similar_host')
