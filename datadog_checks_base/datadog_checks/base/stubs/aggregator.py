@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from collections import OrderedDict, defaultdict, namedtuple
+from collections import OrderedDict, defaultdict
 
 from six import binary_type, iteritems
 
