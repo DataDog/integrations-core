@@ -9,6 +9,7 @@ from six import binary_type, iteritems
 
 from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
 from datadog_checks.base.stubs.similar import build_similar_elements_msg
+
 from ..utils.common import ensure_unicode, to_string
 
 
@@ -186,12 +187,20 @@ class AggregatorStub(object):
 
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
-            self._assert(len(candidates) == count,
-                         msg=msg, expected_stub=expected_metric, submitted_elements=self._service_checks)
+            self._assert(
+                len(candidates) == count,
+                msg=msg,
+                expected_stub=expected_metric,
+                submitted_elements=self._service_checks,
+            )
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
-            self._assert(len(candidates) >= at_least,
-                         msg=msg, expected_stub=expected_metric, submitted_elements=self._service_checks)
+            self._assert(
+                len(candidates) >= at_least,
+                msg=msg,
+                expected_stub=expected_metric,
+                submitted_elements=self._service_checks,
+            )
 
     def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None):
         """
@@ -215,16 +224,25 @@ class AggregatorStub(object):
             candidates.append(sc)
 
         expected_service_check = ServiceCheckStub(
-            None, name=name, status=status, tags=tags, hostname=hostname, message=message)
-        
+            None, name=name, status=status, tags=tags, hostname=hostname, message=message
+        )
+
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
-            self._assert(len(candidates) == count,
-                         msg=msg, expected_stub=expected_service_check, submitted_elements=self._metrics)
+            self._assert(
+                len(candidates) == count,
+                msg=msg,
+                expected_stub=expected_service_check,
+                submitted_elements=self._metrics,
+            )
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
-            self._assert(len(candidates) >= at_least,
-                         msg=msg, expected_stub=expected_service_check, submitted_elements=self._metrics)
+            self._assert(
+                len(candidates) >= at_least,
+                msg=msg,
+                expected_stub=expected_service_check,
+                submitted_elements=self._metrics,
+            )
 
     @staticmethod
     def _assert(condition, msg, expected_stub, submitted_elements):
