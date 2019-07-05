@@ -73,7 +73,7 @@ class ProviderArchitecture(with_metaclass(ProviderArchitectureMeta, object)):
     _AVAILABLE_PROVIDER_ARCHITECTURES = frozenset([DEFAULT, _32BIT, _64BIT])
 
 
-class WMISampler(Thread):
+class WMISampler(object):
     """
     WMI Sampler.
     """
@@ -92,7 +92,6 @@ class WMISampler(Thread):
         and_props=None,
         timeout_duration=10,
     ):
-        Thread.__init__(self)
         # Properties
         self._provider = None
         self._formatted_filters = None
@@ -145,12 +144,13 @@ class WMISampler(Thread):
         self._timeout_duration = timeout_duration
 
         self._runSampleEvent = Event()
-        self._sampleComplete = Event()
-        self.setDaemon(True)
+        self._sampleCompleteEvent = Event()
 
-        self.start()
+        thread = Thread(target=self._query_sample_loop, name=class_name)
+        thread.daemon = True
+        thread.start()
 
-    def run(self):
+    def _query_sample_loop(self):
         try:
             pythoncom.CoInitialize()
         except Exception as e:
@@ -165,7 +165,7 @@ class WMISampler(Thread):
 
             self._previous_sample = self._current_sample
             self._current_sample = self._query()
-            self._sampleComplete.set()
+            self._sampleCompleteEvent.set()
 
     @property
     def provider(self):
@@ -232,8 +232,8 @@ class WMISampler(Thread):
         """
         self._sampling = True
         self._runSampleEvent.set()
-        self._sampleComplete.wait()
-        self._sampleComplete.clear()
+        self._sampleCompleteEvent.wait()
+        self._sampleCompleteEvent.clear()
         self._sampling = False
 
     def __len__(self):
@@ -281,13 +281,6 @@ class WMISampler(Thread):
         Equality operator is based on the current sample.
         """
         return self._current_sample == other
-
-    def __hash__(self):
-        """
-        Since we inherit from Thread.
-        We need to provide __hash__ method (seems due to Thread using weakrefset internally).
-        """
-        return hash(id(self))
 
     def __str__(self):
         """
