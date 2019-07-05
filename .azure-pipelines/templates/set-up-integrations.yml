@@ -2,5 +2,6 @@ parameters:
   check: ''
 
 steps:
+# Need unbuffered IO, see: https://github.com/Microsoft/azure-pipelines-yaml/issues/106
 - script: python -u .azure-pipelines/scripts/run.py ${{ coalesce(parameters.check, 'changed') }}
   displayName: 'Set up integration requirements'
