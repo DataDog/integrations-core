@@ -6,7 +6,7 @@ Whether you use Redis as a database, cache, or message queue, this integration h
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to transpose those instructions in a containerized environment.
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to apply those instructions to a containerized environment.
 
 ### Installation
 

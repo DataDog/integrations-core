@@ -23,7 +23,7 @@ Finally, in addition to metrics, the Datadog Agent also sends a service check fo
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to transpose those instructions in a containerized environment.
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
 
 ### Installation
 

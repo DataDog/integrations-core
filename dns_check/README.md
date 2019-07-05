@@ -6,7 +6,7 @@ Monitor the resolvability of and lookup times for any DNS records using nameserv
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to transpose those instructions in a containerized environment.
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to apply those instructions to a containerized environment.
 
 ### Installation
 

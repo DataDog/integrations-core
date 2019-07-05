@@ -9,7 +9,7 @@ It uses the `nodetool` utility to collect them.
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][113] to learn how to transpose those instructions in a containerized environment.
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][113] to learn how to apply those instructions to a containerized environment.
 
 ### Installation
 
