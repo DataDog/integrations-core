@@ -186,7 +186,7 @@ The scaffolding has already been set up to run all tests located in `awesome/tes
 ddev test awesome
 ```
 
-#### Basic integration test
+#### Building an integration test
 
 This test doesn't check our collection _logic_ though, so let's add an integration test. We use `docker` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `awesome/tests/docker-compose.yml` with the following contents:
 

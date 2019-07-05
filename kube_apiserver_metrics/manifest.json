@@ -23,5 +23,5 @@
         "dashboards": {},
         "service_checks": "assets/service_checks.json"
     },
-    "is_public": false
+    "is_public": true
 }

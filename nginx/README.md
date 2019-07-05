@@ -81,11 +81,12 @@ NGINX Plus users can also utilize `stub_status`, but since that module provides 
 For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_api_module][7] instead. For example, enable the `/api` endpoint in your main NGINX configuration file (`/etc/nginx/conf.d/default.conf`):
 
   ```
-  server {
-    listen 8080;
-    location /api {
-    api write=on;
-  }
+  server { 
+    listen 8080; 
+    location /api { 
+      api write=on;
+    }
+  } 
   ```
 
 

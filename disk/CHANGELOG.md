@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 2.3.0 / 2019-07-04
+
+* [Added] Add disk label. See [#3953](https://github.com/DataDog/integrations-core/pull/3953).
+
 ## 2.2.0 / 2019-05-14
 
 * [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
