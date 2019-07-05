@@ -103,15 +103,15 @@ Setting this causes any instance number to be removed from tag_by values i.e. na
 </div>
 
 #### Metrics collection
-The WMI check can potentially emit [custom metrics][12], which may impact your [billing][13].
+The WMI check can potentially emit [custom metrics][9], which may impact your [billing][10].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][9] and look for `wmi_check` under the Checks section.
+[Run the Agent's `status` subcommand][11] and look for `wmi_check` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][10] for a list of metrics provided by this integration.
+See [metadata.csv][12] for a list of metrics provided by this integration.
 
 ### Events
 The WMI check does not include any events.
@@ -120,7 +120,7 @@ The WMI check does not include any events.
 The WMI check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][13].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/wmi_check/images/wmimetric.png
 [2]: https://msdn.microsoft.com/en-us/library/system.diagnostics.performancecounter(v=vs.110.aspx)
@@ -130,8 +130,8 @@ Need help? Contact [Datadog support][11].
 [6]: https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
 [7]: https://technet.microsoft.com/en-us/library/Hh921475.aspx
 [8]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
-[11]: https://docs.datadoghq.com/help
-[12]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[13]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
+[9]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[10]: https://docs.datadoghq.com/account_management/billing/custom_metrics
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[12]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
+[13]: https://docs.datadoghq.com/help

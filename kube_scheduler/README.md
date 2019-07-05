@@ -23,7 +23,7 @@ No additional installation is needed on your server.
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][7]:
+* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
 
 ```
 (...)
@@ -36,19 +36,19 @@ No additional installation is needed on your server.
 (...)
 ```
 
-* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][8].
+* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5].
 
 * [Restart the Agent][3].
 
 ### Validation
 
-[Run the Agent's status subcommand][4] and look for `kube_scheduler` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `kube_scheduler` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -62,14 +62,14 @@ Kube_scheduler does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][8].
+
 
 [1]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/datadog_checks/kube_scheduler/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#restart-the-agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/metadata.csv
-[6]: https://docs.datadoghq.com/help
-[7]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
-[8]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
-
+[4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
+[5]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/metadata.csv
+[8]: https://docs.datadoghq.com/help
