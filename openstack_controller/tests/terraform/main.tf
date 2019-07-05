@@ -41,7 +41,7 @@ resource "google_compute_instance" "devstack" {
 
   metadata = {
     enable-oslogin = "TRUE"
-    ssh-keys = "ubuntu:${tls_private_key.ssh-key.public_key_openssh}"
+    ssh-keys = "ubuntu:${tls_private_key.ssh-key.public_key_openssh} ubuntu"
   }
 
   connection {
