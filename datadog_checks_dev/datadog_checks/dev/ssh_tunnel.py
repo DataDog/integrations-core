@@ -42,7 +42,7 @@ def wait_for_port_listening(host, port, retries=10, wait=1):
 @contextmanager
 def socks_proxy(local_port, host, user, private_key):
     """Open a SSH connection with a SOCKS proxy."""
-    with TempDir() as temp_dir:
+    with TempDir('socks_proxy') as temp_dir:
         key_file = os.path.join(temp_dir, 'ssh_key')
         with open(key_file, 'w') as f:
             f.write(private_key)
