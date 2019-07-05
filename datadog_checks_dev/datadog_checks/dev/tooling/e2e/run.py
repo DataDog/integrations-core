@@ -12,7 +12,7 @@ def start_environment(check, env):
     command = 'tox --develop -e {}'.format(env)
     env_vars = {
         E2E_TEAR_DOWN: 'false',
-        'PYTEST_ADDOPTS': '--benchmark-skip',
+        'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
         'TOX_TESTENV_PASSENV': '{} PYTEST_ADDOPTS'.format(E2E_TEAR_DOWN),
     }
 
@@ -34,4 +34,4 @@ def stop_environment(check, env, metadata=None):
     with chdir(path_join(get_root(), check), env_vars=env_vars):
         result = run_command(command, capture=True)
 
-    return parse_config_from_result(env, result)
+    return result
