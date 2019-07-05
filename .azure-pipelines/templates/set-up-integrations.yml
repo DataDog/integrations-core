@@ -2,5 +2,5 @@ parameters:
   check: ''
 
 steps:
-- script: python .azure-pipelines/scripts/run.py ${{ coalesce(parameters.check, 'changed') }}
+- script: python -u .azure-pipelines/scripts/run.py ${{ coalesce(parameters.check, 'changed') }}
   displayName: 'Set up integration requirements'
