@@ -199,7 +199,7 @@ def test_check_channel_count(aggregator, instance_queue_regex_tag, seed_data):
         aggregator.assert_metric(
             'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
         )
-    aggregator.assert_metric('ibm_mq.channel.count', 0, tags=["channel:my_channel", "status:unknown"])
+    aggregator.assert_metric('ibm_mq.channel.count', 0, tags=["channel:myyyy_channel", "status:unknown"])
 
 
 @pytest.mark.usefixtures("dd_environment")

@@ -160,12 +160,6 @@ class AggregatorStub(object):
         Assert a metric was processed by this stub
         """
 
-        def _assert_metric(condition, msg):
-            new_msg = msg
-            if not condition:  # It's costly to build the message with similar metrics, so it's built only on failure.
-                new_msg = "{}\n{}".format(msg, self.similar_metrics_msg(name, value, tags, hostname, metric_type))
-            assert condition, new_msg
-
         self._asserted.add(name)
         tags = normalize_tags(tags, sort=True)
 
@@ -185,17 +179,25 @@ class AggregatorStub(object):
 
             candidates.append(metric)
 
+        expected = MetricStub(name, metric_type, value, tags, hostname)
+
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
             msg = "Expected count value for '{}': {}, got {}".format(name, value, got)
-            _assert_metric(value == got, msg)
+            self._assert_metric(value == got, msg, expected)
 
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
-            _assert_metric(len(candidates) == count, msg)
+            self._assert_metric(len(candidates) == count, msg, expected)
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
-            _assert_metric(len(candidates) >= at_least, msg)
+            self._assert_metric(len(candidates) >= at_least, msg, expected)
+
+    def _assert_metric(self, condition, msg, expected):
+        new_msg = msg
+        if not condition:  # It's costly to build the message with similar metrics, so it's built only on failure.
+            new_msg = "{}\n{}".format(msg, self._similar_metrics_msg(expected))
+        assert condition, new_msg
 
     def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None):
         """
@@ -293,14 +295,11 @@ class AggregatorStub(object):
         """
         return [ensure_unicode(name) for name in self._service_checks.keys()]
 
-    def similar_metrics_msg(self, name, value, tags, hostname, metric_type):
+    def _similar_metrics_msg(self, expected):
         """
         Return formatted similar metrics received compared to an expected metric
         """
         max_metrics_to_display = 15
-        if tags:
-            tags = sorted(tags)
-        expected = MetricStub(name, metric_type, value, tags, hostname)
 
         similar_metrics = self._get_similar_metrics(expected)
         similar_metrics_to_print = []
