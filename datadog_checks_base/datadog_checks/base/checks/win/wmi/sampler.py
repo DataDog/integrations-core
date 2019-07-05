@@ -73,7 +73,7 @@ class ProviderArchitecture(with_metaclass(ProviderArchitectureMeta, object)):
     _AVAILABLE_PROVIDER_ARCHITECTURES = frozenset([DEFAULT, _32BIT, _64BIT])
 
 
-class WMISampler(Thread):
+class WMISampler(object):
     """
     WMI Sampler.
     """
@@ -92,7 +92,6 @@ class WMISampler(Thread):
         and_props=None,
         timeout_duration=10,
     ):
-        Thread.__init__(self)
         # Properties
         self._provider = None
         self._formatted_filters = None
@@ -146,11 +145,11 @@ class WMISampler(Thread):
 
         self._runSampleEvent = Event()
         self._sampleComplete = Event()
-        self.setDaemon(True)
 
-        self.start()
+        thread = Thread(target=self.query_sample, name=class_name, daemon=True)
+        thread.start()
 
-    def run(self):
+    def query_sample(self):
         try:
             pythoncom.CoInitialize()
         except Exception as e:
@@ -281,13 +280,6 @@ class WMISampler(Thread):
         Equality operator is based on the current sample.
         """
         return self._current_sample == other
-
-    def __hash__(self):
-        """
-        Since we inherit from Thread.
-        We need to provide __hash__ method (seems due to Thread using weakrefset internally).
-        """
-        return hash(id(self))
 
     def __str__(self):
         """
