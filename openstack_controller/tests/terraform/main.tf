@@ -2,11 +2,16 @@ variable "account_json" {
   type = string
 }
 
+resource "random_shuffle" "az" {
+  input = ["europe-west2-a", "europe-west2-b", "europe-west2-c"]
+  result_count = 1
+}
+
 provider "google" {
   credentials = var.account_json
-  project     = "datadog-integrations-lab"
-  region      = "europe-west2"
-  zone        = "europe-west2-c"
+  project = "datadog-integrations-lab"
+  region = "europe-west2"
+  zone = "${random_shuffle.az.result[0]}"
 }
 
 resource "tls_private_key" "ssh-key" {
