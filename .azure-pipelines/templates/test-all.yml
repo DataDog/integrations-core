@@ -138,10 +138,10 @@ jobs:
 #     check: ecs_fargate
 #     display: Amazon ECS Fargate
 
-- template: './test-single-linux.yml'
-  parameters:
-    check: elastic
-    display: Elasticsearch
+# - template: './test-single-linux.yml'
+#   parameters:
+#     check: elastic
+#     display: Elasticsearch
 
 # - template: './test-single-linux.yml'
 #   parameters:
