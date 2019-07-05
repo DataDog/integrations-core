@@ -374,10 +374,10 @@ jobs:
 #     check: ntp
 #     display: NTP
 
-- template: './test-single-linux.yml'
-  parameters:
-    check: openldap
-    display: OpenLDAP
+# - template: './test-single-linux.yml'
+#   parameters:
+#     check: openldap
+#     display: OpenLDAP
 
 # - template: './test-single-linux.yml'
 #   parameters:
