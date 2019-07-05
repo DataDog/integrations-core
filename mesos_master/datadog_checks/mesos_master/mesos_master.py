@@ -184,7 +184,9 @@ class MesosMaster(AgentCheck):
             master_state = self._get_json(url + endpoint, timeout, verify, tags)
             if master_state is not None:
                 self.version = list(map(int, master_state['version'].split('.')))
-        except:
+        except Exception as e:
+            msg = str(e)
+            self.log.warning('Encounted error getting state at {}{}, message: {}'.format(url, endpoint, msg))
         # version >= 1.8.0
             endpoint = '/state'
             master_state = self._get_json(url + endpoint, timeout, verify, tags)
