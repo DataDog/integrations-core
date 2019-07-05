@@ -144,12 +144,12 @@ class WMISampler(object):
         self._timeout_duration = timeout_duration
 
         self._runSampleEvent = Event()
-        self._sampleComplete = Event()
+        self._sampleCompleteEvent = Event()
 
-        thread = Thread(target=self.query_sample, name=class_name, daemon=True)
+        thread = Thread(target=self._query_sample_loop, name=class_name, daemon=True)
         thread.start()
 
-    def query_sample(self):
+    def _query_sample_loop(self):
         try:
             pythoncom.CoInitialize()
         except Exception as e:
@@ -164,7 +164,7 @@ class WMISampler(object):
 
             self._previous_sample = self._current_sample
             self._current_sample = self._query()
-            self._sampleComplete.set()
+            self._sampleCompleteEvent.set()
 
     @property
     def provider(self):
@@ -231,8 +231,8 @@ class WMISampler(object):
         """
         self._sampling = True
         self._runSampleEvent.set()
-        self._sampleComplete.wait()
-        self._sampleComplete.clear()
+        self._sampleCompleteEvent.wait()
+        self._sampleCompleteEvent.clear()
         self._sampling = False
 
     def __len__(self):
