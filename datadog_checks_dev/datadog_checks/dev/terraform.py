@@ -40,22 +40,19 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
     if not which('terraform'):
         pytest.skip('Terraform not available')
 
-    with TempDir('terraform') as temp_dir:
-        terraform_dir = os.path.join(temp_dir, 'terraform')
-        shutil.copytree(directory, terraform_dir)
-        set_up = TerraformUp(terraform_dir)
-        tear_down = TerraformDown(terraform_dir)
+    set_up = TerraformUp(directory)
+    tear_down = TerraformDown(directory)
 
-        with environment_run(
-            up=set_up,
-            down=tear_down,
-            sleep=sleep,
-            endpoints=endpoints,
-            conditions=conditions,
-            env_vars=env_vars,
-            wrapper=wrapper,
-        ) as result:
-            yield result
+    with environment_run(
+        up=set_up,
+        down=tear_down,
+        sleep=sleep,
+        endpoints=endpoints,
+        conditions=conditions,
+        env_vars=env_vars,
+        wrapper=wrapper,
+    ) as result:
+        yield result
 
 
 class TerraformUp(LazyFunction):
@@ -63,11 +60,14 @@ class TerraformUp(LazyFunction):
         self.directory = directory
 
     def __call__(self):
-        with chdir(self.directory):
-            run_command(['terraform', 'init'], check=True)
-            run_command(['terraform', 'apply', '-auto-approve'], check=True)
-            output = run_command(['terraform', 'output', '-json'], capture='stdout', check=True).stdout
-            return json.loads(output)
+        with TempDir('terraform') as temp_dir:
+            terraform_dir = os.path.join(temp_dir, 'terraform')
+            shutil.copytree(self.directory, terraform_dir)
+            with chdir(terraform_dir):
+                run_command(['terraform', 'init'], check=True)
+                run_command(['terraform', 'apply', '-auto-approve'], check=True)
+                output = run_command(['terraform', 'output', '-json'], capture='stdout', check=True).stdout
+                return json.loads(output)
 
 
 class TerraformDown(LazyFunction):
@@ -75,5 +75,7 @@ class TerraformDown(LazyFunction):
         self.directory = directory
 
     def __call__(self):
-        with chdir(self.directory):
-            run_command(['terraform', 'destroy', '-auto-approve'], check=True)
+        with TempDir('terraform') as temp_dir:
+            terraform_dir = os.path.join(temp_dir, 'terraform')
+            with chdir(terraform_dir):
+                run_command(['terraform', 'destroy', '-auto-approve'], check=True)
