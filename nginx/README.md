@@ -140,6 +140,19 @@ sudo nginx -t && sudo nginx -s reload
   ```
   Change the `service` and `path` parameter values and configure them for your environment.
   See the [sample nginx.d/conf.yaml][6] for all available configuration options.
+  
+* The default NGINX log format do not include a response time. Which is why we recommend to update the NGINX log format by adding the following in the `http` section of the NGINX configuration file (`/etc/nginx/nginx.conf`): 
+
+```
+http {
+	#recommended log format
+	log_format nginx '\$remote_addr - \$remote_user [\$time_local] '
+                  '"\$request" \$status \$body_bytes_sent \$request_time '
+                  '"\$http_referer" "\$http_user_agent"';
+
+	access_log /var/log/nginx/access.log;
+}
+```
 
 * [Restart the Agent][7]
 
