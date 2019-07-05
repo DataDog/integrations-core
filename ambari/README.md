@@ -45,7 +45,7 @@ Next, edit `ambari.d/conf.yaml` by uncommenting the `logs` lines at the bottom. 
 [Run the Agent's status subcommand][4] and look for `ambari` under the Checks section.
 
 
-### Metrics
+## Data Collected
 
 This integration collects for every host in every cluster the following system metrics:
 
@@ -59,13 +59,19 @@ This integration collects for every host in every cluster the following system m
 
 If service metrics collection is enabled with `collect_service_metrics` this integration will collect for each
 whitelisted service component the metrics with headers in the white list.
+
+### Metrics
+
 See [metadata.csv][7] for a list of all metrics provided by this integration.
 
 ### Service Checks
 
-- `ambari.can_connect` - Returns `OK` if the cluster is reachable, `CRITICAL` otherwise.
-- `ambari.state` - Returns `OK` if the service is installed or running, `WARNING` if the service is stopping or uninstalling,
-  or `CRITICAL` if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
+**ambari.can_connect**:<br>
+Returns OK if the cluster is reachable, CRITICAL otherwise.
+
+**ambari.state**:<br>
+Returns OK if the service is installed or running, WARNING if the service is stopping or uninstalling,
+or CRITICAL if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
 
 ### Events
 
