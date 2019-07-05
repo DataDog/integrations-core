@@ -4,14 +4,12 @@
 from __future__ import division
 
 from collections import OrderedDict, defaultdict, namedtuple
-from difflib import SequenceMatcher
 
 from six import binary_type, iteritems
 
+from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
+from datadog_checks.base.stubs.similar import build_similar_elements_msg
 from ..utils.common import ensure_unicode, to_string
-
-MetricStub = namedtuple('MetricStub', 'name type value tags hostname')
-ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
 
 
 def normalize_tags(tags, sort=False):
@@ -179,25 +177,21 @@ class AggregatorStub(object):
 
             candidates.append(metric)
 
-        expected = MetricStub(name, metric_type, value, tags, hostname)
+        expected_metric = MetricStub(name, metric_type, value, tags, hostname)
 
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
             msg = "Expected count value for '{}': {}, got {}".format(name, value, got)
-            self._assert_metric(value == got, msg, expected)
+            self._assert(value == got, msg, expected_metric)
 
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
-            self._assert_metric(len(candidates) == count, msg, expected)
+            self._assert(len(candidates) == count,
+                         msg=msg, expected_stub=expected_metric, submitted_elements=self._service_checks)
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
-            self._assert_metric(len(candidates) >= at_least, msg, expected)
-
-    def _assert_metric(self, condition, msg, expected):
-        new_msg = msg
-        if not condition:  # It's costly to build the message with similar metrics, so it's built only on failure.
-            new_msg = "{}\n{}".format(msg, self._similar_metrics_msg(expected))
-        assert condition, new_msg
+            self._assert(len(candidates) >= at_least,
+                         msg=msg, expected_stub=expected_metric, submitted_elements=self._service_checks)
 
     def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None):
         """
@@ -220,12 +214,24 @@ class AggregatorStub(object):
 
             candidates.append(sc)
 
+        expected_service_check = ServiceCheckStub(
+            None, name=name, status=status, tags=tags, hostname=hostname, message=message)
+        
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
-            assert len(candidates) == count, msg
+            self._assert(len(candidates) == count,
+                         msg=msg, expected_stub=expected_service_check, submitted_elements=self._metrics)
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
-            assert len(candidates) >= at_least, msg
+            self._assert(len(candidates) >= at_least,
+                         msg=msg, expected_stub=expected_service_check, submitted_elements=self._metrics)
+
+    @staticmethod
+    def _assert(condition, msg, expected_stub, submitted_elements):
+        new_msg = msg
+        if not condition:  # It's costly to build the message with similar metrics, so it's built only on failure.
+            new_msg = "{}\n{}".format(msg, build_similar_elements_msg(expected_stub, submitted_elements))
+        assert condition, new_msg
 
     def assert_all_metrics_covered(self):
         assert self.metrics_asserted_pct >= 100.0
@@ -294,67 +300,6 @@ class AggregatorStub(object):
         Return all the service checks names seen so far
         """
         return [ensure_unicode(name) for name in self._service_checks.keys()]
-
-    def _similar_metrics_msg(self, expected):
-        """
-        Return formatted similar metrics received compared to an expected metric
-        """
-        max_metrics_to_display = 15
-
-        similar_metrics = self._get_similar_metrics(expected)
-        similar_metrics_to_print = []
-
-        for score, metric_stub in similar_metrics[:max_metrics_to_display]:
-            if metric_stub.tags:
-                metric_stub.tags.sort()
-            similar_metrics_to_print.append("{:.2f}    {}".format(score, metric_stub))
-
-        return (
-            "Expected metric:\n"
-            + "        {}\n".format(expected)
-            + "Similar submitted metrics:\n"
-            + "Score   Metric\n"
-            + "\n".join(similar_metrics_to_print)
-        )
-
-    def _get_similar_metrics(self, expected_metric):
-        """
-        Return similar metrics received compared to a the given metric stub
-        """
-        similar_metric_stubs = []
-        for _, metric_stubs in iteritems(self._metrics):
-            for candidate_metric in metric_stubs:
-                score = self._get_similarity_score(expected_metric, candidate_metric)
-                similar_metric_stubs.append((score, candidate_metric))
-        return sorted(similar_metric_stubs, reverse=True)
-
-    @staticmethod
-    def _get_similarity_score(expected_metric, candidate_metric):
-        def similar(a, b):
-            return SequenceMatcher(None, a, b).ratio()
-
-        # Tuple of (score, weight)
-        scores = [(similar(expected_metric.name, candidate_metric.name), 2)]
-
-        if expected_metric.type is not None:
-            scores.append((1 if expected_metric.type == candidate_metric.type else 0, 1))
-
-        if expected_metric.tags is not None:
-            scores.append((similar(str(sorted(expected_metric.tags)), str(sorted(candidate_metric.tags))), 1))
-
-        if expected_metric.value is not None:
-            scores.append((1 if expected_metric.value == candidate_metric.value else 0, 1))
-
-        if expected_metric.hostname:
-            scores.append((similar(expected_metric.hostname, candidate_metric.hostname), 1))
-
-        score_total = 0
-        weight_total = 0
-        for score, weight in scores:
-            score_total += score
-            weight_total += weight
-
-        return score_total / weight_total
 
 
 # Use the stub as a singleton

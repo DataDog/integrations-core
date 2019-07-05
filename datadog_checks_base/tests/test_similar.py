@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs.aggregator import MetricStub
+from datadog_checks.base.stubs import similar
+from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
 
 
-class TestSimilarMetrics(object):
+class TestSimilarAssertionMessages(object):
     def test_message_output(self, aggregator):
         check = AgentCheck()
 
@@ -15,13 +16,13 @@ class TestSimilarMetrics(object):
         check.gauge('test.very_very_different', 0)
 
         expected_metric = MetricStub("test.similar_metric", None, None, None, None)
-        actual_msg = aggregator._similar_metrics_msg(expected_metric)
+        actual_msg = similar.build_similar_elements_msg(expected_metric, aggregator._metrics)
 
         expected_msg = '''
-Expected metric:
+Expected:
         MetricStub(name='test.similar_metric', type=None, value=None, tags=None, hostname=None)
-Similar submitted metrics:
-Score   Metric
+Similar submitted:
+Score   Most similar
 0.44    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='')
 0.41    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='')
 0.31    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='')
@@ -38,7 +39,7 @@ Score   Metric
         check.gauge('test.very_very_different', 0)
 
         expected_metric = MetricStub("test.similar_metric", type=None, value=None, tags=None, hostname=None)
-        similar_metrics = aggregator._get_similar_metrics(expected_metric)
+        similar_metrics = similar._build_similar_elements(expected_metric, aggregator._metrics)
 
         expected_most_similar_metric = similar_metrics[0][1]
         expected_second_most_similar_metric = similar_metrics[1][1]
@@ -54,7 +55,7 @@ Score   Metric
         check.gauge('test.similar_metric3', 30)
 
         expected_metric = MetricStub("test.my_metric", type=None, value=20, tags=None, hostname=None)
-        similar_metrics = aggregator._get_similar_metrics(expected_metric)
+        similar_metrics = similar._build_similar_elements(expected_metric, aggregator._metrics)
 
         expected_most_similar_metric = similar_metrics[0][1]
         print(similar_metrics)
@@ -68,8 +69,10 @@ Score   Metric
         check.gauge('test.similar_metric2', 10, tags=['name:less_similar_tag'])
         check.gauge('test.similar_metric3', 10, tags=['something:different'])
 
-        expected_metric = MetricStub("test.test.similar_metric", type=None, value=10, tags=['name:similar_tag'], hostname=None)
-        similar_metrics = aggregator._get_similar_metrics(expected_metric)
+        expected_metric = MetricStub(
+            "test.test.similar_metric", type=None, value=10, tags=['name:similar_tag'], hostname=None
+        )
+        similar_metrics = similar._build_similar_elements(expected_metric, aggregator._metrics)
 
         # expect similar metrics in a similarity order
         assert similar_metrics[0][1].name == 'test.similar_metric1'
@@ -83,10 +86,31 @@ Score   Metric
         check.gauge('test.similar_metric1', 10, hostname='similar_host')
         check.gauge('test.similar_metric3', 10, hostname='different')
 
-        expected_metric = MetricStub("test.test.similar_metric", type=None, value=10, tags=None, hostname='similar_host')
-        similar_metrics = aggregator._get_similar_metrics(expected_metric)
+        expected_metric = MetricStub(
+            "test.test.similar_metric", type=None, value=10, tags=None, hostname='similar_host'
+        )
+        similar_metrics = similar._build_similar_elements(expected_metric, aggregator._metrics)
 
         # expect similar metrics in a similarity order
         assert similar_metrics[0][1].name == 'test.similar_metric1'
         assert similar_metrics[1][1].name == 'test.similar_metric2'
         assert similar_metrics[2][1].name == 'test.similar_metric3'
+
+    def test__get_similar_service_check__metric_name(self, aggregator):
+        check = AgentCheck()
+
+        check.service_check('test.second_similar_service_check', AgentCheck.OK)
+        check.service_check('test.very_different_service_check', AgentCheck.OK)
+        check.service_check('test.most_similar_service_check', AgentCheck.OK)
+        check.service_check('test.very_very_different', AgentCheck.OK)
+
+        expected_metric = ServiceCheckStub(
+            None, "test.similar_service_check", status=AgentCheck.OK, tags=None, hostname=None, message=None
+        )
+        similar_metrics = similar._build_similar_elements(expected_metric, aggregator._service_checks)
+
+        # expect similar metrics in a similarity order
+        assert similar_metrics[0][1].name == 'test.most_similar_service_check'
+        assert similar_metrics[1][1].name == 'test.second_similar_service_check'
+        assert similar_metrics[2][1].name == 'test.very_different_service_check'
+        assert similar_metrics[3][1].name == 'test.very_very_different'

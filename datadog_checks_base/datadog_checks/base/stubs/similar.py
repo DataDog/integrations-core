@@ -1,0 +1,110 @@
+from difflib import SequenceMatcher
+
+from six import iteritems
+
+from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
+
+
+'''
+Build similar message used in test assertion failure message.
+'''
+
+
+def build_similar_elements_msg(expected, submitted_elements):
+    """
+    Return formatted similar elements (metrics, service checks) received compared to submitted elements
+    """
+    max_similar_to_display = 15
+
+    similar_metrics = _build_similar_elements(expected, submitted_elements)
+    similar_metrics_to_print = []
+
+    for score, metric_stub in similar_metrics[:max_similar_to_display]:
+        if metric_stub.tags:
+            metric_stub.tags.sort()
+        similar_metrics_to_print.append("{:.2f}    {}".format(score, metric_stub))
+
+    return (
+        "Expected:\n"
+        + "        {}\n".format(expected)
+        + "Similar submitted:\n"
+        + "Score   Most similar\n"
+        + "\n".join(similar_metrics_to_print)
+    )
+
+
+def _build_similar_elements(expected_element, submitted_elements):
+    """
+    Return similar elements (metrics, service checks) received compared to the submitted elements
+    """
+    if isinstance(expected_element, MetricStub):
+        scoring_fn = _get_similarity_score_for_metric
+    elif isinstance(expected_element, ServiceCheckStub):
+        scoring_fn = _get_similarity_score_for_service_check
+    else:
+        raise NotImplementedError("Invalid type: {}".format(expected_element))
+
+    similar_elements = []
+    for _, metric_stubs in iteritems(submitted_elements):
+        for candidate_metric in metric_stubs:
+            score = scoring_fn(expected_element, candidate_metric)
+            similar_elements.append((score, candidate_metric))
+    return sorted(similar_elements, reverse=True)
+
+
+def _get_similarity_score_for_metric(expected_metric, candidate_metric):
+    # Tuple of (score, weight)
+    scores = [(_is_similar_text_score(expected_metric.name, candidate_metric.name), 2)]
+
+    if expected_metric.type is not None:
+        scores.append((1 if expected_metric.type == candidate_metric.type else 0, 1))
+
+    if expected_metric.tags is not None:
+        scores.append(
+            (_is_similar_text_score(str(sorted(expected_metric.tags)), str(sorted(candidate_metric.tags))), 1)
+        )
+
+    if expected_metric.value is not None:
+        scores.append((1 if expected_metric.value == candidate_metric.value else 0, 1))
+
+    if expected_metric.hostname:
+        scores.append((_is_similar_text_score(expected_metric.hostname, candidate_metric.hostname), 1))
+
+    score_total = 0
+    weight_total = 0
+    for score, weight in scores:
+        score_total += score
+        weight_total += weight
+
+    return score_total / weight_total
+
+
+def _get_similarity_score_for_service_check(expected_metric, candidate_metric):
+    # Tuple of (score, weight)
+    scores = [(_is_similar_text_score(expected_metric.name, candidate_metric.name), 2)]
+
+    if expected_metric.status is not None:
+        scores.append((1 if expected_metric.status == candidate_metric.status else 0, 1))
+
+    if expected_metric.tags is not None:
+        scores.append(
+            (_is_similar_text_score(str(sorted(expected_metric.tags)), str(sorted(candidate_metric.tags))), 1)
+        )
+
+    if expected_metric.hostname:
+        scores.append((_is_similar_text_score(expected_metric.hostname, candidate_metric.hostname), 1))
+
+    if expected_metric.message:
+        scores.append((_is_similar_text_score(expected_metric.message, candidate_metric.message), 1))
+
+    score_total = 0
+    weight_total = 0
+    for score, weight in scores:
+        score_total += score
+        weight_total += weight
+
+    return score_total / weight_total
+
+
+def _is_similar_text_score(a, b):
+    return SequenceMatcher(None, a, b).ratio()
