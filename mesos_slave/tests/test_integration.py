@@ -6,8 +6,6 @@ import platform
 import pytest
 from six import iteritems
 
-pytestmark = pytest.mark.integration
-
 
 @pytest.mark.integration
 # Linux only: https://github.com/docker/for-mac/issues/1031
@@ -25,16 +23,9 @@ def test_integration(check, instance, aggregator):
     ):
         metrics.update(d)
 
-    for _, v in iteritems(check.TASK_METRICS):
-        aggregator.assert_metric(v[0])
     for _, v in iteritems(metrics):
         aggregator.assert_metric(v[0])
 
-    service_check_tags = [
-        'instance:mytag1',
-        'mesos_cluster:test',
-        'mesos_node:slave',
-        'mesos_pid:slave(1)@127.0.0.1:5051',
-        'task_name:hello',
-    ]
-    aggregator.assert_service_check('hello.ok', tags=service_check_tags, count=1, status=check.OK)
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=check.OK)
