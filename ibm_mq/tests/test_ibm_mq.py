@@ -87,7 +87,7 @@ def test_service_check_connection_issues(aggregator, instance, seed_data):
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags)
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags)
+    aggregator.assert_service_check('ibm_mq.queue_manager', check.CRITICAL, tags=['channel:DEV.ADMIN.SVRCONN', 'mq_host:localhost', 'port:11414', 'queue_manager:datadog'] + ["abc"])
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -172,8 +172,10 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
         'foo:bar',
     ]
 
-    for metric in QUEUE_METRICS:
-        aggregator.assert_metric(metric, tags=tags)
+    # for metric in QUEUE_METRICS:
+    #     aggregator.assert_metric(metric, tags=tags)
+
+    aggregator.assert_metric('ibm_mq.queue', value=1.0, tags=['channel:DEV.ADMIN.SVRCONN', 'foo:bar', 'mq_host:localhost', 'port:11414', 'queue:DEV.QUEUE.1', 'queue_manager:datadog'])
 
 
 @pytest.mark.usefixtures("dd_environment")

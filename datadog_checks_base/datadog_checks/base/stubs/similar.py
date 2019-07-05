@@ -54,7 +54,7 @@ def _build_similar_elements(expected_element, submitted_elements):
 
 def _get_similarity_score_for_metric(expected_metric, candidate_metric):
     # Tuple of (score, weight)
-    scores = [(_is_similar_text_score(expected_metric.name, candidate_metric.name), 2)]
+    scores = [(_is_similar_text_score(expected_metric.name, candidate_metric.name), 3)]
 
     if expected_metric.type is not None:
         score = 1 if expected_metric.type == candidate_metric.type else 0
@@ -72,18 +72,12 @@ def _get_similarity_score_for_metric(expected_metric, candidate_metric):
         score = _is_similar_text_score(expected_metric.hostname, candidate_metric.hostname)
         scores.append((score, 1))
 
-    score_total = 0
-    weight_total = 0
-    for score, weight in scores:
-        score_total += score
-        weight_total += weight
-
-    return score_total / weight_total
+    return _compute_score(scores)
 
 
 def _get_similarity_score_for_service_check(expected_service_check, candidate_service_check):
     # Tuple of (score, weight)
-    scores = [(_is_similar_text_score(expected_service_check.name, candidate_service_check.name), 2)]
+    scores = [(_is_similar_text_score(expected_service_check.name, candidate_service_check.name), 3)]
 
     if expected_service_check.status is not None:
         score = 1 if expected_service_check.status == candidate_service_check.status else 0
@@ -103,10 +97,15 @@ def _get_similarity_score_for_service_check(expected_service_check, candidate_se
         score = _is_similar_text_score(expected_service_check.message, candidate_service_check.message)
         scores.append((score, 1))
 
+    return _compute_score(scores)
+
+
+def _compute_score(scores):
     score_total = 0
     weight_total = 0
+
     for score, weight in scores:
-        score_total += score
+        score_total += score * weight
         weight_total += weight
 
     return score_total / weight_total

@@ -23,12 +23,12 @@ Expected:
         MetricStub(name='test.similar_metric', type=None, value=None, tags=None, hostname=None)
 Similar submitted:
 Score   Most similar
-0.44    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='')
-0.41    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='')
-0.31    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='')
-0.21    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='')
+0.88    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='')
+0.83    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='')
+0.62    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='')
+0.42    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='')
         '''
-        assert expected_msg.strip() == actual_msg.strip()
+        assert expected_msg.strip() == actual_msg.strip(), "Actual message:\n" + actual_msg
 
     def test__build_similar_elements__metric_name(self, aggregator):
         check = AgentCheck()

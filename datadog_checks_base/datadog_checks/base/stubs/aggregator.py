@@ -183,24 +183,19 @@ class AggregatorStub(object):
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
             msg = "Expected count value for '{}': {}, got {}".format(name, value, got)
-            self._assert(value == got, msg, expected_metric)
-
-        if count is not None:
+            condition = len(candidates) == count
+        elif count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
-            self._assert(
-                len(candidates) == count,
-                msg=msg,
-                expected_stub=expected_metric,
-                submitted_elements=self._service_checks,
-            )
+            condition = len(candidates) == count
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
-            self._assert(
-                len(candidates) >= at_least,
-                msg=msg,
-                expected_stub=expected_metric,
-                submitted_elements=self._service_checks,
-            )
+            condition = len(candidates) >= at_least
+        self._assert(
+            condition,
+            msg=msg,
+            expected_stub=expected_metric,
+            submitted_elements=self._metrics,
+        )
 
     def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None):
         """
@@ -229,20 +224,16 @@ class AggregatorStub(object):
 
         if count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
-            self._assert(
-                len(candidates) == count,
-                msg=msg,
-                expected_stub=expected_service_check,
-                submitted_elements=self._metrics,
-            )
+            condition = len(candidates) == count
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
-            self._assert(
-                len(candidates) >= at_least,
-                msg=msg,
-                expected_stub=expected_service_check,
-                submitted_elements=self._metrics,
-            )
+            condition = len(candidates) >= at_least
+        self._assert(
+            condition=condition,
+            msg=msg,
+            expected_stub=expected_service_check,
+            submitted_elements=self._service_checks,
+        )
 
     @staticmethod
     def _assert(condition, msg, expected_stub, submitted_elements):
