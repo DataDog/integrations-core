@@ -21,9 +21,9 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
 
 1. Check if monitoring is enabled on your installation
 
-  ```
+    ```
       sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=module{0},cn=config
-  ```
+    ```
 
     If you see a line with `olcModuleLoad: back_monitor.la`, monitoring is already enabled, go to step 3.
 
@@ -95,11 +95,11 @@ See the [sample openldap.yaml][2] for all available configuration options.
 2. Add this configuration block to your `openldap.d/conf.yaml` file to start collecting your Openldap logs:
 
     ```yaml
-      logs:
-        - type: file
-          path: /var/log/slapd.log
-          source: openldap
-          service: <SERVICE_NAME>
+    logs:
+      - type: file
+      path: /var/log/slapd.log
+      source: openldap
+      service: <SERVICE_NAME>
     ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample openldap.d/conf.yaml][2] for all available configuration options.
