@@ -10,9 +10,9 @@ class TestSimilarAssertionMessages(object):
     def test_build_similar_elements_msg(self, aggregator):
         check = AgentCheck()
 
-        check.gauge('test.most_similar_metric', 0)
         check.gauge('test.another_similar_metric', 0)
         check.gauge('test.very_different_metric', 0)
+        check.gauge('test.most_similar_metric', 0)
         check.gauge('test.very_very_different', 0)
 
         expected_metric = MetricStub("test.similar_metric", None, None, None, None)
@@ -33,9 +33,9 @@ Score   Most similar
     def test__build_similar_elements__metric_name(self, aggregator):
         check = AgentCheck()
 
-        check.gauge('test.most_similar_metric', 0)
         check.gauge('test.another_similar_metric', 0)
         check.gauge('test.very_different_metric', 0)
+        check.gauge('test.most_similar_metric', 0)
         check.gauge('test.very_very_different', 0)
 
         expected_metric = MetricStub("test.similar_metric", type=None, value=None, tags=None, hostname=None)
@@ -65,8 +65,8 @@ Score   Most similar
     def test__build_similar_elements__metric_tags(self, aggregator):
         check = AgentCheck()
 
-        check.gauge('test.similar_metric1', 10, tags=['name:similar_tag'])
         check.gauge('test.similar_metric2', 10, tags=['name:less_similar_tag'])
+        check.gauge('test.similar_metric1', 10, tags=['name:similar_tag'])
         check.gauge('test.similar_metric3', 10, tags=['something:different'])
 
         expected_metric = MetricStub(
