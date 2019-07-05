@@ -118,9 +118,9 @@ Score   Most similar
     def test__build_similar_elements__service_check_status(self, aggregator):
         check = AgentCheck()
 
-        check.service_check('test.similar11', AgentCheck.OK)
-        check.service_check('test.similar22', AgentCheck.CRITICAL)
-        check.service_check('test.similar12', AgentCheck.WARNING)
+        check.service_check('test.similar1', AgentCheck.OK)
+        check.service_check('test.similar2', AgentCheck.CRITICAL)
+        check.service_check('test.similar3', AgentCheck.WARNING)
 
         expected_service_check = ServiceCheckStub(
             None, "test.similar", status=AgentCheck.CRITICAL, tags=None, hostname=None, message=None
@@ -128,9 +128,7 @@ Score   Most similar
         similar_service_checks = similar._build_similar_elements(expected_service_check, aggregator._service_checks)
 
         # expect similar metrics in a similarity order
-        assert similar_service_checks[0][1].name == 'test.similar22'
-        assert similar_service_checks[1][1].name.startswith('test.similar1')
-        assert similar_service_checks[2][1].name.startswith('test.similar1')
+        assert similar_service_checks[0][1].name == 'test.similar2'
 
     def test__build_similar_elements__service_check_message(self, aggregator):
         check = AgentCheck()
