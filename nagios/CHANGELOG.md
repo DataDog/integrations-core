@@ -1,5 +1,9 @@
 # CHANGELOG - nagios
 
+## 1.4.1 / 2019-07-04
+
+* [Fixed] Fix event payload so the check name is parsed correctly. See [#3979](https://github.com/DataDog/integrations-core/pull/3979).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3542](https://github.com/DataDog/integrations-core/pull/3542).

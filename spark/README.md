@@ -12,9 +12,12 @@ The Spark check collects metrics for:
 - Job state: number of jobs active, completed, skipped, failed
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
+
 ### Installation
 
-The Spark check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your:
+The Spark check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your:
 
 - Mesos master (if you're running Spark on Mesos),
 - YARN ResourceManager (if you're running Spark on YARN), or
@@ -22,8 +25,8 @@ The Spark check is included in the [Datadog Agent][2] package, so you don't need
 
 ### Configuration
 
-1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
-    See the [sample spark.d/conf.yaml][4] for all available configuration options:
+1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
+    See the [sample spark.d/conf.yaml][5] for all available configuration options:
 
     ```yaml
         init_config:
@@ -45,15 +48,15 @@ The Spark check is included in the [Datadog Agent][2] package, so you don't need
 
     Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
 
-2. [Restart the Agent][5] to start sending Spark metrics to Datadog.
+2. [Restart the Agent][6] to start sending Spark metrics to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `spark` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `spark` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 The Spark check does not include any events.
@@ -71,21 +74,22 @@ The checks return CRITICAL if the Agent cannot collect Spark metrics, otherwise 
 ## Troubleshooting
 ### Spark on AWS EMR.
 
-To get Spark metrics if Spark is set up on AWS EMR, [use bootstrap actions][8] to install the [Datadog Agent][9] and then create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with [the proper values on each EMR node][10].
+To get Spark metrics if Spark is set up on AWS EMR, [use bootstrap actions][9] to install the [Datadog Agent][10] and then create the `/etc/dd-agent/conf.d/spark.yaml` configuration file with [the proper values on each EMR node][11].
 
 ## Further Reading
 
-* [Hadoop & Spark monitoring with Datadog][11]
+* [Hadoop & Spark monitoring with Datadog][12]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv
-[8]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html
-[9]: https://docs.datadoghq.com/agent
-[10]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
-[11]: https://www.datadoghq.com/blog/monitoring-spark
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv
+[9]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html
+[10]: https://docs.datadoghq.com/agent
+[11]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
+[12]: https://www.datadoghq.com/blog/monitoring-spark

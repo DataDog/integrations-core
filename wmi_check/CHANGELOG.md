@@ -1,5 +1,9 @@
 # CHANGELOG - wmi_check
 
+## 1.4.1 / 2019-07-04
+
+* [Fixed] Make WMISampler hashable. See [#4043](https://github.com/DataDog/integrations-core/pull/4043).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3584](https://github.com/DataDog/integrations-core/pull/3584).

@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 3.3.0 / 2019-07-04
+
+* [Added] Add swap memory checks to cadvisor kubelet checks. See [#3808](https://github.com/DataDog/integrations-core/pull/3808). Thanks [adammw](https://github.com/adammw).
+
 ## 3.2.1 / 2019-06-28
 
 * [Fixed] Make the kubelet and ECS fargate checks resilient to the tagger returning None. See [#4004](https://github.com/DataDog/integrations-core/pull/4004).

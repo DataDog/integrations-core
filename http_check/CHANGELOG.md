@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 4.1.0 / 2019-07-04
+
+* [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
+
 ## 4.0.0 / 2019-05-14
 
 * [Changed] Remove every default header except `User-Agent`. See [#3644](https://github.com/DataDog/integrations-core/pull/3644).
