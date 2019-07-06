@@ -22,13 +22,15 @@ def lib_tds_path():
 
 HOST = get_docker_hostname()
 PORT = 1433
+DOCKER_SERVER = '{},{}'.format(HOST, PORT)
+LOCAL_SERVER = 'localhost,{}'.format(PORT)
 HERE = os.path.dirname(os.path.abspath(__file__))
 CHECK_NAME = "sqlserver"
 
 EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS]
 
 INSTANCE_DOCKER = {
-    'host': '{},1433'.format(HOST),
+    'host': DOCKER_SERVER,
     'connector': 'odbc',
     'driver': lib_tds_path(),
     'username': 'sa',
@@ -36,7 +38,13 @@ INSTANCE_DOCKER = {
     'tags': ['optional:tag1'],
 }
 
-INSTANCE_SQL2017 = {'host': r'(local)\SQL2017', 'username': 'sa', 'password': 'Password12!'}
+INSTANCE_SQL2017 = {
+    'host': LOCAL_SERVER,
+    'username': 'sa',
+    'password': 'Password12!',
+    'connector': 'odbc',
+    'driver': '{ODBC Driver 17 for SQL Server}',
+}
 
 INIT_CONFIG = {
     'custom_metrics': [

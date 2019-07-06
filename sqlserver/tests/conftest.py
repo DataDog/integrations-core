@@ -10,14 +10,13 @@ import pytest
 from datadog_checks.dev import WaitFor, docker_run
 
 from .common import (
+    DOCKER_SERVER,
     FULL_CONFIG,
     HERE,
-    HOST,
     INIT_CONFIG,
     INIT_CONFIG_OBJECT_NAME,
     INSTANCE_DOCKER,
     INSTANCE_SQL2017,
-    PORT,
     lib_tds_path,
 )
 
@@ -53,7 +52,7 @@ def dd_environment():
         raise Exception("pyodbc is not installed!")
 
     def sqlserver():
-        conn = 'DRIVER={};Server={},{};Database=master;UID=sa;PWD=Password123;'.format(lib_tds_path(), HOST, PORT)
+        conn = 'DRIVER={};Server={};Database=master;UID=sa;PWD=Password123;'.format(lib_tds_path(), DOCKER_SERVER)
         pyodbc.connect(conn, timeout=30)
 
     with docker_run(

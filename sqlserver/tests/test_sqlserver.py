@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 
-from .common import CHECK_NAME, EXPECTED_METRICS
+from .common import CHECK_NAME, EXPECTED_METRICS, LOCAL_SERVER
 
 try:
     import pyodbc
@@ -122,7 +122,7 @@ def test_object_name(aggregator, init_config_object_name, instance_docker):
 def test_check_local(aggregator, init_config, instance_sql2017):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_sql2017])
     sqlserver_check.check(instance_sql2017)
-    expected_tags = instance_sql2017.get('tags', []) + [r'host:(local)\SQL2017', 'db:master']
+    expected_tags = instance_sql2017.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
     _assert_metrics(aggregator, expected_tags)
 
 

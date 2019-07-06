@@ -474,10 +474,10 @@ jobs:
 #     check: sqlserver
 #     display: SQL Server (Linux)
 
-- template: './test-single-windows.yml'
-  parameters:
-    check: sqlserver
-    display: SQL Server (Windows)
+# - template: './test-single-windows.yml'
+#   parameters:
+#     check: sqlserver
+#     display: SQL Server (Windows)
 
 # - template: './test-single-linux.yml'
 #   parameters:

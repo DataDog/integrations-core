@@ -36,14 +36,13 @@ def main():
         if not os.path.isdir(check_path):
             continue
 
-        print(f'\nSetting up: {check}')
-
         contents = os.listdir(check_path)
         if 'run.py' in contents:
             script_file = os.path.join(check_path, 'run.py')
             display_action(script_file)
             subprocess.run([sys.executable, script_file], check=True)
         elif PLATFORM in contents:
+            print(f'\nSetting up: {check}')
             scripts_path = os.path.join(check_path, PLATFORM)
             scripts = sorted(os.listdir(scripts_path))
 
