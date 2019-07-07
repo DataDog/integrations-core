@@ -1,16 +1,9 @@
 jobs:
 - template: './test-single-linux.yml'
   parameters:
-    check: Validate
-    display: Validate
-    validate: true
-    test: false
-    benchmark: false
-
-- template: './test-single-linux.yml'
-  parameters:
     check: datadog_checks_base
     display: Datadog Checks Base
+    validate: true
 
 - template: './test-single-linux.yml'
   parameters:
