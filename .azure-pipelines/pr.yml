@@ -13,6 +13,7 @@ jobs:
   parameters:
     job_name: Changed
     display: Linux
+    validate: true
 
 - template: './templates/test-single-windows.yml'
   parameters:
