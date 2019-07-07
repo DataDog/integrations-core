@@ -5,16 +5,28 @@ import os
 
 import mock
 
-from datadog_checks.dev.utils import running_on_appveyor, running_on_ci, running_on_travis
+from datadog_checks.dev.utils import running_on_ci, running_on_linux_ci, running_on_macos_ci, running_on_windows_ci
 
 
-def test_running_on_appveyor():
-    with mock.patch.dict(os.environ, {'APPVEYOR': 'true'}):
-        assert running_on_appveyor() is True
+def test_running_on_windows_ci():
+    with mock.patch.dict(os.environ, {'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI': 'url', 'AGENT_OS': 'Windows_NT'}):
         assert running_on_ci() is True
+        assert running_on_windows_ci() is True
 
 
-def test_running_on_travis():
-    with mock.patch.dict(os.environ, {'TRAVIS': 'true'}):
-        assert running_on_travis() is True
+def test_running_on_linux_ci():
+    with mock.patch.dict(os.environ, {'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI': 'url', 'AGENT_OS': 'Linux'}):
         assert running_on_ci() is True
+        assert running_on_linux_ci() is True
+
+
+def test_running_on_macos_ci():
+    with mock.patch.dict(os.environ, {'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI': 'url', 'AGENT_OS': 'Darwin'}):
+        assert running_on_ci() is True
+        assert running_on_macos_ci() is True
+
+
+def test_not_running_ci():
+    with mock.patch.dict(os.environ, {'AGENT_OS': 'Linux'}):
+        assert running_on_ci() is False
+        assert running_on_linux_ci() is False

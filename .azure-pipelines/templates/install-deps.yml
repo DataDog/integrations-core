@@ -15,6 +15,9 @@ steps:
 - script: python -m pip install --disable-pip-version-check --upgrade pip setuptools
   displayName: 'Upgrade Python packaging tools'
 
+- script: pip install --disable-pip-version-check --upgrade codecov
+  displayName: 'Install Codecov'
+
 - script: pip install ./datadog_checks_dev[cli]
   displayName: 'Install ddev'
 

@@ -16,7 +16,7 @@ jobs:
   steps:
   - template: './checkout-code.yml'
   - template: './set-up-windows.yml'
-  - template: './install-deps-python.yml'
+  - template: './install-deps.yml'
   - template: './set-up-integrations.yml'
     parameters:
       check: ${{ parameters.check }}

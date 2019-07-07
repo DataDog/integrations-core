@@ -18,18 +18,22 @@ def display_action(script_file):
 
 
 def main():
-    if len(sys.argv) == 1:
-        return
-
     checks = [c.strip() for c in sys.argv[1:]]
-    print(f'Checks chosen: {repr(checks).strip("[]")}')
 
-    if 'changed' in checks:
-        print('Detecting changed checks...')
-        result = subprocess.run(['ddev', 'test', '--list'], encoding='utf-8', capture_output=True, check=True)
-        checks = sorted(c.strip('`') for c in re.findall('^`[^`]+`', result.stdout, re.M))
+    if checks:
+        if checks[0] == 'skip':
+            print('Skipping set up')
+        else:
+            print(f'Checks chosen: {repr(checks).strip("[]")}')
     else:
-        checks = sorted(c for c in checks if c and not c.startswith('-'))
+        print(f'Checks chosen: changed')
+
+    command = ['ddev', 'test', '--list']
+    command.extend(checks)
+
+    print('Detecting changed checks...')
+    result = subprocess.run(command, encoding='utf-8', capture_output=True, check=True)
+    checks = sorted(c.strip('`') for c in re.findall('^`[^`]+`', result.stdout, re.M))
 
     for check in checks:
         check_path = os.path.join(HERE, check)
