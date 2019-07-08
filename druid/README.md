@@ -1,9 +1,6 @@
 # Agent Check: druid
 
-# TODO: Gunicorn and Consul also use statsd
-
-
-![Consul Dash][1]
+(TBD Add Druid Dashboard Image here)
 
 ## Overview
 
