@@ -26,7 +26,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return HDFSDataNode('hdfs_datanode')
+    return lambda instance: HDFSDataNode('hdfs_datanode', {}, [instance])
 
 
 @pytest.fixture
