@@ -500,7 +500,16 @@ class __AgentCheck(object):
             if 'set_breakpoint' in self.init_config:
                 enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
             else:
+                from guppy import hpy
+
+                h = hpy()
+                before = h.heap()
+
                 self.check(instance)
+
+                after = h.heap()
+                heapDiff = after - before
+                self.log.error('CheckName: {} , heap diff:{}'.format(self.name, heapDiff))
 
             result = ''
         except Exception as e:

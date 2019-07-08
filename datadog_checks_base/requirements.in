@@ -1,5 +1,6 @@
 contextlib2==0.5.5
 ddtrace==0.13.0
+guppy==0.1.10; python_version < '3.0'
 kubernetes==8.0.1
 prometheus-client==0.3.0
 protobuf==3.7.0
