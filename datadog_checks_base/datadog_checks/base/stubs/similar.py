@@ -4,22 +4,22 @@ from six import iteritems
 
 from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
 
-
 '''
 Build similar message for better test assertion failure message.
 '''
+
+MAX_SIMILAR_TO_DISPLAY = 15
 
 
 def build_similar_elements_msg(expected, submitted_elements):
     """
     Return formatted similar elements (metrics, service checks) received compared to submitted elements
     """
-    max_similar_to_display = 15
 
     similar_metrics = _build_similar_elements(expected, submitted_elements)
     similar_metrics_to_print = []
 
-    for score, metric_stub in similar_metrics[:max_similar_to_display]:
+    for score, metric_stub in similar_metrics[:MAX_SIMILAR_TO_DISPLAY]:
         if metric_stub.tags:
             metric_stub.tags.sort()
         similar_metrics_to_print.append("{:.2f}    {}".format(score, metric_stub))
