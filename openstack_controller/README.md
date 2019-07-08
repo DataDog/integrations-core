@@ -56,7 +56,7 @@ Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL`
 
 **openstack.neutron.network.up**
 
-Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise.
+Returns `CRITICAL` if the Network is down. Returns `OK` otherwise.
 
 
 ### Events
