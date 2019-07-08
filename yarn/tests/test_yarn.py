@@ -31,11 +31,13 @@ from .common import (
 
 
 def test_check(aggregator, mocked_request):
+    instance = YARN_CONFIG['instances'][0]
+
     # Instantiate YarnCheck
-    yarn = YarnCheck('yarn', {}, {})
+    yarn = YarnCheck('yarn', {}, [instance])
 
     # Run the check once
-    yarn.check(YARN_CONFIG['instances'][0])
+    yarn.check(instance)
 
     aggregator.assert_service_check(
         SERVICE_CHECK_NAME,
@@ -73,11 +75,13 @@ def test_check(aggregator, mocked_request):
 
 
 def test_check_excludes_app_metrics(aggregator, mocked_request):
+    instance = YARN_CONFIG_EXCLUDING_APP['instances'][0]
+
     # Instantiate YarnCheck
-    yarn = YarnCheck('yarn', {}, {})
+    yarn = YarnCheck('yarn', {}, [instance])
 
     # Run the check once
-    yarn.check(YARN_CONFIG_EXCLUDING_APP['instances'][0])
+    yarn.check(instance)
 
     # Check that the YARN App metrics is empty
     for metric, _ in YARN_APP_METRICS.values():
@@ -93,11 +97,13 @@ def test_check_excludes_app_metrics(aggregator, mocked_request):
 
 
 def test_auth(aggregator, mocked_auth_request):
+    instance = YARN_AUTH_CONFIG['instances'][0]
+
     # Instantiate YarnCheck
-    yarn = YarnCheck('yarn', {}, {})
+    yarn = YarnCheck('yarn', {}, [instance])
 
     # Run the check once
-    yarn.check(YARN_AUTH_CONFIG['instances'][0])
+    yarn.check(instance)
 
     # Make sure check is working
     aggregator.assert_service_check(
@@ -109,12 +115,14 @@ def test_auth(aggregator, mocked_auth_request):
 
 
 def test_ssl_verification(aggregator, mocked_bad_cert_request):
+    instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
+
     # Instantiate YarnCheck
-    yarn = YarnCheck('yarn', {}, {})
+    yarn = YarnCheck('yarn', {}, [instance])
 
     # Run the check on a config with a badly configured SSL certificate
     try:
-        yarn.check(YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0])
+        yarn.check(instance)
     except SSLError:
         aggregator.assert_service_check(
             SERVICE_CHECK_NAME,
@@ -127,7 +135,9 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
         raise AssertionError('Should have thrown an SSLError due to a badly configured certificate')
 
     # Run the check on the same configuration, but with verify=False. We shouldn't get an exception.
-    yarn.check(YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0])
+    instance = YARN_SSL_VERIFY_FALSE_CONFIG['instances'][0]
+    yarn = YarnCheck('yarn', {}, [instance])
+    yarn.check(instance)
     aggregator.assert_service_check(
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,

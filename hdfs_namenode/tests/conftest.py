@@ -29,7 +29,7 @@ def instance():
 
 @pytest.fixture
 def check():
-    return HDFSNameNode("hdfs_namenode", {}, {})
+    return lambda instance: HDFSNameNode('hdfs_datanode', {}, [instance])
 
 
 @pytest.fixture
