@@ -5,5 +5,7 @@ from datadog_checks.base import AgentCheck
 
 
 class DruidCheck(AgentCheck):
+    # TODO: Use http.RequestsWrapper
+
     def check(self, instance):
         pass
