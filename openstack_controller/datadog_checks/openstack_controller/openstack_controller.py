@@ -848,6 +848,6 @@ class OpenStackControllerCheck(AgentCheck):
         cloud = openstack_config.get_one(cloud=openstack_cloud_name)
         cloud_auth = cloud.get_auth()
         if not cloud_auth or not cloud_auth.auth_url:
-            self.log.error('No auth_url found for cloud {} in {}', openstack_cloud_name, openstack_config_file_path)
-            return None
+            raise IncompleteConfig(
+                'No auth_url found for cloud {} in {}', openstack_cloud_name, openstack_config_file_path)
         return cloud_auth.auth_url
