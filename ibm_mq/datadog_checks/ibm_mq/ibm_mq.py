@@ -202,6 +202,9 @@ class IbmMqCheck(AgentCheck):
                     self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
     def get_pcf_queue_metrics(self, queue_manager, queue_name, queue, tags):
+        """
+        Queue Status Metrics are only available for local queues.
+        """
         queue_type = queue[pymqi.CMQC.MQIA_Q_TYPE]
         if queue_type != pymqi.CMQC.MQQT_LOCAL:
             return
@@ -215,6 +218,7 @@ class IbmMqCheck(AgentCheck):
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
+            print("warning queue: ", queue, queue[pymqi.CMQC.MQIA_Q_TYPE])
             self.warning("Error getting pcf queue stats for {}: {}".format(queue_name, e))
         else:
             # Response is a list. It likely has only one member in it.
