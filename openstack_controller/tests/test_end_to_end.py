@@ -7116,7 +7116,8 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                 ],
                 hostname='',
-            )
+            ),
+            aggregator.assert_metric('openstack.controller', value=1)
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()

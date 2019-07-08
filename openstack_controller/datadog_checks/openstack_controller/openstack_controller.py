@@ -708,6 +708,8 @@ class OpenStackControllerCheck(AgentCheck):
             self.log.debug("Running check with credentials: \n")
 
             self._send_api_service_checks(keystone_server_url, custom_tags)
+            # Artificial metric introduced to distinguish between old and new openstack integrations
+            self.gauge("openstack.controller", 1)
 
             # List projects and filter them
             # TODO: NOTE: During authentication we use /v3/auth/projects and here we use /v3/projects.
