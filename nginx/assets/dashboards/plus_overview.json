@@ -15,8 +15,7 @@
     "role": null,
     "access_role": "adm",
     "verified": true,
-    "email": "support@datadoghq.com",
-    "icon": "https://secure.gravatar.com/avatar/ef1e7a19ad5bbab8ab508d94e4a404ea?s=48&d=retro"
+    "email": "support@datadoghq.com"
   },
   "new_id": "xit-gm3-zdi",
   "modified": "2019-07-05T10:26:39.073430+00:00",
