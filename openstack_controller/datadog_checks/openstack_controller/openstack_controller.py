@@ -7,11 +7,10 @@ from collections import defaultdict
 from datetime import datetime
 
 import requests
-from six import iteritems, itervalues, next
+from six import iteritems, itervalues
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.utils.common import pattern_filter
+from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.common import pattern_filter
 
 from .api import ApiFactory
 from .exceptions import (
@@ -25,7 +24,6 @@ from .exceptions import (
 )
 from .retry import BackOffRetry
 from .utils import traced
-
 
 SOURCE_TYPE = 'openstack'
 
@@ -710,6 +708,8 @@ class OpenStackControllerCheck(AgentCheck):
             self.log.debug("Running check with credentials: \n")
 
             self._send_api_service_checks(keystone_server_url, custom_tags)
+            # Artificial metric introduced to distinguish between old and new openstack integrations
+            self.gauge("openstack.controller", 1)
 
             # List projects and filter them
             # TODO: NOTE: During authentication we use /v3/auth/projects and here we use /v3/projects.

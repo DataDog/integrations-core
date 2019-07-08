@@ -1,5 +1,17 @@
 # CHANGELOG - kubelet
 
+## 3.3.0 / 2019-07-04
+
+* [Added] Add swap memory checks to cadvisor kubelet checks. See [#3808](https://github.com/DataDog/integrations-core/pull/3808). Thanks [adammw](https://github.com/adammw).
+
+## 3.2.1 / 2019-06-28
+
+* [Fixed] Make the kubelet and ECS fargate checks resilient to the tagger returning None. See [#4004](https://github.com/DataDog/integrations-core/pull/4004).
+
+## 3.2.0 / 2019-06-13
+
+* [Fixed] Revert "Collect network usage metrics (#3740)". See [#3914](https://github.com/DataDog/integrations-core/pull/3914).
+
 ## 3.1.0 / 2019-05-14
 
 * [Added] Collect network usage metrics. See [#3740](https://github.com/DataDog/integrations-core/pull/3740).
@@ -110,9 +122,9 @@
 [24]: https://github.com/DataDog/integrations-core/pull/1727
 [25]: https://github.com/DataDog/integrations-core/pull/1648
 [26]: https://github.com/DataDog/integrations-core/pull/1581
-[27]: 
-[28]: 
-[29]: 
-[30]: 
-[31]: 
-[32]: 
+[27]:
+[28]:
+[29]:
+[30]:
+[31]:
+[32]:

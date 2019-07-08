@@ -672,7 +672,10 @@ class PrometheusScraperMixin(object):
         # histograms do not have a value attribute
         val = getattr(metric, self.METRIC_TYPES[4]).sample_count
         if self._is_value_valid(val):
-            self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
+            if send_histograms_buckets:
+                self._submit_gauge("{}.count".format(name), val, metric, custom_tags=custom_tags + ["upper_bound:none"])
+            else:
+                self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
         else:
             self.log.debug("Metric value is not supported for metric {}.count.".format(name))
         val = getattr(metric, self.METRIC_TYPES[4]).sample_sum

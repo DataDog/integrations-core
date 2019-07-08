@@ -1,5 +1,13 @@
 # CHANGELOG - postgres
 
+## 2.9.1 / 2019-07-04
+
+* [Fixed] Fix tagging for custom queries using custom tags. See [#3930](https://github.com/DataDog/integrations-core/pull/3930).
+
+## 2.9.0 / 2019-06-20
+
+* [Added] Add regex matching for per-relation metrics. See [#3916](https://github.com/DataDog/integrations-core/pull/3916).
+
 ## 2.8.0 / 2019-05-14
 
 * [Fixed] Use configuration user for pgsql activity metric. See [#3720](https://github.com/DataDog/integrations-core/pull/3720). Thanks [fischaz](https://github.com/fischaz).

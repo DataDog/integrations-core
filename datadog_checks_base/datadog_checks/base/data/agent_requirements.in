@@ -4,8 +4,9 @@ asn1crypto==0.24.0
 beautifulsoup4==4.5.1
 boto==2.46.1
 cffi==1.11.5
-cryptography==2.3.1
-cx_oracle==6.0.1
+contextlib2==0.5.5
+cryptography==2.7
+cx-oracle==7.2.0
 ddtrace==0.13.0
 dnspython==1.16.0
 enum34==1.1.6
@@ -34,15 +35,16 @@ psutil==5.6.2
 psycopg2-binary==2.8.2
 pyasn1==0.4.2
 pycparser==2.18
-pycryptodomex==3.4.7
+pycryptodomex==3.8.2
 pymongo==3.5.1
 pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.9.3
-pyodbc==4.0.22; sys_platform != 'darwin'
+pyodbc==4.0.26; sys_platform != 'darwin'
 pyro4==4.73; sys_platform == 'win32'
 pysmi==0.2.2
 pysnmp==4.4.3
 pysnmp-mibs==0.1.6
+pysocks==1.7.0
 python-binary-memcached==0.26.1; sys_platform != 'win32'
 python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
 pyvmomi==v6.5.0.2017.5-1
@@ -62,3 +64,4 @@ six==1.12.0
 supervisor==4.0.1
 tuf==0.11.2.dev3
 uptime==3.0.1
+win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'

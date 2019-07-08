@@ -1,5 +1,41 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.5.0 / 2019-07-04
+
+* [Fixed] Make WMISampler hashable. See [#4043](https://github.com/DataDog/integrations-core/pull/4043).
+* [Added] Support SOCKS proxies. See [#4021](https://github.com/DataDog/integrations-core/pull/4021).
+* [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
+* [Added] Add others forms of auth to RequestsWrapper. See [#3956](https://github.com/DataDog/integrations-core/pull/3956).
+* [Fixed] Fix busy loop in WMI implementation. See [#4018](https://github.com/DataDog/integrations-core/pull/4018).
+* [Added] Add others forms of auth to RequestsWrapper. See [#3956](https://github.com/DataDog/integrations-core/pull/3956).
+* [Added] Better log message for unsafe yaml loading/dumping. See [#3771](https://github.com/DataDog/integrations-core/pull/3771).
+
+## 8.4.1 / 2019-06-29
+
+* [Fixed] Change WMISampler class to create a single thread, owned by the object. See [#3987](https://github.com/DataDog/integrations-core/pull/3987).
+
+## 8.4.0 / 2019-06-18
+
+* [Added] Support E2E testing. See [#3896](https://github.com/DataDog/integrations-core/pull/3896).
+
+## 8.3.3 / 2019-06-05
+
+* [Fixed] Revert "[openmetrics] allow blacklisting of strings". See [#3867](https://github.com/DataDog/integrations-core/pull/3867).
+* [Fixed] Encode hostname in set_external_tags. See [#3866](https://github.com/DataDog/integrations-core/pull/3866).
+
+## 8.3.2 / 2019-06-04
+
+* [Fixed] Revert: Properly utilize the provided `metrics_mapper`. See [#3861](https://github.com/DataDog/integrations-core/pull/3861).
+
+## 8.3.1 / 2019-06-02
+
+* [Fixed] Fix package order of `get_datadog_wheels`. See [#3847](https://github.com/DataDog/integrations-core/pull/3847).
+
+## 8.3.0 / 2019-06-01
+
+* [Added] [openmetrics] Use Kube service account bearer token for authentication. See [#3829](https://github.com/DataDog/integrations-core/pull/3829).
+* [Fixed] Add upper_bound tag for the total count when collecting histograms buckets. See [#3777](https://github.com/DataDog/integrations-core/pull/3777).
+
 ## 8.2.0 / 2019-05-21
 
 * [Added] Upgrade requests to 2.22.0. See [#3778](https://github.com/DataDog/integrations-core/pull/3778).

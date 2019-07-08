@@ -77,14 +77,14 @@ class SessionWrapper:
             ).format(signature, self.certDn)
             prepped_request.headers['Cookie'] = cookie
         else:
-            self.warning("The Cisco ACI Integration requires either a cert or a username and password")
+            self.log.warning("The Cisco ACI Integration requires either a cert or a username and password")
             raise APIAuthException("The Cisco ACI Integration requires either a cert or a username and password")
 
         response = self.session.send(prepped_request, verify=self.verify, timeout=self.timeout)
         try:
             response.raise_for_status()
         except Exception as e:
-            self.log.warning("Error making request: {}".format(e))
+            self.log.warning("Error making request: exception='%s' reponse.content='%s'", e, response.content)
             raise APIConnectionException("Error making request: {}".format(e))
         try:
             return response.json()

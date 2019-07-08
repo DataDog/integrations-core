@@ -9,6 +9,7 @@ from datadog_checks.yarn.yarn import SERVICE_CHECK_NAME, YARN_APP_METRICS, YARN_
 
 from .common import (
     CUSTOM_TAGS,
+    DEPRECATED_YARN_APP_METRICS_VALUES,
     RM_ADDRESS,
     YARN_APP_METRICS_TAGS,
     YARN_APP_METRICS_VALUES,
@@ -48,6 +49,8 @@ def test_check(aggregator, mocked_request):
 
     # Check the YARN App Metrics
     for metric, value in iteritems(YARN_APP_METRICS_VALUES):
+        aggregator.assert_metric(metric, value=value, tags=YARN_APP_METRICS_TAGS + CUSTOM_TAGS, count=1)
+    for metric, value in iteritems(DEPRECATED_YARN_APP_METRICS_VALUES):
         aggregator.assert_metric(metric, value=value, tags=YARN_APP_METRICS_TAGS + CUSTOM_TAGS, count=1)
 
     # Check the YARN Node Metrics

@@ -5,6 +5,7 @@ aliases:
     - /developers/integrations/integration_sdk/
     - /developers/integrations/testing/
     - /integrations/datadog_checks_dev/
+    - /guides/new_integration/
 ---
 
 To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, a number of prerequisites must be met:
@@ -144,6 +145,8 @@ There are two basic types of tests: unit tests for specific functionality, and i
 
 For more information, see the [Datadog Checks Dev documentation][8].
 
+#### Unit test
+
 The first part of the `check` method retrieves and verifies two pieces of information we need from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with something like this:
 
 ```python
@@ -182,6 +185,8 @@ The scaffolding has already been set up to run all tests located in `awesome/tes
 ```
 ddev test awesome
 ```
+
+#### Building an integration test
 
 This test doesn't check our collection _logic_ though, so let's add an integration test. We use `docker` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `awesome/tests/docker-compose.yml` with the following contents:
 
@@ -226,6 +231,8 @@ def dd_environment():
 def instance():
     return INSTANCE.copy()
 ```
+
+#### Integration test
 
 Finally, add an integration test to our `awesome/tests/test_awesome.py` file:
 
@@ -301,7 +308,7 @@ Arguments:
   * *double*
   * *float*
   * *dictionary*
-  * *list\**
+  * *list&#42;*
   * *object*
 * `defval`: default value for the parameter; can be empty (optional).
 
@@ -346,7 +353,7 @@ instances:
     ## The string to search for
     #
     search_string: "Example Domain"
-    
+
     ## @param user - object - optional
     ## The user should map to the structure
     ## {'name': ['<FIRST_NAME>', '<LAST_NAME>'], 'username': <USERNAME>, 'password': <PASSWORD>}
@@ -357,12 +364,12 @@ instances:
     #     - <LAST_NAME>
     #   username: <USERNAME>
     #   password: <PASSWORD>
-    
+
     ## @param options - object - required
     ## Optional flags you can set
     #
     options:
-    
+
       ## @param follow_redirects - boolean - optional - default: false
       ## Set to true to follow 301 Redirect
       #
@@ -407,7 +414,7 @@ Our example integration has a very simple `awesome/manifest.json`, the bulk of w
 
 ```json
 {
-  "display_name": "Awesome",
+  "display_name": "awesome",
   "maintainer": "email@example.org",
   "manifest_version": "1.0.0",
   "name": "awesome",
@@ -415,20 +422,25 @@ Our example integration has a very simple `awesome/manifest.json`, the bulk of w
   "metric_to_check": "",
   "creates_events": false,
   "short_description": "",
-  "guid": "x23b0c2c-dc39-4196-95fd-bddf93254a0x",
+  "guid": "x16b8750-df1e-46c0-839a-2056461b604x",
   "support": "contrib",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Awesome Integration",
+  "public_title": "Datadog-awesome Integration",
   "categories": [
     "web"
   ],
   "type": "check",
   "is_public": false,
-  "integration_id": "awesome"
+  "integration_id": "awesome",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }
 ```
 

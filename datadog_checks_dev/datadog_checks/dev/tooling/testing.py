@@ -11,7 +11,16 @@ STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
 
 
-def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every=False, changed_only=False, sort=False):
+def get_tox_envs(
+    checks,
+    style=False,
+    format_style=False,
+    benchmark=False,
+    every=False,
+    changed_only=False,
+    sort=False,
+    e2e_tests_only=False,
+):
     testable_checks = get_testable_checks()
     # Run `get_changed_checks` at most once because git calls are costly
     changed_checks = get_changed_checks() if not checks or changed_only else None
@@ -29,7 +38,7 @@ def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every
             checks_seen.add(check)
 
         envs_selected = envs_selected.split(',') if envs_selected else []
-        envs_available = get_available_tox_envs(check, sort=sort)
+        envs_available = get_available_tox_envs(check, sort=sort, e2e_tests_only=e2e_tests_only)
 
         if format_style:
             envs_selected[:] = [e for e in envs_available if 'format_style' in e]
@@ -58,16 +67,28 @@ def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every
         yield check, envs_selected
 
 
-def get_available_tox_envs(check, sort=False, e2e_only=False):
-    if e2e_only:
+def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
+    if e2e_tests_only:
+        tox_command = 'tox --listenvs-all -v'
+    elif e2e_only:
         tox_command = 'tox --listenvs-all'
     else:
         tox_command = 'tox --listenvs'
 
     with chdir(path_join(get_root(), check)):
-        env_list = run_command(tox_command, capture='out').stdout
+        output = run_command(tox_command, capture='out').stdout
 
-    env_list = [e.strip() for e in env_list.splitlines()]
+    env_list = [e.strip() for e in output.splitlines()]
+
+    if e2e_tests_only:
+        envs = []
+        for line in env_list:
+            if '->' in line:
+                env, _, description = line.partition('->')
+                if 'e2e ready' in description.lower():
+                    envs.append(env.strip())
+
+        return envs
 
     if e2e_only:
         sort = True
@@ -98,10 +119,14 @@ def get_available_tox_envs(check, sort=False, e2e_only=False):
 
         if e2e_only:
             # No need for unit tests as they wouldn't set up a real environment
-            try:
-                env_list.remove('unit')
-            except ValueError:
-                pass
+            unit_envs = []
+
+            for e in env_list:
+                if e.endswith('unit'):
+                    unit_envs.append(e)
+
+            for e in unit_envs:
+                env_list.remove(e)
 
     return env_list
 
@@ -160,10 +185,10 @@ def construct_pytest_options(
         )
 
     if marker:
-        pytest_options += ' -m {}'.format(marker)
+        pytest_options += ' -m "{}"'.format(marker)
 
     if test_filter:
-        pytest_options += ' -k {}'.format(test_filter)
+        pytest_options += ' -k "{}"'.format(test_filter)
 
     if pytest_args:
         pytest_options += ' {}'.format(pytest_args)

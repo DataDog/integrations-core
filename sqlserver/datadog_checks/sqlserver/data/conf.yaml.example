@@ -19,15 +19,15 @@ instances:
     #
   - host: <HOST>,<PORT>
 
-    ## @param username - string - required
+    ## @param username - string - optional
     ## Username for the Datadog-SQL server check user
     #
-    username: datadog
+    # username: datadog
 
-    ## @param password - string - required
+    ## @param password - string - optional
     ## Password for the Datadog-SQL server check user
     #
-    password: <PASSWORD>
+    # password: <PASSWORD>
 
     ## @param database - string - optional - default: master
     ## Database name to query
@@ -63,6 +63,7 @@ instances:
     ## @param connection_string - string - optional
     ## Specify a custom connection string to be used
     ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
+    ## "Trusted_Connection=yes" to use Windows Authentication
     #
     # connection_string: "<CONNECTION_STRING>"
 

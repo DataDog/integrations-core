@@ -21,11 +21,15 @@ kubernetes.io.read_bytes,gauge,,byte,,The amount of bytes read from the disk,0,k
 kubernetes.io.write_bytes,gauge,,byte,,The amount of bytes written to the disk,0,kubelet,k8_io_write_bytes
 kubernetes.memory.capacity,gauge,,byte,,The amount of memory (in bytes) in this machine,0,kubelet,k8s.mem.capacity
 kubernetes.memory.limits,gauge,,byte,,The limit of memory set,0,kubelet,k8s.mem.limits
+kubernetes.memory.sw_limit,gauge,,byte,,The limit of swap space set,0,kubelet,k8s.mem.sw_limit
 kubernetes.memory.requests,gauge,,byte,,The requested memory,0,kubelet,k8s.mem.requests
 kubernetes.memory.usage,gauge,,byte,,Current memory usage in bytes including all memory regardless of when it was accessed,-1,kubelet,k8s.mem
 kubernetes.memory.working_set,gauge,,byte,,Current working set in bytes - this is what the OOM killer is watching for,-1,kubelet,k8s.mem.ws
+kubernetes.memory.cache,gauge,,byte,,The amount of memory that is being used to cache data from disk (e.g. memory contents that can be associated precisely with a block on a block device),-1,kubelet,k8s.mem.cache
 kubernetes.memory.rss,gauge,,byte,,Size of RSS in bytes,-1,kubelet,k8s.mem.rss
+kubernetes.memory.swap,gauge,,byte,,The amount of swap currently used by by processes in this cgroup,-1,kubelet,k8s.mem.swap
 kubernetes.memory.usage_pct,gauge,,fraction,,The percentage of memory used,-1,kubelet,k8s.mem.used_pct
+kubernetes.memory.sw_in_use,gauge,,fraction,,The percentage of swap space used,-1,kubelet,k8s.mem.sw_in_use
 kubernetes.network.rx_bytes,gauge,,byte,second,The amount of bytes per second received,0,kubelet,k8s.net.rx
 kubernetes.network.rx_dropped,gauge,,packet,second,The amount of rx packets dropped per second,-1,kubelet,k8s.net.rx.drop
 kubernetes.network.rx_errors,gauge,,error,second,The amount of rx errors per second,-1,kubelet,k8s.net.rx.errors

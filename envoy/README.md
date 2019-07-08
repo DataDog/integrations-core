@@ -4,7 +4,6 @@
 This check collects distributed system observability metrics from [Envoy][1].
 
 ## Setup
-
 ### Installation
 
 The Envoy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
@@ -130,6 +129,24 @@ Here there are `3` tag sequences: `('<CLUSTER_NAME>')`, `('<GRPC_SERVICE>', '<GR
 If you care only about the cluster name and grpc service, you would add this to your whitelist:
 
 `^cluster\.<CLUSTER_NAME>\.grpc\.<GRPC_SERVICE>\.`
+
+#### Log Collection
+
+To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
+```
+    logs_enabled: true
+```
+
+Next, edit `envoy.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Envoy log files.
+
+```yaml
+ logs:
+   - type: file
+     path: /var/log/envoy.log
+     source: envoy
+     service: envoy
+```
+
 
 ### Validation
 

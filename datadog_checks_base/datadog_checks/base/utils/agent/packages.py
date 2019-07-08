@@ -15,4 +15,4 @@ def get_datadog_wheels():
             name = package.project_name[len(DATADOG_CHECK_PREFIX) :].replace('-', '_')
             packages.append(name)
 
-    return packages
+    return sorted(packages)[::-1]

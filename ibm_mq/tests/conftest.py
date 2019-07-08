@@ -5,11 +5,11 @@ import copy
 import logging
 import re
 
-import pymqi
 import pytest
 from six.moves import range
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.ibm_mq import IbmMqCheck
 
 from . import common
@@ -29,8 +29,14 @@ def instance():
 
 
 @pytest.fixture
-def instance_pattern():
-    inst = copy.deepcopy(common.INSTANCE_PATTERN)
+def instance_queue_pattern():
+    inst = copy.deepcopy(common.INSTANCE_QUEUE_PATTERN)
+    return inst
+
+
+@pytest.fixture
+def instance_queue_regex():
+    inst = copy.deepcopy(common.INSTANCE_QUEUE_REGEX)
     return inst
 
 
@@ -53,6 +59,9 @@ def seed_data():
 
 
 def publish():
+    # Late import to not require it for e2e
+    import pymqi
+
     conn_info = "%s(%s)" % (common.HOST, common.PORT)
 
     qmgr = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
@@ -75,6 +84,9 @@ def publish():
 
 
 def consume():
+    # Late import to not require it for e2e
+    import pymqi
+
     conn_info = "%s(%s)" % (common.HOST, common.PORT)
 
     qmgr = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
@@ -108,5 +120,7 @@ def dd_environment():
 
     env = {'COMPOSE_DIR': common.COMPOSE_DIR}
 
-    with docker_run(common.COMPOSE_FILE_PATH, env_vars=env, log_patterns=log_pattern, sleep=10):
-        yield common.INSTANCE
+    with docker_run(
+        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq', log_pattern)], sleep=10
+    ):
+        yield common.INSTANCE, common.E2E_METADATA

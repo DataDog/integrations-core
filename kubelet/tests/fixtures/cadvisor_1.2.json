@@ -135,6 +135,7 @@
           "usage": 1068859392,
           "cache": 1025363968,
           "rss": 43405312,
+          "swap": 0,
           "working_set": 382758912,
           "failcnt": 0,
           "container_data": {
@@ -307,6 +308,7 @@
           "usage": 1068822528,
           "cache": 1025363968,
           "rss": 43409408,
+          "swap": 0,
           "working_set": 382722048,
           "failcnt": 0,
           "container_data": {
@@ -479,6 +481,7 @@
           "usage": 1068773376,
           "cache": 1025363968,
           "rss": 43409408,
+          "swap": 0,
           "working_set": 382672896,
           "failcnt": 0,
           "container_data": {
@@ -651,6 +654,7 @@
           "usage": 1068765184,
           "cache": 1025363968,
           "rss": 43401216,
+          "swap": 0,
           "working_set": 382664704,
           "failcnt": 0,
           "container_data": {
@@ -823,6 +827,7 @@
           "usage": 1068773376,
           "cache": 1025363968,
           "rss": 43409408,
+          "swap": 0,
           "working_set": 382672896,
           "failcnt": 0,
           "container_data": {
@@ -995,6 +1000,7 @@
           "usage": 1068769280,
           "cache": 1025363968,
           "rss": 43405312,
+          "swap": 0,
           "working_set": 382668800,
           "failcnt": 0,
           "container_data": {
@@ -1167,6 +1173,7 @@
           "usage": 1068761088,
           "cache": 1025363968,
           "rss": 43397120,
+          "swap": 0,
           "working_set": 382660608,
           "failcnt": 0,
           "container_data": {
@@ -1339,6 +1346,7 @@
           "usage": 1068773376,
           "cache": 1025363968,
           "rss": 43409408,
+          "swap": 0,
           "working_set": 382672896,
           "failcnt": 0,
           "container_data": {
@@ -1561,6 +1569,7 @@
           "usage": 97558528,
           "cache": 19447808,
           "rss": 78110720,
+          "swap": 0,
           "working_set": 90456064,
           "failcnt": 10636,
           "container_data": {
@@ -1755,6 +1764,7 @@
           "usage": 100651008,
           "cache": 19836928,
           "rss": 80814080,
+          "swap": 0,
           "working_set": 93540352,
           "failcnt": 10636,
           "container_data": {
@@ -1949,6 +1959,7 @@
           "usage": 102555648,
           "cache": 20086784,
           "rss": 82468864,
+          "swap": 0,
           "working_set": 95449088,
           "failcnt": 10636,
           "container_data": {
@@ -2143,6 +2154,7 @@
           "usage": 100925440,
           "cache": 20119552,
           "rss": 80805888,
+          "swap": 0,
           "working_set": 93818880,
           "failcnt": 10636,
           "container_data": {
@@ -2337,6 +2349,7 @@
           "usage": 117256192,
           "cache": 23101440,
           "rss": 94154752,
+          "swap": 0,
           "working_set": 110149632,
           "failcnt": 10636,
           "container_data": {
@@ -2531,6 +2544,7 @@
           "usage": 101531648,
           "cache": 23130112,
           "rss": 78155776,
+          "swap": 0,
           "working_set": 94425088,
           "failcnt": 10636,
           "container_data": {
@@ -2725,6 +2739,7 @@
           "usage": 101298176,
           "cache": 23142400,
           "rss": 78155776,
+          "swap": 0,
           "working_set": 94191616,
           "failcnt": 10636,
           "container_data": {
@@ -2919,6 +2934,7 @@
           "usage": 101560320,
           "cache": 23179264,
           "rss": 78155776,
+          "swap": 0,
           "working_set": 94449664,
           "failcnt": 10636,
           "container_data": {
@@ -3194,6 +3210,7 @@
           "usage": 3849244672,
           "cache": 1538514944,
           "rss": 26042368,
+          "swap": 0,
           "working_set": 1948114944,
           "failcnt": 0,
           "container_data": {
@@ -3412,6 +3429,7 @@
           "usage": 3850002432,
           "cache": 1538514944,
           "rss": 26042368,
+          "swap": 0,
           "working_set": 1948868608,
           "failcnt": 0,
           "container_data": {
@@ -3630,6 +3648,7 @@
           "usage": 3855687680,
           "cache": 1538514944,
           "rss": 26042368,
+          "swap": 0,
           "working_set": 1954549760,
           "failcnt": 0,
           "container_data": {
@@ -3848,6 +3867,7 @@
           "usage": 3851542528,
           "cache": 1538514944,
           "rss": 26042368,
+          "swap": 0,
           "working_set": 1950404608,
           "failcnt": 0,
           "container_data": {
@@ -4066,6 +4086,7 @@
           "usage": 3870437376,
           "cache": 1538514944,
           "rss": 26042368,
+          "swap": 0,
           "working_set": 1969303552,
           "failcnt": 0,
           "container_data": {
@@ -4284,6 +4305,7 @@
           "usage": 3870306304,
           "cache": 1538514944,
           "rss": 26042368,
+          "swap": 0,
           "working_set": 1969172480,
           "failcnt": 0,
           "container_data": {
@@ -4502,6 +4524,7 @@
           "usage": 3854356480,
           "cache": 1538514944,
           "rss": 26042368,
+          "swap": 0,
           "working_set": 1953222656,
           "failcnt": 0,
           "container_data": {
@@ -4720,6 +4743,7 @@
           "usage": 3854516224,
           "cache": 1538514944,
           "rss": 26042368,
+          "swap": 0,
           "working_set": 1953378304,
           "failcnt": 0,
           "container_data": {
@@ -4938,6 +4962,7 @@
           "usage": 3854888960,
           "cache": 1538514944,
           "rss": 26042368,
+          "swap": 0,
           "working_set": 1953751040,
           "failcnt": 0,
           "container_data": {
@@ -5109,6 +5134,7 @@
           "usage": 1482752,
           "cache": 12288,
           "rss": 1470464,
+          "swap": 0,
           "working_set": 1482752,
           "failcnt": 0,
           "container_data": {
@@ -5219,6 +5245,7 @@
           "usage": 1482752,
           "cache": 12288,
           "rss": 1470464,
+          "swap": 0,
           "working_set": 1482752,
           "failcnt": 0,
           "container_data": {
@@ -5329,6 +5356,7 @@
           "usage": 1482752,
           "cache": 12288,
           "rss": 1470464,
+          "swap": 0,
           "working_set": 1482752,
           "failcnt": 0,
           "container_data": {
@@ -5439,6 +5467,7 @@
           "usage": 1482752,
           "cache": 12288,
           "rss": 1470464,
+          "swap": 0,
           "working_set": 1482752,
           "failcnt": 0,
           "container_data": {
@@ -5549,6 +5578,7 @@
           "usage": 1482752,
           "cache": 12288,
           "rss": 1470464,
+          "swap": 0,
           "working_set": 1482752,
           "failcnt": 0,
           "container_data": {
@@ -5659,6 +5689,7 @@
           "usage": 1482752,
           "cache": 12288,
           "rss": 1470464,
+          "swap": 0,
           "working_set": 1482752,
           "failcnt": 0,
           "container_data": {
@@ -5769,6 +5800,7 @@
           "usage": 1482752,
           "cache": 12288,
           "rss": 1470464,
+          "swap": 0,
           "working_set": 1482752,
           "failcnt": 0,
           "container_data": {
@@ -5879,6 +5911,7 @@
           "usage": 1482752,
           "cache": 12288,
           "rss": 1470464,
+          "swap": 0,
           "working_set": 1482752,
           "failcnt": 0,
           "container_data": {
@@ -6108,6 +6141,7 @@
           "usage": 28196864,
           "cache": 2928640,
           "rss": 25137152,
+          "swap": 0,
           "working_set": 28028928,
           "failcnt": 0,
           "container_data": {
@@ -6280,6 +6314,7 @@
           "usage": 28065792,
           "cache": 2928640,
           "rss": 25137152,
+          "swap": 0,
           "working_set": 27897856,
           "failcnt": 0,
           "container_data": {
@@ -6452,6 +6487,7 @@
           "usage": 28188672,
           "cache": 2928640,
           "rss": 25137152,
+          "swap": 0,
           "working_set": 28020736,
           "failcnt": 0,
           "container_data": {
@@ -6624,6 +6660,7 @@
           "usage": 28151808,
           "cache": 2928640,
           "rss": 25137152,
+          "swap": 0,
           "working_set": 27983872,
           "failcnt": 0,
           "container_data": {
@@ -6796,6 +6833,7 @@
           "usage": 28188672,
           "cache": 2928640,
           "rss": 25137152,
+          "swap": 0,
           "working_set": 28020736,
           "failcnt": 0,
           "container_data": {
@@ -6968,6 +7006,7 @@
           "usage": 28065792,
           "cache": 2928640,
           "rss": 25137152,
+          "swap": 0,
           "working_set": 27897856,
           "failcnt": 0,
           "container_data": {
@@ -7140,6 +7179,7 @@
           "usage": 28192768,
           "cache": 2932736,
           "rss": 25137152,
+          "swap": 0,
           "working_set": 28020736,
           "failcnt": 0,
           "container_data": {
@@ -7312,6 +7352,7 @@
           "usage": 28164096,
           "cache": 2932736,
           "rss": 25137152,
+          "swap": 0,
           "working_set": 27992064,
           "failcnt": 0,
           "container_data": {
@@ -7484,6 +7525,7 @@
           "usage": 28364800,
           "cache": 2932736,
           "rss": 25309184,
+          "swap": 0,
           "working_set": 28196864,
           "failcnt": 0,
           "container_data": {

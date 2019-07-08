@@ -14,7 +14,7 @@ from datadog_checks.base import ensure_unicode
 from .common import SOURCE_TYPE
 
 EXCLUDE_FILTERS = {
-    'AlarmStatusChangedEvent': [r'Gray'],
+    'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
     'TaskEvent': [
         r'Initialize powering On',
         r'Power Off virtual machine',
@@ -38,7 +38,7 @@ EXCLUDE_FILTERS = {
 class VSphereEvent(object):
     UNKNOWN = 'unknown'
 
-    def __init__(self, raw_event, event_config=None):
+    def __init__(self, raw_event, event_config, tags):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
             self.event_type = self.raw_event.__class__.__name__[10:]
@@ -46,7 +46,12 @@ class VSphereEvent(object):
             self.event_type = VSphereEvent.UNKNOWN
 
         self.timestamp = int((self.raw_event.createdTime.replace(tzinfo=None) - datetime(1970, 1, 1)).total_seconds())
-        self.payload = {"timestamp": self.timestamp, "event_type": SOURCE_TYPE, "source_type_name": SOURCE_TYPE}
+        self.payload = {
+            "timestamp": self.timestamp,
+            "event_type": SOURCE_TYPE,
+            "source_type_name": SOURCE_TYPE,
+            "tags": tags[:],
+        }
         if event_config is None:
             self.event_config = {}
         else:
@@ -109,12 +114,14 @@ class VSphereEvent(object):
         self.payload["msg_text"] += "\n".join(changes)
 
         self.payload['host'] = self.raw_event.vm.name
-        self.payload['tags'] = [
-            'vsphere_host:{}'.format(ensure_unicode(pre_host)),
-            'vsphere_host:{}'.format(ensure_unicode(new_host)),
-            'vsphere_datacenter:{}'.format(ensure_unicode(pre_dc)),
-            'vsphere_datacenter:{}'.format(ensure_unicode(new_dc)),
-        ]
+        self.payload['tags'].extend(
+            [
+                'vsphere_host:{}'.format(ensure_unicode(pre_host)),
+                'vsphere_host:{}'.format(ensure_unicode(new_host)),
+                'vsphere_datacenter:{}'.format(ensure_unicode(pre_dc)),
+                'vsphere_datacenter:{}'.format(ensure_unicode(new_dc)),
+            ]
+        )
         return self.payload
 
     def transform_alarmstatuschangedevent(self):
@@ -129,16 +136,15 @@ class VSphereEvent(object):
                 return None
             if vals[before] < vals[after]:
                 return 'Triggered'
-            else:
-                return 'Recovered'
+            return 'Recovered'
 
-        TO_ALERT_TYPE = {'green': 'success', 'yellow': 'warning', 'red': 'error'}
+        TO_ALERT_TYPE = {'green': 'success', 'yellow': 'warning', 'red': 'error', 'gray': 'info'}
 
         def get_agg_key(alarm_event):
             return 'h:{0}|dc:{1}|a:{2}'.format(
-                md5(alarm_event.entity.name).hexdigest()[:10],
-                md5(alarm_event.datacenter.name).hexdigest()[:10],
-                md5(alarm_event.alarm.name).hexdigest()[:10],
+                md5(alarm_event.entity.name.encode('utf-8')).hexdigest()[:10],
+                md5(alarm_event.datacenter.name.encode('utf-8')).hexdigest()[:10],
+                md5(alarm_event.alarm.name.encode('utf-8')).hexdigest()[:10],
             )
 
         # Get the entity type/name

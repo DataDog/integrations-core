@@ -14,9 +14,7 @@ import simplejson as json
 from six import iteritems
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-
+from datadog_checks.base import AgentCheck, is_affirmative
 
 SOURCE_TYPE = 'openstack'
 

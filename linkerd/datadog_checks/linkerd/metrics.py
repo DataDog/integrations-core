@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 METRIC_MAP = {
+    # V1 metrics
     'jvm:start_time': 'jvm.start_time',
     'jvm:thread:count': 'jvm.thread.count',
     'jvm:nonheap:committed': 'jvm.nonheap.committed',
@@ -42,6 +43,35 @@ METRIC_MAP = {
     'rt:server:connections': 'rt.server.connections',
     'rt:server:connects': 'rt.server.connects_s',
     'rt:server:request_latency_ms': 'rt.server.request_latency_ms',
+    # V2 metrics
+    'request_total': 'request_total',
+    'response_latency_ms': 'response_latency',
+    'response_total': 'response_total',
+    'retry_skipped_total': 'retry_skipped_total',
+    'route_request_total': 'route.request_total',
+    'route_response_latency_ms': 'route.response_latency',
+    'route_response_total': 'route.response_total',
+    'route_retry_skipped_total': 'route.retry_skipped_total',
+    'route_actual_request_total': 'route.actual_request_total',
+    'route_actual_response_latency_ms': 'route.actual_response_latency',
+    'route_actual_response_total': 'route.actual_response_total',
+    'route_actual_retry_skipped_total': 'route.actual_retry_skipped_total',
+    'tcp_open_total': 'tcp.open_total',
+    'tcp_open_connections': 'tcp.open_connections',
+    'tcp_read_bytes_total': 'tcp.read_bytes_total',
+    'tcp_write_bytes_total': 'tcp.write_bytes_total',
+    'tcp_close_total': 'tcp.close_total',
+    'tcp_connection_duration_ms': 'tcp.connection_duration',
+    'control_request_total': 'control.request_total',
+    'control_response_latency_ms': 'control.response_latency',
+    'control_response_total': 'control.response_total',
+    'control_retry_skipped_total': 'control.retry_skipped_total',
+    'process_start_time_seconds': 'process.start_time',
+    'process_cpu_seconds_total': 'process.cpu_seconds_total',
+    'process_open_fds': 'process.open_fds',
+    'process_max_fds': 'process.max_fds',
+    'process_virtual_memory_bytes': 'process.virtual_memory',
+    'process_resident_memory_bytes': 'process.resident_memory',
 }
 
 TYPE_OVERRIDES = {

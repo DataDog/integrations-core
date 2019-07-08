@@ -84,7 +84,7 @@ class NagiosCheck(AgentCheck):
 
     def gauge(self, *args, **kwargs):
         """
-        Compatability wrapper for Agents that do not submit gauge metrics with custom timestamps
+        Compatibility wrapper for Agents that do not submit gauge metrics with custom timestamps
         """
         orig_gauge = super(NagiosCheck, self).gauge
         # remove 'timestamp' arg if the base class' gauge function does not accept a 'timestamp' arg
@@ -351,7 +351,7 @@ class NagiosEventLogTailer(NagiosTailer):
         event_payload = fields._asdict()
 
         msg_text = {
-            'event_type': event_payload.pop('event_type', None),
+            'event_type': event_type,
             'event_soft_hard': event_payload.pop('event_soft_hard', None),
             'check_name': event_payload.pop('check_name', None),
             'event_state': event_payload.pop('event_state', None),

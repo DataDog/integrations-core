@@ -1,32 +1,13 @@
 init_config:
-
-    ## @param metric_headers - list - required
-    ## Metric headings from which component metrics will be sourced.  To query all metrics
-    ## from a component to see what headings it has, see here:
-    ## https://github.com/apache/ambari/blob/trunk/ambari-server/docs/api/v1/components-component.md
+    ## @param collect_service_metrics - boolean - optional - default: true
+    ## Change to `false` to omit collecting service level metrics
     #
-    metric_headers:
-      - cpu
-      - disk
-      - load
-      - memory
-      - network
-      - process
+    # collect_service_metrics: true
 
-    ## @param collect_host_metrics - boolean - optional - default: True
-    ## Change to False to omit collecting host level metrics
+    ## @param collect_service_status - boolean - optional - default: false
+    ## Change to `false` to omit collecting services status
     #
-    # collect_host_metrics: True
-
-    ## @param collect_service_metrics - boolean - optional - default: True
-    ## Change to False to omit collecting service level metrics
-    #
-    # collect_service_metrics: True
-
-    ## @param collect_service_status - boolean - optional - default: False
-    ## Change to False to omit collecting services status
-    #
-    # collect_service_status: False
+    # collect_service_status: false
 
 instances:
 
@@ -48,17 +29,20 @@ instances:
     ## @param services - object - optional
     ## Required if collecting component metrics or service status.
     ## Note that each level of values is required.  This is essentially whitelisting
-    ## where we will only pull metrics from the components listed under their
-    ## respective services.  Listing no components under a service will cause that
-    ## service to be skipped.
+    ## metrics headers that are pulled for each components listed under their respective services.
+    ## Listing no components or no metrics under a service will cause that service to be skipped for components metrics check.
     #
     # services:
     #     <SERVICE_NAME_1>:
-    #       - <COMPONENT_NAME_1>
-    #       - <COMPONENT_NAME_2>
+    #       <COMPONENT_NAME_1>:
+    #         - <METRIC_HEADER_1>
+    #         - <METRIC_HEADER_2>
+    #       <COMPONENT_NAME_2>:
+    #         - <METRIC_HEADER_1>
+    #         - <METRIC_HEADER_2>
     #     <SERVICE_NAME_2>:
-    #       - <COMPONENT_NAME_1>
-    #       - <COMPONENT_NAME_2>
+    #       <COMPONENT_NAME_1>: []
+    #       <COMPONENT_NAME_2>: []
 
     ## @param tags  - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
@@ -79,15 +63,15 @@ instances:
     #
     # tls_private_key: <PATH_TO_PRIVATE_KEY>
 
-    ## @param tls_verify - boolean - optional - default: True
+    ## @param tls_verify - boolean - optional - default: true
     ## Whether or not to verify TSL certificates (default true)
     #
-    # tls_verify: True
+    # tls_verify: true
 
-    ## @param ignore_tls_warning - boolean - optional - default: False
+    ## @param tls_ignore_warning - boolean - optional - default: false
     ## Ignore warnings for lack of SSL validation
     #
-    # ignore_tls_warning = False
+    # tls_ignore_warning = false
 
     ## @param timeout - integer - optional - default: 10
     ## Customizes the Ambari connection timeout (in seconds).
@@ -101,10 +85,10 @@ instances:
     #   <KEY_1>: <VALUE_1>
     #   <KEY_2>: <VALUE_2>
 
-    ## @param persist_connections - boolean - optional - default: False
+    ## @param persist_connections - boolean - optional - default: false
     ## Whether or not to persist cookies and use connection pooling
     #
-    # persist_connections: False
+    # persist_connections: false
 
     ## @param proxy - object - optional
     ## Proxy configuration
@@ -116,11 +100,11 @@ instances:
     #     - <HOSTNAME_1>
     #     - <HOSTNAME_2>
 
-    ## @param skip_proxy - boolean - optional - default: False
+    ## @param skip_proxy - boolean - optional - default: false
     ## Whether or not to skip the proxy configured in the Agent's config file when
     ## making the request to the PerfServlet
     #
-    # skip_proxy: False
+    # skip_proxy: false
 
 ## Log Section (Available for Agent >=6.0)
 ##
@@ -135,6 +119,50 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /var/log/ambari-server/*.log
+#     path: /var/log/ambari-server/ambari-alerts.log
+#     source: ambari
+#     service: ambari
+#     log_processing_rules:
+#        - type: multi_line
+#          name: new_log_start_with_date
+#          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])  # 2019-04-22 15:47:00,999
+#   - type: file
+#     path: /var/log/ambari-server/ambari-audit.log
+#     source: ambari
+#     service: ambari
+#     log_processing_rules:
+#        - type: multi_line
+#          name: new_log_start_with_date
+#          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])  # 2019-05-25T13:13:17.875Z
+#   - type: file
+#     path: /var/log/ambari-server/config-changes.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-eclipselink.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/server-check-database.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server-command.log
+#     source: ambari
+#     service: ambari
+#     log_processing_rules:
+#        - type: multi_line
+#          name: new_log_start_with_date
+#          pattern: (INFO|ERROR|WARN)  # ERROR 2019-04-22
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server-pkgmgr.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-stack-merger.log
 #     source: ambari
 #     service: ambari

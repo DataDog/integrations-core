@@ -7,11 +7,14 @@
 Collect IIS metrics aggregated across all of your sites, or on a per-site basis. The IIS Agent check collects metrics for active connections, bytes sent and received, request count by HTTP method, and more. It also sends a service check for each site, letting you know whether it's up or down.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
+
 ### Installation
 
 The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, you need to:
 
-1. [Install the Agent][2] on your IIS servers.
+1. [Install the Agent][3] on your IIS servers.
 
 2. Your IIS servers must have the `Win32_PerfFormattedData_W3SVC_WebService` WMI class installed.
   You can check for this using the following command:
@@ -39,7 +42,7 @@ The IIS check is packaged with the Agent. To start gathering your IIS metrics an
 
 ### Configuration
 
-Edit the `iis.d/conf.yaml` file  in the [Agent's `conf.d` directory][3] at the root of your [Agent's configuration directory][4],
+Edit the `iis.d/conf.yaml` file  in the [Agent's `conf.d` directory][4] at the root of your [Agent's configuration directory][5],
 
 #### Prepare IIS
 
@@ -72,16 +75,14 @@ instances:
   #   - dev.example.com
 ```
 
-To collect metrics on a per-site basis, you *must* use the `sites` option. The Agent collects metrics for each site you list and tags them with the site name - `iis.net.num_connections` tagged with `site:example.com`, and `iis.net.num_connections` tagged with `site:dev.example.com`.
+Use the `sites` option to collect metrics on a per-site basis. When setup, the Agent collects metrics for each site you list and tags them with the corresponding site name. If you don't configure `sites`, the Agent collects the same metrics, but their values reflect totals across all sites.
 
-If you don't configure `sites`, the Agent collects all the same metrics, but their values reflect totals across all sites - `iis.net.num_connections` is the total number of connections on the IIS server; you will not have visibility into per-site metrics.
-
-You can also monitor sites on remote IIS servers. See the [sample iis.d/conf.yaml][5] for relevant configuration options. By default, this check runs against a single instance - the current machine that the Agent is running on. It will check the WMI performance counters for IIS on that machine.
+You can also monitor sites on remote IIS servers. See the [sample iis.d/conf.yaml][6] for relevant configuration options. By default, this check runs against a single instance - the current machine that the Agent is running on. It will check the WMI performance counters for IIS on that machine.
 
 If you want to check other remote machines as well, you can add one instance per host.
 Note: If you also want to check the counters on the current machine, you will haveto create an instance with empty params.
 
-The optional `provider` parameter allows to specify a WMI provider (default to `32` on Datadog Agent 32-bit or `64`). It is used to request WMI data from the non-default provider. Available options are: `32` or `64`. For more information, [review this MSDN article][6].
+The optional `provider` parameter allows to specify a WMI provider (default to `32` on Datadog Agent 32-bit or `64`). It is used to request WMI data from the non-default provider. Available options are: `32` or `64`. For more information, [review this MSDN article][7].
 
 The `sites` parameter allows you to specify a list of sites you want to read metrics from. With sites specified, metrics will be tagged with the site name. If you don't define any sites, the check will pull the aggregate values across all sites.
 
@@ -101,9 +102,9 @@ Here's an example of configuration that would check the current machine and a re
 
 * `is_2008` (Optional) - NOTE: because of a typo in IIS6/7 (typically on W2K8) where perfmon reports TotalBytesTransferred as TotalBytesTransfered, you may have to enable this to grab the IIS metrics in that environment.
 
-* See the [sample iis.yaml][5] for all available configuration options.
+* See the [sample iis.yaml][6] for all available configuration options.
 
-* [Restart the Agent][7] to begin sending IIS metrics to Datadog.
+* [Restart the Agent][8] to begin sending IIS metrics to Datadog.
 
 #### Log Collection
 
@@ -127,19 +128,19 @@ Here's an example of configuration that would check the current machine and a re
   ```
 
   Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample iis.d/conf.yaml][5] for all available configuration options.
+  See the [sample iis.d/conf.yaml][6] for all available configuration options.
 
-  * [Restart the Agent][8].
+  * [Restart the Agent][9].
 
 
 ### Validation
 
-[Run the Agent's `status` subcommand][9] and look for `iis` under the Checks section.
+[Run the Agent's `status` subcommand][10] and look for `iis` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this integration.
+See [metadata.csv][11] for a list of metrics provided by this integration.
 
 ### Events
 The IIS check does not include any events.
@@ -151,16 +152,17 @@ The IIS check does not include any events.
 The Agent submits this service check for each configured site in `iis.yaml`. It returns `Critical` if the site's uptime is zero, otherwise `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/iis/images/iisgraph.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example
-[6]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure
+[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[6]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example
+[7]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
-[11]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
+[12]: https://docs.datadoghq.com/help

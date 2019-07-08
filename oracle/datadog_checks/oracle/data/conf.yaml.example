@@ -5,7 +5,7 @@ init_config:
   ##
   ## 1. metric_prefix - This is what each metric will start with.
   ## 2. query - This is the SQL to execute. It can be a simple statement or a
-  ##            multi-line script. Only the first row of the result is read.
+  ##            multi-line script. Alls rows of the result are evaluated.
   ## 3. columns - This is a list representing each column, ordered sequentially
   ##              from left to right. There are 2 required pieces of data:
   ##                a. type - This is the submission method (gauge, count, etc.).
@@ -92,7 +92,7 @@ instances:
     ##
     ## 1. metric_prefix - This is what each metric will start with.
     ## 2. query - This is the SQL to execute. It can be a simple statement or a
-    ##            multi-line script. Only the first row of the result is read.
+    ##            multi-line script. All rows of the result are evaluated.
     ## 3. columns - This is a list representing each column, ordered sequentially
     ##              from left to right. There are 2 required pieces of data:
     ##                a. type - This is the submission method (gauge, count, etc.).

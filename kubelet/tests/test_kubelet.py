@@ -49,7 +49,9 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.memory.requests',
     'kubernetes.memory.usage',
     'kubernetes.memory.working_set',
+    'kubernetes.memory.cache',
     'kubernetes.memory.rss',
+    'kubernetes.memory.swap',
     'kubernetes.network.rx_bytes',
     'kubernetes.network.tx_bytes',
 ]
@@ -61,12 +63,11 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.cpu.cfs.throttled.periods',
     'kubernetes.cpu.cfs.throttled.seconds',
     'kubernetes.memory.usage_pct',
+    'kubernetes.memory.sw_limit',
     'kubernetes.network.rx_dropped',
     'kubernetes.network.rx_errors',
     'kubernetes.network.tx_dropped',
     'kubernetes.network.tx_errors',
-    'kubernetes.network.tcp.usage',
-    'kubernetes.network.udp.usage',
     'kubernetes.io.write_bytes',
     'kubernetes.io.read_bytes',
     'kubernetes.apiserver.certificate.expiration.count',
@@ -131,10 +132,6 @@ METRICS_WITH_INTERFACE_TAG = {
     'kubernetes.network.rx_dropped': 'eth0',
     'kubernetes.network.tx_dropped': 'eth0',
 }
-
-METRICS_WITH_TCP_STATE_TAG = {'kubernetes.network.tcp.usage': 'close'}
-
-METRICS_WITH_UDP_STATE_TAG = {'kubernetes.network.udp.usage': 'dropped'}
 
 
 class MockStreamResponse:
@@ -666,12 +663,4 @@ def test_add_labels_to_tags(monkeypatch, aggregator):
 
     for metric in METRICS_WITH_INTERFACE_TAG:
         tag = 'interface:%s' % METRICS_WITH_INTERFACE_TAG[metric]
-        aggregator.assert_metric_has_tag(metric, tag)
-
-    for metric in METRICS_WITH_TCP_STATE_TAG:
-        tag = 'tcp_state:%s' % METRICS_WITH_TCP_STATE_TAG[metric]
-        aggregator.assert_metric_has_tag(metric, tag)
-
-    for metric in METRICS_WITH_UDP_STATE_TAG:
-        tag = 'udp_state:%s' % METRICS_WITH_UDP_STATE_TAG[metric]
         aggregator.assert_metric_has_tag(metric, tag)

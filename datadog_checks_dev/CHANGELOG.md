@@ -1,5 +1,46 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.30.1 / 2019-07-04
+
+* [Fixed] Fix metadata bootstrap workflow. See [#4047](https://github.com/DataDog/integrations-core/pull/4047).
+
+## 0.30.0 / 2019-07-04
+
+* [Fixed] Update wording on installing extras in ddev create command. See [#4032](https://github.com/DataDog/integrations-core/pull/4032).
+* [Added] Remove timeout when stopping containers. See [#3973](https://github.com/DataDog/integrations-core/pull/3973).
+
+## 0.29.0 / 2019-06-24
+
+* [Added] Only sign updated checks. See [#3944](https://github.com/DataDog/integrations-core/pull/3944).
+
+## 0.28.0 / 2019-06-19
+
+* [Added] Print line number on validate metadata. See [#3931](https://github.com/DataDog/integrations-core/pull/3931).
+
+## 0.27.0 / 2019-06-18
+
+* [Fixed] Validate interval in metadata validation. See [#3857](https://github.com/DataDog/integrations-core/pull/3857).
+* [Added] Support E2E testing. See [#3896](https://github.com/DataDog/integrations-core/pull/3896).
+* [Added] Allow releasing multiple checks at once. See [#3881](https://github.com/DataDog/integrations-core/pull/3881).
+
+## 0.26.1 / 2019-06-05
+
+* [Fixed] Fix JMX template. See [#3879](https://github.com/DataDog/integrations-core/pull/3879).
+* [Fixed] Update APM team label. See [#3878](https://github.com/DataDog/integrations-core/pull/3878).
+* [Fixed] Fix logic to skip docs PRs for release testing. See [#3877](https://github.com/DataDog/integrations-core/pull/3877).
+
+## 0.26.0 / 2019-06-01
+
+* [Added] Better error message when releasing on the wrong branch. See [#3832](https://github.com/DataDog/integrations-core/pull/3832).
+
+## 0.25.2 / 2019-05-28
+
+* [Fixed] Fix tox plugin. See [#3825](https://github.com/DataDog/integrations-core/pull/3825).
+
+## 0.25.1 / 2019-05-24
+
+* [Fixed] Use safe default when validating manifests. See [#3810](https://github.com/DataDog/integrations-core/pull/3810).
+
 ## 0.25.0 / 2019-05-20
 
 * [Added] Move all assets to a dedicated directory. See [#3768](https://github.com/DataDog/integrations-core/pull/3768).

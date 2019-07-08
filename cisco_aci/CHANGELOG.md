@@ -1,5 +1,14 @@
 # CHANGELOG - cisco_aci
 
+## 1.7.0 / 2019-07-04
+
+* [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
+
+## 1.6.0 / 2019-06-01
+
+* [Added] Improve API logs. See [#3794](https://github.com/DataDog/integrations-core/pull/3794).
+* [Fixed] Sanitize external host tags. See [#3792](https://github.com/DataDog/integrations-core/pull/3792).
+
 ## 1.5.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3489](https://github.com/DataDog/integrations-core/pull/3489).

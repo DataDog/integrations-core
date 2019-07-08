@@ -34,5 +34,14 @@
         "statuses": ["ok", "critical"],
         "name": "Channel Can Connect",
         "description": "Returns `CRITICAL` if the Agent cannot retrieve channel stats. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "6.8.1",
+        "integration":"IBM MQ",
+        "groups": ["queue_manager", "mq_host", "port", "channel"],
+        "check": "ibm_mq.channel.status",
+        "statuses": ["ok", "critical", "warning", "unknown"],
+        "name": "Channel Status",
+        "description": "Return `CRITICAL` if the status is INACTIVE/STOPPED/STOPPING. Returns `OK` if the status is RUNNING. Returns `WARNING` if the status might lead to running."
     }
 ]

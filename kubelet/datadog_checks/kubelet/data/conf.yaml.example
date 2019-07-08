@@ -31,7 +31,7 @@ instances:
     ## The histogram buckets can be noisy and generate a lot of tags.
     ## send_histograms_buckets controls whether or not you want to pull them.
     #
-    # send_histograms_buckets: True
+    # send_histograms_buckets: true
 
     ## Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
     ## This port is closed by default on k8s 1.7+ and OpenShift, enable it

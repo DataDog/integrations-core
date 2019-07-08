@@ -34,12 +34,12 @@ def test_bad_config_string_regex():
     }
     c = Disk('disk', None, {}, [instance])
 
-    assert c._file_system_whitelist == re.compile('test', re.I)
-    assert c._file_system_blacklist == re.compile('test|iso9660$', re.I)
-    assert c._device_whitelist == re.compile('test', IGNORE_CASE)
-    assert c._device_blacklist == re.compile('test', IGNORE_CASE)
-    assert c._mount_point_whitelist == re.compile('test', IGNORE_CASE)
-    assert c._mount_point_blacklist == re.compile('test', IGNORE_CASE)
+    assert c._file_system_whitelist.pattern == 'test'
+    assert c._file_system_blacklist.pattern == 'test|iso9660$'
+    assert c._device_whitelist.pattern == 'test'
+    assert c._device_blacklist.pattern == 'test'
+    assert c._mount_point_whitelist.pattern == 'test'
+    assert c._mount_point_blacklist.pattern == 'test'
 
 
 def test_ignore_empty_regex():
@@ -53,12 +53,12 @@ def test_ignore_empty_regex():
     }
     c = Disk('disk', None, {}, [instance])
 
-    assert c._file_system_whitelist == re.compile('test', re.I)
-    assert c._file_system_blacklist == re.compile('test|iso9660$', re.I)
-    assert c._device_whitelist == re.compile('test', IGNORE_CASE)
-    assert c._device_blacklist == re.compile('test', IGNORE_CASE)
-    assert c._mount_point_whitelist == re.compile('test', IGNORE_CASE)
-    assert c._mount_point_blacklist == re.compile('test', IGNORE_CASE)
+    assert c._file_system_whitelist.pattern == 'test'
+    assert c._file_system_blacklist.pattern == 'test|iso9660$'
+    assert c._device_whitelist.pattern == 'test'
+    assert c._device_blacklist.pattern == 'test'
+    assert c._mount_point_whitelist.pattern == 'test'
+    assert c._mount_point_blacklist.pattern == 'test'
 
 
 def test_exclude_bad_devices():
