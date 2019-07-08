@@ -12,6 +12,7 @@ pytestmark = pytest.mark.integration
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator, check, instance):
+    check = check(instance)
     check.check(instance)
 
     for metric in common.EXPECTED_METRICS:

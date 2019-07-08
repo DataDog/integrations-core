@@ -18,10 +18,11 @@ from .common import (
 
 
 def test_check(aggregator, mocked_request):
-    hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, {})
+    instance = HDFS_NAMENODE_CONFIG['instances'][0]
+    hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
     # Run the check once
-    hdfs_namenode.check(HDFS_NAMENODE_CONFIG['instances'][0])
+    hdfs_namenode.check(instance)
 
     aggregator.assert_service_check(
         HDFSNameNode.JMX_SERVICE_CHECK, HDFSNameNode.OK, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=1
@@ -40,10 +41,11 @@ def test_check(aggregator, mocked_request):
 
 
 def test_auth(aggregator, mocked_auth_request):
-    hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, {})
+    instance = HDFS_NAMENODE_AUTH_CONFIG['instances'][0]
+    hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
     # Run the check once
-    hdfs_namenode.check(HDFS_NAMENODE_AUTH_CONFIG['instances'][0])
+    hdfs_namenode.check(instance)
 
     aggregator.assert_service_check(
         HDFSNameNode.JMX_SERVICE_CHECK, HDFSNameNode.OK, tags=HDFS_NAMESYSTEM_METRIC_TAGS + CUSTOM_TAGS, count=1
