@@ -19,16 +19,16 @@ INSTANCE_INTEGRATION = {
 E2E_METADATA = {
     'start_commands': [
         'apt-get update',
-        'apt-get install exim4-config -yq',
-        'apt-get install nagios4-core -yq',
+        #'apt-get install exim4-config -yq',
+        #'apt-get install nagios4-core -yq',
         # Configure nagios
-        "sed -i 's/process_performance_data=0/process_performance_data=1/' /etc/nagios4/nagios.cfg",  # Enable perf data
-        "sed -i 's/#host_perfdata_file=/host_perfdata_file=/' /etc/nagios4/nagios.cfg",  # Uncomment host_perfdata_file
-        "sed -i 's/#host_perfdata_file_template=/host_perfdata_file_template=/' /etc/nagios4/nagios.cfg",
-        "sed -i 's/status_update_interval=[0-9]*/status_update_interval=2/' /etc/nagios4/nagios.cfg",
-        "sed -i 's/interval_length=[0-9]*/interval_length=2/' /etc/nagios4/nagios.cfg",
-        'service datadog-agent stop',  # This is to avoid the agent going through the log files outside of check time
-        'service nagios4 start'
+        #"sed -i 's/process_performance_data=0/process_performance_data=1/' /etc/nagios4/nagios.cfg",  # Enable perf data
+        #"sed -i 's/#host_perfdata_file=/host_perfdata_file=/' /etc/nagios4/nagios.cfg",  # Uncomment host_perfdata_file
+        #"sed -i 's/#host_perfdata_file_template=/host_perfdata_file_template=/' /etc/nagios4/nagios.cfg",
+        #"sed -i 's/status_update_interval=[0-9]*/status_update_interval=2/' /etc/nagios4/nagios.cfg",
+        #"sed -i 's/interval_length=[0-9]*/interval_length=2/' /etc/nagios4/nagios.cfg",
+        #'service datadog-agent stop',  # This is to avoid the agent going through the log files outside of check time
+        #'service nagios4 start'
     ]
 }
 

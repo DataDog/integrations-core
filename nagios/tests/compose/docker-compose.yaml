@@ -1,0 +1,7 @@
+version: '3.5'
+
+services:
+  nginx:
+    image: jasonrivers/nagios:4.43
+    volumes:
+      - ${NAGIOS_CONFIG_FOLDER}:/etc/nagios4
