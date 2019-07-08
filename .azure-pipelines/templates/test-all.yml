@@ -10,6 +10,11 @@ jobs:
     check: datadog_checks_dev
     display: Datadog Checks Dev
 
+- template: './test-single-linux.yml'
+  parameters:
+    check: datadog_checks_downloader
+    display: Datadog Checks Downloader
+
 - template: './test-single-windows.yml'
   parameters:
     check: active_directory
