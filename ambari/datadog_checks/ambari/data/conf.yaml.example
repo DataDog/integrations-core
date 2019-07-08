@@ -53,18 +53,18 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param tsl_cert - string - optional
-    ## Path to certificate to connect to the Ambari server if using TSL authentication
+    ## @param tls_cert - string - optional
+    ## Path to certificate to connect to the Ambari server if using TLS authentication
     #
-    # tsl_cert: <PATH_TO_CERTIFICATE>
+    # tls_cert: <PATH_TO_CERTIFICATE>
 
     ## @param tls_private_key - string - optional
-    ## Path to certificate private key to connect to the Ambari server if using TSL authentication
+    ## Path to certificate private key to connect to the Ambari server if using TLS authentication
     #
     # tls_private_key: <PATH_TO_PRIVATE_KEY>
 
     ## @param tls_verify - boolean - optional - default: true
-    ## Whether or not to verify TSL certificates (default true)
+    ## Whether or not to verify TLS certificates (default true)
     #
     # tls_verify: true
 

@@ -37,7 +37,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return YarnCheck('yarn', {}, {})
+    return lambda instance: YarnCheck('yarn', {}, [instance])
 
 
 @pytest.fixture
