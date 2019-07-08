@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.12.0 / 2019-07-08
+
+* [Added] Upgrade dependencies for Python 3.7 binary wheels. See [#4030](https://github.com/DataDog/integrations-core/pull/4030).
+
 ## 1.11.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3567](https://github.com/DataDog/integrations-core/pull/3567).
