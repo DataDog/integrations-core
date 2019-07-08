@@ -8,6 +8,9 @@
 # Documentation
 /docs/                @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
 *.md                  @DataDog/baklava @DataDog/agent-integrations
+conf.yaml.example     @DataDog/baklava @DataDog/agent-integrations
+conf.yaml.default     @DataDog/baklava @DataDog/agent-integrations @DataDog/agent-core
+auto_conf.yaml        @DataDog/baklava @DataDog/agent-integrations @DataDog/container-integrations
 manifest.json         @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
 assets/               @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
 

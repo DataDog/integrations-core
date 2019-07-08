@@ -44,6 +44,8 @@ install:
   - pip uninstall -y docker-py
   - pip install .\datadog_checks_dev[cli]
   - ddev config set core .
+  - ps: Invoke-WebRequest -Uri "https://s3.amazonaws.com/ddagent-windows-stable/datadog-agent-6-latest.amd64.msi" -OutFile "C:\datadog-agent.msi"
+  - ps: Start-Process -Wait msiexec -ArgumentList '/qn /i C:\datadog-agent.msi'
 
 test_script:
   # Only test any of these that have changed for pull requests
