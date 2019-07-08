@@ -2,7 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.dev import get_here
+from datadog_checks.utils.common import get_docker_hostname
 
 HERE = get_here()
+HOST = get_docker_hostname()
+PORT = '5050'
 
-INSTANCE = {'url': 'http://localhost:5050', 'tags': ['instance:mytag1']}
+INSTANCE = {'url': 'http://{}:{}'.format(HOST, PORT), 'tags': ['instance:mytag1']}
+
+CHECK_NAME = "mesos_master"

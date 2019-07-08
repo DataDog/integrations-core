@@ -7,6 +7,7 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run
+from datadog_checks.mesos_master import MesosMaster
 
 from . import common
 
@@ -17,6 +18,11 @@ def dd_environment(instance):
 
     with docker_run(compose_file, service_name="mesos-master", log_patterns=['A new leading master']):
         yield instance
+
+
+@pytest.fixture
+def check():
+    return MesosMaster(common.CHECK_NAME, {}, {})
 
 
 @pytest.fixture(scope='session')
