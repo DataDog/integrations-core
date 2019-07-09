@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.6.0 / 2019-07-09
+
+* [Fixed] Fix regression in assert_metric for value comparison. See [#4076](https://github.com/DataDog/integrations-core/pull/4076).
+* [Added] Output similar metrics on failed aggregator stub assertions to help debugging. See [#4035](https://github.com/DataDog/integrations-core/pull/4035).
+* [Fixed] Avoid WMISampler inheriting from Thread. See [#4051](https://github.com/DataDog/integrations-core/pull/4051).
+
 ## 8.5.0 / 2019-07-04
 
 * [Fixed] Make WMISampler hashable. See [#4043](https://github.com/DataDog/integrations-core/pull/4043).
