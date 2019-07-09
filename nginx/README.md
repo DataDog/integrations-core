@@ -141,6 +141,8 @@ sudo nginx -t && sudo nginx -s reload
   Change the `service` and `path` parameter values and configure them for your environment.
   See the [sample nginx.d/conf.yaml][6] for all available configuration options.
   
+* [Restart the Agent][7]
+
 **Note**: The default NGINX log format does not have a request response time. To include it into your logs, update the NGINX log format by adding the following configuration block in the `http` section of your NGINX configuration file (`/etc/nginx/nginx.conf`): 
 
 ```
@@ -153,8 +155,6 @@ http {
 	access_log /var/log/nginx/access.log;
 }
 ```
-
-* [Restart the Agent][7]
 
 **Learn more about log collection [in the log documentation][8]**
 
