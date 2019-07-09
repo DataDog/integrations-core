@@ -1,5 +1,9 @@
 # CHANGELOG - ceph
 
+## 1.6.0 / 2019-07-09
+
+* [Added] Add log setup and configuration. See [#3960](https://github.com/DataDog/integrations-core/pull/3960).
+
 ## 1.5.1 / 2019-06-05
 
 * [Fixed] Fix version discovery. See [#3874](https://github.com/DataDog/integrations-core/pull/3874).
