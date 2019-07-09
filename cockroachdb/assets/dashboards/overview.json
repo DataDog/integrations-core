@@ -1,6 +1,6 @@
 {
     "board_title": "CockroachDB Overview",
-    "description": "This dashboard provides a high-level overview of key CockroachDB metrics so you can easily ensure that your cluster is available and serving queries, and that it has sufficient resources to maintain high levels of performance. Further reading on CockroachDB monitoring:\n\n- [Monitor CockroachDB with Datadog](https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog/)\n\n- [Datadog's CockroachDB docs](https://docs.datadoghq.com/integrations/cockroachdb/).\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
+    "description": "This dashboard provides a high-level overview of key CockroachDB metrics so you can ensure that your cluster is available, serving queries, and has sufficient resources to maintain high levels of performance. Further reading on CockroachDB monitoring:\n\n- [Monitor CockroachDB with Datadog](https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog/)\n\n- [Datadog's CockroachDB docs](https://docs.datadoghq.com/integrations/cockroachdb/).\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
     "board_bgtype": "board_graph",
     "created": "2019-05-10T19:41:52.064458+00:00",
     "author_info": {
