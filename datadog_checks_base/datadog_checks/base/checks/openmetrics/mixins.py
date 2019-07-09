@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import unicode_literals
+
 from fnmatch import fnmatchcase
 from math import isinf, isnan
 from os.path import isfile
@@ -14,6 +16,7 @@ from urllib3.exceptions import InsecureRequestWarning
 
 from ...config import is_affirmative
 from ...errors import CheckException
+from ...utils.common import ensure_unicode
 from .. import AgentCheck
 
 if PY3:
@@ -644,7 +647,7 @@ class OpenMetricsScraperMixin(object):
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
             if label_name not in scraper_config['exclude_labels']:
                 tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
-                _tags.append(u'{}:{}'.format(tag_name, label_value))
+                _tags.append('{}:{}'.format(ensure_unicode(tag_name), ensure_unicode(label_value)))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, sample, custom_tags=custom_tags, hostname=hostname
         )
