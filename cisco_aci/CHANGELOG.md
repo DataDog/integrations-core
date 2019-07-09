@@ -1,5 +1,9 @@
 # CHANGELOG - cisco_aci
 
+## 1.7.1 / 2019-07-08
+
+* [Fixed] Fix event submission call. See [#4044](https://github.com/DataDog/integrations-core/pull/4044).
+
 ## 1.7.0 / 2019-07-04
 
 * [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
