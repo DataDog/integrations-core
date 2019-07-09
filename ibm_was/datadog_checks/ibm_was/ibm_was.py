@@ -96,7 +96,10 @@ class IbmWasCheck(AgentCheck):
         metric_name = self.normalize(
             ensure_unicode(child.get('name')), prefix='{}.{}'.format(self.METRIC_PREFIX, prefix), fix_case=True
         )
-        self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
+        if prefix == "jvm":
+            self.gauge(metric_name, value, tags=tags)
+        else:
+            self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
 
     def make_request(self, instance, url, tags):
         try:

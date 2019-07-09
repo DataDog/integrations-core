@@ -19,7 +19,7 @@ ibm_was.jdbc.jdbc_time,gauge,,millisecond,,"The average time in milliseconds spe
 ibm_was.jvm.heap_size,gauge,,,,The total memory in the JVM run time,0,ibm_was,jvm heap size
 ibm_was.jvm.free_memory,gauge,,,,The free memory in the JVM run time,0,ibm_was,jvm free memory
 ibm_was.jvm.used_memory,gauge,,,,The used memory in the JVM run time,0,ibm_was,jvm used memory
-ibm_was.jvm.up_time,gauge,,,,The amount of time that the JVM is running,0,ibm_was,jvm uptime
+ibm_was.jvm.up_time,gauge,,second,,The amount of time that the JVM is running,0,ibm_was,jvm uptime
 ibm_was.jvm.process_cpu_usage,gauge,,percent,,The CPU Usage (in percent) of the Java virtual machine.,0,ibm_was,jvm process cpu usage
 ibm_was.thread_pools.create_count,gauge,,thread,,The total number of threads created,0,ibm_was,thread pools create count
 ibm_was.thread_pools.destroy_count,gauge,,thread,,The total number of threads destroyed,0,ibm_was,thread pools destroy count
