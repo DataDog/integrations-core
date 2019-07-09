@@ -75,7 +75,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
     if not python:
         # Make the tox environment Python specifier influence the Agent
         python = env_python_version or DEFAULT_PYTHON_VERSION
-    elif env_python_version and env_python_version != str(python):
+    elif env_python_version and env_python_version != int(python):
         echo_warning(
             'The local environment `{}` does not match the expected Python. The Agent will use Python {}. '
             'To influence the Agent Python version, use the `-py/--python` option.'.format(env, python)
