@@ -1,5 +1,9 @@
 # CHANGELOG - yarn
 
+## 1.9.0 / 2019-07-09
+
+* [Added] Use the new RequestsWrapper for connecting to services. See [#4059](https://github.com/DataDog/integrations-core/pull/4059).
+
 ## 1.8.0 / 2019-06-19
 
 * [Deprecated] Add yarn.apps.<METRIC>_gauge metrics and deprecate yarn.apps.<METRIC> metrics. See [#3927](https://github.com/DataDog/integrations-core/pull/3927).
