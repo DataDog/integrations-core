@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev.ssh_tunnel import find_free_port, socks_proxy
+from datadog_checks.dev.ssh_tunnel import socks_proxy
 from datadog_checks.dev.terraform import terraform_run
 from datadog_checks.dev.utils import get_here
 
@@ -21,13 +21,12 @@ def dd_environment():
         ip = outputs['ip']['value']
         internal_ip = outputs['internal_ip']['value']
         private_key = outputs['ssh_private_key']['value']
-        socks_port = find_free_port()
         instance = {
             'name': 'test',
             'keystone_server_url': 'http://{}/identity/v3'.format(internal_ip),
             'user': {'name': 'admin', 'password': 'labstack', 'domain': {'id': 'default'}},
             'ssl_verify': False,
         }
-        agent_config = {'proxy': {'http': 'socks5://localhost:{}'.format(socks_port)}}
-        with socks_proxy(socks_port, ip, 'ubuntu', private_key):
+        with socks_proxy(ip, 'ubuntu', private_key) as socks_port:
+            agent_config = {'proxy': {'http': 'socks5://localhost:{}'.format(socks_port)}}
             yield instance, agent_config
