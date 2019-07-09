@@ -32,8 +32,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     '--python',
     '-py',
     type=click.INT,
-    default=DEFAULT_PYTHON_VERSION,
-    help='The version of Python to use (default {})'.format(DEFAULT_PYTHON_VERSION),
+    help='The version of Python to use. Defaults to {} if no tox Python is specified.'.format(DEFAULT_PYTHON_VERSION),
 )
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
@@ -73,7 +72,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
         abort()
 
     env_python_version = get_tox_env_python_version(env)
-    if env_python_version and env_python_version != str(python):
+    if not python:
+        # Make the tox environment Python specifier influence the Agent
+        python = env_python_version or DEFAULT_PYTHON_VERSION
+    elif env_python_version and env_python_version != str(python):
         echo_warning(
             'The local environment `{}` does not match the expected Python. The Agent will use Python {}. '
             'To influence the Agent Python version, use the `-py/--python` option.'.format(env, python)
@@ -128,7 +130,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    env_vars = dict(ev.split('=') for ev in env_vars)
+    env_vars = dict(ev.split('=', 1) for ev in env_vars)
     for key, value in metadata.get('env_vars', {}):
         env_vars.setdefault(key, value)
 

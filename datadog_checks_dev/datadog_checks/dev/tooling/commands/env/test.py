@@ -4,7 +4,7 @@
 import click
 
 from ...e2e.agent import DEFAULT_PYTHON_VERSION
-from ...testing import get_tox_env_python_version, get_tox_envs
+from ...testing import get_tox_envs
 from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
 from ..test import test as test_command
 from .start import start
@@ -68,14 +68,6 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
 
         for env in envs:
             if new_env:
-                if not python:
-                    # Make the tox environment Python specifier influence the Agent
-                    env_python_version = get_tox_env_python_version(env)
-                    if env_python_version:
-                        python = env_python_version
-                    else:
-                        python = DEFAULT_PYTHON_VERSION
-
                 ctx.invoke(
                     start, check=check, env=env, agent=agent, python=python, dev=dev, base=base, env_vars=env_vars
                 )

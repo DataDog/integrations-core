@@ -223,4 +223,4 @@ def get_changed_checks():
 def get_tox_env_python_version(env):
     match = re.match(PYTHON_MAJOR_PATTERN, env)
     if match:
-        return match.group(1)
+        return int(match.group(1))
