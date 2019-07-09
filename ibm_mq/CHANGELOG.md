@@ -1,5 +1,8 @@
 # CHANGELOG - IBM MQ
 
+## 3.2.0-rc.1 / 2019-07-09
+
+
 ## 3.1.0 / 2019-07-04
 
 * [Fixed] Use MQCMD_INQUIRE_Q instead of queue.inquire. See [#3997](https://github.com/DataDog/integrations-core/pull/3997).
