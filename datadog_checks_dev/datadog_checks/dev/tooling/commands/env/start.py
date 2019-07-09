@@ -9,7 +9,8 @@ from six import string_types
 
 from ....utils import dir_exists, file_exists, path_join
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
-from ...testing import get_available_tox_envs
+from ...e2e.agent import DEFAULT_PYTHON_VERSION
+from ...testing import get_available_tox_envs, get_tox_env_python_version
 from ...utils import get_tox_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
@@ -27,6 +28,13 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
         'config (agent5, agent6, etc.)'
     ),
 )
+@click.option(
+    '--python',
+    '-py',
+    type=click.INT,
+    default=DEFAULT_PYTHON_VERSION,
+    help='The version of Python to use (default {})'.format(DEFAULT_PYTHON_VERSION),
+)
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
 @click.option(
@@ -39,7 +47,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     ),
 )
 @click.pass_context
-def start(ctx, check, env, agent, dev, base, env_vars):
+def start(ctx, check, env, agent, python, dev, base, env_vars):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
@@ -63,6 +71,13 @@ def start(ctx, check, env, agent, dev, base, env_vars):
         echo_failure('`{}` is not an available environment.'.format(env))
         echo_info('See what is available via `ddev env ls {}`.'.format(check))
         abort()
+
+    env_python_version = get_tox_env_python_version(env)
+    if env_python_version and env_python_version != str(python):
+        echo_warning(
+            'The local environment `{}` does not match the expected Python. The Agent will use Python {}. '
+            'To influence the Agent Python version, use the `-py/--python` option.'.format(env, python)
+        )
 
     api_key = ctx.obj['dd_api_key']
     if api_key is None:
@@ -113,13 +128,11 @@ def start(ctx, check, env, agent, dev, base, env_vars):
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    metadata_env_vars = metadata.get('env_vars', {})
-    if metadata_env_vars:
-        env_vars = list(env_vars)
-        for key, value in metadata_env_vars.items():
-            env_vars.append('{}={}'.format(key, value))
+    env_vars = dict(ev.split('=') for ev in env_vars)
+    for key, value in metadata.get('env_vars', {}):
+        env_vars.setdefault(key, value)
 
-    environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key)
+    environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key, python)
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)
     environment.update_agent()
