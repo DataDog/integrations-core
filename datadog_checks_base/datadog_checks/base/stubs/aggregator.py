@@ -183,7 +183,7 @@ class AggregatorStub(object):
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
             msg = "Expected count value for '{}': {}, got {}".format(name, value, got)
-            condition = len(candidates) == count
+            condition = value == got
         elif count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
             condition = len(candidates) == count
