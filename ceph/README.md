@@ -11,14 +11,17 @@ Enable the Datadog-Ceph integration to:
   * Monitor I/O performance metrics
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
+
 ### Installation
 
-The Ceph check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Ceph servers.
+The Ceph check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Ceph servers.
 
 ### Configuration
 
-Edit the file `ceph.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
-See the [sample ceph.d/conf.yaml][4] for all available configuration options:
+Edit the file `ceph.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
+See the [sample ceph.d/conf.yaml][5] for all available configuration options:
 
 ```yaml
 init_config:
@@ -34,14 +37,31 @@ If you enabled `use_sudo`, add a line like the following to your `sudoers` file:
 dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 ```
 
+#### Log Collection
+
+To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
+```
+    logs_enabled: true
+```
+
+Next, edit `ceph.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Ceph log files.
+
+```yaml
+logs:
+ - type: file
+   path: /var/log/ceph/*.log
+   source: ceph
+   service: <APPLICATION_NAME>
+```
+
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `ceph` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `ceph` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 Note: If you are running ceph luminous or later, you will not see the metric `ceph.osd.pct_used`.
 
@@ -91,18 +111,19 @@ In addition to this service check, the Ceph check also collects a configurable l
 * `ceph.request_stuck` : Returns `OK` requests are taking a normal time to process. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-* [Monitor Ceph: From node status to cluster-wide performance][8]
+* [Monitor Ceph: From node status to cluster-wide performance][9]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ceph/images/ceph_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/ceph/datadog_checks/ceph/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
-[7]: https://docs.datadoghq.com/help
-[8]: https://www.datadoghq.com/blog/monitor-ceph-datadog
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/ceph/datadog_checks/ceph/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
+[8]: https://docs.datadoghq.com/help
+[9]: https://www.datadoghq.com/blog/monitor-ceph-datadog

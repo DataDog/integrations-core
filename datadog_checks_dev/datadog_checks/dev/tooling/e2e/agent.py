@@ -6,6 +6,7 @@ from os.path import expanduser
 from .platform import LINUX, MAC, WINDOWS
 
 DEFAULT_AGENT_VERSION = 6
+DEFAULT_PYTHON_VERSION = 2
 
 # Must be a certain length
 FAKE_API_KEY = 'a' * 32
@@ -39,6 +40,15 @@ def get_agent_exe(agent_version, platform=LINUX):
             return '/opt/datadog-agent/agent/agent.py'
 
 
+def get_pip_exe(python_version, platform=LINUX):
+    if platform == WINDOWS:
+        return [r'C:\Program Files\Datadog\Datadog Agent\embedded{}\python.exe'.format(python_version), '-m', 'pip']
+    elif platform == MAC:
+        pass
+    else:
+        return ['/opt/datadog-agent/embedded/bin/pip{}'.format(python_version)]
+
+
 def get_agent_conf_dir(check, agent_version, platform=LINUX):
     if platform == WINDOWS:
         if agent_version >= 6:
@@ -62,13 +72,6 @@ def get_agent_version_manifest(platform):
         return r'C:\Program Files\Datadog\Datadog Agent\version-manifest.txt'
     else:
         return '/opt/datadog-agent/version-manifest.txt'
-
-
-def get_agent_pip_install(version, platform):
-    if platform == WINDOWS:
-        return [r'C:\Program Files\Datadog\Datadog Agent\embedded\python', '-m', 'pip', 'install']
-    else:
-        return ['/opt/datadog-agent/embedded/bin/pip', 'install', '--user']
 
 
 def get_agent_service_cmd(version, platform, action):

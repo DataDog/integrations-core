@@ -7,9 +7,12 @@
 The network check collects TCP/IP stats from the host operating system.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
+
 ### Installation
 
-The network check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
+The network check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your server.
 
 To collect metrics with this integration, make sure the conntrack module is activated on your host. If it's not the case, run:
 
@@ -21,8 +24,8 @@ sudo modprobe nf_conntrack_ipv6
 
 ### Configuration
 
-1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
-  See the [sample network.d/conf.yaml][4] for all available configuration options:
+1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
+  See the [sample network.d/conf.yaml][5] for all available configuration options:
 
     ```yaml
       init_config:
@@ -37,7 +40,7 @@ sudo modprobe nf_conntrack_ipv6
       #   excluded_interface_re: eth1.*
     ```
 
-2. [Restart the Agent][5] to effect any configuration changes.
+2. [Restart the Agent][6] to effect any configuration changes.
 
 
 **Note**: Some conntrack metrics require running conntrack with privileged access to be retrieved. Configure the following sudoers rule for this to work:
@@ -48,11 +51,13 @@ dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `network` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `network` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
+
+**Note**: `system.net.conntrack` metrics are available with Agent v6.12+. See the [CHANGELOG][11] for details.
 
 ### Events
 The Network check does not include any events.
@@ -62,19 +67,21 @@ The Network check does not include any service checks.
 
 ## Troubleshooting
 
-* [How to send TCP/UDP host metrics via the Datadog API ?][8]
+* [How to send TCP/UDP host metrics via the Datadog API ?][9]
 
 ## Further Reading
 
-* [Built a network monitor on an http check][9]
+* [Built a network monitor on an http check][10]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/network/datadog_checks/network/data/conf.yaml.default
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv
-[8]: https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api
-[9]: https://docs.datadoghq.com/monitors/monitor_types/network
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/network/datadog_checks/network/data/conf.yaml.default
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv
+[9]: https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api
+[10]: https://docs.datadoghq.com/monitors/monitor_types/network
+[11]: https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md#1110--2019-05-14

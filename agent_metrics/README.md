@@ -23,15 +23,15 @@ The Agent Metrics check is included in the [Datadog Agent][3] package, so you do
 2. [Restart the Agent][6].
 
 #### Metrics collection
-The Agent Metrics integration can potentially emit [custom metrics][10], which may impact your [billing][11].
+The Agent Metrics integration can potentially emit [custom metrics][7], which may impact your [billing][8].
 
 ### Validation
 
-[Run the Agent's status subcommand][7] and look for `agent_metrics` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `agent_metrics` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Events
 The Agent Metrics check does not include any events.
@@ -40,7 +40,7 @@ The Agent Metrics check does not include any events.
 The Agent Metrics check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][11].
 
  [1]: https://docs.datadoghq.com/integrations/go_expvar
 [2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/go_expvar.d/agent_stats.yaml.example
@@ -48,8 +48,8 @@ Need help? Contact [Datadog support][9].
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/agent_metrics/datadog_checks/agent_metrics/data/conf.yaml.default
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/agent_metrics/metadata.csv
-[9]: https://docs.datadoghq.com/help
-[10]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[11]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
+[7]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[8]: https://docs.datadoghq.com/account_management/billing/custom_metrics
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[10]: https://github.com/DataDog/integrations-core/blob/master/agent_metrics/metadata.csv
+[11]: https://docs.datadoghq.com/help

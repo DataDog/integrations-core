@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
+from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import get_tox_envs
 from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
 from ..test import test as test_command
@@ -22,7 +23,13 @@ from .stop import stop
         'config (agent5, agent6, etc.)'
     ),
 )
-@click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
+@click.option(
+    '--python',
+    '-py',
+    type=click.INT,
+    help='The version of Python to use. Defaults to {} if no tox Python is specified.'.format(DEFAULT_PYTHON_VERSION),
+)
+@click.option('--dev/--prod', default=None, help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
 @click.option(
     '--env-vars',
@@ -35,7 +42,7 @@ from .stop import stop
 )
 @click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
 @click.pass_context
-def test(ctx, checks, agent, dev, base, env_vars, new_env):
+def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True)
     tests_ran = False
@@ -45,6 +52,10 @@ def test(ctx, checks, agent, dev, base, env_vars, new_env):
     # ensure environments and Agents are spun up and down.
     if not checks:
         new_env = True
+
+    # Default to testing the local development version.
+    if dev is None:
+        dev = True
 
     for check, envs in check_envs:
         if not envs:
@@ -57,7 +68,9 @@ def test(ctx, checks, agent, dev, base, env_vars, new_env):
 
         for env in envs:
             if new_env:
-                ctx.invoke(start, check=check, env=env, agent=agent, dev=dev, base=base, env_vars=env_vars)
+                ctx.invoke(
+                    start, check=check, env=env, agent=agent, python=python, dev=dev, base=base, env_vars=env_vars
+                )
 
             try:
                 ctx.invoke(test_command, checks=['{}:{}'.format(check, env)], e2e=True)

@@ -7,16 +7,19 @@ This check watches for successful build-related events and sends them to Datadog
 Unlike most Agent checks, this one doesn't collect any metrics-just events.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to apply those instructions to a containerized environment.
+
 ### Installation
 
-The Teamcity check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Teamcity servers.
+The Teamcity check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Teamcity servers.
 
 ### Configuration
 #### Prepare Teamcity
 
-Follow [Teamcity's documentation][2] to enable Guest Login.
+Follow [Teamcity's documentation][3] to enable Guest Login.
 
-Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample teamcity.d/conf.yaml][4] for all available configuration options:
+Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample teamcity.d/conf.yaml][5] for all available configuration options:
 
 ```
 init_config:
@@ -36,11 +39,11 @@ instances:
 
 Add an item like the above to `instances` for each build configuration you want to track.
 
-[Restart the Agent][5] to start collecting and sending Teamcity events to Datadog.
+[Restart the Agent][6] to start collecting and sending Teamcity events to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `teamcity` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `teamcity` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -53,18 +56,19 @@ Teamcity events representing successful builds are forwarded to your Datadog app
 The Teamcity check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-* [Track performance impact of code changes with TeamCity and Datadog.][8]
+* [Track performance impact of code changes with TeamCity and Datadog.][9]
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/teamcity/datadog_checks/teamcity/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[7]: https://docs.datadoghq.com/help
-[8]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog
+[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/teamcity/datadog_checks/teamcity/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[8]: https://docs.datadoghq.com/help
+[9]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog
