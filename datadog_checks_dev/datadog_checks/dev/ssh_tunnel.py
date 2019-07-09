@@ -5,18 +5,11 @@ from __future__ import absolute_import
 
 import os
 import socket
-import time
 from contextlib import closing, contextmanager
-from tempfile import TemporaryFile
 
-from six import PY3
-
-from .structures import TempDir
-
-if PY3:
-    import subprocess
-else:
-    import subprocess32 as subprocess
+from .env import environment_run
+from .structures import LazyFunction, TempDir
+from .subprocess import run_command
 
 
 def find_free_port():
@@ -26,46 +19,58 @@ def find_free_port():
         return s.getsockname()[1]
 
 
-def wait_for_port_listening(host, port, retries=10, wait=1):
-    for _ in range(retries):
-        try:
-            with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-                s.connect((host, port))
-        except socket.error:
-            pass
-        else:
-            return
-        time.sleep(wait)
-    raise RuntimeError("Couldn't connect to {}:{}".format(host, port))
-
-
 @contextmanager
-def socks_proxy(local_port, host, user, private_key):
+def socks_proxy(host, user, private_key):
     """Open a SSH connection with a SOCKS proxy."""
-    with TempDir('socks_proxy') as temp_dir:
-        key_file = os.path.join(temp_dir, 'ssh_key')
-        with open(key_file, 'w') as f:
-            f.write(private_key)
-        os.chmod(key_file, 0o600)
-        command = [
-            'ssh',
-            '-N',
-            '-D',
-            'localhost:{}'.format(local_port),
-            '-i',
-            key_file,
-            '-o',
-            'BatchMode=yes',
-            '-o',
-            'UserKnownHostsFile=/dev/null',
-            '-o',
-            'StrictHostKeyChecking=no',
-            '{}@{}'.format(user, host),
-        ]
-        stdin = TemporaryFile()
-        stdout = TemporaryFile()
-        process = subprocess.Popen(command, stdout=stdout, stdin=stdin, stderr=stdout)
-        with process as p:
-            wait_for_port_listening('localhost', local_port)
-            yield p
-            p.terminate()
+    set_up = SocksProxyUp(host, user, private_key)
+    tear_down = SocksProxyDown()
+    conditions = []
+
+    with environment_run(up=set_up, down=tear_down, conditions=conditions) as result:
+        yield result
+
+
+class SocksProxyUp(LazyFunction):
+    def __init__(self, host, user, private_key):
+        self.host = host
+        self.user = user
+        self.private_key = private_key
+
+    def __call__(self):
+        with TempDir('socks_proxy') as temp_dir:
+            local_port = find_free_port()
+            key_file = os.path.join(temp_dir, 'ssh_key')
+            with open(key_file, 'w') as f:
+                f.write(self.private_key)
+            os.chmod(key_file, 0o600)
+            command = [
+                'nohup',
+                'ssh',
+                '-N',
+                '-D',
+                'localhost:{}'.format(local_port),
+                '-i',
+                key_file,
+                '-o',
+                'BatchMode=yes',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-o',
+                'StrictHostKeyChecking=no',
+                '{}@{}'.format(self.user, self.host),
+                '&',
+                'echo $!',
+            ]
+            process = run_command(' '.join(command), capture='stdout', shell=True)
+            with open(os.path.join(temp_dir, 'ssh.pid'), 'w') as ssh_pid:
+                ssh_pid.write(process.stdout.split()[0])
+            return local_port
+
+
+class SocksProxyDown(LazyFunction):
+    def __call__(self):
+        with TempDir('socks_proxy') as temp_dir:
+            with open(os.path.join(temp_dir, 'ssh.pid')) as ssh_pid:
+                pid = int(ssh_pid.read())
+                run_command('kill {}'.format(pid))
+                return 0
