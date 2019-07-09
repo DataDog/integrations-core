@@ -183,13 +183,13 @@ class AggregatorStub(object):
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
             msg = "Expected count value for '{}': {}, got {}".format(name, value, got)
-            condition = len(candidates) == count
+            condition = (value == got)
         elif count is not None:
             msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
-            condition = len(candidates) == count
+            condition = (len(candidates) == count)
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
-            condition = len(candidates) >= at_least
+            condition = (len(candidates) >= at_least)
         self._assert(condition, msg=msg, expected_stub=expected_metric, submitted_elements=self._metrics)
 
     def assert_service_check(self, name, status=None, tags=None, count=None, at_least=1, hostname=None, message=None):

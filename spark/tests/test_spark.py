@@ -65,9 +65,11 @@ def join_url_dir(url, *args):
 
 
 class Url(object):
-    """A url object that can be compared with other url orbjects
+    """
+    A url object that can be compared with other url orbjects
     without regard to the vagaries of encoding, escaping, and ordering
-    of parameters in query strings."""
+    of parameters in query strings.
+    """
 
     def __init__(self, url):
         parts = urlparse(url)
