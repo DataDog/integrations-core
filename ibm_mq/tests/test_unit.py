@@ -64,20 +64,20 @@ def test__discover_queues():
 
     pcf_conn = mock.MagicMock()
     pcf_conn.MQCMD_INQUIRE_Q.return_value = [
-        {pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.PREDEFINED1', pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PREDEFINED},
+        {pymqi.CMQC.MQCA_Q_NAME: b'MY.QUEUE.PREDEFINED1', pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PREDEFINED},
         {
-            pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.PERMANENT_DYNAMIC',
+            pymqi.CMQC.MQCA_Q_NAME: b'MY.QUEUE.PERMANENT_DYNAMIC',
             pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PERMANENT_DYNAMIC,
         },
         {
-            pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.TEMPORARY_DYNAMIC',
+            pymqi.CMQC.MQCA_Q_NAME: b'MY.QUEUE.TEMPORARY_DYNAMIC',
             pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_TEMPORARY_DYNAMIC,
         },
         {
-            pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.SHARED_DYNAMIC',
+            pymqi.CMQC.MQCA_Q_NAME: b'MY.QUEUE.SHARED_DYNAMIC',
             pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_SHARED_DYNAMIC,
         },
-        {pymqi.CMQC.MQCA_Q_NAME: 'MY.QUEUE.PREDEFINED2', pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PREDEFINED},
+        {pymqi.CMQC.MQCA_Q_NAME: b'MY.QUEUE.PREDEFINED2', pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PREDEFINED},
     ]
 
     config = Config({'queue_definition_types': ['PREDEFINED', 'TEMPORARY_DYNAMIC']})
