@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import socket
 import time
+from contextlib import closing
 
 from six import string_types
 from six.moves.urllib.request import urlopen
@@ -143,3 +145,23 @@ class CheckDockerLogs(CheckCommandOutput):
             command, patterns, matches=matches, stdout=stdout, stderr=stderr, attempts=attempts, wait=wait
         )
         self.identifier = identifier
+
+
+class CheckPortListening(LazyFunction):
+    def __init__(self, host, port, attempts=10, wait=1):
+        self.host = host
+        self.port = port
+        self.attempts = attempts
+        self.wait = wait
+
+    def __call__(self):
+        for _ in range(self.attempts):
+            try:
+                with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+                    s.connect((self.host, self.port))
+            except socket.error:
+                pass
+            else:
+                return True
+            time.sleep(self.wait)
+        raise RetryError("Couldn't connect to {}:{}".format(self.host, self.port))
