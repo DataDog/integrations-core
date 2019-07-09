@@ -63,9 +63,9 @@ instances:
     #
     # auto_discover_queues: false
 
-    ## @param queue_definition_types - list of strings - optional - default: PREDEFINED
+    ## @param queue_definition_types - list of strings - optional
     ## List of queue definition types to match for auto-discovery.
-    ## If not set, all definition types are matched.
+    ## If no definition types are provided, all definition types are matched.
     ## Possible values are: `PREDEFINED`, `PERMANENT_DYNAMIC`, `TEMPORARY_DYNAMIC`,  and `SHARED_DYNAMIC`.
     #
     # queue_definition_types:
