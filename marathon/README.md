@@ -33,15 +33,15 @@ The Marathon check is included in the [Datadog Agent][1] package, so you don't n
 
 #### Log Collection
 
- **Available for Agent >6.0**
+**Available for Agent >6.0**
 
- 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
      ```yaml
     logs_enabled: true
     ```
 
- 2. Because Marathon uses logback, you can specify a custom log format. With Datadog, two formats are supported out of the box: the default one provided by Marathon and the Datadog recommended format. Add a fileappender to your configuration as in the following example and replace `$PATTERN$` with either `[%date] %-5level %message \(%logger:%thread\)%n` for Marathon default format or `%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n` for Datadog recommended format.
+2. Because Marathon uses logback, you can specify a custom log format. With Datadog, two formats are supported out of the box: the default one provided by Marathon and the Datadog recommended format. Add a fileappender to your configuration as in the following example and replace `$PATTERN$` with either `[%date] %-5level %message \(%logger:%thread\)%n` for Marathon default format or `%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n` for Datadog recommended format.
 
     ```xml
     <?xml version="1.0" encoding="UTF-8"?>
@@ -73,17 +73,17 @@ The Marathon check is included in the [Datadog Agent][1] package, so you don't n
     </configuration>
     ```
 
- 3. Add this configuration block to your `marathon.d/conf.yaml` file to start collecting your Marathon logs:
+3. Add this configuration block to your `marathon.d/conf.yaml` file to start collecting your Marathon logs:
 
-     ```yaml
-    logs:
-      - type: file
-        path: /var/log/marathon.log
-        source: marathon
-        service: <SERVICE_NAME>
-    ```
+      ```yaml
+      logs:
+        - type: file
+          path: /var/log/marathon.log
+          source: marathon
+          service: <SERVICE_NAME>
+      ```
 
- 3. [Restart the Agent][4].
+4. [Restart the Agent][4].
 
 ### Validation
 
