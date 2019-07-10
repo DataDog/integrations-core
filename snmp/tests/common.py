@@ -50,8 +50,8 @@ SUPPORTED_METRIC_TYPES = [
 UNSUPPORTED_METRICS = [{'OID': "1.3.6.1.2.1.25.6.3.1.5.1", 'name': "IAmString"}]  # String (not supported)
 
 CAST_METRICS = [
-    {'OID': "1.3.6.1.4.1.2021.10.1.3.1", 'name': "cpuload1"},  # Counter32
-    {'OID': "1.3.6.1.4.1.2021.10.1.6.1", 'name': "cpuload2"},  # Counter32
+    {'OID': "1.3.6.1.4.1.2021.10.1.3.1", 'name': "cpuload1"},  # OctetString
+    {'OID': "1.3.6.1.4.1.2021.10.1.6.1", 'name': "cpuload2"},  # Opaque
 ]
 
 CONSTRAINED_OID = [{"MIB": "RFC1213-MIB", "symbol": "tcpRtoAlgorithm"}]
