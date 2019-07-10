@@ -34,6 +34,62 @@ The Marathon check is included in the [Datadog Agent][2] package, so you don't n
 
 2. [Restart the Agent][5] to begin sending Marathon metrics to Datadog.
 
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+     ```yaml
+    logs_enabled: true
+    ```
+
+2. Because Marathon uses logback, you can specify a custom log format. With Datadog, two formats are supported out of the box: the default one provided by Marathon and the Datadog recommended format. Add a file appender to your configuration as in the following example and replace `$PATTERN$` with your selected format:
+    * Marathon default: `[%date] %-5level %message \(%logger:%thread\)%n`
+    * Datadog recommended: `%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n````
+
+    ```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+
+    <configuration>
+        <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+        <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>[%date] %-5level %message \(%logger:%thread\)%n</pattern>
+            </encoder>
+        </appender>
+        <appender name="async" class="ch.qos.logback.classic.AsyncAppender">
+            <appender-ref ref="stdout" />
+            <queueSize>1024</queueSize>
+        </appender>
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>/var/log/marathon.log</file>
+            <append>true</append>
+            <!-- set immediateFlush to false for much higher logging throughput -->
+            <immediateFlush>true</immediateFlush>
+            <encoder>
+                <pattern>$PATTERN$</pattern>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="async"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </configuration>
+    ```
+
+3. Add this configuration block to your `marathon.d/conf.yaml` file to start collecting your Marathon logs:
+
+      ```yaml
+      logs:
+        - type: file
+          path: /var/log/marathon.log
+          source: marathon
+          service: <SERVICE_NAME>
+      ```
+
+4. [Restart the Agent][4].
+
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `marathon` under the Checks section.

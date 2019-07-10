@@ -16,6 +16,12 @@ except ImportError:
 CONTEXT_SETTINGS = {'help_option_names': ['-h', '--help']}
 UNKNOWN_OPTIONS = {'help_option_names': [], 'ignore_unknown_options': True}
 DEFAULT_INDENT = '    '
+DISPLAY_COLOR = None
+
+
+def set_color(color_choice):
+    global DISPLAY_COLOR
+    DISPLAY_COLOR = color_choice
 
 
 def indent_text(text, indent):
@@ -25,34 +31,34 @@ def indent_text(text, indent):
 def echo_info(text, nl=True, err=False, indent=None):
     if indent:
         text = indent_text(text, indent)
-    click.secho(text, bold=True, nl=nl, err=err)
+    click.secho(text, bold=True, nl=nl, err=err, color=DISPLAY_COLOR)
 
 
 def echo_success(text, nl=True, err=False, indent=None):
     if indent:
         text = indent_text(text, indent)
-    click.secho(text, fg='cyan', bold=True, nl=nl, err=err)
+    click.secho(text, fg='cyan', bold=True, nl=nl, err=err, color=DISPLAY_COLOR)
 
 
 def echo_failure(text, nl=True, err=False, indent=None):
     if indent:
         text = indent_text(text, indent)
-    click.secho(text, fg='red', bold=True, nl=nl, err=err)
+    click.secho(text, fg='red', bold=True, nl=nl, err=err, color=DISPLAY_COLOR)
 
 
 def echo_warning(text, nl=True, err=False, indent=None):
     if indent:
         text = indent_text(text, indent)
-    click.secho(text, fg='yellow', bold=True, nl=nl, err=err)
+    click.secho(text, fg='yellow', bold=True, nl=nl, err=err, color=DISPLAY_COLOR)
 
 
 def echo_waiting(text, nl=True, err=False, indent=None):
     if indent:
         text = indent_text(text, indent)
-    click.secho(text, fg='magenta', bold=True, nl=nl, err=err)
+    click.secho(text, fg='magenta', bold=True, nl=nl, err=err, color=DISPLAY_COLOR)
 
 
 def abort(text=None, code=1, out=False):
     if text is not None:
-        click.secho(text, fg='red', bold=True, err=not out)
+        click.secho(text, fg='red', bold=True, err=not out, color=DISPLAY_COLOR)
     sys.exit(code)

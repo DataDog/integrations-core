@@ -24,7 +24,9 @@
   "integration_id": "cockroachdb",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "CockroachDB Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

@@ -15,18 +15,24 @@ FILTERED_NETWORK_ID = 'server-2'
 FILTERED_SERVER_ID = 'server-1'
 FILTERED_BY_PROJ_SERVER_ID = ['server-1', 'server-2']
 
-MOCK_CONFIG = {
-    'init_config': {},
-    'instances': [
-        {
-            'name': 'test_name',
-            'keystone_server_url': 'http://10.0.2.15:5000',
-            'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
-            'ssl_verify': False,
-            'exclude_network_ids': EXCLUDED_NETWORK_IDS,
-        }
-    ],
+CONFIG_FILE_INSTANCE = {
+    'name': 'test_name',
+    'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
+    'ssl_verify': False,
+    'exclude_network_ids': EXCLUDED_NETWORK_IDS,
+    'openstack_config_file_path': os.path.abspath('./tests/fixtures/openstack_config.yaml'),
+    'openstack_cloud_name': 'test_cloud',
 }
+
+KEYSTONE_INSTACE = {
+    'name': 'test_name',
+    'keystone_server_url': 'http://10.0.2.15:5000',
+    'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
+    'ssl_verify': False,
+    'exclude_network_ids': EXCLUDED_NETWORK_IDS,
+}
+
+MOCK_CONFIG = {'init_config': {}, 'instances': [KEYSTONE_INSTACE]}
 
 EXAMPLE_AUTH_RESPONSE = {
     u'token': {

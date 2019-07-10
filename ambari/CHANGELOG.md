@@ -1,5 +1,9 @@
 # CHANGELOG - Ambari
 
+## 1.1.1 / 2019-07-09
+
+* [Fixed] Fix typo TSL => TLS. See [#4072](https://github.com/DataDog/integrations-core/pull/4072).
+
 ## 1.1.0 / 2019-07-04
 
 * [Added] Add logs multiline managing. See [#3912](https://github.com/DataDog/integrations-core/pull/3912).

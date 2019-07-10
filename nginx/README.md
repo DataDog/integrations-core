@@ -147,6 +147,19 @@ sudo nginx -t && sudo nginx -s reload
 
 **Learn more about log collection [in the log documentation][10]**
 
+**Note**: The default NGINX log format does not have a request response time. To include it into your logs, update the NGINX log format by adding the following configuration block in the `http` section of your NGINX configuration file (`/etc/nginx/nginx.conf`): 
+
+```
+http {
+	#recommended log format
+	log_format nginx '\$remote_addr - \$remote_user [\$time_local] '
+                  '"\$request" \$status \$body_bytes_sent \$request_time '
+                  '"\$http_referer" "\$http_user_agent"';
+
+	access_log /var/log/nginx/access.log;
+}
+```
+
 ### Validation
 
 [Run the Agent's `status` subcommand][11] and look for `nginx` under the Checks section.

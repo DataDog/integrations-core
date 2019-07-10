@@ -6,18 +6,20 @@ import re
 from contextlib import contextmanager
 from shutil import copyfile, move
 
+from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS, file_exists, path_join
 from ..constants import get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
+    DEFAULT_PYTHON_VERSION,
     FAKE_API_KEY,
     MANIFEST_VERSION_PATTERN,
     get_agent_conf_dir,
     get_agent_exe,
-    get_agent_pip_install,
     get_agent_service_cmd,
     get_agent_version_manifest,
+    get_pip_exe,
     get_rate_flag,
 )
 from .config import config_file_name, locate_config_dir, locate_config_file, remove_env_data, write_env_data
@@ -28,22 +30,34 @@ class LocalAgentInterface(object):
     ENV_TYPE = 'local'
 
     def __init__(
-        self, check, env, base_package=None, config=None, env_vars=None, metadata=None, agent_build=None, api_key=None
+        self,
+        check,
+        env,
+        base_package=None,
+        config=None,
+        env_vars=None,
+        metadata=None,
+        agent_build=None,
+        api_key=None,
+        python_version=DEFAULT_PYTHON_VERSION,
     ):
         self.check = check
         self.env = env
         self.base_package = base_package
         self.config = config or {}
         # Env vars are not currently used in local E2E
-        self.env_vars = env_vars
+        self.env_vars = env_vars or {}
         self.metadata = metadata or {}
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY
+        self.python_version = python_version or DEFAULT_PYTHON_VERSION
 
         self._agent_version = self.metadata.get('agent_version')
         self.config_dir = locate_config_dir(check, env)
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
+
+        self.env_vars['DD_PYTHON_VERSION'] = self.python_version
 
     @property
     def platform(self):
@@ -145,15 +159,14 @@ class LocalAgentInterface(object):
         return run_command(command, capture=capture)
 
     def update_check(self):
-        install_cmd = get_agent_pip_install(self.agent_version, self.platform) + [
-            '-e',
-            path_join(get_root(), self.check),
-        ]
-        return run_command(install_cmd, capture=True, check=True)
+        command = get_pip_exe(self.python_version, self.platform)
+        command.extend(('install', '-e', path_join(get_root(), self.check)))
+        return run_command(command, capture=True, check=True)
 
     def update_base_package(self):
-        install_cmd = get_agent_pip_install(self.agent_version, self.platform) + ['-e', self.base_package]
-        return run_command(install_cmd, capture=True, check=True)
+        command = get_pip_exe(self.python_version, self.platform)
+        command.extend(('install', '-e', self.base_package))
+        return run_command(command, capture=True, check=True)
 
     def update_agent(self):
         # The Local E2E assumes an Agent is already installed on the machine
@@ -170,7 +183,9 @@ class LocalAgentInterface(object):
             self.metadata['agent_version'] = self.agent_version
 
     def start_agent(self):
-        command = get_agent_service_cmd(self.agent_version, self.platform, 'start')
+        with EnvVars(self.env_vars):
+            command = get_agent_service_cmd(self.agent_version, self.platform, 'start')
+
         return run_command(command, capture=True)
 
     def stop_agent(self):
