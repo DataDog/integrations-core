@@ -158,10 +158,21 @@ def fix_coverage_report(check, report_file):
 
 
 def construct_pytest_options(
-    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter='', pytest_args=''
+    verbose=0,
+    color=None,
+    enter_pdb=False,
+    debug=False,
+    bench=False,
+    coverage=False,
+    marker='',
+    test_filter='',
+    pytest_args='',
 ):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
+
+    if color is not None:
+        pytest_options += ' --color=yes' if color else ' --color=no'
 
     if enter_pdb:
         # Drop to PDB on first failure, then end test session
