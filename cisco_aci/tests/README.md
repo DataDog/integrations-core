@@ -41,4 +41,4 @@ The major downsides here are:
 - Only one version of the cisco api
 - The sandbox comes with almost nothing configured and you have to setup the whole environment otherwise most metrics won't show up.
 - Such a sandbox requires you to reserve it, sometimes one day in advance.
-- Require the use of a VPN that is incompatible with appgate.
+- It requires the use of a VPN that may be incompatible with other corporate VPNs
