@@ -407,6 +407,10 @@ The complete list of mandatory and optional attributes for the `manifest.json` f
 | `metric_to_check`    | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken in the Datadog application. |
 | `metric_prefix`      | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                               |
 | `process_signatures` | Array of String | Optional           | A list of signatures that matches the command line of this integration.                                                                                                                                                  |
+| `assets`       | Dictionary | Mandatory          | Relative location of where certain asset files live and their respective names.                                                                                                                                             |
+| `assets`-> `dashboards`       | Dictionary | Mandatory          | Dictionary where the key is the name of the dashboard (must be globally unique across integrations) and the value is the relative file path where the dashbaord definition lives.                                                                                                      |
+| `assets`-> `monitors`       | Dictionary | Mandatory          | Dictionary where the key is the name of the monitor (must be globally unique across integrations) and the value is the relative file path where the dashboard definition lives.                                                                                                                                              |
+| `assets`-> `service_checks`       | String | Mandatory          | Relative location of where the `service_checks.json` file lives.                                                                       |
 
 ##### Example manifest config
 
@@ -459,7 +463,7 @@ Descriptions of each column of the `metadata.csv` file:
 | `per_unit_name` | Optional           | If there is a unit sub-division, i.e `request per second`                                                                                                                       |
 | `description`   | Optional           | Description of the metric.                                                                                                                                                      |
 | `orientation`   | Mandatory          | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`. |
-| `integration`   | Mandatory          | Name of the integration that emits the metric.                                                                                                                                  |
+| `integration`   | Mandatory          | Name of the integration that emits the metric. Must be the normalized version of the `display_name` from the `manifest.json` file. Any character besides letters, underscores, dashes and numbers are converted to underscores. E.g. `Openstack Controller` -> `openstack_controller`and `ASP.NET` -> `asp_net` and `CRI-o` -> `cri-o`.                                                                                                                                |
 | `short_name`    | Mandatory          | Explicit Unique ID for the metric.                                                                                                                                              |
 
 ##### Example metadata config
@@ -475,11 +479,11 @@ The `service_checks.json` file contains the following mandatory attributes:
 | Attribute       | Description                                                                                                              |
 | ----            | ----                                                                                                                     |
 | `agent_version` | Minimum Agent version supported.                                                                                         |
-| `integration`   | Integration name.                                                                                                        |
+| `integration`   | The name of the integration that emits this service check. Must be the non-normalized `display_name` from `manifest.json`.                                                                                                      |
 | `check`         | Name of the Service Check. It must be unique.                                                                            |
 | `statuses`      | List of different status of the check, to choose among `ok`, `warning`, and `critical`. `unknown` is also a possibility. |
 | `groups`        | [Tags][14] sent with the Service Check.                                                                                  |
-| `name`          | Displayed name of the Service Check. The displayed name must be unique and self-explanatory.                             |
+| `name`          | Displayed name of the Service Check. The displayed name must be self-explanatory and unique across all integrations.                             |
 | `description`   | Description of the Service Check                                                                                         |
 
 ##### Example service check config
@@ -508,10 +512,11 @@ The directory structure for images and logos:
     awesome/
     ├── images
     │   └── an_awesome_image.png
-    └── logos
-        ├── avatars-bot.png
-        ├── saas_logos-bot.png
-        └── saas_logos-small.png
+    ├── assets
+    │   └── logos/
+            ├── avatars-bot.png
+            ├── saas_logos-bot.png
+            └── saas_logos-small.png
 ```
 
 The `images` folder contains all images that are used in the integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`:
@@ -520,7 +525,7 @@ The `images` folder contains all images that are used in the integration tile. T
 ![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/awesome/images/snapshot.png)
 ```
 
-The `logos` folder must contain **three** images with filenames and sizes that match the following specifications _exactly_. Underneath each specification is a list of places where the images may appear in the web app.
+The `assets/logos/` directory must contain **three** images with filenames and sizes that match the following specifications _exactly_. Underneath each specification is a list of places where the images may appear in the web app.
 
 #### saas_logos-bot.png (200 × 128)
 
