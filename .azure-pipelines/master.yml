@@ -11,5 +11,8 @@ pr:
     include:
     - datadog_checks_base/datadog_checks/*
 
+variables:
+  DDEV_COLOR: 1
+
 jobs:
 - template: './templates/test-all.yml'
