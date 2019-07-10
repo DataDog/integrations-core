@@ -1,5 +1,5 @@
 {
-  "display_name": "Kube metrics server",
+  "display_name": "Kubernetes Metrics Server",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "kube_metrics_server",
@@ -20,7 +20,7 @@
     "containers"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "kube-metrics-server",
   "assets": {
     "monitors": {},

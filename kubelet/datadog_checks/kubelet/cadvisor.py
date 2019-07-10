@@ -23,7 +23,14 @@ Collects metrics from cAdvisor instance
 NAMESPACE = "kubernetes"
 DEFAULT_MAX_DEPTH = 10
 DEFAULT_ENABLED_RATES = ['diskio.io_service_bytes.stats.total', 'network.??_bytes', 'cpu.*.total']
-DEFAULT_ENABLED_GAUGES = ['memory.usage', 'memory.working_set', 'memory.rss', 'filesystem.usage']
+DEFAULT_ENABLED_GAUGES = [
+    'memory.cache',
+    'memory.usage',
+    'memory.swap',
+    'memory.working_set',
+    'memory.rss',
+    'filesystem.usage',
+]
 DEFAULT_POD_LEVEL_METRICS = ['network.*']
 
 NET_ERRORS = ['rx_errors', 'tx_errors', 'rx_dropped', 'tx_dropped']
@@ -175,7 +182,7 @@ class CadvisorScraper(object):
             if pod_list_utils.is_excluded(cid):
                 self.log.debug("Filtering out " + cid)
                 return
-            tags = tagger.tag(cid, tagger.HIGH)
+            tags = tagger.tag(cid, tagger.HIGH) or []
 
         if not tags:
             self.log.debug("Subcontainer {} doesn't have tags, skipping.".format(subcontainer_id))

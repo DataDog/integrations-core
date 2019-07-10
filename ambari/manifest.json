@@ -15,10 +15,11 @@
   ],
   "public_title": "Datadog-Ambari Integration",
   "categories": [
-    "processing"
+    "processing",
+    "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "ambari",
   "assets": {
     "monitors": {},

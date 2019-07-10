@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 1.7.0 / 2019-07-04
+
+* [Added] Add logs section. See [#3961](https://github.com/DataDog/integrations-core/pull/3961).
+
 ## 1.6.0 / 2019-05-14
 
 * [Fixed] Use name instead of db to identify databases from SHOW DATABASES. See [#3459](https://github.com/DataDog/integrations-core/pull/3459). Thanks [joekohlsdorf](https://github.com/joekohlsdorf).

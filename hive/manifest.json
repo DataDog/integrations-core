@@ -24,7 +24,9 @@
   "integration_id": "hive",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Hive Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

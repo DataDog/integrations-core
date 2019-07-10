@@ -351,7 +351,7 @@ class NagiosEventLogTailer(NagiosTailer):
         event_payload = fields._asdict()
 
         msg_text = {
-            'event_type': event_payload.pop('event_type', None),
+            'event_type': event_type,
             'event_soft_hard': event_payload.pop('event_soft_hard', None),
             'check_name': event_payload.pop('check_name', None),
             'event_state': event_payload.pop('event_state', None),

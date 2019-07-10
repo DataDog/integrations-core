@@ -1,5 +1,24 @@
 # CHANGELOG - datadog_checks_base
 
+## 8.6.0 / 2019-07-09
+
+* [Added] Output similar metrics on failed aggregator stub assertions to help debugging. See [#4035](https://github.com/DataDog/integrations-core/pull/4035) and [#4076](https://github.com/DataDog/integrations-core/pull/4076).
+* [Fixed] Avoid WMISampler inheriting from Thread. See [#4051](https://github.com/DataDog/integrations-core/pull/4051).
+
+## 8.5.0 / 2019-07-04
+
+* [Fixed] Make WMISampler hashable. See [#4043](https://github.com/DataDog/integrations-core/pull/4043).
+* [Added] Support SOCKS proxies. See [#4021](https://github.com/DataDog/integrations-core/pull/4021).
+* [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
+* [Added] Add others forms of auth to RequestsWrapper. See [#3956](https://github.com/DataDog/integrations-core/pull/3956).
+* [Fixed] Fix busy loop in WMI implementation. See [#4018](https://github.com/DataDog/integrations-core/pull/4018).
+* [Added] Add others forms of auth to RequestsWrapper. See [#3956](https://github.com/DataDog/integrations-core/pull/3956).
+* [Added] Better log message for unsafe yaml loading/dumping. See [#3771](https://github.com/DataDog/integrations-core/pull/3771).
+
+## 8.4.1 / 2019-06-29
+
+* [Fixed] Change WMISampler class to create a single thread, owned by the object. See [#3987](https://github.com/DataDog/integrations-core/pull/3987).
+
 ## 8.4.0 / 2019-06-18
 
 * [Added] Support E2E testing. See [#3896](https://github.com/DataDog/integrations-core/pull/3896).

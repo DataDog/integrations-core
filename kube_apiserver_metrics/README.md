@@ -1,4 +1,4 @@
-# Agent Check: Kube_apiserver_metrics
+# Agent Check: Kubernetes API server metrics
 
 ## Overview
 
@@ -33,24 +33,24 @@ Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Dat
 
 Disclaimer: Your apiserver(s) need to run as pods, other methods (e.g. systemd unit) are not supported at the moment.
 
-You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent’s configuration directory][9].
+You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent’s configuration directory][4].
 See the [sample kube_apiserver_metrics.d/conf.yaml][2] for all available configuration options.
 
 By default the Agent running the check tries to get the service account bearer token to authenticate against the APIServer. If you are not using RBACs, set `bearer_token_auth` to `false`.
 
-Finally, if you run the Datadog Agent on the master nodes, you can rely on [Autodiscovery][4] to schedule the check. It is automatic if you are running the official image `k8s.gcr.io/kube-apiserver`.
+Finally, if you run the Datadog Agent on the master nodes, you can rely on [Autodiscovery][5] to schedule the check. It is automatic if you are running the official image `k8s.gcr.io/kube-apiserver`.
 
-2. [Restart the Agent][5].
+2. [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `kube_apiserver_metrics` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `kube_apiserver_metrics` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -62,14 +62,14 @@ Kube_apiserver_metrics does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
-[1]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/
+[1]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/autodiscovery/clusterchecks/
-[4]: https://docs.datadoghq.com/agent/autodiscovery/?tab=kubernetes
-[5]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/metadata.csv
-[8]: https://docs.datadoghq.com/help/
-[9]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/autodiscovery/clusterchecks
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[5]: https://docs.datadoghq.com/agent/autodiscovery/?tab=kubernetes
+[6]: https://docs.datadoghq.com/agent/faq/agent-commands/#start-stop-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/metadata.csv
+[9]: https://docs.datadoghq.com/help

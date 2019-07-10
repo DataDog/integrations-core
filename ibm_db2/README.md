@@ -131,4 +131,4 @@ Additional helpful documentation, links, and articles:
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
 [9]: https://docs.datadoghq.com/help
-[10]: https://www.datadoghq.com/blog/monitor-db2-with-datadog/
+[10]: https://www.datadoghq.com/blog/monitor-db2-with-datadog

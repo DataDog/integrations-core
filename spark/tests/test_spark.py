@@ -565,7 +565,7 @@ SPARK_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME]
 
 def test_yarn(aggregator):
     with mock.patch('requests.get', yarn_requests_get_mock):
-        c = SparkCheck('spark', None, {}, [YARN_CONFIG])
+        c = SparkCheck('spark', {}, [YARN_CONFIG])
         c.check(YARN_CONFIG)
 
         # Check the succeeded job metrics
@@ -614,7 +614,7 @@ def test_yarn(aggregator):
 
 def test_auth_yarn(aggregator):
     with mock.patch('requests.get', yarn_requests_auth_mock):
-        c = SparkCheck('spark', None, {}, [YARN_AUTH_CONFIG])
+        c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
         c.check(YARN_AUTH_CONFIG)
 
         tags = ['url:http://localhost:8088', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
@@ -633,7 +633,7 @@ def test_auth_yarn(aggregator):
 
 def test_mesos(aggregator):
     with mock.patch('requests.get', mesos_requests_get_mock):
-        c = SparkCheck('spark', None, {}, [MESOS_CONFIG])
+        c = SparkCheck('spark', {}, [MESOS_CONFIG])
         c.check(MESOS_CONFIG)
 
         # Check the running job metrics
@@ -689,7 +689,7 @@ def test_mesos(aggregator):
 
 def test_mesos_filter(aggregator):
     with mock.patch('requests.get', mesos_requests_get_mock):
-        c = SparkCheck('spark', None, {}, [MESOS_FILTERED_CONFIG])
+        c = SparkCheck('spark', {}, [MESOS_FILTERED_CONFIG])
         c.check(MESOS_FILTERED_CONFIG)
 
         for sc in aggregator.service_checks(MESOS_SERVICE_CHECK):
@@ -701,7 +701,7 @@ def test_mesos_filter(aggregator):
 
 def test_standalone_unit(aggregator):
     with mock.patch('requests.get', standalone_requests_get_mock):
-        c = SparkCheck('spark', None, {}, [STANDALONE_CONFIG])
+        c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
         c.check(STANDALONE_CONFIG)
 
         # Check the running job metrics
@@ -754,7 +754,7 @@ def test_standalone_unit(aggregator):
 
 def test_standalone_pre20(aggregator):
     with mock.patch('requests.get', standalone_requests_pre20_get_mock):
-        c = SparkCheck('spark', None, {}, [STANDALONE_CONFIG_PRE_20])
+        c = SparkCheck('spark', {}, [STANDALONE_CONFIG_PRE_20])
         c.check(STANDALONE_CONFIG_PRE_20)
 
         # Check the running job metrics
@@ -807,7 +807,7 @@ def test_standalone_pre20(aggregator):
 
 def test_ssl():
     run_ssl_server()
-    c = SparkCheck('spark', None, {}, [SSL_CONFIG])
+    c = SparkCheck('spark', {}, [SSL_CONFIG])
 
     with pytest.raises(requests.exceptions.SSLError):
         c.check(SSL_CONFIG)
@@ -817,7 +817,7 @@ def test_ssl_no_verify():
     # Disable ssl warning for self signed cert/no verify
     urllib3.disable_warnings()
     run_ssl_server()
-    c = SparkCheck('spark', None, {}, [SSL_NO_VERIFY_CONFIG])
+    c = SparkCheck('spark', {}, [SSL_NO_VERIFY_CONFIG])
 
     c.check(SSL_NO_VERIFY_CONFIG)
 
@@ -826,7 +826,7 @@ def test_ssl_cert():
     # Disable ssl warning for self signed cert/no verify
     urllib3.disable_warnings()
     run_ssl_server()
-    c = SparkCheck('spark', None, {}, [SSL_CERT_CONFIG])
+    c = SparkCheck('spark', {}, [SSL_CERT_CONFIG])
 
     c.check(SSL_CERT_CONFIG)
 
@@ -855,7 +855,7 @@ def run_ssl_server():
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_standalone(aggregator, instance_standalone):
-    c = SparkCheck('spark', None, {}, [instance_standalone])
+    c = SparkCheck('spark', {}, [instance_standalone])
     c.check(instance_standalone)
 
     # Check the running job metrics

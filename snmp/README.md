@@ -212,11 +212,11 @@ The Agent looks for the converted MIB Python files by specifying the destination
 [Restart the Agent][9] to start sending SNMP metrics to Datadog.
 
 #### Metrics collection
-The SNMP check can potentially emit [custom metrics][14], which may impact your [billing][15].
+The SNMP check can potentially emit [custom metrics][10], which may impact your [billing][11].
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `snmp` under the Checks section.
+[Run the Agent's status subcommand][12] and look for `snmp` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -233,13 +233,13 @@ The SNMP check does not include any events.
 Returns `CRITICAL` if the Agent cannot collect SNMP metrics, otherwise returns `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][13].
 
 ## Further Reading
 Additional helpful documentation, links, and articles:
 
-* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][12]
-* [Monitoring Unifi devices using SNMP and Datadog][13]
+* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][14]
+* [Monitoring Unifi devices using SNMP and Datadog][15]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -251,9 +251,9 @@ Additional helpful documentation, links, and articles:
 [7]: https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md#dependency-changes-3
 [8]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[11]: https://docs.datadoghq.com/help
-[12]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
-[13]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
-[14]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[15]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
+[10]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[11]: https://docs.datadoghq.com/account_management/billing/custom_metrics
+[12]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[13]: https://docs.datadoghq.com/help
+[14]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
+[15]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca

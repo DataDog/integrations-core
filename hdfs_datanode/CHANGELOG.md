@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_datanode
 
+## 1.8.0 / 2019-07-09
+
+* [Added] Use the new RequestsWrapper for connecting to services. See [#4056](https://github.com/DataDog/integrations-core/pull/4056).
+
 ## 1.7.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3514](https://github.com/DataDog/integrations-core/pull/3514).

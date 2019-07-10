@@ -10,6 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "kubeproxy.",
+  "metric_to_check": "kubeproxy.cpu.time",
   "name": "kube_proxy",
   "public_title": "Datadog-Kube Proxy Integration",
   "short_description": "kube_proxy description.",

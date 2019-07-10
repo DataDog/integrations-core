@@ -1,0 +1,4 @@
+UI_SECRET=zwLrffYTowkr96Ra
+JOBSERVICE_SECRET=o3hTR0RyVUPXfyJL
+ADMINSERVER_URL=http://adminserver:8080
+GODEBUG=netdns=cgo

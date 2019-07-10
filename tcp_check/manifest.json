@@ -14,6 +14,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "network.",
+  "metric_to_check": "network.tcp.can_connect",
   "name": "tcp_check",
   "public_title": "Datadog-TCP Check Integration",
   "short_description": "Monitor TCP connectivity to remote hosts.",

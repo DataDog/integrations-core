@@ -53,18 +53,18 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param tsl_cert - string - optional
-    ## Path to certificate to connect to the Ambari server if using TSL authentication
+    ## @param tls_cert - string - optional
+    ## Path to certificate to connect to the Ambari server if using TLS authentication
     #
-    # tsl_cert: <PATH_TO_CERTIFICATE>
+    # tls_cert: <PATH_TO_CERTIFICATE>
 
     ## @param tls_private_key - string - optional
-    ## Path to certificate private key to connect to the Ambari server if using TSL authentication
+    ## Path to certificate private key to connect to the Ambari server if using TLS authentication
     #
     # tls_private_key: <PATH_TO_PRIVATE_KEY>
 
     ## @param tls_verify - boolean - optional - default: true
-    ## Whether or not to verify TSL certificates (default true)
+    ## Whether or not to verify TLS certificates (default true)
     #
     # tls_verify: true
 
@@ -119,6 +119,50 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /var/log/ambari-server/*.log
+#     path: /var/log/ambari-server/ambari-alerts.log
+#     source: ambari
+#     service: ambari
+#     log_processing_rules:
+#        - type: multi_line
+#          name: new_log_start_with_date
+#          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])  # 2019-04-22 15:47:00,999
+#   - type: file
+#     path: /var/log/ambari-server/ambari-audit.log
+#     source: ambari
+#     service: ambari
+#     log_processing_rules:
+#        - type: multi_line
+#          name: new_log_start_with_date
+#          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])  # 2019-05-25T13:13:17.875Z
+#   - type: file
+#     path: /var/log/ambari-server/config-changes.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-eclipselink.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/server-check-database.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server-command.log
+#     source: ambari
+#     service: ambari
+#     log_processing_rules:
+#        - type: multi_line
+#          name: new_log_start_with_date
+#          pattern: (INFO|ERROR|WARN)  # ERROR 2019-04-22
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server-pkgmgr.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-stack-merger.log
 #     source: ambari
 #     service: ambari

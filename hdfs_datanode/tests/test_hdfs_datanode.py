@@ -19,11 +19,11 @@ def test_check(aggregator, mocked_request):
     """
     Test that we get all the metrics we're supposed to get
     """
-
-    hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, {})
+    instance = HDFS_DATANODE_CONFIG['instances'][0]
+    hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
 
     # Run the check once
-    hdfs_datanode.check(HDFS_DATANODE_CONFIG['instances'][0])
+    hdfs_datanode.check(instance)
 
     # Make sure the service is up
     aggregator.assert_service_check(
@@ -40,11 +40,11 @@ def test_auth(aggregator, mocked_auth_request):
     """
     Test that we can connect to the endpoint when we authenticate
     """
-
-    hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, {})
+    instance = HDFS_DATANODE_AUTH_CONFIG['instances'][0]
+    hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
 
     # Run the check once
-    hdfs_datanode.check(HDFS_DATANODE_AUTH_CONFIG['instances'][0])
+    hdfs_datanode.check(instance)
 
     # Make sure the service is up
     aggregator.assert_service_check(
