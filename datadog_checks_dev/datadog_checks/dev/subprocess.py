@@ -42,7 +42,7 @@ def run_command(command, capture=None, check=False, encoding='utf-8', shell=Fals
     if shell == 'detect':
         shell = NEED_SHELL
 
-    if isinstance(command, string_types) and not ON_WINDOWS and not shell:
+    if isinstance(command, string_types) and not ON_WINDOWS:
         command = shlex.split(command)
 
     if capture:

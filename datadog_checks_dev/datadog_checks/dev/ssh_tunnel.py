@@ -21,9 +21,16 @@ else:
 
 def find_free_port():
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('localhost', 0))
+        s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
+
+
+def get_ip():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        return s.getsockname()[0]
 
 
 @contextmanager
@@ -50,11 +57,12 @@ class SocksProxyUp(LazyFunction):
             with open(key_file, 'w') as f:
                 f.write(self.private_key)
             os.chmod(key_file, 0o600)
+            ip = get_ip()
             command = [
                 'ssh',
                 '-N',
                 '-D',
-                'localhost:{}'.format(local_port),
+                '{}:{}'.format(ip, local_port),
                 '-i',
                 key_file,
                 '-o',
@@ -68,7 +76,7 @@ class SocksProxyUp(LazyFunction):
             process = subprocess.Popen(command, start_new_session=True)
             with open(os.path.join(temp_dir, 'ssh.pid'), 'w') as ssh_pid:
                 ssh_pid.write(str(process.pid))
-            return local_port
+            return ip, local_port
 
 
 class SocksProxyDown(LazyFunction):

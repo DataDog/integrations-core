@@ -27,6 +27,7 @@ def dd_environment():
             'user': {'name': 'admin', 'password': 'labstack', 'domain': {'id': 'default'}},
             'ssl_verify': False,
         }
-        with socks_proxy(ip, 'ubuntu', private_key) as socks_port:
-            agent_config = {'proxy': {'http': 'socks5://localhost:{}'.format(socks_port)}}
+        with socks_proxy(ip, 'ubuntu', private_key) as socks:
+            socks_ip, socks_port = socks
+            agent_config = {'proxy': {'http': 'socks5://{}:{}'.format(socks_ip, socks_port)}}
             yield instance, agent_config
