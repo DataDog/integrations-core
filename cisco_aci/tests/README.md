@@ -1,7 +1,6 @@
 ## How to test cisco_aci
 
-It is not possible to test this integration with a simple docker-compose environment on which to run the agent. This document lists some of the available options to test this integration. Note that installing a real cisco ACI environment is out of the
-topic as it requires a custom hardware setup.
+It is not possible to test this integration with a simple docker-compose environment on which to run the agent. This document lists some of the available options to test this integration. Note that installing a real cisco ACI environment is not feasible as it requires a custom hardware setup.
 
 ### Unit tests
 
@@ -10,8 +9,7 @@ continue to be as extensive as possible as only those are run in the CI for ever
 
 ### Cisco Application Centric Infrastructure Simulator
 
-Cisco has created VM images for a simulator that is said to behave exactly like a real cisco ACI setup. This would exactly fit our
-needs, except that they do not offer public links and would need us to have an existing contract with them.
+Cisco has created VM images for a simulator that is said to behave exactly like a real cisco ACI setup. However, these images are only offered under a partnership contract.
 
 ### Cisco public sandbox
 
@@ -41,6 +39,6 @@ kubernetes integration installed.
 
 The major downsides here are:
 - Only one version of the cisco api
-- The sandbox comes with almost nothing and you have to expend the setup otherwise most metrics won't show up.
+- The sandbox comes with almost nothing configured and you have to setup the whole environment otherwise most metrics won't show up.
 - Such a sandbox requires you to reserve it sometimes one day in advance.
 - Require the use of a VPN that is incompatible with appgate.
