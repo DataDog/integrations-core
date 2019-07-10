@@ -7,9 +7,16 @@ import os
 import socket
 from contextlib import closing, contextmanager
 
+from six import PY3
+
 from .env import environment_run
 from .structures import LazyFunction, TempDir
 from .subprocess import run_command
+
+if PY3:
+    import subprocess
+else:
+    import subprocess32 as subprocess
 
 
 def find_free_port():
@@ -44,7 +51,6 @@ class SocksProxyUp(LazyFunction):
                 f.write(self.private_key)
             os.chmod(key_file, 0o600)
             command = [
-                'nohup',
                 'ssh',
                 '-N',
                 '-D',
@@ -58,12 +64,10 @@ class SocksProxyUp(LazyFunction):
                 '-o',
                 'StrictHostKeyChecking=no',
                 '{}@{}'.format(self.user, self.host),
-                '&',
-                'echo $!',
             ]
-            process = run_command(' '.join(command), capture='stdout', shell=True)
+            process = subprocess.Popen(command, start_new_session=True)
             with open(os.path.join(temp_dir, 'ssh.pid'), 'w') as ssh_pid:
-                ssh_pid.write(process.stdout.split()[0])
+                ssh_pid.write(str(process.pid))
             return local_port
 
 
