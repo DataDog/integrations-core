@@ -33,6 +33,7 @@ def main():
 
     print('Detecting changed checks...')
     result = subprocess.run(command, encoding='utf-8', capture_output=True, check=True)
+    print(result.stdout)
     checks = sorted(c.strip('`') for c in re.findall('^`[^`]+`', result.stdout, re.M))
 
     for check in checks:
