@@ -28,12 +28,11 @@ def main():
     else:
         print(f'Checks chosen: changed')
 
-    command = ['ddev', 'test', '--list']
+    command = ['ddev', '--no-color', 'test', '--list']
     command.extend(checks)
 
     print('Detecting changed checks...')
     result = subprocess.run(command, encoding='utf-8', capture_output=True, check=True)
-    print(repr(result.stdout))
     checks = sorted(c.strip('`') for c in re.findall('^`[^`]+`', result.stdout, re.M))
 
     for check in checks:
