@@ -38,7 +38,9 @@ def display_envs(check_envs):
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
+@click.pass_context
 def test(
+    ctx,
     checks,
     format_style,
     style,
@@ -73,6 +75,7 @@ def test(
 
     root = get_root()
     testing_on_ci = running_on_ci()
+    color = ctx.obj['color']
 
     # Implicitly track coverage
     if cov_missing:
@@ -83,6 +86,7 @@ def test(
 
     pytest_options = construct_pytest_options(
         verbose=verbose,
+        color=color,
         enter_pdb=enter_pdb,
         debug=debug,
         bench=bench,
@@ -106,6 +110,9 @@ def test(
         'DDEV_COV_MISSING': coverage_show_missing_lines,
         'PYTEST_ADDOPTS': pytest_options,
     }
+
+    if color is not None:
+        test_env_vars['PY_COLORS'] = '1' if color else '0'
 
     if e2e:
         test_env_vars[E2E_PARENT_PYTHON] = sys.executable
