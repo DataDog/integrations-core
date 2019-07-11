@@ -160,8 +160,7 @@ class CheckPortListening(LazyFunction):
                 with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
                     s.connect((self.host, self.port))
             except socket.error:
-                pass
-            else:
-                return True
-            time.sleep(self.wait)
+                time.sleep(self.wait)
+                continue
+            return True
         raise RetryError("Couldn't connect to {}:{}".format(self.host, self.port))
