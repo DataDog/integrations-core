@@ -28,7 +28,7 @@ instances:
 
 The main downsides of this are that:
 - Anyone can modify the environment and thus tests cannot be reproducible.
-- Only one version of the cisco API is provided 3.0(2k) as of 07/08/19
+- Only one version of the cisco API is provided 3.0(2k) as of 07/08/19.
 
 Yet this is a very convenient way to test the integration against a real system.
 
