@@ -26,7 +26,7 @@ try:
 except ImportError:
     is_agent_6 = False
 
-# See: https://github.com/DataDog/integrations-core/pull/1109
+# See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
 IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
 
 
