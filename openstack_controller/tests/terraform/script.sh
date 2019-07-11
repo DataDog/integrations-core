@@ -8,8 +8,8 @@ IP=$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
 IP_PREFIX=$(echo $IP | cut -d. -f 1,2,3)
 cat <<EOF | sudo tee -a local.conf
 [[local|localrc]]
-FIXED_RANGE=10.4.128.0/20
-FLOATING_RANGE=$IP_PREFIX.128/25
+FIXED_RANGE=10.11.12.0/24
+FLOATING_RANGE=$IP_PREFIX.224/27
 LOGFILE=/opt/stack/logs/stack.sh.log
 ADMIN_PASSWORD=labstack
 DATABASE_PASSWORD=supersecret
