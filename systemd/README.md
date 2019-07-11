@@ -50,6 +50,7 @@ Some metrics are reported only if the respective configurations are enable:
 
 Some metrics are only available from specific version of Systemd:
 
+- `systemd.service.cpu_usage_n_sec` requires Systemd v220
 - `systemd.service.n_restarts` requires Systemd v235
 - `systemd.socket.n_refused` requires Systemd v239
 
