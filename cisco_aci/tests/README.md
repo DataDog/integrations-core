@@ -16,7 +16,7 @@ Cisco has created VM images for a simulator that is said to behave exactly like 
 https://devnetsandbox.cisco.com/
 
 Even if the simulator cannot be installed on a VM, cisco offers a publicly available sandbox which is running a specific version
-of the simulator. This AlwaysOn simulator is very convenient to use as it doesn't require a VPN and you can just configure the agent
+of the simulator. This AlwaysOn simulator is very convenient to use as it doesn't require a VPN and you can just configure the Agent
 to point at the sandbox with the following configuration:
 
 ```yaml
