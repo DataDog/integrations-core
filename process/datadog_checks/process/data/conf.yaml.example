@@ -69,11 +69,11 @@ instances:
     # ignore_denied_access: true
 
     ## @param thresholds - object - optional
-    ## The threshold paramter is composed of two ranges: critical and warning
+    ## The threshold parameter is composed of two ranges: critical and warning
     ##   * warning: (optional) List of two values: If the number of processes found is below the first value or
-    ##             above the second one, the process check will return WARNING. Set to -1 to disable a boundary.
+    ##             above the second one, the process check will return WARNING. Set to .inf or -.inf to disable a boundary.
     ##   * critical: (optional) List of two values: If the number of processes found is below the first value or
-    ##             above the second one, the process check will return CRITICAL. Set to -1 to disable a boundary.
+    ##             above the second one, the process check will return CRITICAL. Set to .inf or -.inf to disable a boundary.
     #
     # thresholds:
     #   warning: [<BELOW_VALUE> , <TOP_VALUE>]

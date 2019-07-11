@@ -458,9 +458,9 @@ class ProcessCheck(AgentCheck):
             critical = bounds.get('critical', [1, float('inf')])
 
             # -1 disable the boundary
-            if (warning[1] != -1 and warning[1] < nb_procs) or nb_procs < warning[0]:
+            if warning[1] < nb_procs or nb_procs < warning[0]:
                 status = AgentCheck.WARNING
-            if (critical[1] != -1 and critical[1] < nb_procs) or nb_procs < critical[0]:
+            if critical[1] < nb_procs or nb_procs < critical[0]:
                 status = AgentCheck.CRITICAL
 
         self.service_check(

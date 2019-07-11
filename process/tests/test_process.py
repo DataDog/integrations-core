@@ -335,8 +335,8 @@ def test_process_service_check(aggregator):
     process = ProcessCheck(common.CHECK_NAME, {}, {})
 
     process._process_service_check('warning', 3, {'warning': [4, 6], 'critical': [2, 10]}, [])
-    process._process_service_check('no_top_ok', 3, {'warning': [2, -1], 'critical': [2, -1]}, [])
-    process._process_service_check('no_top_critical', 0, {'warning': [2, -1], 'critical': [2, -1]}, [])
+    process._process_service_check('no_top_ok', 3, {'warning': [2, .inf], 'critical': [2, .inf]}, [])
+    process._process_service_check('no_top_critical', 0, {'warning': [2, .inf], 'critical': [2, .inf]}, [])
 
     aggregator.assert_service_check('process.up', count=1, tags=['process:warning'], status=process.WARNING)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_ok'], status=process.OK)
