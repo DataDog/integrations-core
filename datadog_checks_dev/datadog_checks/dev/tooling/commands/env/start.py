@@ -131,7 +131,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
         abort()
 
     env_vars = dict(ev.split('=', 1) for ev in env_vars)
-    for key, value in metadata.get('env_vars', {}):
+    for key, value in metadata.get('env_vars', {}).items():
         env_vars.setdefault(key, value)
 
     environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key, python)
