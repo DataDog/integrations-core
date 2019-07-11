@@ -410,8 +410,8 @@ class OpenMetricsScraperMixin(object):
         if metric.name in scraper_config['ignore_metrics']:
             self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, 1, scraper_config)
             return  # Ignore the metric
-        else:
-            self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, 1, scraper_config)
+
+        self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, 1, scraper_config)
 
         if self._filter_metric(metric):
             return  # Ignore the metric
