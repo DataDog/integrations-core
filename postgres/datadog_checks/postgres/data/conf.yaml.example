@@ -31,16 +31,25 @@ instances:
     #
     # dbname: <DB_NAME>
 
-    ## @param ssl - boolean - optional - default: false
-    ## Whether or not the agent should connect to the PostgreSQL Database using SSL.
+    ## @param ssl - string - optional - default: false
+    ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
+    ## is negotiated with the server. There are six modes:
+    ##
+    ## - `disable`: Only tries a non-SSL connection.
+    ## - `allow`: First tries a non-SSL connection; if if fails, tries an SSL connection.
+    ## - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
+    ## - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
+    ##            the same way as if verify-ca was specified.
+    ## - `verify-ca`: Only tries an SSL connection, and verifies that the server certificate is issued by a
+    ##              trusted certificate authority (CA).
+    ## - `verify-full`: Only tries an SSL connection and verifies that the server certificate is issued by a
+    ##                trusted CA and that the requested server host name matches the one in the certificate.
+    ##
+    ## For a detailed description of how these options work, see https://www.postgresql.org/docs/current/libpq-ssl.html
+    ##
+    ## Note: `true` is an alias for `require`, and `false` is an alias for `disable`
     #
     # ssl: false
-
-    ## @param use_psycopg2 - boolean - optional - default: false
-    ## Force using psycogp2 instead of pg8000 to connect.
-    ## WARNING: psycopg2 doesn't support SSL mode.
-    #
-    # use_psycopg2: false
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
