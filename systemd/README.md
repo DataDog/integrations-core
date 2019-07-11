@@ -60,11 +60,11 @@ Some metrics are only available from specific version of Systemd:
 
 Returns `OK` if Systemd is reachable, `CRITICAL` otherwise.
 
-**systemd.system_state**:
+**systemd.system.state**:
 
 Returns `OK` if Systemd's system state is running. Returns `CRITICAL` if the state is degraded, maintenance, or stopping. Returns `UNKNOWN` if the state is initializing, starting, or other.
 
-**systemd.unit.active_state**:
+**systemd.unit.state**:
 
 Returns `OK` if the unit active state is active. Returns `CRITICAL` if the state is inactive, deactivating, or failed. Returns `UNKNOWN` if the state is activating or other.
 
