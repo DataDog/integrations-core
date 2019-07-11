@@ -5,6 +5,7 @@ import json
 import os
 
 import mock
+import pytest
 
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
@@ -7122,9 +7123,12 @@ def test_scenario(make_request, aggregator):
         aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.integration
 def test_check(aggregator, dd_environment):
     instance, agent_config = dd_environment
     init_config = {}
     check = OpenStackControllerCheck('openstack_controller', init_config, agent_config, instances=[instance])
     check.check(instance)
-    aggregator.assert_metric('openstack.nova.hypervisor_load.1')
+    for metric in common.DEFAULT_METRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_all_metrics_covered()

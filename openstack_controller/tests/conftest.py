@@ -12,6 +12,8 @@ from datadog_checks.dev.utils import get_here
 
 @pytest.fixture(scope='session')
 def dd_environment():
+    if not os.environ.get('TF_VAR_account_json'):
+        pytest.skip('TF_VAR_account_json not set')
     with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
         if not outputs:
             # We're stopping the environment, we need fake values
