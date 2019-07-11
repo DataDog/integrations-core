@@ -244,7 +244,7 @@ class OpenMetricsScraperMixin(object):
         # The service account bearer token to be used for authentication
         config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
 
-        config['telemetry_enable'] = is_affirmative(instance.get('telemetry', default_instance.get('telemetry', False)))
+        config['telemetry'] = is_affirmative(instance.get('telemetry', default_instance.get('telemetry', False)))
 
         return config
 
@@ -332,7 +332,7 @@ class OpenMetricsScraperMixin(object):
         return '{}.{}.{}'.format(scraper_config['namespace'], 'telemetry', metric_name)
 
     def _send_telemetry_gauge(self, metric_name, val, scraper_config):
-        if scraper_config['telemetry_enable']:
+        if scraper_config['telemetry']:
             metric_name_with_namespace = self._telemetry_metric_name_with_namespace(metric_name, scraper_config)
             # Determine the tags to send
             custom_tags = scraper_config['custom_tags']
@@ -341,13 +341,13 @@ class OpenMetricsScraperMixin(object):
             self.gauge(metric_name_with_namespace, val, tags=tags)
 
     def _send_telemetry_counter(self, metric_name, val, scraper_config):
-        if scraper_config['telemetry_enable']:
+        if scraper_config['telemetry']:
             metric_name_with_namespace = self._telemetry_metric_name_with_namespace(metric_name, scraper_config)
             # Determine the tags to send
             custom_tags = scraper_config['custom_tags']
             tags = list(custom_tags)
             tags.extend(scraper_config['_metric_tags'])
-            self.count(metric_name_with_namespace, 1.0, tags=tags)
+            self.count(metric_name_with_namespace, val, tags=tags)
 
     def _store_labels(self, metric, scraper_config):
         # If targeted metric, store labels
