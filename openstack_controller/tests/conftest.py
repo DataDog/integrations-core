@@ -14,8 +14,8 @@ from datadog_checks.dev.utils import get_here
 def dd_environment():
     with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
         if not outputs:
-            # We're stopping the environment
-            yield {}
+            # We're stopping the environment, we need fake values
+            ip = internal_ip = private_key = ''
             return
 
         ip = outputs['ip']['value']
