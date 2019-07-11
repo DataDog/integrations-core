@@ -9,7 +9,6 @@ from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, to_string
-from datadog_checks.base.utils.headers import headers
 
 from .config import from_instance
 from .metrics import (
@@ -26,6 +25,12 @@ class AuthenticationError(requests.exceptions.HTTPError):
 
 
 class ESCheck(AgentCheck):
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_verify': {'name': 'tls_verify'},
+        'ssl_cert': {'name': 'tls_cert'},
+        'ssl_key': {'name': 'tls_private_key'},
+    }
+
     SERVICE_CHECK_CONNECT_NAME = 'elasticsearch.can_connect'
     SERVICE_CHECK_CLUSTER_STATUS = 'elasticsearch.cluster_health'
     SOURCE_TYPE_NAME = 'elasticsearch'
@@ -186,33 +191,9 @@ class ESCheck(AgentCheck):
         """
         Hit a given URL and return the parsed json
         """
-        # Load basic authentication configuration, if available.
-        if config.username and config.password:
-            auth = (config.username, config.password)
-        else:
-            auth = None
-
-        # Load SSL configuration, if available.
-        # ssl_verify can be a bool or a string
-        # (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
-        if isinstance(config.ssl_verify, bool) or isinstance(config.ssl_verify, str):
-            verify = config.ssl_verify
-        else:
-            verify = None
-
-        if config.ssl_cert:
-            if config.ssl_key:
-                cert = (config.ssl_cert, config.ssl_key)
-            else:
-                cert = config.ssl_cert
-        else:
-            cert = None
-
         resp = None
         try:
-            resp = requests.get(
-                url, timeout=config.timeout, headers=headers(self.agentConfig), auth=auth, verify=verify, cert=cert
-            )
+            resp = self.http.get(url)
             resp.raise_for_status()
         except Exception as e:
             # this means we've hit a particular kind of auth error that means the config is broken

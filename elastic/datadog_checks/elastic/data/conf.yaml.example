@@ -22,20 +22,63 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param ssl_verify - boolean - optional - default: false
-    ## Instruct the check to validate SSL certificates when connecting to "url"
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of services.
     #
-    # ssl_verify: false
+    # tls_verify: true
 
-    ## @param ssl_cert - boolean - optional
-    ## Path to the certificate file used to identify the connection to url.
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If you disable `tls_verify` you will receive security warnings in logs.
+    ## Disable those by setting `tls_ignore_warning` to true.
     #
-    # ssl_cert: <CERT_PEM_PATH>
+    # tls_ignore_warning: false
 
-    ## @param ssl_key - boolean - optional
-    ## Path to the private keyfile used to identify the connection to url.
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate’s authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
     #
-    # ssl_key: <CERT_KEY_PATH>
+    # tls_cert: <CERT_PATH>
+
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    #
+    # tls_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param tls_ca_cert - string - optional
+    ## The path to a file of concatenated CA certificates in PEM format or a directory
+    ## containing several CA certificates in PEM format. If a directory, the directory
+    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
+    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    #
+    # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param headers - list of key:value elements - optional
+    ## The headers parameter allows you to send specific headers with every request.
+    ## This is useful for explicitly specifying the host header or adding headers for
+    ## authorization purposes.
+    ##
+    ## This overrides any default headers.
+    #
+    # headers:
+    #   Host: alternative.host.example.com
+    #   X-Auth-Token: <AUTH_TOKEN>
+
+    ## @param timeout - integer - optional - default: 10
+    ## The timeout for connecting to services.
+    #
+    # timeout: 10
+
+    ## @param log_requests - boolean - optional - default: false
+    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
+    #
+    # log_requests: false
+
+    ## @param persist_connections - boolean - optional - default: false
+    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    #
+    # persist_connections: false
 
     ## @param node_name_as_host - boolean - optional - default: false
     ## If each machine only runs a single Elasticsearch node per cluster, you
@@ -98,6 +141,29 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param proxy - object - optional
+    ## This overrides the `proxy` setting in `init_config`.
+    ##
+    ## Set HTTP or HTTPS proxies. Use the `no_proxy` list
+    ## to specify hosts that must bypass proxies.
+    ##
+    ## The SOCKS protocol is also supported like so:
+    ##
+    ## socks5://user:pass@host:port
+    ##
+    ## Using the scheme `socks5` causes the DNS resolution to happen on the
+    ## client, rather than on the proxy server. This is in line with `curl`,
+    ## which uses the scheme to decide whether to do the DNS resolution on
+    ## the client or proxy. If you want to resolve the domains on the proxy
+    ## server, use `socks5h` as the scheme.
+    #
+    # proxy:
+    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+    #   no_proxy:
+    #     - <HOSTNAME_1>
+    #     - <HOSTNAME_2>
 
 ## Log Section (Available for Agent >=6.0)
 ##
