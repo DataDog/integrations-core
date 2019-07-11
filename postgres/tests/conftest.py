@@ -38,25 +38,9 @@ def check():
 
 @pytest.fixture
 def pg_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-        'username': USER,
-        'password': PASSWORD,
-        'dbname': DB_NAME,
-        'use_psycopg2': os.environ.get('USE_PSYCOPG2', 'false'),
-        'tags': ['foo:bar'],
-    }
+    return {'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}
 
 
 @pytest.fixture(scope='session')
 def e2e_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-        'username': USER,
-        'password': PASSWORD,
-        'dbname': DB_NAME,
-        'use_psycopg2': os.environ.get('USE_PSYCOPG2', 'true'),
-        'tags': ['foo:bar'],
-    }
+    return {'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}
