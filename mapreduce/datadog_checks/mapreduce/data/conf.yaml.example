@@ -1,48 +1,48 @@
 init_config:
 
-  ## @param general_counters - list of objects - optional
-  ##
-  ## `general_counters` are job agnostic metrics that create a metric for each specified counter
-  ## Create a an object with the following layout:
-  ##
-  ## - counter_group_name: '<COUNTER_GROUP_NAME>'
-  ##   counters:
-  ##     - counter_name: 'MAP_INPUT_RECORDS'
-  ##     - counter_name: 'MAP_OUTPUT_RECORDS'
-  ##     - counter_name: 'REDUCE_INPUT_RECORDS'
-  ##     - counter_name: 'REDUCE_OUTPUT_RECORDS'
-  ##
-  ## For more information on counters visit the MapReduce documentation page:
-  ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API #noqa
-  #
-  # general_counters:
-  #   - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
-  #     counters:
-  #       - counter_name: 'HDFS_BYTES_READ'
+    ## @param general_counters - list of objects - optional
+    ##
+    ## `general_counters` are job agnostic metrics that create a metric for each specified counter
+    ## Create a an object with the following layout:
+    ##
+    ## - counter_group_name: '<COUNTER_GROUP_NAME>'
+    ##   counters:
+    ##     - counter_name: 'MAP_INPUT_RECORDS'
+    ##     - counter_name: 'MAP_OUTPUT_RECORDS'
+    ##     - counter_name: 'REDUCE_INPUT_RECORDS'
+    ##     - counter_name: 'REDUCE_OUTPUT_RECORDS'
+    ##
+    ## For more information on counters visit the MapReduce documentation page:
+    ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API #noqa
+    #
+    # general_counters:
+    #   - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
+    #     counters:
+    #       - counter_name: 'HDFS_BYTES_READ'
 
-  ## @param job_specific_counters - list of objects - optional
-  ## `job_specific_counters` are metrics that are specific to a particular job.
-  ## Create an object with the following layout:
-  ##
-  ## - job_name: <JOB_NAME>
-  ##   metrics:
-  ##   - counter_group_name: <COUNTER_GROUP_NAME>
-  ##       counters:
-  ##         - counter_name: <COUNTER_NAME>
-  ##
-  ## For more information on counters visit the MapReduce documentation page:
-  ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API #noqa
-  #
-  # job_specific_counters:
-  #   - job_name: '<JOB_NAME>'
-  #     metrics:
-  #       - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
-  #         counters:
-  #           - counter_name: 'FILE_BYTES_WRITTEN'
-  #           - counter_name: 'HDFS_BYTES_WRITTEN'
-  #       - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
-  #          counters:
-  #            - counter_name: 'HDFS_BYTES_READ'
+    ## @param job_specific_counters - list of objects - optional
+    ## `job_specific_counters` are metrics that are specific to a particular job.
+    ## Create an object with the following layout:
+    ##
+    ## - job_name: <JOB_NAME>
+    ##   metrics:
+    ##   - counter_group_name: <COUNTER_GROUP_NAME>
+    ##       counters:
+    ##         - counter_name: <COUNTER_NAME>
+    ##
+    ## For more information on counters visit the MapReduce documentation page:
+    ## https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredAppMasterRest.html#Job_Counters_API #noqa
+    #
+    # job_specific_counters:
+    #   - job_name: '<JOB_NAME>'
+    #     metrics:
+    #       - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
+    #         counters:
+    #           - counter_name: 'FILE_BYTES_WRITTEN'
+    #           - counter_name: 'HDFS_BYTES_WRITTEN'
+    #       - counter_group_name: 'org.apache.hadoop.mapreduce.FileSystemCounter'
+    #          counters:
+    #            - counter_name: 'HDFS_BYTES_READ'
 
     ## @param proxy - object - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
