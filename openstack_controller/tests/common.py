@@ -335,7 +335,7 @@ EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE = {
     "totalInstancesUsed": 0,
     "totalRAMUsed": 0,
     "totalSecurityGroupsUsed": 0,
-    "totalFloatingIpsUsed": 0,
+    "totalFloatingIpsUsed": 1,
     "totalServerGroupsUsed": 0,
 }
 
