@@ -32,22 +32,22 @@ instances:
     # dbname: <DB_NAME>
 
     ## @param ssl - string - optional - default: false
-    ## This option determines whether or with what priority a secure SSL TCP/IP connection will
-    ## be negotiated with the server. There are six modes:
+    ## This option determines whether or not and with what priority a secure SSL TCP/IP connection
+    ## is negotiated with the server. There are six modes:
     ##
-    ## - disable: only try a non-SSL connection
-    ## - allow: first try a non-SSL connection; if that fails, try an SSL connection
-    ## - prefer: first try an SSL connection; if that fails, try a non-SSL connection
-    ## - require: only try an SSL connection. If a root CA file is present, verify the certificate in
-    ##            the same way as if verify-ca was specified
-    ## - verify-ca: only try an SSL connection, and verify that the server certificate is issued by a
-    ##              trusted certificate authority (CA)
-    ## - verify-full: only try an SSL connection, verify that the server certificate is issued by a
-    ##                trusted CA and that the requested server host name matches that in the certificate
+    ## - `disable`: Only tries a non-SSL connection.
+    ## - `allow`: First tries a non-SSL connection; if if fails, tries an SSL connection.
+    ## - `prefer`: First tries an SSL connection; if it fails, tries a non-SSL connection.
+    ## - `require`: Only tries an SSL connection. If a root CA file is present, verifies the certificate in
+    ##            the same way as if verify-ca was specified.
+    ## - `verify-ca`: Only tries an SSL connection, and verifies that the server certificate is issued by a
+    ##              trusted certificate authority (CA).
+    ## - `verify-full`: Only tries an SSL connection and verifies that the server certificate is issued by a
+    ##                trusted CA and that the requested server host name matches the one in the certificate.
     ##
     ## For a detailed description of how these options work, see https://www.postgresql.org/docs/current/libpq-ssl.html
     ##
-    ## Note: true is an alias for `require`, and false is an alias for `disable`
+    ## Note: `true` is an alias for `require`, and `false` is an alias for `disable`
     #
     # ssl: false
 
