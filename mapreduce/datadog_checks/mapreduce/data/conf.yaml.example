@@ -2,7 +2,7 @@ init_config:
 
   ## @param general_counters - list of objects - optional
   ##
-  ## general_counters are job agnostic metrics that create a metric for each specified counter
+  ## `general_counters` are job agnostic metrics that create a metric for each specified counter
   ## Create a an object with the following layout:
   ##
   ## - counter_group_name: '<COUNTER_GROUP_NAME>'
@@ -21,7 +21,7 @@ init_config:
   #       - counter_name: 'HDFS_BYTES_READ'
 
   ## @param job_specific_counters - list of objects - optional
-  ## job_specific_counters are metrics that are specific to a particular job.
+  ## `job_specific_counters` are metrics that are specific to a particular job.
   ## Create an object with the following layout:
   ##
   ## - job_name: <JOB_NAME>
@@ -66,7 +66,7 @@ init_config:
     #     - <HOSTNAME_2>
 
     ## @param skip_proxy - boolean - optional - default: false
-    ## If set to true, this makes the check bypass any proxy
+    ## If set to `true`, this makes the check bypass any proxy
     ## settings enabled and attempt to reach services directly.
     #
     # skip_proxy: false
@@ -132,7 +132,7 @@ instances:
     ## @param skip_proxy - boolean - optional - default: false
     ## This overrides the `skip_proxy` setting in `init_config`.
     ##
-    ## If set to true, this makes the check bypass any proxy
+    ## If set to `true`, this makes the check bypass any proxy
     ## settings enabled and attempt to reach services directly.
     #
     # skip_proxy: false
@@ -143,10 +143,10 @@ instances:
     # username: <USERNAME>
 
     ## @param ntlm_domain - string - optional
-    ## If your services uses NTLM authentication, you can optionally
-    ## specify a domain that will be used in the check. For NTLM Auth,
+    ## If your services uses NTLM authentication, you can
+    ## specify a domain that is used in the check. For NTLM Auth,
     ## append the username to domain, not as the `username` parameter.
-    ## Example: example_ntlm_domain\example_username
+    ## Example: <NTLM_DOMAIN>/<USERNAME>
     #
     # ntlm_domain: <DOMAIN>
 
@@ -167,13 +167,13 @@ instances:
     # kerberos_auth: disabled
 
     ## @param kerberos_delegate - boolean - optional - default: false
-    ## Set to true to enable kerberos delegation of credentials to a server that requests delegation.
+    ## Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
     ## See https://github.com/requests/requests-kerberos#delegation
     #
     # kerberos_delegate: false
 
     ## @param kerberos_force_initiate - boolean - optional - default: false
-    ## Set to true to preemptively initiate the Kerberos GSS exchange and present a Kerberos ticket on the initial
+    ## Set to `true` to preemptively initiate the Kerberos GSS exchange and present a Kerberos ticket on the initial
     ## request (and all subsequent).
     ## See https://github.com/requests/requests-kerberos#preemptive-authentication
     #
@@ -203,7 +203,7 @@ instances:
     # tls_verify: true
 
     ## @param tls_ignore_warning - boolean - optional - default: false
-    ## If you disable `tls_verify` you will receive security warnings in logs.
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
     #
     # tls_ignore_warning: false
@@ -231,13 +231,13 @@ instances:
 
     ## @param headers - list of key:value elements - optional
     ## The headers parameter allows you to send specific headers with every request.
-    ## This is useful for explicitly specifying the host header or adding headers for
+    ## You can use it for explicitly specifying the host header or adding headers for
     ## authorization purposes.
     ##
     ## This overrides any default headers.
     #
     # headers:
-    #   Host: alternative.host.example.com
+    #   Host: <ALTERNATIVE_HOSTNAME>
     #   X-Auth-Token: <AUTH_TOKEN>
 
     ## @param timeout - integer - optional - default: 10
