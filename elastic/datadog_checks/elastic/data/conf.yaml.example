@@ -9,16 +9,12 @@ instances:
   - url: http://localhost:9200
 
     ## @param username - string - optional
-    ## If you're using basic authentication with a 3rd party library, for example
-    ## elasticsearch-http-basic, you need to specify a value for username
-    ## and password for every instance that requires authentication.
+    ## The username to use if services are behind basic auth.
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## If you're using basic authentication with a 3rd party library, for example
-    ## elasticsearch-http-basic, you need to specify a value for username
-    ## and password for every instance that requires authentication.
+    ## The password to use if services are behind basic or NTLM auth.
     #
     # password: <PASSWORD>
 
@@ -28,7 +24,7 @@ instances:
     # tls_verify: true
 
     ## @param tls_ignore_warning - boolean - optional - default: false
-    ## If you disable `tls_verify` you will receive security warnings in logs.
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
     #
     # tls_ignore_warning: false
@@ -56,13 +52,13 @@ instances:
 
     ## @param headers - list of key:value elements - optional
     ## The headers parameter allows you to send specific headers with every request.
-    ## This is useful for explicitly specifying the host header or adding headers for
+    ## You can use it for explicitly specifying the host header or adding headers for
     ## authorization purposes.
     ##
     ## This overrides any default headers.
     #
     # headers:
-    #   Host: alternative.host.example.com
+    #   Host: <ALTERNATIVE_HOSTNAME>
     #   X-Auth-Token: <AUTH_TOKEN>
 
     ## @param timeout - integer - optional - default: 10
