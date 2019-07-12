@@ -358,14 +358,14 @@ def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
     _l1.name = 'my_1st_label'
     _l1.value = 'my_1st_label_value'
     _l2 = ref_gauge.metric[0].label.add()
-    _l2.name = 'my_2nd_label'
-    _l2.value = 'my_2nd_label_value'
+    _l2.name = u'my_2nd_label_\xc3\xa9'
+    _l2.value = u'my_2nd_label_value_\xc3\xa9'
     check = mocked_prometheus_check
     check._submit(check.metrics_mapper[ref_gauge.name], ref_gauge)
     check.gauge.assert_called_with(
         'prometheus.process.vm.bytes',
         39211008.0,
-        ['my_1st_label:my_1st_label_value', 'my_2nd_label:my_2nd_label_value'],
+        ['my_1st_label:my_1st_label_value', u'my_2nd_label_\xc3\xa9:my_2nd_label_value_\xc3\xa9'],
         hostname=None,
     )
 
