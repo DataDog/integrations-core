@@ -16,22 +16,13 @@ ESInstanceConfig = namedtuple(
         'node_name_as_host',
         'cluster_stats',
         'index_stats',
-        'password',
         'service_check_tags',
         'health_tags',
         'tags',
-        'timeout',
         'url',
-        'username',
         'pending_task_stats',
-        'ssl_verify',
-        'ssl_cert',
-        'ssl_key',
     ],
 )
-
-
-DEFAULT_TIMEOUT = 5
 
 
 def from_instance(instance):
@@ -69,8 +60,6 @@ def from_instance(instance):
     tags = ['url:{}'.format(url)]
     tags.extend(custom_tags)
 
-    timeout = instance.get('timeout') or DEFAULT_TIMEOUT
-
     config = ESInstanceConfig(
         admin_forwarder=admin_forwarder,
         pshard_stats=pshard_stats,
@@ -78,16 +67,10 @@ def from_instance(instance):
         node_name_as_host=node_name_as_host,
         cluster_stats=cluster_stats,
         index_stats=index_stats,
-        password=instance.get('password'),
         service_check_tags=service_check_tags,
         health_tags=[],
-        ssl_cert=instance.get('ssl_cert'),
-        ssl_key=instance.get('ssl_key'),
-        ssl_verify=instance.get('ssl_verify'),
         tags=tags,
-        timeout=timeout,
         url=url,
-        username=instance.get('username'),
         pending_task_stats=pending_task_stats,
     )
     return config
