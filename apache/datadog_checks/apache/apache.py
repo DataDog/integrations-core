@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import warnings
 
-import requests
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -15,7 +14,6 @@ try:
 except ImportError:
     from datadog_checks.config import _is_affirmative
 
-# compatibility layer
 try:
     from util import headers
 except ImportError:
