@@ -71,7 +71,7 @@ Add the following permissions to your [Datadog IAM policy][9] to collect ECS Far
 | `ecs:DescribeContainerInstances` | Describe instances to add metrics on resources and tasks running. |
 
 #### Run the Task as a Replica Service
-The only option in ECS Fargate is to run the task as a [Replica Service][11]. The Datadog Agent runs as a sidecar in each Fargate task.
+The only option in ECS Fargate is to run the task as a [Replica Service][11]. The Datadog Agent runs in the same task definition as your application and integration containers.
 
 ##### AWS CLI
 Run the following commands using the [AWS CLI tools][3]. 
