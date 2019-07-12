@@ -1,6 +1,5 @@
 # NTP check
 
-
 ## Overview
 
 The Network Time Protocol (NTP) integration is enabled by default and reports the time offset from an ntp server every 15 minutes. When the local agent's time is more than 15 seconds off from the Datadog service and the other hosts that you are monitoring, you may experience:
