@@ -27,7 +27,6 @@ meld3==1.0.2
 ntplib==0.3.3
 openstacksdk==0.24.0
 paramiko==2.1.5
-pg8000==1.10.1
 ply==3.10
 prometheus-client==0.3.0
 protobuf==3.7.0
@@ -36,7 +35,7 @@ psycopg2-binary==2.8.2
 pyasn1==0.4.2
 pycparser==2.18
 pycryptodomex==3.8.2
-pymongo==3.5.1
+pymongo==3.8.0
 pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.9.3
 pyodbc==4.0.26; sys_platform != 'darwin'

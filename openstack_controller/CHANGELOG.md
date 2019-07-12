@@ -1,5 +1,14 @@
 # CHANGELOG - Openstack_controller
 
+## 1.4.0 / 2019-07-12
+
+* [Added] Retrieve floating IPs from network quotas. See [#4079](https://github.com/DataDog/integrations-core/pull/4079).
+
+## 1.3.0 / 2019-07-09
+
+* [Added] Make keystone_server_url config optional in openstack_controller config. See [#3920](https://github.com/DataDog/integrations-core/pull/3920).
+* [Added] Openstack: introduce artificial metric in controller to distinguish from legacy integration. See [#4036](https://github.com/DataDog/integrations-core/pull/4036).
+
 ## 1.2.1 / 2019-06-01
 
 * [Fixed] Fix code style. See [#3838](https://github.com/DataDog/integrations-core/pull/3838).

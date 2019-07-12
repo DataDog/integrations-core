@@ -33,7 +33,6 @@ UNSCOPED_AUTH = 'unscoped'
 class ApiFactory(object):
     @staticmethod
     def create(logger, proxies, instance_config):
-        keystone_server_url = instance_config.get("keystone_server_url")
         ssl_verify = is_affirmative(instance_config.get("ssl_verify", True))
         paginated_limit = instance_config.get('paginated_limit', DEFAULT_PAGINATED_LIMIT)
         request_timeout = instance_config.get('request_timeout', DEFAULT_API_REQUEST_TIMEOUT)
@@ -41,11 +40,10 @@ class ApiFactory(object):
         openstack_config_file_path = instance_config.get("openstack_config_file_path")
         openstack_cloud_name = instance_config.get("openstack_cloud_name")
 
-        api = None
-
-        # If an openstack configuration is specified, an OpenstackSDKApi will be created, and the authentification
-        # will be made directly from the openstack configuration file
+        # If an OpenStack configuration is specified, an OpenstackSDKApi is created, and the authentication
+        # is made directly from the OpenStack configuration file
         if openstack_cloud_name is None:
+            keystone_server_url = instance_config.get("keystone_server_url")
             api = SimpleApi(
                 logger,
                 keystone_server_url,
@@ -212,6 +210,14 @@ class OpenstackSDKApi(AbstractApi):
         for raw_value, value in key_name_conversion.items():
             project_limits[value] = project_limits_raw[raw_value]
 
+        try:
+            network_quotas = self.connection.get_network_quotas(project_id, details=True)
+        except Exception:
+            self.logger.exception('There was a problem getting network quotas')
+        else:
+            project_limits['totalFloatingIpsUsed'] = network_quotas['floatingip']['used']
+            project_limits['maxTotalFloatingIps'] = network_quotas['floatingip']['limit']
+
         return project_limits
 
     def get_os_hypervisors_detail(self):
@@ -366,6 +372,16 @@ class SimpleApi(AbstractApi):
         url = '{}/limits'.format(self.nova_endpoint)
         server_stats = self._make_request(url, self.headers, params={"tenant_id": tenant_id})
         limits = server_stats.get('limits', {}).get('absolute', {})
+
+        try:
+            url = '{}/{}/quotas/{}/details'.format(self.neutron_endpoint, DEFAULT_NEUTRON_API_VERSION, tenant_id)
+            network_quotas = self._make_request(url, self.headers)
+        except Exception:
+            self.logger.exception('There was a problem getting network quotas')
+        else:
+            limits['totalFloatingIpsUsed'] = network_quotas['quota']['floatingip']['used']
+            limits['maxTotalFloatingIps'] = network_quotas['quota']['floatingip']['limit']
+
         return limits
 
     def get_flavors_detail(self, query_params):

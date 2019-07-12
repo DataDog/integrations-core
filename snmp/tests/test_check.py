@@ -412,3 +412,14 @@ def test_network_failure(aggregator, check):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
+
+
+def test_cast_metrics(aggregator, check):
+    metrics = common.CAST_METRICS
+    instance = common.generate_instance_config(metrics)
+
+    check.check(instance)
+    aggregator.assert_metric('snmp.cpuload1', value=0.06)
+    aggregator.assert_metric('snmp.cpuload2', value=0.06)
+
+    aggregator.all_metrics_asserted()

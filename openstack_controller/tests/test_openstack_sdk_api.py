@@ -314,6 +314,11 @@ class MockOpenstackConnection:
     def search_flavors(self, filters):
         return EXAMPLE_FLAVORS_VALUE
 
+    def get_network_quotas(self, project, details=False):
+        if not details:
+            return {}
+        return {'floatingip': {'used': 1, 'limit': 10}}
+
 
 def test_get_endpoint():
     api = OpenstackSDKApi(None)

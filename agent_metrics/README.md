@@ -30,7 +30,11 @@ The Agent Metrics integration can potentially emit [custom metrics][7], which ma
 [Run the Agent's status subcommand][9] and look for `agent_metrics` under the Checks section.
 
 ## Data Collected
+
+All data collected are only available for Agent v5.
+
 ### Metrics
+
 See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Events

@@ -27,7 +27,9 @@
   "integration_id": "nginx",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "NGINX Plus base overview": "assets/dashboards/plus_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

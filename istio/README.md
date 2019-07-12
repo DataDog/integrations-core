@@ -30,6 +30,7 @@ instances:
     mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
     galley_endpoint: http://istio-galley.istio-system:15014/metrics
     pilot_endpoint: http://istio-pilot.istio-system:15014/metrics
+    citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
     send_histograms_buckets: true
 ```
 

@@ -7,31 +7,19 @@ import string
 import threading
 from contextlib import closing
 
-import pg8000
+import psycopg2
 from six import iteritems
 from six.moves import zip_longest
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-
-try:
-    import psycopg2
-except ImportError:
-    psycopg2 = None
-
 
 MAX_CUSTOM_RESULTS = 100
 TABLE_COUNT_LIMIT = 200
 
 ALL_SCHEMAS = object()
 
-
-def psycopg2_connect(*args, **kwargs):
-    if 'ssl' in kwargs:
-        del kwargs['ssl']
-    if 'unix_sock' in kwargs:
-        kwargs['host'] = kwargs['unix_sock']
-        del kwargs['unix_sock']
-    return psycopg2.connect(*args, **kwargs)
+# https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 
 
 class ShouldRestartException(Exception):
@@ -410,16 +398,6 @@ GROUP BY datid, datname
         with PostgreSql._known_servers_lock:
             PostgreSql._known_servers.add((host, port))
 
-    def _get_pg_attrs(self, instance):
-        if is_affirmative(instance.get('use_psycopg2', False)):
-            if psycopg2 is None:
-                self.log.error("Unable to import psycopg2, falling back to pg8000")
-            else:
-                return psycopg2_connect, psycopg2.InterfaceError, psycopg2.ProgrammingError
-
-        # Let's use pg8000
-        return pg8000.connect, pg8000.InterfaceError, pg8000.ProgrammingError
-
     def _get_replication_role(self, key, db):
         cursor = db.cursor()
         cursor.execute('SELECT pg_is_in_recovery();')
@@ -703,9 +681,7 @@ GROUP BY datid, datname
                 self.log.warning('Unhandled relations config type: {}'.format(element))
         return config
 
-    def _query_scope(
-        self, cursor, scope, key, db, instance_tags, is_custom_metrics, programming_error, relations_config
-    ):
+    def _query_scope(self, cursor, scope, key, db, instance_tags, is_custom_metrics, relations_config):
         if scope is None:
             return None
 
@@ -731,7 +707,7 @@ GROUP BY datid, datname
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-        except programming_error as e:
+        except psycopg2.ProgrammingError as e:
             log_func("Not all metrics may be available: %s" % str(e))
             db.rollback()
             return None
@@ -823,8 +799,6 @@ GROUP BY datid, datname
         collect_activity_metrics,
         collect_database_size_metrics,
         collect_default_db,
-        interface_error,
-        programming_error,
     ):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
@@ -858,33 +832,25 @@ GROUP BY datid, datname
         try:
             cursor = db.cursor()
             results_len = self._query_scope(
-                cursor, db_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
+                cursor, db_instance_metrics, key, db, instance_tags, False, relations_config
             )
             if results_len is not None:
                 self.gauge(
                     "postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")]
                 )
 
-            self._query_scope(
-                cursor, bgw_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
-            )
-            self._query_scope(
-                cursor, archiver_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
-            )
+            self._query_scope(cursor, bgw_instance_metrics, key, db, instance_tags, False, relations_config)
+            self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, False, relations_config)
 
             if collect_activity_metrics:
                 activity_metrics = self._get_activity_metrics(key, db, user)
-                self._query_scope(
-                    cursor, activity_metrics, key, db, instance_tags, False, programming_error, relations_config
-                )
+                self._query_scope(cursor, activity_metrics, key, db, instance_tags, False, relations_config)
 
             for scope in list(metric_scope) + custom_metrics:
-                self._query_scope(
-                    cursor, scope, key, db, instance_tags, scope in custom_metrics, programming_error, relations_config
-                )
+                self._query_scope(cursor, scope, key, db, instance_tags, scope in custom_metrics, relations_config)
 
             cursor.close()
-        except (interface_error, socket.error) as e:
+        except (psycopg2.InterfaceError, socket.error) as e:
             self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
 
@@ -895,7 +861,7 @@ GROUP BY datid, datname
         service_check_tags = list(set(service_check_tags))
         return service_check_tags
 
-    def get_connection(self, key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=True):
+    def get_connection(self, key, host, port, user, password, dbname, ssl, tags, use_cached=True):
         """Get and memoize connections to instances"""
         if key in self.dbs and use_cached:
             return self.dbs[key]
@@ -904,17 +870,13 @@ GROUP BY datid, datname
             try:
                 if host == 'localhost' and password == '':
                     # Use ident method
-                    connection = connect_fct("user=%s dbname=%s" % (user, dbname))
+                    connection = psycopg2.connect("user=%s dbname=%s" % (user, dbname))
                 elif port != '':
-                    connection = connect_fct(
-                        host=host, port=port, user=user, password=password, database=dbname, ssl=ssl
+                    connection = psycopg2.connect(
+                        host=host, port=port, user=user, password=password, database=dbname, sslmode=ssl
                     )
-                elif host.startswith('/'):
-                    # If the hostname starts with /, it's probably a path
-                    # to a UNIX socket. This is similar behaviour to psql
-                    connection = connect_fct(unix_sock=host, user=user, password=password, database=dbname)
                 else:
-                    connection = connect_fct(host=host, user=user, password=password, database=dbname, ssl=ssl)
+                    connection = psycopg2.connect(host=host, user=user, password=password, database=dbname, sslmode=ssl)
                 self.dbs[key] = connection
                 return connection
             except Exception as e:
@@ -930,7 +892,7 @@ GROUP BY datid, datname
             elif not user:
                 raise ConfigurationError('Please specify a user to connect to Postgres as.')
 
-    def _get_custom_queries(self, db, tags, custom_queries, programming_error):
+    def _get_custom_queries(self, db, tags, custom_queries):
         """
         Given a list of custom_queries, execute each query and parse the result for metrics
         """
@@ -956,7 +918,7 @@ GROUP BY datid, datname
                 try:
                     self.log.debug("Running query: {}".format(query))
                     cursor.execute(query)
-                except programming_error as e:
+                except psycopg2.ProgrammingError as e:
                     self.log.error("Error executing query for metric_prefix {}: {}".format(metric_prefix, str(e)))
                     db.rollback()
                     continue
@@ -1074,7 +1036,9 @@ GROUP BY datid, datname
         tags = instance.get('tags', [])
         dbname = instance.get('dbname', None)
         relations = instance.get('relations', [])
-        ssl = is_affirmative(instance.get('ssl', False))
+        ssl = instance.get('ssl', False)
+        if ssl not in SSL_MODES:
+            ssl = 'require' if is_affirmative(ssl) else 'disable'
         collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
         collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
@@ -1113,12 +1077,10 @@ GROUP BY datid, datname
 
         self.log.debug("Custom metrics: %s" % custom_metrics)
 
-        connect_fct, interface_error, programming_error = self._get_pg_attrs(instance)
-
         # Collect metrics
         try:
             # Check version
-            db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags)
+            db = self.get_connection(key, host, port, user, password, dbname, ssl, tags)
             version = self._get_version(key, db)
             self.log.debug("Running check against version %s" % version)
             if tag_replication_role:
@@ -1135,13 +1097,11 @@ GROUP BY datid, datname
                 collect_activity_metrics,
                 collect_database_size_metrics,
                 collect_default_db,
-                interface_error,
-                programming_error,
             )
-            self._get_custom_queries(db, tags, custom_queries, programming_error)
+            self._get_custom_queries(db, tags, custom_queries)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
-            db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=False)
+            db = self.get_connection(key, host, port, user, password, dbname, ssl, tags, use_cached=False)
             self._collect_stats(
                 key,
                 db,
@@ -1154,10 +1114,8 @@ GROUP BY datid, datname
                 collect_activity_metrics,
                 collect_database_size_metrics,
                 collect_default_db,
-                interface_error,
-                programming_error,
             )
-            self._get_custom_queries(db, tags, custom_queries, programming_error)
+            self._get_custom_queries(db, tags, custom_queries)
 
         service_check_tags = self._get_service_check_tags(host, port, tags)
         message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)

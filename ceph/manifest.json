@@ -1,7 +1,8 @@
 {
   "categories": [
     "data store",
-    "os & system"
+    "os & system",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Ceph",

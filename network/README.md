@@ -57,6 +57,8 @@ dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ### Metrics
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
+**Note**: `system.net.conntrack` metrics are available with Agent v6.12+. See the [CHANGELOG][11] for details.
+
 ### Events
 The Network check does not include any events.
 
@@ -82,3 +84,4 @@ The Network check does not include any service checks.
 [8]: https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv
 [9]: https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api
 [10]: https://docs.datadoghq.com/monitors/monitor_types/network
+[11]: https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md#1110--2019-05-14

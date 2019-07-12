@@ -20,11 +20,13 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "hive",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Hive Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

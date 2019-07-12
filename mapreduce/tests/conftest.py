@@ -41,7 +41,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return MapReduceCheck('mapreduce', {}, {})
+    return lambda instance: MapReduceCheck('mapreduce', {}, [instance])
 
 
 @pytest.fixture

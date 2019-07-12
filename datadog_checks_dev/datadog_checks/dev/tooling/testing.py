@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
 from .constants import TESTABLE_FILE_EXTENSIONS, get_root
@@ -9,6 +11,7 @@ from .utils import get_testable_checks
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
+PYTHON_MAJOR_PATTERN = r'py(\d)'
 
 
 def get_tox_envs(
@@ -155,10 +158,21 @@ def fix_coverage_report(check, report_file):
 
 
 def construct_pytest_options(
-    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter='', pytest_args=''
+    verbose=0,
+    color=None,
+    enter_pdb=False,
+    debug=False,
+    bench=False,
+    coverage=False,
+    marker='',
+    test_filter='',
+    pytest_args='',
 ):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
+
+    if color is not None:
+        pytest_options += ' --color=yes' if color else ' --color=no'
 
     if enter_pdb:
         # Drop to PDB on first failure, then end test session
@@ -215,3 +229,9 @@ def get_changed_checks():
     changed_files[:] = testable_files(changed_files)
 
     return {line.split('/')[0] for line in changed_files}
+
+
+def get_tox_env_python_version(env):
+    match = re.match(PYTHON_MAJOR_PATTERN, env)
+    if match:
+        return int(match.group(1))

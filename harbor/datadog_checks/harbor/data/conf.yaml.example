@@ -40,7 +40,7 @@ instances:
     #   <KEY_1>: <VALUE_1>
     #   <KEY_2>: <VALUE_2>
 
-    ## @param tls_veify - boolean - optional - default: true
+    ## @param tls_verify - boolean - optional - default: true
     ## Whether or not to verify TLS certificates.
     #
     # tls_verify: true
