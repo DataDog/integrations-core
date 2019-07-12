@@ -1,5 +1,12 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.0.0 / 2019-07-12
+
+* [Fixed] Fix prometheus label encoding. See [#4089](https://github.com/DataDog/integrations-core/pull/4089).
+* [Changed] Add SSL support for psycopg2, remove pg8000. See [#4096](https://github.com/DataDog/integrations-core/pull/4096).
+* [Added] Upgrade pymongo to 3.8. See [#4095](https://github.com/DataDog/integrations-core/pull/4095).
+* [Fixed] Fix label encoding. See [#4073](https://github.com/DataDog/integrations-core/pull/4073).
+
 ## 8.6.0 / 2019-07-09
 
 * [Added] Output similar metrics on failed aggregator stub assertions to help debugging. See [#4035](https://github.com/DataDog/integrations-core/pull/4035) and [#4076](https://github.com/DataDog/integrations-core/pull/4076).
