@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 3.0.0 / 2019-07-12
+
+* [Changed] Add SSL support for psycopg2, remove pg8000. See [#4096](https://github.com/DataDog/integrations-core/pull/4096).
+
 ## 2.9.1 / 2019-07-04
 
 * [Fixed] Fix tagging for custom queries using custom tags. See [#3930](https://github.com/DataDog/integrations-core/pull/3930).

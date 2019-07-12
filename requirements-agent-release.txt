@@ -10,17 +10,17 @@ datadog-cacti==1.4.0; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.5.0
 datadog-cassandra==1.3.1
 datadog-ceph==1.6.0; sys_platform != 'win32'
-datadog-checks-base==8.6.0
+datadog-checks-base==9.0.0
 datadog-checks-downloader==0.6.0
 datadog-cisco-aci==1.7.1
 datadog-cockroachdb==1.1.0
 datadog-consul==1.8.0
 datadog-coredns==1.2.0; sys_platform == 'linux2'
 datadog-couch==3.3.0
-datadog-couchbase==1.8.0
+datadog-couchbase==1.8.1
 datadog-crio==1.2.0
 datadog-directory==1.4.0
-datadog-disk==2.3.0
+datadog-disk==2.4.0
 datadog-dns-check==1.4.0
 datadog-dotnetclr==1.3.1; sys_platform == 'win32'
 datadog-ecs-fargate==2.2.1
@@ -61,7 +61,7 @@ datadog-kyototycoon==1.6.0
 datadog-lighttpd==1.4.0
 datadog-linkerd==2.3.0
 datadog-linux-proc-extras==1.2.0; sys_platform == 'linux2'
-datadog-mapreduce==1.4.0
+datadog-mapreduce==1.5.0
 datadog-marathon==1.7.0; sys_platform != 'win32'
 datadog-mcache==1.6.0; sys_platform != 'win32'
 datadog-mesos-master==1.4.0; sys_platform != 'win32'
@@ -75,21 +75,21 @@ datadog-nginx-ingress-controller==1.1.0
 datadog-nginx==3.2.0
 datadog-openldap==1.4.0
 datadog-openmetrics==1.2.0
-datadog-openstack-controller==1.3.0
+datadog-openstack-controller==1.4.0
 datadog-openstack==1.8.1
 datadog-oracle==1.9.0
 datadog-pdh-check==1.6.1; sys_platform == 'win32'
 datadog-pgbouncer==1.7.0; sys_platform != 'win32'
 datadog-php-fpm==1.5.0
 datadog-postfix==1.4.0; sys_platform != 'win32'
-datadog-postgres==2.9.1
+datadog-postgres==3.0.0
 datadog-powerdns-recursor==1.3.0
 datadog-presto==2.0.1
 datadog-process==1.10.0
 datadog-prometheus==3.2.0
 datadog-rabbitmq==1.8.0
 datadog-redisdb==1.12.0
-datadog-riak==1.5.0
+datadog-riak==1.6.0
 datadog-riakcs==2.1.0
 datadog-snmp==1.8.0
 datadog-solr==1.2.0
