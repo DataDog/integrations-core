@@ -2,7 +2,7 @@
 
 ## 1.8.1 / 2019-07-12
 
-* [Fixed] Change metric unit. See [#4078](https://github.com/DataDog/integrations-core/pull/4078).
+* [Fixed] Change `couchbase.by_bucket.avg_bg_wait_time` metric unit from second to microsecond. See [#4078](https://github.com/DataDog/integrations-core/pull/4078).
 
 ## 1.8.0 / 2019-05-14
 
