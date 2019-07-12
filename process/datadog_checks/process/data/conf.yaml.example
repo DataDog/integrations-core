@@ -71,9 +71,11 @@ instances:
     ## @param thresholds - object - optional
     ## The threshold parameter is composed of two ranges: critical and warning
     ##   * warning: (optional) List of two values: If the number of processes found is below the first value or
-    ##             above the second one, the process check returns WARNING. Set to .inf or -.inf to disable a boundary.
+    ##             above the second one, the process check returns WARNING. To make an semi-unbounded interval, 
+    ##             use `.inf` for the upper bound.
     ##   * critical: (optional) List of two values: If the number of processes found is below the first value or
-    ##             above the second one, the process check returns CRITICAL. Set to .inf or -.inf to disable a boundary.
+    ##             above the second one, the process check returns CRITICAL. To make an semi-unbounded interval, 
+    ##             use `.inf` for the upper bound.
     #
     # thresholds:
     #   warning: [<BELOW_VALUE> , <TOP_VALUE>]
