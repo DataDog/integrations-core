@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 2.4.0 / 2019-07-12
+
+* [Added] Remove legacy code. See [#4103](https://github.com/DataDog/integrations-core/pull/4103).
+
 ## 2.3.0 / 2019-07-04
 
 * [Added] Add disk label. See [#3953](https://github.com/DataDog/integrations-core/pull/3953).
