@@ -2,10 +2,9 @@
 
 ## 9.0.0 / 2019-07-12
 
-* [Fixed] Fix prometheus label encoding. See [#4089](https://github.com/DataDog/integrations-core/pull/4089).
 * [Changed] Add SSL support for psycopg2, remove pg8000. See [#4096](https://github.com/DataDog/integrations-core/pull/4096).
 * [Added] Upgrade pymongo to 3.8. See [#4095](https://github.com/DataDog/integrations-core/pull/4095).
-* [Fixed] Fix label encoding. See [#4073](https://github.com/DataDog/integrations-core/pull/4073).
+* [Fixed] Fix label encoding. See [#4073](https://github.com/DataDog/integrations-core/pull/4073) and [#4089](https://github.com/DataDog/integrations-core/pull/4089).
 
 ## 8.6.0 / 2019-07-09
 
