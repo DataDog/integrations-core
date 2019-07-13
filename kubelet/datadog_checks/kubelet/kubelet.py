@@ -360,12 +360,12 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             has_container_running = False
             for container in containers:
                 container_id = container.get('containerID')
-                tagger_cid = '://'.join(['container_id', container_id.split('://')[1]])
                 if not container_id:
                     self.log.debug('skipping container with no id')
                     continue
                 if "running" not in container.get('state', {}):
                     continue
+                tagger_cid = '://'.join(['container_id', container_id.split('://')[1]])
                 has_container_running = True
                 tags = tagger.tag(tagger_cid, tagger.LOW) or None
                 if not tags:
@@ -450,7 +450,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             for ctr_status in pod['status'].get('containerStatuses', []):
                 c_name = ctr_status.get('name')
                 cid = ctr_status.get('containerID')
-                tagger_cid = '://'.join(['container_id', cid.split('://')[1]])
 
                 if not c_name or not cid:
                     continue
@@ -458,6 +457,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
+                tagger_cid = '://'.join(['container_id', cid.split('://')[1]])
                 tags = tagger.tag('%s' % tagger_cid, tagger.ORCHESTRATOR) or []
                 tags += instance_tags
 

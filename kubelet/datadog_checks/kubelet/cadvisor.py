@@ -179,10 +179,10 @@ class CadvisorScraper(object):
                     k_container_name,
                 )
             )
-            tagger_cid = '://'.join(['container_id', cid.split('://')[1]])
             if pod_list_utils.is_excluded(cid):
                 self.log.debug("Filtering out " + cid)
                 return
+            tagger_cid = '://'.join(['container_id', cid.split('://')[1]])
             tags = tagger.tag(tagger_cid, tagger.HIGH) or []
 
         if not tags:
