@@ -54,6 +54,9 @@ class DockerInterface(object):
 
         self.env_vars['DD_PYTHON_VERSION'] = self.python_version
 
+        if self.metadata.get('use_jmx', False):
+            self.agent_build = '{}-jmx'.format(self.agent_build)
+
     @property
     def agent_version(self):
         return self._agent_version or DEFAULT_AGENT_VERSION
