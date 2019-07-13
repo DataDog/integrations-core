@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.31.0 / 2019-07-13
+
+* [Added] Add support for selecting an Agent build via environment. See [#4112](https://github.com/DataDog/integrations-core/pull/4112).
+* [Added] Add ways to control the colorization of output. See [#4086](https://github.com/DataDog/integrations-core/pull/4086).
+* [Added] Support multiple Python versions for E2E. See [#4075](https://github.com/DataDog/integrations-core/pull/4075).
+
 ## 0.30.1 / 2019-07-04
 
 * [Fixed] Fix metadata bootstrap workflow. See [#4047](https://github.com/DataDog/integrations-core/pull/4047).

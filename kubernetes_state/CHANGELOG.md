@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 4.5.0 / 2019-07-13
+
+* [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025). Thanks [clamoriniere](https://github.com/clamoriniere).
+
 ## 4.4.1 / 2019-06-19
 
 * [Fixed] Correct service check for ksm - cronjob. See [#3937](https://github.com/DataDog/integrations-core/pull/3937).

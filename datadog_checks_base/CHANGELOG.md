@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.1.0 / 2019-07-13
+
+* [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025). Thanks [clamoriniere](https://github.com/clamoriniere).
+
 ## 9.0.0 / 2019-07-12
 
 * [Changed] Add SSL support for psycopg2, remove pg8000. See [#4096](https://github.com/DataDog/integrations-core/pull/4096).

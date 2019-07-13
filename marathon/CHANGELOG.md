@@ -1,5 +1,9 @@
 # CHANGELOG - marathon
 
+## 1.8.0 / 2019-07-13
+
+* [Added] Add log section. See [#4014](https://github.com/DataDog/integrations-core/pull/4014).
+
 ## 1.7.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3536](https://github.com/DataDog/integrations-core/pull/3536).

@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 1.11.0 / 2019-07-13
+
+* [Added] Upgrade pymongo to 3.8. See [#4095](https://github.com/DataDog/integrations-core/pull/4095).
+
 ## 1.10.3 / 2019-06-18
 
 * [Fixed] Reduce doc in configuration file in favor of official documentation. See [#3892](https://github.com/DataDog/integrations-core/pull/3892).
