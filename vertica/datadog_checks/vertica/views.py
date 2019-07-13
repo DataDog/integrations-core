@@ -7,24 +7,7 @@
 # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/VerticaSystemTables.htm
 
 
-class View(object):
-    name = ''
-
-    def __hash__(self):
-        return hash(self.name)
-
-    def __eq__(self, other):
-        if isinstance(other, View):
-            return self.name == other.name
-
-        return self.name == other
-
-    # TODO: Remove when only on Python 3+
-    def __ne__(self, other):
-        return not self == other
-
-
-class Licenses(View):
+class Licenses:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/LICENSES.htm
     """
@@ -34,7 +17,7 @@ class Licenses(View):
     query = 'SELECT {} FROM v_catalog.{}'.format(', '.join(fields), name)
 
 
-class LicenseAudits(View):
+class LicenseAudits:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/LICENSE_AUDITS.htm
     """
@@ -47,7 +30,7 @@ class LicenseAudits(View):
     )
 
 
-class System(View):
+class System:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/SYSTEM.htm
     """
@@ -57,7 +40,7 @@ class System(View):
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 
-class Nodes(View):
+class Nodes:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/NODES.htm
     """
@@ -67,7 +50,7 @@ class Nodes(View):
     query = 'SELECT {} FROM v_catalog.{}'.format(', '.join(fields), name)
 
 
-class Projections(View):
+class Projections:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/PROJECTIONS.htm
     """
@@ -77,7 +60,7 @@ class Projections(View):
     query = 'SELECT {} FROM v_catalog.{}'.format(', '.join(fields), name)
 
 
-class ProjectionStorage(View):
+class ProjectionStorage:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
     """
@@ -87,7 +70,7 @@ class ProjectionStorage(View):
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 
-class QueryMetrics(View):
+class QueryMetrics:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/QUERY_METRICS.htm
     """
@@ -103,7 +86,7 @@ class QueryMetrics(View):
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 
-class DiskStorage(View):
+class DiskStorage:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/DISK_STORAGE.htm
     """
@@ -122,7 +105,7 @@ class DiskStorage(View):
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 
-class HostResources(View):
+class HostResources:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/HOST_RESOURCES.htm
     """
@@ -144,7 +127,7 @@ class HostResources(View):
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 
-class ResourceUsage(View):
+class ResourceUsage:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/RESOURCE_USAGE.htm
     """

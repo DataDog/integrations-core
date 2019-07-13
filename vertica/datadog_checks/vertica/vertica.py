@@ -84,18 +84,18 @@ class VerticaCheck(AgentCheck):
         self._tags.append('db:{}'.format(self._db))
 
         # We'll connect on the first check run
-        self._conn = None
+        self._connection = None
 
         # Cache database results for re-use among disparate functions
         self._view = defaultdict(list)
 
     def check(self, instance):
-        if self._conn is None:
+        if self._connection is None:
             connection = self.get_connection()
             if connection is None:
                 return
 
-            self._conn = connection
+            self._connection = connection
 
         # The order of queries is important as some results are cached for later re-use
         try:
@@ -371,7 +371,7 @@ class VerticaCheck(AgentCheck):
                 continue
 
             self.log.debug('Running custom query for Vertica')
-            cursor = self._conn.cursor()
+            cursor = self._connection.cursor()
             cursor.execute(query)
 
             rows = cursor.iterate()
@@ -478,7 +478,7 @@ class VerticaCheck(AgentCheck):
             return connection
 
     def iter_rows(self, view):
-        cursor = self._conn.cursor('dict')
+        cursor = self._connection.cursor('dict')
         cursor.execute(view.query)
 
         for row in cursor.iterate():

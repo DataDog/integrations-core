@@ -33,7 +33,7 @@ See [metadata.csv][metrics csv] for a list of metrics provided by this integrati
 ### Service Checks
 
 - `vertica.can_connect` returns `OK` if the Agent is able to connect to the monitored Vertica database, or `CRITICAL` otherwise.
-- `vertica.node_state` returns `OK` if the monitored Vertica database is UP, `WARNING` for states that are on a possible path to UP, or `CRITICAL` otherwise.
+- `vertica.node_state` returns `OK` for each node that is UP, `WARNING` for nodes that are on a possible path to UP, or `CRITICAL` otherwise.
 
 ### Events
 
