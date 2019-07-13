@@ -5,7 +5,6 @@ import os
 
 import click
 import pyperclip
-from six import string_types
 
 from ....utils import dir_exists, file_exists, path_join
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
@@ -21,7 +20,6 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 @click.option(
     '--agent',
     '-a',
-    default='6',
     help=(
         'The agent build to use e.g. a Docker image like `datadog/agent:6.5.2`. For '
         'Docker environments you can use an integer corresponding to fields in the '
@@ -100,22 +98,11 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
     echo_success('success!')
 
     env_type = metadata['env_type']
-    use_jmx = metadata.get('use_jmx', False)
 
-    # Support legacy config where agent5 and agent6 were strings
-    agent_ver = ctx.obj.get('agent{}'.format(agent), agent)
-    if isinstance(agent_ver, string_types):
-        agent_build = agent_ver
-        if agent_ver != agent:
-            echo_warning(
-                'Agent fields missing from ddev config, please update to the latest config via '
-                '`ddev config update`, falling back to latest docker image...'
-            )
-    else:
-        agent_build = agent_ver.get(env_type, env_type)
-
-    if not isinstance(agent_ver, string_types) and use_jmx:
-        agent_build = '{}-jmx'.format(agent_build)
+    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', '6')
+    agent_build = ctx.obj.get('agent{}'.format(agent_ver), agent_ver)
+    if isinstance(agent_build, dict):
+        agent_build = agent_build.get(env_type, env_type)
 
     interface = derive_interface(env_type)
     if interface is None:
@@ -124,7 +111,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    if env_type not in E2E_SUPPORTED_TYPES and agent.isdigit():
+    if env_type not in E2E_SUPPORTED_TYPES and agent_ver.isdigit():
         echo_failure('Configuration for default Agents are only for Docker. You must specify the full build.')
         echo_waiting('Stopping the environment...')
         stop_environment(check, env, metadata=metadata)
