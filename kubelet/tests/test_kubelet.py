@@ -184,15 +184,19 @@ def mock_kubelet_check(monkeypatch, instances):
         attrs = None
         if prometheus_url.endswith('/metrics/cadvisor'):
             # Mock response for "/metrics/cadvisor"
+            content = mock_from_file('cadvisor_metrics.txt')
             attrs = {
                 'close.return_value': True,
-                'iter_lines.return_value': mock_from_file('cadvisor_metrics.txt').split('\n'),
+                'iter_lines.return_value': content.split('\n'),
+                'content': content,
             }
         elif prometheus_url.endswith('/metrics'):
             # Mock response for "/metrics"
+            content = mock_from_file('kubelet_metrics.txt')
             attrs = {
                 'close.return_value': True,
-                'iter_lines.return_value': mock_from_file('kubelet_metrics.txt').split('\n'),
+                'iter_lines.return_value': content.split('\n'),
+                'content': content,
             }
         else:
             raise Exception("Must be a valid endpoint")
