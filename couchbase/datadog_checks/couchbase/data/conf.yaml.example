@@ -5,7 +5,7 @@ instances:
     ## @param server - string - required
     ## The server's url.
     #
-   - server: http://localhost:8091
+  - server: http://localhost:8091
 
     ## @param query_monitoring_url - string - optional
     ## Url to get query monitoring stats, available since couchbase 4.5.
