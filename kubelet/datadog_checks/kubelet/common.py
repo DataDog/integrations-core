@@ -74,6 +74,20 @@ def is_static_pending_pod(pod):
         return False
 
 
+def replace_container_rt_prefix(cid):
+    """
+    Return the container ID after replacing the container runtime
+    prefix with container_id://.
+    Return the string unchanged if no such prefix is found.
+    Eg: replace_container_rt_prefix('docker://deadbeef') --> 'container_id://deadbeef'
+    :param cid: string
+    :return: string
+    """
+    if cid and '://' in cid:
+        return '://'.join(['container_id', cid.split('://')[1]])
+    return cid
+
+
 class PodListUtils(object):
     """
     Queries the podlist and the agent6's filtering logic to determine whether to

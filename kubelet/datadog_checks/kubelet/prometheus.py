@@ -10,7 +10,7 @@ from six import iteritems
 from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
-from .common import get_pod_by_uid, is_static_pending_pod
+from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
@@ -286,9 +286,7 @@ class CadvisorPrometheusScraperMixin(object):
                 continue
 
             tags = scraper_config['custom_tags'][:]
-            if '://' in c_id:
-                tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
-                tags += tagger.tag(tagger_cid, tagger.HIGH) or []
+            tags += tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH) or []
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
@@ -357,9 +355,7 @@ class CadvisorPrometheusScraperMixin(object):
                 continue
 
             tags = scraper_config['custom_tags'][:]
-            if '://' in c_id:
-                tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
-                tags += tagger.tag(tagger_cid, tagger.HIGH) or []
+            tags += tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH) or []
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
@@ -398,9 +394,7 @@ class CadvisorPrometheusScraperMixin(object):
                 continue
 
             tags = scraper_config['custom_tags'][:]
-            if '://' in c_id:
-                tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
-                tags += tagger.tag(tagger_cid, tagger.HIGH) or []
+            tags += tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH) or []
 
             if m_name:
                 self.gauge(m_name, limit, tags)
