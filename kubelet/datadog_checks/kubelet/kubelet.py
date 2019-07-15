@@ -360,14 +360,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             has_container_running = False
             for container in containers:
                 container_id = container.get('containerID')
-                tagger_cid = '://'.join(['container_id', container_id.split('://')[1]])
                 if not container_id:
                     self.log.debug('skipping container with no id')
                     continue
                 if "running" not in container.get('state', {}):
                     continue
+                if '://' in container_id:
+                    container_id = '://'.join(['container_id', container_id.split('://')[1]])
                 has_container_running = True
-                tags = tagger.tag(tagger_cid, tagger.LOW) or None
+                tags = tagger.tag(container_id, tagger.LOW) or None
                 if not tags:
                     continue
                 tags += instance_tags
@@ -409,7 +410,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     if ctr_status.get('name') == c_name:
                         # it is already prefixed with 'runtime://'
                         cid = ctr_status.get('containerID')
-                        tagger_cid = '://'.join(['container_id', cid.split('://')[1]])
                         break
                 if not cid:
                     continue
@@ -418,8 +418,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = tagger.tag('%s' % tagger_cid, tagger.HIGH) or []
-                tags += instance_tags
+                tags = instance_tags[:]
+                if '://' in cid:
+                    tagger_cid = '://'.join(['container_id', cid.split('://')[1]])
+                    tags += tagger.tag('%s' % tagger_cid, tagger.HIGH) or []
 
                 try:
                     for resource, value_str in iteritems(ctr.get('resources', {}).get('requests', {})):
@@ -450,7 +452,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             for ctr_status in pod['status'].get('containerStatuses', []):
                 c_name = ctr_status.get('name')
                 cid = ctr_status.get('containerID')
-                tagger_cid = '://'.join(['container_id', cid.split('://')[1]])
+                if cidtagger_cid = '://'.join(['container_id', cid.split('://')[1]])
 
                 if not c_name or not cid:
                     continue

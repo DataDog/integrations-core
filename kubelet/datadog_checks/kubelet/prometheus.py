@@ -282,12 +282,13 @@ class CadvisorPrometheusScraperMixin(object):
         samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
         for c_id, sample in iteritems(samples):
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
-            tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(tagger_cid, tagger.HIGH) or []
-            tags += scraper_config['custom_tags']
+            tags = scraper_config['custom_tags'][:]
+            if '://' in c_id:
+                tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
+                tags += tagger.tag(tagger_cid, tagger.HIGH) or []
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
@@ -349,15 +350,16 @@ class CadvisorPrometheusScraperMixin(object):
         samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
         for c_id, sample in iteritems(samples):
             c_name = self._get_container_label(sample[self.SAMPLE_LABELS], 'name')
-            tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
             if not c_name:
                 continue
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(tagger_cid, tagger.HIGH) or []
-            tags += scraper_config['custom_tags']
+            tags = scraper_config['custom_tags'][:]
+            if '://' in c_id:
+                tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
+                tags += tagger.tag(tagger_cid, tagger.HIGH) or []
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
@@ -392,12 +394,13 @@ class CadvisorPrometheusScraperMixin(object):
         for c_id, sample in iteritems(samples):
             limit = sample[self.SAMPLE_VALUE]
             pod_uid = self._get_pod_uid(sample[self.SAMPLE_LABELS])
-            tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(tagger_cid, tagger.HIGH) or []
-            tags += scraper_config['custom_tags']
+            tags = scraper_config['custom_tags'][:]
+            if '://' in c_id:
+                tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
+                tags = tagger.tag(tagger_cid, tagger.HIGH) or []
 
             if m_name:
                 self.gauge(m_name, limit, tags)
