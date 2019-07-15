@@ -5,75 +5,22 @@ instances:
     ## @param server - string - required
     ## The Couch server's url.
     #
-    - server: http://localhost:5984
+  - server: http://localhost:5984
 
     ## @param username - string - optional
-    ## The username to use if services are behind basic auth.
+    ## The username to use if `server` is behind basic auth.
     #
-    # username: <USERNAME>
+    # user: <USERNAME>
 
     ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
+    ## The password to use if `server` is behind basic auth.
     #
     # password: <PASSWORD>
 
-    ## @param tls_verify - boolean - optional - default: true
-    ## Instructs the check to validate the TLS certificate of services.
+    ## @param timeout - integer - optional - default: 5
+    ## The timeout for connecting to the `server`
     #
-    # tls_verify: true
-
-    ## @param tls_ignore_warning - boolean - optional - default: false
-    ## If `tls_verify` is disabled, security warnings are logged by the check.
-    ## Disable those by setting `tls_ignore_warning` to true.
-    #
-    # tls_ignore_warning: false
-
-    ## @param tls_cert - string - optional
-    ## The path to a single file in PEM format containing a certificate as well as any
-    ## number of CA certificates needed to establish the certificate’s authenticity for
-    ## use when connecting to services. It may also contain an unencrypted private key to use.
-    #
-    # tls_cert: <CERT_PATH>
-
-    ## @param tls_private_key - string - optional
-    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
-    ## required if `tls_cert` is set and it does not already contain a private key.
-    #
-    # tls_private_key: <PRIVATE_KEY_PATH>
-
-    ## @param tls_ca_cert - string - optional
-    ## The path to a file of concatenated CA certificates in PEM format or a directory
-    ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
-    #
-    # tls_ca_cert: <CA_CERT_PATH>
-
-    ## @param headers - list of key:value elements - optional
-    ## The headers parameter allows you to send specific headers with every request.
-    ## You can use it for explicitly specifying the host header or adding headers for
-    ## authorization purposes.
-    ##
-    ## This overrides any default headers.
-    #
-    # headers:
-    #   Host: <ALTERNATIVE_HOSTNAME>
-    #   X-Auth-Token: <AUTH_TOKEN>
-
-    ## @param timeout - integer - optional - default: 10
-    ## The timeout for connecting to services.
-    #
-    # timeout: 10
-
-    ## @param log_requests - boolean - optional - default: false
-    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
-    #
-    # log_requests: false
-
-    ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
-    #
-    # persist_connections: false
+    # timeout: 5
 
     ## @param db_whitelist - list of strings - optional - default: all
     ## The `db_whitelist` should contain the names of the databases meant to be checked.

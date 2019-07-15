@@ -8,7 +8,7 @@ instances:
     ## Add a `?usedonly` on the end if you wish to ignore
     ## unused metrics instead of reporting them as `0`.
     #
-  - stats_url: http://localhost:80/stats
+    - stats_url: http://localhost:80/stats
 
     ## @param metric_whitelist - list of strings - optional
     ## Whitelist metrics using regular expressions.
