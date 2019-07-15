@@ -447,24 +447,24 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
         mock.call(
             'kubernetes.cpu.requests',
             0.1,
-            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
         ),
         mock.call(
             'kubernetes.memory.requests',
             209715200.0,
-            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
         ),
         mock.call(
             'kubernetes.memory.limits',
             314572800.0,
-            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
         ),
         mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
         mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
         mock.call('kubernetes.memory.requests', 134217728.0, instance_tags),
         mock.call('kubernetes.cpu.limits', 0.25, instance_tags),
         mock.call('kubernetes.memory.limits', 536870912.0, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, instance_tags + ["pod_name:demo-app-success-c485bc67b-klj45"]),
     ]
     if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
@@ -490,26 +490,26 @@ def test_report_container_state_metrics(monkeypatch, tagger):
         mock.call(
             'kubernetes.containers.last_state.terminated',
             1,
-            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
-            + instance_tags
+            instance_tags
+            + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
             + ['reason:OOMKilled'],
         ),
         mock.call(
             'kubernetes.containers.state.waiting',
             1,
-            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
-            + instance_tags
+            instance_tags
+            + ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
             + ['reason:CrashLoopBackOff'],
         ),
         mock.call(
             'kubernetes.containers.restarts',
             1,
-            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
         ),
         mock.call(
             'kubernetes.containers.restarts',
             0,
-            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
+            instance_tags + ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'],
         ),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
