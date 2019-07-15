@@ -41,7 +41,7 @@ instances:
     # cache_metrics: true
 
     ## @param username - string - optional
-    ## Enter your username if the stats page is behind basic auth.
+    ## The username to use if services are behind basic auth.
     ## Note: The Envoy admin endpoint does not support auth until:
     ## https://github.com/envoyproxy/envoy/issues/2763
     ## For an alternative, see:
@@ -50,7 +50,7 @@ instances:
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## Enter your password if the stats page is behind basic auth.
+    ## The password to use if services are behind basic or NTLM auth.
     ## Note: The Envoy admin endpoint does not support auth until:
     ## https://github.com/envoyproxy/envoy/issues/2763
     ## For an alternative, see:
@@ -58,23 +58,69 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param verify_ssl - boolean - optional - default: true
-    ## The verify_ssl parameter instructs the check to validate SSL
-    ## certificates when connecting to Envoy. Set to false if
-    ## you want to disable SSL certificate validation.
-    #
-    # verify_ssl: true
-
     ## @param skip_proxy - boolean - optional - default: false
-    ## The (optional) skip_proxy parameter bypasses any proxy
-    ## settings enabled and attempt to reach Envoy directly.
+    ## If set to true, this makes the check bypass any proxy
+    ## settings enabled and attempt to reach services directly.
     #
     # skip_proxy: false
 
-    ## @param timeout - integer - optional - default: 20
-    ## Specify a custom timeout in seconds for the check connection.
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of services.
     #
-    # timeout: 20
+    # tls_verify: true
+
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    #
+    # tls_ignore_warning: false
+
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate’s authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
+    #
+    # tls_cert: <CERT_PATH>
+
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    #
+    # tls_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param tls_ca_cert - string - optional
+    ## The path to a file of concatenated CA certificates in PEM format or a directory
+    ## containing several CA certificates in PEM format. If a directory, the directory
+    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
+    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    #
+    # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param headers - list of key:value elements - optional
+    ## The headers parameter allows you to send specific headers with every request.
+    ## You can use it for explicitly specifying the host header or adding headers for
+    ## authorization purposes.
+    ##
+    ## This overrides any default headers.
+    #
+    # headers:
+    #   Host: <ALTERNATIVE_HOSTNAME>
+    #   X-Auth-Token: <AUTH_TOKEN>
+
+    ## @param timeout - integer - optional - default: 10
+    ## The timeout for connecting to services.
+    #
+    # timeout: 10
+
+    ## @param log_requests - boolean - optional - default: false
+    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
+    #
+    # log_requests: false
+
+    ## @param persist_connections - boolean - optional - default: false
+    ## Whether or not to persist cookies and use connection pooling for increased performance.
+    #
+    # persist_connections: false
 
     ## @param tags - list of key:value string - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
