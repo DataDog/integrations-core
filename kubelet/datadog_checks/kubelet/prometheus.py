@@ -400,7 +400,7 @@ class CadvisorPrometheusScraperMixin(object):
             tags = scraper_config['custom_tags'][:]
             if '://' in c_id:
                 tagger_cid = '://'.join(['container_id', c_id.split('://')[1]])
-                tags = tagger.tag(tagger_cid, tagger.HIGH) or []
+                tags += tagger.tag(tagger_cid, tagger.HIGH) or []
 
             if m_name:
                 self.gauge(m_name, limit, tags)

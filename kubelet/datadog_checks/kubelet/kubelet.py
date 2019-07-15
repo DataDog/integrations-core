@@ -452,7 +452,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             for ctr_status in pod['status'].get('containerStatuses', []):
                 c_name = ctr_status.get('name')
                 cid = ctr_status.get('containerID')
-                if cidtagger_cid = '://'.join(['container_id', cid.split('://')[1]])
 
                 if not c_name or not cid:
                     continue
@@ -460,8 +459,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = tagger.tag('%s' % tagger_cid, tagger.ORCHESTRATOR) or []
-                tags += instance_tags
+                tags = instance_tags[:]
+                if '://' in cid:
+                    tagger_cid = '://'.join(['container_id', cid.split('://')[1]])
+                    tags += tagger.tag('%s' % tagger_cid, tagger.ORCHESTRATOR) or []
 
                 restart_count = ctr_status.get('restartCount', 0)
                 self.gauge(self.NAMESPACE + '.containers.restarts', restart_count, tags)

@@ -89,33 +89,33 @@ EXPECTED_METRICS_PROMETHEUS = [
 ]
 
 COMMON_TAGS = {
-    "kubernetes_pod://2edfd4d9-10ce-11e8-bd5a-42010af00137": ["pod_name:fluentd-gcp-v2.0.10-9q9t4"],
-    "kubernetes_pod://2fdfd4d9-10ce-11e8-bd5a-42010af00137": ["pod_name:fluentd-gcp-v2.0.10-p13r3"],
-    'docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
+    "kubernetes_pod_uid://2edfd4d9-10ce-11e8-bd5a-42010af00137": ["pod_name:fluentd-gcp-v2.0.10-9q9t4"],
+    "kubernetes_pod_uid://2fdfd4d9-10ce-11e8-bd5a-42010af00137": ["pod_name:fluentd-gcp-v2.0.10-p13r3"],
+    'container_id://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
         'kube_container_name:fluentd-gcp',
         'kube_deployment:fluentd-gcp-v2.0.10',
     ],
-    "docker://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
+    "container_id://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
         'kube_container_name:prometheus-to-sd-exporter',
         'kube_deployment:fluentd-gcp-v2.0.10',
     ],
-    'docker://6941ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
+    'container_id://6941ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561': [
         'kube_container_name:fluentd-gcp',
         'kube_deployment:fluentd-gcp-v2.0.10',
     ],
-    "docker://690cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
+    "container_id://690cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
         'kube_container_name:prometheus-to-sd-exporter',
         'kube_deployment:fluentd-gcp-v2.0.10',
     ],
-    "docker://5f93d91c7aee0230f77fbe9ec642dd60958f5098e76de270a933285c24dfdc6f": [
+    "container_id://5f93d91c7aee0230f77fbe9ec642dd60958f5098e76de270a933285c24dfdc6f": [
         "pod_name:demo-app-success-c485bc67b-klj45"
     ],
-    "kubernetes_pod://d2e71e36-10d0-11e8-bd5a-42010af00137": ['pod_name:dd-agent-q6hpw'],
-    "kubernetes_pod://260c2b1d43b094af6d6b4ccba082c2db": ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'],
-    "kubernetes_pod://24d6daa3-10d8-11e8-bd5a-42010af00137": ['pod_name:demo-app-success-c485bc67b-klj45'],
-    "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": ['pod_name:pi-kff76'],
-    "kubernetes_pod://12ceeaa9-33ca-11e6-ac8f-42010af00003": ['pod_name:dd-agent-ntepl'],
-    "docker://32fc50ecfe24df055f6d56037acb966337eef7282ad5c203a1be58f2dd2fe743": ['pod_name:dd-agent-ntepl'],
+    "kubernetes_pod_uid://d2e71e36-10d0-11e8-bd5a-42010af00137": ['pod_name:dd-agent-q6hpw'],
+    "kubernetes_pod_uid://260c2b1d43b094af6d6b4ccba082c2db": ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'],
+    "kubernetes_pod_uid://24d6daa3-10d8-11e8-bd5a-42010af00137": ['pod_name:demo-app-success-c485bc67b-klj45'],
+    "container_id://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": ['pod_name:pi-kff76'],
+    "kubernetes_pod_uid://12ceeaa9-33ca-11e6-ac8f-42010af00003": ['pod_name:dd-agent-ntepl'],
+    "container_id://32fc50ecfe24df055f6d56037acb966337eef7282ad5c203a1be58f2dd2fe743": ['pod_name:dd-agent-ntepl'],
 }
 
 METRICS_WITH_DEVICE_TAG = {
@@ -181,22 +181,16 @@ def mock_kubelet_check(monkeypatch, instances):
         scraper_config = args[0]
         prometheus_url = scraper_config['prometheus_url']
 
-        attrs = None
         if prometheus_url.endswith('/metrics/cadvisor'):
             # Mock response for "/metrics/cadvisor"
-            attrs = {
-                'close.return_value': True,
-                'iter_lines.return_value': mock_from_file('cadvisor_metrics.txt').split('\n'),
-            }
+            content = mock_from_file('cadvisor_metrics.txt')
         elif prometheus_url.endswith('/metrics'):
             # Mock response for "/metrics"
-            attrs = {
-                'close.return_value': True,
-                'iter_lines.return_value': mock_from_file('kubelet_metrics.txt').split('\n'),
-            }
+            content = mock_from_file('kubelet_metrics.txt')
         else:
             raise Exception("Must be a valid endpoint")
 
+        attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
         return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
 
     monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll))
