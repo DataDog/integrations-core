@@ -111,7 +111,8 @@ COMMON_TAGS = {
         "pod_name:demo-app-success-c485bc67b-klj45"
     ],
     "kubernetes_pod_uid://d2e71e36-10d0-11e8-bd5a-42010af00137": ['pod_name:dd-agent-q6hpw'],
-    "kubernetes_pod_uid://260c2b1d43b094af6d6b4ccba082c2db": ['pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'],
+    "kubernetes_pod_uid://260c2b1d43b094af6d6b4ccba082c2db": [
+        'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'],
     "kubernetes_pod_uid://24d6daa3-10d8-11e8-bd5a-42010af00137": ['pod_name:demo-app-success-c485bc67b-klj45'],
     "container_id://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": ['pod_name:pi-kff76'],
     "kubernetes_pod_uid://12ceeaa9-33ca-11e6-ac8f-42010af00003": ['pod_name:dd-agent-ntepl'],
