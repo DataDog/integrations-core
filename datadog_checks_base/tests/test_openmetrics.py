@@ -1562,7 +1562,7 @@ def mock_filter_get():
 
 
 class FilterOpenMetricsCheck(OpenMetricsBaseCheck):
-    def _filter_metric(self, metric):
+    def _filter_metric(self, metric, scraper_config):
         return metric.documentation.startswith("(Deprecated)")
 
 

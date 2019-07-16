@@ -413,7 +413,7 @@ class OpenMetricsScraperMixin(object):
 
         self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, 1, scraper_config)
 
-        if self._filter_metric(metric):
+        if self._filter_metric(metric, scraper_config):
             return  # Ignore the metric
 
         # Filter metric to see if we can enrich with joined labels
