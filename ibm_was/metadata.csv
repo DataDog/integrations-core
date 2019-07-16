@@ -17,9 +17,9 @@ ibm_was.jdbc.connection_handle_count,count,,connection,,The number of connection
 ibm_was.jdbc.prep_stmt_cache_discard_count,count,,,,The total number of statements that are discarded by the least recently used (LRU) algorithm of the statement cache.,0,ibm_was,jdbc cache discard count
 ibm_was.jdbc.jdbc_time,gauge,,millisecond,,"The average time in milliseconds spent running in the JDBC driver that includes time that is spent in the JDBC driver, network, and database.",0,ibm_was,jdbc time
 ibm_was.jvm.heap_size,count,,,,Deprecated use ibm_was.jvm.heap_size_gauge instead,0,ibm_was,jvm heap size
-ibm_was.jvm.free_memory,count,,,,Deprecated use ibm_was.jvm.free_memory,count_gauge instead,0,ibm_was,jvm free memory
+ibm_was.jvm.free_memory,count,,,,Deprecated use ibm_was.jvm.free_memory_gauge instead,0,ibm_was,jvm free memory
 ibm_was.jvm.used_memory,count,,,,Deprecated use ibm_was.jvm.used_memory_gauge instead,0,ibm_was,jvm used memory
-ibm_was.jvm.up_time,count,,,,Deprecated use ibm_was.jvm.up_time,count_gauge instead,0,ibm_was,jvm uptime
+ibm_was.jvm.up_time,count,,,,Deprecated use ibm_was.jvm.up_time_gauge instead,0,ibm_was,jvm uptime
 ibm_was.jvm.process_cpu_usage,count,,percent,,Deprecated use ibm_was.jvm.process_cpu_usage_gauge instead,0,ibm_was,jvm process cpu usage
 ibm_was.jvm.heap_size_gauge,gauge,,byte,,The total memory in the JVM run time,0,ibm_was,jvm heap size
 ibm_was.jvm.free_memory_gauge,gauge,,byte,,The free memory in the JVM run time,0,ibm_was,jvm free memory
