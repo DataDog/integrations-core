@@ -1,7 +1,7 @@
 {
     "board_bgtype": "board_graph",
     "board_title": "Oracle",
-    "description": "This dashboard provides an overview of your Oracle databases, so you can track tablespace and disk usage and optimize your caches. Further reading on Oracle Database monitoring:\n\n- [Monitor Oracle Database with Datadog](https://www.datadoghq.com/blog/monitor-oracle-database/)\n\n- [Datadog's Oracle Database integration docs](https://docs.datadoghq.com/integrations/oracle/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "This dashboard provides an overview of your Oracle databases, so you can track tablespace and disk usage and optimize your caches. Further reading on Oracle Database monitoring:\n\n- [Monitor Oracle Database with Datadog](https://www.datadoghq.com/blog/monitor-oracle-database/)\n\n- [Datadog's Oracle Database integration docs](https://docs.datadoghq.com/integrations/oracle/)\n\nClone this template dashboard to make changes and add your own graph widgets!",
     "height": 93,
     "id": "oracle",
     "template_variables": [
