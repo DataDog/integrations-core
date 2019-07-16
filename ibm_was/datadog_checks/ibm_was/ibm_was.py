@@ -96,7 +96,7 @@ class IbmWasCheck(AgentCheck):
         metric_name = self.normalize(
             ensure_unicode(child.get('name')), prefix='{}.{}'.format(self.METRIC_PREFIX, prefix), fix_case=True
         )
-        
+
         # includes deprecated JVM metrics that were reporting as count instead of gauge
         self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
 
