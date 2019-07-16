@@ -36,9 +36,7 @@ SEVERITY_TAGS = {
 class TwistlockCheck(AgentCheck):
     NAMESPACE = 'twistlock'
 
-    HTTP_CONFIG_REMAPPER = {
-        'ssl_verify': {'name': 'tls_verify'},
-    }
+    HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
