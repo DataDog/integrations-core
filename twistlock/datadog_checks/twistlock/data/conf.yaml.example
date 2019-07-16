@@ -33,15 +33,15 @@ instances:
     #
   - url: 'http://localhost:8081'
 
-    ## @param username - string - optional
+    ## @param username - string - required
     ## The username to use if services are behind basic auth.
     #
-    # username: <USERNAME>
+    username: '<USERNAME>'
 
-    ## @param password - string - optional
+    ## @param password - string - required
     ## The password to use if services are behind basic or NTLM auth.
     #
-    # password: <PASSWORD>
+    password: '<PASSWORD>'
 
     ## @param ntlm_domain - string - optional
     ## If your services uses NTLM authentication, you can optionally
