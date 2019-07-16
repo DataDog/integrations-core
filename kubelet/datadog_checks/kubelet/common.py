@@ -27,7 +27,7 @@ def tags_for_pod(pod_id, cardinality):
     Queries the tagger for a given pod uid
     :return: string array, empty if pod not found
     """
-    return tagger.tag('kubernetes_pod://%s' % pod_id, cardinality) or []
+    return tagger.tag('kubernetes_pod_uid://%s' % pod_id, cardinality) or []
 
 
 def tags_for_docker(cid, cardinality):
@@ -35,7 +35,7 @@ def tags_for_docker(cid, cardinality):
     Queries the tagger for a given container id
     :return: string array, empty if container not found
     """
-    return tagger.tag('docker://%s' % cid, cardinality) or []
+    return tagger.tag('container_id://%s' % cid, cardinality) or []
 
 
 def get_pod_by_uid(uid, podlist):
@@ -72,6 +72,20 @@ def is_static_pending_pod(pod):
         return "containerStatuses" not in pod_status
     except KeyError:
         return False
+
+
+def replace_container_rt_prefix(cid):
+    """
+    Return the container ID after replacing the container runtime
+    prefix with container_id://.
+    Return the string unchanged if no such prefix is found.
+    Eg: replace_container_rt_prefix('docker://deadbeef') --> 'container_id://deadbeef'
+    :param cid: string
+    :return: string
+    """
+    if cid and '://' in cid:
+        return '://'.join(['container_id', cid.split('://')[1]])
+    return cid
 
 
 class PodListUtils(object):
