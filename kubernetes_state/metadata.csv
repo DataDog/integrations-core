@@ -98,3 +98,9 @@ kubernetes_state.statefulset.replicas_desired,gauge,,,,The number of desired rep
 kubernetes_state.statefulset.replicas_current,gauge,,,,The number of current replicas per StatefulSet,0,kubernetes,k8s_state.statefulset.replicas_current
 kubernetes_state.statefulset.replicas_ready,gauge,,,,The number of ready replicas per StatefulSet,0,kubernetes,k8s_state.statefulset.replicas_ready
 kubernetes_state.statefulset.replicas_updated,gauge,,,,The number of updated replicas per StatefulSet,0,kubernetes,k8s_state.statefulset.replicas_updated
+kubernetes_state.telemetry.payload.size,gauge,,byte,,The message size received from kube-state-metrics,0,kubernetes,k8s_state.telemetry.payload.size
+kubernetes_state.telemetry.metrics.processed.count,counter,,,,The number of metrics processed,0,kubernetes,k8s_state.telemetry.metrics.processed.count
+kubernetes_state.telemetry.metrics.input.count,counter,,,,The number of metrics received,0,kubernetes,k8s_state.telemetry.metrics.input.count
+kubernetes_state.telemetry.metrics.blacklist.count,counter,,,,The number of metrics blacklisted by the check,0,kubernetes,k8s_state.telemetry.metrics.blacklist.count
+kubernetes_state.telemetry.metrics.ignored.count,counter,,,,The number of metrics ignored by the check,0,kubernetes,k8s_state.telemetry.metrics.ignored.count
+kubernetes_state.telemetry.collector.metrics.count,counter,,,,The number of metrics by collector (kubernetes object kind) by kubernetes namespaces,0,kubernetes,k8s_state.telemetry.collector.metrics.count
