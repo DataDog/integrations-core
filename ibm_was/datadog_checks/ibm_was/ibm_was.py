@@ -100,7 +100,7 @@ class IbmWasCheck(AgentCheck):
         # includes deprecated JVM metrics that were reporting as count instead of gauge
         self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
 
-        # creates new VJM metrics correctly as gauges
+        # creates new JVM metrics correctly as gauges
         if prefix == "jvm":
             jvm_metric_name = "{}_gauge".format(metric_name)
             self.gauge(jvm_metric_name, value, tags=tags)
