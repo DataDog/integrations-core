@@ -1,5 +1,9 @@
 # CHANGELOG - istio
 
+## 2.4.1 / 2019-07-16
+
+* [Fixed] Comment out mixer and mesh by default from configuration. See [#4121](https://github.com/DataDog/integrations-core/pull/4121).
+
 ## 2.4.0 / 2019-06-24
 
 * [Added] Support citadel endpoint. See [#3962](https://github.com/DataDog/integrations-core/pull/3962).
