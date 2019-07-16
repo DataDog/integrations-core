@@ -88,7 +88,7 @@ logs:
         pattern: \d{4}\-(0?[1-9]|[12][0-9]|3[01])\-(0?[1-9]|1[012])
 ```
 
-4. [Restart the Agent][6].
+3. [Restart the Agent][6].
 
 ### Validation
 
