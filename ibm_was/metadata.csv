@@ -21,9 +21,9 @@ ibm_was.jvm.free_memory,count,,,,Deprecated use ibm_was.jvm.free_memory,count_ga
 ibm_was.jvm.used_memory,count,,,,Deprecated use ibm_was.jvm.used_memory_gauge instead,0,ibm_was,jvm used memory
 ibm_was.jvm.up_time,count,,,,Deprecated use ibm_was.jvm.up_time,count_gauge instead,0,ibm_was,jvm uptime
 ibm_was.jvm.process_cpu_usage,count,,percent,,Deprecated use ibm_was.jvm.process_cpu_usage_gauge instead,0,ibm_was,jvm process cpu usage
-ibm_was.jvm.heap_size_gauge,gauge,,kilobyte,,The total memory in the JVM run time,0,ibm_was,jvm heap size
-ibm_was.jvm.free_memory_gauge,gauge,,kilobyte,,The free memory in the JVM run time,0,ibm_was,jvm free memory
-ibm_was.jvm.used_memory_gauge,gauge,,kilobyte,,The used memory in the JVM run time,0,ibm_was,jvm used memory
+ibm_was.jvm.heap_size_gauge,gauge,,byte,,The total memory in the JVM run time,0,ibm_was,jvm heap size
+ibm_was.jvm.free_memory_gauge,gauge,,byte,,The free memory in the JVM run time,0,ibm_was,jvm free memory
+ibm_was.jvm.used_memory_gauge,gauge,,byte,,The used memory in the JVM run time,0,ibm_was,jvm used memory
 ibm_was.jvm.up_time_gauge,gauge,,second,,The amount of time that the JVM is running,0,ibm_was,jvm uptime
 ibm_was.jvm.process_cpu_usage_gauge,gauge,,percent,,The CPU Usage (in percent) of the Java virtual machine.,0,ibm_was,jvm process cpu usage
 ibm_was.thread_pools.create_count,count,,thread,,The total number of threads created,0,ibm_was,thread pools create count
@@ -43,7 +43,7 @@ ibm_was.servlet_session.live_count,gauge,,session,,The number of local sessions 
 ibm_was.servlet_session.no_room_for_new_session_count,gauge,,,,Applies only to session in memory with AllowOverflow=false. The number of times that a request for a new session cannot be handled because it exceeds the maximum session count.,0,ibm_was,
 ibm_was.servlet_session.cache_discard_count,count,,session,,The number of session objects that have been forced out of the cache. A least recently used (LRU) algorithm removes old entries to make room for new sessions and cache misses. Applicable only for persistent sessions.,0,ibm_was,servlet session cache discard count
 ibm_was.servlet_session.external_read_time,gauge,,millisecond,,"The time (ms) taken in reading the session data from the persistent store. For multirow sessions, the metrics are for the attribute; for single row sessions, the metrics are for the entire session. Applicable only for persistent sessions. When using a JMS persistent store, only available if replicated data is serialized.",0,ibm_was,servlet session external read time
-ibm_was.servlet_session.external_read_size,gauge,,btye,,Size of the session data read from persistent store. Applicable only for (serialized) persistent sessions; similar to external Read Time.,0,ibm_was,servlet session external read size
+ibm_was.servlet_session.external_read_size,gauge,,byte,,Size of the session data read from persistent store. Applicable only for (serialized) persistent sessions; similar to external Read Time.,0,ibm_was,servlet session external read size
 ibm_was.servlet_session.external_write_time,gauge,,millisecond,,The time (milliseconds) taken to write the session data from the persistent store. Applicable only for (serialized) persistent sessions. Similar to external Read Time.,0,ibm_was,servlet session external write time
 ibm_was.servlet_session.external_write_size,gauge,,request,,The size of the session data written to persistent store. Applicable only for (serialized) persistent sessions. Similar to external Read Time.,0,ibm_was,servlet session external write size
 ibm_was.servlet_session.affinity_break_count,count,,request,,The number of requests that are received for sessions that were last accessed from another web application. This value can indicate failover processing or a corrupt plug-in configuration.,0,ibm_was,servlet session affinity break
