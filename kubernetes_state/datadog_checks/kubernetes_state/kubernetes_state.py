@@ -100,11 +100,13 @@ class KubernetesState(OpenMetricsBaseCheck):
         if scraper_config['telemetry']:
             # name is like "kube_pod_execution_duration"
             name_part = metric.name.split("_", 3)
+            if len(name_part) < 2:
+                return False
             family = name_part[1]
             tags = ["name:" + family]
             for sample in metric.samples:
-                if "namespace" in sample[1]:
-                    ns = sample[1]["namespace"]
+                if "namespace" in sample[self.SAMPLE_LABELS]:
+                    ns = sample[self.SAMPLE_LABELS]["namespace"]
                     tags.append("kube_namespace:" + ns)
                     break
             self._send_telemetry_counter(
