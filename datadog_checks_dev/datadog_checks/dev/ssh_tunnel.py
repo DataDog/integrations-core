@@ -95,3 +95,59 @@ class SocksProxyDown(LazyFunction):
                 process = psutil.Process(pid)
                 process.kill()
                 return 0
+
+
+@contextmanager
+def tcp_tunnel(host, user, private_key, remote_port):
+    """Open a SSH connection with a TCP tunnel proxy."""
+    set_up = TCPTunnelUp(host, user, private_key, remote_port)
+    tear_down = TCPTunnelDown()
+    conditions = []
+
+    with environment_run(up=set_up, down=tear_down, conditions=conditions) as result:
+        yield result
+
+
+class TCPTunnelUp(LazyFunction):
+    def __init__(self, host, user, private_key, remote_port):
+        self.host = host
+        self.user = user
+        self.private_key = private_key
+        self.remote_port = remote_port
+
+    def __call__(self):
+        with TempDir('tcp_tunnel') as temp_dir:
+            local_port = find_free_port()
+            key_file = os.path.join(temp_dir, 'ssh_key')
+            with open(key_file, 'w') as f:
+                f.write(self.private_key)
+            os.chmod(key_file, 0o600)
+            ip = get_ip()
+            command = [
+                'ssh',
+                '-N',
+                '-L',
+                '{}:{}:localhost:{}'.format(ip, local_port, self.remote_port),
+                '-i',
+                key_file,
+                '-o',
+                'BatchMode=yes',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-o',
+                'StrictHostKeyChecking=no',
+                '{}@{}'.format(self.user, self.host),
+            ]
+            process = subprocess.Popen(command, start_new_session=True)
+            with open(os.path.join(temp_dir, 'ssh.pid'), 'w') as ssh_pid:
+                ssh_pid.write(str(process.pid))
+            return ip, local_port
+
+
+class TCPTunnelDown(LazyFunction):
+    def __call__(self):
+        with TempDir('tcp_tunnel') as temp_dir:
+            with open(os.path.join(temp_dir, 'ssh.pid')) as ssh_pid:
+                pid = int(ssh_pid.read())
+                run_command('kill {}'.format(pid))
+                return 0
