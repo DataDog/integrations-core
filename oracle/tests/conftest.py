@@ -5,6 +5,9 @@ import os
 
 import pytest
 
+from datadog_checks.dev.ssh_tunnel import tcp_tunnel
+from datadog_checks.dev.terraform import terraform_run
+from datadog_checks.dev.utils import get_here
 from datadog_checks.oracle import Oracle
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -25,3 +28,41 @@ def instance():
         'service_name': 'xe',
         'tags': ['optional:tag1'],
     }
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    if not os.environ.get('TF_VAR_account_json'):
+        pytest.skip('TF_VAR_account_json not set')
+    with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
+        if not outputs:
+            # We're stopping the environment, we need fake values
+            ip = private_key = ''
+        else:
+            ip = outputs['ip']['value']
+            private_key = outputs['ssh_private_key']['value']
+        with tcp_tunnel(ip, 'oracle', private_key, 1521) as tunnel:
+            if tunnel:
+                ip, port = tunnel
+            else:
+                ip, port = '', 0
+            instance = {
+                'server': '{}:{}'.format(ip, port),
+                'user': 'datadog',
+                'password': 'Oracle123',
+                'service_name': 'orcl.c.datadog-integrations-lab.internal',
+            }
+            yield instance, E2E_METADATA
+
+
+E2E_METADATA = {
+    'start_commands': [
+        'mkdir /opt/oracle',
+        'apt-get update',
+        'apt-get install libaio1 unzip',
+        'curl -o /opt/oracle/instantclient.zip '
+        'https://storage.googleapis.com/datadog-integrations-lab/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip',
+        'unzip /opt/oracle/instantclient.zip -d /opt/oracle',
+    ],
+    'env_vars': {'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3'},
+}
