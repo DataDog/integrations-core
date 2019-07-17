@@ -423,6 +423,13 @@ class TestProxies:
 
         http.get('https://www.google.com')
 
+    def test_socks5_proxy(self, socks5_proxy):
+        instance = {'proxy': {'http': 'socks5h://{}'.format(socks5_proxy)}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        http.get('http://www.google.com')
+        http.get('http://nginx')
+
 
 class TestIgnoreTLSWarning:
     def test_config_default(self):
