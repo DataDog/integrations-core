@@ -19,6 +19,7 @@ resource "random_string" "suffix" {
 }
 
 provider "google" {
+  version = "~> 2.11"
   credentials = var.account_json
   project = "datadog-integrations-lab"
   region = "europe-west2"
@@ -38,6 +39,22 @@ provider "kubernetes" {
 
 resource "google_compute_network" "vpc_network" {
   name = "istio-network"
+}
+
+resource "google_compute_firewall" "default" {
+  name    = "istio-test-http-ip-firewall"
+  network = google_compute_network.vpc_network.name
+
+  allow {
+    protocol = "icmp"
+  }
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+
+  source_ranges = ["38.122.226.210"]
 }
 
 resource "google_container_cluster" "gke_cluster" {
