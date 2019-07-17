@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import namedtuple
 
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
