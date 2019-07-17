@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 2.2.2 / 2019-07-17
+
+* [Fixed] Use tagger with container_id prefix. See [#4126](https://github.com/DataDog/integrations-core/pull/4126).
+
 ## 2.2.1 / 2019-06-28
 
 * [Fixed] Make the kubelet and ECS fargate checks resilient to the tagger returning None. See [#4004](https://github.com/DataDog/integrations-core/pull/4004).
