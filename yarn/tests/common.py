@@ -4,6 +4,7 @@
 
 import os
 
+from datadog_checks.dev import get_docker_hostname
 from datadog_checks.yarn.yarn import (
     YARN_APPLICATION_STATES,
     YARN_APPS_PATH,
@@ -18,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CLUSTER_NAME = 'SparkCluster'
 
 # Resource manager URI
-RM_ADDRESS = 'http://localhost:8088'
+RM_ADDRESS = 'http://{}:8088'.format(get_docker_hostname())
 
 # Service URLs
 YARN_CLUSTER_METRICS_URL = '{}{}'.format(RM_ADDRESS, YARN_CLUSTER_METRICS_PATH)
