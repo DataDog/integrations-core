@@ -5,7 +5,7 @@ instances:
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_url: localhost:443/metrics
+  - prometheus_url: https://localhost:443/metrics
     
     ## @param scheme - string - optional
     ## Used to specify the scheme to reach the APIServer endpoints. Default to https.
