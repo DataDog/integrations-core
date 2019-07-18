@@ -103,11 +103,11 @@ class KubernetesState(OpenMetricsBaseCheck):
             if len(name_part) < 2:
                 return False
             family = name_part[1]
-            tags = ["name:" + family]
+            tags = ["resource_name:" + family]
             for sample in metric.samples:
                 if "namespace" in sample[self.SAMPLE_LABELS]:
                     ns = sample[self.SAMPLE_LABELS]["namespace"]
-                    tags.append("kube_namespace:" + ns)
+                    tags.append("resource_namespace:" + ns)
                     break
             self._send_telemetry_counter(
                 'collector.metrics.count', len(metric.samples), scraper_config, extra_tags=tags
