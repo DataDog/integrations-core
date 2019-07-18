@@ -6,7 +6,7 @@ Use the Datadog Agent to monitor how well Istio is performing.
 
 * Collect metrics on what apps are making what kinds of requests
 * Look at how applications are using bandwidth
-* Understand istio's resource consumption
+* Understand Istio's resource consumption
 
 ## Setup
 
@@ -14,13 +14,13 @@ Find below instructions to install and configure the check when running the Agen
 
 ### Installation
 
-Istio is included in the Datadog Agent. So, just [install the Agent][2] on your istio servers or in your cluster and point it at Istio.
+Istio is included in the Datadog Agent. So, just [install the Agent][2] on your Istio servers or in your cluster and point it at Istio.
 
 ### Configuration
 
 #### Connect the Agent
 
-Edit the `istio.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to connect it to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options:
+Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][3]) to connect to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options:
 
 ```
 init_config:
@@ -34,7 +34,28 @@ instances:
     send_histograms_buckets: true
 ```
 
-Each of the endpoints are optional, but at least one must be configured. See the [istio documentation][5] to learn more about the prometheus adapter.
+Each of the endpoints is optional, but at least one must be configured. See the [Istio documentation][5] to learn more about the Prometheus adapter.
+
+#### Disable sidecar injection
+
+Add the `sidecar.istio.io/inject: "false"` annotation to the `datadog-agent` DaemonSet:
+
+```
+...
+spec:
+  ...
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    ...
+```
+
+This can also be done with the `kubectl patch` command.
+
+```
+kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"annotations":{"sidecar.istio.io/inject":"false"}}}}}'
+```
 
 ### Validation
 
