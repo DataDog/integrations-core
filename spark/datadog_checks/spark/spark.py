@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import namedtuple
 
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -141,15 +140,12 @@ SPARK_STREAMING_STATISTICS_METRICS = {
     'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT),
 }
 
-RequestsConfig = namedtuple('RequestsConfig', ['auth', 'ssl_verify', 'ssl_cert', 'ssl_key', 'kerberos_keytab'])
-
 
 class SparkCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
         'ssl_cert': {'name': 'tls_cert'},
         'ssl_key': {'name': 'tls_private_key'},
-        'verify': {'name': 'tls_ca_cert'},
     }
 
     def check(self, instance):
