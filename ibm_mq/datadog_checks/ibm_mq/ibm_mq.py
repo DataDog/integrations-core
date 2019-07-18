@@ -17,24 +17,9 @@ try:
 except ImportError as e:
     pymqiException = e
     pymqi = None
-
-log = logging.getLogger(__file__)
-
-
-class IbmMqCheck(AgentCheck):
-
-    METRIC_PREFIX = 'ibm_mq'
-
-    SERVICE_CHECK = 'ibm_mq.can_connect'
-
-    QUEUE_MANAGER_SERVICE_CHECK = 'ibm_mq.queue_manager'
-    QUEUE_SERVICE_CHECK = 'ibm_mq.queue'
-
-    CHANNEL_SERVICE_CHECK = 'ibm_mq.channel'
-    CHANNEL_STATUS_SERVICE_CHECK = 'ibm_mq.channel.status'
-
-    CHANNEL_COUNT_CHECK = 'ibm_mq.channel.count'
-
+else:
+    # pymqi is not be available on win/macOS when running e2e
+    # so we load the following constants only pymqi import succeed
     SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
 
     STATUS_MQCHS_UNKNOWN = -1
@@ -64,6 +49,24 @@ class IbmMqCheck(AgentCheck):
         pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
         pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
     }
+
+
+log = logging.getLogger(__file__)
+
+
+class IbmMqCheck(AgentCheck):
+
+    METRIC_PREFIX = 'ibm_mq'
+
+    SERVICE_CHECK = 'ibm_mq.can_connect'
+
+    QUEUE_MANAGER_SERVICE_CHECK = 'ibm_mq.queue_manager'
+    QUEUE_SERVICE_CHECK = 'ibm_mq.queue'
+
+    CHANNEL_SERVICE_CHECK = 'ibm_mq.channel'
+    CHANNEL_STATUS_SERVICE_CHECK = 'ibm_mq.channel.status'
+
+    CHANNEL_COUNT_CHECK = 'ibm_mq.channel.count'
 
     def check(self, instance):
         config = IBMMQConfig(instance)
@@ -132,7 +135,7 @@ class IbmMqCheck(AgentCheck):
     def _discover_queues(self, queue_manager, mq_pattern_filter):
         queues = []
 
-        for queue_type in self.SUPPORTED_QUEUE_TYPES:
+        for queue_type in SUPPORTED_QUEUE_TYPES:
             args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
             try:
                 pcf = pymqi.PCFExecute(queue_manager)
@@ -264,18 +267,18 @@ class IbmMqCheck(AgentCheck):
                 self._submit_status_check(channel_name, channel_status, channel_tags)
 
     def _submit_status_check(self, channel_name, channel_status, channel_tags):
-        if channel_status in self.SERVICE_CHECK_MAP:
-            service_check_status = self.SERVICE_CHECK_MAP[channel_status]
+        if channel_status in SERVICE_CHECK_MAP:
+            service_check_status = SERVICE_CHECK_MAP[channel_status]
         else:
             self.log.warning("Status `{}` not found for channel `{}`".format(channel_status, channel_name))
             service_check_status = AgentCheck.UNKNOWN
         self.service_check(self.CHANNEL_STATUS_SERVICE_CHECK, service_check_status, channel_tags)
 
     def _submit_channel_count(self, channel_name, channel_status, channel_tags):
-        if channel_status not in self.CHANNEL_STATUS_MAP:
+        if channel_status not in CHANNEL_STATUS_MAP:
             self.log.warning("Status `{}` not found for channel `{}`".format(channel_status, channel_name))
-            channel_status = self.STATUS_MQCHS_UNKNOWN
+            channel_status = STATUS_MQCHS_UNKNOWN
 
-        for status, status_label in iteritems(self.CHANNEL_STATUS_MAP):
+        for status, status_label in iteritems(CHANNEL_STATUS_MAP):
             status_active = int(status == channel_status)
             self.gauge(self.CHANNEL_COUNT_CHECK, status_active, tags=channel_tags + ["status:" + status_label])
