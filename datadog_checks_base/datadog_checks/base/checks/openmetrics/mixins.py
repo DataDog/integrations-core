@@ -340,13 +340,15 @@ class OpenMetricsScraperMixin(object):
             tags.extend(scraper_config['_metric_tags'])
             self.gauge(metric_name_with_namespace, val, tags=tags)
 
-    def _send_telemetry_counter(self, metric_name, val, scraper_config):
+    def _send_telemetry_counter(self, metric_name, val, scraper_config, extra_tags=None):
         if scraper_config['telemetry']:
             metric_name_with_namespace = self._telemetry_metric_name_with_namespace(metric_name, scraper_config)
             # Determine the tags to send
             custom_tags = scraper_config['custom_tags']
             tags = list(custom_tags)
             tags.extend(scraper_config['_metric_tags'])
+            if extra_tags:
+                tags.extend(extra_tags)
             self.count(metric_name_with_namespace, val, tags=tags)
 
     def _store_labels(self, metric, scraper_config):
@@ -413,7 +415,7 @@ class OpenMetricsScraperMixin(object):
 
         self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, 1, scraper_config)
 
-        if self._filter_metric(metric):
+        if self._filter_metric(metric, scraper_config):
             return  # Ignore the metric
 
         # Filter metric to see if we can enrich with joined labels

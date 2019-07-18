@@ -96,6 +96,25 @@ class KubernetesState(OpenMetricsBaseCheck):
         for job_tags, job_count in iteritems(self.job_failed_count):
             self.monotonic_count(scraper_config['namespace'] + '.job.failed', job_count, list(job_tags))
 
+    def _filter_metric(self, metric, scraper_config):
+        if scraper_config['telemetry']:
+            # name is like "kube_pod_execution_duration"
+            name_part = metric.name.split("_", 3)
+            if len(name_part) < 2:
+                return False
+            family = name_part[1]
+            tags = ["name:" + family]
+            for sample in metric.samples:
+                if "namespace" in sample[self.SAMPLE_LABELS]:
+                    ns = sample[self.SAMPLE_LABELS]["namespace"]
+                    tags.append("kube_namespace:" + ns)
+                    break
+            self._send_telemetry_counter(
+                'collector.metrics.count', len(metric.samples), scraper_config, extra_tags=tags
+            )
+        # do not filter
+        return False
+
     def _create_kubernetes_state_prometheus_instance(self, instance):
         """
         Set up the kubernetes_state instance so it can be used in OpenMetricsBaseCheck
