@@ -94,30 +94,36 @@ class DockerInterface(object):
         log_level=None,
         as_json=False,
         break_point=None,
+        jmx_list='matching',
     ):
-        command = '{} check {}'.format(self.agent_command, self.check)
+        # JMX check
+        if self.metadata.get('use_jmx', False):
+            command = '{} jmx list {}'.format(self.agent_command, jmx_list)
+        # Classic check
+        else:
+            command = '{} check {}'.format(self.agent_command, self.check)
 
-        if rate:
-            command += ' {}'.format(get_rate_flag(self.agent_version))
+            if rate:
+                command += ' {}'.format(get_rate_flag(self.agent_version))
 
-        # These are only available for Agent 6+
-        if times is not None:
-            command += ' --check-times {}'.format(times)
+            # These are only available for Agent 6+
+            if times is not None:
+                command += ' --check-times {}'.format(times)
 
-        if pause is not None:
-            command += ' --pause {}'.format(pause)
+            if pause is not None:
+                command += ' --pause {}'.format(pause)
 
-        if delay is not None:
-            command += ' --delay {}'.format(delay)
+            if delay is not None:
+                command += ' --delay {}'.format(delay)
+
+            if as_json:
+                command += ' --json {}'.format(as_json)
+
+            if break_point is not None:
+                command += ' --breakpoint {}'.format(break_point)
 
         if log_level is not None:
-            command += ' --log-level {}'.format(log_level)
-
-        if as_json:
-            command += ' --json {}'.format(as_json)
-
-        if break_point is not None:
-            command += ' --breakpoint {}'.format(break_point)
+                command += ' --log-level {}'.format(log_level)
 
         return self.exec_command(command, capture=capture, interactive=break_point is not None)
 
