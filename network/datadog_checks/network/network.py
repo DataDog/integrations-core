@@ -285,9 +285,11 @@ class Network(AgentCheck):
         custom_tags = instance.get('tags', [])
 
         if Platform.is_containerized() and proc_location != "/proc":
-            proc_location = "%s/1" % proc_location
+            net_proc_base_location = "%s/1" % proc_location
+        else:
+            net_proc_base_location = proc_location
 
-        if self._is_collect_cx_state_runnable(proc_location):
+        if self._is_collect_cx_state_runnable(net_proc_base_location):
             try:
                 self.log.debug("Using `ss` to collect connection state")
                 # Try using `ss` for increased performance over `netstat`
@@ -338,7 +340,7 @@ class Network(AgentCheck):
             except SubprocessOutputEmptyError:
                 self.log.exception("Error collecting connection stats.")
 
-        proc_dev_path = "{}/net/dev".format(proc_location)
+        proc_dev_path = "{}/net/dev".format(net_proc_base_location)
         with open(proc_dev_path, 'r') as proc:
             lines = proc.readlines()
         # Inter-|   Receive                                                 |  Transmit
@@ -364,7 +366,7 @@ class Network(AgentCheck):
 
         netstat_data = {}
         for f in ['netstat', 'snmp']:
-            proc_data_path = "{}/net/{}".format(proc_location, f)
+            proc_data_path = "{}/net/{}".format(net_proc_base_location, f)
             try:
                 with open(proc_data_path, 'r') as netstat:
                     while True:
