@@ -160,7 +160,7 @@ class LocalAgentInterface(object):
                 command += ' --breakpoint {}'.format(break_point)
 
         if log_level is not None:
-                command += ' --log-level {}'.format(log_level)
+            command += ' --log-level {}'.format(log_level)
 
         return run_command(command, capture=capture)
 

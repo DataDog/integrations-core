@@ -58,7 +58,14 @@ def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_p
 
     environment = create_interface(check, env)
     check_args = dict(
-        rate=rate, times=times, pause=pause, delay=delay, log_level=log_level, as_json=as_json, break_point=break_point, jmx_list=jmx_list
+        rate=rate,
+        times=times,
+        pause=pause,
+        delay=delay,
+        log_level=log_level,
+        as_json=as_json,
+        break_point=break_point,
+        jmx_list=jmx_list,
     )
 
     if config_file:
@@ -70,4 +77,7 @@ def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_p
 
         if not rate:
             echo_success('Note: ', nl=False)
-            echo_info('If some metrics are missing, you may want to try again with the -r / --rate flag for a classic integration.')
+            echo_info(
+                'If some metrics are missing, you may want to try again with the -r / --rate flag '
+                'for a classic integration.'
+            )

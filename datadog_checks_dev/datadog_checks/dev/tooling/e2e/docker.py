@@ -123,7 +123,7 @@ class DockerInterface(object):
                 command += ' --breakpoint {}'.format(break_point)
 
         if log_level is not None:
-                command += ' --log-level {}'.format(log_level)
+            command += ' --log-level {}'.format(log_level)
 
         return self.exec_command(command, capture=capture, interactive=break_point is not None)
 
