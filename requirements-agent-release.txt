@@ -93,7 +93,7 @@ datadog-riak==1.6.0
 datadog-riakcs==2.1.0
 datadog-snmp==1.9.0
 datadog-solr==1.2.0
-datadog-spark==1.8.0
+datadog-spark==1.8.1
 datadog-sqlserver==1.13.0; sys_platform != 'darwin'
 datadog-squid==1.2.0
 datadog-ssh-check==1.7.0
