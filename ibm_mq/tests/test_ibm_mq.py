@@ -12,11 +12,6 @@ from datadog_checks.ibm_mq import IbmMqCheck
 
 from . import common
 
-try:
-    import pymqi
-except ImportError:
-    pymqi = None
-
 log = logging.getLogger(__file__)
 
 QUEUE_METRICS = [
