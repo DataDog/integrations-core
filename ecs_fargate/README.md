@@ -142,7 +142,7 @@ Example for the Agent container:
 }
 ```
 
-**Note**: You should not use `DD_HOSTNAME` and `DD_TAGS` since there is no concept of a host to the user in Fargate.
+**Note**: You should not use `DD_HOSTNAME` since there is no concept of a host to the user in Fargate. `DD_TAGS` is traditionally used to assign host tags, but as of Datadog Agent version 6.13.0 you can use the environment variable to set global tags on your integration metrics.
 
 ### Crawler-based metrics
 
