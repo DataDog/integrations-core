@@ -98,3 +98,113 @@ resource "google_container_cluster" "gke_cluster" {
     }
   }
 }
+
+resource "kubernetes_service" "citadel" {
+  metadata {
+    name = "prometheus-citadel"
+    namespace = "istio-system"
+  }
+  spec {
+    selector = {
+      istio = "citadel"
+    }
+    port {
+      port        = 80
+      target_port = 15014
+    }
+
+    type = "LoadBalancer"
+  }
+}
+
+resource "kubernetes_service" "galley" {
+  metadata {
+    name = "prometheus-galley"
+    namespace = "istio-system"
+  }
+  spec {
+    selector = {
+      istio = "galley"
+    }
+    port {
+      port        = 80
+      target_port = 15014
+    }
+
+    type = "LoadBalancer"
+  }
+}
+
+resource "kubernetes_service" "mesh" {
+  metadata {
+    name = "prometheus-mesh"
+    namespace = "istio-system"
+  }
+  spec {
+    selector = {
+      app = "telemetry"
+    }
+    port {
+      port        = 80
+      target_port = 42422
+    }
+
+    type = "LoadBalancer"
+  }
+}
+
+resource "kubernetes_service" "mixer" {
+  metadata {
+    name = "prometheus-mixer"
+    namespace = "istio-system"
+  }
+  spec {
+    selector = {
+      app = "telemetry"
+    }
+    port {
+      port        = 80
+      target_port = 15014
+    }
+
+    type = "LoadBalancer"
+  }
+}
+
+resource "kubernetes_service" "pilot" {
+  metadata {
+    name = "prometheus-pilot"
+    namespace = "istio-system"
+  }
+  spec {
+    selector = {
+      istio = "pilot"
+    }
+    port {
+      port        = 80
+      target_port = 15014
+    }
+
+    type = "LoadBalancer"
+  }
+}
+
+output "citadel-ip" {
+  value = kubernetes_service.citadel.load_balancer_ingress.0.ip
+}
+
+output "galley-ip" {
+  value = kubernetes_service.galley.load_balancer_ingress.0.ip
+}
+
+output "mesh-ip" {
+  value = kubernetes_service.mesh.load_balancer_ingress.0.ip
+}
+
+output "mixer-ip" {
+  value = kubernetes_service.mixer.load_balancer_ingress.0.ip
+}
+
+output "pilot-ip" {
+  value = kubernetes_service.pilot.load_balancer_ingress.0.ip
+}

@@ -31,29 +31,3 @@ kubectl wait pods --all --for=condition=Ready --timeout=300s
 # Adds a gateway to the app
 kubectl apply -f ./istio-$ISTIO_VERSION/samples/bookinfo/networking/bookinfo-gateway.yaml
 kubectl wait pods --all --for=condition=Ready --timeout=300s
-
-# Make sure the application works, no log but fail if error.
-export INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
-
-#curl -s http://$INGRESS_HOST:$INGRESS_PORT/productpage | grep -o "<title>.*</title>"
-
-# Port forward citadel
-# kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l istio=citadel -o jsonpath='{.items[0].metadata.name}') 16000:15014 &
-# CITADEL_PID=$!
-
-# Port forward mesh
-# kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=telemetry -o jsonpath='{.items[0].metadata.name}') 16001:42422 &
-# MESH_PID=$!
-
-# Port forward telemetry
-# kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=telemetry -o jsonpath='{.items[0].metadata.name}') 16002:15014 &
-# MIXER_PID=$!
-
-# Port forward galley
-# kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l istio=galley -o jsonpath='{.items[0].metadata.name}') 16003:15014 &
-# GALLEY_PID=$!
-
-# Port forward pilot
-# kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l istio=pilot -o jsonpath='{.items[0].metadata.name}') 16004:15014 &
-# GALLEY_PID=$!
