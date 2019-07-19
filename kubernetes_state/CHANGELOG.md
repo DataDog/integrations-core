@@ -1,5 +1,10 @@
 # CHANGELOG - kubernetes_state
 
+## 4.6.0 / 2019-07-19
+
+* [Fixed] Fix kubernetes_state avoid tags collision. See [#4149](https://github.com/DataDog/integrations-core/pull/4149).
+* [Added] Add telemetry metrics counter by ksm collector. See [#4125](https://github.com/DataDog/integrations-core/pull/4125).
+
 ## 4.5.0 / 2019-07-13
 
 * [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025). Thanks [clamoriniere](https://github.com/clamoriniere).
