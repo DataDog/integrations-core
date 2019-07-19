@@ -21,16 +21,16 @@ Edit the `kong.d/conf.yaml` file, in the `conf.d/` folder at the root of your [A
 1. Add this configuration block to your `kong.d/conf.yaml` file to start gathering your [Kong Metrics](#metrics):
 
     ```yaml
-    init_config:
+      init_config:
 
-    instances:
-      # Each instance needs a `kong_status_url`. Tags are optional.
-      - kong_status_url: http://example.com:8001/status/
-        tags:
-          - instance:foo
-      - kong_status_url: http://example2.com:8001/status/
-        tags:
-          - instance:bar
+      instances:
+        # Each instance needs a `kong_status_url`. Tags are optional.
+        - kong_status_url: http://example.com:8001/status/
+          tags:
+            - instance:foo
+        - kong_status_url: http://example2.com:8001/status/
+          tags:
+            - instance:bar
     ```
 
     See the [sample kong.d/conf.yaml][4] for all available configuration options.
