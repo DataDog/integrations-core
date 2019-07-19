@@ -579,7 +579,7 @@ For agent versions <= 6.11:
 
 For agent version >= 6.12:
 ```
-"C:\Program Files\Datadog\Datadog Agent\embedded2\agent.exe" integration install -w /path/to/wheel.whl
+"C:\Program Files\Datadog\Datadog Agent\bin\agent.exe" integration install -w /path/to/wheel.whl
 ```
 
 
