@@ -174,7 +174,7 @@ PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FIL
   --destination-format=pysnmp <MIB_FILE_NAME>
 ```
 
-Agent version >=6.12:
+Agent versions >=6.12:
 ```
 PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded2\python.exe' '<PATH_TO_FILE>\mibdump.py' `
   --mib-source <PATH_TO_MIB_SOURCE> `
