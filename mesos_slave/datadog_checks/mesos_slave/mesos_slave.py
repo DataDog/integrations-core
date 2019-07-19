@@ -103,7 +103,7 @@ class MesosSlave(AgentCheck):
             if not ssl_verify and parsed_url.scheme == 'https':
                 self.log.warning('Skipping SSL cert validation for %s based on configuration.' % url)
 
-    def _get_json(self, url, timeout, verify, tags=None):
+    def _get_json(self, url, timeout, verify, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
         msg = None
         status = None
@@ -124,7 +124,7 @@ class MesosSlave(AgentCheck):
             status = AgentCheck.CRITICAL
         finally:
             self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
-            if self.service_check_needed:
+            if self.service_check_needed and not failure_expected:
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
                 self.service_check_needed = False
             if status is AgentCheck.CRITICAL:
@@ -137,19 +137,15 @@ class MesosSlave(AgentCheck):
 
     def _get_state(self, url, timeout, verify, tags):
         try:
-            # version < 1.8.0
-            endpoint = '/state.json'
-            master_state = self._get_json(url + endpoint, timeout, verify, tags)
-            if master_state is not None:
-                self.version = list(map(int, master_state['version'].split('.')))
-        except Exception as e:
+            # Mesos version >= 0.25
+            endpoint = '/state'
+            master_state = self._get_json(url + endpoint, timeout, verify, failure_expected=True, tags=tags)
+        except CheckException as e:
             msg = str(e)
             self.log.warning('Encounted error getting state at {}{}, message: {}'.format(url, endpoint, msg))
-            # version >= 1.8.0
-            endpoint = '/state'
-            master_state = self._get_json(url + endpoint, timeout, verify, tags)
-            if master_state is not None:
-                self.version = list(map(int, master_state['version'].split('.')))
+            # Mesos version < 0.25
+            endpoint = '/state.json'
+            master_state = self._get_json(url + endpoint, timeout, verify, tags=tags)
         return master_state
 
     def _get_stats(self, url, timeout, verify, tags):
@@ -157,7 +153,7 @@ class MesosSlave(AgentCheck):
             endpoint = '/metrics/snapshot'
         else:
             endpoint = '/stats.json'
-        return self._get_json(url + endpoint, timeout, verify, tags)
+        return self._get_json(url + endpoint, timeout, verify, tags=tags)
 
     def _get_constant_attributes(self, url, timeout, master_port, verify, tags):
         state_metrics = None
@@ -165,8 +161,7 @@ class MesosSlave(AgentCheck):
         if self.cluster_name is None:
             state_metrics = self._get_state(url, timeout, verify, tags)
             if state_metrics is not None:
-                self.version = list(map(int, state_metrics['version'].split('.')))
-
+                self.version = [int(i) for i in state_metrics['version'].split('.')]
                 if 'master_hostname' in state_metrics:
                     master_state = self._get_state(
                         '{0}://{1}:{2}'.format(parsed_url.scheme, state_metrics['master_hostname'], master_port),
