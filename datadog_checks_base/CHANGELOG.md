@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.2.1 / 2019-07-19
+
+* [Fixed] Fix openmetrics mixins telemetry metrics. See [#4155](https://github.com/DataDog/integrations-core/pull/4155).
+
 ## 9.2.0 / 2019-07-19
 
 * [Added] Add telemetry metrics counter by ksm collector. See [#4125](https://github.com/DataDog/integrations-core/pull/4125).

@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 4.6.1 / 2019-07-19
+
+* [Fixed] Fix openmetrics mixins telemetry metrics. See [#4155](https://github.com/DataDog/integrations-core/pull/4155).
+
 ## 4.6.0 / 2019-07-19
 
 * [Fixed] Fix kubernetes_state avoid tags collision. See [#4149](https://github.com/DataDog/integrations-core/pull/4149).
