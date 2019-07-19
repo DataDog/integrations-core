@@ -144,7 +144,7 @@ class MesosMaster(AgentCheck):
             if not ssl_verify and parsed_url.scheme == 'https':
                 self.log.warning('Skipping SSL cert validation for %s based on configuration.' % url)
 
-    def _get_json(self, url, timeout, verify=True, tags=None):
+    def _get_json(self, url, timeout, verify=True, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
         msg = None
         status = None
@@ -165,7 +165,7 @@ class MesosMaster(AgentCheck):
             status = AgentCheck.CRITICAL
         finally:
             self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
-            if self.service_check_needed:
+            if self.service_check_needed and not failure_expected:
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
                 self.service_check_needed = False
             if status is AgentCheck.CRITICAL:
@@ -179,19 +179,15 @@ class MesosMaster(AgentCheck):
 
     def _get_master_state(self, url, timeout, verify, tags):
         try:
-            # version < 1.8.0
-            endpoint = '/state.json'
-            master_state = self._get_json(url + endpoint, timeout, verify, tags)
-            if master_state is not None:
-                self.version = list(map(int, master_state['version'].split('.')))
-        except Exception as e:
+            # Mesos version >= 0.25
+            endpoint = '/state'
+            master_state = self._get_json(url + endpoint, timeout, verify=verify, failure_expected=True, tags=tags)
+        except CheckException as e:
             msg = str(e)
             self.log.warning('Encounted error getting state at {}{}, message: {}'.format(url, endpoint, msg))
-            # version >= 1.8.0
-            endpoint = '/state'
-            master_state = self._get_json(url + endpoint, timeout, verify, tags)
-            if master_state is not None:
-                self.version = list(map(int, master_state['version'].split('.')))
+            # Mesos version < 0.25
+            endpoint = '/state.json'
+            master_state = self._get_json(url + endpoint, timeout, verify=verify, tags=tags)
         return master_state
 
     def _get_master_stats(self, url, timeout, verify, tags):
@@ -213,6 +209,7 @@ class MesosMaster(AgentCheck):
         self.leader = False
 
         if state_metrics is not None:
+            self.version = [int(i) for i in state_metrics['version'].split('.')]
             if state_metrics['leader'] == state_metrics['pid']:
                 self.leader = True
 
