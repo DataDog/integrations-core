@@ -401,11 +401,11 @@ def test_telemetry(aggregator, instance):
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=76.0)
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',
-        tags=['name:pod', 'kube_namespace:default', 'optional:tag1'],
+        tags=['resource_name:pod', 'resource_namespace:default', 'optional:tag1'],
         value=600.0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',
-        tags=['name:hpa', 'kube_namespace:ns1', 'optional:tag1'],
+        tags=['resource_name:hpa', 'resource_namespace:ns1', 'optional:tag1'],
         value=8.0,
     )
