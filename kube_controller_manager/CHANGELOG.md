@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_controller_manager
 
+## 1.4.0 / 2019-07-19
+
+* [Added] Add telemetry metrics counter by ksm collector. See [#4125](https://github.com/DataDog/integrations-core/pull/4125).
+
 ## 1.3.0 / 2019-07-04
 
 * [Added] Add support for new metrics introduced in kubernetes v1.14. See [#3905](https://github.com/DataDog/integrations-core/pull/3905).
