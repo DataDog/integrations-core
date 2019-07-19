@@ -260,7 +260,9 @@ class OpenMetricsScraperMixin(object):
             input_gen = self._text_filter_input(input_gen, scraper_config)
 
         for metric in text_fd_to_metric_families(input_gen):
-            self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_INPUT_COUNT, 1, scraper_config)
+            self._send_telemetry_counter(
+                self.TELEMETRY_COUNTER_METRICS_INPUT_COUNT, len(metric.samples), scraper_config
+            )
             metric.type = scraper_config['type_overrides'].get(metric.name, metric.type)
             if metric.type not in self.METRIC_TYPES:
                 continue
@@ -410,10 +412,12 @@ class OpenMetricsScraperMixin(object):
         self._store_labels(metric, scraper_config)
 
         if metric.name in scraper_config['ignore_metrics']:
-            self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, 1, scraper_config)
+            self._send_telemetry_counter(
+                self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
+            )
             return  # Ignore the metric
 
-        self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, 1, scraper_config)
+        self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, len(metric.samples), scraper_config)
 
         if self._filter_metric(metric, scraper_config):
             return  # Ignore the metric
