@@ -13,32 +13,36 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to
-start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][3] for all available configuration options.
+1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
 
-#### Log Collection
+#### Log collection
 
-To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
-```
-    logs_enabled: true
-```
+ **Available for Agent >6.0**
 
-Next, edit `ambari.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Ambari log files.
+ 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-```yaml
- logs:
-   - type: file
-     path: /var/log/ambari-server/ambari-alerts.log
-     source: ambari
-     service: ambari
-     log_processing_rules:
-        - type: multi_line
-          name: new_log_start_with_date
-          pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])  # 2019-04-22 15:47:00,999
-...
-```
+     ```yaml
+      logs_enabled: true
+    ```
+
+ 2. Edit your `ambari.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Ambari log files.
+
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/ambari-server/ambari-alerts.log
+          source: ambari
+          service: ambari
+          log_processing_rules:
+              - type: multi_line
+                name: new_log_start_with_date
+                pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])  # 2019-04-22 15:47:00,999
+      ...
+    ```
+
+ 3. [Restart the Agent][4].
 
 ### Validation
 
@@ -66,11 +70,11 @@ See [metadata.csv][7] for a list of all metrics provided by this integration.
 ### Service Checks
 
 **ambari.can_connect**:<br>
-Returns OK if the cluster is reachable, CRITICAL otherwise.
+Returns `OK` if the cluster is reachable, otherwise returns `CRITICAL`.
 
 **ambari.state**:<br>
-Returns OK if the service is installed or running, WARNING if the service is stopping or uninstalling,
-or CRITICAL if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
+Returns `OK` if the service is installed or running, `WARNING` if the service is stopping or uninstalling,
+or `CRITICAL` if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
 
 ### Events
 

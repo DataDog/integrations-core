@@ -106,36 +106,35 @@ Here's an example of configuration that would check the current machine and a re
 
 * [Restart the Agent][8] to begin sending IIS metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Add this configuration block to your `iis.d/conf.yaml` file to start collecting your IIS Logs:
+2. Add this configuration block to your `iis.d/conf.yaml` file to start collecting your IIS Logs:
 
-  ```
-  logs:
-       - type: file
-         path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
-         service: myservice
-         source: iis
-         sourcecategory: http_web_access
-  ```
+    ```yaml
+      logs:
+          - type: file
+            path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
+            service: myservice
+            source: iis
+            sourcecategory: http_web_access
+    ```
 
-  Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample iis.d/conf.yaml][6] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment.
+    See the [sample iis.d/conf.yaml][6] for all available configuration options.
 
-  * [Restart the Agent][9].
-
+3. [Restart the Agent][8].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][10] and look for `iis` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `iis` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -147,9 +146,8 @@ The IIS check does not include any events.
 
 ### Service Checks
 
-`iis.site_up`:
-
-The Agent submits this service check for each configured site in `iis.yaml`. It returns `Critical` if the site's uptime is zero, otherwise `OK`.
+**iis.site_up**:<br>
+The Agent submits this service check for each configured site in `iis.yaml`. It returns `Critical` if the site's uptime is zero, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][12].
@@ -162,7 +160,6 @@ Need help? Contact [Datadog support][12].
 [6]: https://github.com/DataDog/integrations-core/blob/master/iis/datadog_checks/iis/data/conf.yaml.example
 [7]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/iis/metadata.csv
 [12]: https://docs.datadoghq.com/help

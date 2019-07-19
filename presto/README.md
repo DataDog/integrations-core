@@ -22,41 +22,41 @@ No additional installation is needed on your server. Install the Agent on each C
    Agent's configuration directory to start collecting your presto performance data.
    See the [sample presto.d/conf.yaml][4] for all available configuration options.
 
-   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
-   You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][5] for more detailed instructions.
-   If you need to monitor more metrics, contact [Datadog support][6].
+    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
+    You can specify the metrics you are interested in by editing the configuration below.
+    To learn how to customize the metrics to collect visit the [JMX Checks documentation][5] for more detailed instructions.
+    If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][7].
 
-#### Metric Collection
+#### Metric collection
 
 Use the default configuration of your presto.d/conf.yaml file to activate the collection of your Presto metrics. See the sample [presto.d/conf.yaml][4] for all available configuration options.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, enable it in your datadog.yaml file:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-```
-logs_enabled: true
-```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Add this configuration block to your presto.d/conf.yaml file to start collecting your Presto logs:
+2. Add this configuration block to your presto.d/conf.yaml file to start collecting your Presto logs:
 
-```
-logs:
-  - type: file
-    path: /var/log/presto/*.log
-    source: presto
-    sourcecategory: database
-    service: <SERVICE_NAME>
-```
+    ```
+      logs:
+        - type: file
+          path: /var/log/presto/*.log
+          source: presto
+          sourcecategory: database
+          service: <SERVICE_NAME>
+    ```
 
-Change the `path` and `service` parameter values and configure them for your environment. See the sample [presto.d/conf.yaml][4] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the sample [presto.d/conf.yaml][4] for all available configuration options.
 
-[Restart the Agent][7].
+3. [Restart the Agent][7].
 
 ### Validation
 
@@ -68,14 +68,14 @@ Change the `path` and `service` parameter values and configure them for your env
 
 See [metadata.csv][9] for a list of metrics provided by this check.
 
-### Service Checks
-
-**presto.can_connect**
-Returns CRITICAL if the Agent is unable to connect to and collect metrics from the monitored Presto instance. Returns OK otherwise.
-
 ### Events
 
 Presto does not include any events.
+
+### Service Checks
+
+**presto.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Presto instance, otherwise returns `OK`.
 
 ## Troubleshooting
 

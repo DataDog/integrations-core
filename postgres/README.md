@@ -50,7 +50,7 @@ psql -h localhost -U datadog postgres -c \
 
 When it prompts for a password, enter the one used in the first command.
 
-#### Metric Collection
+#### Metric collection
 
 * Edit the `postgres.d/conf.yaml` file to point to your server / port and set the masters to monitor. See the [sample postgres.d/conf.yaml][5] for all available configuration options.
 
@@ -80,50 +80,51 @@ grant SELECT ON pg_stat_activity_dd to datadog;
 
 * [Restart the Agent][6] to start sending PostgreSQL metrics to Datadog.
 
-#### Log Collection
+#### Log collection
+
+**Available for Agent >6.0**
 
 PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix.
 
-* Edit your PostgreSQL configuration file `/etc/postgresql/<version>/main/postgresql.conf` and uncomment the following parameter in the log section:
+1. Edit your PostgreSQL configuration file `/etc/postgresql/<version>/main/postgresql.conf` and uncomment the following parameter in the log section:
 
-  ```
-  logging_collector = on
-  log_directory = 'pg_log'  # directory where log files are written,
-                            # can be absolute or relative to PGDATA
-  log_filename = 'pg.log'   #log file name, can include pattern
-  log_statement = 'all'     #log all queries
-  log_line_prefix= '%m [%p] %d %a %u %h %c '
-  log_file_mode = 0644
-  ## For Windows
-  #log_destination = 'eventlog'
-  ```
+    ```conf
+      logging_collector = on
+      log_directory = 'pg_log'  # directory where log files are written,
+                                # can be absolute or relative to PGDATA
+      log_filename = 'pg.log'   #log file name, can include pattern
+      log_statement = 'all'     #log all queries
+      log_line_prefix= '%m [%p] %d %a %u %h %c '
+      log_file_mode = 0644
+      ## For Windows
+      #log_destination = 'eventlog'
+    ```
 
-* Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml`:
+2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-*  Add this configuration block to your `postgres.d/conf.yaml` file to start collecting your PostgreSQL logs:
+3.  Add this configuration block to your `postgres.d/conf.yaml` file to start collecting your PostgreSQL logs:
 
-  ```
-  logs:
-      - type: file
-        path: /var/log/pg_log/pg.log
-        source: postgresql
-        sourcecategory: database
-        service: myapp
-        #To handle multi line that starts with yyyy-mm-dd use the following pattern
-        #log_processing_rules:
-        #  - type: multi_line
-        #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-        #    name: new_log_start_with_date
-  ```
-* Change the `service` and `path` parameter values to configure for your environment. See the [sample postgres.d/conf.yaml][5] for all available configuration options.
+    ```yaml
+      logs:
+          - type: file
+            path: /var/log/pg_log/pg.log
+            source: postgresql
+            sourcecategory: database
+            service: myapp
+            #To handle multi line that starts with yyyy-mm-dd use the following pattern
+            #log_processing_rules:
+            #  - type: multi_line
+            #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+            #    name: new_log_start_with_date
+    ```
+    
+    Change the `service` and `path` parameter values to configure for your environment. See the [sample postgres.d/conf.yaml][5] for all available configuration options.
 
-* [Restart the Agent][6].
-
-**Learn more about log collection in the [log documentation][7]**
+4. [Restart the Agent][6].
 
 ### Validation
 
@@ -142,8 +143,8 @@ The PostgreSQL check does not include any events.
 
 ### Service Checks
 
-**postgres.can_connect**
-Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL instance. Returns `OK` otherwise.
+**postgres.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL instance, otherwie returns `OK`.
 
 ## Further Reading
 Additional helpful documentation, links, and articles:
@@ -163,7 +164,6 @@ Additional helpful documentation, links, and articles:
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/logs
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [10]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained

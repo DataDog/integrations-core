@@ -24,7 +24,7 @@ The Zookeeper check is included in the [Datadog Agent][3] package, so you don't 
 ### Zookeepr Whitelist
 As of version 3.5, Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][7]) that whitelists [4 letter word commands][8]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
 
-#### Metric Collection
+#### Metric collection
 
 *  Add this configuration block to your `zk.yaml` file to start gathering your [Zookeeper metrics](#metrics):
 
@@ -41,58 +41,58 @@ instances:
 
 * [Restart the Agent][6] to start sending Zookeeper metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-Zookeeper uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file:
+1. Zookeeper uses the `log4j` logger per default. To activate the logging into a file and customize the format edit the `log4j.properties` file:
 
-```
- # Set root logger level to INFO and its only appender to R
-log4j.rootLogger=INFO, R
-log4j.appender.R.File=/var/log/zookeeper.log
-log4j.appender.R.layout=org.apache.log4j.PatternLayout
-log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
-```
+    ```
+      # Set root logger level to INFO and its only appender to R
+      log4j.rootLogger=INFO, R
+      log4j.appender.R.File=/var/log/zookeeper.log
+      log4j.appender.R.layout=org.apache.log4j.PatternLayout
+      log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
+    ```
 
-By default, our integration pipeline support the following conversion patterns:
+2. By default, our integration pipeline support the following conversion patterns:
 
-  ```
-  %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
-  %d [%t] %-5p %c - %m%n
-  %r [%t] %p %c %x - %m%n
-  ```
+    ```
+      %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+      %d [%t] %-5p %c - %m%n
+      %r [%t] %p %c %x - %m%n
+    ```
+    
+    Make sure you clone and edit the integration pipeline if you have a different format.
 
-Make sure you clone and edit the integration pipeline if you have a different format.
+3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-* Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
+    ```yaml
+      logs_enabled: true
+    ```
 
-  ```
-  logs_enabled: true
-  ```
+4. Add this configuration block to your `zk.yaml` file to start collecting your Zookeeper Logs:
 
-* Add this configuration block to your `zk.yaml` file to start collecting your Zookeeper Logs:
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/zookeeper.log
+          source: zookeeper
+          service: myapp
+          #To handle multi line that starts with yyyy-mm-dd use the following pattern
+          #log_processing_rules:
+          #  - type: multi_line
+          #    name: log_start_with_date
+          #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+    ```
 
-  ```
-  logs:
-    - type: file
-      path: /var/log/zookeeper.log
-      source: zookeeper
-      service: myapp
-      #To handle multi line that starts with yyyy-mm-dd use the following pattern
-      #log_processing_rules:
-      #  - type: multi_line
-      #    name: log_start_with_date
-      #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-  ```
+    See the [sample zk.yaml][5] for all available configuration options.
 
-* See the [sample zk.yaml][5] for all available configuration options.
-
-* [Restart the Agent][6] to start sending Zookeeper Logs to Datadog.
+5. [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][9] and look for `zk` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `zk` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -128,13 +128,11 @@ The Zookeeper check does not include any events.
 
 ### Service Checks
 
-**zookeeper.ruok**:
-
+**zookeeper.ruok**:<br>
 Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN` in the case of a different response and `CRITICAL` if no response is received..
 
-**zookeeper.mode**:
-
-The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when Zookeeper's actual mode matches `expected_mode`, otherwise `CRITICAL`.
+**zookeeper.mode**:<br>
+The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when Zookeeper's actual mode matches `expected_mode`, otherwise returns `CRITICAL`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][11].

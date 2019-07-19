@@ -35,7 +35,7 @@ If you're running Varnish 4.1+, add the `dd-agent` system user to the Varnish gr
 sudo usermod -G varnish -a dd-agent
 ```
 
-#### Metric Collection
+#### Metric collection
 
 * Add this configuration block to your `varnish.d/conf.yaml` file to start gathering your [Varnish metrics](#metrics):
 
@@ -67,49 +67,47 @@ Configuration of the Varnish check using Autodiscovery in containerized environm
 * [libvmod-statsd][7]
 * [prometheus_varnish_exporter][8]
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-* To enable Varnish logging uncomment the following in `/etc/default/varnishncsa`:
+1. To enable Varnish logging uncomment the following in `/etc/default/varnishncsa`:
 
-```
-VARNISHNCSA_ENABLED=1
-```
+    ```
+      VARNISHNCSA_ENABLED=1
+    ```
 
-  Add the following at the end of the same file:
+2. Add the following at the end of the same file:
 
-```
-LOG_FORMAT="{\"date_access\": \"%{%Y-%m-%dT%H:%M:%S%z}t\", \"network.client.ip\":\"%h\", \"http.auth\" : \"%u\", \"varnish.x_forwarded_for\" : \"%{X-Forwarded-For}i\", \"varnish.hit_miss\":  \"%{Varnish:hitmiss}x\", \"network.bytes_written\": %b, \"http.response_time\": %D, \"http.status_code\": \"%s\", \"http.url\": \"%r\", \"http.ident\": \"%{host}i\", \"http.method\": \"%m\", \"varnish.time_first_byte\" : %{Varnish:time_firstbyte}x, \"varnish.handling\" : \"%{Varnish:handling}x\", \"http.referer\": \"%{Referer}i\", \"http.useragent\": \"%{User-agent}i\" }"
+    ```
+      LOG_FORMAT="{\"date_access\": \"%{%Y-%m-%dT%H:%M:%S%z}t\", \"network.client.ip\":\"%h\", \"http.auth\" : \"%u\", \"varnish.x_forwarded_for\" : \"%{X-Forwarded-For}i\", \"varnish.hit_miss\":  \"%{Varnish:hitmiss}x\", \"network.bytes_written\": %b, \"http.response_time\": %D, \"http.status_code\": \"%s\", \"http.url\": \"%r\", \"http.ident\": \"%{host}i\", \"http.method\": \"%m\", \"varnish.time_first_byte\" : %{Varnish:time_firstbyte}x, \"varnish.handling\" : \"%{Varnish:handling}x\", \"http.referer\": \"%{Referer}i\", \"http.useragent\": \"%{User-agent}i\" }"
 
-DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
-```
+      DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
+    ```
 
-  Restart Varnishncsa to apply the changes.
+3. Restart Varnishncsa to apply the changes.
 
 
-*  Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+4. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Add this configuration block to your `varnish.d/conf.yaml` file to start collecting your Varnish logs:
+5. Add this configuration block to your `varnish.d/conf.yaml` file to start collecting your Varnish logs:
 
-  ```
-  logs:
-    - type: file
-       path: /var/log/varnish/varnishncsa.log
-      source: varnish
-      sourcecategory: http_web_access
-      service: varnish
-  ```
-  Change the `path` and `service` parameter value and configure them for your environment.
-  See the [sample varnish.yaml][5] for all available configuration options.
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/varnish/varnishncsa.log
+          source: varnish
+          sourcecategory: http_web_access
+          service: varnish
+    ```
+    Change the `path` and `service` parameter value and configure them for your environment.
+    See the [sample varnish.yaml][5] for all available configuration options.
 
-* [Restart the Agent][6].
-
-**Learn more about log collection [in the log documentation][9]**
+6. [Restart the Agent][6].
 
 ### Validation
 
@@ -123,7 +121,7 @@ See [metadata.csv][11] for a list of metrics provided by this check.
 The Varnish check does not include any events.
 
 ### Service Checks
-**varnish.backend_healthy**:
+**varnish.backend_healthy**:<br>
 The Agent submits this service check if you configure `varnishadm`. It submits a service check for each Varnish backend, tagging each with `backend:<backend_name>`.
 
 ## Troubleshooting
@@ -145,7 +143,6 @@ Additional helpful documentation, links, and articles:
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [7]: https://github.com/jib/libvmod-statsd
 [8]: https://github.com/jonnenauha/prometheus_varnish_exporter
-[9]: https://docs.datadoghq.com/logs
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
 [12]: https://docs.datadoghq.com/help

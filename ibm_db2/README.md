@@ -64,29 +64,29 @@ Now if you run `get dbm cfg`, you should see the following:
 
 2. [Restart the Agent][6].
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-```
-logs_enabled: true
-```
+    ```yaml
+      logs_enabled: true
+    ```
 
 2. Add this configuration block to your `ibm_db2.d/conf.yaml` file to start collecting your IBM Db2 logs:
 
-```
-logs:
-  - type: file
-    path: /home/db2inst1/sqllib/db2dump/db2diag.log
-    source: ibm_db2
-    service: db2sysc
-    log_processing_rules:
-      - type: multi_line
-        name: new_log_start_with_date
-        pattern: \d{4}\-(0?[1-9]|[12][0-9]|3[01])\-(0?[1-9]|1[012])
-```
+    ```yaml
+      logs:
+        - type: file
+          path: /home/db2inst1/sqllib/db2dump/db2diag.log
+          source: ibm_db2
+          service: db2sysc
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \d{4}\-(0?[1-9]|[12][0-9]|3[01])\-(0?[1-9]|1[012])
+    ```
 
 3. [Restart the Agent][6].
 
@@ -102,10 +102,11 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-- `ibm_db2.can_connect` returns `CRITICAL` if the Agent is unable to connect to
-  the monitored IBM Db2 database, otherwise returns `OK`.
-- `ibm_db2.status` returns `CRITICAL` if the monitored IBM Db2 database is
-  quiesced, `WARNING` for quiesce-pending or rollforwards, otherwise returns `OK`.
+**ibm_db2.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the monitored IBM Db2 database, otherwise returns `OK`.
+
+**ibm_db2.status**:<br>
+Returns `CRITICAL` if the monitored IBM Db2 database is quiesced, `WARNING` for quiesce-pending or rollforwards, otherwise returns `OK`.
 
 ### Events
 

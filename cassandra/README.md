@@ -35,33 +35,33 @@ See the [sample  cassandra.d/conf.yaml][7] for all available configuration optio
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```yaml
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Add this configuration block to your `cassandra.d/conf.yaml` file to start collecting your Cassandra logs:
+2. Add this configuration block to your `cassandra.d/conf.yaml` file to start collecting your Cassandra logs:
 
-  ```yaml
-  logs:
-    - type: file
-      path: /var/log/cassandra/*.log
-      source: cassandra
-      sourcecategory: database
-      service: myapplication
-  ```
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/cassandra/*.log
+          source: cassandra
+          sourcecategory: database
+          service: myapplication
+    ```
 
-  Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample  cassandra.d/conf.yaml][7] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment.
+    See the [sample  cassandra.d/conf.yaml][7] for all available configuration options.
 
-To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][8] can be added.
+    To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][8] can be added.
 
-* [Restart the Agent][9].
+3. [Restart the Agent][9].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][10] and look for `cassandra` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `cassandra` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -71,9 +71,8 @@ See [metadata.csv][11] for a list of metrics provided by this integration.
 The Cassandra check does not include any events.
 
 ### Service Checks
-**cassandra.can_connect**
-
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Cassandra instance. Returns `OK` otherwise.
+**cassandra.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Cassandra instance, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][5].

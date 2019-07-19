@@ -45,7 +45,7 @@ The Agent collects metrics via a stats endpoint:
 
 2. [Restart HAProxy to enable the stats endpoint][7].
 
-#### Metric Collection
+#### Metric collection
 
 Add this configuration block to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
@@ -62,36 +62,34 @@ See the [sample haproxy.yaml][6] for all available configuration options.
 
 *  [Restart the Agent][8].
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```
-    logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Add this configuration block to your `haproxy.d/conf.yaml` file to start collecting your Haproxy Logs:
+2. Add this configuration block to your `haproxy.d/conf.yaml` file to start collecting your Haproxy Logs:
 
-  ```
-    logs:
-        - type: udp
-          port: 514
-          service: haproxy
-          source: haproxy
-          sourcecategory: http_web_access
-  ```
+    ```yaml
+      logs:
+          - type: udp
+            port: 514
+            service: haproxy
+            source: haproxy
+            sourcecategory: http_web_access
+    ```
 
-  Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml][6] for all available configuration options.
+    Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml][6] for all available configuration options.
 
-* [Restart the Agent][8]
-
-**Learn more about log collection [in the log documentation][9]**
+3. [Restart the Agent][8].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][10] and look for `haproxy` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `haproxy` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -101,8 +99,7 @@ See [metadata.csv][11] for a list of metrics provided by this integration.
 The Haproxy check does not include any events.
 
 ### Service Checks
-**haproxy.backend_up**
-
+**haproxy.backend_up**:<br>
 Converts the HAProxy status page into service checks.
 Returns `CRITICAL` for a given service if HAProxy is reporting it `down`.
 Returns `OK` for `maint`, `ok` and any other state.
@@ -125,7 +122,6 @@ Need help? Contact [Datadog support][12].
 [6]: https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [7]: https://www.haproxy.org/download/1.7/doc/management.txt
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/logs
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv
 [12]: https://docs.datadoghq.com/help

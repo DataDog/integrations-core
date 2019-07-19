@@ -77,14 +77,14 @@ In the main Consul configuration file, add your `dogstatsd_addr` nested under th
 
 Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
 
     ```yaml
-    logs_enabled: true
+      logs_enabled: true
     ```
 
 2. Add this configuration block to your `consul.yaml` file to start collecting your Consul Logs:
@@ -101,11 +101,9 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
 3. [Restart the Agent][6].
 
-**Learn more about log collection [in the log documentation][7]**
-
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `consul` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `consul` under the Checks section.
 
 **Note**: If your Consul nodes have debug logging enabled, you'll see the Datadog Agent's regular polling in the Consul log:
 
@@ -139,14 +137,12 @@ See [Consul's Network Coordinates doc][11] if you're curious about how the netwo
 
 ### Events
 
-`consul.new_leader`:
-
+**consul.new_leader**:<br>
 The Datadog Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`.
 
 ### Service Checks
 
-`consul.check`:
-
+**consul.check**:<br>
 The Datadog Agent submits a service check for each of Consul's health checks, tagging each with:
 
 * `service:<name>`, if Consul reports a `ServiceName`
@@ -167,7 +163,6 @@ Need help? Contact [Datadog support][12].
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/consul/datadog_checks/consul/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/logs
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv
 [10]: https://www.consul.io/docs/agent/telemetry.html

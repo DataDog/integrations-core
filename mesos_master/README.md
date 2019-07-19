@@ -38,11 +38,11 @@ If you passed the correct Master URL when starting datadog-agent, the Agent is a
 
 Unless your masters' API uses a self-signed certificate. In that case, set `disable_ssl_validation: true` in `mesos_master.d/conf.yaml`.
 
-### Log Collection
+#### Log collection
 
-Datadog Agent version 6 and greater can collect logs from containers. You can either collect all logs from all your containers or filter them by container image name or container label to cherry pick what logs should be collected.
+Datadog Agent >6.0 collects logs from containers. You can either collect all logs from all your containers or filter them by container image name or container label to cherry pick what logs should be collected.
 
-Add those extra variables to the Datadog Agent run command to start collecting logs:
+Add these extra variables to the Datadog Agent run command to start collecting logs:
 
 * `-e DD_LOGS_ENABLED=true`: this enables the log collection when set to `true`. The Agent now looks for log instructions in configuration files or container labels
 * `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this enables log collection for all containers
@@ -80,9 +80,8 @@ The Mesos-master check does not include any events.
 
 ### Service Checks
 
-`mesos_master.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to the Mesos Master API to collect metrics, otherwise OK.
+**mesos_master.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to the Mesos Master API to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][6].
