@@ -31,7 +31,7 @@ ibm_was.thread_pools.destroy_count,gauge,,thread,,The total number of threads de
 ibm_was.thread_pools.active_count,gauge,,thread,,The number of concurrently active threads,0,ibm_was,thread pools active count
 ibm_was.thread_pools.pool_size,gauge,,thread,,The average number of threads in pool,0,ibm_was,thread pools size
 ibm_was.thread_pools.percent_maxed,gauge,,percent,,The average percent of the time that all threads are in use,0,ibm_was,thread pools percent max
-ibm_was.thread_pools.declaredthread_hung_count,gague,,thread,,The number of threads declared hung,0,ibm_was,thread pools declared count
+ibm_was.thread_pools.declaredthread_hung_count,gauge,,thread,,The number of threads declared hung,0,ibm_was,thread pools declared count
 ibm_was.thread_pools.cleared_thread_hang_count,gauge,,thread,,The number of thread hangs cleared,0,ibm_was,thread pools cleared
 ibm_was.thread_pools.concurrent_hung_thread_count,gauge,,thread,,The number of concurrently hung threads,0,ibm_was,thread pools concurrent hung
 ibm_was.thread_pools.active_time,gauge,,millisecond,,The average time in milliseconds the threads are in active state,0,ibm_was,thread pools active time
