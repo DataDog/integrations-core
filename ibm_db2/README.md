@@ -29,7 +29,7 @@ For Agent versions <= 6.11:
 "C:\Program Files\Datadog\Datadog Agent\embedded\Scripts\python.exe" -m pip install ibm_db==3.0.1
 ```
 
-For agent version >= 6.12:
+For Agent versions >= 6.12:
 ```
 "C:\Program Files\Datadog\Datadog Agent\embedded2\Scripts\python.exe" -m pip install ibm_db==3.0.1
 ```
