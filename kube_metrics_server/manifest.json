@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Kube_metrics_server Integration",
+  "public_title": "Datadog-Kubernetes Metric Server Integration",
   "categories": [
     "orchestration",
     "containers"
