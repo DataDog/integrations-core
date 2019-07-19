@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.2.0 / 2019-07-19
+
+* [Added] Add telemetry metrics counter by ksm collector. See [#4125](https://github.com/DataDog/integrations-core/pull/4125).
+
 ## 9.1.0 / 2019-07-13
 
 * [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025). Thanks [clamoriniere](https://github.com/clamoriniere).
