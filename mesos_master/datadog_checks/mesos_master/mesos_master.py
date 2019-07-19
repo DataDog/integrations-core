@@ -142,7 +142,7 @@ class MesosMaster(AgentCheck):
             parsed_url = urlparse(url)
             ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
             if not ssl_verify and parsed_url.scheme == 'https':
-                self.log.warning('Skipping SSL cert validation for %s based on configuration.' % url)
+                self.log.warning('Skipping SSL cert validation for {0} based on configuration.'.format(url))
 
     def _get_json(self, url, timeout, verify=True, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
@@ -180,29 +180,28 @@ class MesosMaster(AgentCheck):
     def _get_master_state(self, url, timeout, verify, tags):
         try:
             # Mesos version >= 0.25
-            endpoint = '/state'
-            master_state = self._get_json(url + endpoint, timeout, verify=verify, failure_expected=True, tags=tags)
+            endpoint = url + '/state'
+            master_state = self._get_json(endpoint, timeout, verify=verify, failure_expected=True, tags=tags)
         except CheckException as e:
-            msg = str(e)
-            self.log.warning('Encounted error getting state at {}{}, message: {}'.format(url, endpoint, msg))
+            self.log.warning('Encountered error getting state at {0}, message: {1}'.format(endpoint, str(e)))
             # Mesos version < 0.25
-            endpoint = '/state.json'
-            master_state = self._get_json(url + endpoint, timeout, verify=verify, tags=tags)
+            endpoint = url + '/state.json'
+            master_state = self._get_json(endpoint, timeout, verify=verify, tags=tags)
         return master_state
 
     def _get_master_stats(self, url, timeout, verify, tags):
         if self.version >= [0, 22, 0]:
-            endpoint = '/metrics/snapshot'
+            endpoint = url + '/metrics/snapshot'
         else:
-            endpoint = '/stats.json'
-        return self._get_json(url + endpoint, timeout, verify, tags)
+            endpoint = url + '/stats.json'
+        return self._get_json(endpoint, timeout, verify, tags)
 
     def _get_master_roles(self, url, timeout, verify, tags):
         if self.version >= [1, 8, 0]:
-            endpoint = '/roles'
+            endpoint = url + '/roles'
         else:
-            endpoint = '/roles.json'
-        return self._get_json(url + endpoint, timeout, verify, tags)
+            endpoint = url + '/roles.json'
+        return self._get_json(endpoint, timeout, verify, tags)
 
     def _check_leadership(self, url, timeout, verify, tags=None):
         state_metrics = self._get_master_state(url, timeout, verify, tags)
