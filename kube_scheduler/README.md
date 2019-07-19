@@ -1,14 +1,14 @@
-# Agent Check: Kubernetes Scheduler
+# Agent Check: Kube_scheduler
 
 ## Overview
 
-This check monitors [Kubernetes Scheduler][1], part of the Kubernetes control plane.
+This check monitors [Kube_scheduler][1], part of the Kubernetes control plane.
 
 ## Setup
 
 ### Installation
 
-The Kubernetes Scheduler check is included in the [Datadog Agent][2] package.
+The Kube_scheduler check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
