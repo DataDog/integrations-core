@@ -24,7 +24,7 @@ The [ibm_db][4] client library is required. To install it, ensure you have a wor
 
 ##### Windows:
 
-For agent versions <= 6.11:
+For Agent versions <= 6.11:
 ```
 "C:\Program Files\Datadog\Datadog Agent\embedded\Scripts\python.exe" -m pip install ibm_db==3.0.1
 ```
