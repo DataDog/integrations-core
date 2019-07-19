@@ -165,7 +165,7 @@ In Linux, use this format for the script:
 
 Windows Powershell example:
 
-Agent version <=6.11:
+Agent versions <=6.11:
 ```
 PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FILE>\mibdump.py' `
   --mib-source <PATH_TO_MIB_SOURCE> `
