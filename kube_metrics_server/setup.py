@@ -24,7 +24,7 @@ CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 setup(
     name='datadog-kube_metrics_server',
     version=ABOUT['__version__'],
-    description='The Kubernetes Metrics Server check',
+    description='The Kube_metrics_server check',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent kube_metrics_server check',
