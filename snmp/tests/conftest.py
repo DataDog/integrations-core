@@ -21,4 +21,4 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return SnmpCheck('snmp', {}, {}, {})
+    return SnmpCheck('snmp', {}, [])

@@ -12,20 +12,21 @@ from . import common
 pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
-def test_command_generator(aggregator):
+def test_command_generator():
     """
     Command generator's parameters should match init_config
     """
-    check = SnmpCheck('snmp', common.MIBS_FOLDER, {}, {})
-    snmp_engine, _, _, _, _, _, _, _ = check._load_conf(common.SNMP_CONF)
+    instance = common.generate_instance_config(common.CONSTRAINED_OID)
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [])
+    config = check._load_conf(instance)
 
     # Test command generator MIB source
-    mib_folders = snmp_engine.getMibBuilder().getMibSources()
-    full_path_mib_folders = map(lambda f: f.fullPath(), mib_folders)
+    mib_folders = config.snmp_engine.getMibBuilder().getMibSources()
+    full_path_mib_folders = [f.fullPath() for f in mib_folders]
     assert check.ignore_nonincreasing_oid is False  # Default value
 
-    check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, {}, {})
-    assert check.ignore_nonincreasing_oid is True
+    check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, [])
+    assert check.ignore_nonincreasing_oid
 
     assert common.MIBS_FOLDER["mibs_folder"] in full_path_mib_folders
 
@@ -88,7 +89,7 @@ def test_snmp_getnext_call(check):
         assert ("ignoreNonIncreasingOid", False) in kwargs.items()
         assert ("lexicographicMode", False) in kwargs.items()
 
-        check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, {}, {})
+        check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, [])
         check.check(instance)
         _, kwargs = nextCmd.call_args
         assert ("ignoreNonIncreasingOid", True) in kwargs.items()
@@ -99,7 +100,7 @@ def test_custom_mib(aggregator):
     instance = common.generate_instance_config(common.DUMMY_MIB_OID)
     instance["community_string"] = "dummy"
 
-    check = SnmpCheck('snmp', common.MIBS_FOLDER, {}, {})
+    check = SnmpCheck('snmp', common.MIBS_FOLDER, [])
     check.check(instance)
 
     # Test metrics
@@ -131,23 +132,25 @@ def test_scalar(aggregator, check):
 
 
 def test_enforce_constraint(aggregator, check):
-    """
-    Allow ignoring constraints
-    """
     instance = common.generate_instance_config(common.CONSTRAINED_OID)
     instance["community_string"] = "constraint"
     instance["enforce_mib_constraints"] = True
 
     check.check(instance)
 
-    assert "service_check_error" in instance and "failed at: ValueConstraintError" in instance["service_check_error"]
-    # Test metrics
-    for metric in common.CONSTRAINED_OID:
-        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
-        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0)
+    assert "service_check_error" in instance
+    assert "failed at: ValueConstraintError" in instance["service_check_error"]
 
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
+
+
+def test_unenforce_constraint(aggregator, check):
+    """
+    Allow ignoring constraints
+    """
+    instance = common.generate_instance_config(common.CONSTRAINED_OID)
+    instance["community_string"] = "constraint"
     instance["enforce_mib_constraints"] = False
-    del instance["service_check_error"]
     check.check(instance)
 
     # Test metrics
@@ -415,8 +418,7 @@ def test_network_failure(aggregator, check):
 
 
 def test_cast_metrics(aggregator, check):
-    metrics = common.CAST_METRICS
-    instance = common.generate_instance_config(metrics)
+    instance = common.generate_instance_config(common.CAST_METRICS)
 
     check.check(instance)
     aggregator.assert_metric('snmp.cpuload1', value=0.06)
