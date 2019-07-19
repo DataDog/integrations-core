@@ -1,5 +1,5 @@
 {
-  "display_name": "Kubernetes Metrics Server",
+  "display_name": "Kube metrics server",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "kube_metrics_server",
