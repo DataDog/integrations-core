@@ -572,12 +572,12 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 
 **Windows** (Ensure that your shell session has _administrator_ privileges):
 
-For agent versions <= 6.12:
+For agent versions <= 6.11:
 ```
 "C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe" integration install -w /path/to/wheel.whl
 ```
 
-For agent version >= 6.13:
+For agent version >= 6.12:
 ```
 "C:\Program Files\Datadog\Datadog Agent\embedded2\agent.exe" integration install -w /path/to/wheel.whl
 ```
