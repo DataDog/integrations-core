@@ -88,7 +88,7 @@ static_resources:
 
 2. Check if the Datadog Agent can access Envoy's [admin endpoint][4].
 
-3. [Restart the Agent][9]
+3. [Restart the Agent][9].
 
 | Setting            | Description                                                                                                                                                                |
 | ---                | ---                                                                                                                                                                        |
@@ -130,27 +130,31 @@ If you care only about the cluster name and grpc service, you would add this to 
 
 `^cluster\.<CLUSTER_NAME>\.grpc\.<GRPC_SERVICE>\.`
 
-#### Log Collection
+#### Log collection
 
-To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
-```
-    logs_enabled: true
-```
+**Available for Agent >6.0**
 
-Next, edit `envoy.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Envoy log files.
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-```yaml
- logs:
-   - type: file
-     path: /var/log/envoy.log
-     source: envoy
-     service: envoy
-```
+    ```yaml
+      logs_enabled: true
+    ```
 
+2. Next, edit `envoy.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Envoy log files.
+
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/envoy.log
+          source: envoy
+          service: envoy
+    ```
+
+3. [Restart the Agent][9].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][11] and look for `envoy` under the Checks section.
+[Run the Agent's status subcommand][11] and look for `envoy` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -165,9 +169,8 @@ The Envoy check does not include any events.
 
 ### Service Checks
 
-`envoy.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to Envoy to collect metrics, otherwise OK.
+**envoy.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Envoy to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 

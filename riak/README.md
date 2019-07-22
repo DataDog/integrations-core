@@ -16,8 +16,7 @@ The Riak check is included in the [Datadog Agent][3] package, so you don't need 
 
 ### Configuration
 
-1. Edit the `riak.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
-	See the [sample riak.yaml][5] for all available configuration options:
+1. Edit the `riak.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample riak.yaml][5] for all available configuration options:
 
     ```yaml
     init_config:
@@ -28,49 +27,49 @@ The Riak check is included in the [Datadog Agent][3] package, so you don't need 
 
 2. [Restart the Agent][6] to start sending Riak metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
-    logs_enabled: true
+      logs_enabled: true
     ```
 
 2. Add this configuration block to your `riak.d/conf.yaml` file to start collecting your Riak logs:
 
-    ```yaml
-    logs:
-      - type: file
-        path: /var/log/riak/console.log
-        source: riak
-        service: <SERVICE_NAME>
+    ```
+      logs:
+        - type: file
+          path: /var/log/riak/console.log
+          source: riak
+          service: <SERVICE_NAME>
 
-      - type: file
-        path: /var/log/riak/error.log
-        source: riak
-        service: <SERVICE_NAME>
-        log_processing_rules:
-          - type: multi_line
-            name: new_log_start_with_date
-            pattern: \d{4}\-\d{2}\-\d{2}
+        - type: file
+          path: /var/log/riak/error.log
+          source: riak
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \d{4}\-\d{2}\-\d{2}
 
-      - type: file
-        path: /var/log/riak/crash.log
-        source: riak
-        service: <SERVICE_NAME>
-        log_processing_rules:
-          - type: multi_line
-            name: new_log_start_with_date
-            pattern: \d{4}\-\d{2}\-\d{2}
+        - type: file
+          path: /var/log/riak/crash.log
+          source: riak
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \d{4}\-\d{2}\-\d{2}
     ```
 
 3. [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `riak` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `riak` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -82,9 +81,8 @@ The Riak check does not include any events.
 
 ### Service Checks
 
-**riak.can_connect**:
-
-Returns CRITICAL if the Agent cannot connect to the Riak stats endpoint to collect metrics, otherwise OK.
+**riak.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to the Riak stats endpoint to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][9].

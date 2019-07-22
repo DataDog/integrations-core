@@ -46,35 +46,34 @@ See the [sample redisdb.d/conf.yaml][4] for all available configuration options.
 
 [Restart the Agent][5] to begin sending Redis metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Add this configuration block to your `redisdb.d/conf.yaml` file to start collecting your Redis Logs:
+2. Add this configuration block to your `redisdb.d/conf.yaml` file to start collecting your Redis Logs:
 
-  ```
-    logs:
-        - type: file
-          path: /var/log/redis_6379.log
-          source: redis
-          sourcecategory: database
-          service: myapplication
-  ```
+    ```yaml
+      logs:
+          - type: file
+            path: /var/log/redis_6379.log
+            source: redis
+            sourcecategory: database
+            service: myapplication
+    ```
 
-  Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample redisdb.yaml][4] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample redisdb.yaml][4] for all available configuration options.
 
-* [Restart the Agent][5] to begin sending Redis logs to Datadog.
+3. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `redisdb` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `redisdb` under the Checks section.
 
 ## Data Collected
 
@@ -88,13 +87,11 @@ The Redis check does not include any events.
 
 ### Service Checks
 
-**redis.can_connect**:
+**redis.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Redis to collect metrics, otherwise returns `OK`.
 
-Returns CRITICAL if the Agent cannot connect to Redis to collect metrics, otherwise OK.
-
-**redis.replication.master_link_status**
-
-Returns `CRITICAL` if this Redis instance is unable to connect to its master instance. Returns `OK` otherwise.
+**redis.replication.master_link_status**:<br>
+Returns `CRITICAL` if this Redis instance is unable to connect to its master instance, otherwise returns `OK`.
 
 ## Troubleshooting
 
@@ -222,7 +219,9 @@ pytest -m"not integration"
 
 ## Further Reading
 
-Read our [series of blog posts][10] about how to monitor your Redis servers with Datadog. We detail the key performance metrics, how to collect them, and how to use Datadog to monitor Redis.
+Additional helpful documentation, links, and articles:
+
+* [How to monitor Redis performance metrics][10]
 
 
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations

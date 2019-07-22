@@ -19,26 +19,26 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][3].
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
 
-```
-(...)
-  env:
+    ```
     (...)
-    - name: DD_LOGS_ENABLED
-        value: "true"
-    - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-        value: "true"
-(...)
-```
+      env:
+        (...)
+        - name: DD_LOGS_ENABLED
+            value: "true"
+        - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+            value: "true"
+    (...)
+    ```
 
-* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5].
+2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5].
 
-* [Restart the Agent][3].
+3. [Restart the Agent][3].
 
 ### Validation
 
@@ -52,13 +52,12 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-`kube_scheduler.prometheus.health`:
-
-Returns CRITICAL if the Agent cannot reach the metrics endpoints.
+**kube_scheduler.prometheus.health**:<br>
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, otherwise returns `OK`.
 
 ### Events
 
-Kube_scheduler does not include any events.
+Kube Scheduler does not include any events.
 
 ## Troubleshooting
 

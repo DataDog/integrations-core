@@ -24,34 +24,39 @@ See the [sample gitlab.d/conf.yaml][5] for all available configuration options.
 **Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
 
 
-#### Log Collection
+#### Log collection
 
-To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
-```yaml
-    logs_enabled: true
-```
+**Available for Agent >6.0**
 
-Next, edit `gitlab.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Gitlab log files.
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-```yaml
-logs:
-   - type: file
-     path: /var/log/gitlab/gitlab-rails/production_json.log
-     service: <SERVICE_NAME>
-     source: gitlab
-   - type: file
-     path: /var/log/gitlab/gitlab-rails/production.log
-     service: <SERVICE_NAME>
-     source: gitlab
-   - type: file
-     path: /var/log/gitlab/gitlab-rails/api_json.log
-     service: <SERVICE_NAME>
-     source: gitlab
-```
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Next, edit `gitlab.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Gitlab log files.
+
+    ```
+      logs:
+        - type: file
+          path: /var/log/gitlab/gitlab-rails/production_json.log
+          service: <SERVICE_NAME>
+          source: gitlab
+        - type: file
+          path: /var/log/gitlab/gitlab-rails/production.log
+          service: <SERVICE_NAME>
+          source: gitlab
+        - type: file
+          path: /var/log/gitlab/gitlab-rails/api_json.log
+          service: <SERVICE_NAME>
+          source: gitlab
+    ```
+
+3. [Restart the Agent][9].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `gitlab` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `gitlab` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -75,3 +80,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [8]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent

@@ -18,28 +18,28 @@ The `nginx-ingress-controller` check is included in the [Datadog Agent][2] packa
 
 2. [Restart the Agent][3].
 
-#### Log Collection
+#### Log collection
 
 Gather your logs from NGINX Ingress Controller, including Weave NPC and Weave Kube and send them to Datadog.
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
 
-```
-(...)
-  env:
-    (...)
-    - name: DD_LOGS_ENABLED
-        value: "true"
-    - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-        value: "true"
-(...)
-```
+    ```
+      (...)
+        env:
+          (...)
+          - name: DD_LOGS_ENABLED
+              value: "true"
+          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+              value: "true"
+      (...)
+    ```
 
-* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5].
+2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5].
 
-* [Restart the Agent][3].
+3. [Restart the Agent][3].
 
 ### Configuration of the NGINX check (optional)
 
@@ -58,7 +58,7 @@ ad.datadoghq.com/nginx-ingress-controller.logs: '[{"service": "controller", "sou
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `nginx_ingress_controller` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `nginx_ingress_controller` under the Checks section.
 
 ## Data Collected
 
@@ -66,13 +66,13 @@ ad.datadoghq.com/nginx-ingress-controller.logs: '[{"service": "controller", "sou
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-### Service Checks
-
-nginx-ingress-controller does not include any service checks.
-
 ### Events
 
-nginx-ingress-controller does not include any events.
+The NGINX Ingress Controller does not include any events.
+
+### Service Checks
+
+The NGINX Ingress Controller does not include any service checks.
 
 ## Troubleshooting
 

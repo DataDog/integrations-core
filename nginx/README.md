@@ -97,7 +97,7 @@ sudo nginx -t && sudo nginx -s reload
 ```
 
 
-#### Metric Collection
+#### Metric collection
 
 1. Set the `nginx_status_url` parameter to `http://localhost:81/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][8] for all available configuration options.
 
@@ -114,38 +114,36 @@ sudo nginx -t && sudo nginx -s reload
 
 3. [Restart the Agent][9] to start sending NGINX metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-*  Add this configuration block to your `nginx.d/conf.yaml` file to start collecting your NGINX Logs:
+2. Add this configuration block to your `nginx.d/conf.yaml` file to start collecting your NGINX Logs:
 
-  ```
-  logs:
-    - type: file
-      path: /var/log/nginx/access.log
-      service: nginx
-      source: nginx
-      sourcecategory: http_web_access
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/nginx/access.log
+          service: nginx
+          source: nginx
+          sourcecategory: http_web_access
 
-    - type: file
-      path: /var/log/nginx/error.log
-      service: nginx
-      source: nginx
-      sourcecategory: http_web_access
-  ```
-  Change the `service` and `path` parameter values and configure them for your environment.
-  See the [sample nginx.d/conf.yaml][8] for all available configuration options.
+        - type: file
+          path: /var/log/nginx/error.log
+          service: nginx
+          source: nginx
+          sourcecategory: http_web_access
+    ```
+    Change the `service` and `path` parameter values and configure them for your environment.
+    See the [sample nginx.d/conf.yaml][8] for all available configuration options.
 
-* [Restart the Agent][9]
-
-**Learn more about log collection [in the log documentation][10]**
+3. [Restart the Agent][9].
 
 **Note**: The default NGINX log format does not have a request response time. To include it into your logs, update the NGINX log format by adding the following configuration block in the `http` section of your NGINX configuration file (`/etc/nginx/nginx.conf`): 
 
@@ -162,7 +160,7 @@ http {
 
 ### Validation
 
-[Run the Agent's `status` subcommand][11] and look for `nginx` under the Checks section.
+[Run the Agent's status subcommand][11] and look for `nginx` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -198,16 +196,18 @@ The NGINX check does not include any events.
 
 ### Service Checks
 
-`nginx.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to NGINX to collect metrics, otherwise OK.
+**nginx.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to NGINX to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][13].
 
 ## Further Reading
+Additional helpful documentation, links, and articles:
 
-Learn more about how to monitor NGINX performance metrics thanks to [our series of posts][14]. We detail the key performance metrics, [how to collect them][15], and [how to use Datadog to monitor NGINX][16].
+* [How to monitor NGINX][14]
+* [How to collect NGINX metrics][15]
+* [How to monitor NGINX with Datadog][16]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
@@ -219,7 +219,6 @@ Learn more about how to monitor NGINX performance metrics thanks to [our series 
 [7]: https://nginx.org/en/docs/http/ngx_http_api_module.html
 [8]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/logs
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
 [13]: https://docs.datadoghq.com/help

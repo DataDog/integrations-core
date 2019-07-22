@@ -44,14 +44,14 @@ The CouchDB check is included in the [Datadog Agent][3] package, so you don't ne
 
 3. [Restart the Agent][6] to begin sending CouchDB metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
     ```yaml
-    logs_enabled: true
+      logs_enabled: true
     ```
 
 2. Add this configuration block to your `couch.d/conf.yaml` file to start collecting your CouchDB Logs:
@@ -71,7 +71,7 @@ The CouchDB check is included in the [Datadog Agent][3] package, so you don't ne
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `couch` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `couch` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -84,7 +84,8 @@ The Couch check does not include any events.
 
 ### Service Checks
 
-`couchdb.can_connect`: Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics.
+**couchdb.can_connect**:<br>
+Returns `Critical` if the Agent cannot connect to CouchDB to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][9].

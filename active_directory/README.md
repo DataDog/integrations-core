@@ -21,24 +21,24 @@ See the [sample active_directory.d/conf.yaml][3] for all available configuration
 
 2. [Restart the Agent][4]
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
     ```yaml
-    logs_enabled: true
+      logs_enabled: true
     ```
 
 2. Add this configuration block to your `active_directory.d/conf.yaml` file to start collecting your Active Directory Logs:
 
-    ```yaml
+    ```
       logs:
-          - type: file
-            path: /path/to/my/directory/file.log
-            source: ruby
-            service: <MY_SERVICE>
+        - type: file
+          path: /path/to/my/directory/file.log
+          source: ruby
+          service: <MY_SERVICE>
     ```
 
     Change the `path` and `service` parameter values and configure them for your environment.
@@ -50,7 +50,7 @@ See the [sample active_directory.d/conf.yaml][3] for all available configuration
 
 ### Validation
 
-[Run the Agent's `info` subcommand][6] and look for `active_directory` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `active_directory` under the Checks section.
 
 ## Data Collected
 

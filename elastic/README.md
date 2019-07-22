@@ -23,7 +23,7 @@ The Elasticsearch check is included in the [Datadog Agent][3] package, so you do
 
 2. [Restart the Agent][6]
 
-#### Metric Collection
+#### Metric collection
 
 *  Add this configuration block to your `elastic.yaml` file to start gathering your [ElasticSearch metrics](#metrics):
 
@@ -48,35 +48,33 @@ See the [sample elastic.yaml][5] for all available configuration options, includ
 
 Finally, [Restart the Agent][6] to begin sending Elasticsearch metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Then Add this configuration block to your `elastic.d/conf.yaml` file to start collecting your Elasticsearch logs:
+2. Add this configuration block to your `elastic.d/conf.yaml` file to start collecting your Elasticsearch logs:
 
-  ```yaml
-    logs:
-        - type: file
-          path: /var/log/elasticsearch/*.log
-          source: elasticsearch
-          service: myservice
-  ```
+    ```yaml
+      logs:
+          - type: file
+            path: /var/log/elasticsearch/*.log
+            source: elasticsearch
+            service: myservice
+    ```
 
-  Change the `path` and `service` parameter values and configure them for your environment.
+    Change the `path` and `service` parameter values and configure them for your environment.
 
-* [Restart the Agent][6] to begin sending Elasticsearch logs to Datadog.
-
-**Learn more about log collection [in the log documentation][7]**
+3. [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `elastic` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `elastic` under the Checks section.
 
 ## Data Collected
 
@@ -121,7 +119,6 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/logs
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://www.elastic.co/guide/en/elasticsearch/reference/current/release-notes-6.3.0.html
 [10]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv

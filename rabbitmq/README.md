@@ -46,7 +46,7 @@ rabbitmqctl set_user_tags datadog monitoring
 
 Here, `/` refers to the default host. Set this to your specified virtual host name. See the [RabbitMQ documentation][8] for more information.
 
-#### Metric Collection
+#### Metric collection
 
 * Add this configuration block to your `rabbitmq.d/conf.yaml` file to start gathering your [RabbitMQ metrics](#metrics):
 
@@ -86,35 +86,35 @@ Configuration Options:
 
 [Restart the Agent][10] to begin sending RabbitMQ metrics, events, and service checks to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following to your RabbitMQ configuration file (`/etc/rabbitmq/rabbitmq.conf`):
 
-    ```
-    log.dir = /var/log/rabbit
-    log.file = rabbit.log
+    ```conf
+      log.dir = /var/log/rabbit
+      log.file = rabbit.log
     ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```
-    logs_enabled: true
+    ```yaml
+      logs_enabled: true
     ```
 
 3. Add this configuration block to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
-    ```
-    logs:
-        - type: file
-          path: /var/log/rabbit/*.log
-          source: rabbitmq
-          service: myservice
-          log_processing_rules:
-            - type: multi_line
-              name: logs_starts_with_equal_sign
-              pattern: "="
+    ```yaml
+      logs:
+          - type: file
+            path: /var/log/rabbit/*.log
+            source: rabbitmq
+            service: myservice
+            log_processing_rules:
+              - type: multi_line
+                name: logs_starts_with_equal_sign
+                pattern: "="
     ```
 
 4. [Restart the Agent][10].
@@ -138,17 +138,19 @@ If you require an increase in the number of exchanges, queues, or nodes, contact
 
 ### Service Checks
 
-**rabbitmq.aliveness**:
-The Agent submits this service check for all vhosts (if `vhosts` is not configured) OR a subset of vhosts (those configured in `vhosts`). Each service check is tagged with `vhost:<vhost_name>`. Returns CRITICAL if the aliveness check failed, otherwise returns OK.
+**rabbitmq.aliveness**:<br>
+The Agent submits this service check for all vhosts (if `vhosts` is not configured) OR a subset of vhosts (those configured in `vhosts`). Each service check is tagged with `vhost:<vhost_name>`. Returns `CRITICAL` if the aliveness check failed, otherwise returns `OK`.
 
-**rabbitmq.status**:
-Returns CRITICAL if the Agent cannot connect to RabbitMQ to collect metrics, otherwise returns OK.
+**rabbitmq.status**:<br>
+Returns `CRITICAL` if the Agent cannot connect to RabbitMQ to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][13].
 
 ## Further Reading
+Additional helpful documentation, links, and articles:
+
 ### Datadog Blog
 * [Key metrics for RabbitMQ monitoring][14]
 * [Collecting metrics with RabbitMQ monitoring tools][15]

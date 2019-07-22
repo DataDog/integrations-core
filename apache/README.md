@@ -23,9 +23,9 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample apache.d/conf.yaml][5] for all available configuration options.
 
-2. [Restart the Agent][6]
+2. [Restart the Agent][6].
 
-#### Metric Collection
+#### Metric collection
 
 1. Add this configuration block to your `apache.d/conf.yaml` file to start gathering your [Apache Metrics](#metrics):
 
@@ -42,14 +42,14 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 2.  [Restart the Agent][6].
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
     ```yaml
-    logs_enabled: true
+      logs_enabled: true
     ```
 
 2. Add this configuration block to your `apache.d/conf.yaml` file to start collecting your Apache Logs:
@@ -74,8 +74,6 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
 
 3. [Restart the Agent][6].
 
-**Learn more about log collection [in the log documentation][7]**.
-
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `apache` under the Checks section.
@@ -90,8 +88,8 @@ The Apache check does not include any events.
 
 ### Service Checks
 
-**apache.can_connect**:
-Returns CRITICAL if the Agent cannot connect to the configured `apache_status_url`, otherwise OK.
+**apache.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to the configured `apache_status_url`, otherwise returns `OK`.
 
 ## Troubleshooting
 
@@ -115,7 +113,6 @@ Additional helpful documentation, links, and articles:
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/logs
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
 [10]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues

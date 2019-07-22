@@ -48,54 +48,54 @@ spec:
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `twistlock` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `twistlock` under the Checks section.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 ##### Kubernetes
 
-* Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][6]:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][6]:
 
-```
-(...)
-  env:
-    (...)
-    - name: DD_LOGS_ENABLED
-        value: "true"
-    - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-        value: "true"
-(...)
-```
+    ```
+      (...)
+        env:
+          (...)
+          - name: DD_LOGS_ENABLED
+              value: "true"
+          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+              value: "true"
+      (...)
+    ```
 
-* Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][7].
+2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][7].
 
-* Make sure the log section is included in the Pod annotation for the defender, where the container name can be found just below in the pod spec:
+3. Make sure the log section is included in the Pod annotation for the defender, where the container name can be found just below in the pod spec:
 
-```yaml
-ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
-```
+    ```yaml
+      ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
+    ```
 
-* [Restart the Agent][4] to begin sending Twistlock logs to Datadog.
+4. [Restart the Agent][4].
 
 ##### Docker
 
-* Collecting logs is disabled by default in the Datadog Agent. Enable it by adding those two environment variables:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it with the environment variable:
 
-```
-DD_LOGS_ENABLED=true
-```
+    ```
+      DD_LOGS_ENABLED=true
+    ```
 
-* Add a label on the defender container:
+2. Add a label on the defender container:
 
-```yaml
-ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
-```
+    ```yaml
+      ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
+    ```
 
-* Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][8]
+3. Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][8]
 
-* [Restart the Agent][4] to begin sending Twistlock logs to Datadog.
+4. [Restart the Agent][4].
 
 ## Data Collected
 
@@ -103,13 +103,13 @@ ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "tw
 
 See [metadata.csv][9] for a list of metrics provided by this check.
 
-### Service Checks
-
-Twistlock sends service checks when a scan fails.
-
 ### Events
 
 Twistlock sends an event when a new CVE is found.
+
+### Service Checks
+
+Twistlock sends service checks when a scan fails.
 
 ## Troubleshooting
 
