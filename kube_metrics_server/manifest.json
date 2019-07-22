@@ -24,7 +24,9 @@
   "integration_id": "kube-metrics-server",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Kubernetes Metrics Server Dashboard": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
