@@ -6,13 +6,7 @@ import warnings
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
-from datadog_checks.checks import AgentCheck
-
-# compatibility layer
-try:
-    from config import _is_affirmative
-except ImportError:
-    from datadog_checks.config import _is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
 
 try:
     from util import headers
@@ -41,6 +35,12 @@ class Apache(AgentCheck):
 
     RATES = {'Total kBytes': 'apache.net.bytes_per_s', 'Total Accesses': 'apache.net.request_per_s'}
 
+    HTTP_CONFIG_REMAPPER = {
+            'apache_user': {'name': 'username'},
+            'apache_password': {'name': 'password'},
+            'disable_ssl_validation': {'name': 'tls_verify'},
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.assumed_url = {}
@@ -50,16 +50,10 @@ class Apache(AgentCheck):
             raise Exception("Missing 'apache_status_url' in Apache config")
 
         url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
+        #TODO: these will be covered by remapper
         connect_timeout = int(instance.get('connect_timeout', 5))
         receive_timeout = int(instance.get('receive_timeout', 15))
         tags = instance.get('tags', [])
-
-        self.HTTP_CONFIG_REMAPPER = {
-            'apache_user': {'name': 'username', 'default': None, 'invert': False},
-            'apache_password': {'name': 'password', 'default': None, 'invert': False},
-            'disable_ssl_validation': {'name': 'ssl_verify', 'default': False, 'invert': True},
-            'headers': {'name': 'headers', 'default': headers(self.agentConfig)},
-        }
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
@@ -72,7 +66,7 @@ class Apache(AgentCheck):
                 'apache check initiating request, connect timeout %d receive %d' % (connect_timeout, receive_timeout)
             )
             with warnings.catch_warnings():
-                if _is_affirmative(instance.get('tls_ignore_warning', False)):
+                if is_affirmative(instance.get('tls_ignore_warning', False)):
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
                 r = self.http.get(url)
