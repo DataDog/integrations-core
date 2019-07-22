@@ -18,8 +18,8 @@ except ImportError as e:
     pymqiException = e
     pymqi = None
 else:
-    # pymqi is not be available on win/macOS when running e2e
-    # so we load the following constants only pymqi import succeed
+    # Since pymqi is not be available/installed on win/macOS when running e2e,
+    # we load the following constants only pymqi import succeed
     SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
 
     STATUS_MQCHS_UNKNOWN = -1
