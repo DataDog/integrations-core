@@ -36,9 +36,9 @@ class Apache(AgentCheck):
     RATES = {'Total kBytes': 'apache.net.bytes_per_s', 'Total Accesses': 'apache.net.request_per_s'}
 
     HTTP_CONFIG_REMAPPER = {
-            'apache_user': {'name': 'username'},
-            'apache_password': {'name': 'password'},
-            'disable_ssl_validation': {'name': 'tls_verify'},
+        'apache_user': {'name': 'username'},
+        'apache_password': {'name': 'password'},
+        'disable_ssl_validation': {'name': 'tls_verify'},
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -50,7 +50,7 @@ class Apache(AgentCheck):
             raise Exception("Missing 'apache_status_url' in Apache config")
 
         url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
-        #TODO: these will be covered by remapper
+        # TODO: these will be covered by remapper
         connect_timeout = int(instance.get('connect_timeout', 5))
         receive_timeout = int(instance.get('receive_timeout', 15))
         tags = instance.get('tags', [])
