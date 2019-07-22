@@ -165,8 +165,18 @@ In Linux, use this format for the script:
 
 Windows Powershell example:
 
+Agent versions <=6.11:
 ```
 PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FILE>\mibdump.py' `
+  --mib-source <PATH_TO_MIB_SOURCE> `
+  --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
+  --destination-directory=<PATH_TO_MIB_DESTINATION> `
+  --destination-format=pysnmp <MIB_FILE_NAME>
+```
+
+Agent versions >=6.12:
+```
+PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded2\python.exe' '<PATH_TO_FILE>\mibdump.py' `
   --mib-source <PATH_TO_MIB_SOURCE> `
   --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
   --destination-directory=<PATH_TO_MIB_DESTINATION> `

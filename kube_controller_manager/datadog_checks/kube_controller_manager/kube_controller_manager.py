@@ -154,7 +154,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             leader_config["tags"] = instance.get("tags", [])
             self.check_election_status(leader_config)
 
-    def _ignore_deprecated_metric(self, metric):
+    def _ignore_deprecated_metric(self, metric, scraper_config):
         return metric.documentation.startswith("(Deprecated)")
 
     def _tag_and_submit(self, metric, scraper_config, metric_name, tag_name, tag_value_trim):

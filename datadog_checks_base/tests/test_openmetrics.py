@@ -159,11 +159,9 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """ submitting metrics that contain labels should result in tags on the gauge call """
     ref_gauge = GaugeMetricFamily(
-        'process_virtual_memory_bytes',
-        'Virtual memory size in bytes.',
-        labels=['my_1st_label', 'my_2nd_label', u"lab\xc3\xa9l"],
+        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
     )
-    ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value', u"lab\xc3\xa9l"], 54927360.0)
+    ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value'], 54927360.0)
 
     check = mocked_prometheus_check
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
@@ -171,7 +169,7 @@ def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_pr
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
-        tags=['my_1st_label:my_1st_label_value', 'my_2nd_label:my_2nd_label_value', u"lab\xc3\xa9l:lab\xc3\xa9l"],
+        tags=['my_1st_label:my_1st_label_value', 'my_2nd_label:my_2nd_label_value'],
         count=1,
     )
 
@@ -1564,7 +1562,7 @@ def mock_filter_get():
 
 
 class FilterOpenMetricsCheck(OpenMetricsBaseCheck):
-    def _filter_metric(self, metric):
+    def _filter_metric(self, metric, scraper_config):
         return metric.documentation.startswith("(Deprecated)")
 
 

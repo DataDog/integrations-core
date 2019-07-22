@@ -1,12 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import unicode_literals
-
 from six import string_types
 
 from ...errors import CheckException
-from ...utils.common import ensure_unicode
 from .. import AgentCheck
 from .mixins import PrometheusScraperMixin
 
@@ -64,7 +61,7 @@ class PrometheusScraper(PrometheusScraperMixin):
                 tag_name = label.name
                 if self.labels_mapper is not None and label.name in self.labels_mapper:
                     tag_name = self.labels_mapper[label.name]
-                _tags.append('{}:{}'.format(ensure_unicode(tag_name), ensure_unicode(label.value)))
+                _tags.append('{}:{}'.format(tag_name, label.value))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, metric, custom_tags=custom_tags, hostname=hostname
         )

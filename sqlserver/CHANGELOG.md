@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.13.0 / 2019-07-13
+
+* [Added] Allow SQLNCLI11 provider in SQL server. See [#4097](https://github.com/DataDog/integrations-core/pull/4097).
+
 ## 1.12.0 / 2019-07-08
 
 * [Added] Upgrade dependencies for Python 3.7 binary wheels. See [#4030](https://github.com/DataDog/integrations-core/pull/4030).

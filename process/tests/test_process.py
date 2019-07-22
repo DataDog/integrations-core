@@ -329,3 +329,17 @@ def test_relocated_procfs(aggregator):
     expected_tags = generate_expected_tags(config['instances'][0])
     expected_tags += ['process:moved_procfs']
     aggregator.assert_service_check('process.up', count=1, tags=expected_tags)
+
+
+def test_process_service_check(aggregator):
+    process = ProcessCheck(common.CHECK_NAME, {}, {})
+
+    process._process_service_check('warning', 3, {'warning': [4, 6], 'critical': [2, 10]}, [])
+    process._process_service_check('no_top_ok', 3, {'warning': [2, float('inf')], 'critical': [2, float('inf')]}, [])
+    process._process_service_check(
+        'no_top_critical', 0, {'warning': [2, float('inf')], 'critical': [2, float('inf')]}, []
+    )
+
+    aggregator.assert_service_check('process.up', count=1, tags=['process:warning'], status=process.WARNING)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_ok'], status=process.OK)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_critical'], status=process.CRITICAL)

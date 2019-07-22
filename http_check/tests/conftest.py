@@ -2,10 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import sys
 
 import pytest
 from mock import patch
 
+from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.http_check import HTTPCheck
 
 from .common import CONFIG, HERE
@@ -21,6 +23,14 @@ def http_check():
     # Patch the function to return the certs located in the `tests/` folder
     with patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
         yield HTTPCheck('http_check', {}, {})
+
+
+@pytest.fixture(scope='session')
+def embedded_dir():
+    if ON_WINDOWS:
+        return 'embedded{}'.format(sys.version_info[0])
+    else:
+        return 'embedded'
 
 
 def mock_get_ca_certs_path():

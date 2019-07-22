@@ -210,7 +210,7 @@ class MockResponse:
 
 @pytest.fixture
 def instance():
-    return {'host': 'foo', 'kube_state_url': 'http://foo', 'tags': ['optional:tag1']}
+    return {'host': 'foo', 'kube_state_url': 'http://foo', 'tags': ['optional:tag1'], 'telemetry': False}
 
 
 @pytest.fixture
@@ -378,4 +378,34 @@ def test_pod_phase_gauges(aggregator, instance, check):
     )
     aggregator.assert_metric(
         NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=2
+    )
+
+
+def test_telemetry(aggregator, instance):
+    instance['telemetry'] = True
+
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    with open(os.path.join(HERE, 'fixtures', 'prometheus.txt'), 'rb') as f:
+        check.poll = mock.MagicMock(return_value=MockResponse(f.read(), 'text/plain'))
+
+    endpoint = instance['kube_state_url']
+    scraper_config = check.config_map[endpoint]
+    scraper_config['_text_filter_blacklist'] = ['resourcequota']
+
+    for _ in range(2):
+        check.check(instance)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=87416.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=956.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1270.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=314.0)
+    aggregator.assert_metric(
+        NAMESPACE + '.telemetry.collector.metrics.count',
+        tags=['resource_name:pod', 'resource_namespace:default', 'optional:tag1'],
+        value=600.0,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.telemetry.collector.metrics.count',
+        tags=['resource_name:hpa', 'resource_namespace:ns1', 'optional:tag1'],
+        value=8.0,
     )

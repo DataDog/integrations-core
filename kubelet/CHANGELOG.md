@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 3.3.1 / 2019-07-16
+
+* [Fixed] Update tagger usage to match prefix update. See [#4109](https://github.com/DataDog/integrations-core/pull/4109).
+
 ## 3.3.0 / 2019-07-04
 
 * [Added] Add swap memory checks to cadvisor kubelet checks. See [#3808](https://github.com/DataDog/integrations-core/pull/3808). Thanks [adammw](https://github.com/adammw).

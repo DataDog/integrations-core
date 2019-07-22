@@ -16,16 +16,22 @@ The IBM Db2 check is included in the [Datadog Agent][3] package.
 
 The [ibm_db][4] client library is required. To install it, ensure you have a working compiler and run:
 
-Unix:
+##### Unix:
 
 ```
 /opt/datadog-agent/embedded/bin/pip install ibm_db==3.0.1
 ```
 
-Windows:
+##### Windows:
 
+For Agent versions <= 6.11:
 ```
 "C:\Program Files\Datadog\Datadog Agent\embedded\Scripts\python.exe" -m pip install ibm_db==3.0.1
+```
+
+For Agent versions >= 6.12:
+```
+"C:\Program Files\Datadog\Datadog Agent\embedded2\Scripts\python.exe" -m pip install ibm_db==3.0.1
 ```
 
 Additionally, on Linux there may be need for XML functionality. If you encounter errors during
@@ -88,7 +94,7 @@ logs:
         pattern: \d{4}\-(0?[1-9]|[12][0-9]|3[01])\-(0?[1-9]|1[012])
 ```
 
-4. [Restart the Agent][6].
+3. [Restart the Agent][6].
 
 ### Validation
 

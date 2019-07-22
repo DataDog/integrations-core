@@ -23,7 +23,9 @@
   "integration_id": "oracle",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "oracle": "assets/dashboards/oracle_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
