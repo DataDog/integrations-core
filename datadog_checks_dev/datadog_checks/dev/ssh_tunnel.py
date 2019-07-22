@@ -38,9 +38,8 @@ def socks_proxy(host, user, private_key):
     """Open a SSH connection with a SOCKS proxy."""
     set_up = SocksProxyUp(host, user, private_key)
     tear_down = SocksProxyDown()
-    conditions = []
 
-    with environment_run(up=set_up, down=tear_down, conditions=conditions) as result:
+    with environment_run(up=set_up, down=tear_down) as result:
         yield result
 
 
