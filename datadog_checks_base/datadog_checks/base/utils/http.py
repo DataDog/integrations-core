@@ -134,7 +134,10 @@ class RequestsWrapper(object):
             config[field] = value
 
         # http://docs.python-requests.org/en/master/user/advanced/#timeouts
-        timeout = float(config['timeout'])
+        if type(config['timeout']) is tuple:
+            timeout = (float(config['timeout'][0]), float(config['timeout'][1]))
+        else:
+            timeout = float(config['timeout'])
 
         # http://docs.python-requests.org/en/master/user/quickstart/#custom-headers
         # http://docs.python-requests.org/en/master/user/advanced/#header-ordering

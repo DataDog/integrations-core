@@ -52,6 +52,13 @@ class TestTimeout:
 
         assert http.options['timeout'] == 24.5
 
+    def test_config_tuple_timeout(self):
+        instance = {'timeout': (10, 4)}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['timeout'] == (10, 4)
+
 
 class TestHeaders:
     def test_config_default(self):
