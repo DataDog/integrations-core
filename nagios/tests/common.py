@@ -11,25 +11,9 @@ HOST = get_docker_hostname()
 CONTAINER_NAME = "dd-test-nagios"
 
 INSTANCE_INTEGRATION = {
-    'nagios_conf': '/etc/nagios4/nagios.cfg',
+    'nagios_conf': '/opt/nagios/etc/nagios.cfg',
     'collect_host_performance_data': True,
-    'collect_service_performance_data': False,
-}
-
-E2E_METADATA = {
-    'start_commands': [
-        'apt-get update',
-        #'apt-get install exim4-config -yq',
-        #'apt-get install nagios4-core -yq',
-        # Configure nagios
-        #"sed -i 's/process_performance_data=0/process_performance_data=1/' /etc/nagios4/nagios.cfg",  # Enable perf data
-        #"sed -i 's/#host_perfdata_file=/host_perfdata_file=/' /etc/nagios4/nagios.cfg",  # Uncomment host_perfdata_file
-        #"sed -i 's/#host_perfdata_file_template=/host_perfdata_file_template=/' /etc/nagios4/nagios.cfg",
-        #"sed -i 's/status_update_interval=[0-9]*/status_update_interval=2/' /etc/nagios4/nagios.cfg",
-        #"sed -i 's/interval_length=[0-9]*/interval_length=2/' /etc/nagios4/nagios.cfg",
-        #'service datadog-agent stop',  # This is to avoid the agent going through the log files outside of check time
-        #'service nagios4 start'
-    ]
+    'collect_service_performance_data': True
 }
 
 EXPECTED_METRICS = ["rta", "pl"]

@@ -1,7 +1,8 @@
 version: '3.5'
-
 services:
-  nginx:
-    image: jasonrivers/nagios:4.43
+  nagios:
+    image: jasonrivers/nagios:latest
     volumes:
-      - ${NAGIOS_CONFIG_FOLDER}:/etc/nagios4
+      - ${NAGIOS_CONFIG_FILE}:/opt/nagios/etc/nagios.cfg
+      - ${NAGIOS_LOGS_PATH}:/opt/nagios/var/
+
