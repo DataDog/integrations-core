@@ -5,10 +5,11 @@
 
 import re
 from collections import defaultdict
+
 from six import iteritems
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 DEFAULT_MAX_METRICS = 350
 PATH = "path"
