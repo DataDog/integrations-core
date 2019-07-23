@@ -2,13 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.dev.structures import TempDir
 import os
 from copy import deepcopy
 
 import pytest
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.structures import TempDir
 from datadog_checks.nagios import NagiosCheck
 
 from .common import HERE, INSTANCE_INTEGRATION
@@ -34,8 +34,7 @@ def dd_environment():
         }
 
         with docker_run(
-            os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-            env_vars={'NAGIOS_LOGS_PATH': nagios_var_log},
+            os.path.join(HERE, 'compose', 'docker-compose.yaml'), env_vars={'NAGIOS_LOGS_PATH': nagios_var_log}
         ):
             yield INSTANCE_INTEGRATION, e2e_metadata
 
