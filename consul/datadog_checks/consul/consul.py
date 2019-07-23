@@ -213,7 +213,7 @@ class ConsulCheck(AgentCheck):
 
                 self.event(
                     {
-                        "timestamp": int((datetime.now() - EPOCH).total_seconds()),
+                        "timestamp": int((datetime.utcnow() - EPOCH).total_seconds()),
                         "event_type": "consul.new_leader",
                         "source_type_name": self.SOURCE_TYPE_NAME,
                         "msg_title": "New Consul Leader Elected in consul_datacenter:{}".format(agent_dc),
