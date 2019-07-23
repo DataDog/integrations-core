@@ -10,9 +10,9 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq import IbmMqCheck
-from .common import METRICS, OPTIONAL_METRICS, QUEUE_METRICS
 
 from . import common
+from .common import METRICS, OPTIONAL_METRICS, QUEUE_METRICS
 
 log = logging.getLogger(__file__)
 
