@@ -40,8 +40,8 @@ class CactiCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.last_ts = {}
 
-    @classmethod
-    def get_library_versions(cls):
+    @staticmethod
+    def get_library_versions():
         if rrdtool is not None:
             return {"rrdtool": rrdtool.__version__}
         return {"rrdtool": "Not Found"}
@@ -107,12 +107,12 @@ class CactiCheck(AgentCheck):
 
         return Config(host, user, password, db, rrd_path, whitelist, field_names, tags)
 
-    @classmethod
-    def _get_rrd_info(cls, rrd_path):
+    @staticmethod
+    def _get_rrd_info(rrd_path):
         return rrdtool.info(rrd_path)
 
-    @classmethod
-    def _get_rrd_fetch(cls, rrd_path, c, start):
+    @staticmethod
+    def _get_rrd_fetch(rrd_path, c, start):
         return rrdtool.fetch(rrd_path, c, '--start', str(start))
 
     def _read_rrd(self, rrd_path, hostname, device_name, tags):
@@ -217,8 +217,8 @@ class CactiCheck(AgentCheck):
 
         return res
 
-    @classmethod
-    def _format_metric_name(cls, m_name, cfunc):
+    @staticmethod
+    def _format_metric_name(m_name, cfunc):
         """ Format a cacti metric name into a Datadog-friendly name. """
         try:
             aggr = CFUNC_TO_AGGR[cfunc]
@@ -233,8 +233,8 @@ class CactiCheck(AgentCheck):
         except KeyError:
             return "cacti.{}.{}".format(m_name.lower(), aggr)
 
-    @classmethod
-    def _transform_metric(cls, m_name, val):
+    @staticmethod
+    def _transform_metric(m_name, val):
         """ Add any special case transformations here. """
         # Report memory in MB
         if m_name[0:11] in ('system.mem.', 'system.disk'):

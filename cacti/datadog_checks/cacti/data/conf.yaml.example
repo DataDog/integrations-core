@@ -55,7 +55,7 @@ instances:
     ## one per line, that should be fetched. If no whitelist is specified, all
     ## metrics will be fetched.
     #
-    # rrd_whitelist: <RRD_WHITELIST_FILE_PATH>.txt
+    # rrd_whitelist: <RRD_WHITELIST_FILE_PATH>
 
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
