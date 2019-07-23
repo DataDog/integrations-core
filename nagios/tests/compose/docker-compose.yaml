@@ -4,4 +4,4 @@ services:
     build: .
     volumes:
       - ${NAGIOS_CONFIG_FILE}:/opt/nagios/etc/nagios.cfg
-      - ${NAGIOS_LOGS_PATH}:/opt/nagios/var/
+      - ${NAGIOS_LOGS_PATH}:/opt/nagios/var/log/

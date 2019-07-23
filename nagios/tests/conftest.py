@@ -23,12 +23,12 @@ def aggregator():
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    nagios_var = os.path.join(HERE, 'compose', 'nagios4', 'var')
+    nagios_var = os.path.join(HERE, 'compose', 'nagios4', 'var', 'log')
     nagios_conf = os.path.join(HERE, 'compose', 'nagios4', 'nagios.cfg')
     e2e_metadata = {
         'docker_volumes': [
             '{}:/opt/nagios/etc/nagios.cfg'.format(nagios_conf),
-            '{}:/opt/nagios/var/'.format(nagios_var),
+            '{}:/opt/nagios/var/log/'.format(nagios_var),
         ]
     }
 
