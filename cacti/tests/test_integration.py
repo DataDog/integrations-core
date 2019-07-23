@@ -5,11 +5,11 @@ import pytest
 
 from . import common
 
-
 #
 # To get the rrd metrics, once the dd environment is up go to localhost:8080/cacti and go through the
 # setup wizard
 #
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")

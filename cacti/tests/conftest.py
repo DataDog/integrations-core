@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.dev.structures import TempDir
-
 import os
 from copy import deepcopy
 
@@ -12,6 +10,7 @@ import pytest
 
 from datadog_checks.cacti import CactiCheck
 from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev.structures import TempDir
 
 from .common import E2E_METADATA, HERE, HOST, INSTANCE_INTEGRATION, RRD_PATH
 
@@ -45,10 +44,7 @@ def dd_environment():
         with docker_run(
             conditions=[WaitFor(create_db_user)],
             compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
-            env_vars={
-                'HOST': HOST,
-                'RRD_PATH': rrd_path
-            },
+            env_vars={'HOST': HOST, 'RRD_PATH': rrd_path},
         ):
             yield INSTANCE_INTEGRATION, e2e_metadata
 

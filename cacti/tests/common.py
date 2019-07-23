@@ -20,11 +20,7 @@ INSTANCE_INTEGRATION = {
     'collect_task_metrics': True,
 }
 
-EXPECTED_METRICS = [
-    'cacti.hosts.count',
-    'cacti.metrics.count',
-    'cacti.rrd.count'
-]
+EXPECTED_METRICS = ['cacti.hosts.count', 'cacti.metrics.count', 'cacti.rrd.count']
 
 E2E_METADATA = {
     'start_commands': [
