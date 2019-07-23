@@ -68,6 +68,10 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
 
         for env in envs:
             if new_env:
+                if env.endswith('-unit'):
+                    echo_warning('Skipping {} environment'.format(env))
+                    continue
+
                 ctx.invoke(
                     start, check=check, env=env, agent=agent, python=python, dev=dev, base=base, env_vars=env_vars
                 )
