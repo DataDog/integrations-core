@@ -48,7 +48,7 @@ def environment_run(up, down, sleep=None, endpoints=None, conditions=None, env_v
             key = 'environment_result_{}'.format(up.__class__.__name__.lower())
             if set_up_env():
                 result = up()
-                set_env_vars({key: serialize_data(result)})
+                set_env_vars({key: serialize_data(result).decode('utf-8')})
 
                 for condition in conditions:
                     condition()
