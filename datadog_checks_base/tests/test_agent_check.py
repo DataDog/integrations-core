@@ -8,6 +8,7 @@ import pytest
 from six import PY3
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.checks.base import datadog_agent
 
 
 def test_instance():
@@ -249,12 +250,13 @@ class TestTags:
         in_str.encode.side_effect = Exception
         assert check._to_bytes(in_str) is None
 
-    def test_none_value(self):
+    def test_none_value(self, caplog):
         check = AgentCheck()
         tags = [None, 'tag:foo']
 
         normalized_tags = check._normalize_tags_type(tags, None)
         assert normalized_tags == ['tag:foo']
+        assert 'Error encoding tag' not in caplog.text
 
     def test_external_host_tag_normalization(self):
         """
@@ -265,6 +267,16 @@ class TestTags:
         with mock.patch.object(check, '_normalize_tags_type', return_value=['normalize:tag']):
             check.set_external_tags(external_host_tags)
             assert external_host_tags == [('hostname', {'src_name': ['normalize:tag']})]
+
+    def test_external_hostname(self):
+        check = AgentCheck()
+        external_host_tags = [(u'hostnam\xe9', {'src_name': ['key1:val1']})]
+        with mock.patch.object(datadog_agent, 'set_external_tags') as set_external_tags:
+            check.set_external_tags(external_host_tags)
+            if PY3:
+                set_external_tags.assert_called_with([(u'hostnam\xe9', {'src_name': ['key1:val1']})])
+            else:
+                set_external_tags.assert_called_with([('hostnam\xc3\xa9', {'src_name': ['key1:val1']})])
 
 
 class LimitedCheck(AgentCheck):

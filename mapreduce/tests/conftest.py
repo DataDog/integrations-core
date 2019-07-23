@@ -3,12 +3,22 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import subprocess
+from copy import deepcopy
 
 import pytest
+import requests
 from mock import patch
 
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import WaitFor
+from datadog_checks.mapreduce import MapReduceCheck
+
 from .common import (
+    CONTAINER_NAME,
     HERE,
+    HOST,
+    INSTANCE_INTEGRATION,
     MR_JOB_COUNTERS_URL,
     MR_JOBS_URL,
     MR_TASKS_URL,
@@ -16,6 +26,27 @@ from .common import (
     TEST_USERNAME,
     YARN_APPS_URL_BASE,
 )
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    env = {'HOSTNAME': HOST}
+    with docker_run(
+        compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
+        conditions=[WaitFor(setup_mapreduce, attempts=240, wait=5)],
+        env_vars=env,
+    ):
+        yield INSTANCE_INTEGRATION
+
+
+@pytest.fixture
+def check():
+    return lambda instance: MapReduceCheck('mapreduce', {}, [instance])
+
+
+@pytest.fixture
+def instance():
+    return deepcopy(INSTANCE_INTEGRATION)
 
 
 @pytest.fixture
@@ -28,6 +59,30 @@ def mocked_request():
 def mocked_auth_request():
     with patch("requests.get", new=requests_auth_mock):
         yield
+
+
+def setup_mapreduce():
+    # Run a job in order to get metrics from the environment
+    subprocess.Popen(
+        [
+            'docker',
+            'exec',
+            CONTAINER_NAME,
+            '/usr/local/hadoop/bin/yarn',
+            'jar',
+            '/usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.1.jar',
+            'grep',
+            'input',
+            'output',
+            '\'dfs[a-z.]+\'',
+        ],
+        close_fds=True,
+    )
+
+    # Called in WaitFor which catches exceptions
+    r = requests.get("{}/ws/v1/cluster/apps?states=RUNNING".format(INSTANCE_INTEGRATION['resourcemanager_uri']))
+
+    return r.json().get("apps", None) is not None
 
 
 def requests_get_mock(*args, **kwargs):

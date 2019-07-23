@@ -49,7 +49,7 @@ def mocked_requests_get(*args, **kwargs):
 def mocked_get_tags(entity, _):
     # Values taken from Agent6's TestParseMetadataV10 test
     tag_store = {
-        "docker://e8d4a9a20a0d931f8f632ec166b3f71a6ff00450aa7e99607f650e586df7d068": [
+        "container_id://e8d4a9a20a0d931f8f632ec166b3f71a6ff00450aa7e99607f650e586df7d068": [
             "docker_image:datadog/docker-dd-agent:latest",
             "image_name:datadog/docker-dd-agent",
             "short_image:docker-dd-agent",
@@ -62,7 +62,7 @@ def mocked_get_tags(entity, _):
             "container_name:ecs-redis-datadog-1-dd-agent-8085fa82d1d3ada5a601",
             "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
         ],
-        "docker://c912d0f0f204360ee90ce67c0d083c3514975f149b854f38a48deac611e82e48": [
+        "container_id://c912d0f0f204360ee90ce67c0d083c3514975f149b854f38a48deac611e82e48": [
             "docker_image:redis:latest",
             "image_name:redis",
             "short_image:redis",
@@ -75,7 +75,7 @@ def mocked_get_tags(entity, _):
             "container_name:ecs-redis-datadog-1-redis-ce99d29f8ce998ed4a00",
             "task_arn:arn:aws:ecs:eu-west-1:172597598159:task/648ca535-cbe0-4de7-b102-28e50b81e888",
         ],
-        "docker://39e13ccc425e7777187a603fe33f466a18515030707c4063de1dc1b63d14d411": [
+        "container_id://39e13ccc425e7777187a603fe33f466a18515030707c4063de1dc1b63d14d411": [
             "docker_image:amazon/amazon-ecs-pause:0.1.0",
             "image_name:amazon/amazon-ecs-pause",
             "short_image:amazon-ecs-pause",

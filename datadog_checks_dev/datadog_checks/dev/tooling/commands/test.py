@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import sys
 
 import click
 
+from ..._env import E2E_PARENT_PYTHON
 from ...subprocess import run_command
 from ...utils import chdir, file_exists, remove_path, running_on_ci
 from ..constants import get_root
@@ -24,6 +26,7 @@ def display_envs(check_envs):
 @click.option('--format-style', '-fs', is_flag=True, help='Run only the code style formatter')
 @click.option('--style', '-s', is_flag=True, help='Run only style checks')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
+@click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
 @click.option('--marker', '-m', help='Only run tests matching given marker expression')
@@ -35,11 +38,14 @@ def display_envs(check_envs):
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
+@click.pass_context
 def test(
+    ctx,
     checks,
     format_style,
     style,
     bench,
+    e2e,
     coverage,
     cov_missing,
     marker,
@@ -69,13 +75,18 @@ def test(
 
     root = get_root()
     testing_on_ci = running_on_ci()
+    color = ctx.obj['color']
 
     # Implicitly track coverage
     if cov_missing:
         coverage = True
 
+    if e2e:
+        marker = 'e2e'
+
     pytest_options = construct_pytest_options(
         verbose=verbose,
+        color=color,
         enter_pdb=enter_pdb,
         debug=debug,
         bench=bench,
@@ -99,6 +110,13 @@ def test(
         'DDEV_COV_MISSING': coverage_show_missing_lines,
         'PYTEST_ADDOPTS': pytest_options,
     }
+
+    if color is not None:
+        test_env_vars['PY_COLORS'] = '1' if color else '0'
+
+    if e2e:
+        test_env_vars[E2E_PARENT_PYTHON] = sys.executable
+        test_env_vars['TOX_TESTENV_PASSENV'] += ' {}'.format(E2E_PARENT_PYTHON)
 
     check_envs = get_tox_envs(checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed)
     tests_ran = False
@@ -129,6 +147,8 @@ def test(
                 test_type_display = 'only style checks'
             elif bench:
                 test_type_display = 'only benchmarks'
+            elif e2e:
+                test_type_display = 'only end-to-end tests'
             else:
                 test_type_display = 'tests'
 
@@ -169,6 +189,10 @@ def test(
                         remove_path('coverage.xml')
 
         echo_success('\nPassed!')
+
+        # You can only test one environment at a time since the setup/tear down occurs elsewhere
+        if e2e:
+            break
 
     if not tests_ran:
         if format_style:

@@ -14,7 +14,7 @@ Edit the `coredns.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 #### Using with service discovery
 
-If you are using one dd-agent pod (daemon set) per kubernetes worker nodes, use the following annotations on your kube-dns pod to retrieve the data automatically.
+If you are using one dd-agent pod (daemon set) per kubernetes worker nodes, use the following annotations on your core-dns pod to retrieve the data automatically.
 
 ```yaml
 metadata:
@@ -46,7 +46,9 @@ The CoreDNS check does not include any events.
 
 ### Service Checks
 
-The CoreDNS check does not include any service checks.
+`coredns.prometheus.health`:
+
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
 
 ## Troubleshooting
 

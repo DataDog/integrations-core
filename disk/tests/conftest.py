@@ -30,12 +30,12 @@ def dd_environment(instance_basic_volume):
 
 @pytest.fixture(scope='session')
 def instance_basic_volume():
-    return {'use_mount': 'false'}
+    return {'use_mount': 'false', 'tag_by_label': False}
 
 
 @pytest.fixture(scope='session')
 def instance_basic_mount():
-    return {'use_mount': 'true'}
+    return {'use_mount': 'true', 'tag_by_label': False}
 
 
 @pytest.fixture(scope='session')

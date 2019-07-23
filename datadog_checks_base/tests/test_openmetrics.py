@@ -360,15 +360,15 @@ def test_submit_summary(aggregator, mocked_prometheus_check, mocked_prometheus_s
 def test_submit_histogram(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
     _histo.add_metric(
-        [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 1), ("4.324e+08", 1), ("+Inf", 3)], sum_value=3
+        [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
     )
     check = mocked_prometheus_check
     check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.histogram.sum', 3, tags=[], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 3, tags=[], count=1)
+    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
+    aggregator.assert_metric('prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1)
     aggregator.assert_metric('prometheus.custom.histogram.count', 1, tags=['upper_bound:1.0'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 1, tags=['upper_bound:31104000.0'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 1, tags=['upper_bound:432400000.0'], count=1)
+    aggregator.assert_metric('prometheus.custom.histogram.count', 2, tags=['upper_bound:31104000.0'], count=1)
+    aggregator.assert_metric('prometheus.custom.histogram.count', 3, tags=['upper_bound:432400000.0'], count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -1562,7 +1562,7 @@ def mock_filter_get():
 
 
 class FilterOpenMetricsCheck(OpenMetricsBaseCheck):
-    def _filter_metric(self, metric):
+    def _filter_metric(self, metric, scraper_config):
         return metric.documentation.startswith("(Deprecated)")
 
 

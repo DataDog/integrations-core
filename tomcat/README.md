@@ -13,19 +13,22 @@ This check collects Tomcat metrics, for example:
 And more.
 
 ## Setup
+
+Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
+
 ### Installation
 
-The Tomcat check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Tomcat servers.
+The Tomcat check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Tomcat servers.
 
-This check is JMX-based, so you need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][3] to do that.
+This check is JMX-based, so you need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][4] to do that.
 
 ### Configuration
 
-1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection). See the [sample tomcat.d/conf.yaml][5] for all available configuration options.
+1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5] to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection). See the [sample tomcat.d/conf.yaml][6] for all available configuration options.
 
-2. [Restart the Agent][6]
+2. [Restart the Agent][7]
 
-#### Metric Collection
+#### Metric collection
 
 *  Add this configuration block to your `tomcat.yaml` file to start gathering your [Tomcat metrics](#metrics):
 
@@ -104,9 +107,9 @@ init_config:
             metric_type: counter
 ```
 
-See the [JMX Check documentation][7] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
+See the [JMX Check documentation][8] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
 
-[Restart the Agent][6] to start sending Tomcat metrics to Datadog.
+[Restart the Agent][7] to start sending Tomcat metrics to Datadog.
 
 Configuration Options:
 
@@ -136,9 +139,9 @@ Your metric is mydomain (or some variation depending on the attribute inside the
 
 If you specify an alias in an `include` key that is formatted as *camel case*, it is converted to *snake case*. For example, `MyMetricName` is shown in Datadog as `my_metric_name`.
 
-See the [sample tomcat.yaml][5] for all available configuration options.
+See the [sample tomcat.yaml][6] for all available configuration options.
 
-##### The `attribute` filter
+##### The attribute filter
 
 The `attribute` filter accepts two types of values:
 
@@ -226,105 +229,103 @@ init_config:
         bean: second_bean_name
 ```
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-Tomcat uses by default the `log4j` logger. To activate the logging into a file and customize the log format edit the `log4j.properties` file in the `$CATALINA_BASE/lib` directory as follows:
+1. Tomcat uses by default the `log4j` logger. To activate the logging into a file and customize the log format edit the `log4j.properties` file in the `$CATALINA_BASE/lib` directory as follows:
 
-```
-log4j.rootLogger = INFO, CATALINA
+    ```
+      log4j.rootLogger = INFO, CATALINA
 
- # Define all the appenders
-log4j.appender.CATALINA = org.apache.log4j.DailyRollingFileAppender
-log4j.appender.CATALINA.File = /var/log/tomcat/catalina.log
-log4j.appender.CATALINA.Append = true
+      # Define all the appenders
+      log4j.appender.CATALINA = org.apache.log4j.DailyRollingFileAppender
+      log4j.appender.CATALINA.File = /var/log/tomcat/catalina.log
+      log4j.appender.CATALINA.Append = true
 
- # Roll-over the log once per day
-log4j.appender.CATALINA.layout = org.apache.log4j.PatternLayout
-log4j.appender.CATALINA.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
+      # Roll-over the log once per day
+      log4j.appender.CATALINA.layout = org.apache.log4j.PatternLayout
+      log4j.appender.CATALINA.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
 
-log4j.appender.LOCALHOST = org.apache.log4j.DailyRollingFileAppender
-log4j.appender.LOCALHOST.File = /var/log/tomcat/localhost.log
-log4j.appender.LOCALHOST.Append = true
-log4j.appender.LOCALHOST.layout = org.apache.log4j.PatternLayout
-log4j.appender.LOCALHOST.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
+      log4j.appender.LOCALHOST = org.apache.log4j.DailyRollingFileAppender
+      log4j.appender.LOCALHOST.File = /var/log/tomcat/localhost.log
+      log4j.appender.LOCALHOST.Append = true
+      log4j.appender.LOCALHOST.layout = org.apache.log4j.PatternLayout
+      log4j.appender.LOCALHOST.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
 
-log4j.appender.MANAGER = org.apache.log4j.DailyRollingFileAppender
-log4j.appender.MANAGER.File = /var/log/tomcat/manager.log
-log4j.appender.MANAGER.Append = true
-log4j.appender.MANAGER.layout = org.apache.log4j.PatternLayout
-log4j.appender.MANAGER.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
+      log4j.appender.MANAGER = org.apache.log4j.DailyRollingFileAppender
+      log4j.appender.MANAGER.File = /var/log/tomcat/manager.log
+      log4j.appender.MANAGER.Append = true
+      log4j.appender.MANAGER.layout = org.apache.log4j.PatternLayout
+      log4j.appender.MANAGER.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
 
-log4j.appender.HOST-MANAGER = org.apache.log4j.DailyRollingFileAppender
-log4j.appender.HOST-MANAGER.File = /var/log/tomcat/host-manager.log
-log4j.appender.HOST-MANAGER.Append = true
-log4j.appender.HOST-MANAGER.layout = org.apache.log4j.PatternLayout
-log4j.appender.HOST-MANAGER.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
+      log4j.appender.HOST-MANAGER = org.apache.log4j.DailyRollingFileAppender
+      log4j.appender.HOST-MANAGER.File = /var/log/tomcat/host-manager.log
+      log4j.appender.HOST-MANAGER.Append = true
+      log4j.appender.HOST-MANAGER.layout = org.apache.log4j.PatternLayout
+      log4j.appender.HOST-MANAGER.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
 
-log4j.appender.CONSOLE = org.apache.log4j.ConsoleAppender
-log4j.appender.CONSOLE.layout = org.apache.log4j.PatternLayout
-log4j.appender.CONSOLE.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
+      log4j.appender.CONSOLE = org.apache.log4j.ConsoleAppender
+      log4j.appender.CONSOLE.layout = org.apache.log4j.PatternLayout
+      log4j.appender.CONSOLE.layout.ConversionPattern = %d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
 
- # Configure which loggers log to which appenders
-log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost] = INFO, LOCALHOST
-log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/manager] =\
-  INFO, MANAGER
-log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/host-manager] =\
-  INFO, HOST-MANAGER
-```
+      # Configure which loggers log to which appenders
+      log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost] = INFO, LOCALHOST
+      log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/manager] =\
+        INFO, MANAGER
+      log4j.logger.org.apache.catalina.core.ContainerBase.[Catalina].[localhost].[/host-manager] =\
+        INFO, HOST-MANAGER
+    ```
 
-Check Tomcat [logging documentation][8] for more information about Tomcat logging capabilities.
+2. By default, Datadog's integration pipeline support the following conversion patterns:
 
-By default, Datadog's integration pipeline support the following conversion patterns:
+    ```
+      %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+      %d [%t] %-5p %c - %m%n
+    ```
+    
+    Clone and edit the [integration pipeline][10] if you have a different format. Check Tomcat [logging documentation][9] for more information about Tomcat logging capabilities.
 
-  ```
-  %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
-  %d [%t] %-5p %c - %m%n
-  ```
+3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-Make sure you clone and edit the [integration pipeline][9] if you have a different format.
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
+4. Add this configuration block to your `tomcat.d/conf.yaml` file to start collecting your Tomcat Logs:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/tomcat/*.log
+          source: tomcat
+          service: myapp
+          #To handle multi line that starts with yyyy-mm-dd use the following pattern
+          #log_processing_rules:
+          #  - type: multi_line
+          #    name: log_start_with_date
+          #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+    ```
 
-* Add this configuration block to your `tomcat.d/conf.yaml` file to start collecting your Tomcat Logs:
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample tomcat.yaml][6] for all available configuration options.
 
-  ```
-  logs:
-    - type: file
-      path: /var/log/tomcat/*.log
-      source: tomcat
-      service: myapp
-      #To handle multi line that starts with yyyy-mm-dd use the following pattern
-      #log_processing_rules:
-      #  - type: multi_line
-      #    name: log_start_with_date
-      #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-  ```
-
-* Change the `path` and `service` parameter values and configure them for your environment. See the [sample tomcat.yaml][5] for all available configuration options.
-
-* [Restart the Agent][6].
+5. [Restart the Agent][7].
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `tomcat` under the **Checks** section.
+[Run the Agent's status subcommand][11] and look for `tomcat` under the **Checks** section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][11] for a list of metrics provided by this check.
+See [metadata.csv][12] for a list of metrics provided by this check.
 
 ### Events
 The Tomcat check does not include any events.
 
 ### Service Checks
 
-**tomcat.can_connect**
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Tomcat instance. Returns `OK` otherwise.
+**tomcat.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Tomcat instance, otherwise returns `OK`.
 
 ## Troubleshooting
 ### Commands to view the metrics that are available:
@@ -347,20 +348,21 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 ## Further Reading
 Additional helpful documentation, links, and articles:
 
-* [Monitor Tomcat metrics with Datadog][12]
-* [Key metrics for monitoring Tomcat][13]
+* [Monitor Tomcat metrics with Datadog][13]
+* [Key metrics for monitoring Tomcat][14]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/integrations/java
-[8]: https://tomcat.apache.org/tomcat-7.0-doc/logging.html
-[9]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[11]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
-[12]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
-[13]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
+[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[6]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[8]: https://docs.datadoghq.com/integrations/java
+[9]: https://tomcat.apache.org/tomcat-7.0-doc/logging.html
+[10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[12]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
+[13]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
+[14]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance

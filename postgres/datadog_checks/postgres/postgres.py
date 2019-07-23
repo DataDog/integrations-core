@@ -3,36 +3,44 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 import socket
+import string
 import threading
 from contextlib import closing
 
-import pg8000
+import psycopg2
 from six import iteritems
 from six.moves import zip_longest
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-try:
-    import psycopg2
-except ImportError:
-    psycopg2 = None
-
-
 MAX_CUSTOM_RESULTS = 100
 TABLE_COUNT_LIMIT = 200
 
+ALL_SCHEMAS = object()
 
-def psycopg2_connect(*args, **kwargs):
-    if 'ssl' in kwargs:
-        del kwargs['ssl']
-    if 'unix_sock' in kwargs:
-        kwargs['host'] = kwargs['unix_sock']
-        del kwargs['unix_sock']
-    return psycopg2.connect(*args, **kwargs)
+# https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 
 
 class ShouldRestartException(Exception):
     pass
+
+
+class PartialFormatter(string.Formatter):
+    """Follows PEP3101, used to format only specified args in a string.
+    Ex:
+    > print("This is a {type} with {nb_params} parameters.".format(type='string'))
+    > "This is a string with {nb_params} parameters."
+    """
+
+    def get_value(self, key, args, kwargs):
+        if isinstance(key, str):
+            return kwargs.get(key, '{' + key + '}')
+        else:
+            return string.Formatter.get_value(self, key, args, kwargs)
+
+
+fmt = PartialFormatter()
 
 
 class PostgreSql(AgentCheck):
@@ -98,7 +106,7 @@ class PostgreSql(AgentCheck):
 SELECT mode,
        pd.datname,
        pc.relname,
-       count(*) AS %s
+       count(*) AS {metrics_columns}
   FROM pg_locks l
   JOIN pg_database pd ON (l.database = pd.oid)
   JOIN pg_class pc ON (l.relation = pc.oid)
@@ -125,9 +133,9 @@ SELECT mode,
             'n_dead_tup': ('postgresql.dead_rows', GAUGE),
         },
         'query': """
-SELECT relname,schemaname,%s
+SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
- WHERE relname = ANY(array[%s])""",
+ WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
         'relation': True,
     }
 
@@ -142,9 +150,9 @@ SELECT relname,schemaname,%s
 SELECT relname,
        schemaname,
        indexrelname,
-       %s
+       {metrics_columns}
   FROM pg_stat_user_indexes
- WHERE relname = ANY(array[%s])""",
+ WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
         'relation': True,
     }
 
@@ -159,29 +167,30 @@ SELECT relname,
         'query': """
 SELECT
   relname,
-  %s
+  {metrics_columns}
 FROM pg_class C
 LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   nspname !~ '^pg_toast' AND
   relkind IN ('r') AND
-  relname = ANY(array[%s])""",
+  relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
     }
 
     COUNT_METRICS = {
         'descriptors': [('schemaname', 'schema')],
         'metrics': {'pg_stat_user_tables': ('postgresql.table.count', GAUGE)},
         'relation': False,
-        'query': """
+        'query': fmt.format(
+            """
 SELECT schemaname, count(*) FROM
 (
   SELECT schemaname
-  FROM %s
+  FROM {metrics_columns}
   ORDER BY schemaname, relname
   LIMIT {table_count_limit}
 ) AS subquery GROUP BY schemaname
-        """.format(
-            table_count_limit=TABLE_COUNT_LIMIT
+        """,
+            table_count_limit=TABLE_COUNT_LIMIT,
         ),
     }
 
@@ -221,7 +230,7 @@ SELECT schemaname, count(*) FROM
         'metrics': {},
         'relation': False,
         'query': """
-SELECT %s
+SELECT {metrics_columns}
  WHERE (SELECT pg_is_in_recovery())""",
     }
 
@@ -234,7 +243,7 @@ SELECT %s
         'relation': False,
         'query': """
 WITH max_con AS (SELECT setting::float FROM pg_settings WHERE name = 'max_connections')
-SELECT %s
+SELECT {metrics_columns}
   FROM pg_stat_database, max_con
 """,
     }
@@ -254,9 +263,9 @@ SELECT %s
         'query': """
 SELECT relname,
        schemaname,
-       %s
+       {metrics_columns}
   FROM pg_statio_user_tables
- WHERE relname = ANY(array[%s])""",
+ WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
         'relation': True,
     }
 
@@ -278,7 +287,7 @@ SELECT s.schemaname,
        CASE WHEN o.funcname IS NULL OR p.proargnames IS NULL THEN p.proname
             ELSE p.proname || '_' || array_to_string(p.proargnames, '_')
         END funcname,
-        %s
+        {metrics_columns}
   FROM pg_proc p
   JOIN pg_stat_user_functions s
     ON p.oid = s.funcid
@@ -335,7 +344,7 @@ SELECT s.schemaname,
     # The base query for postgres version >= 10
     ACTIVITY_QUERY_10 = """
 SELECT datname,
-    %s
+    {metrics_columns}
 FROM pg_stat_activity
 WHERE backend_type = 'client backend'
 GROUP BY datid, datname
@@ -344,7 +353,7 @@ GROUP BY datid, datname
     # The base query for postgres version < 10
     ACTIVITY_QUERY_LT_10 = """
 SELECT datname,
-    %s
+    {metrics_columns}
 FROM pg_stat_activity
 GROUP BY datid, datname
 """
@@ -388,16 +397,6 @@ GROUP BY datid, datname
         """
         with PostgreSql._known_servers_lock:
             PostgreSql._known_servers.add((host, port))
-
-    def _get_pg_attrs(self, instance):
-        if is_affirmative(instance.get('use_psycopg2', False)):
-            if psycopg2 is None:
-                self.log.error("Unable to import psycopg2, falling back to pg8000")
-            else:
-                return psycopg2_connect, psycopg2.InterfaceError, psycopg2.ProgrammingError
-
-        # Let's use pg8000
-        return pg8000.connect, pg8000.InterfaceError, pg8000.ProgrammingError
 
     def _get_replication_role(self, key, db):
         cursor = db.cursor()
@@ -513,7 +512,7 @@ GROUP BY datid, datname
         res = {
             'descriptors': [('psd.datname', 'db')],
             'metrics': metrics,
-            'query': "SELECT psd.datname, %s "
+            'query': "SELECT psd.datname, {metrics_columns} "
             "FROM pg_stat_database psd "
             "JOIN pg_database pd ON psd.datname = pd.datname "
             "WHERE psd.datname not ilike 'template%%' "
@@ -561,7 +560,12 @@ GROUP BY datid, datname
         if not metrics:
             return None
 
-        return {'descriptors': [], 'metrics': metrics, 'query': "select %s FROM pg_stat_bgwriter", 'relation': False}
+        return {
+            'descriptors': [],
+            'metrics': metrics,
+            'query': "select {metrics_columns} FROM pg_stat_bgwriter",
+            'relation': False,
+        }
 
     def _get_archiver_metrics(self, key, db):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
@@ -591,7 +595,12 @@ GROUP BY datid, datname
         if not metrics:
             return None
 
-        return {'descriptors': [], 'metrics': metrics, 'query': "select %s FROM pg_stat_archiver", 'relation': False}
+        return {
+            'descriptors': [],
+            'metrics': metrics,
+            'query': "select {metrics_columns} FROM pg_stat_archiver",
+            'relation': False,
+        }
 
     def _get_replication_metrics(self, key, db):
         """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
@@ -644,25 +653,35 @@ GROUP BY datid, datname
         """Builds a dictionary from relations configuration while maintaining compatibility
         """
         config = {}
+
         for element in yamlconfig:
             if isinstance(element, str):
-                config[element] = {'relation_name': element, 'schemas': []}
+                config[element] = {'relation_name': element, 'schemas': [ALL_SCHEMAS]}
             elif isinstance(element, dict):
-                if 'relation_name' not in element or 'schemas' not in element:
-                    self.log.warning("Unknown element format for relation element %s", element)
+                if not ('relation_name' in element or 'relation_regex' in element):
+                    self.log.warning(
+                        "Parameter 'relation_name' or 'relation_regex' is required for relation element %s", element
+                    )
                     continue
-                if not isinstance(element['schemas'], list):
+                if 'relation_name' in element and 'relation_regex' in element:
+                    self.log.warning(
+                        "Expecting only of parameters 'relation_name', 'relation_regex' for relation element %s",
+                        element,
+                    )
+                    continue
+                schemas = element.get('schemas', [])
+                if not isinstance(schemas, list):
                     self.log.warning("Expected a list of schemas for %s", element)
                     continue
-                name = element['relation_name']
-                config[name] = {'relation_name': name, 'schemas': element['schemas']}
+                name = element.get('relation_name') or element['relation_regex']
+                config[name] = element.copy()
+                if len(schemas) == 0:
+                    config[name]['schemas'] = [ALL_SCHEMAS]
             else:
                 self.log.warning('Unhandled relations config type: {}'.format(element))
         return config
 
-    def _query_scope(
-        self, cursor, scope, key, db, instance_tags, is_custom_metrics, programming_error, relations_config
-    ):
+    def _query_scope(self, cursor, scope, key, db, instance_tags, is_custom_metrics, relations_config):
         if scope is None:
             return None
 
@@ -676,19 +695,19 @@ GROUP BY datid, datname
         # we must remember that order to parse results
 
         try:
+            query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
             if scope['relation'] and len(relations_config) > 0:
-                relnames = ', '.join("'{0}'".format(w) for w in relations_config)
-                query = scope['query'] % (", ".join(cols), "%s")  # Keep the last %s intact
-                self.log.debug("Running query: %s with relations: %s" % (query, relnames))
-                cursor.execute(query % relnames)
+                rel_names = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_name' in v)
+                rel_regex = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_regex' in v)
+                self.log.debug("Running query: {} with relations matching: {}".format(query, rel_names + rel_regex))
+                cursor.execute(query.format(relations_names=rel_names, relations_regexes=rel_regex))
             else:
-                query = scope['query'] % (", ".join(cols))
                 self.log.debug("Running query: %s" % query)
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-        except programming_error as e:
+        except psycopg2.ProgrammingError as e:
             log_func("Not all metrics may be available: %s" % str(e))
             db.rollback()
             return None
@@ -724,12 +743,19 @@ GROUP BY datid, datname
                 row_table = desc_map['table']
                 row_schema = desc_map['schema']
 
-                config_table_obj = relations_config.get(row_table)
-                if not config_table_obj:
+                if row_table in relations_config:
+                    config_table_objects = [relations_config[row_table]]
+                else:
+                    # Find all matching regexes. Required if the same table matches two different regex
+                    regex_configs = (v for v in relations_config.values() if 'relation_regex' in v)
+                    config_table_objects = [r for r in regex_configs if re.match(r['relation_regex'], row_table)]
+
+                if not config_table_objects:
                     self.log.info("Got row %s.%s, but not relation", row_schema, row_table)
                 else:
-                    config_schemas = config_table_obj.get('schemas')
-                    if not config_schemas:
+                    # Create set of all schemas by flattening and removing duplicates
+                    config_schemas = {s for r in config_table_objects for s in r['schemas']}
+                    if ALL_SCHEMAS in config_schemas:
                         self.log.debug("All schemas are allowed for table %s.%s", row_schema, row_table)
                     elif row_schema not in config_schemas:
                         self.log.debug("Skipping non matched schema %s for table %s", desc_map['schema'], row_table)
@@ -773,8 +799,6 @@ GROUP BY datid, datname
         collect_activity_metrics,
         collect_database_size_metrics,
         collect_default_db,
-        interface_error,
-        programming_error,
     ):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
@@ -808,33 +832,25 @@ GROUP BY datid, datname
         try:
             cursor = db.cursor()
             results_len = self._query_scope(
-                cursor, db_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
+                cursor, db_instance_metrics, key, db, instance_tags, False, relations_config
             )
             if results_len is not None:
                 self.gauge(
                     "postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")]
                 )
 
-            self._query_scope(
-                cursor, bgw_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
-            )
-            self._query_scope(
-                cursor, archiver_instance_metrics, key, db, instance_tags, False, programming_error, relations_config
-            )
+            self._query_scope(cursor, bgw_instance_metrics, key, db, instance_tags, False, relations_config)
+            self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, False, relations_config)
 
             if collect_activity_metrics:
                 activity_metrics = self._get_activity_metrics(key, db, user)
-                self._query_scope(
-                    cursor, activity_metrics, key, db, instance_tags, False, programming_error, relations_config
-                )
+                self._query_scope(cursor, activity_metrics, key, db, instance_tags, False, relations_config)
 
             for scope in list(metric_scope) + custom_metrics:
-                self._query_scope(
-                    cursor, scope, key, db, instance_tags, scope in custom_metrics, programming_error, relations_config
-                )
+                self._query_scope(cursor, scope, key, db, instance_tags, scope in custom_metrics, relations_config)
 
             cursor.close()
-        except (interface_error, socket.error) as e:
+        except (psycopg2.InterfaceError, socket.error) as e:
             self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
 
@@ -845,7 +861,7 @@ GROUP BY datid, datname
         service_check_tags = list(set(service_check_tags))
         return service_check_tags
 
-    def get_connection(self, key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=True):
+    def get_connection(self, key, host, port, user, password, dbname, ssl, tags, use_cached=True):
         """Get and memoize connections to instances"""
         if key in self.dbs and use_cached:
             return self.dbs[key]
@@ -854,17 +870,13 @@ GROUP BY datid, datname
             try:
                 if host == 'localhost' and password == '':
                     # Use ident method
-                    connection = connect_fct("user=%s dbname=%s" % (user, dbname))
+                    connection = psycopg2.connect("user=%s dbname=%s" % (user, dbname))
                 elif port != '':
-                    connection = connect_fct(
-                        host=host, port=port, user=user, password=password, database=dbname, ssl=ssl
+                    connection = psycopg2.connect(
+                        host=host, port=port, user=user, password=password, database=dbname, sslmode=ssl
                     )
-                elif host.startswith('/'):
-                    # If the hostname starts with /, it's probably a path
-                    # to a UNIX socket. This is similar behaviour to psql
-                    connection = connect_fct(unix_sock=host, user=user, password=password, database=dbname)
                 else:
-                    connection = connect_fct(host=host, user=user, password=password, database=dbname, ssl=ssl)
+                    connection = psycopg2.connect(host=host, user=user, password=password, database=dbname, sslmode=ssl)
                 self.dbs[key] = connection
                 return connection
             except Exception as e:
@@ -880,7 +892,7 @@ GROUP BY datid, datname
             elif not user:
                 raise ConfigurationError('Please specify a user to connect to Postgres as.')
 
-    def _get_custom_queries(self, db, tags, custom_queries, programming_error):
+    def _get_custom_queries(self, db, tags, custom_queries):
         """
         Given a list of custom_queries, execute each query and parse the result for metrics
         """
@@ -906,7 +918,7 @@ GROUP BY datid, datname
                 try:
                     self.log.debug("Running query: {}".format(query))
                     cursor.execute(query)
-                except programming_error as e:
+                except psycopg2.ProgrammingError as e:
                     self.log.error("Error executing query for metric_prefix {}: {}".format(metric_prefix, str(e)))
                     db.rollback()
                     continue
@@ -927,7 +939,7 @@ GROUP BY datid, datname
                         continue
 
                     metric_info = []
-                    query_tags = custom_query.get('tags', [])
+                    query_tags = list(custom_query.get('tags', []))
                     query_tags.extend(tags)
 
                     for column, value in zip(columns, row):
@@ -989,6 +1001,14 @@ GROUP BY datid, datname
 
             self.log.debug("Metric: {0}".format(m))
 
+            # Old formatting to new formatting. The first params is always the columns names from which to
+            # read metrics. The `relation` param instructs the check to replace the next '%s' with the list of
+            # relations names.
+            if m['relation']:
+                m['query'] = m['query'] % ('{metrics_columns}', '{relations_names}')
+            else:
+                m['query'] = m['query'] % '{metrics_columns}'
+
             try:
                 for ref, (_, mtype) in iteritems(m['metrics']):
                     cap_mtype = mtype.upper()
@@ -1016,7 +1036,9 @@ GROUP BY datid, datname
         tags = instance.get('tags', [])
         dbname = instance.get('dbname', None)
         relations = instance.get('relations', [])
-        ssl = is_affirmative(instance.get('ssl', False))
+        ssl = instance.get('ssl', False)
+        if ssl not in SSL_MODES:
+            ssl = 'require' if is_affirmative(ssl) else 'disable'
         collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
         collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
@@ -1055,12 +1077,10 @@ GROUP BY datid, datname
 
         self.log.debug("Custom metrics: %s" % custom_metrics)
 
-        connect_fct, interface_error, programming_error = self._get_pg_attrs(instance)
-
         # Collect metrics
         try:
             # Check version
-            db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags)
+            db = self.get_connection(key, host, port, user, password, dbname, ssl, tags)
             version = self._get_version(key, db)
             self.log.debug("Running check against version %s" % version)
             if tag_replication_role:
@@ -1077,13 +1097,11 @@ GROUP BY datid, datname
                 collect_activity_metrics,
                 collect_database_size_metrics,
                 collect_default_db,
-                interface_error,
-                programming_error,
             )
-            self._get_custom_queries(db, tags, custom_queries, programming_error)
+            self._get_custom_queries(db, tags, custom_queries)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
-            db = self.get_connection(key, host, port, user, password, dbname, ssl, connect_fct, tags, use_cached=False)
+            db = self.get_connection(key, host, port, user, password, dbname, ssl, tags, use_cached=False)
             self._collect_stats(
                 key,
                 db,
@@ -1096,10 +1114,8 @@ GROUP BY datid, datname
                 collect_activity_metrics,
                 collect_database_size_metrics,
                 collect_default_db,
-                interface_error,
-                programming_error,
             )
-            self._get_custom_queries(db, tags, custom_queries, programming_error)
+            self._get_custom_queries(db, tags, custom_queries)
 
         service_check_tags = self._get_service_check_tags(host, port, tags)
         message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)

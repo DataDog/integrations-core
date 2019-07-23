@@ -108,120 +108,220 @@ instances:
       - include:
           bean: presto.execution:name=QueryManager
           attribute:
-            - AbandonedQueries.OneMinute.Count
-            - AbandonedQueries.OneMinute.Rate
-            - AbandonedQueries.TotalCount
-            - CanceledQueries.OneMinute.Count
-            - CanceledQueries.OneMinute.Rate
-            - CanceledQueries.TotalCount
-            - CompletedQueries.OneMinute.Count
-            - CompletedQueries.OneMinute.Rate
-            - CompletedQueries.TotalCount
-            - ConsumedCpuTimeSecs.OneMinute.Count
-            - ConsumedCpuTimeSecs.OneMinute.Rate
-            - ConsumedCpuTimeSecs.TotalCount
-            - CpuInputByteRate.AllTime.Avg
-            - CpuInputByteRate.AllTime.P75
-            - CpuInputByteRate.AllTime.P95
-            - CpuInputByteRate.OneMinute.Avg
-            - CpuInputByteRate.OneMinute.Count
-            - CpuInputByteRate.OneMinute.Max
-            - CpuInputByteRate.OneMinute.Min
-            - CpuInputByteRate.OneMinute.P75
-            - CpuInputByteRate.OneMinute.P95
-            - CpuInputByteRate.OneMinute.Total
-            - ExecutionTime.AllTime.Avg
-            - ExecutionTime.AllTime.Count
-            - ExecutionTime.AllTime.Max
-            - ExecutionTime.AllTime.Min
-            - ExecutionTime.AllTime.P75
-            - ExecutionTime.AllTime.P95
-            - ExecutionTime.OneMinute.Avg
-            - ExecutionTime.OneMinute.Max
-            - ExecutionTime.OneMinute.Min
-            - ExecutionTime.OneMinute.P75
-            - ExecutionTime.OneMinute.P95
-            - Executor.ActiveCount
-            - Executor.CompletedTaskCount
-            - Executor.CorePoolSize
-            - Executor.PoolSize
-            - Executor.QueuedTaskCount
-            - Executor.TaskCount
-            - ExternalFailures.OneMinute.Count
-            - ExternalFailures.OneMinute.Rate
-            - ExternalFailures.TotalCount
-            - FailedQueries.OneMinute.Count
-            - FailedQueries.OneMinute.Rate
-            - FailedQueries.TotalCount
-            - InsufficientResourcesFailures.OneMinute.Count
-            - InsufficientResourcesFailures.OneMinute.Rate
-            - InsufficientResourcesFailures.TotalCount
-            - InternalFailures.OneMinute.Count
-            - InternalFailures.OneMinute.Rate
-            - InternalFailures.TotalCount
-            - ManagementExecutor.ActiveCount
-            - ManagementExecutor.CompletedTaskCount
-            - ManagementExecutor.QueuedTaskCount
-            - RunningQueries
-            - StartedQueries.OneMinute.Count
-            - StartedQueries.OneMinute.Rate
-            - StartedQueries.TotalCount
-            - UserErrorFailures.OneMinute.Count
-            - UserErrorFailures.OneMinute.Rate
-            - UserErrorFailures.TotalCount
-            - WallInputBytesRate.OneMinute.Avg
-            - WallInputBytesRate.OneMinute.Max
-            - WallInputBytesRate.OneMinute.Min
-            - WallInputBytesRate.OneMinute.P75
-            - WallInputBytesRate.OneMinute.P95
+            AbandonedQueries.OneMinute.Count:
+              alias: presto.execution.abandoned_queries.one_minute.count
+            AbandonedQueries.OneMinute.Rate:
+              alias: presto.execution.abandoned_queries.one_minute.rate
+            AbandonedQueries.TotalCount:
+              alias: presto.execution.abandoned_queries.total_count
+            CanceledQueries.OneMinute.Count:
+              alias: presto.execution.canceled_queries.one_minute.count
+            CanceledQueries.OneMinute.Rate:
+              alias: presto.execution.canceled_queries.one_minute.rate
+            CanceledQueries.TotalCount:
+              alias: presto.execution.canceled_queries.total_count
+            CompletedQueries.OneMinute.Count:
+              alias: presto.execution.completed_queries.one_minute.count
+            CompletedQueries.OneMinute.Rate:
+              alias: presto.execution.completed_queries.one_minute.rate
+            CompletedQueries.TotalCount:
+              alias: presto.execution.completed_queries.total_count
+            ConsumedCpuTimeSecs.OneMinute.Count:
+              alias: presto.execution.consumed_cpu_time_secs.one_minute.count
+            ConsumedCpuTimeSecs.OneMinute.Rate:
+              alias: presto.execution.consumed_cpu_time_secs.one_minute.rate
+            ConsumedCpuTimeSecs.TotalCount:
+              alias: presto.execution.consumed_cpu_time_secs.total_count
+            CpuInputByteRate.AllTime.Avg:
+              alias: presto.execution.cpu_input_byte_rate.all_time.avg
+            CpuInputByteRate.AllTime.P75:
+              alias: presto.execution.cpu_input_byte_rate.all_time.p75
+            CpuInputByteRate.AllTime.P95:
+              alias: presto.execution.cpu_input_byte_rate.all_time.p95
+            CpuInputByteRate.OneMinute.Avg:
+              alias: presto.execution.cpu_input_byte_rate.one_minute.avg
+            CpuInputByteRate.OneMinute.Count:
+              alias: presto.execution.cpu_input_byte_rate.one_minute.count
+            CpuInputByteRate.OneMinute.Max:
+              alias: presto.execution.cpu_input_byte_rate.one_minute.max
+            CpuInputByteRate.OneMinute.Min:
+              alias: presto.execution.cpu_input_byte_rate.one_minute.min
+            CpuInputByteRate.OneMinute.P75:
+              alias: presto.execution.cpu_input_byte_rate.one_minute.p75
+            CpuInputByteRate.OneMinute.P95:
+              alias: presto.execution.cpu_input_byte_rate.one_minute.p95
+            CpuInputByteRate.OneMinute.Total:
+              alias: presto.execution.cpu_input_byte_rate.one_minute.total
+            ExecutionTime.AllTime.Avg:
+              alias: presto.execution.execution_time.all_time.avg
+            ExecutionTime.AllTime.Count:
+              alias: presto.execution.execution_time.all_time.count
+            ExecutionTime.AllTime.Max:
+              alias: presto.execution.execution_time.all_time.max
+            ExecutionTime.AllTime.Min:
+              alias: presto.execution.execution_time.all_time.min
+            ExecutionTime.AllTime.P75:
+              alias: presto.execution.execution_time.all_time.p75
+            ExecutionTime.AllTime.P95:
+              alias: presto.execution.execution_time.all_time.p95
+            ExecutionTime.OneMinute.Avg:
+              alias: presto.execution.execution_time.one_minute.avg
+            ExecutionTime.OneMinute.Max:
+              alias: presto.execution.execution_time.one_minute.max
+            ExecutionTime.OneMinute.Min:
+              alias: presto.execution.execution_time.one_minute.min
+            ExecutionTime.OneMinute.P75:
+              alias: presto.execution.execution_time.one_minute.p75
+            ExecutionTime.OneMinute.P95:
+              alias: presto.execution.execution_time.one_minute.p95
+            Executor.ActiveCount:
+              alias: presto.execution.executor.active_count
+            Executor.CompletedTaskCount:
+              alias: presto.execution.executor.completed_task_count
+            Executor.CorePoolSize:
+              alias: presto.execution.executor.core_pool_size
+            Executor.PoolSize:
+              alias: presto.execution.executor.pool_size
+            Executor.QueuedTaskCount:
+              alias: presto.execution.executor.queued_task_count
+            Executor.TaskCount:
+              alias: presto.execution.executor.task_count
+            ExternalFailures.OneMinute.Count:
+              alias: presto.execution.external_failures.one_minute.count
+            ExternalFailures.OneMinute.Rate:
+              alias: presto.execution.external_failures.one_minute.rate
+            ExternalFailures.TotalCount:
+              alias: presto.execution.external_failures.total_count
+            FailedQueries.OneMinute.Count:
+              alias: presto.execution.failed_queries.one_minute.count
+            FailedQueries.OneMinute.Rate:
+              alias: presto.execution.failed_queries.one_minute.rate
+            FailedQueries.TotalCount:
+              alias: presto.execution.failed_queries.total_count
+            InsufficientResourcesFailures.OneMinute.Count:
+              alias: presto.execution.insufficient_resources_failures.one_minute.count
+            InsufficientResourcesFailures.OneMinute.Rate:
+              alias: presto.execution.insufficient_resources_failures.one_minute.rate
+            InsufficientResourcesFailures.TotalCount:
+              alias: presto.execution.insufficient_resources_failures.total_count
+            InternalFailures.OneMinute.Count:
+              alias: presto.execution.internal_failures.one_minute.count
+            InternalFailures.OneMinute.Rate:
+              alias: presto.execution.internal_failures.one_minute.rate
+            InternalFailures.TotalCount:
+              alias: presto.execution.internal_failures.total_count
+            ManagementExecutor.ActiveCount:
+              alias: presto.execution.management_executor.active_count
+            ManagementExecutor.CompletedTaskCount:
+              alias: presto.execution.management_executor.completed_task_count
+            ManagementExecutor.QueuedTaskCount:
+              alias: presto.execution.management_executor.queued_task_count
+            RunningQueries:
+              alias: presto.execution.running_queries
+            StartedQueries.OneMinute.Count:
+              alias: presto.execution.started_queries.one_minute.count
+            StartedQueries.OneMinute.Rate:
+              alias: presto.execution.started_queries.one_minute.rate
+            StartedQueries.TotalCount:
+              alias: presto.execution.started_queries.total_count
+            UserErrorFailures.OneMinute.Count:
+              alias: presto.execution.user_error_failures.one_minute.count
+            UserErrorFailures.OneMinute.Rate:
+              alias: presto.execution.user_error_failures.one_minute.rate
+            UserErrorFailures.TotalCount:
+              alias: presto.execution.user_error_failures.total_count
+            WallInputBytesRate.OneMinute.Avg:
+              alias: presto.execution.wall_input_bytes_rate.one_minute.avg
+            WallInputBytesRate.OneMinute.Max:
+              alias: presto.execution.wall_input_bytes_rate.one_minute.max
+            WallInputBytesRate.OneMinute.Min:
+              alias: presto.execution.wall_input_bytes_rate.one_minute.min
+            WallInputBytesRate.OneMinute.P75:
+              alias: presto.execution.wall_input_bytes_rate.one_minute.p75
+            WallInputBytesRate.OneMinute.P95:
+              alias: presto.execution.wall_input_bytes_rate.one_minute.p95
       - include:
           bean: presto.execution.executor:name=TaskExecutor
           attribute:
-            - BlockedSplits
-            - ProcessorExecutor.QueuedTaskCount
-            - RunningSplits
-            - TotalSplits
-            - WaitingSplits
+            BlockedSplits:
+              alias: presto.execution.executor.blocked_splits
+            ProcessorExecutor.QueuedTaskCount:
+              alias: presto.execution.executor.processor_executor.queued_task_count
+            RunningSplits:
+              alias: presto.execution.executor.running_splits
+            TotalSplits:
+              alias: presto.execution.executor.total_splits
+            WaitingSplits:
+              alias: presto.execution.executor.waiting_splits
 
       - include:
           bean: presto.execution:name=TaskManager
           attribute:
-            - InputDataSize.OneMinute.Count
-            - InputDataSize.OneMinute.Rate
-            - InputDataSize.TotalCount
-            - InputPositions.OneMinute.Count
-            - InputPositions.OneMinute.Rate
-            - InputPositions.TotalCount
-            - OutputDataSize.OneMinute.Count
-            - OutputDataSize.OneMinute.Rate
-            - OutputDataSize.TotalCount
-            - OutputPositions.OneMinute.Count
-            - OutputPositions.OneMinute.Rate
-            - OutputPositions.TotalCount
-            - TaskNotificationExecutor.ActiveCount
-            - TaskNotificationExecutor.CompletedTaskCount
-            - TaskNotificationExecutor.PoolSize
-            - TaskNotificationExecutor.QueuedTaskCount
+            InputDataSize.OneMinute.Count:
+              alias: presto.execution.input_data_size.one_minute.count
+            InputDataSize.OneMinute.Rate:
+              alias: presto.execution.input_data_size.one_minute.rate
+            InputDataSize.TotalCount:
+              alias: presto.execution.input_data_size.total_count
+            InputPositions.OneMinute.Count:
+              alias: presto.execution.input_positions.one_minute.count
+            InputPositions.OneMinute.Rate:
+              alias: presto.execution.input_positions.one_minute.rate
+            InputPositions.TotalCount:
+              alias: presto.execution.input_positions.total_count
+            OutputDataSize.OneMinute.Count:
+              alias: presto.execution.output_data_size.one_minute.count
+            OutputDataSize.OneMinute.Rate:
+              alias: presto.execution.output_data_size.one_minute.rate
+            OutputDataSize.TotalCount:
+              alias: presto.execution.output_data_size.total_count
+            OutputPositions.OneMinute.Count:
+              alias: presto.execution.output_positions.one_minute.count
+            OutputPositions.OneMinute.Rate:
+              alias: presto.execution.output_positions.one_minute.rate
+            OutputPositions.TotalCount:
+              alias: presto.execution.output_positions.total_count
+            TaskNotificationExecutor.ActiveCount:
+              alias: presto.execution.task_notification_executor.active_count
+            TaskNotificationExecutor.CompletedTaskCount:
+              alias: presto.execution.task_notification_executor.completed_task_count
+            TaskNotificationExecutor.PoolSize:
+              alias: presto.execution.task_notification_executor.pool_size
+            TaskNotificationExecutor.QueuedTaskCount:
+              alias: presto.execution.task_notification_executor.queued_task_count
       - include:
           bean:
             - presto.failureDetector:name=HeartbeatFailureDetector
           attribute:
-            - ActiveCount
+            ActiveCount:
+              alias: presto.failure_detector.active_count
       - include:
           domain: presto.memory
           attribute:
-            - AssignedQueries
-            - BlockedNodes
-            - ClusterMemoryBytes
-            - FreeBytes
-            - FreeDistributedBytes
-            - MaxBytes
-            - Nodes
-            - ReservedBytes
-            - ReservedDistributedBytes
-            - ReservedRevocableBytes
-            - ReservedRevocableDistributedBytes
-            - TotalDistributedBytes
+            AssignedQueries:
+              alias: presto.memory.assigned_queries
+            BlockedNodes:
+              alias: presto.memory.blocked_nodes
+            ClusterMemoryBytes:
+              alias: presto.memory.cluster_memory_bytes
+            FreeBytes:
+              alias: presto.memory.free_bytes
+            FreeDistributedBytes:
+              alias: presto.memory.free_distributed_bytes
+            MaxBytes:
+              alias: presto.memory.max_bytes
+            Nodes:
+              alias: presto.memory.nodes
+            ReservedBytes:
+              alias: presto.memory.reserved_bytes
+            ReservedDistributedBytes:
+              alias: presto.memory.reserved_distributed_bytes
+            ReservedRevocableBytes:
+              alias: presto.memory.reserved_revocable_bytes
+            ReservedRevocableDistributedBytes:
+              alias: presto.memory.reserved_revocable_distributed_bytes
+            TotalDistributedBytes:
+              alias: presto.memory.total_distributed_bytes
 
 ## Log Section (Available for Agent >=6.0)
 ##

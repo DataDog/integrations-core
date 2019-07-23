@@ -90,7 +90,7 @@ class FargateCheck(AgentCheck):
         container_tags = {}
         for container in metadata['Containers']:
             c_id = container['DockerId']
-            tagger_tags = get_tags('docker://%s' % c_id, True)
+            tagger_tags = get_tags('container_id://%s' % c_id, True) or []
 
             # Compatibility with previous versions of the check
             compat_tags = []

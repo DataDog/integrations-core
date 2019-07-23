@@ -4,6 +4,7 @@
 
 import os
 
+from datadog_checks.dev import get_docker_hostname
 from datadog_checks.yarn.yarn import (
     YARN_APPLICATION_STATES,
     YARN_APPS_PATH,
@@ -18,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CLUSTER_NAME = 'SparkCluster'
 
 # Resource manager URI
-RM_ADDRESS = 'http://localhost:8088'
+RM_ADDRESS = 'http://{}:8088'.format(get_docker_hostname())
 
 # Service URLs
 YARN_CLUSTER_METRICS_URL = '{}{}'.format(RM_ADDRESS, YARN_CLUSTER_METRICS_PATH)
@@ -183,7 +184,7 @@ YARN_CLUSTER_METRICS_VALUES = {
 
 YARN_CLUSTER_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME)]
 
-YARN_APP_METRICS_VALUES = {
+DEPRECATED_YARN_APP_METRICS_VALUES = {
     'yarn.apps.progress': 100,
     'yarn.apps.started_time': 1326815573334,
     'yarn.apps.finished_time': 1326815598530,
@@ -193,6 +194,18 @@ YARN_APP_METRICS_VALUES = {
     'yarn.apps.running_containers': 0,
     'yarn.apps.memory_seconds': 151730,
     'yarn.apps.vcore_seconds': 103,
+}
+
+YARN_APP_METRICS_VALUES = {
+    'yarn.apps.progress_gauge': 100,
+    'yarn.apps.started_time_gauge': 1326815573334,
+    'yarn.apps.finished_time_gauge': 1326815598530,
+    'yarn.apps.elapsed_time_gauge': 25196,
+    'yarn.apps.allocated_mb_gauge': 0,
+    'yarn.apps.allocated_vcores_gauge': 0,
+    'yarn.apps.running_containers_gauge': 0,
+    'yarn.apps.memory_seconds_gauge': 151730,
+    'yarn.apps.vcore_seconds_gauge': 103,
 }
 
 YARN_APP_METRICS_TAGS = ['cluster_name:{}'.format(CLUSTER_NAME), 'app_name:word count', 'app_queue:default']

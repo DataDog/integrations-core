@@ -23,5 +23,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "tokumx"
+  "integration_id": "tokumx",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

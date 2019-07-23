@@ -8,11 +8,11 @@ This integration monitors [Pivotal Container Service][1] clusters.
 
 Since Datadog already integrates with Kubernetes, it is ready-made to monitor PKS.
 
-### Metric Collection
+### Metric collection
 
 Monitoring PKS requires that you set up the Datadog integration for [Kubernetes][2].
 
-### Log Collection
+### Log collection
 
 **Available for Agent >6.0**
 

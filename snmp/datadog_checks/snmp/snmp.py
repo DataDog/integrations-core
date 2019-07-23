@@ -4,6 +4,7 @@
 from collections import defaultdict
 
 import pysnmp.proto.rfc1902 as snmp_type
+from pyasn1.codec.ber import decoder
 from pyasn1.type.univ import OctetString
 from pysnmp import hlapi
 from pysnmp.error import PySnmpError
@@ -453,7 +454,7 @@ class SnmpCheck(NetworkCheck):
         for metric in metrics:
             forced_type = metric.get('forced_type')
             if 'OID' in metric:
-                queried_oid = metric['OID']
+                queried_oid = metric['OID'].lstrip('.')
                 if queried_oid in results:
                     value = results[queried_oid]
                 else:
@@ -585,6 +586,25 @@ class SnmpCheck(NetworkCheck):
             return
         if snmp_class in SNMP_GAUGES:
             value = int(snmp_value)
+            self.gauge(metric_name, value, tags)
+            return
+
+        if snmp_class == 'Opaque':
+            # Try support for floats
+            try:
+                value = float(decoder.decode(bytes(snmp_value))[0])
+            except Exception:
+                pass
+            else:
+                self.gauge(metric_name, value, tags)
+                return
+
+        # Falls back to try to cast the value.
+        try:
+            value = float(snmp_value)
+        except ValueError:
+            pass
+        else:
             self.gauge(metric_name, value, tags)
             return
 

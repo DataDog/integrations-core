@@ -168,7 +168,7 @@ class Tenant:
                 tags.append("cause:" + ev['cause'])
             if 'severity' in ev:
                 tags.append("severity:" + ev['severity'])
-            self.event(
+            self.check.event(
                 {
                     'timestamp': timestamp,
                     'event_type': 'cisco_aci',
@@ -176,7 +176,7 @@ class Tenant:
                     'msg_text': ev['descr'],
                     "tags": tags + dn_tags,
                     "aggregation_key": ev['id'],
-                    'host': self.hostname,
+                    'host': self.check.hostname,
                 }
             )
 

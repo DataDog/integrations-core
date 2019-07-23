@@ -71,7 +71,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         """
         return _tags
 
-    def _filter_metric(self, metric):
+    def _filter_metric(self, metric, scraper_config):
         """
         Used to filter metrics at the begining of the processing, by default no metric is filtered
         """

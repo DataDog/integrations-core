@@ -556,7 +556,7 @@ def test_submit_histogram(mocked_prometheus_check):
     check._submit('custom.histogram', _histo)
     check.gauge.assert_has_calls(
         [
-            mock.call('prometheus.custom.histogram.count', 42, [], hostname=None),
+            mock.call('prometheus.custom.histogram.count', 42, ['upper_bound:none'], hostname=None),
             mock.call('prometheus.custom.histogram.sum', 3.14, [], hostname=None),
             mock.call('prometheus.custom.histogram.count', 33, ['upper_bound:12.7'], hostname=None),
             mock.call('prometheus.custom.histogram.count', 666, ['upper_bound:18.2'], hostname=None),

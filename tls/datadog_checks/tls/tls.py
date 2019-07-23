@@ -59,6 +59,8 @@ class TLSCheck(AgentCheck):
             self._sock_type = socket.SOCK_STREAM
             self._port = int(self.instance.get('port', parsed_uri.port or 443))
 
+        self._validate_cert = is_affirmative(self.instance.get('validate_cert', True))
+
         # https://en.wikipedia.org/wiki/Server_Name_Indication
         self._server_hostname = self.instance.get('server_hostname', self._server)
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
@@ -327,12 +329,15 @@ class TLSCheck(AgentCheck):
             # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS
             self._tls_context = ssl.SSLContext(protocol=PROTOCOL_TLS_CLIENT)
 
-            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
-            self._tls_context.verify_mode = ssl.CERT_REQUIRED
-
             # Run our own validation later on if need be
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
+            #
+            # IMPORTANT: This must be set before verify_mode in Python 3.7+, see:
+            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
             self._tls_context.check_hostname = False
+
+            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
+            self._tls_context.verify_mode = ssl.CERT_REQUIRED if self._validate_cert else ssl.CERT_NONE
 
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.load_verify_locations
             if self._cafile or self._capath:  # no cov

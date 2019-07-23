@@ -5,6 +5,7 @@ aliases:
     - /developers/integrations/integration_sdk/
     - /developers/integrations/testing/
     - /integrations/datadog_checks_dev/
+    - /guides/new_integration/
 ---
 
 To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, a number of prerequisites must be met:
@@ -144,6 +145,8 @@ There are two basic types of tests: unit tests for specific functionality, and i
 
 For more information, see the [Datadog Checks Dev documentation][8].
 
+#### Unit test
+
 The first part of the `check` method retrieves and verifies two pieces of information we need from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with something like this:
 
 ```python
@@ -182,6 +185,8 @@ The scaffolding has already been set up to run all tests located in `awesome/tes
 ```
 ddev test awesome
 ```
+
+#### Building an integration test
 
 This test doesn't check our collection _logic_ though, so let's add an integration test. We use `docker` to spin up an Nginx container and let the check retrieve the welcome page. Create a compose file at `awesome/tests/docker-compose.yml` with the following contents:
 
@@ -226,6 +231,8 @@ def dd_environment():
 def instance():
     return INSTANCE.copy()
 ```
+
+#### Integration test
 
 Finally, add an integration test to our `awesome/tests/test_awesome.py` file:
 
@@ -301,7 +308,7 @@ Arguments:
   * *double*
   * *float*
   * *dictionary*
-  * *list\**
+  * *list&#42;*
   * *object*
 * `defval`: default value for the parameter; can be empty (optional).
 
@@ -346,7 +353,7 @@ instances:
     ## The string to search for
     #
     search_string: "Example Domain"
-    
+
     ## @param user - object - optional
     ## The user should map to the structure
     ## {'name': ['<FIRST_NAME>', '<LAST_NAME>'], 'username': <USERNAME>, 'password': <PASSWORD>}
@@ -357,12 +364,12 @@ instances:
     #     - <LAST_NAME>
     #   username: <USERNAME>
     #   password: <PASSWORD>
-    
+
     ## @param options - object - required
     ## Optional flags you can set
     #
     options:
-    
+
       ## @param follow_redirects - boolean - optional - default: false
       ## Set to true to follow 301 Redirect
       #
@@ -400,6 +407,10 @@ The complete list of mandatory and optional attributes for the `manifest.json` f
 | `metric_to_check`    | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken in the Datadog application. |
 | `metric_prefix`      | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                               |
 | `process_signatures` | Array of String | Optional           | A list of signatures that matches the command line of this integration.                                                                                                                                                  |
+| `assets`       | Dictionary | Mandatory          | Relative location of where certain asset files live and their respective names.                                                                                                                                             |
+| `assets`-> `dashboards`       | Dictionary | Mandatory          | Dictionary where the key is the name of the dashboard (must be globally unique across integrations) and the value is the relative file path where the dashbaord definition lives.                                                                                                      |
+| `assets`-> `monitors`       | Dictionary | Mandatory          | Dictionary where the key is the name of the monitor (must be globally unique across integrations) and the value is the relative file path where the dashboard definition lives.                                                                                                                                              |
+| `assets`-> `service_checks`       | String | Mandatory          | Relative location of where the `service_checks.json` file lives.                                                                       |
 
 ##### Example manifest config
 
@@ -407,7 +418,7 @@ Our example integration has a very simple `awesome/manifest.json`, the bulk of w
 
 ```json
 {
-  "display_name": "Awesome",
+  "display_name": "awesome",
   "maintainer": "email@example.org",
   "manifest_version": "1.0.0",
   "name": "awesome",
@@ -415,20 +426,25 @@ Our example integration has a very simple `awesome/manifest.json`, the bulk of w
   "metric_to_check": "",
   "creates_events": false,
   "short_description": "",
-  "guid": "x23b0c2c-dc39-4196-95fd-bddf93254a0x",
+  "guid": "x16b8750-df1e-46c0-839a-2056461b604x",
   "support": "contrib",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Awesome Integration",
+  "public_title": "Datadog-awesome Integration",
   "categories": [
     "web"
   ],
   "type": "check",
   "is_public": false,
-  "integration_id": "awesome"
+  "integration_id": "awesome",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }
 ```
 
@@ -447,7 +463,7 @@ Descriptions of each column of the `metadata.csv` file:
 | `per_unit_name` | Optional           | If there is a unit sub-division, i.e `request per second`                                                                                                                       |
 | `description`   | Optional           | Description of the metric.                                                                                                                                                      |
 | `orientation`   | Mandatory          | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`. |
-| `integration`   | Mandatory          | Name of the integration that emits the metric.                                                                                                                                  |
+| `integration`   | Mandatory          | Name of the integration that emits the metric. Must be the normalized version of the `display_name` from the `manifest.json` file. Any character besides letters, underscores, dashes and numbers are converted to underscores. E.g. `Openstack Controller` -> `openstack_controller`and `ASP.NET` -> `asp_net` and `CRI-o` -> `cri-o`.                                                                                                                                |
 | `short_name`    | Mandatory          | Explicit Unique ID for the metric.                                                                                                                                              |
 
 ##### Example metadata config
@@ -463,16 +479,16 @@ The `service_checks.json` file contains the following mandatory attributes:
 | Attribute       | Description                                                                                                              |
 | ----            | ----                                                                                                                     |
 | `agent_version` | Minimum Agent version supported.                                                                                         |
-| `integration`   | Integration name.                                                                                                        |
+| `integration`   | The name of the integration that emits this service check. Must be the non-normalized `display_name` from `manifest.json`.                                                                                                      |
 | `check`         | Name of the Service Check. It must be unique.                                                                            |
 | `statuses`      | List of different status of the check, to choose among `ok`, `warning`, and `critical`. `unknown` is also a possibility. |
 | `groups`        | [Tags][14] sent with the Service Check.                                                                                  |
-| `name`          | Displayed name of the Service Check. The displayed name must be unique and self-explanatory.                             |
+| `name`          | Displayed name of the Service Check. The displayed name must be self-explanatory and unique across all integrations.                             |
 | `description`   | Description of the Service Check                                                                                         |
 
 ##### Example service check config
 
-Our example integration contains a service check, so we need to add it to the `awesome/service_checks.json` file:
+Our example integration contains a service check, so we need to add it to the `awesome/assets/service_checks.json` file:
 
 ```json
 [
@@ -496,10 +512,11 @@ The directory structure for images and logos:
     awesome/
     ├── images
     │   └── an_awesome_image.png
-    └── logos
-        ├── avatars-bot.png
-        ├── saas_logos-bot.png
-        └── saas_logos-small.png
+    ├── assets
+    │   └── logos/
+            ├── avatars-bot.png
+            ├── saas_logos-bot.png
+            └── saas_logos-small.png
 ```
 
 The `images` folder contains all images that are used in the integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`:
@@ -508,7 +525,7 @@ The `images` folder contains all images that are used in the integration tile. T
 ![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/awesome/images/snapshot.png)
 ```
 
-The `logos` folder must contain **three** images with filenames and sizes that match the following specifications _exactly_. Underneath each specification is a list of places where the images may appear in the web app.
+The `assets/logos/` directory must contain **three** images with filenames and sizes that match the following specifications _exactly_. Underneath each specification is a list of places where the images may appear in the web app.
 
 #### saas_logos-bot.png (200 × 128)
 
@@ -554,8 +571,15 @@ sudo datadog-agent integration install -w /path/to/wheel.whl
 ```
 
 **Windows** (Ensure that your shell session has _administrator_ privileges):
+
+For Agent versions <= 6.11:
 ```
 "C:\Program Files\Datadog\Datadog Agent\embedded\agent.exe" integration install -w /path/to/wheel.whl
+```
+
+For Agent versions >= 6.12:
+```
+"C:\Program Files\Datadog\Datadog Agent\bin\agent.exe" integration install -w /path/to/wheel.whl
 ```
 
 

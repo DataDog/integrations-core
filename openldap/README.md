@@ -22,10 +22,10 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
 1. Check if monitoring is enabled on your installation
 
     ```
-        sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=module{0},cn=config
+      sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=module{0},cn=config
     ```
 
-If you see a line with `olcModuleLoad: back_monitor.la`, monitoring is already enabled, go to step 3.
+    If you see a line with `olcModuleLoad: back_monitor.la`, monitoring is already enabled, go to step 3.
 
 2. Enable monitoring on your server
 
@@ -38,23 +38,21 @@ If you see a line with `olcModuleLoad: back_monitor.la`, monitoring is already e
         EOF
     ```
 
-3. Create a user for accessing the monitoring information
+3. Create an encrypted password with `slappasswd`
+4. Add a new user:
 
-    1. Create an encrypted password with `slappasswd`
-    2. Add a new user
+    ```
+        cat <<EOF | ldapadd -H ldapi:/// -D <YOUR BIND DN HERE> -w <YOUR PASSWORD HERE>
+        dn: <USER_DISTINGUISHED_NAME>
+        objectClass: simpleSecurityObject
+        objectClass: organizationalRole
+        cn: <COMMON_NAME_OF_THE_NEW_USER>
+        description: LDAP monitor
+        userPassword:<PASSWORD>
+        EOF
+    ```
 
-        ```
-            cat <<EOF | ldapadd -H ldapi:/// -D <YOUR BIND DN HERE> -w <YOUR PASSWORD HERE>
-            dn: <DN OF THE NEW USER>
-            objectClass: simpleSecurityObject
-            objectClass: organizationalRole
-            cn: <COMMON NAME OF THE NEW USER>
-            description: LDAP monitor
-            userPassword:<ENCRYPTED PASSWORD HERE>
-            EOF
-        ```
-
-4. Configure the monitor database
+5. Configure the monitor database
 
     ```
         cat <<EOF | sudo ldapadd -Y EXTERNAL -H ldapi:///
@@ -62,7 +60,7 @@ If you see a line with `olcModuleLoad: back_monitor.la`, monitoring is already e
         objectClass: olcDatabaseConfig
         objectClass: olcMonitorConfig
         olcDatabase: Monitor
-        olcAccess: to dn.subtree='cn=Monitor' by dn.base='<YOUR MONITOR USER DN HERE>' read by * none
+        olcAccess: to dn.subtree='cn=Monitor' by dn.base='<USER_DISTINGUISHED_NAME>' read by * none
         EOF
     ```
 
@@ -76,30 +74,41 @@ Add this configuration block to your `openldap.yaml` file to start gathering you
   instances:
       - url: ldaps://localhost
         port: 686
-        username: <your monitor user DN>
-        password: <your monitor user password>
+        username: <USER_DISTINGUISHED_NAME>
+        password: <PASSWORD>
 ```
 
 See the [sample openldap.yaml][2] for all available configuration options.
 
 [Restart the Agent][3] to begin sending OpenLDAP metrics to Datadog.
 
+#### Log collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Add this configuration block to your `openldap.d/conf.yaml` file to start collecting your Openldap logs:
+
+    ```
+      logs:
+        - type: file
+          path: /var/log/slapd.log
+          source: openldap
+          service: <SERVICE_NAME>
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample openldap.d/conf.yaml][2] for all available configuration options.
+
+3. [Restart the Agent][3].
+
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `openldap` under the Checks section:
-
-```
-  Checks
-  ======
-    [...]
-
-    openldap
-    --------
-      - instance #0 [OK]
-      - Collected 26 metrics, 0 events & 1 service check
-
-    [...]
-```
+[Run the Agent's status subcommand][4] and look for `openldap` under the Checks section.
 
 ## Compatibility
 
@@ -117,18 +126,13 @@ The openldap check does not include any events.
 
 ### Service Checks
 
-**openldap.can_connect**
-
-Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP server, `OK` otherwise.
+**openldap.can_connect**:<br>
+Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP server, otherwise returns `OK`.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
 
-## Development
-
-See the [main documentation][7]
-for more details about how to test and develop Agent based integrations.
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/openldap/datadog_checks/openldap/data/conf.yaml.example
@@ -136,4 +140,3 @@ for more details about how to test and develop Agent based integrations.
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
 [6]: https://docs.datadoghq.com/help
-[7]: https://docs.datadoghq.com/developers

@@ -19,5 +19,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "aspdotnet"
+  "integration_id": "aspdotnet",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

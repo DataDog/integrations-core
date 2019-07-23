@@ -21,5 +21,12 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": true
+  "is_public": true,
+  "assets": {
+    "monitors": {},
+    "dashboards": {
+      "IBM Db2 Overview": "assets/dashboards/overview.json"
+    },
+    "service_checks": "assets/service_checks.json"
+  }
 }

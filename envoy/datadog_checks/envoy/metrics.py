@@ -1063,11 +1063,35 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    'listener.ssl.cipher': {
+    'listener.ssl.ciphers': {
         'tags': (
             ('address', ),
             (),
             ('cipher', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener.ssl.versions': {
+        'tags': (
+            ('address', ),
+            (),
+            ('version', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener.ssl.curves': {
+        'tags': (
+            ('address', ),
+            (),
+            ('curve', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener.ssl.sigalgs': {
+        'tags': (
+            ('address', ),
+            (),
+            ('sigalg', ),
         ),
         'method': 'monotonic_count',
     },
@@ -1882,6 +1906,78 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.ssl.connection_error': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.handshake': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.session_reused': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.no_certificate': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.fail_no_sni_match': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.fail_verify_no_cert': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.fail_verify_error': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.fail_verify_san': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.fail_verify_cert_hash': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.upstream_flow_control_paused_reading_total': {
         'tags': (
             ('cluster_name', ),
@@ -2122,6 +2218,13 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.upstream_rq_completed': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.upstream_rq_1xx': {
         'tags': (
             ('cluster_name', ),
@@ -2163,6 +2266,14 @@ METRICS = {
             (),
         ),
         'method': 'histogram',
+    },
+    'cluster.canary.upstream_rq_completed': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
     },
     'cluster.canary.upstream_rq_1xx': {
         'tags': (
@@ -2212,6 +2323,14 @@ METRICS = {
         ),
         'method': 'histogram',
     },
+    'cluster.internal.upstream_rq_completed': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.internal.upstream_rq_1xx': {
         'tags': (
             ('cluster_name', ),
@@ -2259,6 +2378,14 @@ METRICS = {
             (),
         ),
         'method': 'histogram',
+    },
+    'cluster.external.upstream_rq_completed': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
     },
     'cluster.external.upstream_rq_1xx': {
         'tags': (

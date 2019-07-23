@@ -166,3 +166,133 @@ init_config:
     - prometheus_target_sync_length_seconds
     - prometheus_treecache_watcher_goroutines
     - prometheus_treecache_zookeeper_failures_total
+
+## Log Section (Available for Agent >=6.0)
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+## tags: - optional - Add tags to the collected logs
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/production_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/integrations_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/production.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#     log_processing_rules:
+#       - type: multi_line
+#         pattern: 'Started [A-Z]+ "[^"]+" for'
+#         name: new_log_start_pattern
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/api_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/application.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/integrations_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/kubernetes.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/audit_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/sidekiq.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/gitlab-shell.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-shell/gitlab-shell.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/unicorn_stderr.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/graphql_json.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-rails/sidekiq_exporter.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#     log_processing_rules:
+#       - type: multi_line
+#         pattern: 'Started [A-Z]+ "[^"]+" for'
+#         name: new_log_start_pattern
+#
+#   - type: file
+#     path: /var/log/gitlab/gitaly/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/alertmanager/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/gitlab-workhorse/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/postgres-exporter/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/prometheus/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/redis-exporter/current
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/unicorn/*.log
+#     service: <SERVICE_NAME>
+#     source: gitlab
+#
+#   - type: file
+#     path: /var/log/gitlab/nginx/*.log
+#     service: <SERVICE_NAME>
+#     source: nginx

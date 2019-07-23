@@ -2,17 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from contextlib import contextmanager
 
 from ...subprocess import run_command
 from ...utils import path_join
 from ..constants import get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
+    DEFAULT_PYTHON_VERSION,
     FAKE_API_KEY,
     MANIFEST_VERSION_PATTERN,
     get_agent_conf_dir,
     get_agent_exe,
     get_agent_version_manifest,
+    get_pip_exe,
     get_rate_flag,
 )
 from .config import config_file_name, env_exists, locate_config_dir, locate_config_file, remove_env_data, write_env_data
@@ -22,22 +25,37 @@ class DockerInterface(object):
     ENV_TYPE = 'docker'
 
     def __init__(
-        self, check, env, base_package=None, config=None, env_vars=None, metadata=None, agent_build=None, api_key=None
+        self,
+        check,
+        env,
+        base_package=None,
+        config=None,
+        env_vars=None,
+        metadata=None,
+        agent_build=None,
+        api_key=None,
+        python_version=DEFAULT_PYTHON_VERSION,
     ):
         self.check = check
         self.env = env
-        self.env_vars = env_vars
+        self.env_vars = env_vars or {}
         self.base_package = base_package
         self.config = config or {}
         self.metadata = metadata or {}
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY
+        self.python_version = python_version or DEFAULT_PYTHON_VERSION
 
         self._agent_version = self.metadata.get('agent_version')
         self.container_name = 'dd_{}_{}'.format(self.check, self.env)
         self.config_dir = locate_config_dir(check, env)
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
+
+        self.env_vars['DD_PYTHON_VERSION'] = self.python_version
+
+        if self.metadata.get('use_jmx', False):
+            self.agent_build = '{}-jmx'.format(self.agent_build)
 
     @property
     def agent_version(self):
@@ -109,8 +127,20 @@ class DockerInterface(object):
     def remove_config(self):
         remove_env_data(self.check, self.env)
 
-    def write_config(self):
-        write_env_data(self.check, self.env, self.config, self.metadata)
+    def write_config(self, config=None):
+        write_env_data(self.check, self.env, config or self.config, self.metadata)
+
+    @contextmanager
+    def use_config(self, config):
+        # Avoid an unnecessary file write if possible
+        if config != self.config:
+            try:
+                self.write_config(config)
+                yield
+            finally:
+                self.write_config()
+        else:
+            yield
 
     def detect_agent_version(self):
         if self.agent_build and self._agent_version is None:
@@ -133,11 +163,15 @@ class DockerInterface(object):
             self.metadata['agent_version'] = self.agent_version
 
     def update_check(self):
-        command = ['docker', 'exec', self.container_name, 'pip', 'install', '-e', self.check_mount_dir]
+        command = ['docker', 'exec', self.container_name]
+        command.extend(get_pip_exe(self.python_version))
+        command.extend(('install', '-e', self.check_mount_dir))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
-        command = ['docker', 'exec', self.container_name, 'pip', 'install', '-e', self.base_mount_dir]
+        command = ['docker', 'exec', self.container_name]
+        command.extend(get_pip_exe(self.python_version))
+        command.extend(('install', '-e', self.base_mount_dir))
         run_command(command, capture=True, check=True)
 
     def update_agent(self):
@@ -173,7 +207,8 @@ class DockerInterface(object):
             ]
 
             # Any environment variables passed to the start command
-            command.extend('-e {}'.format(var) for var in self.env_vars)
+            for key, value in sorted(self.env_vars.items()):
+                command.extend(['-e', '{}={}'.format(key, value)])
 
             if self.base_package:
                 # Mount the check directory

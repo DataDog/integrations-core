@@ -29,12 +29,13 @@ def test_check(aggregator, mocked_request):
     """
     Test that we get all the metrics we're supposed to get
     """
+    instance = MR_CONFIG['instances'][0]
 
     # Instantiate the check
-    mapreduce = MapReduceCheck("mapreduce", INIT_CONFIG, {})
+    mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 
     # Run the check once
-    mapreduce.check(MR_CONFIG["instances"][0])
+    mapreduce.check(instance)
 
     # Check the MapReduce job metrics
     for metric, value in iteritems(MAPREDUCE_JOB_METRIC_VALUES):
@@ -91,12 +92,13 @@ def test_auth(aggregator, mocked_auth_request):
     """
     Test that we get all the metrics we're supposed to get
     """
+    instance = MR_AUTH_CONFIG['instances'][0]
 
     # Instantiate the check
-    mapreduce = MapReduceCheck("mapreduce", INIT_CONFIG, {})
+    mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 
     # Run the check once
-    mapreduce.check(MR_AUTH_CONFIG["instances"][0])
+    mapreduce.check(instance)
 
     # Check the service tests
     service_check_tags = ["url:{}".format(RM_URI)] + CUSTOM_TAGS

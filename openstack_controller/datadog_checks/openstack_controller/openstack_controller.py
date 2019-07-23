@@ -7,11 +7,11 @@ from collections import defaultdict
 from datetime import datetime
 
 import requests
-from six import iteritems, itervalues, next
+from openstack.config.loader import OpenStackConfig
+from six import iteritems, itervalues
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.utils.common import pattern_filter
+from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.common import pattern_filter
 
 from .api import ApiFactory
 from .exceptions import (
@@ -25,14 +25,6 @@ from .exceptions import (
 )
 from .retry import BackOffRetry
 from .utils import traced
-
-try:
-    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
-    from datadog_agent import set_external_tags
-except ImportError:
-    # Agent < 6.0: the Agent pulls tags invoking `OpenStackControllerCheck.get_external_host_tags`
-    set_external_tags = None
-
 
 SOURCE_TYPE = 'openstack'
 
@@ -598,7 +590,7 @@ class OpenStackControllerCheck(AgentCheck):
         ):
             self.service_check(self.NETWORK_API_SC, AgentCheck.CRITICAL, tags=service_check_tags)
 
-    def init_api(self, instance_config, custom_tags):
+    def init_api(self, instance_config, keystone_server_url, custom_tags):
         """
         Guarantees a valid auth scope for this instance, and returns it
 
@@ -606,7 +598,6 @@ class OpenStackControllerCheck(AgentCheck):
         removed due to token expiry
         """
         custom_tags = custom_tags or []
-        keystone_server_url = instance_config.get("keystone_server_url")
         proxy_config = self.get_instance_proxy(instance_config, keystone_server_url)
 
         if self._api is None:
@@ -666,7 +657,7 @@ class OpenStackControllerCheck(AgentCheck):
 
         if self._api is None:
             # Fast fail in the absence of an api
-            raise IncompleteConfig()
+            raise IncompleteConfig("Could not initialise Openstack API")
 
     @traced
     def check(self, instance):
@@ -675,18 +666,12 @@ class OpenStackControllerCheck(AgentCheck):
         self.instance_name = instance.get('name')
         if not self.instance_name:
             # We need a instance_name to identify this instance
-            raise IncompleteConfig()
+            raise IncompleteConfig("Missing name")
 
         # have we been backed off
         if not self._backoff.should_run():
             self.log.info('Skipping run due to exponential backoff in effect')
             return
-
-        # Fetch instance configs
-        keystone_server_url = instance.get("keystone_server_url")
-
-        if not keystone_server_url:
-            raise IncompleteConfig()
 
         network_ids = instance.get('network_ids', [])
         exclude_network_id_patterns = set(instance.get('exclude_network_ids', []))
@@ -709,14 +694,16 @@ class OpenStackControllerCheck(AgentCheck):
 
         try:
             # Authenticate and add the instance api to apis cache
-            self.init_api(instance, custom_tags)
+            keystone_server_url = self._get_keystone_server_url(instance)
+            self.init_api(instance, keystone_server_url, custom_tags)
             if self._api is None:
                 self.log.info("Not api found, make sure you admin user has access to your OpenStack projects: \n")
                 return
 
             self.log.debug("Running check with credentials: \n")
-
             self._send_api_service_checks(keystone_server_url, custom_tags)
+            # Artificial metric introduced to distinguish between old and new openstack integrations
+            self.gauge("openstack.controller", 1)
 
             # List projects and filter them
             # TODO: NOTE: During authentication we use /v3/auth/projects and here we use /v3/projects.
@@ -758,8 +745,7 @@ class OpenStackControllerCheck(AgentCheck):
             if collect_network_metrics:
                 self.collect_networks_metrics(custom_tags, network_ids, exclude_network_id_rules)
 
-            if set_external_tags is not None:
-                set_external_tags(self.get_external_host_tags())
+            self.set_external_tags(self.get_external_host_tags())
 
         except IncompleteConfig as e:
             if isinstance(e, IncompleteIdentity):
@@ -770,7 +756,7 @@ class OpenStackControllerCheck(AgentCheck):
                     + "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
                 )
             else:
-                self.warning("Configuration Incomplete! Check your openstack.yaml file")
+                self.warning("Configuration Incomplete: {}! Check your openstack.yaml file".format(e))
         except AuthenticationNeeded:
             # Delete the scope, we'll populate a new one on the next run for this instance
             self.delete_api_cache()
@@ -849,3 +835,22 @@ class OpenStackControllerCheck(AgentCheck):
 
     def get_networks(self):
         return self._api.get_networks()
+
+    def _get_keystone_server_url(self, instance_config):
+        keystone_server_url = instance_config.get("keystone_server_url")
+        if keystone_server_url:
+            return keystone_server_url
+
+        openstack_config_file_path = instance_config.get("openstack_config_file_path")
+        if not openstack_config_file_path and not keystone_server_url:
+            raise IncompleteConfig("Either keystone_server_url or openstack_config_file_path need to be provided")
+
+        openstack_cloud_name = instance_config.get("openstack_cloud_name")
+        openstack_config = OpenStackConfig(config_files=[openstack_config_file_path])
+        cloud = openstack_config.get_one(cloud=openstack_cloud_name)
+        cloud_auth = cloud.get_auth()
+        if not cloud_auth or not cloud_auth.auth_url:
+            raise IncompleteConfig(
+                'No auth_url found for cloud {} in {}', openstack_cloud_name, openstack_config_file_path
+            )
+        return cloud_auth.auth_url

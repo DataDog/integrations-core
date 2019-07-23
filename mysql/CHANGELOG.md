@@ -1,5 +1,13 @@
 # CHANGELOG - mysql
 
+## 1.9.0 / 2019-07-04
+
+* [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
+
+## 1.8.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3541](https://github.com/DataDog/integrations-core/pull/3541).
+
 ## 1.7.0 / 2019-02-27
 
 * [Added] Remove Encrypted column from results. See [#3174](https://github.com/DataDog/integrations-core/pull/3174).

@@ -29,7 +29,7 @@ REQUIRES = [
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
     'pytest-mock',
-    'requests>=2.20.0',
+    'requests>=2.22.0',
     'six',
 ]
 
@@ -76,7 +76,7 @@ setup(
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',
-            'tox>=3.7.0',
+            'tox>=3.12.1',
             'twine>=1.11.0',
             'wheel>=0.31.0',
         ]

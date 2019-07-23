@@ -2,8 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
+from os.path import realpath
 
 import yaml
+from six import string_types
 
 try:
     from yaml import CSafeLoader as yLoader
@@ -38,7 +40,8 @@ def safe_yaml_dump_all(
     tags=None,
 ):
     if Dumper != yDumper:
-        log.warning("Unsafe dumping of YAML has been disabled - using safe dumper instead")
+        stream_name = get_stream_name(stream)
+        log.debug("Unsafe dumping of YAML has been disabled - using safe dumper instead in {}".format(stream_name))
 
     if pyyaml_dump_all:
         return pyyaml_dump_all(
@@ -80,7 +83,8 @@ def safe_yaml_dump_all(
 
 def safe_yaml_load(stream, Loader=yLoader):
     if Loader != yLoader:
-        log.warning("Unsafe loading of YAML has been disabled - using safe loader instead")
+        stream_name = get_stream_name(stream)
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
 
     if pyyaml_load:
         return pyyaml_load(stream, Loader=yLoader)
@@ -90,12 +94,24 @@ def safe_yaml_load(stream, Loader=yLoader):
 
 def safe_yaml_load_all(stream, Loader=yLoader):
     if Loader != yLoader:
-        log.warning("Unsafe loading of YAML has been disabled - using safe loader instead")
+        stream_name = get_stream_name(stream)
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
 
     if pyyaml_load_all:
         return pyyaml_load_all(stream, Loader=yLoader)
 
     return yaml.load_all(stream, Loader=yLoader)
+
+
+def get_stream_name(stream):
+    """Using the same logic as pyyaml to handle both string types and file types. All file objects do not necessarily
+    have a `name` attribute, in that case we can only say the stream is a file."""
+    if isinstance(stream, string_types):
+        return "<string>"
+    elif hasattr(stream, 'name'):
+        return realpath(stream.name)
+    else:
+        return "<file>"
 
 
 def monkey_patch_pyyaml():

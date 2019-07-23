@@ -1,5 +1,17 @@
 # CHANGELOG - wmi_check
 
+## 1.4.2 / 2019-07-13
+
+* [Fixed] Avoid WMISampler inheriting from Thread. See [#4051](https://github.com/DataDog/integrations-core/pull/4051).
+
+## 1.4.1 / 2019-07-04
+
+* [Fixed] Make WMISampler hashable. See [#4043](https://github.com/DataDog/integrations-core/pull/4043).
+
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3584](https://github.com/DataDog/integrations-core/pull/3584).
+
 ## 1.3.0 / 2019-02-18
 
 * [Added] Support Python 3 for WMI. See [#3031](https://github.com/DataDog/integrations-core/pull/3031).

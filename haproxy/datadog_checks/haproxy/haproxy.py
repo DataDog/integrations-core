@@ -79,7 +79,9 @@ class HAProxy(AgentCheck):
         "eresp": ("rate", "errors.resp_rate"),
         "wretr": ("rate", "warnings.retr_rate"),
         "wredis": ("rate", "warnings.redis_rate"),
+        "lastchg": ("gauge", "uptime"),
         "req_rate": ("gauge", "requests.rate"),  # HA Proxy 1.4 and higher
+        "req_tot": ("rate", "requests.tot_rate"),  # HA Proxy 1.4 and higher
         "hrsp_1xx": ("rate", "response.1xx"),  # HA Proxy 1.4 and higher
         "hrsp_2xx": ("rate", "response.2xx"),  # HA Proxy 1.4 and higher
         "hrsp_3xx": ("rate", "response.3xx"),  # HA Proxy 1.4 and higher
@@ -90,7 +92,9 @@ class HAProxy(AgentCheck):
         "ctime": ("gauge", "connect.time"),  # HA Proxy 1.5 and higher
         "rtime": ("gauge", "response.time"),  # HA Proxy 1.5 and higher
         "ttime": ("gauge", "session.time"),  # HA Proxy 1.5 and higher
-        "lastchg": ("gauge", "uptime"),
+        "conn_rate": ("gauge", "connections.rate"),  # HA Proxy 1.7 and higher
+        "conn_tot": ("rate", "connections.tot_rate"),  # HA Proxy 1.7 and higher
+        "intercepted": ("rate", "requests.intercepted"),  # HA Proxy 1.7 and higher
     }
 
     SERVICE_CHECK_NAME = 'haproxy.backend_up'
@@ -116,7 +120,7 @@ class HAProxy(AgentCheck):
 
             data = self._fetch_url_data(url, username, password, verify, custom_headers)
 
-        collect_aggregates_only = _is_affirmative(instance.get('collect_aggregates_only', True))
+        collect_aggregates_only = instance.get('collect_aggregates_only', True)
         collect_status_metrics = _is_affirmative(instance.get('collect_status_metrics', False))
 
         collect_status_metrics_by_host = _is_affirmative(instance.get('collect_status_metrics_by_host', False))
@@ -426,17 +430,14 @@ class HAProxy(AgentCheck):
             hosts_statuses[key] += 1
 
     def _should_process(self, data_dict, collect_aggregates_only):
+        """if collect_aggregates_only, we process only the aggregates
         """
-            if collect_aggregates_only, we process only the aggregates
-            else we process all except Services.BACKEND
-        """
-        if collect_aggregates_only:
-            if self._is_aggregate(data_dict):
-                return True
-            return False
-        elif data_dict['svname'] == Services.BACKEND:
-            return False
-        return True
+        if _is_affirmative(collect_aggregates_only):
+            return self._is_aggregate(data_dict)
+        elif str(collect_aggregates_only).lower() == 'both':
+            return True
+
+        return data_dict['svname'] != Services.BACKEND
 
     def _is_service_excl_filtered(self, service_name, services_incl_filter, services_excl_filter):
         if self._tag_match_patterns(service_name, services_excl_filter):

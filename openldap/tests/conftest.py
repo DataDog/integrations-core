@@ -19,7 +19,7 @@ def dd_environment():
         host_socket_path = os.path.join(d, 'ldapi')
 
         if not path_exists(host_socket_path):
-            os.chmod(d, 0o770)
+            os.chmod(d, 0o777)
             create_file(host_socket_path)
             os.chmod(host_socket_path, 0o640)
 

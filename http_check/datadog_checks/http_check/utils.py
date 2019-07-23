@@ -2,6 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import sys
+
+from datadog_checks.base.utils.platform import Platform
+
+EMBEDDED_DIR = 'embedded'
+
+if Platform.is_windows():
+    EMBEDDED_DIR += str(sys.version_info[0])
 
 
 def get_ca_certs_path():
@@ -31,7 +39,7 @@ def _get_ca_certs_paths():
 
     embedded_root = os.path.dirname(os.path.abspath(__file__))
     for _ in range(10):
-        if os.path.basename(embedded_root) == 'embedded':
+        if os.path.basename(embedded_root) == EMBEDDED_DIR:
             ca_certs.append(os.path.join(embedded_root, 'ssl', 'certs', 'cacert.pem'))
             break
         embedded_root = os.path.dirname(embedded_root)

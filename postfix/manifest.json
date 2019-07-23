@@ -24,5 +24,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "postfix"
+  "integration_id": "postfix",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

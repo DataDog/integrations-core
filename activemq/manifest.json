@@ -1,5 +1,6 @@
 {
   "categories": [
+    "log collection",
     "processing",
     "messaging"
   ],
@@ -24,5 +25,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "activemq"
+  "integration_id": "activemq",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

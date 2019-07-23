@@ -22,7 +22,7 @@ from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
 from .cadvisor import CadvisorScraper
-from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils
+from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix
 from .prometheus import CadvisorPrometheusScraperMixin
 
 try:
@@ -366,7 +366,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if "running" not in container.get('state', {}):
                     continue
                 has_container_running = True
-                tags = tagger.tag(container_id, tagger.LOW) or None
+                tags = tagger.tag(replace_container_rt_prefix(container_id), tagger.LOW) or None
                 if not tags:
                     continue
                 tags += instance_tags
@@ -379,7 +379,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             if not pod_id:
                 self.log.debug('skipping pod with no uid')
                 continue
-            tags = tagger.tag('kubernetes_pod://%s' % pod_id, tagger.LOW) or None
+            tags = tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.LOW) or None
             if not tags:
                 continue
             tags += instance_tags
@@ -416,7 +416,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = tagger.tag('%s' % cid, tagger.HIGH) + instance_tags
+                tags = instance_tags[:]
+                tags += tagger.tag('%s' % replace_container_rt_prefix(cid), tagger.HIGH) or []
 
                 try:
                     for resource, value_str in iteritems(ctr.get('resources', {}).get('requests', {})):
@@ -447,13 +448,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             for ctr_status in pod['status'].get('containerStatuses', []):
                 c_name = ctr_status.get('name')
                 cid = ctr_status.get('containerID')
+
                 if not c_name or not cid:
                     continue
 
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = tagger.tag('%s' % cid, tagger.ORCHESTRATOR) + instance_tags
+                tags = instance_tags[:]
+                tags += tagger.tag('%s' % replace_container_rt_prefix(cid), tagger.ORCHESTRATOR) or []
 
                 restart_count = ctr_status.get('restartCount', 0)
                 self.gauge(self.NAMESPACE + '.containers.restarts', restart_count, tags)
