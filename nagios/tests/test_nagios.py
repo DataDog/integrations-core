@@ -5,8 +5,6 @@ import json
 import tempfile
 import time
 
-import pytest
-
 from datadog_checks.base import ensure_bytes
 from datadog_checks.nagios import NagiosCheck
 

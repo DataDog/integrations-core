@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
@@ -13,7 +14,7 @@ CONTAINER_NAME = "dd-test-nagios"
 INSTANCE_INTEGRATION = {
     'nagios_conf': '/opt/nagios/etc/nagios.cfg',
     'collect_host_performance_data': True,
-    'collect_service_performance_data': True
+    'collect_service_performance_data': True,
 }
 
 CHECK_NAME = 'nagios'
