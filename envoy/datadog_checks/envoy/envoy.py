@@ -16,8 +16,8 @@ class Envoy(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'verify_ssl': {'name': 'tls_verify'}}
     SERVICE_CHECK_NAME = 'envoy.can_connect'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        super(Envoy, self).__init__(name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(Envoy, self).__init__(name, init_config, instances)
         self.unknown_metrics = defaultdict(int)
         self.unknown_tags = defaultdict(int)
         self.whitelist = None
@@ -56,7 +56,7 @@ class Envoy(AgentCheck):
             response = self.http.get(stats_url)
         except requests.exceptions.Timeout:
             msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(
-                stats_url, timeout=self.http.options['timeout'])
+                stats_url, timeout=self.http.options['timeout']
             )
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.exception(msg)
