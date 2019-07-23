@@ -7,5 +7,6 @@ services:
     container_name: dd-test-cacti
     ports:
       - "3306:3306"
+      - "8080:80"
     volumes:
       - ${RRD_PATH}:/var/www/html/cacti/rra
