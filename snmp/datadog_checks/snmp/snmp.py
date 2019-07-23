@@ -12,9 +12,8 @@ from pysnmp.smi import builder, view
 from pysnmp.smi.exval import noSuchInstance, noSuchObject
 from six import iteritems
 
-from datadog_checks.base.checks.base import AgentCheck
-from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.errors import CheckException, ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.errors import CheckException
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -226,7 +225,7 @@ class SnmpCheck(AgentCheck):
         for instance in instances:
             self._load_conf(instance)
 
-        super(AgentCheck, self).__init__(name, init_config, instances)
+        super(SnmpCheck, self).__init__(name, init_config, instances)
 
     def _load_conf(self, instance):
         if 'name' not in instance:
@@ -291,7 +290,7 @@ class SnmpCheck(AgentCheck):
                         config.auth_data,
                         config.transport,
                         config.context_data,
-                        *(oids_batch),
+                        *oids_batch,
                         lookupMib=enforce_constraints
                     )
                 )
