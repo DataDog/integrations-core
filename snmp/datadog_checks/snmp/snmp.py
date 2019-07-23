@@ -46,31 +46,19 @@ class SnmpCheck(AgentCheck):
     SC_STATUS = 'snmp.can_check'
 
     def __init__(self, name, init_config, instances):
+        super(SnmpCheck, self).__init__(name, init_config, instances)
+
         # Set OID batch size
         self.oid_batch_size = int(init_config.get('oid_batch_size', DEFAULT_OID_BATCH_SIZE))
 
         # Load Custom MIB directory
-        self.mibs_path = None
-        self.ignore_nonincreasing_oid = False
-        if init_config is not None:
-            self.mibs_path = init_config.get('mibs_folder')
-            self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
+        self.mibs_path = init_config.get('mibs_folder')
+        self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
 
-        self._conf = {}
-
-        for instance in instances:
-            self._load_conf(instance)
-
-        super(SnmpCheck, self).__init__(name, init_config, instances)
-
-    def _load_conf(self, instance):
-        if 'name' not in instance:
-            instance['name'] = self._get_instance_key(instance)
-        if instance['name'] not in self._conf:
-            self._conf[instance['name']] = InstanceConfig(
-                instance, self.warning, self.init_config.get('global_metrics', []), self.mibs_path
-            )
-        return self._conf[instance['name']]
+        self.instance['name'] = self._get_instance_key(self.instance)
+        self._config = InstanceConfig(
+            self.instance, self.warning, self.init_config.get('global_metrics', []), self.mibs_path
+        )
 
     def _get_instance_key(self, instance):
         key = instance.get('name')
@@ -81,7 +69,7 @@ class SnmpCheck(AgentCheck):
         port = instance.get('port')
         if ip and port:
             key = '{host}:{port}'.format(host=ip, port=port)
-        elif ip:
+        else:
             key = ip
 
         return key
@@ -92,7 +80,7 @@ class SnmpCheck(AgentCheck):
             instance['service_check_error'] = message
             raise CheckException(message)
 
-    def check_table(self, oids, config, lookup_names, enforce_constraints):
+    def check_table(self, oids, lookup_names, enforce_constraints):
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -111,6 +99,7 @@ class SnmpCheck(AgentCheck):
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
 
         # Set aliases for snmpget and snmpgetnext with logging
+        config = self._config
 
         first_oid = 0
         all_binds = []
@@ -213,19 +202,18 @@ class SnmpCheck(AgentCheck):
         Perform two series of SNMP requests, one for all that have MIB associated
         and should be looked up and one for those specified by oids.
         """
-        config = self._load_conf(instance)
-
+        config = self._config
         try:
             if config.table_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.table_oids))
                 table_results = self.check_table(
-                    config.table_oids, config, lookup_names=True, enforce_constraints=config.enforce_constraints
+                    config.table_oids, lookup_names=True, enforce_constraints=config.enforce_constraints
                 )
                 self.report_table_metrics(config.metrics, table_results, config.tags)
 
             if config.raw_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.raw_oids))
-                raw_results = self.check_table(config.raw_oids, config, lookup_names=False, enforce_constraints=False)
+                raw_results = self.check_table(config.raw_oids, lookup_names=False, enforce_constraints=False)
                 self.report_raw_metrics(config.metrics, raw_results, config.tags)
         except Exception as e:
             if 'service_check_error' not in instance:

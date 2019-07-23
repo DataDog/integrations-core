@@ -5,7 +5,7 @@
 import mock
 import pytest
 
-from datadog_checks.snmp.snmp import InstanceConfig
+from datadog_checks.snmp.config import InstanceConfig
 
 pytestmark = pytest.mark.unit
 
@@ -14,7 +14,7 @@ def warning(*args):
     pass
 
 
-@mock.patch("datadog_checks.snmp.snmp.hlapi")
+@mock.patch("datadog_checks.snmp.config.hlapi")
 def test_parse_metrics(hlapi_mock):
     # No metrics
     metrics = []
