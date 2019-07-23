@@ -35,24 +35,17 @@ def dd_environment():
     if not os.environ.get('TF_VAR_account_json'):
         pytest.skip('TF_VAR_account_json not set')
     with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
-        if not outputs:
-            # We're stopping the environment, we need fake values
-            ip = private_key = ''
-        else:
-            ip = outputs['ip']['value']
-            private_key = outputs['ssh_private_key']['value']
+        ip = outputs['ip']['value']
+        private_key = outputs['ssh_private_key']['value']
         with tcp_tunnel(ip, 'oracle', private_key, 1521) as tunnel:
-            if tunnel:
-                ip, port = tunnel
-            else:
-                ip, port = '', 0
-            instance = {
+            ip, port = tunnel
+            env_instance = {
                 'server': '{}:{}'.format(ip, port),
                 'user': 'datadog',
                 'password': 'Oracle123',
                 'service_name': 'orcl.c.datadog-integrations-lab.internal',
             }
-            yield instance, E2E_METADATA
+            yield env_instance, E2E_METADATA
 
 
 E2E_METADATA = {
