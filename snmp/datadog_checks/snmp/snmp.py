@@ -44,6 +44,8 @@ def reply_invalid(oid):
 class SnmpCheck(AgentCheck):
 
     SC_STATUS = 'snmp.can_check'
+    _error = None
+    _severity = None
 
     def __init__(self, name, init_config, instances):
         super(SnmpCheck, self).__init__(name, init_config, instances)
@@ -74,10 +76,10 @@ class SnmpCheck(AgentCheck):
 
         return key
 
-    def raise_on_error_indication(self, error_indication, instance):
+    def raise_on_error_indication(self, error_indication, ip_address):
         if error_indication:
-            message = '{} for instance {}'.format(error_indication, instance['ip_address'])
-            instance['service_check_error'] = message
+            message = '{} for instance {}'.format(error_indication, ip_address)
+            self._error = message
             raise CheckException(message)
 
     def check_table(self, oids, lookup_names, enforce_constraints):
@@ -122,7 +124,7 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Returned vars: %s', var_binds)
 
                 # Raise on error_indication
-                self.raise_on_error_indication(error_indication, config.instance)
+                self.raise_on_error_indication(error_indication, config.ip_address)
 
                 missing_results = []
                 complete_results = []
@@ -151,11 +153,11 @@ class SnmpCheck(AgentCheck):
 
                         self.log.debug('Returned vars: %s', var_binds_table)
                         # Raise on error_indication
-                        self.raise_on_error_indication(error_indication, config.instance)
+                        self.raise_on_error_indication(error_indication, config.ip_address)
 
                         if error_status:
                             message = '{} for instance {}'.format(error_status.prettyPrint(), config.ip_address)
-                            config.instance['service_check_error'] = message
+                            self._error = message
 
                             # submit CRITICAL service check if we can't connect to device
                             if 'unknownUserName' in message:
@@ -169,16 +171,16 @@ class SnmpCheck(AgentCheck):
                 all_binds.extend(complete_results)
 
             except PySnmpError as e:
-                if 'service_check_error' not in config.instance:
-                    config.instance['service_check_error'] = 'Fail to collect some metrics: {}'.format(e)
+                if not self._error:
+                    self._error = 'Fail to collect some metrics: {}'.format(e)
                 self.warning('Fail to collect some metrics: {}'.format(e))
 
             # if we fail move onto next batch
             first_oid = first_oid + self.oid_batch_size
 
         # if we've collected some variables, it's not that bad.
-        if 'service_check_error' in config.instance and len(all_binds):
-            config.instance['service_check_severity'] = self.WARNING
+        if self._error and all_binds:
+            self._severity = self.WARNING
 
         for result_oid, value in all_binds:
             if lookup_names:
@@ -202,6 +204,8 @@ class SnmpCheck(AgentCheck):
         Perform two series of SNMP requests, one for all that have MIB associated
         and should be looked up and one for those specified by oids.
         """
+        # Reset errors
+        self._error = self._severity = None
         config = self._config
         try:
             if config.table_oids:
@@ -216,20 +220,19 @@ class SnmpCheck(AgentCheck):
                 raw_results = self.check_table(config.raw_oids, lookup_names=False, enforce_constraints=False)
                 self.report_raw_metrics(config.metrics, raw_results, config.tags)
         except Exception as e:
-            if 'service_check_error' not in instance:
-                instance['service_check_error'] = 'Fail to collect metrics for {} - {}'.format(instance['name'], e)
-            self.warning(instance['service_check_error'])
+            if not self._error:
+                self._error = 'Fail to collect metrics for {} - {}'.format(instance['name'], e)
+            self.warning(self._error)
         finally:
             # Report service checks
             sc_tags = ['snmp_device:{}'.format(instance['ip_address'])]
             sc_tags.extend(instance.get('tags', []))
             status = self.OK
-            msg = instance.get('service_check_error')
-            if msg:
+            if self._error:
                 status = self.CRITICAL
-                if 'service_check_severity' in instance:
-                    status = instance['service_check_severity']
-            self.service_check(self.SC_STATUS, status, tags=sc_tags, message=msg)
+                if self._severity:
+                    status = self._severity
+            self.service_check(self.SC_STATUS, status, tags=sc_tags, message=self._error)
 
     def report_raw_metrics(self, metrics, results, tags):
         """

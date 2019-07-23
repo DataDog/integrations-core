@@ -55,6 +55,19 @@ def test_type_support(aggregator):
     aggregator.all_metrics_asserted()
 
 
+def test_transient_error(aggregator):
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    check = common.create_check(instance)
+
+    with mock.patch.object(check, 'raise_on_error_indication', side_effect=RuntimeError):
+        check.check(instance)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
+
+    check.check(instance)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+
 def test_snmpget(aggregator):
     """
     When failing with 'snmpget' command, SNMP check falls back to 'snpgetnext'
@@ -143,8 +156,7 @@ def test_enforce_constraint(aggregator):
 
     check.check(instance)
 
-    assert "service_check_error" in instance
-    assert "failed at: ValueConstraintError" in instance["service_check_error"]
+    assert "failed at: ValueConstraintError" in check._error
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
 

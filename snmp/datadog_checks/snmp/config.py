@@ -15,8 +15,6 @@ class InstanceConfig:
     DEFAULT_TIMEOUT = 1
 
     def __init__(self, instance, warning, global_metrics, mibs_path):
-        self.instance = instance
-
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
         if is_affirmative(instance.get('use_global_metrics', True)):
