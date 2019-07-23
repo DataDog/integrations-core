@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.dev.structures import TempDir
 import os
 from copy import deepcopy
 
@@ -23,20 +24,20 @@ def aggregator():
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    nagios_var = os.path.join(HERE, 'compose', 'nagios4', 'var', 'log')
     nagios_conf = os.path.join(HERE, 'compose', 'nagios4', 'nagios.cfg')
-    e2e_metadata = {
-        'docker_volumes': [
-            '{}:/opt/nagios/etc/nagios.cfg'.format(nagios_conf),
-            '{}:/opt/nagios/var/log/'.format(nagios_var),
-        ]
-    }
+    with TempDir("nagios_var_log") as nagios_var_log:
+        e2e_metadata = {
+            'docker_volumes': [
+                '{}:/opt/nagios/etc/nagios.cfg'.format(nagios_conf),
+                '{}:/opt/nagios/var/log/'.format(nagios_var_log),
+            ]
+        }
 
-    with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-        env_vars={'NAGIOS_CONFIG_FILE': nagios_conf, 'NAGIOS_LOGS_PATH': nagios_var},
-    ):
-        yield INSTANCE_INTEGRATION, e2e_metadata
+        with docker_run(
+            os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+            env_vars={'NAGIOS_LOGS_PATH': nagios_var_log},
+        ):
+            yield INSTANCE_INTEGRATION, e2e_metadata
 
 
 @pytest.fixture
