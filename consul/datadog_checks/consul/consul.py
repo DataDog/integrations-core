@@ -7,6 +7,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from itertools import islice
 from math import ceil, sqrt
+from time import time as timestamp
 
 import requests
 from six import iteritems, iterkeys, itervalues
@@ -14,8 +15,6 @@ from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import hash_mutable
-
-EPOCH = datetime(1970, 1, 1)
 
 
 # More information in https://www.consul.io/docs/internals/coordinates.html,
@@ -126,10 +125,10 @@ class ConsulCheck(AgentCheck):
     def _get_local_config(self, instance, instance_state):
         time_window = 0
         if instance_state.last_config_fetch_time:
-            time_window = datetime.now() - instance_state.last_config_fetch_time
+            time_window = datetime.utcnow() - instance_state.last_config_fetch_time
         if not instance_state.local_config or time_window > timedelta(seconds=self.MAX_CONFIG_TTL):
             instance_state.local_config = self.consul_request(instance, '/v1/agent/self')
-            instance_state.last_config_fetch_time = datetime.now()
+            instance_state.last_config_fetch_time = datetime.utcnow()
 
         return instance_state.local_config
 
@@ -213,7 +212,7 @@ class ConsulCheck(AgentCheck):
 
                 self.event(
                     {
-                        "timestamp": int((datetime.utcnow() - EPOCH).total_seconds()),
+                        "timestamp": timestamp(),
                         "event_type": "consul.new_leader",
                         "source_type_name": self.SOURCE_TYPE_NAME,
                         "msg_title": "New Consul Leader Elected in consul_datacenter:{}".format(agent_dc),
