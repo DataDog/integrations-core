@@ -414,8 +414,11 @@ class NagiosPerfDataTailer(NagiosTailer):
 
             # Parse the prefdata values, which are a space-delimited list of:
             #   'label'=value[UOM];[warn];[crit];[min];[max]
-            perf_data = data.get(self.perfdata_field, '').split(' ')
-            for pair in perf_data:
+            perf_data = data.get(self.perfdata_field, '')
+            if not perf_data:
+                self.log.warning('Could not find field {} in {}, check your perfdata_format'.format(self.perfdata_field, line))
+                return
+            for pair in perf_data.split(' '):
                 pair_match = self.pair_pattern.match(pair)
                 if not pair_match:
                     continue
