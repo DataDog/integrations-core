@@ -10,7 +10,6 @@
     "disabled": false,
     "email": "support@datadoghq.com",
     "handle": "support@datadoghq.com",
-    "icon": "https://secure.gravatar.com/avatar/20fa6641334a4ff8f42197dc4993c358?s=48&d=retro",
     "is_admin": false,
     "name": "Datadog",
     "role": null,
