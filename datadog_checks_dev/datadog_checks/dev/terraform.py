@@ -20,6 +20,18 @@ else:
     from shutilwhich import which
 
 
+def construct_env_vars():
+    # Terraform expects case-sensitive environment variables, which does not work inside tox
+    # on Windows since it passes down variables using the case-insensitive os.environ.
+    env = dict(os.environ)
+    for key in list(env):
+        if key.lower() == 'tf_var_account_json':
+            location = env.pop(key)
+            env['TF_VAR_account_json'] = location
+
+    return env
+
+
 @contextmanager
 def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper=None):
     """This utility provides a convenient way to safely set up and tear down Docker environments.
@@ -64,9 +76,10 @@ class TerraformUp(LazyFunction):
             terraform_dir = os.path.join(temp_dir, 'terraform')
             shutil.copytree(self.directory, terraform_dir)
             with chdir(terraform_dir):
-                run_command(['terraform', 'init'], check=True)
-                run_command(['terraform', 'apply', '-auto-approve'], check=True)
-                output = run_command(['terraform', 'output', '-json'], capture='stdout', check=True).stdout
+                env = construct_env_vars()
+                run_command(['terraform', 'init'], check=True, env=env)
+                run_command(['terraform', 'apply', '-auto-approve', '-input=false', '-no-color'], check=True, env=env)
+                output = run_command(['terraform', 'output', '-json'], capture='stdout', check=True, env=env).stdout
                 return json.loads(output)
 
 
@@ -78,4 +91,5 @@ class TerraformDown(LazyFunction):
         with TempDir('terraform') as temp_dir:
             terraform_dir = os.path.join(temp_dir, 'terraform')
             with chdir(terraform_dir):
+                env = construct_env_vars()
                 run_command(['terraform', 'destroy', '-auto-approve'], check=True)

@@ -24,6 +24,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 REQUIRES = [
     'coverage>=4.5.1',
     'mock',
+    'psutil',
     'PyYAML>=5.1',
     'pytest',
     'pytest-benchmark>=3.2.1',
