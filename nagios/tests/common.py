@@ -16,8 +16,6 @@ INSTANCE_INTEGRATION = {
     'collect_service_performance_data': True
 }
 
-EXPECTED_METRICS = ["rta", "pl"]
-
 CHECK_NAME = 'nagios'
 CUSTOM_TAGS = ['optional:tag1']
 
