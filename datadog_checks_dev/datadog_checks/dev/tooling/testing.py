@@ -71,9 +71,7 @@ def get_tox_envs(
 
 
 def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
-    if e2e_tests_only:
-        tox_command = 'tox --listenvs-all -v'
-    elif e2e_only:
+    if e2e_only or e2e_tests_only:
         tox_command = 'tox --listenvs-all'
     else:
         tox_command = 'tox --listenvs'
@@ -84,14 +82,7 @@ def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=Fal
     env_list = [e.strip() for e in output.splitlines()]
 
     if e2e_tests_only:
-        envs = []
-        for line in env_list:
-            if '->' in line:
-                env, _, description = line.partition('->')
-                if 'e2e ready' in description.lower():
-                    envs.append(env.strip())
-
-        return envs
+        return [env for env in env_list if env.endswith('e2e')]
 
     if e2e_only:
         sort = True
