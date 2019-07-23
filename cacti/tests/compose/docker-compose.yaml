@@ -2,8 +2,10 @@ version: "3"
 
 services:
   cacti:
-    image: quantumobject/docker-cacti
+    build: .
     hostname: ${HOST}
     container_name: dd-test-cacti
     ports:
       - "3306:3306"
+    volumes:
+      - ${RRD_PATH}:/var/www/html/cacti/rra

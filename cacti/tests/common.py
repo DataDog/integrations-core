@@ -10,7 +10,7 @@ HOST = get_docker_hostname()
 # ID
 CONTAINER_NAME = "dd-test-cacti"
 
-RRD_PATH = '/var/lib/cacti/rra'
+RRD_PATH = '/var/www/html/cacti/rra'
 
 INSTANCE_INTEGRATION = {
     'mysql_host': 'localhost',
