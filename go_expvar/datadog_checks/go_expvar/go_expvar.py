@@ -69,7 +69,6 @@ class GoExpvar(AgentCheck):
         'ssl_verify': {'name': 'tls_verify', 'default': None},
         'ssl_certfile': {'name': 'tls_cert', 'default': None},
         'ssl_keyfile': {'name': 'tls_private_key', 'default': None},
-        'timeout': {'name': 'timeout', 'default': 10}
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
