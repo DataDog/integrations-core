@@ -4,6 +4,7 @@ echo "stack ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers
 cd /opt/stack
 sudo git clone https://opendev.org/openstack/devstack
 cd devstack
+sudo git checkout origin/stable/stein
 IP=$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
 IP_PREFIX=$(echo $IP | cut -d. -f 1,2,3)
 cat <<EOF | sudo tee -a local.conf
