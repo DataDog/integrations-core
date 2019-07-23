@@ -92,4 +92,4 @@ class TerraformDown(LazyFunction):
             terraform_dir = os.path.join(temp_dir, 'terraform')
             with chdir(terraform_dir):
                 env = construct_env_vars()
-                run_command(['terraform', 'destroy', '-auto-approve'], check=True)
+                run_command(['terraform', 'destroy', '-auto-approve', '-no-color'], check=True, env=env)
