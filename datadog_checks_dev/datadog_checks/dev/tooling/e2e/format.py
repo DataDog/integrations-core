@@ -3,11 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
-import json
 import re
-from base64 import urlsafe_b64decode
 
-from ..._env import E2E_FIXTURE_NAME
+from ..._env import E2E_FIXTURE_NAME, deserialize_data
 
 CONFIG_MESSAGE_PATTERN = 'DDEV_E2E_START_MESSAGE (.+) DDEV_E2E_END_MESSAGE'
 
@@ -42,7 +40,4 @@ def parse_config_from_result(env, result):
 def parse_encoded_config_data(output):
     match = re.search(CONFIG_MESSAGE_PATTERN, output)
     if match:
-        encoded = match.group(1)
-        decoded = urlsafe_b64decode(encoded.encode('utf-8'))
-        data = json.loads(decoded.decode('utf-8'))
-        return data
+        return deserialize_data(match.group(1))

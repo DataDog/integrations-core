@@ -19,6 +19,7 @@ from .._env import (
     format_config,
     get_env_vars,
     replay_check_run,
+    serialize_data,
 )
 
 __aggregator = None
@@ -89,13 +90,7 @@ def dd_environment_runner(request):
 
     data = {'config': config, 'metadata': metadata}
 
-    # Serialize to json
-    data = json.dumps(data, separators=(',', ':'))
-
-    # Using base64 ensures:
-    # 1. Printing to stdout won't fail
-    # 2. Easy parsing since there are no spaces
-    message = urlsafe_b64encode(data.encode('utf-8'))
+    message = serialize_data(data)
 
     message = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'.format(message.decode('utf-8'))
 
