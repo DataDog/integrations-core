@@ -1,4 +1,4 @@
-To run integration tests you need to install python-rrdtool
+To run integration tests, install python-rrdtool:
 
 Install python-rrdtool on MAC
 =============================
