@@ -38,28 +38,28 @@ instances:
     ## @param suppress_errors - boolean - optional - default: false
     ## Suppresses connection errors if url is expected to be sometimes offline (e.g. standby host).
     #
-    #  suppress_errors: false
+    # suppress_errors: false
 
     ## @param detailed_queues - list of string - optional
     ## If you have more than 300 queues you need to list the ones you want to track.
     #
-    #  detailed_queues:
-    #    - <QUEUE_1>
-    #    - <QUEUE_2>
+    # detailed_queues:
+    #   - <QUEUE_1>
+    #   - <QUEUE_2>
 
     ## @param detailed_topics - list of string - optional
     ## If you have more than 300 topics you need to list the ones you want to track.
     #
-    #  detailed_topics:
-    #    - <TOPIC_1>
-    #    - <TOPIC_2>
+    # detailed_topics:
+    #   - <TOPIC_1>
+    #   - <TOPIC_2>
 
     ## @param detailed_subscribers - list of string - optional
     ## If you have more than 300 subscribers you need to list the ones you want to track.
     #
-    #  detailed_subscribers:
-    #   - <SUBSCRIBER_1>
-    #   - <SUBSCRIBER_2>
+    # detailed_subscribers:
+    #  - <SUBSCRIBER_1>
+    #  - <SUBSCRIBER_2>
 
     ## @param proxy - object - optional
     ## This overrides the `proxy` setting in `init_config`.
