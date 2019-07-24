@@ -53,7 +53,7 @@ instances:
     ## @param rrd_whitelist - string - optional
     ## The `rrd_whitelist` is a path to a text file that has a list of patterns,
     ## one per line, that should be fetched. If no whitelist is specified, all
-    ## metrics will be fetched.
+    ## metrics are fetched.
     #
     # rrd_whitelist: <RRD_WHITELIST_FILE_PATH>
 
