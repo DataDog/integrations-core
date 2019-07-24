@@ -34,7 +34,8 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     help='Line number to start a PDB session (0: first line, -1: last line)',
 )
 @click.option('--config', 'config_file', help='Path to a JSON check configuration to use')
-def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_point, config_file):
+@click.option('--jmx-list', 'jmx_list', default='matching', help='JMX metrics listing method')
+def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_point, config_file, jmx_list):
     """Run an Agent check."""
     envs = get_configured_envs(check)
     if not envs:
@@ -57,7 +58,14 @@ def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_p
 
     environment = create_interface(check, env)
     check_args = dict(
-        rate=rate, times=times, pause=pause, delay=delay, log_level=log_level, as_json=as_json, break_point=break_point
+        rate=rate,
+        times=times,
+        pause=pause,
+        delay=delay,
+        log_level=log_level,
+        as_json=as_json,
+        break_point=break_point,
+        jmx_list=jmx_list,
     )
 
     if config_file:
@@ -69,4 +77,7 @@ def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_p
 
         if not rate:
             echo_success('Note: ', nl=False)
-            echo_info('If some metrics are missing, you may want to try again with the -r / --rate flag.')
+            echo_info(
+                'If some metrics are missing, you may want to try again with the -r / --rate flag '
+                'for a classic integration.'
+            )
