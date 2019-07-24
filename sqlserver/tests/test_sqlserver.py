@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
@@ -126,6 +128,18 @@ def test_check_local(aggregator, init_config, instance_sql2017):
     _assert_metrics(aggregator, expected_tags)
 
 
+@pytest.mark.local
+@pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11'])
+def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovider):
+    instance = deepcopy(instance_sql2017)
+    instance['adoprovider'] = adoprovider
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance])
+    sqlserver_check.check(instance)
+    expected_tags = instance.get('tags', []) + [r'host:(local)\SQL2017', 'db:master']
+    _assert_metrics(aggregator, expected_tags)
+
+
 def _assert_metrics(aggregator, expected_tags):
     """
     Boilerplate asserting all the expected metrics and service checks.
@@ -135,4 +149,4 @@ def _assert_metrics(aggregator, expected_tags):
     for mname in EXPECTED_METRICS:
         aggregator.assert_metric(mname, count=1)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=expected_tags)
-    aggregator.assert_all_metrics_covered
+    aggregator.assert_all_metrics_covered()

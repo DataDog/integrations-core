@@ -1,5 +1,5 @@
 comment:
-  layout: "diff"
+  layout: "reach,files"
   behavior: default
   branches: null
 

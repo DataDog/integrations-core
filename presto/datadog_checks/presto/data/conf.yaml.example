@@ -79,7 +79,7 @@ instances:
     ## trust_store_password should be set if ssl is enabled
     ## password for your TrustStore.jks file
     #
-    # trust_store_password: password
+    # trust_store_password: <PASSWORD>
 
     ## @param key_store_path - string - optional
     ## key_store_path should be set if client authentication is enabled on the target JVM.

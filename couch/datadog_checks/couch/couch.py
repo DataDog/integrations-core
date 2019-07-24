@@ -11,13 +11,12 @@ from six import iteritems
 from six.moves.urllib.parse import quote, urljoin
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.couch import errors
 from datadog_checks.utils.headers import headers
-
-from . import errors
 
 
 class CouchDb(AgentCheck):
-
+    HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}}
     TIMEOUT = 5
     SERVICE_CHECK_NAME = 'couchdb.can_connect'
     SOURCE_TYPE_NAME = 'couchdb'
@@ -27,22 +26,16 @@ class CouchDb(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.checker = None
 
-    def get(self, url, instance, service_check_tags, run_check=False):
-        "Hit a given URL and return the parsed json"
+    def get(self, url, service_check_tags, run_check=False):
+        """Hit a given URL and return the parsed json"""
         self.log.debug('Fetching CouchDB stats at url: %s' % url)
-
-        auth = None
-        if 'user' in instance and 'password' in instance:
-            auth = (instance['user'], instance['password'])
 
         # Override Accept request header so that failures are not redirected to the Futon web-ui
         request_headers = headers(self.agentConfig)
         request_headers['Accept'] = 'text/json'
 
         try:
-            r = requests.get(
-                url, auth=auth, headers=request_headers, timeout=int(instance.get('timeout', self.TIMEOUT))
-            )
+            r = self.http.get(url, headers=request_headers)
             r.raise_for_status()
             if run_check:
                 self.service_check(
@@ -74,7 +67,7 @@ class CouchDb(AgentCheck):
             tags = ["instance:{0}".format(name)] + self.get_config_tags(instance)
 
             try:
-                version = self.get(self.get_server(instance), instance, tags, True)['version']
+                version = self.get(self.get_server(instance), tags, True)['version']
             except Exception as e:
                 raise errors.ConnectionError("Unable to talk to the server: {}".format(e))
 
@@ -142,7 +135,7 @@ class CouchDB1:
 
         url = urljoin(server, endpoint)
 
-        overall_stats = self.agent_check.get(url, instance, tags, True)
+        overall_stats = self.agent_check.get(url, tags, True)
 
         # No overall stats? bail out now
         if overall_stats is None:
@@ -160,7 +153,7 @@ class CouchDB1:
         self.db_blacklist.setdefault(server, [])
         self.db_blacklist[server].extend(instance.get('db_blacklist', []))
         whitelist = set(db_whitelist) if db_whitelist else None
-        databases = set(self.agent_check.get(url, instance, tags)) - set(self.db_blacklist[server])
+        databases = set(self.agent_check.get(url, tags)) - set(self.db_blacklist[server])
         databases = databases.intersection(whitelist) if whitelist else databases
 
         max_dbs_per_check = instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
@@ -171,7 +164,7 @@ class CouchDB1:
         for dbName in databases:
             url = urljoin(server, quote(dbName, safe=''))
             try:
-                db_stats = self.agent_check.get(url, instance, tags)
+                db_stats = self.agent_check.get(url, tags)
             except requests.exceptions.HTTPError as e:
                 couchdb['databases'][dbName] = None
                 if (e.response.status_code == 403) or (e.response.status_code == 401):
@@ -306,15 +299,15 @@ class CouchDB2:
         name = instance.get('name', None)
         if name is None:
             url = urljoin(server, "/_membership")
-            names = self.agent_check.get(url, instance, [])['cluster_nodes']
+            names = self.agent_check.get(url, [])['cluster_nodes']
             return names[: instance.get('max_nodes_per_check', self.MAX_NODES_PER_CHECK)]
         else:
             return [name]
 
-    def _get_dbs_to_scan(self, server, instance, name, tags):
-        dbs = self.agent_check.get(urljoin(server, "_all_dbs"), instance, tags)
+    def _get_dbs_to_scan(self, server, name, tags):
+        dbs = self.agent_check.get(urljoin(server, "_all_dbs"), tags)
         try:
-            nodes = self.agent_check.get(urljoin(server, "_membership"), instance, tags)['cluster_nodes']
+            nodes = self.agent_check.get(urljoin(server, "_membership"), tags)['cluster_nodes']
         except KeyError:
             return []
 
@@ -329,33 +322,33 @@ class CouchDB2:
         max_dbs_per_check = instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
         for name in self._get_instance_names(server, instance):
             tags = config_tags + ["instance:{0}".format(name)]
-            self._build_metrics(self._get_node_stats(server, name, instance, tags), tags)
-            self._build_system_metrics(self._get_system_stats(server, name, instance, tags), tags)
-            self._build_active_tasks_metrics(self._get_active_tasks(server, name, instance, tags), tags)
+            self._build_metrics(self._get_node_stats(server, name, tags), tags)
+            self._build_system_metrics(self._get_system_stats(server, name, tags), tags)
+            self._build_active_tasks_metrics(self._get_active_tasks(server, name, tags), tags)
 
             db_whitelist = instance.get('db_whitelist', None)
             db_blacklist = instance.get('db_blacklist', [])
             scanned_dbs = 0
-            for db in self._get_dbs_to_scan(server, instance, name, tags):
+            for db in self._get_dbs_to_scan(server, name, tags):
                 if (db_whitelist is None or db in db_whitelist) and (db not in db_blacklist):
                     db_tags = config_tags + ["db:{0}".format(db)]
                     db_url = urljoin(server, db)
-                    self._build_db_metrics(self.agent_check.get(db_url, instance, db_tags), db_tags)
+                    self._build_db_metrics(self.agent_check.get(db_url, db_tags), db_tags)
                     for dd in self.agent_check.get(
-                        "{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), instance, db_tags
+                        "{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), db_tags
                     )['rows']:
                         self._build_dd_metrics(
-                            self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), instance, db_tags), db_tags
+                            self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), db_tags), db_tags
                         )
                     scanned_dbs += 1
                     if scanned_dbs >= max_dbs_per_check:
                         break
 
-    def _get_node_stats(self, server, name, instance, tags):
+    def _get_node_stats(self, server, name, tags):
         url = urljoin(server, "/_node/{0}/_stats".format(name))
 
         # Fetch initial stats and capture a service check based on response.
-        stats = self.agent_check.get(url, instance, tags, True)
+        stats = self.agent_check.get(url, tags, True)
 
         # No overall stats? bail out now
         if stats is None:
@@ -363,16 +356,16 @@ class CouchDB2:
 
         return stats
 
-    def _get_system_stats(self, server, name, instance, tags):
+    def _get_system_stats(self, server, name, tags):
         url = urljoin(server, "/_node/{0}/_system".format(name))
 
         # Fetch _system (Erlang) stats.
-        return self.agent_check.get(url, instance, tags)
+        return self.agent_check.get(url, tags)
 
-    def _get_active_tasks(self, server, name, instance, tags):
+    def _get_active_tasks(self, server, name, tags):
         url = urljoin(server, "/_active_tasks")
 
-        tasks = self.agent_check.get(url, instance, tags)
+        tasks = self.agent_check.get(url, tags)
 
         #  print tasks
 

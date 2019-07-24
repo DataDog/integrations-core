@@ -12,7 +12,7 @@ instances:
     ## enable endpoint checks alongside the service check and use autodiscovery
     ## to get pod IP by setting up `prometheus_url` to https://%%host%%/metrics
     #
-  - prometheus_url: http://localhost:443/metrics
+  - prometheus_url: https://localhost:443/metrics
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metrics, events and service checks emitted by this integration.

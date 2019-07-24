@@ -25,7 +25,8 @@ PORT = 1433
 HERE = os.path.dirname(os.path.abspath(__file__))
 CHECK_NAME = "sqlserver"
 
-EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS]
+CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.exec.in_progress']
+EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS] + CUSTOM_METRICS
 
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
