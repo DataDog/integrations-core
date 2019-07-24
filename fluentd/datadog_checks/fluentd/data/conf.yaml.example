@@ -1,13 +1,13 @@
 init_config:
     ## @param skip_proxy - boolean - optional - default: false
-    ## Set `skip_proxy` parameter to `true` bypass any proxy settings
+    ## Set `skip_proxy` parameter to `true` bypass any proxy
     ## settings enabled.
     #
     #  skip_proxy: false
 
     ## @param proxy - list of string - optional
     ## Set HTTP or HTTPS proxy for all instances.
-    ## Use the no_proxy list to specify hosts that must bypass proxy
+    ## Use the no_proxy list to specify hosts that must bypass proxy.
     #  
     # proxy:
     #    https: https://<SSL_PROXY_SERVER_FOR_HTTPS>:<PORT>
@@ -45,14 +45,13 @@ instances:
     #   - <KEY_2>:<VALUE_2>
   
     ## @param skip_proxy - boolean - optional - default: false
-    ## Set `skip_proxy` parameter to `true` bypass any proxy settings
-    ## settings enabled.
+    ## Set `skip_proxy` parameter to `true` bypass any proxy
     #
     #  skip_proxy: false
 
     ## @param proxy - list of string - optional
     ## Set HTTP or HTTPS proxy for this instance.
-    ## Use the no_proxy list to specify hosts that must bypass proxy
+    ## Use the no_proxy list to specify hosts that must bypass proxy.
     #  
     # proxy:
     #    https: https://<SSL_PROXY_SERVER_FOR_HTTPS>:<PORT>
