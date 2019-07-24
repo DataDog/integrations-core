@@ -50,7 +50,7 @@
       "title_size": 16,
       "title_text": "",
       "type": "image",
-      "url": "https://raw.githubusercontent.com/DataDog/integrations-core/davidb/systemd/systemd/logos/saas_logos-bot.png",
+      "url": "https://s3.amazonaws.com/dd-integrations/systemd/configuration/tile/logo.png",
       "width": 15,
       "x": 1,
       "y": 2
