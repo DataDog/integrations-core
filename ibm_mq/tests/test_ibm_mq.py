@@ -4,7 +4,6 @@
 
 import logging
 
-import pymqi
 import pytest
 from six import iteritems
 
@@ -44,6 +43,9 @@ def test_service_check_connection_issues(aggregator, instance, seed_data):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_service_check_from_status(aggregator, instance, seed_data):
+    # Late import to not require it for e2e
+    import pymqi
+
     check = IbmMqCheck('ibm_mq', {}, {})
 
     service_check_map = {
@@ -129,6 +131,9 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_check_channel_count(aggregator, instance_queue_regex_tag, seed_data):
+    # Late import to not require it for e2e
+    import pymqi
+
     metrics_to_assert = {
         "inactive": 0,
         "binding": 0,
