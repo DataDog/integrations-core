@@ -10,7 +10,6 @@ from . import common
 pytestmark = pytest.mark.e2e
 
 
-@pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
 
