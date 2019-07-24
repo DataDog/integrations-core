@@ -12,7 +12,6 @@ from six import PY3
 
 from .env import environment_run
 from .structures import LazyFunction, TempDir
-from .subprocess import run_command
 from .utils import ON_WINDOWS
 
 if PY3:
@@ -133,12 +132,15 @@ class TCPTunnelUp(LazyFunction):
                 '-o',
                 'BatchMode=yes',
                 '-o',
-                'UserKnownHostsFile=/dev/null',
+                'UserKnownHostsFile={}'.format(os.devnull),
                 '-o',
                 'StrictHostKeyChecking=no',
                 '{}@{}'.format(self.user, self.host),
             ]
-            process = subprocess.Popen(command, start_new_session=True)
+            if ON_WINDOWS:
+                process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+            else:
+                process = subprocess.Popen(command, start_new_session=True)
             with open(os.path.join(temp_dir, 'ssh.pid'), 'w') as ssh_pid:
                 ssh_pid.write(str(process.pid))
             return ip, local_port
@@ -149,5 +151,6 @@ class TCPTunnelDown(LazyFunction):
         with TempDir('tcp_tunnel') as temp_dir:
             with open(os.path.join(temp_dir, 'ssh.pid')) as ssh_pid:
                 pid = int(ssh_pid.read())
-                run_command('kill {}'.format(pid))
+                process = psutil.Process(pid)
+                process.kill()
                 return 0
