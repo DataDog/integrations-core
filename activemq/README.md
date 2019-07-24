@@ -85,28 +85,28 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 
 3. [Restart the agent][7]
 
-#### Log Collection
+#### Log collection
 
  **Available for Agent >6.0**
 
  1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-     ```yaml
-    logs_enabled: true
+    ```yaml
+      logs_enabled: true
     ```
 
  2. Add this configuration block to your `activemq.d/conf.yaml` file to start collecting your Riak logs:
 
-     ```yaml
-    logs:
-      - type: file
-        path: <ACTIVEMQ_BASEDIR>/data/activemq.log
-        source: activemq
-        service: <SERVICE_NAME>
-      - type: file
-        path: <ACTIVEMQ_BASEDIR>/data/audit.log
-        source: activemq
-        service: <SERVICE_NAME>
+     ```
+      logs:
+        - type: file
+          path: <ACTIVEMQ_BASEDIR>/data/activemq.log
+          source: activemq
+          service: <SERVICE_NAME>
+        - type: file
+          path: <ACTIVEMQ_BASEDIR>/data/audit.log
+          source: activemq
+          service: <SERVICE_NAME>
     ```
 
  3. [Restart the Agent][7].
@@ -114,7 +114,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `activemq` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `activemq` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -124,8 +124,8 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 The ActiveMQ check does not include any events.
 
 ### Service Checks
-**activemq.can_connect**:
-Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance. Returns `OK` otherwise.
+**activemq.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][10].

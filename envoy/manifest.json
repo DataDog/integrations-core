@@ -1,7 +1,8 @@
 {
   "categories": [
     "cloud",
-    "web"
+    "web",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Envoy",

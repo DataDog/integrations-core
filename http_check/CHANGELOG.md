@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 4.1.1 / 2019-07-22
+
+* [Fixed] Fix detection of the embedded Agent directory. See [#4158](https://github.com/DataDog/integrations-core/pull/4158).
+
 ## 4.1.0 / 2019-07-04
 
 * [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).

@@ -45,3 +45,17 @@ def test_check_auto(aggregator, check):
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check):
+    aggregator = dd_agent_check(STATUS_CONFIG, rate=True)
+
+    tags = STATUS_CONFIG['tags']
+    for mname in APACHE_GAUGES + APACHE_RATES:
+        aggregator.assert_metric(mname, tags=tags)
+
+    sc_tags = ['host:' + HOST, 'port:' + PORT] + tags
+    aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
+
+    aggregator.assert_all_metrics_covered()

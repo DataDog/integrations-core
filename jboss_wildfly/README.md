@@ -25,22 +25,27 @@ The JBoss/WildFly check is included in the [Datadog Agent][4] package. No additi
 
 2. [Restart the Agent][8].
 
-#### Log Collection
+#### Log collection
 
-To enable collecting logs in the Datadog Agent, update `logs_enabled` in `datadog.yaml`:
-```
-    logs_enabled: true
-```
+**Available for Agent >6.0**
 
-Next, edit `jboss_wildfly.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your JBoss log files.
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-```yaml
-logs:
- - type: file
-   path: /opt/jboss/wildfly/standalone/log/*.log
-   source: jboss_wildfly
-   service: <APPLICATION_NAME>
-```
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Next, edit `jboss_wildfly.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your JBoss log files.
+
+    ```
+      logs:
+        - type: file
+          path: /opt/jboss/wildfly/standalone/log/*.log
+          source: jboss_wildfly
+          service: <APPLICATION_NAME>
+    ```
+
+3. [Restart the Agent][8].
 
 ### Validation
 
@@ -52,13 +57,13 @@ logs:
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
-### Service Checks
-
-The JBoss/WildFly integration does not include any service checks.
-
 ### Events
 
 The JBoss/WildFly integration does not include any events.
+
+### Service Checks
+
+The JBoss/WildFly integration does not include any service checks.
 
 ## Troubleshooting
 

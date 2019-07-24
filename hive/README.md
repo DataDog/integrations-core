@@ -46,14 +46,14 @@ No additional installation is needed on your server.
 
 4. [Restart the Agent][8].
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
     ```yaml
-    logs_enabled: true
+      logs_enabled: true
     ```
 
 2. Add this configuration block to your `hive.d/conf.yaml` file to start collecting your Hive logs:
@@ -86,7 +86,7 @@ See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Service Checks
 
- **hive.can_connect**:
+ **hive.can_connect**:<br>
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored HiveServer2/Hive Metastore instance, otherwise returns `OK`.
 
 ### Events

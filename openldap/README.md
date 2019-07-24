@@ -82,24 +82,24 @@ See the [sample openldap.yaml][2] for all available configuration options.
 
 [Restart the Agent][3] to begin sending OpenLDAP metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```
-    logs_enabled: true
+    ```yaml
+      logs_enabled: true
     ```
 
 2. Add this configuration block to your `openldap.d/conf.yaml` file to start collecting your Openldap logs:
 
-    ```yaml
-    logs:
-      - type: file
-      path: /var/log/slapd.log
-      source: openldap
-      service: <SERVICE_NAME>
+    ```
+      logs:
+        - type: file
+          path: /var/log/slapd.log
+          source: openldap
+          service: <SERVICE_NAME>
     ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample openldap.d/conf.yaml][2] for all available configuration options.
@@ -126,18 +126,13 @@ The openldap check does not include any events.
 
 ### Service Checks
 
-**openldap.can_connect**
-
-Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP server, `OK` otherwise.
+**openldap.can_connect**:<br>
+Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP server, otherwise returns `OK`.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
 
-## Development
-
-See the [main documentation][7]
-for more details about how to test and develop Agent based integrations.
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/openldap/datadog_checks/openldap/data/conf.yaml.example
@@ -145,4 +140,3 @@ for more details about how to test and develop Agent based integrations.
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
 [6]: https://docs.datadoghq.com/help
-[7]: https://docs.datadoghq.com/developers

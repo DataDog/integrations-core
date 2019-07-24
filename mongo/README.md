@@ -47,7 +47,7 @@ db.createUser({
 })
 ```
 
-#### Metric Collection
+#### Metric collection
 
 * Add this configuration block to your `mongo.d/conf.yaml` file to start gathering your [MongoDB Metrics](#metrics):
 
@@ -65,35 +65,33 @@ db.createUser({
 
 * [Restart the Agent][6] to start sending MongoDB metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Add this configuration block to your `mongo.d/conf.yaml` file to start collecting your MongoDB Logs:
+2. Add this configuration block to your `mongo.d/conf.yaml` file to start collecting your MongoDB Logs:
 
-  ```
-  logs:
-      - type: file
-        path: /var/log/mongodb/mongodb.log
-        service: mongo
-        source: mongodb
-  ```
-  Change the `service` and `path` parameter values and configure them for your environment.
-  See the [sample mongo.yaml][5] for all available configuration options
+    ```yaml
+      logs:
+          - type: file
+            path: /var/log/mongodb/mongodb.log
+            service: mongo
+            source: mongodb
+    ```
+    Change the `service` and `path` parameter values and configure them for your environment.
+    See the [sample mongo.yaml][5] for all available configuration options
 
-* [Restart the Agent][6].
-
-**Learn more about log collection [in the log documentation][7]**
+3. [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `mongo` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `mongo` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -123,15 +121,13 @@ See the [MongoDB 3.0 Manual][10] for more detailed descriptions of some of these
 
 ### Events
 
-**Replication state changes**:
-
+**Replication state changes**:<br>
 This check emits an event each time a Mongo node has a change in its replication state.
 
 ### Service Checks
 
-`mongodb.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to MongoDB to collect metrics, otherwise OK.
+**mongodb.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to MongoDB to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][11].
@@ -139,8 +135,8 @@ Need help? Contact [Datadog support][11].
 ## Further Reading
 Read our series of blog posts about collecting metrics from MongoDB with Datadog:
 
-* [Start here][12] if you're using the WiredTiger storage engine.
-* [Start here][13] if you're using MMAPv1 storage engine.
+* [Monitoring MongoDB performance metrics (WiredTiger)][12]
+* [Monitoring MongoDB performance metrics (MMAP)][13]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
@@ -149,7 +145,6 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/mongo/datadog_checks/mongo/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/logs
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv
 [10]: https://docs.mongodb.org/manual/reference/command/dbStats

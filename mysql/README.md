@@ -89,7 +89,7 @@ mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-#### Metric Collection
+#### Metric collection
 
 * Add this configuration block to your `mysql.d/conf.yaml` to collect your [MySQL metrics](#metrics):
 
@@ -121,84 +121,82 @@ See our [sample mysql.yaml][8] for all available configuration options, includin
 
 [Restart the Agent][9] to start sending MySQL metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. By default MySQL logs everything in `/var/log/syslog` which requires root access to read. To make the logs more accessible, follow these steps:
 
-  - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
-  - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error, and slow query logs:
+    - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
+    - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error, and slow query logs:
 
-    ```
-    [mysqld_safe]
-    log_error=/var/log/mysql/mysql_error.log
-    [mysqld]
-    general_log = on
-    general_log_file = /var/log/mysql/mysql.log
-    log_error=/var/log/mysql/mysql_error.log
-    slow_query_log = on
-    slow_query_log_file = /var/log/mysql/mysql-slow.log
-    long_query_time = 2
-    ```
+      ```
+        [mysqld_safe]
+        log_error=/var/log/mysql/mysql_error.log
+        [mysqld]
+        general_log = on
+        general_log_file = /var/log/mysql/mysql.log
+        log_error=/var/log/mysql/mysql_error.log
+        slow_query_log = on
+        slow_query_log_file = /var/log/mysql/mysql-slow.log
+        long_query_time = 2
+      ```
 
-  - Save the file and restart MySQL using following commands:
-    `service mysql restart`
-  - Make sure the Agent has read access on the `/var/log/mysql` directory and all of the files within. Double-check your logrotate configuration to make sure those files are taken into account and that the permissions are correctly set there as well.
-  - In `/etc/logrotate.d/mysql-server` there should be something similar to:
+    - Save the file and restart MySQL using following commands:
+      `service mysql restart`
+    - Make sure the Agent has read access on the `/var/log/mysql` directory and all of the files within. Double-check your logrotate configuration to make sure those files are taken into account and that the permissions are correctly set there as well.
+    - In `/etc/logrotate.d/mysql-server` there should be something similar to:
 
-    ```
-    /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql-slow.log {
-            daily
-            rotate 7
-            missingok
-            create 644 mysql adm
-            Compress
-    }
-    ```
+      ```
+        /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql-slow.log {
+                daily
+                rotate 7
+                missingok
+                create 644 mysql adm
+                Compress
+        }
+      ```
 
-2. Collecting logs is disabled by default in the Datadog Agent, so you need to enable it in `datadog.yaml`:
+2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```
-    logs_enabled: true
+    ```yaml
+      logs_enabled: true
     ```
 
 3. Add this configuration block to your `mysql.d/conf.yaml` file to start collecting your MySQL logs:
 
-    ```
-    logs:
-        - type: file
-          path: /var/log/mysql/mysql_error.log
-          source: mysql
-          sourcecategory: database
-          service: myapplication
+    ```yaml
+      logs:
+          - type: file
+            path: /var/log/mysql/mysql_error.log
+            source: mysql
+            sourcecategory: database
+            service: myapplication
 
-        - type: file
-          path: /var/log/mysql/mysql-slow.log
-          source: mysql
-          sourcecategory: database
-          service: myapplication
+          - type: file
+            path: /var/log/mysql/mysql-slow.log
+            source: mysql
+            sourcecategory: database
+            service: myapplication
 
-        - type: file
-          path: /var/log/mysql/mysql.log
-          source: mysql
-          sourcecategory: database
-          service: myapplication
-          # For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
-          # log_processing_rules:
-          #   - type: multi_line
-          #     name: new_log_start_with_date
-          #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+          - type: file
+            path: /var/log/mysql/mysql.log
+            source: mysql
+            sourcecategory: database
+            service: myapplication
+            # For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
+            # log_processing_rules:
+            #   - type: multi_line
+            #     name: new_log_start_with_date
+            #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
     ```
     See our [sample mysql.yaml][8] for all available configuration options, including those for custom metrics.
 
 4. [Restart the Agent][9].
 
-**Learn more about log collection [in the log documentation][10]**
-
 ### Validation
 
-[Run the Agent's `status` subcommand][11] and look for `mysql` under the Checks section.
+[Run the Agent's status subcommand][11] and look for `mysql` under the Checks section.
 
 ## Data Collected
 
@@ -355,12 +353,11 @@ The MySQL check does not include any events.
 
 ### Service Checks
 
-`mysql.replication.slave_running`:
-Returns `CRITICAL` if the Agent is unable to connect to the monitored MySQL instance. Returns `OK` otherwise.
-See [this][13] for more details.
+**mysql.replication.slave_running**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to the monitored MySQL instance, otherwise returns `OK`. See [this][13] for more details.
 
-`mysql.can_connect`:
-Returns CRITICAL if the Agent cannot connect to MySQL to collect metrics, otherwise OK.
+**mysql.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to MySQL to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 
@@ -386,7 +383,6 @@ Read our [series of blog posts][23] about monitoring MySQL with Datadog.
 [7]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
 [8]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/logs
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv
 [13]: https://github.com/DataDog/integrations-core/blob/master/mysql/assets/SERVICE_CHECK_CLARIFICATION.md

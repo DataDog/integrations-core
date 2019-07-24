@@ -47,14 +47,14 @@ stats_users = datadog
 
 [Restart the Agent][5] to start sending PgBouncer metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
-    logs_enabled: true
+      logs_enabled: true
     ```
 
 2. Add this configuration block to your `pgbouncer.d/conf.yaml` file to start collecting your Pgbouncer logs:
@@ -73,25 +73,25 @@ stats_users = datadog
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `pgbouncer` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `pgbouncer` under the Checks section.
 
 ## Data Collected
 ### Metrics
 See [metadata.csv][7] for a list of metrics provided by this check.
 
-Note: Not all metrics are available with all versions of PgBouncer.
+**Note**: Not all metrics are available with all versions of PgBouncer.
 
 ### Events
 The PgBouncer check does not include any events.
 
 ### Service Checks
 
-`pgbouncer.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to PgBouncer to collect metrics, otherwise OK.
+**pgbouncer.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to PgBouncer to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][8].
+
 
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent

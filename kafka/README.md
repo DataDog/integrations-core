@@ -27,62 +27,58 @@ The check collects metrics via JMX, so you need a JVM on each kafka node so the 
 
 Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your [Agent's configuration directory][7].
 
-#### Metric Collection
-
-**The following instructions are for the Datadog agent >= 5.0. For agents before that, see the [older documentation][8].**
+#### Metric collection
 
 Kafka bean names depend on the exact Kafka version you're running. Use the [example configuration file][9] that comes packaged with the Agent as a base since it is the most up-to-date configuration. **Note**: the Agent version in the example may be for a newer version of the Agent than what you have installed.
 
 After you've configured `kafka.yaml`, [restart the Agent][10] to begin sending Kafka metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
-Kafka uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties` file:
+1. Kafka uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties` file:
 
-```
-# Set root logger level to INFO and its only appender to R
-log4j.rootLogger=INFO, R
-log4j.appender.R.File=/var/log/kafka/server.log
-log4j.appender.R.layout=org.apache.log4j.PatternLayout
-log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
-```
+    ```
+      # Set root logger level to INFO and its only appender to R
+      log4j.rootLogger=INFO, R
+      log4j.appender.R.File=/var/log/kafka/server.log
+      log4j.appender.R.layout=org.apache.log4j.PatternLayout
+      log4j.appender.R.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+    ```
 
-By default, our integration pipeline supports the following conversion patterns:
+2. By default, our integration pipeline supports the following conversion patterns:
 
-  ```
-  %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
-  %d [%t] %-5p %c - %m%n
-  %r [%t] %p %c %x - %m%n
-  ```
+    ```
+      %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+      %d [%t] %-5p %c - %m%n
+      %r [%t] %p %c %x - %m%n
+    ```
 
-Clone and edit the [integration pipeline][11] if you have a different format.
+    Clone and edit the [integration pipeline][11] if you have a different format.
 
-* Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file with:
+3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Add the following configuration block to your `kafka.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample kafka.d/conf.yaml][9] for all available configuration options.
+4. Add the following configuration block to your `kafka.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample kafka.d/conf.yaml][9] for all available configuration options.
 
-  ```
-  logs:
-    - type: file
-      path: /var/log/kafka/server.log
-      source: kafka
-      service: myapp
-      #To handle multi line that starts with yyyy-mm-dd use the following pattern
-      #log_processing_rules:
-      #  - type: multi_line
-      #    name: log_start_with_date
-      #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-  ```
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/kafka/server.log
+          source: kafka
+          service: myapp
+          #To handle multi line that starts with yyyy-mm-dd use the following pattern
+          #log_processing_rules:
+          #  - type: multi_line
+          #    name: log_start_with_date
+          #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+    ```
 
-* [Restart the Agent][10].
-
-**Learn more about log collection [in the log documentation][12]**
+5. [Restart the Agent][10].
 
 ### Validation
 
@@ -110,7 +106,7 @@ See [metadata.csv][14] for a list of metrics provided by this check.
 The Kafka check does not include any events.
 
 ### Service Checks
-**kafka.can_connect**
+**kafka.can_connect**:<br>
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Kafka instance, otherwise returns `OK`.
 
 ## Troubleshooting
@@ -133,11 +129,9 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 [5]: https://app.datadoghq.com/account/settings#agent
 [6]: https://github.com/DataDog/jmxfetch
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[8]: https://github.com/DataDog/dd-agent/wiki/Deprecated-instructions-to-install-python-dependencies-for-the-Datadog-Agent
 [9]: https://github.com/DataDog/integrations-core/blob/master/kafka/datadog_checks/kafka/data/conf.yaml.example
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [11]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[12]: https://docs.datadoghq.com/logs
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
 [15]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka
