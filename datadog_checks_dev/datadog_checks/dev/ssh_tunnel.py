@@ -20,6 +20,8 @@ if PY3:
 else:
     import subprocess32 as subprocess
 
+PID_FILE = 'ssh.pid'
+
 
 def find_free_port(ip):
     """Return a port available for listening on the given `ip`."""
@@ -41,7 +43,7 @@ def get_ip():
 def socks_proxy(host, user, private_key):
     """Open a SSH connection with a SOCKS proxy."""
     set_up = SocksProxyUp(host, user, private_key)
-    tear_down = SocksProxyDown()
+    tear_down = KillProcess('socks_proxy', PID_FILE)
 
     with environment_run(up=set_up, down=tear_down) as result:
         yield result
@@ -87,7 +89,7 @@ class SocksProxyUp(LazyFunction):
             else:
                 process = subprocess.Popen(command, start_new_session=True)
 
-            with open(os.path.join(temp_dir, 'ssh.pid'), 'w') as ssh_pid:
+            with open(os.path.join(temp_dir, PID_FILE), 'w') as ssh_pid:
                 ssh_pid.write(str(process.pid))
 
             WaitForPortListening(ip, local_port)()
@@ -95,27 +97,13 @@ class SocksProxyUp(LazyFunction):
             return ip, local_port
 
 
-class SocksProxyDown(LazyFunction):
-    """Kill a previous started SOCKS proxy."""
-
-    def __call__(self):
-        with TempDir('socks_proxy') as temp_dir:
-            with open(os.path.join(temp_dir, 'ssh.pid')) as ssh_pid:
-                pid = int(ssh_pid.read())
-                # TODO: Remove psutil as a dependency when we drop Python 2, on Python 3 os.kill supports Windows
-                process = psutil.Process(pid)
-                process.kill()
-                return 0
-
-
 @contextmanager
 def tcp_tunnel(host, user, private_key, remote_port):
     """Open a SSH connection with a TCP tunnel proxy."""
     set_up = TCPTunnelUp(host, user, private_key, remote_port)
-    tear_down = TCPTunnelDown()
-    conditions = []
+    tear_down = KillProcess('tcp_tunnel', PID_FILE)
 
-    with environment_run(up=set_up, down=tear_down, conditions=conditions) as result:
+    with environment_run(up=set_up, down=tear_down) as result:
         yield result
 
 
@@ -153,16 +141,21 @@ class TCPTunnelUp(LazyFunction):
                 process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
             else:
                 process = subprocess.Popen(command, start_new_session=True)
-            with open(os.path.join(temp_dir, 'ssh.pid'), 'w') as ssh_pid:
+            with open(os.path.join(temp_dir, PID_FILE), 'w') as ssh_pid:
                 ssh_pid.write(str(process.pid))
             return ip, local_port
 
 
-class TCPTunnelDown(LazyFunction):
+class KillProcess(LazyFunction):
+    def __init__(self, temp_name, pid_file):
+        self.temp_name = temp_name
+        self.pid_file = pid_file
+
     def __call__(self):
-        with TempDir('tcp_tunnel') as temp_dir:
-            with open(os.path.join(temp_dir, 'ssh.pid')) as ssh_pid:
-                pid = int(ssh_pid.read())
+        with TempDir(self.temp_name) as temp_dir:
+            with open(os.path.join(temp_dir, self.pid_file)) as pid_file:
+                pid = int(pid_file.read())
+                # TODO: Remove psutil as a dependency when we drop Python 2, on Python 3 os.kill supports Windows
                 process = psutil.Process(pid)
                 process.kill()
                 return 0
