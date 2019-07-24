@@ -17,6 +17,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
 from datadog_checks.dev import EnvVars
+from datadog_checks.dev.utils import running_on_appveyor
 
 pytestmark = pytest.mark.http
 
@@ -423,6 +424,7 @@ class TestProxies:
 
         http.get('https://www.google.com')
 
+    @pytest.mark.skipif(running_on_appveyor(), reason="Cannot run on appveyor")
     def test_socks5_proxy(self, socks5_proxy):
         instance = {'proxy': {'http': 'socks5h://{}'.format(socks5_proxy)}}
         init_config = {}
