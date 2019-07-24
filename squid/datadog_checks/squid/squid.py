@@ -69,23 +69,26 @@ SQUID_COUNTERS = [
 
 
 class SquidCheck(AgentCheck):
+
+    HTTP_CONFIG_REMAPPER = {'cachemgr_username': {'name': 'username'}, 'cachemgr_password': {'name': 'password'}}
+
     def check(self, instance):
 
-        name, host, port, cachemgr_user, cachemgr_passwd, custom_tags = self.parse_instance(instance)
+        name, host, port, custom_tags = self.parse_instance(instance)
         tags = ["name:%s" % name]
 
         # Get the squid counters values
-        counters = self.get_counters(host, port, cachemgr_user, cachemgr_passwd, tags + custom_tags)
+        counters = self.get_counters(host, port, tags + custom_tags)
 
         # Send these values as rate
         for counter, value in iteritems(counters):
             self.rate(counter, value, tags=tags + custom_tags)
 
-    def get_counters(self, host, port, user, pwd, tags):
+    def get_counters(self, host, port, tags):
 
         url = "http://%s:%s/squid-internal-mgr/counters" % (host, port)
         try:
-            res = requests.get(url, auth=(user, pwd))
+            res = self.http.get(url)
             res.raise_for_status()
             self.service_check(SERVICE_CHECK, AgentCheck.OK, tags=tags)
         except requests.exceptions.RequestException as e:
@@ -108,10 +111,8 @@ class SquidCheck(AgentCheck):
             raise Exception("Each instance in squid.yaml must have a name")
         host = instance.get("host", "localhost")
         port = instance.get("port", 3128)
-        cachemgr_user = instance.get("cachemgr_username", "")
-        cachemgr_passwd = instance.get("cachemgr_password", "")
         custom_tags = instance.get("tags", [])
-        return name, host, port, cachemgr_user, cachemgr_passwd, custom_tags
+        return name, host, port, custom_tags
 
     def parse_counter(self, line):
         # Squid returns a plain text page with one counter per line:
