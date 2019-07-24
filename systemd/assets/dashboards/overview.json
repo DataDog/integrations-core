@@ -19,7 +19,7 @@
   "disableCog": false,
   "disableEditing": false,
   "height": 80,
-  "icon": "https://s3.amazonaws.com/dd-integrations-staging/systemd/dashboards/logo.png",
+  "icon": "https://s3.amazonaws.com/dd-integrations/systemd/dashboards/logo.png",
   "id": 63965,
   "isIntegration": false,
   "isShared": false,
