@@ -36,6 +36,15 @@ def get_ip():
         return s.getsockname()[0]
 
 
+def run_background_command(command, pid_filename):
+    if ON_WINDOWS:
+        process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+    else:
+        process = subprocess.Popen(command, start_new_session=True)
+    with open(pid_filename, 'w') as pid_file:
+        pid_file.write(str(process.pid))
+
+
 @contextmanager
 def socks_proxy(host, user, private_key):
     """Open a SSH connection with a SOCKS proxy."""
@@ -75,14 +84,7 @@ class SocksProxyUp(LazyFunction):
                 'StrictHostKeyChecking=no',
                 '{}@{}'.format(self.user, self.host),
             ]
-
-            if ON_WINDOWS:
-                process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-            else:
-                process = subprocess.Popen(command, start_new_session=True)
-
-            with open(os.path.join(temp_dir, PID_FILE), 'w') as ssh_pid:
-                ssh_pid.write(str(process.pid))
+            run_background_command(command, os.path.join(temp_dir, PID_FILE))
 
             return ip, local_port
 
@@ -127,12 +129,8 @@ class TCPTunnelUp(LazyFunction):
                 'StrictHostKeyChecking=no',
                 '{}@{}'.format(self.user, self.host),
             ]
-            if ON_WINDOWS:
-                process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-            else:
-                process = subprocess.Popen(command, start_new_session=True)
-            with open(os.path.join(temp_dir, PID_FILE), 'w') as ssh_pid:
-                ssh_pid.write(str(process.pid))
+            run_background_command(command, os.path.join(temp_dir, PID_FILE))
+
             return ip, local_port
 
 
