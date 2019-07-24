@@ -284,10 +284,7 @@ class Network(AgentCheck):
         proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
         custom_tags = instance.get('tags', [])
 
-        if Platform.is_containerized() and proc_location != "/proc":
-            net_proc_base_location = "%s/1" % proc_location
-        else:
-            net_proc_base_location = proc_location
+        net_proc_base_location = self._get_net_proc_base_location(proc_location)
 
         if self._is_collect_cx_state_runnable(net_proc_base_location):
             try:
@@ -460,6 +457,14 @@ class Network(AgentCheck):
                         self.log.debug("{} is not an integer".format(metric_name))
             except IOError as e:
                 self.log.debug("Unable to read {}, skipping {}.".format(metric_file_location, e))
+
+    @staticmethod
+    def _get_net_proc_base_location(proc_location):
+        if Platform.is_containerized() and proc_location != "/proc":
+            net_proc_base_location = "%s/1" % proc_location
+        else:
+            net_proc_base_location = proc_location
+        return net_proc_base_location
 
     def _add_conntrack_stats_metrics(self, conntrack_path, tags):
         """
