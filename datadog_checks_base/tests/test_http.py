@@ -43,14 +43,21 @@ class TestTimeout:
         # Assert the timeout is slightly larger than a multiple of 3,
         # which is the default TCP packet retransmission window. See:
         # https://tools.ietf.org/html/rfc2988
-        assert 0 < http.options['timeout'] % 3 <= 1
+        assert 0 < http.options['timeout'][0] % 3 <= 1
 
     def test_config_timeout(self):
         instance = {'timeout': 24.5}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['timeout'] == 24.5
+        assert http.options['timeout'] == (24.5, 24.5)
+
+    def test_config_multiple_timeouts(self):
+        instance = {'read_timeout': 4, 'connect_timeout': 10}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['timeout'] == (10, 4)
 
 
 class TestHeaders:
@@ -517,7 +524,7 @@ class TestRemapper:
         remapper = {'prometheus_timeout': {'name': 'timeout'}}
         http = RequestsWrapper(instance, init_config, remapper)
 
-        assert http.options['timeout'] == STANDARD_FIELDS['timeout']
+        assert http.options['timeout'] == (STANDARD_FIELDS['timeout'], STANDARD_FIELDS['timeout'])
 
     def test_invert(self):
         instance = {'disable_ssl_validation': False}
