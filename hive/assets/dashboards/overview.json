@@ -122,7 +122,7 @@
       "generated_title": "",
       "title_size": 16,
       "title": true,
-      "url": "https://github.com/DataDog/integrations-core/blob/master/hive/assets/logos/avatars-bot.png?raw=true",
+      "url": "https://s3.amazonaws.com/dd-integrations/hive/configuration/tile/logo.png",
       "margin": "",
       "title_align": "left",
       "title_text": "",
