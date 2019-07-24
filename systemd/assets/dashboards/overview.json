@@ -15,11 +15,11 @@
     "role": null,
     "verified": true
   },
-  "description": "This dashboard provides an overview of Systemd units and metrics on few specific services/sockets to help you monitoring them and investigate issues. Further reading on Presto monitoring:\n\n- [Datadog’s Systemd integration docs](https://docs.datadoghq.com/integrations/systemd/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
+  "description": "This dashboard provides an overview of Systemd units and metrics on few specific services/sockets to help you monitoring them and investigate issues. Further reading on Systemd monitoring:\n\n- [Datadog’s Systemd integration docs](https://docs.datadoghq.com/integrations/systemd/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
   "disableCog": false,
   "disableEditing": false,
   "height": 80,
-  "icon": "https://s3.amazonaws.com/dd-integrations-staging/presto/dashboards/logo.png",
+  "icon": "https://s3.amazonaws.com/dd-integrations-staging/systemd/dashboards/logo.png",
   "id": 63965,
   "isIntegration": false,
   "isShared": false,
