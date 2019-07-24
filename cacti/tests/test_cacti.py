@@ -107,6 +107,7 @@ def check():
     return CactiCheck(CHECK_NAME, {}, {})
 
 
+@pytest.mark.unit
 def test_check(aggregator, check):
     mock_conn = mock.MagicMock()
     mock_cursor = mock.MagicMock()
