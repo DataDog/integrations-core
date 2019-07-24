@@ -6,6 +6,7 @@ import copy
 import logging
 import os
 
+from datadog_checks.snmp import SnmpCheck
 from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger(__name__)
@@ -122,3 +123,7 @@ def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_k
         instance_config['privKey'] = priv_key
 
     return instance_config
+
+
+def create_check(instance):
+    return SnmpCheck('snmp', {}, [instance])
