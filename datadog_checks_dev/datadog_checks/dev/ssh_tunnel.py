@@ -7,11 +7,13 @@ import os
 import socket
 from contextlib import closing, contextmanager
 
+import psutil
 from six import PY3
 
 from .env import environment_run
 from .structures import LazyFunction, TempDir
 from .subprocess import run_command
+from .utils import ON_WINDOWS
 
 if PY3:
     import subprocess
@@ -67,14 +69,20 @@ class SocksProxyUp(LazyFunction):
                 '-o',
                 'BatchMode=yes',
                 '-o',
-                'UserKnownHostsFile=/dev/null',
+                'UserKnownHostsFile={}'.format(os.devnull),
                 '-o',
                 'StrictHostKeyChecking=no',
                 '{}@{}'.format(self.user, self.host),
             ]
-            process = subprocess.Popen(command, start_new_session=True)
+
+            if ON_WINDOWS:
+                process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+            else:
+                process = subprocess.Popen(command, start_new_session=True)
+
             with open(os.path.join(temp_dir, 'ssh.pid'), 'w') as ssh_pid:
                 ssh_pid.write(str(process.pid))
+
             return ip, local_port
 
 
@@ -83,5 +91,7 @@ class SocksProxyDown(LazyFunction):
         with TempDir('socks_proxy') as temp_dir:
             with open(os.path.join(temp_dir, 'ssh.pid')) as ssh_pid:
                 pid = int(ssh_pid.read())
-                run_command('kill {}'.format(pid))
+                # TODO: Remove psutil as a dependency when we drop Python 2, on Python 3 os.kill supports Windows
+                process = psutil.Process(pid)
+                process.kill()
                 return 0
