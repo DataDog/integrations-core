@@ -211,6 +211,8 @@ class DockerInterface(object):
                 '-v',
                 '/proc:/host/proc',
             ]
+            for volume in self.metadata.get('docker_volumes', []):
+                command.extend(['-v', volume])
 
             # Any environment variables passed to the start command
             for key, value in sorted(self.env_vars.items()):
