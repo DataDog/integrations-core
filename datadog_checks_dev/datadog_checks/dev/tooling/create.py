@@ -42,7 +42,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
         license_header = (
             '# (C) Datadog, Inc. {year}\n'
             '# All rights reserved\n'
-            '# Licensed under a 3-clause BSD style license (see LICENSE)\n'.format(year=str(datetime.now().year))
+            '# Licensed under a 3-clause BSD style license (see LICENSE)\n'.format(year=str(datetime.utcnow().year))
         )
         support_type = 'core'
         test_dev_dep = '-e ../datadog_checks_dev'
