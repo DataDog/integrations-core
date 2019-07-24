@@ -26,6 +26,7 @@ E2E_METADATA = {
     'start_commands': [
         'apt-get update',
         'apt-get install rrdtool librrd-dev libpython-dev build-essential -y',
-        'pip install rrdtool',
+        '/opt/datadog-agent/embedded/bin/python -m pip install rrdtool',
+        '/opt/datadog-agent/embedded/bin/python3 -m pip install rrdtool',
     ]
 }
