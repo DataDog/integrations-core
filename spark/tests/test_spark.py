@@ -563,6 +563,7 @@ SPARK_STREAMING_STATISTICS_METRIC_VALUES = {
 SPARK_METRIC_TAGS = ['cluster_name:' + CLUSTER_NAME, 'app_name:' + APP_NAME]
 
 
+@pytest.mark.unit
 def test_yarn(aggregator):
     with mock.patch('requests.get', yarn_requests_get_mock):
         c = SparkCheck('spark', {}, [YARN_CONFIG])
@@ -612,6 +613,7 @@ def test_yarn(aggregator):
         aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.unit
 def test_auth_yarn(aggregator):
     with mock.patch('requests.get', yarn_requests_auth_mock):
         c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
@@ -631,6 +633,7 @@ def test_auth_yarn(aggregator):
             assert sc.tags == tags
 
 
+@pytest.mark.unit
 def test_mesos(aggregator):
     with mock.patch('requests.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_CONFIG])
@@ -687,6 +690,7 @@ def test_mesos(aggregator):
         aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.unit
 def test_mesos_filter(aggregator):
     with mock.patch('requests.get', mesos_requests_get_mock):
         c = SparkCheck('spark', {}, [MESOS_FILTERED_CONFIG])
@@ -699,6 +703,7 @@ def test_mesos_filter(aggregator):
         assert aggregator.metrics_asserted_pct == 100.0
 
 
+@pytest.mark.unit
 def test_standalone_unit(aggregator):
     with mock.patch('requests.get', standalone_requests_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
@@ -752,6 +757,7 @@ def test_standalone_unit(aggregator):
         aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.unit
 def test_standalone_pre20(aggregator):
     with mock.patch('requests.get', standalone_requests_pre20_get_mock):
         c = SparkCheck('spark', {}, [STANDALONE_CONFIG_PRE_20])
@@ -805,6 +811,7 @@ def test_standalone_pre20(aggregator):
         aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.unit
 def test_ssl():
     run_ssl_server()
     c = SparkCheck('spark', {}, [SSL_CONFIG])
@@ -813,6 +820,7 @@ def test_ssl():
         c.check(SSL_CONFIG)
 
 
+@pytest.mark.unit
 def test_ssl_no_verify():
     # Disable ssl warning for self signed cert/no verify
     urllib3.disable_warnings()
@@ -822,6 +830,7 @@ def test_ssl_no_verify():
     c.check(SSL_NO_VERIFY_CONFIG)
 
 
+@pytest.mark.unit
 def test_ssl_cert():
     # Disable ssl warning for self signed cert/no verify
     urllib3.disable_warnings()
