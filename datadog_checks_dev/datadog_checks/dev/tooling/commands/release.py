@@ -635,11 +635,8 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
 
             p_version = parse_version_info(version)
             p_current = parse_version_info(cur_version)
-            if p_version <= p_current:
-                if initial_release:
-                    continue
-                else:
-                    abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
+            if not initial_release and p_version <= p_current:
+                abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
         else:
             cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
             if not changelog_types:
@@ -723,7 +720,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
 
     # sanity check on the version provided
     cur_version = old_version or get_version_string(check)
-    if parse_version_info(version) <= parse_version_info(cur_version):
+    if not initial and parse_version_info(version) <= parse_version_info(cur_version):
         abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
 
     if not quiet:
