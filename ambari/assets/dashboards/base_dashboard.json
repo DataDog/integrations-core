@@ -282,7 +282,7 @@
       "generated_title": "",
       "title_size": 16,
       "title": true,
-      "url": "https://raw.githubusercontent.com/DataDog/integrations-core/master/ambari/assets/images/apache_ambari_200x128%402x.png",
+      "url": "https://s3.amazonaws.com/dd-integrations/ambari/configuration/tile/logo.png",
       "scaleFactor": 1,
       "title_align": "left",
       "title_text": "",
