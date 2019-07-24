@@ -2,13 +2,16 @@ variable "account_json" {
   type = string
 }
 
+resource "random_id" "password" {
+  byte_length = 16
+}
+
 locals {
-  password = "ThisIsAVeryWeirdRandomPassword"
   user = "user"
 }
 
 resource "random_shuffle" "az" {
-  input = ["europe-west2-a", "europe-west2-b", "europe-west2-c"]
+  input = ["europe-west4-a", "europe-west4-b", "europe-west4-c"]
   result_count = 1
 }
 
@@ -22,57 +25,35 @@ provider "google" {
   version = "~> 2.11"
   credentials = var.account_json
   project = "datadog-integrations-lab"
-  region = "europe-west2"
+  region = "europe-west4"
   zone = random_shuffle.az.result[0]
 }
 
-provider "kubernetes" {
-  version = "~> 1.2"
-  username = local.user
-  password = local.password
-  host     = "https://${google_container_cluster.gke_cluster.endpoint}"
-
-  client_certificate     = base64decode(google_container_cluster.gke_cluster.master_auth.0.client_certificate)
-  client_key             = base64decode(google_container_cluster.gke_cluster.master_auth.0.client_key)
-  cluster_ca_certificate = base64decode(google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate)
-}
-
 resource "google_compute_network" "vpc_network" {
-  name = "istio-network"
+  name = "istio-network-${random_string.suffix.result}"
 }
 
-resource "google_compute_firewall" "default" {
-  name    = "istio-test-http-ip-firewall"
-  network = google_compute_network.vpc_network.name
-
-  allow {
-    protocol = "icmp"
-  }
-
-  allow {
-    protocol = "tcp"
-    ports    = ["80"]
-  }
-
-  source_ranges = ["38.122.226.210"]
+resource "local_file" "kubeconfig" {
+  content  = "${data.template_file.kubeconfig.rendered}"
+  filename = "${path.module}/kubeconfig"
 }
 
 resource "google_container_cluster" "gke_cluster" {
   name               = "istio-terraform-test-${random_string.suffix.result}"
   location           = random_shuffle.az.result[0]
-  node_version = "1.13.7-gke.8"
+  node_version       = "1.13.7-gke.8"
   min_master_version = "1.13.7-gke.8"
-  network           = google_compute_network.vpc_network.name
+  network            = google_compute_network.vpc_network.name
 
   lifecycle {
     ignore_changes = ["node_pool"]
   }
 
-  initial_node_count = 4
+  initial_node_count = 2
 
   master_auth {
     username = local.user
-    password = local.password
+    password = "${random_id.password.hex}"
   }
 
   node_config {
@@ -86,125 +67,32 @@ resource "google_container_cluster" "gke_cluster" {
       "https://www.googleapis.com/auth/monitoring",
     ]
   }
+}
 
+data "template_file" "kubeconfig" {
+  template = "${file("${path.module}/kubeconfig-template.yaml")}"
+
+  vars = {
+    cluster_name    = "${google_container_cluster.gke_cluster.name}"
+    user_name       = "${google_container_cluster.gke_cluster.master_auth.0.username}"
+    user_password   = "${google_container_cluster.gke_cluster.master_auth.0.password}"
+    endpoint        = "${google_container_cluster.gke_cluster.endpoint}"
+    cluster_ca      = "${google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate}"
+    client_cert     = "${google_container_cluster.gke_cluster.master_auth.0.client_certificate}"
+    client_cert_key = "${google_container_cluster.gke_cluster.master_auth.0.client_key}"
+  }
+}
+
+resource "null_resource" "startup" {
   provisioner "local-exec" {
     command = "./script.sh"
     environment = {
-      CA_CERTIFICATE = base64decode(google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate)
-      K8S_SERVER     = "https://${google_container_cluster.gke_cluster.endpoint}"
-      K8S_USERNAME   = local.user
-      K8S_PASSWORD   = local.password
+      KUBECONFIG = "${local_file.kubeconfig.filename}"
       ISTIO_VERSION  = "1.2.0"
     }
   }
 }
 
-resource "kubernetes_service" "citadel" {
-  metadata {
-    name = "prometheus-citadel"
-    namespace = "istio-system"
-  }
-  spec {
-    selector = {
-      istio = "citadel"
-    }
-    port {
-      port        = 80
-      target_port = 15014
-    }
-
-    type = "LoadBalancer"
-  }
-}
-
-resource "kubernetes_service" "galley" {
-  metadata {
-    name = "prometheus-galley"
-    namespace = "istio-system"
-  }
-  spec {
-    selector = {
-      istio = "galley"
-    }
-    port {
-      port        = 80
-      target_port = 15014
-    }
-
-    type = "LoadBalancer"
-  }
-}
-
-resource "kubernetes_service" "mesh" {
-  metadata {
-    name = "prometheus-mesh"
-    namespace = "istio-system"
-  }
-  spec {
-    selector = {
-      app = "telemetry"
-    }
-    port {
-      port        = 80
-      target_port = 42422
-    }
-
-    type = "LoadBalancer"
-  }
-}
-
-resource "kubernetes_service" "mixer" {
-  metadata {
-    name = "prometheus-mixer"
-    namespace = "istio-system"
-  }
-  spec {
-    selector = {
-      app = "telemetry"
-    }
-    port {
-      port        = 80
-      target_port = 15014
-    }
-
-    type = "LoadBalancer"
-  }
-}
-
-resource "kubernetes_service" "pilot" {
-  metadata {
-    name = "prometheus-pilot"
-    namespace = "istio-system"
-  }
-  spec {
-    selector = {
-      istio = "pilot"
-    }
-    port {
-      port        = 80
-      target_port = 15014
-    }
-
-    type = "LoadBalancer"
-  }
-}
-
-output "citadel-ip" {
-  value = kubernetes_service.citadel.load_balancer_ingress.0.ip
-}
-
-output "galley-ip" {
-  value = kubernetes_service.galley.load_balancer_ingress.0.ip
-}
-
-output "mesh-ip" {
-  value = kubernetes_service.mesh.load_balancer_ingress.0.ip
-}
-
-output "mixer-ip" {
-  value = kubernetes_service.mixer.load_balancer_ingress.0.ip
-}
-
-output "pilot-ip" {
-  value = kubernetes_service.pilot.load_balancer_ingress.0.ip
+output "kubeconfig" {
+  value = "${local_file.kubeconfig.filename}"
 }
