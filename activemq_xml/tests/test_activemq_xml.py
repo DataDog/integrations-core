@@ -13,7 +13,7 @@ def test_check(aggregator):
     """
     Collect ActiveMQ metrics
     """
-    check = ActiveMQXML(CHECK_NAME, {}, {})
+    check = ActiveMQXML(CHECK_NAME, {}, [CONFIG])
     check.check(CONFIG)
 
     tags = ["url:{}".format(URL)]
