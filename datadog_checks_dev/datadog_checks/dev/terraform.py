@@ -25,9 +25,10 @@ def construct_env_vars():
     # on Windows since it passes down variables using the case-insensitive os.environ.
     env = dict(os.environ)
     for key in list(env):
-        if key.lower() == 'tf_var_account_json':
-            location = env.pop(key)
-            env['TF_VAR_account_json'] = location
+        _, prefix, variable = key.lower().partition('tf_var_')
+        if prefix:
+            value = env.pop(key)
+            env['TF_VAR_{}'.format(variable)] = value
 
     return env
 
