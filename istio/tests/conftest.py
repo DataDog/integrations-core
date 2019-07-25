@@ -6,6 +6,7 @@ import os
 import pytest
 import requests
 
+from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.terraform import terraform_run
 from datadog_checks.dev.utils import get_here
@@ -43,7 +44,10 @@ def dd_environment():
                 'mixer_endpoint': 'http://localhost:{}/metrics'.format(ports[3]),
                 'istio_mesh_endpoint': 'http://localhost:{}/metrics'.format(ports[4]),
             }
+            page = 'http://localhost:{}/productpage'.format(ports[5])
+            # Check a bit to make sure it's available
+            CheckEndpoints([page], wait=5)()
             for _ in range(5):
                 # Generate some traffic
-                requests.get('http://localhost:{}/productpage'.format(ports[5]))
+                requests.get(page)
             yield instance
