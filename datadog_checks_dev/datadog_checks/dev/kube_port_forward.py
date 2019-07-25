@@ -13,10 +13,14 @@ from .structures import LazyFunction, TempDir
 PID_FILE = 'kubectl.pid'
 
 
+def _build_temp_key(namespace, deployment, remote_port):
+    return 'kube_forward_{}_{}_{}'.format(namespace.replace('-', '_'), deployment.replace('-', '_'), remote_port)
+
+
 @contextmanager
 def port_forward(kubeconfig, namespace, deployment, remote_port):
     set_up = PortForwardUp(kubeconfig, namespace, deployment, remote_port)
-    key = 'kube_forward_{}_{}'.format(namespace, deployment)
+    key = _build_temp_key(namespace, deployment, remote_port)
     tear_down = KillProcess(key, PID_FILE)
 
     with environment_run(up=set_up, down=tear_down) as result:
@@ -31,7 +35,7 @@ class PortForwardUp(LazyFunction):
         self.remote_port = remote_port
 
     def __call__(self):
-        key = 'kube_forward_{}_{}'.format(self.namespace, self.deployment)
+        key = _build_temp_key(self.namespace, self.deployment, self.remote_port)
         with TempDir(key) as temp_dir:
             local_port = find_free_port()
             command = [
