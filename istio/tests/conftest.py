@@ -33,18 +33,18 @@ def dd_environment():
     with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
         kubeconfig = outputs['kubeconfig']['value']
         with ExitStack() as stack:
-            ports = [
+            ip_ports = [
                 stack.enter_context(port_forward(kubeconfig, 'istio-system', deployment, port))
                 for (deployment, port) in DEPLOYMENTS
             ]
             instance = {
-                'citadel_endpoint': 'http://localhost:{}/metrics'.format(ports[0]),
-                'galley_endpoint': 'http://localhost:{}/metrics'.format(ports[1]),
-                'pilot_endpoint': 'http://localhost:{}/metrics'.format(ports[2]),
-                'mixer_endpoint': 'http://localhost:{}/metrics'.format(ports[3]),
-                'istio_mesh_endpoint': 'http://localhost:{}/metrics'.format(ports[4]),
+                'citadel_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
+                'galley_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
+                'pilot_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[2]),
+                'mixer_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[3]),
+                'istio_mesh_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[4]),
             }
-            page = 'http://localhost:{}/productpage'.format(ports[5])
+            page = 'http://{}:{}/productpage'.format(*ip_ports[5])
             # Check a bit to make sure it's available
             CheckEndpoints([page], wait=5)()
             for _ in range(5):
