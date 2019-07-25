@@ -69,7 +69,7 @@ SQUID_COUNTERS = [
 
 
 class SquidCheck(AgentCheck):
-    HTTP_CONFIG_REMAPPER = {'cachemgr_user': {'name': 'username'}, 'cachemgr_passwd': {'name': 'password'}}
+    HTTP_CONFIG_REMAPPER = {'cachemgr_username': {'name': 'username'}, 'cachemgr_password': {'name': 'password'}}
 
     def check(self, instance):
 
