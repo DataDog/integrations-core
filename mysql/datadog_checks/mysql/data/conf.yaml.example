@@ -166,11 +166,11 @@ instances:
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
-#   - type: file
-#     path: /var/log/mysql/mysql_error.log
-#     source: mysql
-#     sourcecategory: database
-#     service: <SERVICE_NAME>
+#  - type: file
+#    path: /var/log/mysql/mysql_error.log
+#    source: mysql
+#    sourcecategory: database
+#    service: <SERVICE_NAME>
 #
 #  - type: file
 #    path: /var/log/mysql/mysql-slow.log
