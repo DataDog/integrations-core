@@ -15,17 +15,15 @@ from . import common
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator, check, instance):
     check.check(instance)
-    _assert_all_metrics(aggregator)
+    for metric in common.EXPECTED_METRICS:
+        aggregator.assert_metric(metric)
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
-    _assert_all_metrics(aggregator)
-
-
-def _assert_all_metrics(aggregator):
-    for metric in common.EXPECTED_METRICS:
-        aggregator.assert_metric(metric)
-
+    aggregator.assert_metric('cacti.rrd.count', value=5)
+    aggregator.assert_metric('cacti.hosts.count', value=1)
+    aggregator.assert_metric('cacti.metrics.count')
     aggregator.assert_all_metrics_covered()

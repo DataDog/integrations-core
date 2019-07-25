@@ -15,21 +15,17 @@ from datadog_checks.dev.structures import TempDir
 from .common import E2E_METADATA, HERE, HOST, INSTANCE_INTEGRATION, RRD_PATH
 
 
-def create_db_user():
+def set_up_cacti():
     client = docker.client.from_env()
     container = client.containers.get("dd-test-cacti")
     if not container:
         raise Exception("Could not find container")
 
-    commands = [
-        "CREATE USER 'cactiuser'@'localhost' IDENTIFIED BY 'cactipass';",
-        "GRANT ALL PRIVILEGES ON *.* TO 'cactiuser'@'localhost' WITH GRANT OPTION;",
-        "CREATE USER 'cactiuser'@'%' IDENTIFIED BY 'cactipass';"
-        "GRANT ALL PRIVILEGES ON *.* TO 'cactiuser'@'%' WITH GRANT OPTION;",
-    ]
-
+    commands = ['/sbin/restore', 'mysql -u root -e "flush privileges;"', 'php /opt/cacti/lib/poller.php --force']
     for command in commands:
-        code, out = container.exec_run('mysql -u root -D cacti -e "{}"'.format(command))
+        code, out = container.exec_run(command)
+        print(command)
+        print(out)
         if code != 0:
             raise Exception(out)
     return True
@@ -42,7 +38,7 @@ def dd_environment():
         e2e_metadata['docker_volumes'] = ['{}:{}'.format(rrd_path, RRD_PATH)]
 
         with docker_run(
-            conditions=[WaitFor(create_db_user)],
+            conditions=[WaitFor(set_up_cacti)],
             compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
             env_vars={'HOST': HOST, 'RRD_PATH': rrd_path},
         ):
