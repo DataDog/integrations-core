@@ -3,8 +3,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-import requests
 from collections import defaultdict
+
+import requests
 
 from datadog_checks.checks import AgentCheck
 
