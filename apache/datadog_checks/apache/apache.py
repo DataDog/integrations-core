@@ -8,11 +8,6 @@ from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base import AgentCheck, is_affirmative
 
-try:
-    from util import headers
-except ImportError:
-    from datadog_checks.utils.headers import headers
-
 
 class Apache(AgentCheck):
     """Tracks basic connection/requests/workers metrics
@@ -38,7 +33,7 @@ class Apache(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'apache_user': {'name': 'username'},
         'apache_password': {'name': 'password'},
-        'disable_ssl_validation': {'name': 'tls_verify'},
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True},
     }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
