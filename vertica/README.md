@@ -20,6 +20,28 @@ Additionally, as the metrics for current license usage use the values from the m
 
 2. [Restart the Agent][agent restart].
 
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+```
+logs_enabled: true
+```
+
+2. Add this configuration block to your `vertica.d/conf.yaml` file to start collecting your Vertica logs:
+
+```
+logs:
+  - source: vertica
+    type: file
+    path: /catalog-path/database-name/node-name_catalog/vertica.log
+    service: vertica
+```
+
+3. [Restart the Agent][agent restart].
+
 ### Validation
 
 [Run the Agent's status subcommand][agent status] and look for `vertica` under the Checks section.
