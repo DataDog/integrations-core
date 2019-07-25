@@ -41,7 +41,7 @@ def dd_environment():
             conditions=[WaitFor(set_up_cacti)],
             compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
             env_vars={'HOST': HOST, 'RRD_PATH': rrd_path},
-            build=True
+            build=True,
         ):
             yield INSTANCE_INTEGRATION, e2e_metadata
 
