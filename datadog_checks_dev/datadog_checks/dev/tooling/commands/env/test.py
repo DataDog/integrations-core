@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
+from ...e2e import get_configured_envs
 from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import get_tox_envs
 from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
@@ -62,6 +63,8 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
             echo_warning('No end-to-end environments found for `{}`'.format(check))
             continue
 
+        config_envs = get_configured_envs(check)
+
         # For performance reasons we're generating what to test on the fly and therefore
         # need a way to tell if anything ran since we don't know anything upfront.
         tests_ran = True
@@ -71,6 +74,8 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
                 ctx.invoke(
                     start, check=check, env=env, agent=agent, python=python, dev=dev, base=base, env_vars=env_vars
                 )
+            elif env not in config_envs:
+                continue
 
             try:
                 ctx.invoke(test_command, checks=['{}:{}'.format(check, env)], e2e=True)
