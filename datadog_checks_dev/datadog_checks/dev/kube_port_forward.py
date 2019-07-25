@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from .env import environment_run
 from .ssh_tunnel import KillProcess, find_free_port, run_background_command
 from .structures import LazyFunction, TempDir
+from .utils import chdir
 
 PID_FILE = 'kubectl.pid'
 
@@ -37,16 +38,18 @@ class PortForwardUp(LazyFunction):
     def __call__(self):
         key = _build_temp_key(self.namespace, self.deployment, self.remote_port)
         with TempDir(key) as temp_dir:
-            local_port = find_free_port()
-            command = [
-                'kubectl',
-                'port-forward',
-                '--namespace',
-                self.namespace,
-                'deployment/{}'.format(self.deployment),
-                '{}:{}'.format(local_port, self.remote_port),
-            ]
-            env = os.environ.copy()
-            env['KUBECONFIG'] = self.kubeconfig
-            run_background_command(command, os.path.join(temp_dir, PID_FILE), env=env)
-            return local_port
+            # Run in the temp dir to put kube cache files there
+            with chdir(temp_dir):
+                local_port = find_free_port()
+                command = [
+                    'kubectl',
+                    'port-forward',
+                    '--namespace',
+                    self.namespace,
+                    'deployment/{}'.format(self.deployment),
+                    '{}:{}'.format(local_port, self.remote_port),
+                ]
+                env = os.environ.copy()
+                env['KUBECONFIG'] = self.kubeconfig
+                run_background_command(command, os.path.join(temp_dir, PID_FILE), env=env)
+                return local_port
