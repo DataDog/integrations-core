@@ -10,11 +10,11 @@ kubectl create ns istio-system || true
 kubectl label namespace default istio-injection=enabled
 
 # istio-init install
-helm install ./istio-$ISTIO_VERSION/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system --set prometheus.enabled=true --version $ISTIO_VERSION --wait
+helm install ./istio-$ISTIO_VERSION/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system --version $ISTIO_VERSION --wait
 kubectl wait jobs --all --for=condition=complete --namespace=istio-system --timeout=300s
 
 # istio install
-helm install ./istio-$ISTIO_VERSION/install/kubernetes/helm/istio --name istio --namespace istio-system --set prometheus.enabled=true --version $ISTIO_VERSION --wait
+helm install ./istio-$ISTIO_VERSION/install/kubernetes/helm/istio --name istio --namespace istio-system --version $ISTIO_VERSION --wait
 
 # Example application install
 kubectl apply -f ./istio-$ISTIO_VERSION/samples/bookinfo/platform/kube/bookinfo.yaml
