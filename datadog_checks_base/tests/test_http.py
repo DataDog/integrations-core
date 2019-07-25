@@ -66,7 +66,7 @@ class TestHeaders:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['headers'] is None
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0'}
 
     def test_config_headers(self):
         headers = OrderedDict((('key1', 'value1'), ('key2', 'value2')))
@@ -82,6 +82,23 @@ class TestHeaders:
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['headers'] == {'answer': '42'}
+
+    def test_config_extra_headers(self):
+        headers = OrderedDict((('key1', 'value1'), ('key2', 'value2')))
+        instance = {'extra_headers': headers}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        complete_headers = OrderedDict({'User-Agent': 'Datadog Agent/0.0.0'})
+        complete_headers.update(headers)
+        assert list(iteritems(http.options['headers'])) == list(iteritems(complete_headers))
+
+    def test_config_extra_headers_string_values(self):
+        instance = {'extra_headers': {'answer': 42}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
 
 
 class TestVerify:
