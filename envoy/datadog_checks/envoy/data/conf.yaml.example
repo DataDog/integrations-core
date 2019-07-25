@@ -154,7 +154,7 @@ instances:
     # kerberos_hostname: null
 
     ## @param kerberos_principal - string - optional
-    ## Set an explicit principal, to force Kerberos to look for a matching credential cache for the named user.
+    ## Set an explicit principal to force Kerberos to look for a matching credential cache for the named user.
     ## See https://github.com/requests/requests-kerberos#explicit-principal
     #
     # kerberos_principal: null
