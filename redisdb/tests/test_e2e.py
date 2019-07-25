@@ -1,14 +1,16 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import pytest
 import os
+
+import pytest
 
 from datadog_checks.redisdb import Redis
 
 from . import common
 
 pytestmark = pytest.mark.e2e
+
 
 def assert_core(aggregator):
     tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
