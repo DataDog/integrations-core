@@ -16,7 +16,6 @@ from six import PY3, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
-from ..utils.agent.debug import enter_pdb
 from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
@@ -498,7 +497,16 @@ class __AgentCheck(object):
             instance = copy.deepcopy(self.instances[0])
 
             if 'set_breakpoint' in self.init_config:
+                from ..utils.agent.debug import enter_pdb
+
                 enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
+            elif 'profile_memory' in self.init_config:
+                from ..utils.agent.memory import TRACE_LOCK, profile_memory
+
+                with TRACE_LOCK:
+                    profile_memory(
+                        self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
+                    )
             else:
                 self.check(instance)
 
