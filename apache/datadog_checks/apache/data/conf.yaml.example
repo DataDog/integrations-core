@@ -33,9 +33,9 @@ instances:
     #
   - apache_status_url: http://localhost/server-status?auto
 
-    ## @param apache_user - string - optional
+    ## @param username - string - optional
     ## Username for the Apache status endpoint authentication.
-    #
+    ##
     ## The username to use if services are behind basic auth.
     #
     # username: <USERNAME>
