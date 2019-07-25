@@ -23,6 +23,15 @@ class Vault(AgentCheck):
     SERVICE_CHECK_UNSEALED = 'vault.unsealed'
     SERVICE_CHECK_INITIALIZED = 'vault.initialized'
 
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_verify': {'name': 'tls_verify'},
+        'ssl_cert': {'name': 'tls_cert'},
+        'ssl_private_key': {'name': 'tls_private_key'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
+        'ssl_ignore_warning': {'name': 'tls_ignore_warning'},
+        'timeout': {'name': 'timeout', 'default': 20},
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(Vault, self).__init__(name, init_config, agentConfig, instances)
         self.api_versions = {
