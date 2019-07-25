@@ -3,7 +3,7 @@ init_config:
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
-    ## The SOCKS protocol is also supported like so:
+    ## The SOCKS protocol is also supported:
     ##
     ## socks5://user:pass@host:port
     ##
@@ -75,11 +75,11 @@ instances:
     #
     # connect_timeout: <VALUE_IN_SECOND>
 
-    ## @param receive_timeout - integer - optional
+    ## @param read_timeout - integer - optional
     ## Overrides the default received timeout value, and fails the check if the time to receive
     ## the server status from the Apache server exceeds the receive_timeout value (in seconds)
     #
-    # receive_timeout: <VALUE_IN_SECOND>
+    # read_timeout: <VALUE_IN_SECOND>
 
     ## @param proxy - object - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -87,7 +87,7 @@ instances:
     ## Set HTTP or HTTPS proxies. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
-    ## The SOCKS protocol is also supported like so:
+    ## The SOCKS protocol is also supported:
     ##
     ## socks5://user:pass@host:port
     ##
@@ -104,7 +104,7 @@ instances:
     #     - <HOSTNAME_1>
     #     - <HOSTNAME_2>
 
-     ## @param skip_proxy - boolean - optional - default: false
+    ## @param skip_proxy - boolean - optional - default: false
     ## This overrides the `skip_proxy` setting in `init_config`.
     ##
     ## If set to `true`, this makes the check bypass any proxy
@@ -131,14 +131,14 @@ instances:
 
     ## @param kerberos_force_initiate - boolean - optional - default: false
     ## Set to `true` to preemptively initiate the Kerberos GSS exchange and present a Kerberos ticket on the initial
-    ## request (and all subsequent).
+    ## request (and all subsequent requests).
     ## See https://github.com/requests/requests-kerberos#preemptive-authentication
     #
     # kerberos_force_initiate: false
 
     ## @param kerberos_hostname - string - optional
     ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't match its kerberos
-    ## hostname (eg, behind a content switch or load balancer).
+    ## hostname (e.g., behind a content switch or load balancer).
     ## See https://github.com/requests/requests-kerberos#hostname-override
     #
     # kerberos_hostname: null
@@ -161,7 +161,7 @@ instances:
 
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
-    ## Disable those by setting `tls_ignore_warning` to true.
+    ## Disable these by setting `tls_ignore_warning` to true.
     #
     # tls_ignore_warning: false
 
