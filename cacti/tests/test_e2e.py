@@ -6,18 +6,8 @@ import pytest
 from . import common
 
 #
-# To get the rrd metrics, once the dd environment is up go to localhost:8080/cacti and go through the
-# setup wizard
+# You can access cacti in localhost:8080/cacti and log in with admin/Admin23@
 #
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
-    check.check(instance)
-    for metric in common.EXPECTED_METRICS:
-        aggregator.assert_metric(metric)
-    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.e2e
