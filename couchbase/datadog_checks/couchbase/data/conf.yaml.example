@@ -114,7 +114,7 @@ instances:
     # kerberos_force_initiate: false
 
     ## @param kerberos_hostname - string - optional
-    ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't match its kerberos
+    ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't match its kerberos.
     ## hostname (eg, behind a content switch or load balancer).
     ## See https://github.com/requests/requests-kerberos#hostname-override
     #
