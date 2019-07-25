@@ -7,24 +7,25 @@ import os
 from contextlib import contextmanager
 
 from .env import environment_run
-from .ssh_tunnel import KillProcess, find_free_port, get_ip, run_background_command
+from .ssh_tunnel import KillProcess, find_free_port, run_background_command
 from .structures import LazyFunction, TempDir
 
 PID_FILE = 'kubectl.pid'
 
 
 @contextmanager
-def port_forward(namespace, deployment, remote_port):
-    set_up = PortForwardUp(namespace, deployment, remote_port)
+def port_forward(kubeconfig, namespace, deployment, remote_port):
+    set_up = PortForwardUp(kubeconfig, namespace, deployment, remote_port)
     key = 'kube_forward_{}_{}'.format(namespace, deployment)
-    tear_down = KillProcess(key, 'kubectl.pid')
+    tear_down = KillProcess(key, PID_FILE)
 
     with environment_run(up=set_up, down=tear_down) as result:
         yield result
 
 
 class PortForwardUp(LazyFunction):
-    def __init__(self, namespace, deployment, remote_port):
+    def __init__(self, kubeconfig, namespace, deployment, remote_port):
+        self.kubeconfig = kubeconfig
         self.namespace = namespace
         self.deployment = deployment
         self.remote_port = remote_port
@@ -41,5 +42,7 @@ class PortForwardUp(LazyFunction):
                 'deployment/{}'.format(self.deployment),
                 '{}:{}'.format(local_port, self.remote_port),
             ]
-            run_background_command(command, os.path.join(temp_dir, PID_FILE))
-            return get_ip(), local_port
+            env = os.environ.copy()
+            env['KUBECONFIG'] = self.kubeconfig
+            run_background_command(command, os.path.join(temp_dir, PID_FILE), env=env)
+            return local_port

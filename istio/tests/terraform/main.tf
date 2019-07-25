@@ -49,7 +49,7 @@ resource "google_container_cluster" "gke_cluster" {
     ignore_changes = ["node_pool"]
   }
 
-  initial_node_count = 2
+  initial_node_count = 4
 
   master_auth {
     username = local.user
@@ -94,5 +94,5 @@ resource "null_resource" "startup" {
 }
 
 output "kubeconfig" {
-  value = "${local_file.kubeconfig.filename}"
+  value = abspath("${local_file.kubeconfig.filename}")
 }

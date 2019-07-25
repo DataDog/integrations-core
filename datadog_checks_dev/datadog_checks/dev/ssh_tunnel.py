@@ -36,11 +36,11 @@ def get_ip():
         return s.getsockname()[0]
 
 
-def run_background_command(command, pid_filename):
+def run_background_command(command, pid_filename, env=None):
     if ON_WINDOWS:
         process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
     else:
-        process = subprocess.Popen(command, start_new_session=True)
+        process = subprocess.Popen(command, env=env, start_new_session=True)
     with open(pid_filename, 'w') as pid_file:
         pid_file.write(str(process.pid))
 
