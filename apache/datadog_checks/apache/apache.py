@@ -45,9 +45,6 @@ class Apache(AgentCheck):
             raise Exception("Missing 'apache_status_url' in Apache config")
 
         url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
-        # TODO: these will be covered by remapper
-        connect_timeout = int(instance.get('connect_timeout', 5))
-        receive_timeout = int(instance.get('receive_timeout', 15))
         tags = instance.get('tags', [])
 
         # Submit a service check for status page availability.
@@ -58,7 +55,8 @@ class Apache(AgentCheck):
         service_check_tags = ['host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
             self.log.debug(
-                'apache check initiating request, connect timeout %d receive %d' % (connect_timeout, receive_timeout)
+                'apache check initiating request, connect timeout %d receive %d' %
+                (self.http.options['timeout'][0], self.http.options['timeout'][1])
             )
             with warnings.catch_warnings():
                 if is_affirmative(instance.get('tls_ignore_warning', False)):
