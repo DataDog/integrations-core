@@ -100,10 +100,10 @@ class DockerInterface(object):
         log_level=None,
         as_json=False,
         break_point=None,
-        jmx_list='matching',
+        jmx_list=None,
     ):
         # JMX check
-        if self.metadata.get('use_jmx', False):
+        if jmx_list:
             command = '{} jmx list {}'.format(self.agent_command, jmx_list)
         # Classic check
         else:

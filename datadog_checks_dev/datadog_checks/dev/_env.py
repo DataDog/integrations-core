@@ -75,9 +75,9 @@ def replay_check_run(agent_collector, stub_aggregator):
     errors = []
     for collector in agent_collector:
         aggregator = collector['aggregator']
-        runner = collector['runner']
-        check_id = runner['CheckID']
-        check_name = runner['CheckName']
+        runner = collector.get('runner', {})
+        check_id = runner.get('CheckID', '')
+        check_name = runner.get('CheckName', '')
 
         for data in aggregator.get('metrics', []):
             for _, value in data['points']:
@@ -99,7 +99,7 @@ def replay_check_run(agent_collector, stub_aggregator):
                 check_name, check_id, data['check'], data['status'], data['tags'], data['host_name'], data['message']
             )
 
-        if runner['LastError']:
+        if runner.get('LastError'):
             errors.extend(json.loads(runner['LastError']))
     if errors:
         raise Exception("\n".join("Message: {}\n{}".format(err['message'], err['traceback']) for err in errors))
