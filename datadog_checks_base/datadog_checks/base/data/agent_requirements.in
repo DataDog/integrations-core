@@ -18,7 +18,7 @@ httplib2==0.10.3
 in-toto==0.3.0
 ipaddress==1.0.22; python_version < '3.0'
 jaydebeapi==1.1.1
-jpype1==0.6.3
+jpype1==0.7.0
 kafka-python==1.4.4; sys_platform != 'win32'
 kazoo==2.6.0; sys_platform != 'win32'
 kubernetes==8.0.1
