@@ -4,6 +4,7 @@
 import os
 from contextlib import contextmanager
 
+import docker
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
@@ -39,6 +40,22 @@ def compose_file_active(compose_file):
             return len(lines[i:]) >= 1
 
     return False
+
+
+def run_in_container(container_name, command):
+    """Runs a command in the given container. This is useful for WaitFor conditions in `docker_run`
+
+    :param container_name: The name of the container
+    :param command: Command line to run in the container
+    """
+    client = docker.client.from_env()
+    container = client.containers.get(container_name)
+    if not container:
+        raise Exception("Could not find container {}".format(container_name))
+    code, out = container.exec_run(command)
+    if code != 0:
+        raise Exception(out)
+    return code, out
 
 
 @contextmanager
