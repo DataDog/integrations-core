@@ -4,7 +4,7 @@
 import os
 from contextlib import contextmanager
 
-import docker
+from docker import client as docker_client
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
@@ -48,7 +48,7 @@ def run_in_container(container_name, command):
     :param container_name: The name of the container
     :param command: Command line to run in the container
     """
-    client = docker.client.from_env()
+    client = docker_client.from_env()
     container = client.containers.get(container_name)
     if not container:
         raise Exception("Could not find container {}".format(container_name))
