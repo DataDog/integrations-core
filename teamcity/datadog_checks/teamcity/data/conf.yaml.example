@@ -84,7 +84,7 @@ instances:
 
     ## @param read_timeout - integer - optional
     ## Overrides the default received timeout value, and fails the check if the time to receive
-    ## the server status from the Apache server exceeds the receive_timeout value (in seconds)
+    ## the server status from the server exceeds the read_timeout value (in seconds)
     #
     # read_timeout: <VALUE_IN_SECOND>
 
