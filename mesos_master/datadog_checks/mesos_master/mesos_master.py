@@ -182,11 +182,15 @@ class MesosMaster(AgentCheck):
             # Mesos version >= 0.25
             endpoint = url + '/state'
             master_state = self._get_json(endpoint, timeout, verify=verify, failure_expected=True, tags=tags)
-        except CheckException as e:
-            self.log.warning('Encountered error getting state at {0}, message: {1}'.format(endpoint, str(e)))
+        except CheckException:
             # Mesos version < 0.25
-            endpoint = url + '/state.json'
-            master_state = self._get_json(endpoint, timeout, verify=verify, tags=tags)
+            old_endpoint = endpoint + '.json'
+            self.log.info(
+                'Unable to fetch state from {0}. Retrying with the deprecated endpoint: {1}.'.format(
+                    endpoint, old_endpoint
+                )
+            )
+            master_state = self._get_json(old_endpoint, timeout, verify=verify, tags=tags)
         return master_state
 
     def _get_master_stats(self, url, timeout, verify, tags):
