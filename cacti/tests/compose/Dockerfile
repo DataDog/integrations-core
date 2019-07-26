@@ -1,6 +1,6 @@
 FROM quantumobject/docker-cacti
 
-# username and password is is admin/Admin23@
+# username and password is admin/Admin23@
 COPY alldb_backup.sql /var/backups/
 COPY rra.tar.gz /var/backups/
 
