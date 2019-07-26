@@ -10,7 +10,6 @@ import pytest
 
 from datadog_checks.cacti import CactiCheck
 from datadog_checks.dev import WaitFor, docker_run
-from datadog_checks.dev.structures import TempDir
 
 from .common import E2E_METADATA, HERE, HOST, INSTANCE_INTEGRATION, RRD_PATH
 
