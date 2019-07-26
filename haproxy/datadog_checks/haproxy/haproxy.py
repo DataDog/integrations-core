@@ -10,13 +10,10 @@ import socket
 import time
 from collections import defaultdict
 
-import requests
 from six import PY2, iteritems
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, to_string
-from datadog_checks.config import _is_affirmative
-from datadog_checks.utils.headers import headers
+from datadog_checks.base import AgentCheck, is_affirmative, to_string
 
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
@@ -99,6 +96,11 @@ class HAProxy(AgentCheck):
 
     SERVICE_CHECK_NAME = 'haproxy.backend_up'
 
+    HTTP_CONFIG_REMAPPER = {
+        'headers': {'name': 'extra_headers'},
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True},
+    }
+
     def check(self, instance):
         url = instance.get('url')
         self.log.debug('Processing HAProxy data for %s' % url)
@@ -109,29 +111,20 @@ class HAProxy(AgentCheck):
             data = self._fetch_socket_data(parsed_url)
 
         else:
-            username = instance.get('username')
-            password = instance.get('password')
-            verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
-            custom_headers = instance.get('headers', {})
-
-            # Ensure string values
-            for key, value in custom_headers.items():
-                custom_headers[key] = str(value)
-
-            data = self._fetch_url_data(url, username, password, verify, custom_headers)
+            data = self._fetch_url_data(url)
 
         collect_aggregates_only = instance.get('collect_aggregates_only', True)
-        collect_status_metrics = _is_affirmative(instance.get('collect_status_metrics', False))
+        collect_status_metrics = is_affirmative(instance.get('collect_status_metrics', False))
 
-        collect_status_metrics_by_host = _is_affirmative(instance.get('collect_status_metrics_by_host', False))
+        collect_status_metrics_by_host = is_affirmative(instance.get('collect_status_metrics_by_host', False))
 
-        collate_status_tags_per_host = _is_affirmative(instance.get('collate_status_tags_per_host', False))
+        collate_status_tags_per_host = is_affirmative(instance.get('collate_status_tags_per_host', False))
 
-        count_status_by_service = _is_affirmative(instance.get('count_status_by_service', True))
+        count_status_by_service = is_affirmative(instance.get('count_status_by_service', True))
 
-        tag_service_check_by_host = _is_affirmative(instance.get('tag_service_check_by_host', False))
+        tag_service_check_by_host = is_affirmative(instance.get('tag_service_check_by_host', False))
 
-        enable_service_check = _is_affirmative(instance.get('enable_service_check', False))
+        enable_service_check = is_affirmative(instance.get('enable_service_check', False))
 
         services_incl_filter = instance.get('services_include', [])
         services_excl_filter = instance.get('services_exclude', [])
@@ -164,19 +157,14 @@ class HAProxy(AgentCheck):
             enable_service_check=enable_service_check,
         )
 
-    def _fetch_url_data(self, url, username, password, verify, custom_headers):
+    def _fetch_url_data(self, url):
         ''' Hit a given http url and return the stats lines '''
         # Try to fetch data from the stats URL
-
-        auth = (username, password)
         url = "%s%s" % (url, STATS_URL)
-        custom_headers.update(headers(self.agentConfig))
 
         self.log.debug("Fetching haproxy stats from url: %s" % url)
 
-        response = requests.get(
-            url, auth=auth, headers=custom_headers, verify=verify, timeout=self.default_integration_http_timeout
-        )
+        response = self.http.get(url)
         response.raise_for_status()
 
         # it only needs additional decoding in py3, so skip it if it's py2
@@ -432,7 +420,7 @@ class HAProxy(AgentCheck):
     def _should_process(self, data_dict, collect_aggregates_only):
         """if collect_aggregates_only, we process only the aggregates
         """
-        if _is_affirmative(collect_aggregates_only):
+        if is_affirmative(collect_aggregates_only):
             return self._is_aggregate(data_dict)
         elif str(collect_aggregates_only).lower() == 'both':
             return True
