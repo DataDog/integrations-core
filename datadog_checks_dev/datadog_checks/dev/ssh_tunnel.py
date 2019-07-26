@@ -12,7 +12,6 @@ from six import PY3
 
 from .env import environment_run
 from .structures import LazyFunction, TempDir
-from .subprocess import run_command
 from .utils import ON_WINDOWS
 
 if PY3:
