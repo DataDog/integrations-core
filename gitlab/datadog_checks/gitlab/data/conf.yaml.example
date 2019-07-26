@@ -136,10 +136,11 @@ init_config:
     #     - <HOSTNAME_1>
     #     - <HOSTNAME_2>
 
-     ## @param skip_proxy - boolean - optional - default: false
+    ## @param skip_proxy - boolean - optional - default: false
     ## If set to `true`, this makes the check bypass any proxy
     ## settings enabled and attempt to reach services directly.
     #
+    # skip_proxy: false
 
 instances:
 
