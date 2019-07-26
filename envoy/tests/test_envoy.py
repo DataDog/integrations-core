@@ -14,7 +14,7 @@ class TestEnvoy:
 
     def test_success(self, aggregator):
         instance = INSTANCES['main']
-        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+        c = Envoy(self.CHECK_NAME, {}, [instance])
         c.check(instance)
 
         metrics_collected = 0
@@ -25,7 +25,7 @@ class TestEnvoy:
 
     def test_success_fixture(self, aggregator):
         instance = INSTANCES['main']
-        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+        c = Envoy(self.CHECK_NAME, {}, [instance])
 
         with mock.patch('requests.get', return_value=response('multiple_services')):
             c.check(instance)
@@ -40,7 +40,7 @@ class TestEnvoy:
 
     def test_success_fixture_whitelist(self, aggregator):
         instance = INSTANCES['whitelist']
-        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+        c = Envoy(self.CHECK_NAME, {}, [instance])
 
         with mock.patch('requests.get', return_value=response('multiple_services')):
             c.check(instance)
@@ -50,7 +50,7 @@ class TestEnvoy:
 
     def test_success_fixture_blacklist(self, aggregator):
         instance = INSTANCES['blacklist']
-        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+        c = Envoy(self.CHECK_NAME, {}, [instance])
 
         with mock.patch('requests.get', return_value=response('multiple_services')):
             c.check(instance)
@@ -60,7 +60,7 @@ class TestEnvoy:
 
     def test_success_fixture_whitelist_blacklist(self, aggregator):
         instance = INSTANCES['whitelist_blacklist']
-        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+        c = Envoy(self.CHECK_NAME, {}, [instance])
 
         with mock.patch('requests.get', return_value=response('multiple_services')):
             c.check(instance)
@@ -70,7 +70,7 @@ class TestEnvoy:
 
     def test_service_check(self, aggregator):
         instance = INSTANCES['main']
-        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+        c = Envoy(self.CHECK_NAME, {}, [instance])
 
         with mock.patch('requests.get', return_value=response('multiple_services')):
             c.check(instance)
@@ -79,7 +79,7 @@ class TestEnvoy:
 
     def test_unknown(self):
         instance = INSTANCES['main']
-        c = Envoy(self.CHECK_NAME, None, {}, [instance])
+        c = Envoy(self.CHECK_NAME, {}, [instance])
 
         with mock.patch('requests.get', return_value=response('unknown_metrics')):
             c.check(instance)
