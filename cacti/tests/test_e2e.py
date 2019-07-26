@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from . import common
-
 #
 # You can access cacti in localhost:8080/cacti and log in with admin/Admin23@
 #

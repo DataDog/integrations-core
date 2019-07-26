@@ -2,10 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.dev import get_here
 
 HERE = get_here()
-HOST = get_docker_hostname()
 
 # ID
 CONTAINER_NAME = "dd-test-cacti"
@@ -20,13 +19,11 @@ INSTANCE_INTEGRATION = {
     'collect_task_metrics': True,
 }
 
-EXPECTED_METRICS = ['cacti.hosts.count', 'cacti.metrics.count', 'cacti.rrd.count']
 
 E2E_METADATA = {
     'start_commands': [
         'apt-get update',
         'apt-get install rrdtool librrd-dev libpython-dev build-essential -y',
-        '/opt/datadog-agent/embedded/bin/python -m pip install rrdtool',
-        '/opt/datadog-agent/embedded/bin/python3 -m pip install rrdtool',
+        'pip install rrdtool',
     ]
 }

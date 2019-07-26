@@ -11,7 +11,7 @@ import pytest
 from datadog_checks.cacti import CactiCheck
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 
-from .common import E2E_METADATA, HERE, HOST, INSTANCE_INTEGRATION, RRD_PATH
+from .common import E2E_METADATA, HERE, INSTANCE_INTEGRATION, RRD_PATH
 
 
 def set_up_cacti():
@@ -23,11 +23,8 @@ def set_up_cacti():
     commands = ['/sbin/restore', 'mysql -u root -e "flush privileges;"', 'php /opt/cacti/lib/poller.php --force']
     for command in commands:
         code, out = container.exec_run(command)
-        print(command)
-        print(out)
         if code != 0:
             raise Exception(out)
-    return True
 
 
 @pytest.fixture(scope="session")
@@ -39,7 +36,7 @@ def dd_environment():
         with docker_run(
             conditions=[WaitFor(set_up_cacti)],
             compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
-            env_vars={'HOST': HOST, 'RRD_PATH': rrd_path},
+            env_vars={'RRD_PATH': rrd_path},
             build=True,
         ):
             yield INSTANCE_INTEGRATION, e2e_metadata
