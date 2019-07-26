@@ -12,7 +12,7 @@ from . import common
 pytestmark = pytest.mark.e2e
 
 
-def assert_core(aggregator):
+def assert_common_metrics(aggregator):
     tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
 
     aggregator.assert_service_check('redis.can_connect', status=Redis.OK, tags=tags)
@@ -67,7 +67,7 @@ def assert_core(aggregator):
 def test_e2e_v_3_2(dd_agent_check, master_instance):
     aggregator = dd_agent_check(master_instance, rate=True)
 
-    assert_core(aggregator)
+    assert_common_metrics(aggregator)
 
     tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
     aggregator.assert_metric('redis.clients.biggest_input_buf', count=2, tags=tags)
@@ -80,7 +80,7 @@ def test_e2e_v_3_2(dd_agent_check, master_instance):
 def test_e2e_v_4_0(dd_agent_check, master_instance):
     aggregator = dd_agent_check(master_instance, rate=True)
 
-    assert_core(aggregator)
+    assert_common_metrics(aggregator)
 
     tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
     aggregator.assert_metric('redis.clients.biggest_input_buf', count=2, tags=tags)
@@ -95,7 +95,7 @@ def test_e2e_v_4_0(dd_agent_check, master_instance):
 def test_e2e_v_latest(dd_agent_check, master_instance):
     aggregator = dd_agent_check(master_instance, rate=True)
 
-    assert_core(aggregator)
+    assert_common_metrics(aggregator)
 
     tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
     aggregator.assert_metric('redis.mem.overhead', count=2, tags=tags)
