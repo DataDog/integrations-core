@@ -61,7 +61,7 @@ class KyotoTycoonCheck(AgentCheck):
             service_check_tags.append('instance:%s' % name)
 
         try:
-            r = requests.get(url)
+            r = self.http.get(url)
             r.raise_for_status()
         except requests.exceptions.HTTPError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))

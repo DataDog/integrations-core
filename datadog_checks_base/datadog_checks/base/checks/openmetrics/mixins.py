@@ -295,7 +295,12 @@ class OpenMetricsScraperMixin(object):
         Poll the data from prometheus and return the metrics as a generator.
         """
         response = self.poll(scraper_config)
-        self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, len(response.content), scraper_config)
+        if scraper_config['telemetry']:
+            if 'content-length' in response.headers:
+                content_len = int(response.headers['content-length'])
+            else:
+                content_len = len(response.content)
+            self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, content_len, scraper_config)
         try:
             # no dry run if no label joins
             if not scraper_config['label_joins']:

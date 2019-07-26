@@ -79,6 +79,9 @@ class LocalAgentInterface(object):
         return get_agent_exe(self.agent_version, platform=self.platform)
 
     def exec_command(self, command, **kwargs):
+        if command.startswith('pip '):
+            command = command.replace('pip ', get_pip_exe(self.python_version, self.platform), 1)
+
         return run_command(command, **kwargs)
 
     def write_config(self, config=None):

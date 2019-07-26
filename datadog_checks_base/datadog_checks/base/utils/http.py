@@ -5,7 +5,6 @@ import logging
 import os
 import threading
 import warnings
-from collections import OrderedDict
 from contextlib import contextmanager
 
 import requests
@@ -15,6 +14,7 @@ from urllib3.exceptions import InsecureRequestWarning
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
+from .headers import get_default_headers, update_headers
 
 try:
     from contextlib import ExitStack
@@ -32,7 +32,14 @@ requests_ntlm = None
 
 LOGGER = logging.getLogger(__file__)
 
+# The timeout should be slightly larger than a multiple of 3,
+# which is the default TCP packet retransmission window. See:
+# https://tools.ietf.org/html/rfc2988
+DEFAULT_TIMEOUT = 10
+
 STANDARD_FIELDS = {
+    'connect_timeout': None,
+    'extra_headers': None,
     'headers': None,
     'kerberos_auth': None,
     'kerberos_delegate': False,
@@ -45,13 +52,14 @@ STANDARD_FIELDS = {
     'password': None,
     'persist_connections': False,
     'proxy': None,
+    'read_timeout': None,
     'skip_proxy': False,
     'tls_ca_cert': None,
     'tls_cert': None,
     'tls_ignore_warning': False,
     'tls_private_key': None,
     'tls_verify': True,
-    'timeout': 10,
+    'timeout': DEFAULT_TIMEOUT,
     'username': None,
 }
 # For any known legacy fields that may be widespread
@@ -134,13 +142,22 @@ class RequestsWrapper(object):
             config[field] = value
 
         # http://docs.python-requests.org/en/master/user/advanced/#timeouts
-        timeout = float(config['timeout'])
+        connect_timeout = read_timeout = float(config['timeout'])
+        if config['connect_timeout'] is not None:
+            connect_timeout = float(config['connect_timeout'])
+
+        if config['read_timeout'] is not None:
+            read_timeout = float(config['read_timeout'])
 
         # http://docs.python-requests.org/en/master/user/quickstart/#custom-headers
         # http://docs.python-requests.org/en/master/user/advanced/#header-ordering
-        headers = None
+        headers = get_default_headers()
         if config['headers']:
-            headers = OrderedDict((key, str(value)) for key, value in iteritems(config['headers']))
+            headers.clear()
+            update_headers(headers, config['headers'])
+
+        if config['extra_headers']:
+            update_headers(headers, config['extra_headers'])
 
         # http://docs.python-requests.org/en/master/user/authentication/
         auth = None
@@ -223,7 +240,7 @@ class RequestsWrapper(object):
             'cert': cert,
             'headers': headers,
             'proxies': proxies,
-            'timeout': timeout,
+            'timeout': (connect_timeout, read_timeout),
             'verify': verify,
         }
 

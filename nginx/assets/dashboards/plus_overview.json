@@ -44,7 +44,7 @@
       "generated_title": "",
       "title_size": 16,
       "title": true,
-      "url": "/static/images/screenboard/integrations/nginx.png",
+      "url": "https://s3.amazonaws.com/dd-integrations/nginx/configuration/tile/logo.png",
       "margin": "",
       "title_align": "center",
       "title_text": "center",

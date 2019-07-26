@@ -79,6 +79,9 @@ class DockerInterface(object):
         if kwargs.pop('interactive', False):
             cmd += ' -it'
 
+        if command.startswith('pip '):
+            command = command.replace('pip ', get_pip_exe(self.python_version), 1)
+
         cmd += ' {}'.format(self.container_name)
         cmd += ' {}'.format(command)
 
@@ -200,6 +203,15 @@ class DockerInterface(object):
                 # Agent 6 will simply fail without an API key
                 '-e',
                 'DD_API_KEY={}'.format(self.api_key),
+                # Run expvar on a random port
+                '-e',
+                'DD_EXPVAR_PORT=0',
+                # Run API on a random port
+                '-e',
+                'DD_CMD_PORT=0',
+                # Disable trace agent
+                '-e',
+                'DD_APM_ENABLED=false',
                 # Mount the config directory, not the file, to ensure updates are propagated
                 # https://github.com/moby/moby/issues/15793#issuecomment-135411504
                 '-v',

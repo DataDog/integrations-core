@@ -17,6 +17,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
 from datadog_checks.dev import EnvVars
+from datadog_checks.dev.utils import running_on_appveyor
 
 pytestmark = pytest.mark.http
 
@@ -43,14 +44,21 @@ class TestTimeout:
         # Assert the timeout is slightly larger than a multiple of 3,
         # which is the default TCP packet retransmission window. See:
         # https://tools.ietf.org/html/rfc2988
-        assert 0 < http.options['timeout'] % 3 <= 1
+        assert 0 < http.options['timeout'][0] % 3 <= 1
 
     def test_config_timeout(self):
         instance = {'timeout': 24.5}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['timeout'] == 24.5
+        assert http.options['timeout'] == (24.5, 24.5)
+
+    def test_config_multiple_timeouts(self):
+        instance = {'read_timeout': 4, 'connect_timeout': 10}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['timeout'] == (10, 4)
 
 
 class TestHeaders:
@@ -59,7 +67,7 @@ class TestHeaders:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['headers'] is None
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0'}
 
     def test_config_headers(self):
         headers = OrderedDict((('key1', 'value1'), ('key2', 'value2')))
@@ -75,6 +83,23 @@ class TestHeaders:
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['headers'] == {'answer': '42'}
+
+    def test_config_extra_headers(self):
+        headers = OrderedDict((('key1', 'value1'), ('key2', 'value2')))
+        instance = {'extra_headers': headers}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        complete_headers = OrderedDict({'User-Agent': 'Datadog Agent/0.0.0'})
+        complete_headers.update(headers)
+        assert list(iteritems(http.options['headers'])) == list(iteritems(complete_headers))
+
+    def test_config_extra_headers_string_values(self):
+        instance = {'extra_headers': {'answer': 42}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
 
 
 class TestVerify:
@@ -423,6 +448,14 @@ class TestProxies:
 
         http.get('https://www.google.com')
 
+    @pytest.mark.skipif(running_on_appveyor(), reason="Cannot run on appveyor")
+    def test_socks5_proxy(self, socks5_proxy):
+        instance = {'proxy': {'http': 'socks5h://{}'.format(socks5_proxy)}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        http.get('http://www.google.com')
+        http.get('http://nginx')
+
 
 class TestIgnoreTLSWarning:
     def test_config_default(self):
@@ -517,7 +550,7 @@ class TestRemapper:
         remapper = {'prometheus_timeout': {'name': 'timeout'}}
         http = RequestsWrapper(instance, init_config, remapper)
 
-        assert http.options['timeout'] == STANDARD_FIELDS['timeout']
+        assert http.options['timeout'] == (STANDARD_FIELDS['timeout'], STANDARD_FIELDS['timeout'])
 
     def test_invert(self):
         instance = {'disable_ssl_validation': False}

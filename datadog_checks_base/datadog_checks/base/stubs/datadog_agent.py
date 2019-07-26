@@ -12,7 +12,11 @@ def log(*args, **kwargs):
 
 
 def get_config(*args, **kwargs):
-    return ""
+    return ''
+
+
+def get_version():
+    return '0.0.0'
 
 
 def warning(msg, *args, **kwargs):
