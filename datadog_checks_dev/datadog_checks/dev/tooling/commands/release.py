@@ -779,7 +779,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
     new_entry = StringIO()
 
     # the header contains version and date
-    header = '## {} / {}\n'.format(version, datetime.now().strftime('%Y-%m-%d'))
+    header = '## {} / {}\n'.format(version, datetime.utcnow().strftime('%Y-%m-%d'))
     new_entry.write(header)
 
     # one bullet point for each PR
