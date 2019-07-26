@@ -11,7 +11,7 @@ instances:
     ## Type of authentication to use to collect data from the Lighttpd server url.
     ## Available value are "basic", "digest".
     #
-    # auth: <AUTH_TYPE>
+    # auth_type: <AUTH_TYPE>
 
     ## @param user - string - optional
     ## Username for the Lighttpd status endpoint authentication.

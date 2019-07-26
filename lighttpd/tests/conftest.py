@@ -30,7 +30,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    check = Lighttpd('lighttpd', {}, {})
+    check = Lighttpd('lighttpd', {}, [common.INSTANCE])
     return check
 
 
