@@ -12,7 +12,6 @@ from six import iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
 from datadog_checks.errors import CheckException
 
 
@@ -135,21 +134,25 @@ class MesosMaster(AgentCheck):
         'master/valid_status_updates': ('mesos.cluster.valid_status_updates', GAUGE),
     }
 
+    HTTP_CONFIG_REMAPPER = {
+        'disable_ssl_validation': {'name': 'tls_verify'},
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         for instance in instances or []:
             url = instance.get('url', '')
             parsed_url = urlparse(url)
-            ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
-            if not ssl_verify and parsed_url.scheme == 'https':
-                self.log.warning('Skipping SSL cert validation for {0} based on configuration.'.format(url))
+            if not self.http.options['verify'] and parsed_url.scheme == 'https':
+                self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
 
-    def _get_json(self, url, timeout, verify=True, failure_expected=False, tags=None):
+    def _get_json(self, url, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
         msg = None
         status = None
+        timeout = self.http.options['timeout']
         try:
-            r = requests.get(url, timeout=timeout, verify=verify)
+            r = self.http.get(url)
             if r.status_code != 200:
                 status = AgentCheck.CRITICAL
                 msg = "Got %s when hitting %s" % (r.status_code, url)
@@ -183,11 +186,11 @@ class MesosMaster(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=message)
             self.service_check_needed = False
 
-    def _get_master_state(self, url, timeout, verify, tags):
+    def _get_master_state(self, url, tags):
         try:
             # Mesos version >= 0.25
             endpoint = url + '/state'
-            master_state = self._get_json(endpoint, timeout, verify=verify, failure_expected=True, tags=tags)
+            master_state = self._get_json(endpoint, failure_expected=True, tags=tags)
         except CheckException:
             # Mesos version < 0.25
             old_endpoint = endpoint + '.json'
@@ -196,25 +199,25 @@ class MesosMaster(AgentCheck):
                     endpoint, old_endpoint
                 )
             )
-            master_state = self._get_json(old_endpoint, timeout, verify=verify, tags=tags)
+            master_state = self._get_json(old_endpoint, tags=tags)
         return master_state
 
-    def _get_master_stats(self, url, timeout, verify, tags):
+    def _get_master_stats(self, url, tags):
         if self.version >= [0, 22, 0]:
             endpoint = url + '/metrics/snapshot'
         else:
             endpoint = url + '/stats.json'
-        return self._get_json(endpoint, timeout, verify, tags)
+        return self._get_json(endpoint, tags)
 
-    def _get_master_roles(self, url, timeout, verify, tags):
+    def _get_master_roles(self, url, tags):
         if self.version >= [1, 8, 0]:
             endpoint = url + '/roles'
         else:
             endpoint = url + '/roles.json'
-        return self._get_json(endpoint, timeout, verify, tags)
+        return self._get_json(endpoint, tags)
 
-    def _check_leadership(self, url, timeout, verify, tags=None):
-        state_metrics = self._get_master_state(url, timeout, verify, tags)
+    def _check_leadership(self, url, tags=None):
+        state_metrics = self._get_master_state(url, tags)
         self.leader = False
 
         if state_metrics is not None:
@@ -232,11 +235,8 @@ class MesosMaster(AgentCheck):
         instance_tags = instance.get('tags', [])
         if instance_tags is None:
             instance_tags = []
-        default_timeout = self.init_config.get('default_timeout', 5)
-        timeout = float(instance.get('timeout', default_timeout))
-        ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
 
-        state_metrics = self._check_leadership(url, timeout, ssl_verify, instance_tags)
+        state_metrics = self._check_leadership(url, instance_tags)
         if state_metrics:
             tags = ['mesos_pid:{0}'.format(state_metrics['pid']), 'mesos_node:master']
             if 'cluster' in state_metrics:
@@ -254,7 +254,7 @@ class MesosMaster(AgentCheck):
                     for key_name, (metric_name, metric_func) in iteritems(self.FRAMEWORK_METRICS):
                         metric_func(self, metric_name, resources[key_name], tags=framework_tags)
 
-                role_metrics = self._get_master_roles(url, timeout, ssl_verify, instance_tags)
+                role_metrics = self._get_master_roles(url, instance_tags)
                 if role_metrics is not None:
                     for role in role_metrics['roles']:
                         role_tags = ['mesos_role:' + role['name']] + tags
@@ -263,7 +263,7 @@ class MesosMaster(AgentCheck):
                         for key_name, (metric_name, metric_func) in iteritems(self.ROLE_RESOURCES_METRICS):
                             metric_func(self, metric_name, role['resources'][key_name], tags=role_tags)
 
-            stats_metrics = self._get_master_stats(url, timeout, ssl_verify, instance_tags)
+            stats_metrics = self._get_master_stats(url, instance_tags)
             if stats_metrics is not None:
                 metrics = [self.SYSTEM_METRICS]
                 if self.leader:
