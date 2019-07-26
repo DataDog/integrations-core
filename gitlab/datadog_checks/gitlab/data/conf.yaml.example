@@ -170,23 +170,21 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param apache_user - string - optional	    ## @param username - string - optional
-    ## Username for the Apache status endpoint authentication.	    ## Username for the Apache status endpoint authentication.
-    ##
+    ## @param username - string - optional
     ## The username to use if services are behind basic auth.
-    #	    #
-    # apache_user: <USERNAME>	    # username: <USERNAME>
+    #
+    # username: <USERNAME>
 
 
-     ## @param apache_password - string - optional	    ## @param ntlm_domain - string - optional
-    ## Password for the Apache status endpoint authentication.	    ## If your services uses NTLM authentication, you can
+    ## @param ntlm_domain - string - optional
+    ## If your services uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM Auth,
     ## append the username to domain, not as the `username` parameter.
     ## Example: <NTLM_DOMAIN>/<USERNAME>
-    #	    #
-    # apache_password: <PASSWORD>	    # ntlm_domain: <DOMAIN>
+    #
+    # ntlm_domain: <DOMAIN>
 
-     ## @param password - string - optional
+    ## @param password - string - optional
     ## The password to use if services are behind basic or NTLM auth.
     #
     # password: <PASSWORD>
@@ -200,7 +198,7 @@ instances:
 
     ## @param read_timeout - integer - optional
     ## Overrides the default received timeout value, and fails the check if the time to receive
-    ## the server status from the Apache server exceeds the read_timeout value (in seconds)
+    ## the server status from the server exceeds the read_timeout value (in seconds)
     #
     # read_timeout: <VALUE_IN_SECOND>
 
