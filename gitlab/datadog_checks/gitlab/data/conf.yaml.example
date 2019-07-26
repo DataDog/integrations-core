@@ -176,7 +176,6 @@ instances:
     #
     # username: <USERNAME>
 
-
     ## @param ntlm_domain - string - optional
     ## If your services uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM Auth,
