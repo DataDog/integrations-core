@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from decimal import ROUND_HALF_DOWN
-
 # (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+from decimal import ROUND_HALF_DOWN
+
 import pytest
 from six import PY3
 

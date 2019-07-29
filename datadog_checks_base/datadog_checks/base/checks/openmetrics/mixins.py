@@ -628,7 +628,7 @@ class OpenMetricsScraperMixin(object):
                     hostname=custom_hostname,
                 )
             else:
-                sample[self.SAMPLE_LABELS]["quantile"] = str(float(sample[self.SAMPLE_LABELS]["quantile"]))
+                sample[self.SAMPLE_LABELS]["quantile"] = float(sample[self.SAMPLE_LABELS]["quantile"])
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self.gauge(
                     "{}.{}.quantile".format(scraper_config['namespace'], metric_name),
@@ -670,7 +670,7 @@ class OpenMetricsScraperMixin(object):
                 and sample[self.SAMPLE_NAME].endswith("_bucket")
                 and "Inf" not in sample[self.SAMPLE_LABELS]["le"]
             ):
-                sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
+                sample[self.SAMPLE_LABELS]["le"] = float(sample[self.SAMPLE_LABELS]["le"])
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                 self.gauge(
                     "{}.{}.count".format(scraper_config['namespace'], metric_name),

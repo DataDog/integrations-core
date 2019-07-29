@@ -8,9 +8,14 @@ from decimal import ROUND_HALF_UP, Decimal
 from six import PY3
 from six.moves.urllib.parse import urlparse
 
+if PY3:
+    text_type = str
+else:
+    text_type = unicode  # noqa: F821
+
 
 def ensure_bytes(s):
-    if not isinstance(s, bytes):
+    if isinstance(s, text_type):
         s = s.encode('utf-8')
     return s
 
