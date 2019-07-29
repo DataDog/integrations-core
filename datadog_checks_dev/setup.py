@@ -23,7 +23,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 
 REQUIRES = [
     'coverage>=4.5.1',
-    'docker>=4.0.2',
+    'docker>=3.6.0',
     'mock',
     'PyYAML>=5.1',
     'pytest',
