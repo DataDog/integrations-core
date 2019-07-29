@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import absolute_import  # To be able to import docker client
+
 import os
 from contextlib import contextmanager
 
@@ -46,13 +48,14 @@ def run_in_container(container_name, command):
     """Runs a command in the given container. This is useful for WaitFor conditions in `docker_run`
 
     :param container_name: The name of the container
-    :param command: Command line to run in the container
+    :param command: command line to run in the container
     """
     client = docker_client.from_env()
     container = client.containers.get(container_name)
     if not container:
         raise Exception("Could not find container {}".format(container_name))
-    code, out = container.exec_run(command)
+    command_line = ' '.join(command) if isinstance(command, list) else command
+    code, out = container.exec_run(command_line)
     if code != 0:
         raise Exception(out)
     return code, out

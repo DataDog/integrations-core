@@ -88,7 +88,7 @@ def couchbase_setup():
         '--bucket-ramsize',
         '100',
     ]
-    run_in_container(CB_CONTAINER_NAME, ' '.join(command))
+    run_in_container(CB_CONTAINER_NAME, command)
 
 
 def couchbase_container():
@@ -121,7 +121,7 @@ def couchbase_init():
         '--cluster-fts-ramsize',
         '256',
     ]
-    run_in_container(CB_CONTAINER_NAME, ' '.join(command))
+    run_in_container(CB_CONTAINER_NAME, command)
 
     r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
     return r.status_code == requests.codes.ok
