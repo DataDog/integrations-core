@@ -10,6 +10,7 @@ IP_PREFIX=$(echo $IP | cut -d. -f 1,2,3)
 cat <<EOF | sudo tee -a local.conf
 [[local|localrc]]
 FIXED_RANGE=10.11.12.0/24
+HOST_IP=$IP
 FLOATING_RANGE=$IP_PREFIX.224/27
 LOGFILE=/opt/stack/logs/stack.sh.log
 ADMIN_PASSWORD=labstack
