@@ -134,9 +134,7 @@ class MesosMaster(AgentCheck):
         'master/valid_status_updates': ('mesos.cluster.valid_status_updates', GAUGE),
     }
 
-    HTTP_CONFIG_REMAPPER = {
-        'disable_ssl_validation': {'name': 'tls_verify'},
-    }
+    HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify'}}
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
