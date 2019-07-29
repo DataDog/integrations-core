@@ -8,7 +8,6 @@ import requests
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.headers import headers
 
 VERSION_REGEX = re.compile(r".*/(\d)")
 
@@ -60,9 +59,16 @@ class Lighttpd(AgentCheck):
 
     RATES = {b'Total kBytes': 'lighttpd.net.bytes_per_s', b'Total Accesses': 'lighttpd.net.request_per_s'}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}}
+
+    def __init__(self, name, init_config, instances=None):
+        AgentCheck.__init__(self, name, init_config, instances)
         self.assumed_url = {}
+
+        if instances is not None and 'auth_type' in instances[0]:
+            if instances[0]['auth_type'] == 'digest':
+                auth = self.http.options['auth']
+                self.http.options['auth'] = requests.auth.HTTPDigestAuth(auth[0], auth[1])
 
     def check(self, instance):
         if 'lighttpd_status_url' not in instance:
@@ -71,17 +77,9 @@ class Lighttpd(AgentCheck):
         url = self.assumed_url.get(instance['lighttpd_status_url'], instance['lighttpd_status_url'])
 
         tags = instance.get('tags', [])
-
-        auth = None
         auth_type = instance.get('auth_type', 'basic').lower()
 
-        if auth_type == 'basic':
-            if 'user' in instance and 'password' in instance:
-                auth = (instance['user'], instance['password'])
-        elif auth_type == 'digest':
-            if 'user' in instance and 'password' in instance:
-                auth = requests.auth.HTTPDigestAuth(instance['user'], instance['password'])
-        else:
+        if self.http.options['auth'] is None:
             msg = "Unsupported value of 'auth_type' variable in Lighttpd config: {}".format(auth_type)
             raise Exception(msg)
 
@@ -93,7 +91,7 @@ class Lighttpd(AgentCheck):
         lighttpd_port = parsed_url.port or 80
         service_check_tags = ['host:%s' % lighttpd_url, 'port:%s' % lighttpd_port] + tags
         try:
-            r = requests.get(url, auth=auth, headers=headers(self.agentConfig))
+            r = self.http.get(url)
             r.raise_for_status()
         except Exception:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
