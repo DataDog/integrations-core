@@ -5,6 +5,7 @@ import re
 from contextlib import contextmanager
 
 from datadog_checks.dev.docker import run_in_container
+
 from ...subprocess import run_command
 from ...utils import path_join
 from ..constants import get_root
