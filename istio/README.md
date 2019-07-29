@@ -14,7 +14,7 @@ Find below instructions to install and configure the check when running the Agen
 
 ### Installation
 
-Istio is included in the Datadog Agent. So, just [install the Agent][2] on your Istio servers or in your cluster and point it at Istio.
+Istio is included in the Datadog Agent. [Install the Datadog Agent][2] on your Istio servers or in your cluster and point it at Istio.
 
 ### Configuration
 
@@ -37,6 +37,8 @@ instances:
 Each of the endpoints is optional, but at least one must be configured. See the [Istio documentation][5] to learn more about the Prometheus adapter.
 
 #### Disable sidecar injection
+
+If you are installing the [Datadog Agent in a container][10], first disable Istio's sidecar injection.
 
 Add the `sidecar.istio.io/inject: "false"` annotation to the `datadog-agent` DaemonSet:
 
@@ -90,3 +92,4 @@ Additional helpful documentation, links, and articles:
 [7]: https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/monitor-istio-with-datadog
+[10]: https://docs.datadoghq.com/agent/kubernetes
