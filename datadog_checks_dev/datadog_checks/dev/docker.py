@@ -44,11 +44,12 @@ def compose_file_active(compose_file):
     return False
 
 
-def run_in_container(container_name, command):
+def run_in_container(container_name, command, check=True):
     """Runs a command in the given container. This is useful for WaitFor conditions in `docker_run`
 
     :param container_name: The name of the container
     :param command: command line to run in the container
+    :param check: Whether or not to raise an exception on non-zero exit codes.
     """
     client = docker_client.from_env()
     container = client.containers.get(container_name)
@@ -56,7 +57,7 @@ def run_in_container(container_name, command):
         raise Exception("Could not find container {}".format(container_name))
     command_line = ' '.join(command) if isinstance(command, list) else command
     code, out = container.exec_run(command_line)
-    if code != 0:
+    if check and code != 0:
         raise Exception(out)
     return code, out
 

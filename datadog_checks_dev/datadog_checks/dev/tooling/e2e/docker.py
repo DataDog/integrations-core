@@ -4,6 +4,7 @@
 import re
 from contextlib import contextmanager
 
+from datadog_checks.dev.docker import run_in_container
 from ...subprocess import run_command
 from ...utils import path_join
 from ..constants import get_root
@@ -169,16 +170,12 @@ class DockerInterface(object):
             self.metadata['agent_version'] = self.agent_version
 
     def update_check(self):
-        command = ['docker', 'exec', self.container_name]
-        command.extend(get_pip_exe(self.python_version))
-        command.extend(('install', '-e', self.check_mount_dir))
-        run_command(command, capture=True, check=True)
+        command = [get_pip_exe(self.python_version), 'install', '-e', self.check_mount_dir]
+        run_in_container(self.container_name, command, capture=True)
 
     def update_base_package(self):
-        command = ['docker', 'exec', self.container_name]
-        command.extend(get_pip_exe(self.python_version))
-        command.extend(('install', '-e', self.base_mount_dir))
-        run_command(command, capture=True, check=True)
+        command = [get_pip_exe(self.python_version), 'install', '-e', self.base_mount_dir]
+        run_in_container(self.container_name, command, capture=True)
 
     def update_agent(self):
         if self.agent_build:
