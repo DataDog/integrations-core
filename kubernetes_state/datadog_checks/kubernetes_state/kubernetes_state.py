@@ -35,6 +35,11 @@ class KubernetesState(OpenMetricsBaseCheck):
     See https://github.com/kubernetes/kube-state-metrics
     """
 
+    class JobCount():
+        def __init__(self):
+            self.count = 0
+            self.last_job_ts = 0
+
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -80,21 +85,20 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_service_spec_type': self.count_objects_by_tags,
         }
 
+        # Handling jobs succeeded/failed counts
+        self.failed_job_counts = defaultdict(KubernetesState.JobCount)
+        self.succeeded_job_counts = defaultdict(KubernetesState.JobCount)
+
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
-
-        # Job counters are monotonic: they increase at every run of the job
-        # We want to send the delta via the `monotonic_count` method
-        self.job_succeeded_count = defaultdict(int)
-        self.job_failed_count = defaultdict(int)
 
         scraper_config = self.config_map[endpoint]
         self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
 
-        for job_tags, job_count in iteritems(self.job_succeeded_count):
-            self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job_count, list(job_tags))
-        for job_tags, job_count in iteritems(self.job_failed_count):
-            self.monotonic_count(scraper_config['namespace'] + '.job.failed', job_count, list(job_tags))
+        for job_tags, job_count in iteritems(self.failed_job_counts):
+            self.monotonic_count(scraper_config['namespace'] + '.job.failed', job_count.count, list(job_tags))
+        for job_tags, job_count in iteritems(self.succeeded_job_counts):
+            self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job_count.count, list(job_tags))
 
     def _filter_metric(self, metric, scraper_config):
         if scraper_config['telemetry']:
@@ -398,6 +402,19 @@ class KubernetesState(OpenMetricsBaseCheck):
         pattern = r"(-\d{4,10}$)"
         return re.sub(pattern, '', name)
 
+    def _extract_job_timestamp(self, name):
+        """
+        Extract timestamp of job names if they match -(\\^.+\\-) - match everything until a `-`
+        """
+        pattern = r"(^.+\-)"
+        job_ts = 0
+        try:
+            job_ts = int(re.sub(pattern, '', name))
+        except ValueError:
+            msg = 'Cannot extract ts from job name {}'.format(name)
+            self.log.debug(msg)
+        return job_ts
+
     # Labels attached: namespace, pod
     # As a message the phase=Pending|Running|Succeeded|Failed|Unknown
     # From the phase the check will update its status
@@ -510,25 +527,35 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def kube_job_status_failed(self, metric, scraper_config):
         for sample in metric.samples:
+            job_ts = 0
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
+                    job_ts = self._extract_job_timestamp(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            self.job_failed_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
+            if job_ts != 0 and job_ts > self.failed_job_counts[frozenset(tags)].last_job_ts:
+                self.failed_job_counts[frozenset(tags)].count += sample[self.SAMPLE_VALUE]
+                self.failed_job_counts[frozenset(tags)].last_job_ts = job_ts
+            job_count=self.failed_job_counts[frozenset(tags)]
 
     def kube_job_status_succeeded(self, metric, scraper_config):
         for sample in metric.samples:
+            job_ts = 0
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
+                    job_ts = self._extract_job_timestamp(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            self.job_succeeded_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
+            if job_ts != 0 and job_ts > self.succeeded_job_counts[frozenset(tags)].last_job_ts:
+                self.succeeded_job_counts[frozenset(tags)].count += sample[self.SAMPLE_VALUE]
+                self.succeeded_job_counts[frozenset(tags)].last_job_ts = job_ts
+            job_count=self.succeeded_job_counts[frozenset(tags)]
 
     def kube_node_status_condition(self, metric, scraper_config):
         """ The ready status of a cluster node. v1.0+"""
