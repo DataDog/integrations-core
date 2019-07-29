@@ -32,8 +32,8 @@ def check():
 
 @pytest.fixture
 def check_mock(check):
-    check._get_stats = lambda v, x, y, z: json.loads(read_fixture('stats.json'))
-    check._get_state = lambda v, x, y, z: json.loads(read_fixture('state.json'))
+    check._get_stats = lambda v, x: json.loads(read_fixture('stats.json'))
+    check._get_state = lambda v, x: json.loads(read_fixture('state.json'))
 
     return check
 
