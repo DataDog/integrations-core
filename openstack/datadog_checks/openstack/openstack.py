@@ -1039,12 +1039,12 @@ class OpenStackCheck(AgentCheck):
         assert entry in ["aggregates", "physical_hosts", "hypervisors"]
         ttl = self.CACHE_TTL.get(entry)
         last_fetch_time = getattr(self, self.FETCH_TIME_ACCESSORS.get(entry))
-        return datetime.now() - last_fetch_time > timedelta(seconds=ttl)
+        return datetime.utcnow() - last_fetch_time > timedelta(seconds=ttl)
 
     def _get_and_set_aggregate_list(self):
         if not self._aggregate_list or self._is_expired("aggregates"):
             self._aggregate_list = self.get_all_aggregate_hypervisors()
-            self._last_aggregate_fetch_time = datetime.now()
+            self._last_aggregate_fetch_time = datetime.utcnow()
 
         return self._aggregate_list
 
