@@ -8,15 +8,29 @@ disable_warnings =
 omit =
     */test_bench.py
 
+    # Vendored dependencies
+    */datadog_checks/*/vendor/*
+
     # These are things that are simply stored in the base package
     ../datadog_checks_base/datadog_checks/base/checks/libs/*
     ../datadog_checks_base/datadog_checks/base/checks/win/*
 
-    # We will test repo tooling eventually
-    ../datadog_checks_dev/datadog_checks/dev/tooling/*
+    # Ignore any plugins
+    ../datadog_checks_dev/datadog_checks/dev/plugin/*
 
-    # Vendored dependencies
-    */datadog_checks/*/vendor/*
+    # We will test more repo tooling eventually
+    ../datadog_checks_dev/datadog_checks/dev/tooling/commands/*
+    ../datadog_checks_dev/datadog_checks/dev/tooling/config_validator/*
+    ../datadog_checks_dev/datadog_checks/dev/tooling/e2e/*
+    ../datadog_checks_dev/datadog_checks/dev/tooling/clean.py
+    ../datadog_checks_dev/datadog_checks/dev/tooling/cli.py
+    ../datadog_checks_dev/datadog_checks/dev/tooling/config.py
+    ../datadog_checks_dev/datadog_checks/dev/tooling/github.py
+    ../datadog_checks_dev/datadog_checks/dev/tooling/release.py
+    ../datadog_checks_dev/datadog_checks/dev/tooling/signing.py
+    ../datadog_checks_dev/datadog_checks/dev/tooling/testing.py
+    ../datadog_checks_dev/datadog_checks/dev/tooling/trello.py
+    ../datadog_checks_dev/datadog_checks/dev/tooling/utils.py
 
 [report]
 show_missing = ${DDEV_COV_MISSING}

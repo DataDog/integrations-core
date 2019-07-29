@@ -18,7 +18,7 @@ from ..utils import (
 )
 from .utils import normalize_package_name
 
-TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
 SIMPLE_NAME = r'^\w+$'
 
