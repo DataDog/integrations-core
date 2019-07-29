@@ -8,6 +8,7 @@ import pytest
 from six import PY3
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base import __version__ as base_package_version
 from datadog_checks.base.checks.base import datadog_agent
 
 
@@ -26,6 +27,12 @@ def test_instance():
     check = AgentCheck(init_config=init_config, instances=instances)
     assert check.init_config == {'foo': 'bar'}
     assert check.instances == [{'bar': 'baz'}]
+
+
+def test_check_version():
+    check = AgentCheck()
+
+    assert check.check_version == base_package_version
 
 
 def test_load_config():

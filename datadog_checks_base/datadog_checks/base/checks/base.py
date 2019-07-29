@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import importlib
 import inspect
 import json
 import logging
@@ -133,6 +134,9 @@ class __AgentCheck(object):
         # Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         self._http = None
 
+        # Save the dynamically detected integration version
+        self._check_version = None
+
         # TODO: Remove with Agent 5
         # Set proxy settings
         self.proxies = self._get_requests_proxy()
@@ -200,6 +204,19 @@ class __AgentCheck(object):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
+
+    @property
+    def check_version(self):
+        if self._check_version is None:
+            # 'datadog_checks.<PACKAGE>.<MODULE>...'
+            module_parts = self.__module__.split('.')
+            package_path = '.'.join(module_parts[:2])
+            package = importlib.import_module(package_path)
+
+            # Provide a default just in case
+            self._check_version = getattr(package, '__version__', '0.0.0')
+
+        return self._check_version
 
     @property
     def in_developer_mode(self):
