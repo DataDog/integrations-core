@@ -380,6 +380,7 @@ def test_pod_phase_gauges(aggregator, instance, check):
         NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=2
     )
 
+
 def test_job_counts(aggregator, instance, check):
     for _ in range(2):
         check.check(instance)
@@ -399,6 +400,7 @@ def test_job_counts(aggregator, instance, check):
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=3
     )
+
 
 def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
