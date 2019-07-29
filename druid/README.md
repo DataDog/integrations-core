@@ -67,6 +67,11 @@ More info: https://druid.apache.org/docs/latest/development/extensions-contrib/s
 Restart Druid to start sending more Druid metrics to DogStatsD.
 
 
+
+#### Draft notes
+
+- For metrics, Druid is emitting metrics once per minute (configurable).
+
 #### Log Collection
 
 **Available for Agent >6.0**
