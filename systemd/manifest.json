@@ -21,7 +21,9 @@
   "is_public": false,
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Systemd Overview": "assets/dashboards/systemd_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
