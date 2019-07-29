@@ -35,7 +35,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     See https://github.com/kubernetes/kube-state-metrics
     """
 
-    class JobCount():
+    class JobCount:
         def __init__(self):
             self.count = 0
             self.last_job_ts = 0
@@ -539,6 +539,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             if job_ts != 0 and job_ts > self.failed_job_counts[frozenset(tags)].last_job_ts:
                 self.failed_job_counts[frozenset(tags)].count += sample[self.SAMPLE_VALUE]
                 self.failed_job_counts[frozenset(tags)].last_job_ts = job_ts
+            job_count=self.failed_job_counts[frozenset(tags)]
 
     def kube_job_status_succeeded(self, metric, scraper_config):
         for sample in metric.samples:
@@ -554,6 +555,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             if job_ts != 0 and job_ts > self.succeeded_job_counts[frozenset(tags)].last_job_ts:
                 self.succeeded_job_counts[frozenset(tags)].count += sample[self.SAMPLE_VALUE]
                 self.succeeded_job_counts[frozenset(tags)].last_job_ts = job_ts
+            job_count=self.succeeded_job_counts[frozenset(tags)]
 
     def kube_node_status_condition(self, metric, scraper_config):
         """ The ready status of a cluster node. v1.0+"""
