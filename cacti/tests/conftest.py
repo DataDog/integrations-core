@@ -5,26 +5,21 @@
 import os
 from copy import deepcopy
 
-import docker
 import pytest
 
 from datadog_checks.cacti import CactiCheck
-from datadog_checks.dev import TempDir, WaitFor, docker_run
+from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 
-from .common import E2E_METADATA, HERE, INSTANCE_INTEGRATION, RRD_PATH
+from .common import E2E_METADATA, HERE, INSTANCE_INTEGRATION, RRD_PATH, CONTAINER_NAME
 
 
 def set_up_cacti():
-    client = docker.client.from_env()
-    container = client.containers.get("dd-test-cacti")
-    if not container:
-        raise Exception("Could not find container")
-
-    commands = ['/sbin/restore', 'mysql -u root -e "flush privileges;"', 'php /opt/cacti/lib/poller.php --force']
-    for command in commands:
-        code, out = container.exec_run(command)
-        if code != 0:
-            raise Exception(out)
+    commands = [['/sbin/restore'],
+                ['mysql', '-u', 'root', '-e', "flush privileges;"],
+                ['php', '/opt/cacti/lib/poller.php', '--force']]
+    for c in commands:
+        command = ['docker', 'exec', CONTAINER_NAME] + c
+        run_command(command, capture=True, check=True)
 
 
 @pytest.fixture(scope="session")
