@@ -5,13 +5,8 @@ import os
 import re
 from decimal import ROUND_HALF_UP, Decimal
 
-from six import PY3
+from six import PY3, text_type
 from six.moves.urllib.parse import urlparse
-
-if PY3:
-    text_type = str
-else:
-    text_type = unicode  # noqa: F821
 
 
 def ensure_bytes(s):
