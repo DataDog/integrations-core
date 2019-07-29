@@ -80,7 +80,7 @@ class DockerInterface(object):
             cmd += ' -it'
 
         if command.startswith('pip '):
-            command = command.replace('pip ', get_pip_exe(self.python_version), 1)
+            command = command.replace('pip', ' '.join(get_pip_exe(self.python_version)), 1)
 
         cmd += ' {}'.format(self.container_name)
         cmd += ' {}'.format(command)
