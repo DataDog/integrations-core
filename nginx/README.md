@@ -89,12 +89,12 @@ For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_ap
   } 
   ```
 
-To get more detailed metrics with NGINX Plus (such as 2xx / 3xx / 4xx / 5xx response counts per second), you may need to set a `status_zone` on the servers you want to monitor. For example:
+To get more detailed metrics with NGINX Plus (such as 2xx / 3xx / 4xx / 5xx response counts per second), set a `status_zone` on the servers you want to monitor. For example:
 
   ```
   server {
     listen 80;
-    status_zone <zone_name>;
+    status_zone <ZONE_NAME>;
     ...
   }
   ```
