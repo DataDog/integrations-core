@@ -5,12 +5,12 @@ import os
 import re
 from decimal import ROUND_HALF_UP, Decimal
 
-from six import PY3, string_types
+from six import PY3
 from six.moves.urllib.parse import urlparse
 
 
 def ensure_bytes(s):
-    if isinstance(s, string_types) and not isinstance(s, bytes):
+    if not isinstance(s, bytes):
         s = s.encode('utf-8')
     return s
 

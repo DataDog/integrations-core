@@ -152,14 +152,12 @@ class TestContainers:
 class TestBytesUnicode:
     @pytest.mark.skipif(PY3, reason="Python 3 does not support explicit bytestring with special characters")
     def test_ensure_bytes_py2(self):
-        assert ensure_bytes('🇫🇷🇪🇸🇺🇸') == '🇫🇷🇪🇸🇺🇸'
-        assert ensure_bytes(u'🇫🇷🇪🇸🇺🇸') == '🇫🇷🇪🇸🇺🇸'
+        assert ensure_bytes('éâû') == 'éâû'
+        assert ensure_bytes(u'éâû') == 'éâû'
 
     def test_ensure_bytes(self):
         assert ensure_bytes('qwerty') == b'qwerty'
-        assert ensure_bytes(33) == 33
 
     def test_ensure_unicode(self):
-        assert ensure_unicode('🇫🇷🇪🇸🇺🇸') == u'🇫🇷🇪🇸🇺🇸'
-        assert ensure_unicode(u'🇫🇷🇪🇸🇺🇸') == u'🇫🇷🇪🇸🇺🇸'
-        assert ensure_unicode(33) == 33
+        assert ensure_unicode('éâû') == u'éâû'
+        assert ensure_unicode(u'éâû') == u'éâû'
