@@ -236,8 +236,6 @@ class MesosMaster(AgentCheck):
         instance_tags = instance.get('tags', [])
         if instance_tags is None:
             instance_tags = []
-        # Legacy code: will be removed with Agent 5
-        default_timeout = self.init_config.get('default_timeout', 5)
 
         state_metrics = self._check_leadership(url, instance_tags)
         if state_metrics:
