@@ -22,6 +22,7 @@ class MesosSlave(AgentCheck):
     MONOTONIC_COUNT = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = "mesos_slave.can_connect"
     service_check_needed = True
+    DEFAULT_TIMEOUT = 5
 
     TASK_STATUS = {
         'TASK_STARTING': AgentCheck.OK,
@@ -102,6 +103,14 @@ class MesosSlave(AgentCheck):
             parsed_url = urlparse(url)
             if self.http.options['tls_verify'] and parsed_url.scheme == 'https':
                 self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
+
+            # `default_timeout` config option will be removed with Agent 5
+            self.http.options['timeout'] = (
+                instance.get('timeout')
+                or self.init_config.get('timeout')
+                or self.init_config.get('default_timeout')
+                or self.DEFAULT_TIMEOUT
+            )
 
     def _get_json(self, url, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
