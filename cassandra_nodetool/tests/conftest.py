@@ -15,9 +15,7 @@ from . import common
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    """
-        Start the cassandra cluster with required configuration
-    """
+    """Start the cassandra cluster with required configuration."""
     env = os.environ
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     env['CONTAINER_PORT'] = common.PORT
