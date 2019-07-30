@@ -67,7 +67,7 @@ instances:
     #
     # connect_timeout: <VALUE_IN_SECOND>
 
-     ## @param read_timeout - integer - optional
+    ## @param read_timeout - integer - optional
     ## Overrides the default received timeout value, and fails the check if the time to receive
     ## the server status from the server exceeds the read_timeout value (in seconds)
     #
