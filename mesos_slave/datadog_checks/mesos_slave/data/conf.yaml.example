@@ -71,6 +71,19 @@ instances:
     #
     # password: <PASSWORD>
 
+    ## @param connect_timeout - integer - optional
+    ## Overrides the default connection timeout value,
+    ## and fails the check if the time to establish the (TCP) connection
+    ## exceeds the connect_timeout value (in seconds)
+    #
+    # connect_timeout: <VALUE_IN_SECOND>
+
+    ## @param read_timeout - integer - optional
+    ## Overrides the default received timeout value, and fails the check if the time to receive
+    ## the server status from the server exceeds the read_timeout value (in seconds)
+    #
+    # read_timeout: <VALUE_IN_SECOND>
+
     ## @param proxy - object - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
