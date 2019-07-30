@@ -27,9 +27,8 @@ class TeamCityCheck(AgentCheck):
         'headers': {'name': 'headers', 'default': {"Accept": "application/json"}},
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-
+    def __init__(self, name, init_config, instances):
+        super(TeamCityCheck, self).__init__(name, init_config, instances)
         # Keep track of last build IDs per instance
         self.last_build_ids = {}
 
