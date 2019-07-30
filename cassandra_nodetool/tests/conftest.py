@@ -15,7 +15,7 @@ from . import common
 E2E_METADATA = {
     'start_commands': [
         'apt-get update',
-        'apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker.io'
+        'apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker.io',
     ],
     'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock'],
 }
