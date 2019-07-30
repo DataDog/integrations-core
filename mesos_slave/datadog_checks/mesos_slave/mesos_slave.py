@@ -93,7 +93,7 @@ class MesosSlave(AgentCheck):
         'slave/valid_status_updates': ('mesos.slave.valid_status_updates', GAUGE),
     }
 
-    HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True}}
+    HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
