@@ -11,20 +11,38 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 HOST = get_docker_hostname()
 
-INSTANCE = {
+INSTANCE_E2E = {
     'prometheus_url': 'http://{}:9090/metrics'.format(HOST),
     'namespace': 'prometheus',
     'metrics': [{'prometheus_target_interval_length_seconds': 'target_interval_seconds'}, 'go_memstats_mallocs_total'],
 }
 
+INSTANCE_UNIT = {
+    'prometheus_url': 'http://localhost:10249/metrics',
+    'namespace': 'prometheus',
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
+    'send_histograms_buckets': True,
+    'send_monotonic_counter': True,
+}
+
 
 @pytest.fixture(scope="session")
-def dd_environment():
+def instance():
+    return INSTANCE_E2E.copy()
+
+
+@pytest.fixture(scope="session")
+def e2e_instance():
+    return INSTANCE_E2E.copy()
+
+
+@pytest.fixture(scope="session")
+def dd_environment(e2e_instance):
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yaml')
     log_patterns = 'Server is ready to receive web requests'
 
     with docker_run(compose_file, log_patterns=log_patterns, sleep=10):
-        yield INSTANCE
+        yield e2e_instance
 
 
 @pytest.fixture
