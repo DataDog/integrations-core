@@ -38,7 +38,7 @@ Each of the endpoints is optional, but at least one must be configured. See the 
 
 #### Disable sidecar injection
 
-If you are installing the [Datadog Agent in a container][10], first disable Istio's sidecar injection.
+If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.
 
 Add the `sidecar.istio.io/inject: "false"` annotation to the `datadog-agent` DaemonSet:
 
