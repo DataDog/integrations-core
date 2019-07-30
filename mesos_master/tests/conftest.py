@@ -22,7 +22,7 @@ def dd_environment(instance):
 
 @pytest.fixture
 def check():
-    return MesosMaster(common.CHECK_NAME, {}, {})
+    return MesosMaster(common.CHECK_NAME, {}, [common.INSTANCE])
 
 
 @pytest.fixture(scope='session')
