@@ -8,46 +8,10 @@ instances:
     #
   - rabbitmq_api_url: http://localhost:15672/api/
 
-    ## @param rabbitmq_user - string - optional - default: guest
-    ## RabbitMQ username to use when connecting to the API URL.
-    #
-    # rabbitmq_user: guest
-
-    ## @param rabbitmq_pass - string - optional - default: guest
-    ## RabbitMQ password associated to the above username
-    ## to use when connecting to the API URL.
-    #
-    # rabbitmq_pass: guest
-
     ## @param tag_families - boolean - optional - default: false
     ## to tag queue "families" based off of regex matching.
     #
     # tag_families: false
-
-    ## @param ssl_verify - boolean - optional - default: true
-    ## The ssl_verify parameter can be used to tell the check
-    ## to skip the verification of the SSL certificate of the
-    ## RabbitMQ management web endpoint. Set to false if you want to disable
-    ## SSL certificate verification.
-    ##
-    ## This is mostly useful when checking SSL connections signed with
-    ## certificates that are not themselves signed by a public authority.
-    ## When false, the check logs a warning in collector.log
-    #
-    # ssl_verify: true
-
-    ## @param ignore_ssl_warning - boolean - optional - default: false
-    ## If `ssl_verify` is turned on and the SSL cert is invalid,
-    ## it can be very noisy. This reduces the noise in the logs.
-    #
-    # ignore_ssl_warning: false
-
-    ## @param skip_proxy - boolean - optional - default: false
-    ## The `skip_proxy` parameter bypasses any proxy settings enabled
-    ## and attempt to reach the the URL directly.
-    ## If no proxy is defined at any level, this flag bears no effect.
-    #
-    # skip_proxy: false
 
     ## @param nodes - list of strings - optional
     ## Use the `nodes` parameters to specify the nodes you'd like to
