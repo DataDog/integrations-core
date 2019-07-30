@@ -51,6 +51,21 @@ MNTR_METRICS = [
     'zookeeper.max_latency',
 ]
 
+METRICS_34 = [
+    'zookeeper.packets.sent',
+    'zookeeper.latency.avg',
+    'zookeeper.latency.min',
+    'zookeeper.connections',
+    'zookeeper.zxid.epoch',
+    'zookeeper.bytes_sent',
+    'zookeeper.bytes_received',
+    'zookeeper.instances',
+    'zookeeper.nodes',
+    'zookeeper.zxid.count',
+    'zookeeper.packets.received',
+    'zookeeper.latency.max',
+]
+
 STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']
 
 
