@@ -95,8 +95,8 @@ class MesosSlave(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(MesosSlave, self).__init__(name, init_config, instances)
         self.cluster_name = None
         for instance in instances or []:
             url = instance.get('url', '')
