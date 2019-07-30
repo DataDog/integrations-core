@@ -1,16 +1,17 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 import logging
+import os
 import time
+from copy import deepcopy
 
 import mock
 import pytest
-from .common import HERE
-from copy import deepcopy
 
 from datadog_checks.cacti import CactiCheck
+
+from .common import HERE
 
 log = logging.getLogger()
 
