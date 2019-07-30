@@ -10,13 +10,15 @@ import pytest
 from datadog_checks.cacti import CactiCheck
 from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 
-from .common import E2E_METADATA, HERE, INSTANCE_INTEGRATION, RRD_PATH, CONTAINER_NAME
+from .common import CONTAINER_NAME, E2E_METADATA, HERE, INSTANCE_INTEGRATION, RRD_PATH
 
 
 def set_up_cacti():
-    commands = [['/sbin/restore'],
-                ['mysql', '-u', 'root', '-e', "flush privileges;"],
-                ['php', '/opt/cacti/lib/poller.php', '--force']]
+    commands = [
+        ['/sbin/restore'],
+        ['mysql', '-u', 'root', '-e', "flush privileges;"],
+        ['php', '/opt/cacti/lib/poller.php', '--force'],
+    ]
     for c in commands:
         command = ['docker', 'exec', CONTAINER_NAME] + c
         run_command(command, capture=True, check=True)
