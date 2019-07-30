@@ -176,8 +176,8 @@ class CactiCheck(AgentCheck):
 
         def _in_whitelist(rrd):
             path = rrd.replace('<path_rra>/', '')
-            for p in whitelist:
-                if fnmatch(path, p):
+            for pattern in whitelist:
+                if fnmatch(path, pattern):
                     return True
             return False
 

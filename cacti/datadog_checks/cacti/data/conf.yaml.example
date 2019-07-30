@@ -51,7 +51,7 @@ instances:
     #   - ifIndex
 
     ## @param rrd_whitelist - string - optional
-    ## The `rrd_whitelist` is a path to a text file that has a list of patterns,
+    ## The `rrd_whitelist` is a path to a text file that has a list of file patterns,
     ## one per line, that should be fetched. If no whitelist is specified, all
     ## metrics are fetched.
     #
