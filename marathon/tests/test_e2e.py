@@ -7,9 +7,9 @@ import pytest
 from . import common
 
 
-@pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
-    check.check(instance)
+@pytest.mark.e2e
+def test_check(dd_agent_check, instance):
+    aggregator = dd_agent_check(instance)
 
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS)
