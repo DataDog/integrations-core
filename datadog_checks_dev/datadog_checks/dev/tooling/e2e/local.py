@@ -57,7 +57,7 @@ class LocalAgentInterface(object):
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
 
-        self.env_vars['DD_PYTHON_VERSION'] = self.python_version
+        self.env_vars['DD_PYTHON_VERSION'] = str(self.python_version)
 
     @property
     def platform(self):
