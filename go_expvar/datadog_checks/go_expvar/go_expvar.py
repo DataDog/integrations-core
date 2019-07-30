@@ -72,8 +72,8 @@ class GoExpvar(AgentCheck):
         'ssl_keyfile': {'name': 'tls_private_key', 'default': None},
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(GoExpvar, self).__init__(name, init_config, instances)
         self._regexes = {}
         self._last_gc_count = defaultdict(int)
 
