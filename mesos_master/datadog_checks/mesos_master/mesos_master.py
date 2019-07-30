@@ -134,7 +134,10 @@ class MesosMaster(AgentCheck):
         'master/valid_status_updates': ('mesos.cluster.valid_status_updates', GAUGE),
     }
 
-    HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True}}
+    HTTP_CONFIG_REMAPPER = {
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True},
+        'timeout': {'name': 'timeout', 'default': 5},
+    }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -233,6 +236,8 @@ class MesosMaster(AgentCheck):
         instance_tags = instance.get('tags', [])
         if instance_tags is None:
             instance_tags = []
+        # Legacy code: will be removed with Agent 5
+        default_timeout = self.init_config.get('default_timeout', 5)
 
         state_metrics = self._check_leadership(url, instance_tags)
         if state_metrics:
