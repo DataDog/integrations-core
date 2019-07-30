@@ -7,6 +7,9 @@
 This check collects the number of CPU cores on a host and CPU times (i.e. system, user, idle, etc).
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying these instructions.
+
 ### Installation
 
 The system_core check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
@@ -54,3 +57,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/system_core/metadata.csv
 [8]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations

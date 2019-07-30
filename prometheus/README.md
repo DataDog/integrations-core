@@ -10,6 +10,8 @@ All the metrics retrieved by this integration are considered [custom metrics][1]
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying these instructions.
+
 ### Installation
 
 The Prometheus check is packaged with the Agent starting version 6.1.0.
@@ -66,3 +68,4 @@ Need help? Contact [Datadog support][4].
 [5]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
 [6]: https://docs.datadoghq.com/agent/prometheus
 [7]: https://docs.datadoghq.com/developers/prometheus
+[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations

@@ -9,6 +9,8 @@ This check monitors [Systemd][1] and the units it manages through the Datadog Ag
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying these instructions.
+
 ### Installation
 
 The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
@@ -86,3 +88,4 @@ Need help? Contact [Datadog support][7].
 [7]: https://docs.datadoghq.com/help/
 [8]: https://docs.datadoghq.com/agent/docker/
 [9]: https://github.com/coreos/go-systemd
+[10]: https://docs.datadoghq.com/agent/autodiscovery/integrations

@@ -10,6 +10,9 @@ Get metrics from OpenStack service in real time to:
 * Be notified about OpenStack failovers and events.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][12] for guidance on applying these instructions.
+
 ### Installation
 
 To capture OpenStack metrics you need to [install the Agent][2] on your hosts running hypervisors.
@@ -131,3 +134,4 @@ See also our blog posts:
 [9]: https://www.datadoghq.com/blog/openstack-monitoring-nova
 [10]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
 [11]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones
+[12]: https://docs.datadoghq.com/agent/autodiscovery/integrations

@@ -9,6 +9,9 @@ SNMP uses OIDs, or Object Identifiers, to uniquely identify managed objects. OID
 A MIB, or Management Information Base, acts as a translator between OIDs and human readable names, and organizes a subset of the hierarchy. Because of the way the tree is structured, most SNMP values start with the same set of objects: 1.3.6.1.1 for MIB-2 which is a standard that holds system information like uptime, interfaces, network stack, and 1.3.6.1.4.1 which holds vendor specific information.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][16] for guidance on applying these instructions.
+
 ### Installation
 
 The SNMP check is included in the [Datadog Agent][1] package. No additional installation is necessary to run the check.
@@ -267,3 +270,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/help
 [14]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
 [15]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
+[16]: https://docs.datadoghq.com/agent/autodiscovery/integrations

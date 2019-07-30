@@ -8,6 +8,9 @@ The process check lets you:
 * Use [Process Monitors][1]: configure thresholds for how many instances of a specific process ought to be running and get alerts when the thresholds aren't met (see **Service Checks** below).
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][12] for guidance on applying these instructions.
+
 ### Installation
 
 The process check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
@@ -112,3 +115,4 @@ To get a better idea of how (or why) to monitor process resource consumption wit
 [9]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
 [10]: https://docs.datadoghq.com/help
 [11]: https://www.datadoghq.com/blog/process-check-monitoring
+[12]: https://docs.datadoghq.com/agent/autodiscovery/integrations
