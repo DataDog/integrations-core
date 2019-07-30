@@ -37,4 +37,4 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return Fluentd(CHECK_NAME, {}, {})
+    return Fluentd(CHECK_NAME, {}, [DEFAULT_INSTANCE])
