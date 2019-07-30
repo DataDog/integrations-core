@@ -13,3 +13,5 @@ def test_check(dd_agent_check, instance):
 
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS)
+
+    aggregator.assert_all_metrics_covered()
