@@ -33,6 +33,14 @@ MOST_RECENT_FRAME = -1
 TRACE_LOCK = threading.Lock()
 
 
+class MemoryProfileMetric(object):
+    __slots__ = ('name', 'value')
+
+    def __init__(self, name, value):
+        self.name = 'datadog.agent.profile.memory.{}'.format(name)
+        self.value = float(value)
+
+
 def get_sign(n):
     return '-' if n < 0 else '+'
 
@@ -91,7 +99,7 @@ def get_unit_formatter(unit):
     return lambda n: format_units(unit, *convert_units(n, to=unit))
 
 
-def write_pretty_top(path, snapshot, unit_formatter, key_type, limit, cumulative):
+def gather_top(metrics, path, snapshot, unit_formatter, key_type, limit, cumulative):
     top_stats = snapshot.statistics(key_type, cumulative=cumulative)
 
     with open(path, 'w', encoding='utf-8') as f:
@@ -121,9 +129,11 @@ def write_pretty_top(path, snapshot, unit_formatter, key_type, limit, cumulative
         amount, unit = unit_formatter(total)
         f.write('Total allocated size: {} {}\n'.format(amount, unit))
 
+    metrics.append(MemoryProfileMetric('check_run_total', total))
 
-def write_pretty_diff(
-    path, current_snapshot, previous_snapshot, unit_formatter, key_type, limit, cumulative, diff_order
+
+def gather_diff(
+    metrics, path, current_snapshot, previous_snapshot, unit_formatter, key_type, limit, cumulative, diff_order
 ):
     top_stats = current_snapshot.compare_to(previous_snapshot, key_type=key_type, cumulative=cumulative)
 
@@ -250,13 +260,16 @@ def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
     unit = config.get('profile_memory_unit', DEFAULT_UNIT)
     unit_formatter = get_unit_formatter(unit)
 
+    # Metrics to send
+    metrics = []
+
     # First, write the prettified snapshot
     snapshot_dir = os.path.join(location, 'snapshots')
     if not os.path.isdir(snapshot_dir):
         os.makedirs(snapshot_dir)
 
     new_snapshot = os.path.join(snapshot_dir, get_timestamp_filename('snapshot'))
-    write_pretty_top(new_snapshot, snapshot, unit_formatter, sort_by, limit, combine)
+    gather_top(metrics, new_snapshot, snapshot, unit_formatter, sort_by, limit, combine)
 
     # Then, compute the diff if there was a previous run
     previous_snapshot_dump = os.path.join(location, 'last-snapshot')
@@ -269,7 +282,9 @@ def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
 
         # and write it
         new_diff = os.path.join(diff_dir, get_timestamp_filename('diff'))
-        write_pretty_diff(new_diff, snapshot, previous_snapshot, unit_formatter, sort_by, limit, combine, diff_order)
+        gather_diff(metrics, new_diff, snapshot, previous_snapshot, unit_formatter, sort_by, limit, combine, diff_order)
 
     # Finally, dump the current snapshot for doing a diff on the next run
     snapshot.dump(previous_snapshot_dump)
+
+    return metrics
