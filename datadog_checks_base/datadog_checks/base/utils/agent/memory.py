@@ -9,6 +9,8 @@ from datetime import datetime
 
 from binary import BinaryUnits, convert_units
 
+from .common import METRIC_PROFILE_NAMESPACE
+
 try:
     import tracemalloc
 except ImportError:
@@ -37,7 +39,7 @@ class MemoryProfileMetric(object):
     __slots__ = ('name', 'value')
 
     def __init__(self, name, value):
-        self.name = 'datadog.agent.profile.memory.{}'.format(name)
+        self.name = '{}.memory.{}'.format(METRIC_PROFILE_NAMESPACE, name)
         self.value = float(value)
 
 
@@ -129,7 +131,7 @@ def gather_top(metrics, path, snapshot, unit_formatter, key_type, limit, cumulat
         amount, unit = unit_formatter(total)
         f.write('Total allocated size: {} {}\n'.format(amount, unit))
 
-    metrics.append(MemoryProfileMetric('check_run_total', total))
+    metrics.append(MemoryProfileMetric('check_run_alloc', total))
 
 
 def gather_diff(
