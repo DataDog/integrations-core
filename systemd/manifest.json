@@ -22,7 +22,7 @@
   "assets": {
     "monitors": {},
     "dashboards": {
-      "Systemd Overview": "assets/dashboards/systemd_overview.json"
+      "Systemd Overview": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json"
   }
