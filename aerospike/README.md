@@ -9,6 +9,8 @@ Get metrics from Aerospike Database in real time to:
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying these instructions.
+
 ### Installation
 
 The Aerospike check is included in the [Datadog Agent][1] package.
@@ -48,3 +50,4 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [4]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
 [5]: https://docs.datadoghq.com/help
+[6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
