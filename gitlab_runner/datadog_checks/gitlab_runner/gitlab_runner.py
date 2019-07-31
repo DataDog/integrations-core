@@ -25,7 +25,8 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     HTTP_CONFIG_REMAPPER = {
-        'receive_timeout': {'name': 'read_timeout'},
+        'receive_timeout': {'name': 'read_timeout', 'default': DEFAULT_RECEIVE_TIMEOUT},
+        'connect_timeout': {'name': 'connect_timeout', 'default': DEFAULT_CONNECT_TIMEOUT},
         'gitlab_user': {'name': 'username'},
         'gitlab_password': {'name': 'password'},
         'ssl_cert_validation': {'name': 'tls_verify'},

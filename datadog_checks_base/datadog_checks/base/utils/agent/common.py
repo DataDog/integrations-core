@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-__version__ = '3.1.1'
+METRIC_PROFILE_NAMESPACE = 'datadog.agent.profile'
