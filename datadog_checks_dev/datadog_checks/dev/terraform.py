@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import getpass
 import json
 import os
 import shutil
@@ -78,6 +79,7 @@ class TerraformUp(LazyFunction):
             shutil.copytree(self.directory, terraform_dir)
             with chdir(terraform_dir):
                 env = construct_env_vars()
+                env['TF_VAR_user'] = getpass.getuser()
                 run_command(['terraform', 'init'], check=True, env=env)
                 run_command(['terraform', 'apply', '-auto-approve', '-input=false', '-no-color'], check=True, env=env)
                 output = run_command(['terraform', 'output', '-json'], capture='stdout', check=True, env=env).stdout
@@ -93,4 +95,5 @@ class TerraformDown(LazyFunction):
             terraform_dir = os.path.join(temp_dir, 'terraform')
             with chdir(terraform_dir):
                 env = construct_env_vars()
+                env['TF_VAR_user'] = getpass.getuser()
                 run_command(['terraform', 'destroy', '-auto-approve', '-no-color'], check=True, env=env)

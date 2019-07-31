@@ -2,6 +2,10 @@ variable "account_json" {
   type = string
 }
 
+variable "user" {
+  type = string
+}
+
 resource "random_shuffle" "az" {
   input = ["europe-west2-a", "europe-west2-b", "europe-west2-c"]
   result_count = 1
@@ -16,7 +20,7 @@ provider "google" {
 
 resource "tls_private_key" "ssh-key" {
   algorithm = "RSA"
-  rsa_bits  = 4096
+  rsa_bits = 4096
 }
 
 resource "random_string" "suffix" {
@@ -26,7 +30,7 @@ resource "random_string" "suffix" {
 }
 
 resource "google_compute_instance" "devstack" {
-  name         = "devstack-${random_string.suffix.result}"
+  name = replace("devstack-${var.user}-${random_string.suffix.result}", ".", "-")
   machine_type = "n1-standard-4"
 
   tags = ["openstack", "lab"]

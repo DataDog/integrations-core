@@ -10,7 +10,7 @@ from contextlib import closing, contextmanager
 import psutil
 from six import PY3
 
-from .condtions import WaitForPortListening
+from .conditions import WaitForPortListening
 from .env import environment_run
 from .structures import LazyFunction, TempDir
 from .utils import ON_WINDOWS

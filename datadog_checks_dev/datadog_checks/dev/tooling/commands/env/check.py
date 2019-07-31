@@ -75,7 +75,7 @@ def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_p
     else:
         environment.run_check(**check_args)
 
-        if not rate:
+        if not rate and not as_json:
             echo_success('Note: ', nl=False)
             echo_info(
                 'If some metrics are missing, you may want to try again with the -r / --rate flag '

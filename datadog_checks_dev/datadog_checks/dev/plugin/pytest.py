@@ -109,7 +109,7 @@ def dd_agent_check(request, aggregator):
     # Lazily import to reduce plugin load times for everyone
     from datadog_checks.dev import TempDir, run_command
 
-    def run_check(config, **kwargs):
+    def run_check(config=None, **kwargs):
         root = os.path.dirname(request.module.__file__)
         while True:
             if os.path.isfile(os.path.join(root, 'setup.py')):
@@ -122,14 +122,8 @@ def dd_agent_check(request, aggregator):
 
             root = new_root
 
-        config = format_config(config)
-        env = os.environ['TOX_ENV_NAME']
         python_path = os.environ[E2E_PARENT_PYTHON]
-        config_file = os.path.join(temp_dir, '{}-{}-{}.json'.format(check, env, urlsafe_b64encode(os.urandom(6))))
-
-        with open(config_file, 'wb') as f:
-            output = json.dumps(config).encode('utf-8')
-            f.write(output)
+        env = os.environ['TOX_ENV_NAME']
 
         check_command = [
             python_path,
@@ -139,10 +133,18 @@ def dd_agent_check(request, aggregator):
             'check',
             check,
             env,
-            '--config',
-            config_file,
             '--json',
         ]
+
+        if config:
+            config = format_config(config)
+            config_file = os.path.join(temp_dir, '{}-{}-{}.json'.format(check, env, urlsafe_b64encode(os.urandom(6))))
+
+            with open(config_file, 'wb') as f:
+                output = json.dumps(config).encode('utf-8')
+                f.write(output)
+            check_command.extend(['--config', config_file])
+
         for key, value in kwargs.items():
             if value is not False:
                 check_command.append('--{}'.format(key.replace('_', '-')))
