@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
+import pytest
 import requests
 
 from datadog_checks.vault import Vault
+from datadog_checks.vault.errors import ApiUnreachable
 
 from .common import INSTANCES, MockResponse
 
@@ -79,7 +81,20 @@ class TestVault:
     def test_service_check_connect_fail(self, aggregator):
         instance = INSTANCES['bad_url']
         c = Vault(Vault.CHECK_NAME, None, {}, [instance])
-        c.check(instance)
+        with pytest.raises(ApiUnreachable):
+            c.check(instance)
+
+        aggregator.assert_service_check(
+            Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=['instance:foobar'], count=1
+        )
+
+    def test_service_check_500_fail(self, aggregator):
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+
+        with pytest.raises(ApiUnreachable):
+            with mock.patch('requests.get', return_value=MockResponse('', status_code=500)):
+                c.check(instance)
 
         aggregator.assert_service_check(
             Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=['instance:foobar'], count=1
