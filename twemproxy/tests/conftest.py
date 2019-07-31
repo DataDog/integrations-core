@@ -37,6 +37,11 @@ def check():
 
 
 @pytest.fixture
+def instance():
+    return common.INSTANCE
+
+
+@pytest.fixture
 def setup_request():
     """
     A request needs to be made in order for some of the data to be seeded
