@@ -34,14 +34,12 @@ METRICS = [
     'mongodb.asserts.regularps',
     'mongodb.opcounters.insertps',
     'mongodb.asserts.warningps',
-    'mongodb.metrics.getlasterror.wtime.numps',
     'mongodb.network.numrequestsps',
     'mongodb.opcounters.updateps',
     'mongodb.asserts.userps',
     'mongodb.opcounters.commandps',
     'mongodb.extra_info.page_faultsps',
     'mongodb.network.bytesoutps',
-    'mongodb.metrics.getlasterror.wtime.totalmillisps',
 ]
 
 
