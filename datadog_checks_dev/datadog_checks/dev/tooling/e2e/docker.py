@@ -52,9 +52,10 @@ class DockerInterface(object):
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
 
-        self.env_vars['DD_PYTHON_VERSION'] = self.python_version
+        if self.agent_build and 'py' not in self.agent_build:
+            self.agent_build = '{}-py{}'.format(self.agent_build, self.python_version)
 
-        if self.metadata.get('use_jmx', False):
+        if self.agent_build and self.metadata.get('use_jmx', False):
             self.agent_build = '{}-jmx'.format(self.agent_build)
 
     @property

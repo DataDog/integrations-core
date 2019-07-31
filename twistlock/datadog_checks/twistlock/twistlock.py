@@ -6,7 +6,6 @@ import time
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-import requests
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -36,6 +35,8 @@ SEVERITY_TAGS = {
 
 class TwistlockCheck(AgentCheck):
     NAMESPACE = 'twistlock'
+
+    HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -324,10 +325,7 @@ class TwistlockCheck(AgentCheck):
 
     def _retrieve_json(self, path):
         url = self.config.url + path
-        auth = (self.config.username, self.config.password)
-        response = requests.get(
-            url, auth=auth, verify=self.config.ssl_verify, proxies=self.get_instance_proxy(self.config.instance, url)
-        )
+        response = self.http.get(url)
         try:
             j = response.json()
             # it's possible to get a null response from the server

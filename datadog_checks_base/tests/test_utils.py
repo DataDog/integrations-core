@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
+
 # (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from decimal import ROUND_HALF_DOWN
 
-from datadog_checks.base.utils.common import pattern_filter, round_value
+import pytest
+from six import PY3
+
+from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value
 from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.limiter import Limiter
 
@@ -142,3 +148,17 @@ class TestContainers:
         ]
 
         assert len(list(iter_unique(custom_queries))) == 1
+
+
+class TestBytesUnicode:
+    @pytest.mark.skipif(PY3, reason="Python 3 does not support explicit bytestring with special characters")
+    def test_ensure_bytes_py2(self):
+        assert ensure_bytes('éâû') == 'éâû'
+        assert ensure_bytes(u'éâû') == 'éâû'
+
+    def test_ensure_bytes(self):
+        assert ensure_bytes('qwerty') == b'qwerty'
+
+    def test_ensure_unicode(self):
+        assert ensure_unicode('éâû') == u'éâû'
+        assert ensure_unicode(u'éâû') == u'éâû'
