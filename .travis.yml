@@ -27,6 +27,7 @@ env:
     - C_INCLUDE_PATH="/opt/mqm/inc:$C_INCLUDE_PATH"
     # https://github.com/travis-ci/travis-ci/issues/7940
     - BOTO_CONFIG=/dev/null
+    - DDEV_E2E_AGENT="datadog/agent-dev:jaime-unified-image-py2py3-jmx"
 
 stages:
   - name: test_changed
