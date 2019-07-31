@@ -38,7 +38,7 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
     """This utility provides a convenient way to safely set up and tear down Docker environments.
 
     :param directory: A path containing Terraform files.
-    :type compose_file: ``str``
+    :type directory: ``str``
     :param sleep: Number of seconds to wait before yielding.
     :type sleep: ``float``
     :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding

@@ -45,9 +45,11 @@ def environment_run(up, down, sleep=None, endpoints=None, conditions=None, env_v
     result = None
     with env_vars, wrapper:
         try:
+            # Create an environment variable to store setup result
             key = 'environment_result_{}'.format(up.__class__.__name__.lower())
             if set_up_env():
                 result = up()
+                # Store the serialized data in the environment
                 set_env_vars({key: serialize_data(result).decode('utf-8')})
 
                 for condition in conditions:
@@ -57,6 +59,7 @@ def environment_run(up, down, sleep=None, endpoints=None, conditions=None, env_v
                     time.sleep(sleep)
                 yield result
             else:
+                # If we don't setup, retrieve the data and deserialize it
                 result = get_env_vars().get(key)
                 if result:
                     yield deserialize_data(result)

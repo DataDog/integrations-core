@@ -16,12 +16,11 @@ from .utils import file_exists
 
 
 class WaitFor(LazyFunction):
-    def __init__(self, func, timeout=1, attempts=60, wait=1, args=(), kwargs=None):
+    def __init__(self, func, attempts=60, wait=1, args=(), kwargs=None):
         if kwargs is None:
             kwargs = {}
 
         self.func = func
-        self.timeout = timeout
         self.attempts = attempts
         self.wait = wait
         self.args = args
@@ -147,20 +146,12 @@ class CheckDockerLogs(CheckCommandOutput):
         self.identifier = identifier
 
 
-class CheckPortListening(LazyFunction):
-    def __init__(self, host, port, attempts=10, wait=1):
-        self.host = host
-        self.port = port
-        self.attempts = attempts
-        self.wait = wait
+class WaitForPortListening(WaitFor):
+    """Wait until a server is available on `host:port`."""
 
-    def __call__(self):
-        for _ in range(self.attempts):
-            try:
-                with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-                    s.connect((self.host, self.port))
-            except socket.error:
-                time.sleep(self.wait)
-                continue
-            return True
-        raise RetryError("Couldn't connect to {}:{}".format(self.host, self.port))
+    def __init__(self, host, port, attempts=60, wait=1):
+        super(WaitForPortListening, self).__init__(self.connect, attempts, wait, args=(host, port))
+
+    def connect(self, host, port):
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+            s.connect((host, port))
