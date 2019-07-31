@@ -2,7 +2,7 @@ from difflib import SequenceMatcher
 
 from six import iteritems
 
-from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
+from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub, HistogramBucketStub
 
 '''
 Build similar message for better test assertion failure message.
@@ -41,6 +41,8 @@ def _build_similar_elements(expected_element, submitted_elements):
         scoring_fn = _get_similarity_score_for_metric
     elif isinstance(expected_element, ServiceCheckStub):
         scoring_fn = _get_similarity_score_for_service_check
+    elif isinstance(expected_element, HistogramBucketStub):
+        scoring_fn = _get_similarity_score_for_histogram_bucket
     else:
         raise NotImplementedError("Invalid type: {}".format(expected_element))
 
@@ -95,6 +97,38 @@ def _get_similarity_score_for_service_check(expected_service_check, candidate_se
 
     if expected_service_check.message:
         score = _is_similar_text_score(expected_service_check.message, candidate_service_check.message)
+        scores.append((score, 1))
+
+    return _compute_score(scores)
+
+def _get_similarity_score_for_histogram_bucket(expected_histogram_bucket, candidate_histogram_bucket):
+    # Tuple of (score, weight)
+    scores = [(_is_similar_text_score(expected_histogram_bucket.name, candidate_histogram_bucket.name), 3)]
+
+    if expected_histogram_bucket.value is not None:
+        score = 1 if expected_histogram_bucket.value == candidate_histogram_bucket.value else 0
+        scores.append((score, 1))
+
+    if expected_histogram_bucket.lower_bound is not None:
+        score = 1 if expected_histogram_bucket.lower_bound == candidate_histogram_bucket.lower_bound else 0
+        scores.append((score, 1))
+
+    if expected_histogram_bucket.upper_bound is not None:
+        score = 1 if expected_histogram_bucket.upper_bound == candidate_histogram_bucket.upper_bound else 0
+        scores.append((score, 1))
+
+    if expected_histogram_bucket.monotonic is not None:
+        score = 1 if expected_histogram_bucket.monotonic == candidate_histogram_bucket.monotonic else 0
+        scores.append((score, 1))
+
+    if expected_histogram_bucket.tags is not None:
+        score = _is_similar_text_score(
+            str(sorted(expected_histogram_bucket.tags)), str(sorted(candidate_histogram_bucket.tags))
+        )
+        scores.append((score, 1))
+
+    if expected_histogram_bucket.hostname:
+        score = _is_similar_text_score(expected_histogram_bucket.hostname, candidate_histogram_bucket.hostname)
         scores.append((score, 1))
 
     return _compute_score(scores)

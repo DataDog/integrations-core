@@ -718,6 +718,7 @@ class OpenMetricsScraperMixin(object):
         bucket_tuples_by_upper_bound = {}
         for i, v in enumerate(sorted_buckets):
             if i == 0:
+                # TODO: handle negative buckets
                 bucket_tuples_by_upper_bound[v] = (0, v, bucket_values_by_upper_bound[v])
                 continue
             tmp = bucket_values_by_upper_bound[v] - bucket_values_by_upper_bound[sorted_buckets[i-1]]
@@ -740,7 +741,7 @@ class OpenMetricsScraperMixin(object):
 
     def _submit_sample_histogram_buckets(self, metric_name, sample, scraper_config, hostname=None):
         if "lower_bound" not in sample[self.SAMPLE_LABELS] or "le" not in sample[self.SAMPLE_LABELS]:
-            self.log.warning("Metric: {} was not containing required bucket boundaries labels".format(metric_name))
+            self.log.warning("Metric: {} was not containing required bucket boundaries labels: {}".format(metric_name, sample[self.SAMPLE_LABELS]))
             return
         sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
         sample[self.SAMPLE_LABELS]["lower_bound"] = str(float(sample[self.SAMPLE_LABELS]["lower_bound"]))

@@ -243,7 +243,7 @@ class __AgentCheck(object):
             # ignore metric sample
             return
 
-        tags = self._normalize_tags_type(tags, name)
+        tags = self._normalize_tags_type(tags, metric_name=name)
         if hostname is None:
             hostname = ''
 
