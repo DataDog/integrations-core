@@ -235,7 +235,10 @@ class AggregatorStub(object):
         assert condition, new_msg
 
     def assert_all_metrics_covered(self):
-        assert self.metrics_asserted_pct >= 100.0
+        missing_metrics = ''
+        if self.metrics_asserted_pct < 100.0:
+            missing_metrics = set(self.metric_names) - set(self._asserted)
+        assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
 
     def reset(self):
         """
@@ -285,6 +288,12 @@ class AggregatorStub(object):
                 return 100
             else:
                 return 0
+
+        # If it there have been assertions with at_least=0 the length of the two collections can match
+        # even if there are different metrics in each set
+        not_asserted = set(self.metric_names) - set(self._asserted)
+        if not_asserted:
+            return (num_metrics - len(not_asserted)) / num_metrics * 100
 
         return num_asserted / num_metrics * 100
 
