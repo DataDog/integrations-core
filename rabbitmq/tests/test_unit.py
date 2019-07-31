@@ -9,10 +9,12 @@ import requests
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import NODE_TYPE, RabbitMQException
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.unit
 def test__get_data(check):
-    with mock.patch('datadog_checks.rabbitmq.rabbitmq.requests') as r:
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
         with pytest.raises(RabbitMQException) as e:
             check._get_data('')

@@ -7,7 +7,6 @@ import time
 import warnings
 from collections import defaultdict
 
-import requests
 from requests.exceptions import RequestException
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from six import iteritems
@@ -174,7 +173,7 @@ class RabbitMQ(AgentCheck):
         if not self.http.options['verify'] and parsed_url.scheme == 'https':
             # Only allow suppressing the warning if not ssl_verify
             suppress_warning = self.http.ignore_tls_warning
-            self.log.warning('Skipping SSL cert validation for %s based on configuration.' % (base_url))
+            self.log.warning('Skipping TLS cert validation for %s based on configuration.' % (base_url))
 
         # Limit of queues/nodes to collect metrics from
         max_detailed = {
@@ -292,7 +291,7 @@ class RabbitMQ(AgentCheck):
 
     def _get_data(self, url):
         try:
-            r = requests.get(url)
+            r = self.http.get(url)
             r.raise_for_status()
             return r.json()
         except RequestException as e:
