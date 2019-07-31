@@ -110,7 +110,7 @@ class MorCache:
                 names_chunk = mor_names[idx : min(idx + batch_size, total)]
                 yield {name: mors_dict[name] for name in names_chunk}
 
-    def purge(self, key, ttl):
+    def purge(self, key, ttl, custom_log_method=None):
         """
         Remove all the items in the cache for the given key that are older than
         ttl seconds.
@@ -118,6 +118,7 @@ class MorCache:
         """
         mors_to_purge = []
         now = time.time()
+        custom_log_method("Purging old mors, initial size is {}".format(len(self._mor[key])))
         with self._mor_lock:
             # Don't change the dict during iteration!
             # First collect the names of the Mors to remove...
@@ -127,5 +128,7 @@ class MorCache:
                     mors_to_purge.append(name)
 
             # ...then actually remove the Mors from the cache.
+            custom_log_method("Removing {} Mors from the cache: {}".format(len(mors_to_purge), ','.join(mors_to_purge)))
             for name in mors_to_purge:
                 del self._mor[key][name]
+            custom_log_method("Finished purging old mors, size is {}".format(len(self._mor[key])))

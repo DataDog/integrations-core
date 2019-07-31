@@ -364,6 +364,7 @@ class VSphereCheck(AgentCheck):
         return []
 
     def _collect_mors_and_attributes(self, server_instance):
+        self._log_support("Entering _collect_mors_and_attributes")
         resources = list(RESOURCE_TYPE_METRICS)
         resources.extend(RESOURCE_TYPE_NO_METRIC)
 
@@ -433,6 +434,10 @@ class VSphereCheck(AgentCheck):
                         break
             mor_attrs[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
 
+        mors_names = [str(m) for m in mor_attrs.keys()]
+        mors_names.sort()
+        self._log_support("Collected MORs are {}".format(','.join(mors_names)))
+        self._log_support("Finished collection MORs attributes")
         return mor_attrs
 
     def _get_all_objs(self, server_instance, regexes, include_only_marked, tags, use_guest_hostname=False):
@@ -458,6 +463,7 @@ class VSphereCheck(AgentCheck):
         If it's a node we want to query metric for, it will be enqueued at the
         instance level and will be processed by a subsequent job.
         """
+        self._log_support("Getting all mors from vsphere.")
         start = time.time()
         obj_list = defaultdict(list)
 
@@ -485,8 +491,10 @@ class VSphereCheck(AgentCheck):
                     vimtype = vim.VirtualMachine
                     mor_type = "vm"
                     power_state = properties.get("runtime.powerState")
+                    vm_name = properties.get("name", "unknown")
                     if power_state != vim.VirtualMachinePowerState.poweredOn:
                         self.log.debug("Skipping VM in state %s", ensure_unicode(power_state))
+                        self._log_support("Skipping VM {} in state {}".format(ensure_unicode(vm_name), ensure_unicode(power_state)))
                         continue
                     host_mor = properties.get("runtime.host")
                     host_props = all_objects.get(host_mor, {})
@@ -511,6 +519,7 @@ class VSphereCheck(AgentCheck):
                     hostname = None
                     vimtype = vim.Datastore
                     mor_type = "datastore"
+                    self._log_support("Found datastore named {}".format(ensure_unicode(properties.get("name", "unknown"))))
                 elif isinstance(obj, vim.Datacenter):
                     vsphere_type = 'vsphere_type:datacenter'
                     instance_tags.append(
@@ -594,6 +603,7 @@ class VSphereCheck(AgentCheck):
                     ensure_unicode(resource_type),
                     time.time() - last,
                 )
+                self._log_support("Morlist collection has been skipped as some resources are still being processed.")
                 return
 
         tags = ["vcenter_server:{}".format(ensure_unicode(instance.get('name')))]
@@ -630,6 +640,7 @@ class VSphereCheck(AgentCheck):
         for mor in mors:
             mor_name = str(mor['mor'])
             available_metrics = {m.counterId for m in perfManager.QueryAvailablePerfMetric(entity=mor["mor"])}
+            self._log_support("Metric ids for mor {} are {}".format(mor_name, ','.join([str(s) for s in sorted(available_metrics)])))
             try:
                 self.mor_cache.set_metrics(i_key, mor_name, self._compute_needed_metrics(instance, available_metrics))
             except MorNotFoundError:
@@ -637,6 +648,8 @@ class VSphereCheck(AgentCheck):
                 continue
 
         # TEST-INSTRUMENTATION
+        if mors:
+            self._log_support("Processing the morlist for {} took {}".format(mors[0]['mor_type'], time.time() - t))
         self.histogram(
             'datadog.agent.vsphere.morlist_process_atomic.time', time.time() - t, tags=instance.get('tags', [])
         )
@@ -679,6 +692,7 @@ class VSphereCheck(AgentCheck):
 
                 # We will actually schedule jobs for non realtime resources only.
                 if mors:
+                    self._log_support("Fetching historical data for the followings mors {}".format(','.join([str(m['mor']) for m in mors])))
                     self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, mors))
 
     def _cache_metrics_metadata(self, instance):
@@ -701,6 +715,7 @@ class VSphereCheck(AgentCheck):
         metric_ids = []
         # Use old behaviour with metrics to collect defined by our constants
         if self.in_compatibility_mode(instance, log_warning=True):
+            self._log_support("Instance is in compatibility mode, please let's not do that.")
             for counter in perfManager.perfCounter:
                 metric_name = self.format_metric_name(counter, compatibility=True)
                 new_metadata[counter.key] = {'name': metric_name, 'unit': counter.unitInfo.key}
@@ -709,12 +724,14 @@ class VSphereCheck(AgentCheck):
                     metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter.key, instance="*"))
         else:
             collection_level = instance.get("collection_level", 1)
+            self._log_support("Collection level is `{}`".format(collection_level))
             for counter in perfManager.QueryPerfCounterByLevel(collection_level):
                 new_metadata[counter.key] = {"name": self.format_metric_name(counter), "unit": counter.unitInfo.key}
                 # Build the list of metrics we will want to collect
                 metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter.key, instance="*"))
 
         self.log.info("Finished metadata collection for instance %s", i_key)
+        self._log_support("Collected metric metadata are '{}'".format(';'.join(["name:{},unit:{},counter.key:{}".format(v['name'], v['unit'], k) for k, v in iteritems(new_metadata)])))
         # Reset metadata
         self.metadata_cache.set_metadata(i_key, new_metadata)
         self.metadata_cache.set_metric_ids(i_key, metric_ids)
@@ -722,6 +739,7 @@ class VSphereCheck(AgentCheck):
         self.cache_config.set_last(CacheConfig.Metadata, i_key, time.time())
 
         # ## <TEST-INSTRUMENTATION>
+        self._log_support("Metadata collection time was `{}`".format(t.total()))
         self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
@@ -798,6 +816,10 @@ class VSphereCheck(AgentCheck):
                 for result in mor_perfs.value:
                     counter_id = result.id.counterId
                     if not self.metadata_cache.contains(i_key, counter_id):
+                        self._log_support(
+                            "Skipping value for counter %s, because there is no metadata about it" %
+                            ensure_unicode(counter_id)
+                        )
                         self.log.debug(
                             "Skipping value for counter %s, because there is no metadata about it",
                             ensure_unicode(counter_id),
@@ -810,10 +832,12 @@ class VSphereCheck(AgentCheck):
                     if self.in_compatibility_mode(instance):
                         if metric_name not in ALL_METRICS:
                             self.log.debug("Skipping unknown `%s` metric.", ensure_unicode(metric_name))
+                            self._log_support("Skipping unknown `%s` metric." % ensure_unicode(metric_name))
                             continue
 
                     if not result.value:
                         self.log.debug("Skipping `%s` metric because the value is empty", ensure_unicode(metric_name))
+                        self._log_support("Skipping `%s` metric because the value is empty" % ensure_unicode(metric_name))
                         continue
 
                     instance_name = result.id.instance or "none"
@@ -844,6 +868,7 @@ class VSphereCheck(AgentCheck):
         """
         i_key = self._instance_key(instance)
         if not self.mor_cache.contains(i_key):
+            self._log_support("Not collecting metrics, nothing to do yet.")
             self.log.debug("Not collecting metrics for instance '%s', nothing to do yet.", i_key)
             return
 
@@ -854,9 +879,11 @@ class VSphereCheck(AgentCheck):
         n_mors = self.mor_cache.instance_size(i_key)
         if not n_mors:
             self.gauge('vsphere.vm.count', vm_count, tags=tags)
+            self._log_support("No Mor objects to process.")
             self.log.debug("No Mor objects to process for instance '%s', skip...", i_key)
             return
 
+        self._log_support("Collecting metrics for {} mors".format(n_mors))
         self.log.debug("Collecting metrics for %s mors", ensure_unicode(n_mors))
 
         # Request metrics for several objects at once. We can limit the number of objects with batch_size
@@ -868,6 +895,7 @@ class VSphereCheck(AgentCheck):
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
                 if mor['mor_type'] not in REALTIME_RESOURCES and ('metrics' not in mor or not mor['metrics']):
+                    self._log_support("Ignoring mor {} because it is not real time and does not contain 'metrics'".format(str(mor["mor"])))
                     continue
 
                 query_spec = vim.PerformanceManager.QuerySpec()
@@ -886,21 +914,33 @@ class VSphereCheck(AgentCheck):
         self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
+        self._current_instance_key = self._instance_key(instance)
         try:
+            self._log_support("Starting pool with {} threads".format(self.init_config.get('threads_count', DEFAULT_SIZE_POOL)))
             self.start_pool()
             self.exception_printed = 0
 
             # First part: make sure our object repository is neat & clean
             if self._should_cache(instance, CacheConfig.Metadata):
+                self._log_support("Metadata needs to be cached")
                 self._cache_metrics_metadata(instance)
+                self._log_support("Metadata have been cached correctly!")
 
             if self._should_cache(instance, CacheConfig.Morlist):
+                self._log_support("Morlist needs to be cached")
                 self._cache_morlist_raw(instance)
+                self._log_support("Morlist have been cached correctly!")
 
             self._process_mor_objects_queue(instance)
 
             # Remove old objects that might be gone from the Mor cache
-            self.mor_cache.purge(self._instance_key(instance), self.clean_morlist_interval)
+            self.mor_cache.purge(self._instance_key(instance), self.clean_morlist_interval, lambda x: self._log_support(x))
+
+            if is_affirmative(instance.get('dd_restart_pool', False)):
+                # Let's wait for the mor queues to be fully processed before collecting metrics
+                self._log_support("dd_restart_pool, let's join and restart the pool")
+                self.stop_pool()
+                self.start_pool()
 
             # Second part: do the job
             self.collect_metrics(instance)
@@ -915,3 +955,7 @@ class VSphereCheck(AgentCheck):
         except Exception:
             self.terminate_pool()
             raise
+        self._log_support("Thread pool is stopped, check completed correctly.")
+
+    def _log_support(self, message):
+        self.log.info("[dd-support][inst:{}] {}".format(self._current_instance_key, message))
