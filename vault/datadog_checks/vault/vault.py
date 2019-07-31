@@ -1,12 +1,10 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import warnings
+
 from time import time as timestamp
 
 import requests
-from six import string_types
-from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
@@ -143,21 +141,10 @@ class Vault(AgentCheck):
 
     def access_api(self, url, config, tags):
         try:
-            with warnings.catch_warnings():
-                if config['ssl_ignore_warning']:
-                    warnings.simplefilter('ignore', InsecureRequestWarning)
+            response = self.http.get(url)
 
-                response = requests.get(
-                    url,
-                    auth=config['auth'],
-                    cert=config['ssl_cert'],
-                    verify=config['ssl_verify'],
-                    proxies=config['proxies'],
-                    timeout=config['timeout'],
-                    headers=config['headers'],
-                )
         except requests.exceptions.Timeout:
-            msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, config['timeout'])
+            msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'])
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
             self.log.exception(msg)
             raise ApiUnreachable
