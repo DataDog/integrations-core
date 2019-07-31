@@ -8,6 +8,8 @@ This check monitors [IBM Db2][2] through the Datadog Agent.
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying these instructions.
+
 ### Installation
 
 The IBM Db2 check is included in the [Datadog Agent][3] package.
@@ -139,3 +141,4 @@ Additional helpful documentation, links, and articles:
 [8]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/monitor-db2-with-datadog
+[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations

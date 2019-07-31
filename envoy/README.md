@@ -4,6 +4,9 @@
 This check collects distributed system observability metrics from [Envoy][1].
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][15] for guidance on applying these instructions.
+
 ### Installation
 
 The Envoy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
@@ -191,3 +194,4 @@ Need help? Contact [Datadog support][14].
 [12]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
 [13]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
 [14]: https://docs.datadoghq.com/help
+[15]: https://docs.datadoghq.com/agent/autodiscovery/integrations

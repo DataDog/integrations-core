@@ -6,7 +6,7 @@ This check monitors [Squid][9] metrics from the Cache Manager through the Datado
 
 ## Setup
 
-Follow the instructions below to install and configure this check on the host Agent. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
 
 ### Installation
 
