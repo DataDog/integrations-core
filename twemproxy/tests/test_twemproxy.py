@@ -16,11 +16,19 @@ def test_integration(check, dd_environment, setup_request, aggregator):
     check.check(common.INSTANCE)
     _test_check(aggregator)
 
+    for stat in metrics.INTEGRATION_SERVER_STATS:
+        aggregator.assert_metric("twemproxy.{}".format(stat), count=2)
+    for stat in metrics.INTEGRATION_POOL_STATS:
+        aggregator.assert_metric("twemproxy.{}".format(stat), count=1)
+    aggregator.assert_all_metrics_covered()
+
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance):
+def test_e2e(dd_agent_check, setup_request, instance):
     aggregator = dd_agent_check(instance)
     _test_check(aggregator)
+
+    aggregator.assert_all_metrics_covered()
 
 
 def _test_check(aggregator):
@@ -33,6 +41,3 @@ def _test_check(aggregator):
 
     # Test service check
     aggregator.assert_service_check('twemproxy.can_connect', status=Twemproxy.OK, tags=SC_TAGS, count=1)
-
-    # Raises when COVERAGE=true and coverage < 100%
-    aggregator.assert_all_metrics_covered()
