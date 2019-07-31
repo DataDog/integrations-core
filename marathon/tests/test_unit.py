@@ -5,7 +5,6 @@ import mock
 import pytest
 
 
-@pytest.mark.unit
 def test_get_app_tags(check):
     app = {'id': 'my_app_id', 'version': 'my_app_version', 'labels': {'label_foo': 'foo_value'}}
 
@@ -28,7 +27,6 @@ def test_get_app_tags(check):
     assert check.get_app_tags(app) == ['app_id:', 'version:']
 
 
-@pytest.mark.unit
 def test_process_apps_ko(check, aggregator):
     """
     If the check can't hit the Marathon master Url, no metric should be
@@ -39,7 +37,6 @@ def test_process_apps_ko(check, aggregator):
     assert len(aggregator.metric_names) == 0
 
 
-@pytest.mark.unit
 def test_process_apps(check, aggregator):
     check.get_apps_json = mock.MagicMock(
         return_value={
@@ -56,7 +53,6 @@ def test_process_apps(check, aggregator):
     aggregator.assert_metric('marathon.backoffSeconds', value=101, count=1, tags=['app_id:/', 'version:'])
 
 
-@pytest.mark.unit
 def test_get_instance_config(check):
     # test mandatory
     instance = {}
