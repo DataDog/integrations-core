@@ -4,12 +4,17 @@
 GLOBAL_STATS = {'curr_connections', 'total_connections'}
 
 POOL_STATS = {'client_connections', 'server_ejects'}
-INTEGRATION_POOL_STATS = {'client_eof', 'client_err', 'client_connections', 'server_ejects', 'forward_error', 'fragments'}
 
-SERVER_STATS = {
-    'server_connections',
-    'server_timedout',
+INTEGRATION_POOL_STATS = {
+    'client_eof',
+    'client_err',
+    'client_connections',
+    'server_ejects',
+    'forward_error',
+    'fragments',
 }
+
+SERVER_STATS = {'server_connections', 'server_timedout'}
 
 INTEGRATION_SERVER_STATS = {
     'in_queue',
