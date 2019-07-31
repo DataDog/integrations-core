@@ -149,6 +149,21 @@ class OpenMetricsScraperMixin(object):
             instance.get('send_histograms_buckets', default_instance.get('send_histograms_buckets', True))
         )
 
+        # If you want the bucket to be non cumulative and contains both bound tags
+        # set non_cumulative_buckets to True, enabled when distribution metrics are enabled.
+        config['non_cumulative_buckets'] = is_affirmative(
+            instance.get('non_cumulative_buckets', default_instance.get('non_cumulative_buckets', False))
+        )
+
+        # Send histograms as datadog distribution metrics
+        config['send_distribution_buckets'] = is_affirmative(
+            instance.get('send_distribution_buckets', default_instance.get('send_distribution_buckets', False))
+        )
+
+        # Non cumulative buckets are mandatory for distribution metrics
+        if config['send_distribution_buckets'] == True:
+            config['non_cumulative_buckets'] = True
+
         # If you want to send `counter` metrics as monotonic counts, set this value to True.
         # Set to False if you want to instead send those metrics as `gauge`.
         config['send_monotonic_counter'] = is_affirmative(
@@ -646,6 +661,8 @@ class OpenMetricsScraperMixin(object):
         """
         Extracts metrics from a prometheus histogram and sends them as gauges
         """
+        if scraper_config['non_cumulative_buckets']:
+            self._decumulate_histogram_buckets(metric)
         for sample in metric.samples:
             val = sample[self.SAMPLE_VALUE]
             if not self._is_value_valid(val):
@@ -673,16 +690,63 @@ class OpenMetricsScraperMixin(object):
             elif (
                 scraper_config['send_histograms_buckets']
                 and sample[self.SAMPLE_NAME].endswith("_bucket")
-                and "Inf" not in sample[self.SAMPLE_LABELS]["le"]
             ):
-                sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
-                tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
-                self.gauge(
-                    "{}.{}.count".format(scraper_config['namespace'], metric_name),
-                    val,
-                    tags=tags,
-                    hostname=custom_hostname,
-                )
+                if scraper_config['send_distribution_buckets']:
+                    self._submit_sample_histogram_buckets(metric_name, sample, scraper_config, hostname)
+                elif "Inf" not in sample[self.SAMPLE_LABELS]["le"] or scraper_config['non_cumulative_buckets']:
+                    sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
+                    tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
+                    self.gauge(
+                        "{}.{}.count".format(scraper_config['namespace'], metric_name),
+                        val,
+                        tags=tags,
+                        hostname=custom_hostname,
+                    )
+
+    def _decumulate_histogram_buckets(self, metric):
+        """
+        Decumulate buckets in a given histogram metric and adds the lower_bound label (le being upper_bound)
+        """
+        bucket_values_by_upper_bound = {}
+        for sample in metric.samples:
+            if sample[self.SAMPLE_NAME].endswith("_bucket"):
+                bucket_values_by_upper_bound[float(sample[self.SAMPLE_LABELS]["le"])] = sample[self.SAMPLE_VALUE]
+
+        sorted_buckets = sorted(bucket_values_by_upper_bound.keys())
+
+        # Tuples (lower_bound, upper_bound, value)
+        bucket_tuples_by_upper_bound = {}
+        for i, v in enumerate(sorted_buckets):
+            if i == 0:
+                bucket_tuples_by_upper_bound[v] = (0, v, bucket_values_by_upper_bound[v])
+                continue
+            tmp = bucket_values_by_upper_bound[v] - bucket_values_by_upper_bound[sorted_buckets[i-1]]
+            bucket_tuples_by_upper_bound[v] = (sorted_buckets[i-1], v, tmp)
+
+        # modify original metric to inject lower_bound & modified value
+        for i, sample in enumerate(metric.samples):
+            if not sample[self.SAMPLE_NAME].endswith("_bucket"):
+                continue
+
+            matching_bucket_tuple = bucket_tuples_by_upper_bound[float(sample[self.SAMPLE_LABELS]["le"])]
+            # Replacing the sample tuple
+            sample[self.SAMPLE_LABELS]["lower_bound"] = str(matching_bucket_tuple[0])
+            metric.samples[i] = (
+                sample[self.SAMPLE_NAME],
+                sample[self.SAMPLE_LABELS],
+                matching_bucket_tuple[2],
+            )
+
+
+    def _submit_sample_histogram_buckets(self, metric_name, sample, scraper_config, hostname=None):
+        if "lower_bound" not in sample[self.SAMPLE_LABELS] or "le" not in sample[self.SAMPLE_LABELS]:
+            self.log.warning("Metric: {} was not containing required bucket boundaries labels".format(metric_name))
+            return
+        sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
+        sample[self.SAMPLE_LABELS]["lower_bound"] = str(float(sample[self.SAMPLE_LABELS]["lower_bound"]))
+        tags = self._metric_tags(metric_name, sample[self.SAMPLE_VALUE], sample, scraper_config, hostname)
+        self._submit_histogram_bucket(self.check_id, metric_name, sample[self.SAMPLE_VALUE], float(sample[self.SAMPLE_LABELS]["lower_bound"]), float(sample[self.SAMPLE_LABELS]["le"]), True, hostname, tags)
+
 
     def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None):
         custom_tags = scraper_config['custom_tags']
