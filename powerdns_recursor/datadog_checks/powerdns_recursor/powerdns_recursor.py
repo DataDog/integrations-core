@@ -108,7 +108,7 @@ class PowerDNSRecursorCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(PowerDNSRecursorCheck, self).__init__(name, init_config, instances)
-        if self.instance is not None and 'api_key' in self.instances:
+        if 'api_key' in self.instance:
             self.http.options['headers']['X-API-Key'] = self.instance['api_key']
 
     def check(self, instance):
@@ -151,7 +151,6 @@ class PowerDNSRecursorCheck(AgentCheck):
             url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
 
         service_check_tags = ['recursor_host:{}'.format(config.host), 'recursor_port:{}'.format(config.port)] + tags
-       
         try:
             request = self.http.get(url)
             request.raise_for_status()
