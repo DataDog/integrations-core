@@ -11,16 +11,16 @@ from datadog_checks.vault import Vault
 @pytest.mark.integration
 def test_integration(aggregator, check, instance):
     check.check(instance)
-    test_check(aggregator)
+    _test_check(aggregator)
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
-    test_check(aggregator)
+    _test_check(aggregator)
 
 
-def test_check(aggregator):
+def _test_check(aggregator):
     aggregator.assert_metric('vault.is_leader', value=0, tags=['instance:foobar', 'is_leader:false'], count=1)
     aggregator.assert_all_metrics_covered()
 
