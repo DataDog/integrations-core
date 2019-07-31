@@ -69,7 +69,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param send_histogram_buckets - boolean - optional - default: true
+    ## @param send_histograms_buckets - boolean - optional - default: true
     ## Set send_histograms_buckets to true to send the histograms bucket.
     #
     # send_histograms_buckets: true
