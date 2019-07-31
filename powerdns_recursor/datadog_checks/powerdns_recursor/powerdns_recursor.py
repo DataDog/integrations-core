@@ -108,8 +108,8 @@ class PowerDNSRecursorCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(PowerDNSRecursorCheck, self).__init__(name, init_config, instances)
-        if instances is not None and 'api_key' in instances:
-            self.http.options['headers']['X-API-Key'] = instances['api_key']
+        if self.instance is not None and 'api_key' in self.instances:
+            self.http.options['headers']['X-API-Key'] = self.instance['api_key']
 
     def check(self, instance):
         config, tags = self._get_config(instance)
