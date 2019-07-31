@@ -1,14 +1,12 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from __future__ import unicode_literals
-
 import os
 from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 
 import pytest
 
-from . import common, conftest
+from . import common
 
 
 @pytest.mark.e2e
@@ -18,9 +16,9 @@ def test_e2e(dd_agent_check, get_instance):
     zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
     metrics_to_check = []
     if zk_version and LooseVersion(zk_version) >= LooseVersion("3.4.0"):
-        metrics_to_check = conftest.MNTR_METRICS
+        metrics_to_check = common.MNTR_METRICS
     if zk_version and LooseVersion(zk_version) <= LooseVersion("3.5.0"):
-        metrics_to_check.extend(conftest.METRICS_34)
+        metrics_to_check.extend(common.METRICS_34)
     for mname in metrics_to_check:
         aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
 
