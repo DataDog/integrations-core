@@ -92,7 +92,7 @@ def dd_environment_runner(request):
 
     message = serialize_data(data)
 
-    message = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'.format(message.decode('utf-8'))
+    message = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'.format(message)
 
     if testing_plugin:
         return message

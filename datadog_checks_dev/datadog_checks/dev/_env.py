@@ -100,7 +100,7 @@ def serialize_data(data):
     # Using base64 ensures:
     # 1. Printing to stdout won't fail
     # 2. Easy parsing since there are no spaces
-    return urlsafe_b64encode(data.encode('utf-8'))
+    return urlsafe_b64encode(data.encode('utf-8')).decode('utf-8')
 
 
 def deserialize_data(data):

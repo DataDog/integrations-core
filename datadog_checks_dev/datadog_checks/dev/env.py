@@ -50,7 +50,7 @@ def environment_run(up, down, sleep=None, endpoints=None, conditions=None, env_v
             if set_up_env():
                 result = up()
                 # Store the serialized data in the environment
-                set_env_vars({key: serialize_data(result).decode('utf-8')})
+                set_env_vars({key: serialize_data(result)})
 
                 for condition in conditions:
                     condition()
