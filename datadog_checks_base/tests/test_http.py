@@ -60,6 +60,13 @@ class TestTimeout:
 
         assert http.options['timeout'] == (10, 4)
 
+    def test_config_init_config_override(self):
+        instance = {}
+        init_config = {'timeout': 16}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['timeout'] == (16, 16)
+
 
 class TestHeaders:
     def test_config_default(self):

@@ -521,9 +521,13 @@ class __AgentCheck(object):
                 from ..utils.agent.memory import TRACE_LOCK, profile_memory
 
                 with TRACE_LOCK:
-                    profile_memory(
+                    metrics = profile_memory(
                         self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
                     )
+
+                tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
+                for m in metrics:
+                    self.gauge(m.name, m.value, tags=tags)
             else:
                 self.check(instance)
 
