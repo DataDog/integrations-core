@@ -206,7 +206,6 @@ class RabbitMQ(AgentCheck):
         if not vhosts:
             # Fetch a list of _all_ vhosts from the API.
             vhosts_url = urljoin(base_url, 'vhosts')
-            self.http.options['proxies'] = self.get_instance_proxy(instance, vhosts_url)
             vhosts_response = self._get_data(vhosts_url)
             vhosts = [v['name'] for v in vhosts_response]
 
@@ -255,7 +254,7 @@ class RabbitMQ(AgentCheck):
                     limit_vhosts,
                     custom_tags
                 )
-                self.get_overview_stats(instance, base_url, custom_tags)
+                self.get_overview_stats(base_url, custom_tags)
 
                 self.get_connections_stat(
                     instance,
@@ -268,7 +267,7 @@ class RabbitMQ(AgentCheck):
 
                 # Generate a service check from the aliveness API. In the case of an invalid response
                 # code or unparseable JSON this check will send no data.
-                self._check_aliveness(instance, base_url, vhosts, custom_tags)
+                self._check_aliveness(base_url, vhosts, custom_tags)
 
             # Generate a service check for the service status.
             self.service_check('rabbitmq.status', AgentCheck.OK, custom_tags)
@@ -379,7 +378,6 @@ class RabbitMQ(AgentCheck):
         max_detailed: the limit of objects to collect for this type
         filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
         """
-        self.http.options['proxies'] = self.get_instance_proxy(instance, base_url)
         # Make a copy of this list as we will remove items from it at each
         # iteration
         explicit_filters = list(filters['explicit'])
@@ -532,11 +530,10 @@ class RabbitMQ(AgentCheck):
         # /api/queues/vhost/name/bindings
         if object_type is QUEUE_TYPE:
             self._get_queue_bindings_metrics(
-                base_url, custom_tags, data, instance, object_type
+                base_url, custom_tags, data, object_type
             )
 
-    def get_overview_stats(self, instance, base_url, custom_tags):
-        self.http.options['proxies'] = self.get_instance_proxy(instance, base_url)
+    def get_overview_stats(self, base_url, custom_tags):
         data = self._get_data(urljoin(base_url, "overview"))
         self._get_metrics(data, OVERVIEW_TYPE, custom_tags)
 
@@ -570,7 +567,7 @@ class RabbitMQ(AgentCheck):
         return metrics_sent
 
     def _get_queue_bindings_metrics(
-        self, base_url, custom_tags, data,instance, object_type
+        self, base_url, custom_tags, data, object_type
     ):
         for item in data:
             vhost = item['vhost']
@@ -588,8 +585,6 @@ class RabbitMQ(AgentCheck):
         """
         Collect metrics on currently open connection per vhost.
         """
-        self.http.options['proxies'] = self.get_instance_proxy(instance, base_url)
-
         grab_all_data = True
 
         if self._limit_vhosts(instance):
@@ -667,7 +662,7 @@ class RabbitMQ(AgentCheck):
         vhosts = instance.get('vhosts', [])
         return len(vhosts) > 0
 
-    def _check_aliveness(self, instance, base_url, vhosts, custom_tags, auth=None, ssl_verify=True):
+    def _check_aliveness(self, base_url, vhosts, custom_tags):
         """
         Check the aliveness API against all or a subset of vhosts. The API
         will return {"status": "ok"} and a 200 response code in the case
@@ -679,7 +674,6 @@ class RabbitMQ(AgentCheck):
             # We need to urlencode the vhost because it can be '/'.
             path = u'aliveness-test/{}'.format(quote_plus(vhost))
             aliveness_url = urljoin(base_url, path)
-            self.http.options['proxies'] = self.get_instance_proxy(instance, aliveness_url)
             aliveness_response = self._get_data(aliveness_url)
             message = u"Response from aliveness API: {}".format(aliveness_response)
 
