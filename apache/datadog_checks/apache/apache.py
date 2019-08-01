@@ -33,7 +33,7 @@ class Apache(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
         'apache_user': {'name': 'username'},
         'apache_password': {'name': 'password'},
-        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True},
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False},
         'receive_timeout': {'name': 'read_timeout', 'default': 15},
         'connect_timeout': {'name': 'connect_timeout', 'default': 5},
     }
