@@ -7,6 +7,9 @@ Get metrics from linux_proc_extras service in real time to:
 * Be notified about linux_proc_extras failovers and events.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying these instructions.
+
 ### Installation
 
 The Linux_proc_extras check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
@@ -43,3 +46,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/account_management/billing/custom_metrics
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations

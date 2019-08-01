@@ -11,9 +11,6 @@ Enable the Datadog-Ceph integration to:
   * Monitor I/O performance metrics
 
 ## Setup
-
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
-
 ### Installation
 
 The Ceph check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Ceph servers.
@@ -143,7 +140,6 @@ Need help? Contact [Datadog support][8].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ceph/images/ceph_dashboard.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/ceph/datadog_checks/ceph/data/conf.yaml.example

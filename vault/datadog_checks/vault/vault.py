@@ -5,6 +5,7 @@ import warnings
 from time import time as timestamp
 
 import requests
+from simplejson import JSONDecodeError
 from six import string_types
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -43,13 +44,13 @@ class Vault(AgentCheck):
             api['check_leader'](config, tags)
             api['check_health'](config, tags)
         except ApiUnreachable:
-            return
+            raise
 
         self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=tags)
 
     def check_leader_v1(self, config, tags):
         url = config['api_url'] + '/sys/leader'
-        leader_data = self.access_api(url, config, tags).json()
+        leader_data = self.access_api(url, config, tags)
 
         is_leader = is_affirmative(leader_data.get('is_self'))
         tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
@@ -76,7 +77,7 @@ class Vault(AgentCheck):
 
     def check_health_v1(self, config, tags):
         url = config['api_url'] + '/sys/health'
-        health_data = self.access_api(url, config, tags).json()
+        health_data = self.access_api(url, config, tags)
 
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
@@ -171,6 +172,18 @@ class Vault(AgentCheck):
                     timeout=config['timeout'],
                     headers=config['headers'],
                 )
+                response.raise_for_status()
+                json_data = response.json()
+        except requests.exceptions.HTTPError:
+            msg = 'The Vault endpoint `{}` returned {}.'.format(url, response.status_code)
+            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
+            self.log.exception(msg)
+            raise ApiUnreachable
+        except JSONDecodeError:
+            msg = 'The Vault endpoint `{}` returned invalid json data.'.format(url)
+            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
+            self.log.exception(msg)
+            raise ApiUnreachable
         except requests.exceptions.Timeout:
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, config['timeout'])
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
@@ -182,4 +195,4 @@ class Vault(AgentCheck):
             self.log.exception(msg)
             raise ApiUnreachable
 
-        return response
+        return json_data

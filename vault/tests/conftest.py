@@ -6,6 +6,7 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run
+from datadog_checks.vault import Vault
 
 from .common import INSTANCES
 
@@ -21,3 +22,14 @@ def dd_environment():
         os.path.join(DOCKER_DIR, 'docker-compose.yaml'), endpoints='{}/sys/health'.format(instance['api_url'])
     ):
         yield instance
+
+
+@pytest.fixture
+def check():
+    check = Vault('vault', {}, {}, [INSTANCES['main']])
+    return check
+
+
+@pytest.fixture()
+def instance():
+    return INSTANCES['main']

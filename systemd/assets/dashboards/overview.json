@@ -18,31 +18,31 @@
   "description": "This dashboard provides an overview of Systemd units and metrics on specific services/sockets to help you monitor and investigate issues. Further reading on Systemd monitoring:\n\n- [Datadog’s Systemd integration docs](https://docs.datadoghq.com/integrations/systemd/)\n\nClone this template dashboard to make changes and add your own graphs and widgets.",
   "disableCog": false,
   "disableEditing": false,
-  "height": 80,
-  "id": 63965,
+  "height": 111,
+  "id": 783595,
   "isIntegration": false,
   "isShared": false,
-  "modified": "2019-07-22T11:20:17.973450+00:00",
-  "new_id": "7nw-jch-7aw",
+  "modified": "2019-07-30T17:02:45.880897+00:00",
+  "new_id": "my7-n2s-zrw",
   "originalHeight": 80,
-  "originalWidth": 173,
+  "originalWidth": "100%",
   "read_only": false,
-  "source_type_id": 10057,
-  "template_variables": [],
+  "template_variables": [
+    {
+      "default": "*",
+      "name": "scope",
+      "prefix": null
+    }
+  ],
   "widgets": [
     {
       "add_timeframe": true,
-      "board_id": "529-gfn-ypv",
       "generated_title": "",
-      "globalTimeframe": {
-        "end": 1555718400000,
-        "isLive": true,
-        "start": 1547942400000
-      },
       "height": 14,
       "isShared": false,
+      "legend": false,
+      "legend_size": "0",
       "margin": "",
-      "scaleFactor": 1,
       "sizing": "zoom",
       "title": true,
       "title_align": "left",
@@ -52,139 +52,68 @@
       "url": "https://s3.amazonaws.com/dd-integrations/systemd/configuration/tile/logo.png",
       "width": 15,
       "x": 1,
-      "y": 2
+      "y": 1
     },
     {
       "add_timeframe": true,
       "auto_refresh": false,
+      "background_color": "gray",
       "bgcolor": "gray",
-      "board_id": "529-gfn-ypv",
+      "content": "All Units",
       "font_size": "18",
-      "generated_title": "Notes & Links",
-      "globalTimeframe": {
-        "end": 1555718400000,
-        "isLive": true,
-        "start": 1547942400000
-      },
-      "height": 5,
+      "height": 6,
       "html": "All Units",
       "isShared": false,
+      "legend": false,
+      "legend_size": "0",
       "refresh_every": 30000,
       "scaleFactor": 1,
       "text_align": "center",
       "tick": true,
       "tick_edge": "bottom",
       "tick_pos": "50%",
-      "title": true,
-      "title_align": "left",
-      "title_size": 16,
-      "title_text": "",
+      "title": false,
       "type": "note",
-      "width": 46,
+      "width": 57,
       "x": 17,
-      "y": 2
+      "y": 1
     },
     {
       "add_timeframe": true,
-      "board_id": "529-gfn-ypv",
-      "check": "systemd.can_connect",
       "error": null,
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
-      "group": null,
-      "group_by": [],
-      "grouping": "cluster",
-      "height": 15,
+      "height": 13,
       "isShared": false,
-      "scaleFactor": 1,
-      "tags": [
-        "*"
-      ],
-      "text_align": "center",
-      "text_size": "auto",
+      "legend": false,
+      "legend_size": "0",
+      "tile_def": {
+        "requests": [
+          {
+            "display_type": "line",
+            "q": "avg:systemd.unit.count{$scope}",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "title_align": "left",
+        "title_size": "16",
+        "viz": "timeseries"
+      },
       "time": {},
       "title": true,
-      "title_align": "center",
-      "title_size": 16,
-      "title_text": "Can Connect",
-      "type": "check_status",
-      "width": 15,
-      "x": 1,
-      "y": 17
-    },
-    {
-      "add_timeframe": true,
-      "auto_refresh": false,
-      "bgcolor": "gray",
-      "board_id": "529-gfn-ypv",
-      "font_size": "18",
-      "generated_title": "Notes & Links",
-      "globalTimeframe": {
-        "end": 1555718400000,
-        "isLive": true,
-        "start": 1547942400000
-      },
-      "height": 5,
-      "html": "Unit Cron",
-      "isShared": false,
-      "refresh_every": 30000,
-      "scaleFactor": 1,
-      "text_align": "center",
-      "tick": true,
-      "tick_edge": "bottom",
-      "tick_pos": "50%",
-      "title": true,
       "title_align": "left",
       "title_size": 16,
-      "title_text": "",
-      "type": "note",
-      "width": 34,
-      "x": 64,
-      "y": 2
+      "title_text": "Unit Count",
+      "type": "timeseries",
+      "width": 57,
+      "x": 17,
+      "y": 8
     },
     {
       "add_timeframe": true,
-      "auto_refresh": false,
-      "bgcolor": "gray",
-      "board_id": "529-gfn-ypv",
-      "font_size": "18",
-      "generated_title": "Notes & Links",
-      "globalTimeframe": {
-        "end": 1555718400000,
-        "isLive": true,
-        "start": 1547942400000
-      },
-      "height": 5,
-      "html": "Unit SSH",
-      "isShared": false,
-      "refresh_every": 30000,
-      "scaleFactor": 1,
-      "text_align": "center",
-      "tick": true,
-      "tick_edge": "bottom",
-      "tick_pos": "50%",
-      "title": true,
-      "title_align": "left",
-      "title_size": 16,
-      "title_text": "",
-      "type": "note",
-      "width": 34,
-      "x": 99,
-      "y": 2
-    },
-    {
-      "add_timeframe": true,
-      "board_id": "7nw-jch-7aw",
       "error": null,
-      "generated_title": "Timeseries",
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
       "height": 13,
       "isShared": false,
       "legend": false,
@@ -196,8 +125,10 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:systemd.unit.count{*}",
+            "q": "avg:systemd.unit.loaded.count{$scope}",
             "style": {
+              "line_type": "solid",
+              "line_width": "normal",
               "palette": "dog_classic",
               "type": "solid",
               "width": "normal"
@@ -205,29 +136,24 @@
             "type": "line"
           }
         ],
+        "title_align": "left",
+        "title_size": "16",
         "viz": "timeseries"
       },
       "time": {},
       "title": true,
       "title_align": "left",
       "title_size": 16,
-      "title_text": "Unit Count",
+      "title_text": "Unit Loaded",
       "type": "timeseries",
-      "width": 46,
+      "width": 57,
       "x": 17,
-      "y": 8
+      "y": 24
     },
     {
       "add_timeframe": true,
-      "board_id": "7nw-jch-7aw",
       "error": null,
-      "generated_title": "Timeseries",
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
-      "height": 35,
+      "height": 43,
       "isShared": false,
       "legend": true,
       "legend_size": "0",
@@ -238,15 +164,19 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:systemd.unit.count{*} by {active_state}",
+            "q": "avg:systemd.unit.count{$scope} by {active_state}",
             "style": {
+              "line_type": "solid",
+              "line_width": "normal",
               "palette": "dog_classic",
               "type": "solid",
               "width": "normal"
             },
-            "type": "line"
+            "type": "area"
           }
         ],
+        "title_align": "left",
+        "title_size": "16",
         "viz": "timeseries"
       },
       "time": {},
@@ -255,308 +185,45 @@
       "title_size": 16,
       "title_text": "Unit Count by State",
       "type": "timeseries",
-      "width": 46,
+      "width": 57,
       "x": 17,
-      "y": 24
-    },
-    {
-      "add_timeframe": true,
-      "board_id": "7nw-jch-7aw",
-      "error": null,
-      "generated_title": "Timeseries",
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
-      "height": 13,
-      "isShared": false,
-      "legend": false,
-      "legend_size": "0",
-      "scaleFactor": 1,
-      "tile_def": {
-        "autoscale": true,
-        "requests": [
-          {
-            "aggregator": "avg",
-            "conditional_formats": [],
-            "q": "avg:systemd.service.memory_current{unit:cron.service}",
-            "style": {
-              "palette": "dog_classic",
-              "type": "solid",
-              "width": "normal"
-            },
-            "type": "line"
-          }
-        ],
-        "viz": "timeseries"
-      },
-      "time": {},
-      "title": true,
-      "title_align": "left",
-      "title_size": 16,
-      "title_text": "Cron Memory Usage",
-      "type": "timeseries",
-      "width": 34,
-      "x": 64,
-      "y": 8
-    },
-    {
-      "add_timeframe": true,
-      "board_id": "7nw-jch-7aw",
-      "error": null,
-      "generated_title": "Timeseries",
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
-      "height": 13,
-      "isShared": false,
-      "legend": false,
-      "legend_size": "0",
-      "scaleFactor": 1,
-      "tile_def": {
-        "autoscale": true,
-        "requests": [
-          {
-            "aggregator": "avg",
-            "conditional_formats": [],
-            "q": "avg:systemd.service.cpu_usage_n_sec{unit:cron.service}",
-            "style": {
-              "palette": "dog_classic",
-              "type": "solid",
-              "width": "normal"
-            },
-            "type": "line"
-          }
-        ],
-        "viz": "timeseries"
-      },
-      "time": {},
-      "title": true,
-      "title_align": "left",
-      "title_size": 16,
-      "title_text": "Cron CPU Usage",
-      "type": "timeseries",
-      "width": 34,
-      "x": 64,
-      "y": 24
-    },
-    {
-      "add_timeframe": true,
-      "board_id": "7nw-jch-7aw",
-      "error": null,
-      "generated_title": "Timeseries",
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
-      "height": 13,
-      "isShared": false,
-      "legend": false,
-      "legend_size": "0",
-      "scaleFactor": 1,
-      "tile_def": {
-        "autoscale": true,
-        "requests": [
-          {
-            "aggregator": "avg",
-            "conditional_formats": [],
-            "q": "avg:systemd.service.memory_current{unit:ssh.service}",
-            "style": {
-              "palette": "dog_classic",
-              "type": "solid",
-              "width": "normal"
-            },
-            "type": "line"
-          }
-        ],
-        "viz": "timeseries"
-      },
-      "time": {},
-      "title": true,
-      "title_align": "left",
-      "title_size": 16,
-      "title_text": "SSH Memory Usage",
-      "type": "timeseries",
-      "width": 34,
-      "x": 99,
-      "y": 8
-    },
-    {
-      "add_timeframe": true,
-      "board_id": "7nw-jch-7aw",
-      "error": null,
-      "generated_title": "Timeseries",
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
-      "height": 13,
-      "isShared": false,
-      "legend": false,
-      "legend_size": "0",
-      "scaleFactor": 1,
-      "tile_def": {
-        "autoscale": true,
-        "requests": [
-          {
-            "aggregator": "avg",
-            "conditional_formats": [],
-            "q": "avg:systemd.service.cpu_usage_n_sec{unit:ssh.service}",
-            "style": {
-              "palette": "dog_classic",
-              "type": "solid",
-              "width": "normal"
-            },
-            "type": "line"
-          }
-        ],
-        "viz": "timeseries"
-      },
-      "time": {},
-      "title": true,
-      "title_align": "left",
-      "title_size": 16,
-      "title_text": "SSH CPU Usage",
-      "type": "timeseries",
-      "width": 34,
-      "x": 99,
-      "y": 24
+      "y": 40
     },
     {
       "add_timeframe": true,
       "auto_refresh": false,
+      "background_color": "gray",
       "bgcolor": "gray",
-      "board_id": "529-gfn-ypv",
+      "content": "Service Cron",
       "font_size": "18",
-      "generated_title": "Notes & Links",
-      "globalTimeframe": {
-        "end": 1555718400000,
-        "isLive": true,
-        "start": 1547942400000
-      },
-      "height": 5,
-      "html": "Socket Syslog",
+      "height": 6,
+      "html": "Cron Service",
       "isShared": false,
+      "legend": false,
+      "legend_size": "0",
       "refresh_every": 30000,
       "scaleFactor": 1,
       "text_align": "center",
       "tick": true,
       "tick_edge": "bottom",
       "tick_pos": "50%",
-      "title": true,
-      "title_align": "left",
-      "title_size": 16,
-      "title_text": "",
+      "title": false,
       "type": "note",
-      "width": 69,
-      "x": 64,
-      "y": 40
+      "width": 75,
+      "x": 75,
+      "y": 1
     },
     {
       "add_timeframe": true,
-      "board_id": "7nw-jch-7aw",
+      "check": "systemd.can_connect",
       "error": null,
-      "generated_title": "Timeseries",
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
-      "height": 13,
-      "isShared": false,
-      "legend": false,
-      "legend_size": "0",
-      "scaleFactor": 1,
-      "tile_def": {
-        "autoscale": true,
-        "requests": [
-          {
-            "aggregator": "avg",
-            "conditional_formats": [],
-            "q": "avg:systemd.socket.n_accepted{unit:syslog.socket}",
-            "style": {
-              "palette": "dog_classic",
-              "type": "solid",
-              "width": "normal"
-            },
-            "type": "line"
-          }
-        ],
-        "viz": "timeseries"
-      },
-      "time": {},
-      "title": true,
-      "title_align": "left",
-      "title_size": 16,
-      "title_text": "Syslog Connections Accepted",
-      "type": "timeseries",
-      "width": 34,
-      "x": 64,
-      "y": 46
-    },
-    {
-      "add_timeframe": true,
-      "board_id": "7nw-jch-7aw",
-      "error": null,
-      "generated_title": "Timeseries",
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
-      "height": 13,
-      "isShared": false,
-      "legend": false,
-      "legend_size": "0",
-      "scaleFactor": 1,
-      "tile_def": {
-        "autoscale": true,
-        "requests": [
-          {
-            "aggregator": "avg",
-            "conditional_formats": [],
-            "q": "avg:systemd.socket.n_connections{unit:syslog.socket}",
-            "style": {
-              "palette": "dog_classic",
-              "type": "solid",
-              "width": "normal"
-            },
-            "type": "line"
-          }
-        ],
-        "viz": "timeseries"
-      },
-      "time": {},
-      "title": true,
-      "title_align": "left",
-      "title_size": 16,
-      "title_text": "Syslog Current Connections",
-      "type": "timeseries",
-      "width": 34,
-      "x": 99,
-      "y": 46
-    },
-    {
-      "add_timeframe": true,
-      "board_id": "529-gfn-ypv",
-      "check": "systemd.system.state",
-      "error": null,
-      "globalTimeframe": {
-        "end": 1563191946963,
-        "isLive": true,
-        "start": 1563191046963
-      },
-      "group": null,
+      "group": "host:ubuntu-xenial-alex-test",
       "group_by": [],
       "grouping": "cluster",
-      "height": 15,
+      "height": 14,
       "isShared": false,
-      "scaleFactor": 1,
+      "legend": false,
+      "legend_size": "0",
       "tags": [
         "*"
       ],
@@ -565,13 +232,373 @@
       "time": {},
       "title": true,
       "title_align": "center",
-      "title_size": 16,
+      "title_size": "16",
+      "title_text": "Can Connect",
+      "type": "check_status",
+      "width": 15,
+      "x": 1,
+      "y": 16
+    },
+    {
+      "add_timeframe": true,
+      "check": "systemd.system.state",
+      "error": null,
+      "group": "host:ubuntu-xenial-alex-test",
+      "group_by": [],
+      "grouping": "cluster",
+      "height": 14,
+      "isShared": false,
+      "legend": false,
+      "legend_size": "0",
+      "tags": [
+        "*"
+      ],
+      "text_align": "center",
+      "text_size": "auto",
+      "time": {},
+      "title": true,
+      "title_align": "center",
+      "title_size": "16",
       "title_text": "System State",
       "type": "check_status",
       "width": 15,
       "x": 1,
-      "y": 33
+      "y": 31
+    },
+    {
+      "add_timeframe": true,
+      "error": null,
+      "height": 13,
+      "isShared": false,
+      "legend": false,
+      "legend_size": "0",
+      "tile_def": {
+        "requests": [
+          {
+            "display_type": "line",
+            "q": "avg:systemd.service.memory_current{unit:cron.service,$scope}",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "title_align": "left",
+        "title_size": "16",
+        "viz": "timeseries"
+      },
+      "time": {},
+      "title": true,
+      "title_align": "left",
+      "title_size": 16,
+      "title_text": "Cron Memory Usage",
+      "type": "timeseries",
+      "width": 37,
+      "x": 113,
+      "y": 24
+    },
+    {
+      "add_timeframe": true,
+      "error": null,
+      "height": 13,
+      "isShared": false,
+      "legend": false,
+      "legend_size": "0",
+      "tile_def": {
+        "requests": [
+          {
+            "display_type": "line",
+            "q": "avg:systemd.service.cpu_usage_n_sec{unit:cron.service,$scope}",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "title_align": "left",
+        "title_size": "16",
+        "viz": "timeseries"
+      },
+      "time": {},
+      "title": true,
+      "title_align": "left",
+      "title_size": 16,
+      "title_text": "Cron CPU Usage",
+      "type": "timeseries",
+      "width": 37,
+      "x": 113,
+      "y": 8
+    },
+    {
+      "add_timeframe": true,
+      "error": null,
+      "height": 13,
+      "isShared": false,
+      "legend": false,
+      "legend_size": "0",
+      "scaleFactor": 1,
+      "tile_def": {
+        "autoscale": true,
+        "requests": [
+          {
+            "aggregator": "avg",
+            "conditional_formats": [],
+            "q": "avg:systemd.service.n_restarts{$scope,unit:ssh.service}",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "type": "solid",
+              "width": "normal"
+            },
+            "type": "line"
+          }
+        ],
+        "title_align": "left",
+        "title_size": "16",
+        "viz": "timeseries"
+      },
+      "time": {},
+      "title": true,
+      "title_align": "left",
+      "title_size": 16,
+      "title_text": "SSH Restarts",
+      "type": "timeseries",
+      "width": 37,
+      "x": 113,
+      "y": 47
+    },
+    {
+      "add_timeframe": true,
+      "auto_refresh": false,
+      "background_color": "gray",
+      "bgcolor": "gray",
+      "content": "Service Cron",
+      "font_size": "18",
+      "height": 6,
+      "html": "SSH Service",
+      "isShared": false,
+      "legend": false,
+      "legend_size": "0",
+      "refresh_every": 30000,
+      "scaleFactor": 1,
+      "text_align": "center",
+      "tick": true,
+      "tick_edge": "bottom",
+      "tick_pos": "50%",
+      "title": false,
+      "type": "note",
+      "width": 75,
+      "x": 75,
+      "y": 40
+    },
+    {
+      "add_timeframe": true,
+      "error": null,
+      "height": 13,
+      "isShared": false,
+      "legend": false,
+      "legend_size": "0",
+      "scaleFactor": 1,
+      "tile_def": {
+        "autoscale": true,
+        "requests": [
+          {
+            "aggregator": "avg",
+            "conditional_formats": [],
+            "q": "avg:systemd.service.tasks_current{$scope,unit:ssh.service}",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "type": "solid",
+              "width": "normal"
+            },
+            "type": "line"
+          }
+        ],
+        "title_align": "left",
+        "title_size": "16",
+        "viz": "timeseries"
+      },
+      "time": {},
+      "title": true,
+      "title_align": "left",
+      "title_size": 16,
+      "title_text": "SSH Tasks",
+      "type": "timeseries",
+      "width": 37,
+      "x": 75,
+      "y": 47
+    },
+    {
+      "add_timeframe": true,
+      "auto_refresh": false,
+      "background_color": "gray",
+      "bgcolor": "gray",
+      "content": "Service Cron",
+      "font_size": "18",
+      "height": 6,
+      "html": "Syslog Socket",
+      "isShared": false,
+      "legend": false,
+      "legend_size": "0",
+      "refresh_every": 30000,
+      "scaleFactor": 1,
+      "text_align": "center",
+      "tick": true,
+      "tick_edge": "bottom",
+      "tick_pos": "50%",
+      "title": false,
+      "type": "note",
+      "width": 75,
+      "x": 75,
+      "y": 63
+    },
+    {
+      "add_timeframe": true,
+      "error": null,
+      "height": 13,
+      "legend": false,
+      "legend_size": "0",
+      "tile_def": {
+        "requests": [
+          {
+            "display_type": "line",
+            "q": "avg:systemd.socket.n_accepted{unit:syslog.socket}",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "title_align": "left",
+        "title_size": "16",
+        "viz": "timeseries"
+      },
+      "time": {},
+      "title": true,
+      "title_align": "left",
+      "title_size": 16,
+      "title_text": "Syslog Connections Accepted",
+      "type": "timeseries",
+      "width": 37,
+      "x": 75,
+      "y": 70
+    },
+    {
+      "add_timeframe": true,
+      "error": null,
+      "height": 13,
+      "legend": false,
+      "legend_size": "0",
+      "tile_def": {
+        "requests": [
+          {
+            "display_type": "line",
+            "q": "avg:systemd.socket.n_connections{unit:syslog.socket}",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic"
+            }
+          }
+        ],
+        "title_align": "left",
+        "title_size": "16",
+        "viz": "timeseries"
+      },
+      "time": {},
+      "title": true,
+      "title_align": "left",
+      "title_size": 16,
+      "title_text": "Syslog Current Connections",
+      "type": "timeseries",
+      "width": 37,
+      "x": 113,
+      "y": 70
+    },
+    {
+      "add_timeframe": true,
+      "error": null,
+      "height": 13,
+      "isShared": false,
+      "legend": false,
+      "legend_size": "0",
+      "scaleFactor": 1,
+      "tile_def": {
+        "autoscale": true,
+        "requests": [
+          {
+            "aggregator": "avg",
+            "conditional_formats": [],
+            "q": "avg:systemd.unit.loaded{$scope,unit:cron.service}",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "type": "solid",
+              "width": "normal"
+            },
+            "type": "line"
+          }
+        ],
+        "title_align": "left",
+        "title_size": "16",
+        "viz": "timeseries"
+      },
+      "time": {},
+      "title": true,
+      "title_align": "left",
+      "title_size": 16,
+      "title_text": "Cron Loaded",
+      "type": "timeseries",
+      "width": 37,
+      "x": 75,
+      "y": 8
+    },
+    {
+      "add_timeframe": true,
+      "error": null,
+      "height": 13,
+      "isShared": false,
+      "legend": false,
+      "legend_size": "0",
+      "scaleFactor": 1,
+      "tile_def": {
+        "autoscale": true,
+        "requests": [
+          {
+            "aggregator": "avg",
+            "conditional_formats": [],
+            "q": "avg:systemd.unit.active{$scope,unit:cron.service}",
+            "style": {
+              "line_type": "solid",
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "type": "solid",
+              "width": "normal"
+            },
+            "type": "line"
+          }
+        ],
+        "title_align": "left",
+        "title_size": "16",
+        "viz": "timeseries"
+      },
+      "time": {},
+      "title": true,
+      "title_align": "left",
+      "title_size": 16,
+      "title_text": "Cron Active",
+      "type": "timeseries",
+      "width": 37,
+      "x": 75,
+      "y": 24
     }
   ],
-  "width": 173
+  "width": "100%"
 }
