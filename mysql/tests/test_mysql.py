@@ -15,6 +15,7 @@ from datadog_checks.mysql import MySql
 from . import common, tags, variables
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_minimal_config(aggregator, instance_basic):
     mysql_check = MySql(common.CHECK_NAME, {}, {})
@@ -37,6 +38,7 @@ def test_minimal_config(aggregator, instance_basic):
         aggregator.assert_metric(mname, at_least=0)
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config(aggregator, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[instance_complex])
@@ -106,6 +108,7 @@ def test_complex_config(aggregator, instance_complex):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_failure(aggregator, instance_error):
     """
@@ -121,6 +124,7 @@ def test_connection_failure(aggregator, instance_error):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config_replica(aggregator, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, {})
