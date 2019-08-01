@@ -976,8 +976,9 @@ class VSphereCheck(AgentCheck):
             # Second part: do the job
             self.collect_metrics(instance)
 
+            self._log_support("Querying events")
             self._query_event(instance)
-
+            self._log_support("Events have been fetched correctly.")
             self.set_external_tags(self.get_external_host_tags())
 
             self.stop_pool()
