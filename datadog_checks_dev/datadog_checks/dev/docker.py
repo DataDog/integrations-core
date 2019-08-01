@@ -22,15 +22,9 @@ def get_docker_hostname():
 
 def get_container_ip(container_id_or_name):
     """Get a Docker container's IP address from its id or name."""
-    command = [
-        'docker',
-        'inspect',
-        '-f',
-        '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}',
-        container_id_or_name,
-    ]
-
-    return run_command(command, capture='out', check=True).stdout.strip()
+    client = docker_client.from_env()
+    inspect = client.api.inspect_container(container_id_or_name)
+    return inspect["NetworkSettings"]["Networks"]["compose_default"]["IPAddress"]
 
 
 def compose_file_active(compose_file):
