@@ -63,7 +63,14 @@ class Etcd(OpenMetricsBaseCheck):
         'standardDeviation': 'etcd.leader.latency.stddev',
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_cert': {'name': 'tls_cert'},
+        'ssl_private_key': {'name': 'tls_private_key'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
+        'ssl_verify': {'name': 'tls_verify'},
+    }
+
+    def __init__(self, name, init_config, instances):
         if instances is not None:
             for instance in instances:
                 # For legacy check ensure prometheus_url is set so
@@ -74,7 +81,6 @@ class Etcd(OpenMetricsBaseCheck):
         super(Etcd, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 'etcd': {
