@@ -77,7 +77,6 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-
     ## @param username - string - optional
     ## If the API endpoint is behind basic auth, enter here the required username.
     #
