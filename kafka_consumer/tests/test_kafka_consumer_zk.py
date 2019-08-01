@@ -24,7 +24,7 @@ def test_check_zk(aggregator, zk_instance):
     """
     Testing Kafka_consumer check.
     """
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [{}])
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [zk_instance])
     kafka_consumer_check.check(zk_instance)
 
     for name, consumer_group in zk_instance['consumer_groups'].items():
@@ -71,7 +71,7 @@ def test_multiple_servers_zk(aggregator, zk_instance):
         '{}:9092'.format(HOST),
     ]
 
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [{}])
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [multiple_server_zk_instance])
     kafka_consumer_check.check(multiple_server_zk_instance)
 
     for name, consumer_group in multiple_server_zk_instance['consumer_groups'].items():
@@ -97,7 +97,7 @@ def test_check_nogroups_zk(aggregator, zk_instance):
     nogroup_instance.pop('consumer_groups')
     nogroup_instance['monitor_unlisted_consumer_groups'] = True
 
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [{}])
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [nogroup_instance])
     kafka_consumer_check.check(nogroup_instance)
 
     for topic in TOPICS:
