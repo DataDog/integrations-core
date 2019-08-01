@@ -145,8 +145,8 @@ class Vault(AgentCheck):
     def access_api(self, url, config, tags):
         try:
             response = self.http.get(url)
-                response.raise_for_status()
-                json_data = response.json()
+            response.raise_for_status()
+            json_data = response.json()
         except requests.exceptions.HTTPError:
             msg = 'The Vault endpoint `{}` returned {}.'.format(url, response.status_code)
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
