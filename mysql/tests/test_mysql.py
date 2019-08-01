@@ -36,8 +36,6 @@ def test_minimal_config(aggregator, instance_basic):
     for mname in testable_metrics:
         aggregator.assert_metric(mname, at_least=0)
 
-    aggregator.assert_all_metrics_covered()
-
 
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config(aggregator, instance_complex):
