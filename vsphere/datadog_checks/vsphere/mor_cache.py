@@ -118,6 +118,9 @@ class MorCache:
         """
         mors_to_purge = []
         now = time.time()
+        if custom_log_method is None:
+            # Make it noop
+            custom_log_method = lambda x: None  # noqa: E731
         custom_log_method("Purging old mors, initial size is {}".format(len(self._mor[key])))
         with self._mor_lock:
             # Don't change the dict during iteration!

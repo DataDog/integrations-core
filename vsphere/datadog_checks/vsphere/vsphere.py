@@ -141,6 +141,8 @@ class VSphereCheck(AgentCheck):
         self.latest_event_query = {}
         self.exception_printed = 0
 
+        self._current_instance_key = None
+
     def print_exception(self, msg):
         """ Print exceptions happening in separate threads
         Prevent from logging a ton of them if a potentially big number of them fail the same way
@@ -494,7 +496,9 @@ class VSphereCheck(AgentCheck):
                     vm_name = properties.get("name", "unknown")
                     if power_state != vim.VirtualMachinePowerState.poweredOn:
                         self.log.debug("Skipping VM in state %s", ensure_unicode(power_state))
-                        self._log_support("Skipping VM {} in state {}".format(ensure_unicode(vm_name), ensure_unicode(power_state)))
+                        self._log_support(
+                            "Skipping VM {} in state {}".format(ensure_unicode(vm_name), ensure_unicode(power_state))
+                        )
                         continue
                     host_mor = properties.get("runtime.host")
                     host_props = all_objects.get(host_mor, {})
@@ -519,7 +523,9 @@ class VSphereCheck(AgentCheck):
                     hostname = None
                     vimtype = vim.Datastore
                     mor_type = "datastore"
-                    self._log_support("Found datastore named {}".format(ensure_unicode(properties.get("name", "unknown"))))
+                    self._log_support(
+                        "Found datastore named {}".format(ensure_unicode(properties.get("name", "unknown")))
+                    )
                 elif isinstance(obj, vim.Datacenter):
                     vsphere_type = 'vsphere_type:datacenter'
                     instance_tags.append(
@@ -640,7 +646,9 @@ class VSphereCheck(AgentCheck):
         for mor in mors:
             mor_name = str(mor['mor'])
             available_metrics = {m.counterId for m in perfManager.QueryAvailablePerfMetric(entity=mor["mor"])}
-            self._log_support("Metric ids for mor {} are {}".format(mor_name, ','.join([str(s) for s in sorted(available_metrics)])))
+            self._log_support(
+                "Metric ids for mor {} are {}".format(mor_name, ','.join([str(s) for s in sorted(available_metrics)]))
+            )
             try:
                 self.mor_cache.set_metrics(i_key, mor_name, self._compute_needed_metrics(instance, available_metrics))
             except MorNotFoundError:
@@ -692,7 +700,11 @@ class VSphereCheck(AgentCheck):
 
                 # We will actually schedule jobs for non realtime resources only.
                 if mors:
-                    self._log_support("Fetching historical data for the followings mors {}".format(','.join([str(m['mor']) for m in mors])))
+                    self._log_support(
+                        "Fetching historical data for the followings mors {}".format(
+                            ','.join([str(m['mor']) for m in mors])
+                        )
+                    )
                     self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, mors))
 
     def _cache_metrics_metadata(self, instance):
@@ -731,7 +743,16 @@ class VSphereCheck(AgentCheck):
                 metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter.key, instance="*"))
 
         self.log.info("Finished metadata collection for instance %s", i_key)
-        self._log_support("Collected metric metadata are '{}'".format(';'.join(["name:{},unit:{},counter.key:{}".format(v['name'], v['unit'], k) for k, v in iteritems(new_metadata)])))
+        self._log_support(
+            "Collected metric metadata are '{}'".format(
+                ';'.join(
+                    [
+                        "name:{},unit:{},counter.key:{}".format(v['name'], v['unit'], k)
+                        for k, v in iteritems(new_metadata)
+                    ]
+                )
+            )
+        )
         # Reset metadata
         self.metadata_cache.set_metadata(i_key, new_metadata)
         self.metadata_cache.set_metric_ids(i_key, metric_ids)
@@ -817,8 +838,8 @@ class VSphereCheck(AgentCheck):
                     counter_id = result.id.counterId
                     if not self.metadata_cache.contains(i_key, counter_id):
                         self._log_support(
-                            "Skipping value for counter %s, because there is no metadata about it" %
-                            ensure_unicode(counter_id)
+                            "Skipping value for counter %s, because there is no metadata about it"
+                            % ensure_unicode(counter_id)
                         )
                         self.log.debug(
                             "Skipping value for counter %s, because there is no metadata about it",
@@ -837,7 +858,9 @@ class VSphereCheck(AgentCheck):
 
                     if not result.value:
                         self.log.debug("Skipping `%s` metric because the value is empty", ensure_unicode(metric_name))
-                        self._log_support("Skipping `%s` metric because the value is empty" % ensure_unicode(metric_name))
+                        self._log_support(
+                            "Skipping `%s` metric because the value is empty" % ensure_unicode(metric_name)
+                        )
                         continue
 
                     instance_name = result.id.instance or "none"
@@ -895,7 +918,11 @@ class VSphereCheck(AgentCheck):
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
                 if mor['mor_type'] not in REALTIME_RESOURCES and ('metrics' not in mor or not mor['metrics']):
-                    self._log_support("Ignoring mor {} because it is not real time and does not contain 'metrics'".format(str(mor["mor"])))
+                    self._log_support(
+                        "Ignoring mor {} because it is not real time and does not contain 'metrics'".format(
+                            str(mor["mor"])
+                        )
+                    )
                     continue
 
                 query_spec = vim.PerformanceManager.QuerySpec()
@@ -916,7 +943,9 @@ class VSphereCheck(AgentCheck):
     def check(self, instance):
         self._current_instance_key = self._instance_key(instance)
         try:
-            self._log_support("Starting pool with {} threads".format(self.init_config.get('threads_count', DEFAULT_SIZE_POOL)))
+            self._log_support(
+                "Starting pool with {} threads".format(self.init_config.get('threads_count', DEFAULT_SIZE_POOL))
+            )
             self.start_pool()
             self.exception_printed = 0
 
@@ -934,7 +963,9 @@ class VSphereCheck(AgentCheck):
             self._process_mor_objects_queue(instance)
 
             # Remove old objects that might be gone from the Mor cache
-            self.mor_cache.purge(self._instance_key(instance), self.clean_morlist_interval, lambda x: self._log_support(x))
+            self.mor_cache.purge(
+                self._instance_key(instance), self.clean_morlist_interval, lambda x: self._log_support(x)
+            )
 
             if is_affirmative(instance.get('dd_restart_pool', False)):
                 # Let's wait for the mor queues to be fully processed before collecting metrics

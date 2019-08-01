@@ -113,7 +113,7 @@ def test_purge(cache):
     cache._mor['foo_instance'] = {}
     for i in range(3):
         # set last access to 0, these will be purged
-        cache._mor['foo_instance'][i] = {'creation_time': 0}
+        cache._mor['foo_instance'][str(i)] = {'creation_time': 0}
     # this entry should stay
     cache._mor['foo_instance']['hero'] = {'creation_time': time.time()}
     # purge items older than 60 seconds
