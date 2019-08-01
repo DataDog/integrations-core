@@ -133,8 +133,13 @@ class RequestsWrapper(object):
             if field in instance:
                 continue
 
+            # Invert default booleans if need be
+            default = default_fields[field]
+            if data.get('invert'):
+                default = not default
+
             # Get value, with a possible default
-            value = instance.get(remapped_field, data.get('default', default_fields[field]))
+            value = instance.get(remapped_field, data.get('default', default))
 
             # Invert booleans if need be
             if data.get('invert'):
