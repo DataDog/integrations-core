@@ -6,8 +6,6 @@ from time import time as timestamp
 
 import requests
 from simplejson import JSONDecodeError
-from six import string_types
-from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
