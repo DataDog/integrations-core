@@ -29,7 +29,7 @@ def dd_environment(instance, instance_vts):
 
 @pytest.fixture
 def check():
-    return Nginx('nginx', {}, {})
+    return Nginx('nginx', {}, [])
 
 
 @pytest.fixture(scope='session')

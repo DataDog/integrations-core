@@ -76,11 +76,6 @@ class Nginx(AgentCheck):
         'user': {'name': 'username'},
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        if instances is not None:
-            self.http.options['proxies'] = self.get_instance_proxy(instances[0], instances[0]['nginx_status_url'])
-
     def check(self, instance):
         if 'nginx_status_url' not in instance:
             raise ConfigurationError('NginX instance missing "nginx_status_url" value.')
@@ -106,7 +101,7 @@ class Nginx(AgentCheck):
             # since we can't get everything in one place anymore.
             for endpoint, nest in chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS)):
                 response = self._get_plus_api_data(
-                    instance, url, plus_api_version, endpoint, nest
+                    url, plus_api_version, endpoint, nest
                 )
                 self.log.debug(u"Nginx Plus API version {} `response`: {}".format(plus_api_version, response))
                 metrics.extend(self.parse_json(response, tags))
@@ -161,7 +156,7 @@ class Nginx(AgentCheck):
         resp_headers = r.headers
         return body, resp_headers.get('content-type', 'text/plain')
 
-    def _perform_request(self, instance, url):
+    def _perform_request(self, url):
         r = self.http.get(url)
         r.raise_for_status()
         return r
@@ -179,7 +174,7 @@ class Nginx(AgentCheck):
         service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + custom_tags
         try:
             self.log.debug(u"Querying URL: {}".format(url))
-            r = self._perform_request(instance, url)
+            r = self._perform_request(url)
         except Exception:
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
@@ -196,7 +191,7 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
-    def _get_plus_api_data(self, instance, api_url, plus_api_version, endpoint, nest):
+    def _get_plus_api_data(self, api_url, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
         # so we can treat it the same way
 
@@ -204,7 +199,7 @@ class Nginx(AgentCheck):
         payload = {}
         try:
             self.log.debug(u"Querying URL: {}".format(url))
-            r = self._perform_request(instance, url)
+            r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
             if endpoint in PLUS_API_STREAM_ENDPOINTS:
