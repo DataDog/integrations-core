@@ -66,7 +66,7 @@ def _assert_complex_config(aggregator, count):
         + variables.SYNTHETIC_VARS
     )
 
-    if environ.getenv('MYSQL_VERSION') != '5.5' and environ.get('MYSQL_FLAVOR') != 'mariadb':
+    if environ.get('MYSQL_VERSION') != '5.5' and environ.get('MYSQL_FLAVOR') != 'mariadb':
         testable_metrics.extend(variables.PERFORMANCE_VARS)
 
     # Test metrics
