@@ -146,6 +146,7 @@ def test_complex_config_replica(aggregator, instance_complex):
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
         + variables.SYNTHETIC_VARS
+        + variables.PERFORMANCE_VARS
     )
 
     # Test metrics
@@ -158,9 +159,9 @@ def test_complex_config_replica(aggregator, instance_complex):
             continue
         if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
             continue
-
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
+            # Missing in MariaDB
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], at_least=0)
         elif mname == 'mysql.info.schema.size':
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=1)
