@@ -55,7 +55,11 @@ def run_in_container(container_name, command, check=True):
     container = client.containers.get(container_name)
     if not container:
         raise Exception("Could not find container {}".format(container_name))
-    command_line = ' '.join(command) if isinstance(command, list) else command
+    try:
+        command_line = ' '.join(command) if isinstance(command, list) else command
+    except TypeError as e:
+        print(command)
+        raise e
     code, out = container.exec_run(command_line)
     if check and code != 0:
         raise Exception(out)
