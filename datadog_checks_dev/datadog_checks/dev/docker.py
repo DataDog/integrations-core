@@ -38,12 +38,13 @@ def compose_file_active(compose_file):
     return False
 
 
-def run_in_container(container_name, command, check=True):
+def run_in_container(container_name, command, check=True, interactive=False):
     """Runs a command in the given container. This is useful for WaitFor conditions in `docker_run`
 
     :param container_name: The name of the container
     :param command: command line to run in the container
-    :param check: Whether or not to raise an exception on non-zero exit codes.
+    :param check: Whether or not to raise an exception on non-zero exit codes. Default: ``True``
+    :param interactive: Attach to stdin. Default: ``False``
     """
     client = docker_client.from_env()
     container = client.containers.get(container_name)
@@ -54,7 +55,7 @@ def run_in_container(container_name, command, check=True):
     except TypeError as e:
         print(command)
         raise e
-    code, out = container.exec_run(command_line)
+    code, out = container.exec_run(command_line, stdin=interactive)
     if check and code != 0:
         raise Exception(out)
     return code, out

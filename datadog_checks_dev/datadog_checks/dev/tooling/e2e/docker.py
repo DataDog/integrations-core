@@ -80,18 +80,9 @@ class DockerInterface(object):
         return get_agent_exe(self.agent_version)
 
     def exec_command(self, command, **kwargs):
-        cmd = 'docker exec'
-
-        if kwargs.pop('interactive', False):
-            cmd += ' -it'
-
         if command.startswith('pip '):
             command = command.replace('pip', ' '.join(get_pip_exe(self.python_version)), 1)
-
-        cmd += ' {}'.format(self.container_name)
-        cmd += ' {}'.format(command)
-
-        return run_command(cmd, **kwargs)
+        run_in_container(self.container_name, command, interactive=kwargs.pop('interactive', False))
 
     def run_check(
         self,
