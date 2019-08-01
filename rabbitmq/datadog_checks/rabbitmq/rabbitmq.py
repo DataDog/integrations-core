@@ -142,7 +142,7 @@ class RabbitMQ(AgentCheck):
         'rabbitmq_user': {'name': 'username'},
         'rabbitmq_pass': {'name': 'password'},
         'ssl_verify': {'name': 'tls_verify'},
-        'ignore_ssl_warning': {'name': 'tls_ignore_warning'}
+        'ignore_ssl_warning': {'name': 'tls_ignore_warning'},
     }
 
     def __init__(self, name, init_config, instances=None):
@@ -226,9 +226,7 @@ class RabbitMQ(AgentCheck):
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
                 # Generate metrics from the status API.
-                self.get_stats(
-                    instance,
-                    base_url,
+                self.get_stats(instance, base_url,
                     EXCHANGE_TYPE,
                     max_detailed[EXCHANGE_TYPE],
                     specified[EXCHANGE_TYPE],
@@ -242,7 +240,7 @@ class RabbitMQ(AgentCheck):
                     max_detailed[QUEUE_TYPE],
                     specified[QUEUE_TYPE],
                     limit_vhosts,
-                    custom_tags
+                    custom_tags,
                 )
                 self.get_stats(
                     instance,
@@ -251,18 +249,11 @@ class RabbitMQ(AgentCheck):
                     max_detailed[NODE_TYPE],
                     specified[NODE_TYPE],
                     limit_vhosts,
-                    custom_tags
+                    custom_tags,
                 )
                 self.get_overview_stats(base_url, custom_tags)
 
-                self.get_connections_stat(
-                    instance,
-                    base_url,
-                    CONNECTION_TYPE,
-                    vhosts,
-                    limit_vhosts,
-                    custom_tags
-                )
+                self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags)
 
                 # Generate a service check from the aliveness API. In the case of an invalid response
                 # code or unparseable JSON this check will send no data.
@@ -360,16 +351,7 @@ class RabbitMQ(AgentCheck):
                 tags.append('{}_{}:{}'.format(TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
-    def get_stats(
-        self,
-        instance,
-        base_url,
-        object_type,
-        max_detailed,
-        filters,
-        limit_vhosts,
-        custom_tags
-    ):
+    def get_stats(self, instance, base_url, object_type, max_detailed, filters, limit_vhosts, custom_tags):
         """
         instance: the check instance
         base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
@@ -528,9 +510,7 @@ class RabbitMQ(AgentCheck):
         # get a list of the number of bindings on a given queue
         # /api/queues/vhost/name/bindings
         if object_type is QUEUE_TYPE:
-            self._get_queue_bindings_metrics(
-                base_url, custom_tags, data, object_type
-            )
+            self._get_queue_bindings_metrics(base_url, custom_tags, data, object_type)
 
     def get_overview_stats(self, base_url, custom_tags):
         data = self._get_data(urljoin(base_url, "overview"))
@@ -565,22 +545,16 @@ class RabbitMQ(AgentCheck):
                     )
         return metrics_sent
 
-    def _get_queue_bindings_metrics(
-        self, base_url, custom_tags, data, object_type
-    ):
+    def _get_queue_bindings_metrics(self, base_url, custom_tags, data, object_type):
         for item in data:
             vhost = item['vhost']
             tags = self._get_tags(item, object_type, custom_tags)
             url = '{}/{}/{}/bindings'.format(QUEUE_TYPE, quote_plus(vhost), quote_plus(item['name']))
-            bindings_count = len(
-                self._get_data(urljoin(base_url, url))
-            )
+            bindings_count = len(self._get_data(urljoin(base_url, url)))
 
             self.gauge('rabbitmq.queue.bindings.count', bindings_count, tags)
 
-    def get_connections_stat(
-        self, instance, base_url, object_type, vhosts, limit_vhosts, custom_tags
-    ):
+    def get_connections_stat(self, instance, base_url, object_type, vhosts, limit_vhosts, custom_tags):
         """
         Collect metrics on currently open connection per vhost.
         """
@@ -592,18 +566,14 @@ class RabbitMQ(AgentCheck):
             for vhost in vhosts:
                 url = "vhosts/{}/{}".format(quote_plus(vhost), object_type)
                 try:
-                    data += self._get_data(
-                        urljoin(base_url, url)
-                    )
+                    data += self._get_data(urljoin(base_url, url))
                 except Exception as e:
                     # This will happen if there is no connection data to grab
                     self.log.debug("Couldn't grab connection data from vhost, {}: {}".format(vhost, e))
 
         # sometimes it seems to need to fall back to this
         if grab_all_data or not len(data):
-            data = self._get_data(
-                urljoin(base_url, object_type)
-            )
+            data = self._get_data(urljoin(base_url, object_type))
 
         stats = {vhost: 0 for vhost in vhosts}
         connection_states = defaultdict(int)
