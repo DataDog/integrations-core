@@ -226,7 +226,9 @@ class RabbitMQ(AgentCheck):
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
                 # Generate metrics from the status API.
-                self.get_stats(instance, base_url,
+                self.get_stats(
+                    instance,
+                    base_url,
                     EXCHANGE_TYPE,
                     max_detailed[EXCHANGE_TYPE],
                     specified[EXCHANGE_TYPE],
