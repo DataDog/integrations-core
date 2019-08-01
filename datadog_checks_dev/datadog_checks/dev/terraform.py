@@ -36,7 +36,7 @@ def construct_env_vars():
 
 @contextmanager
 def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper=None):
-    """This utility provides a convenient way to safely set up and tear down Docker environments.
+    """This utility provides a convenient way to safely set up and tear down Terraform environments.
 
     :param directory: A path containing Terraform files.
     :type directory: ``str``
@@ -70,6 +70,11 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
 
 
 class TerraformUp(LazyFunction):
+    """Create the terraform environment, calling `init` and `apply`.
+
+    It also returns the outputs as a `dict`.
+    """
+
     def __init__(self, directory):
         self.directory = directory
 
@@ -87,6 +92,8 @@ class TerraformUp(LazyFunction):
 
 
 class TerraformDown(LazyFunction):
+    """Delete the terraform environment, calling `destroy`."""
+
     def __init__(self, directory):
         self.directory = directory
 

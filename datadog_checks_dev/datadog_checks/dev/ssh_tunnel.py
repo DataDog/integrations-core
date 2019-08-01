@@ -21,14 +21,16 @@ else:
     import subprocess32 as subprocess
 
 
-def find_free_port():
+def find_free_port(ip):
+    """Return a port available for listening on the given `ip`."""
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('', 0))
+        s.bind((ip, 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
 
 
 def get_ip():
+    """Return the IP address used to connect to external networks."""
     with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
         # doesn't even have to be reachable
         s.connect(('10.255.255.255', 1))
@@ -46,6 +48,11 @@ def socks_proxy(host, user, private_key):
 
 
 class SocksProxyUp(LazyFunction):
+    """Create a SOCKS proxy using `ssh`.
+
+    It returns the (`ip`, `port`) on which the proxy is listening.
+    """
+
     def __init__(self, host, user, private_key):
         self.host = host
         self.user = user
@@ -53,12 +60,12 @@ class SocksProxyUp(LazyFunction):
 
     def __call__(self):
         with TempDir('socks_proxy') as temp_dir:
-            local_port = find_free_port()
+            ip = get_ip()
+            local_port = find_free_port(ip)
             key_file = os.path.join(temp_dir, 'ssh_key')
             with open(key_file, 'w') as f:
                 f.write(self.private_key)
             os.chmod(key_file, 0o600)
-            ip = get_ip()
             command = [
                 'ssh',
                 '-N',
@@ -89,6 +96,8 @@ class SocksProxyUp(LazyFunction):
 
 
 class SocksProxyDown(LazyFunction):
+    """Kill a previous started SOCKS proxy."""
+
     def __call__(self):
         with TempDir('socks_proxy') as temp_dir:
             with open(os.path.join(temp_dir, 'ssh.pid')) as ssh_pid:
