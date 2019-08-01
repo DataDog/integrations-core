@@ -110,6 +110,11 @@ def tcp_tunnel(host, user, private_key, remote_port):
 
 
 class TCPTunnelUp(LazyFunction):
+    """Create a TCP tunnel using `ssh`.
+
+    It returns the (`ip`, `port`) on which the tunnel is listening, connecting to `remote_port`.
+    """
+
     def __init__(self, host, user, private_key, remote_port):
         self.host = host
         self.user = user
@@ -118,12 +123,12 @@ class TCPTunnelUp(LazyFunction):
 
     def __call__(self):
         with TempDir('tcp_tunnel') as temp_dir:
-            local_port = find_free_port()
+            ip = get_ip()
+            local_port = find_free_port(ip)
             key_file = os.path.join(temp_dir, 'ssh_key')
             with open(key_file, 'w') as f:
                 f.write(self.private_key)
             os.chmod(key_file, 0o600)
-            ip = get_ip()
             command = [
                 'ssh',
                 '-N',
@@ -141,10 +146,14 @@ class TCPTunnelUp(LazyFunction):
             ]
             run_background_command(command, os.path.join(temp_dir, PID_FILE))
 
+            WaitForPortListening(ip, local_port)()
+
             return ip, local_port
 
 
 class KillProcess(LazyFunction):
+    """Kill a process with the `pid_file` residing in the temporary directory `temp_name`."""
+
     def __init__(self, temp_name, pid_file):
         self.temp_name = temp_name
         self.pid_file = pid_file

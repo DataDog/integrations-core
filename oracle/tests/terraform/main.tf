@@ -2,6 +2,10 @@ variable "account_json" {
   type = string
 }
 
+variable "user" {
+  type = string
+}
+
 provider "google" {
   credentials = var.account_json
   project = "datadog-integrations-lab"
@@ -21,7 +25,7 @@ resource "random_string" "suffix" {
 }
 
 resource "google_compute_instance" "oracle" {
-  name = "oracle-${random_string.suffix.result}"
+  name = replace("oracle-${var.user}-${random_string.suffix.result}", ".", "-")
   machine_type = "n1-standard-4"
 
   tags = ["oracle", "lab"]
