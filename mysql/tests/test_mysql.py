@@ -59,13 +59,13 @@ def _assert_complex_config(aggregator, count):
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, count=count)
     aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS, at_least=1)
     testable_metrics = (
-            variables.STATUS_VARS
-            + variables.VARIABLES_VARS
-            + variables.INNODB_VARS
-            + variables.BINLOG_VARS
-            + variables.SYSTEM_METRICS
-            + variables.SCHEMA_VARS
-            + variables.SYNTHETIC_VARS
+        variables.STATUS_VARS
+        + variables.VARIABLES_VARS
+        + variables.INNODB_VARS
+        + variables.BINLOG_VARS
+        + variables.SYSTEM_METRICS
+        + variables.SCHEMA_VARS
+        + variables.SYNTHETIC_VARS
     )
 
     if environ.getenv('MYSQL_VERSION') != '5.5' and environ.get('MYSQL_FLAVOR') != 'mariadb':
