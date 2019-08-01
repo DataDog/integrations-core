@@ -3,8 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from collections import namedtuple
 
-import requests
-
 from datadog_checks.checks import AgentCheck
 
 
@@ -108,6 +106,11 @@ class PowerDNSRecursorCheck(AgentCheck):
 
     SERVICE_CHECK_NAME = 'powerdns.recursor.can_connect'
 
+    def __init__(self, name, init_config, instances):
+        super(PowerDNSRecursorCheck, self).__init__(name, init_config, instances)
+        if 'api_key' in self.instance:
+            self.http.options['headers']['X-API-Key'] = self.instance['api_key']
+
     def check(self, instance):
         config, tags = self._get_config(instance)
         stats = self._get_pdns_stats(config, tags)
@@ -125,21 +128,20 @@ class PowerDNSRecursorCheck(AgentCheck):
                     self.rate('powerdns.recursor.{}'.format(stat['name']), float(stat['value']), tags=tags)
 
     def _get_config(self, instance):
-        required = ['host', 'port', 'api_key']
+        required = ['host', 'port']
         for param in required:
             if not instance.get(param):
                 raise Exception("powerdns_recursor instance missing %s. Skipping." % (param))
 
         host = instance.get('host')
         port = int(instance.get('port'))
-        api_key = instance.get('api_key')
         version = instance.get('version')
         tags = instance.get('tags', [])
         if tags is None:
             tags = []
-        Config = namedtuple('Config', ['host', 'port', 'api_key', 'version'])
+        Config = namedtuple('Config', ['host', 'port', 'version'])
 
-        return Config(host, port, api_key, version), tags
+        return Config(host, port, version), tags
 
     def _get_pdns_stats(self, config, tags):
         fallback_url = "http://{}:{}/api/v1/servers/localhost/statistics".format(config.host, config.port)
@@ -149,15 +151,14 @@ class PowerDNSRecursorCheck(AgentCheck):
             url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
 
         service_check_tags = ['recursor_host:{}'.format(config.host), 'recursor_port:{}'.format(config.port)] + tags
-        headers = {"X-API-Key": config.api_key}
         try:
-            request = requests.get(url, headers=headers)
+            request = self.http.get(url)
             request.raise_for_status()
         except Exception:
             try:
                 if fallback_url is url:
                     raise
-                request = requests.get(fallback_url, headers=headers)
+                request = self.http.get(fallback_url)
                 request.raise_for_status()
             except Exception:
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)

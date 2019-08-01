@@ -11,6 +11,8 @@ from datadog_checks.utils.containers import hash_mutable
 
 from . import common, consul_mocks
 
+pytestmark = pytest.mark.unit
+
 log = logging.getLogger(__file__)
 
 

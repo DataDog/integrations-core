@@ -638,7 +638,7 @@ def test__should_cache(instance):
 
 
 def alarm_event(from_status='green', to_status='red', message='Some error'):
-    now = datetime.now()
+    now = datetime.utcnow()
     vm = MockedMOR(spec='VirtualMachine')
     dc = MockedMOR(spec="Datacenter")
     dc_arg = vim.event.DatacenterEventArgument(datacenter=dc, name='dc1')
@@ -653,7 +653,7 @@ def alarm_event(from_status='green', to_status='red', message='Some error'):
 
 
 def migrated_event():
-    now = datetime.now()
+    now = datetime.utcnow()
     vm = MockedMOR(spec='VirtualMachine', name='vm1')
     vm_arg = vim.event.VmEventArgument(vm=vm)
     host = MockedMOR(spec='HostSystem')

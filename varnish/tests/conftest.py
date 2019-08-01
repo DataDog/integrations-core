@@ -11,6 +11,14 @@ from datadog_checks.varnish import Varnish
 
 from . import common
 
+E2E_METADATA = {
+    'start_commands': [
+        'apt-get update',
+        'apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker.io',
+    ],
+    'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock'],
+}
+
 
 @pytest.fixture
 def check():
@@ -21,7 +29,7 @@ def check():
 def dd_environment():
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yaml')
     with docker_run(compose_file, sleep=2):
-        yield common.get_config_by_version(), 'local'
+        yield common.get_config_by_version(), E2E_METADATA
 
 
 @pytest.fixture
