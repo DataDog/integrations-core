@@ -814,6 +814,7 @@ class VSphereCheck(AgentCheck):
         """ Task that collects the metrics listed in the morlist for one MOR
         """
         # ## <TEST-INSTRUMENTATION>
+        self._log_support("Starting metric collection async")
         t = Timer()
         # ## </TEST-INSTRUMENTATION>
         i_key = self._instance_key(instance)
@@ -821,6 +822,7 @@ class VSphereCheck(AgentCheck):
         perfManager = server_instance.content.perfManager
         custom_tags = instance.get('tags', [])
         results = perfManager.QueryPerf(query_specs)
+        self._log_support("vSphere answered in {} seconds".format(t.total()))
         if results:
             for mor_perfs in results:
                 mor_name = str(mor_perfs.entity)
@@ -881,6 +883,7 @@ class VSphereCheck(AgentCheck):
                     self.gauge("vsphere.{}".format(ensure_unicode(metric_name)), value, hostname=hostname, tags=tags)
 
         # ## <TEST-INSTRUMENTATION>
+        self._log_support("Async metric collection is over")
         self.histogram('datadog.agent.vsphere.metric_colection.time', t.total(), tags=custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
