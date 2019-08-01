@@ -21,6 +21,14 @@ E_METRICS = [
     'rabbitmq.exchange.messages.publish_out.rate',
 ]
 
+# Only present in 3.5
+E_METRICS_35 = [
+    'rabbitmq.exchange.messages.confirm.count',
+    'rabbitmq.exchange.messages.confirm.rate',
+    'rabbitmq.exchange.messages.return_unroutable.count',
+    'rabbitmq.exchange.messages.return_unroutable.rate',
+]
+
 Q_METRICS = [
     'rabbitmq.queue.consumers',
     'rabbitmq.queue.bindings.count',
