@@ -8,11 +8,13 @@ from os import environ
 import mock
 import psutil
 import pytest
+from pkg_resources import parse_version
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.mysql import MySql
 
 from . import common, tags, variables
+from .common import MYSQL_VERSION_PARSED
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -42,19 +44,19 @@ def test_complex_config(aggregator, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[instance_complex])
     mysql_check.check(instance_complex)
 
-    _assert_complex_config(aggregator, count=1)
+    _assert_complex_config(aggregator)
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance_complex):
-    aggregator = dd_agent_check(instance_complex, rate=True)
+    aggregator = dd_agent_check(instance_complex)
 
-    _assert_complex_config(aggregator, count=2)
+    _assert_complex_config(aggregator)
 
 
-def _assert_complex_config(aggregator, count):
+def _assert_complex_config(aggregator):
     # Test service check
-    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, count=count)
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, count=1)
     aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS, at_least=1)
     testable_metrics = (
         variables.STATUS_VARS
@@ -66,7 +68,7 @@ def _assert_complex_config(aggregator, count):
         + variables.SYNTHETIC_VARS
     )
 
-    if environ.get('MYSQL_VERSION') != '5.5' and environ.get('MYSQL_FLAVOR') != 'mariadb':
+    if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
         testable_metrics.extend(variables.PERFORMANCE_VARS)
 
     # Test metrics
@@ -81,12 +83,12 @@ def _assert_complex_config(aggregator, count):
             continue
 
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=count)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:mysql'], count=count)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:mysql'], count=1)
         elif mname == 'mysql.info.schema.size':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=count)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=count)
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:performance_schema'], count=count)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:performance_schema'], count=1)
         else:
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=0)
 
