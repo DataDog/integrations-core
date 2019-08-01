@@ -7,6 +7,9 @@ The ActiveMQ check collects metrics for brokers and queues, producers and consum
 **Note**: If you are running a ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][1].
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][13] for guidance on applying these instructions.
+
 ### Installation
 
 The Agent's ActiveMQ check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your ActiveMQ nodes.
@@ -149,3 +152,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/help
 [11]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics
 [12]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance
+[13]: https://docs.datadoghq.com/agent/autodiscovery/integrations

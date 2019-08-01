@@ -7,9 +7,6 @@
 Collect IIS metrics aggregated across all of your sites, or on a per-site basis. The IIS Agent check collects metrics for active connections, bytes sent and received, request count by HTTP method, and more. It also sends a service check for each site, letting you know whether it's up or down.
 
 ## Setup
-
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
-
 ### Installation
 
 The IIS check is packaged with the Agent. To start gathering your IIS metrics and logs, you need to:
@@ -153,7 +150,6 @@ The Agent submits this service check for each configured site in `iis.yaml`. It 
 Need help? Contact [Datadog support][12].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/iis/images/iisgraph.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/basic_agent_usage/windows/#agent-check-directory-structure
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory

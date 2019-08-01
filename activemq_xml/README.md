@@ -8,6 +8,9 @@ Get metrics from ActiveMQ XML service in real time to:
 * Be notified about ActiveMQ XML failovers and events.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][121] for guidance on applying these instructions.
+
 ### Installation
 
 The ActiveMQ XML check is included in the [Datadog Agent][111] package, so you don't need to install anything else on your servers.
@@ -53,3 +56,4 @@ Need help? Contact [Datadog support][117].
 [118]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [119]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/metadata.csv
 [120]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance
+[121]: https://docs.datadoghq.com/agent/autodiscovery/integrations

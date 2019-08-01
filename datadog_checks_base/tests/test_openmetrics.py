@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # (C) Datadog, Inc. 2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -159,9 +161,13 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """ submitting metrics that contain labels should result in tags on the gauge call """
     ref_gauge = GaugeMetricFamily(
-        'process_virtual_memory_bytes', 'Virtual memory size in bytes.', labels=['my_1st_label', 'my_2nd_label']
+        'process_virtual_memory_bytes',
+        'Virtual memory size in bytes.',
+        labels=['my_1st_label', 'my_2nd_label', 'labél_nat', 'labél_mix', u'labél_uni'],
     )
-    ref_gauge.add_metric(['my_1st_label_value', 'my_2nd_label_value'], 54927360.0)
+    ref_gauge.add_metric(
+        ['my_1st_label_value', 'my_2nd_label_value', 'my_labél_val', u'my_labél_val🐶', u'my_labél_val'], 54927360.0
+    )
 
     check = mocked_prometheus_check
     metric_name = mocked_prometheus_scraper_config['metrics_mapper'][ref_gauge.name]
@@ -169,7 +175,13 @@ def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_pr
     aggregator.assert_metric(
         'prometheus.process.vm.bytes',
         54927360.0,
-        tags=['my_1st_label:my_1st_label_value', 'my_2nd_label:my_2nd_label_value'],
+        tags=[
+            'my_1st_label:my_1st_label_value',
+            'my_2nd_label:my_2nd_label_value',
+            'labél_nat:my_labél_val',
+            'labél_mix:my_labél_val🐶',
+            'labél_uni:my_labél_val',
+        ],
         count=1,
     )
 

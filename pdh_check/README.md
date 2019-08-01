@@ -7,9 +7,6 @@ Get metrics from Windows performance counters in real time to:
 * Visualize and monitor windows performance counters through the pdh api
 
 ## Setup
-
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to apply those instructions to a containerized environment.
-
 ### Installation
 
 The PDH check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your servers.
@@ -33,7 +30,6 @@ The PDH check does not include any events.
 The PDH check does not include any service checks.
 
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/pdh_check/datadog_checks/pdh_check/data/conf.yaml.example

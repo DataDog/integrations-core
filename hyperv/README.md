@@ -5,9 +5,6 @@
 This check monitors [Hyper-V][1] through the Datadog Agent.
 
 ## Setup
-
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
-
 ### Installation
 
 The Hyper-V check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
@@ -47,7 +44,6 @@ Additional helpful documentation, links, and articles:
 * [Monitor Microsoft Hyper-V with Datadog][9]
 
 [1]: https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://docs.datadoghq.com/agent/basic_agent_usage/windows
 [4]: https://github.com/DataDog/integrations-core/blob/master/hyperv/datadog_checks/hyperv/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent

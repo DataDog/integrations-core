@@ -17,6 +17,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
 from datadog_checks.dev import EnvVars
+from datadog_checks.dev.utils import running_on_appveyor
 
 pytestmark = pytest.mark.http
 
@@ -58,6 +59,13 @@ class TestTimeout:
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['timeout'] == (10, 4)
+
+    def test_config_init_config_override(self):
+        instance = {}
+        init_config = {'timeout': 16}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['timeout'] == (16, 16)
 
 
 class TestHeaders:
@@ -446,6 +454,14 @@ class TestProxies:
         http.no_proxy_uris.__nonzero__ = lambda self, *args, **kwargs: True
 
         http.get('https://www.google.com')
+
+    @pytest.mark.skipif(running_on_appveyor(), reason="Cannot run on appveyor")
+    def test_socks5_proxy(self, socks5_proxy):
+        instance = {'proxy': {'http': 'socks5h://{}'.format(socks5_proxy)}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        http.get('http://www.google.com')
+        http.get('http://nginx')
 
 
 class TestIgnoreTLSWarning:

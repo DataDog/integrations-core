@@ -6,21 +6,21 @@ Use the Datadog Agent to monitor how well Istio is performing.
 
 * Collect metrics on what apps are making what kinds of requests
 * Look at how applications are using bandwidth
-* Understand istio's resource consumption
+* Understand Istio's resource consumption
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to apply those instructions to a containerized environment.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
 
 ### Installation
 
-Istio is included in the Datadog Agent. So, just [install the Agent][2] on your istio servers or in your cluster and point it at Istio.
+Istio is included in the Datadog Agent. [Install the Datadog Agent][2] on your Istio servers or in your cluster and point it at Istio.
 
 ### Configuration
 
 #### Connect the Agent
 
-Edit the `istio.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to connect it to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options:
+Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][3]) to connect to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options:
 
 ```
 init_config:
@@ -34,7 +34,30 @@ instances:
     send_histograms_buckets: true
 ```
 
-Each of the endpoints are optional, but at least one must be configured. See the [istio documentation][5] to learn more about the prometheus adapter.
+Each of the endpoints is optional, but at least one must be configured. See the [Istio documentation][5] to learn more about the Prometheus adapter.
+
+#### Disable sidecar injection
+
+If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.
+
+Add the `sidecar.istio.io/inject: "false"` annotation to the `datadog-agent` DaemonSet:
+
+```
+...
+spec:
+  ...
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    ...
+```
+
+This can also be done with the `kubectl patch` command.
+
+```
+kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"annotations":{"sidecar.istio.io/inject":"false"}}}}}'
+```
 
 ### Validation
 
@@ -69,3 +92,4 @@ Additional helpful documentation, links, and articles:
 [7]: https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/monitor-istio-with-datadog
+[10]: https://docs.datadoghq.com/agent/kubernetes

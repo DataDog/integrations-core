@@ -13,10 +13,11 @@ from .parser import parse_histogram, parse_metric
 
 
 class Envoy(AgentCheck):
+    HTTP_CONFIG_REMAPPER = {'verify_ssl': {'name': 'tls_verify'}}
     SERVICE_CHECK_NAME = 'envoy.can_connect'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        super(Envoy, self).__init__(name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(Envoy, self).__init__(name, init_config, instances)
         self.unknown_metrics = defaultdict(int)
         self.unknown_tags = defaultdict(int)
         self.whitelist = None
@@ -40,13 +41,6 @@ class Envoy(AgentCheck):
             self.log.error(msg)
             return
 
-        username = instance.get('username', None)
-        password = instance.get('password', None)
-        auth = (username, password) if username and password else None
-        verify_ssl = instance.get('verify_ssl', True)
-        proxies = self.get_instance_proxy(instance, stats_url)
-        timeout = int(instance.get('timeout', 20))
-
         if self.whitelist is None:
             whitelist = set(re.sub(r'^envoy\\?\.', '', s, 1) for s in instance.get('metric_whitelist', []))
             self.whitelist = [re.compile(pattern) for pattern in whitelist]
@@ -59,9 +53,11 @@ class Envoy(AgentCheck):
             self.caching_metrics = instance.get('cache_metrics', True)
 
         try:
-            response = requests.get(stats_url, auth=auth, verify=verify_ssl, proxies=proxies, timeout=timeout)
+            response = self.http.get(stats_url)
         except requests.exceptions.Timeout:
-            msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(stats_url, timeout)
+            msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(
+                stats_url, timeout=self.http.options['timeout']
+            )
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.exception(msg)
             return

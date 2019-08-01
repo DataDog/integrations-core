@@ -13,8 +13,8 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 CHECK_NAME = 'gunicorn'
 
 HOST = get_docker_hostname()
-PORT = 26379
+PORT = 18000
 
 PROC_NAME = 'dd-test-gunicorn'
 
-INSTANCE = {'host': HOST, 'port': PORT, 'password': 'datadog-is-devops-best-friend', 'proc_name': PROC_NAME}
+INSTANCE = {'proc_name': PROC_NAME}

@@ -33,17 +33,17 @@ def test_should_not_retry(check, instance):
     backoff only works when response code is 503, otherwise the error
     should bubble up
     """
-    with mock.patch('datadog_checks.php_fpm.php_fpm.requests') as r:
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.side_effect = FooException("Generic http error here")
         with pytest.raises(FooException):
-            check._process_status(instance['status_url'], None, [], None, 10, True, False)
+            check._process_status(instance['status_url'], [], None, False)
 
 
 def test_should_bail_out(check, instance):
     """
     backoff should give up after 3 attempts
     """
-    with mock.patch('datadog_checks.php_fpm.php_fpm.requests') as r:
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
         attrs = {'raise_for_status.side_effect': FooException()}
         r.get.side_effect = [
             mock.MagicMock(status_code=503, **attrs),
@@ -52,7 +52,7 @@ def test_should_bail_out(check, instance):
             mock.MagicMock(status_code=200),
         ]
         with pytest.raises(FooException):
-            check._process_status(instance['status_url'], None, [], None, 10, True, False)
+            check._process_status(instance['status_url'], [], None, False)
 
 
 def test_backoff_success(check, instance, aggregator, payload):
@@ -60,12 +60,12 @@ def test_backoff_success(check, instance, aggregator, payload):
     Success after 2 failed attempts
     """
     instance['ping_url'] = None
-    with mock.patch('datadog_checks.php_fpm.php_fpm.requests') as r:
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
         attrs = {'json.return_value': payload}
         r.get.side_effect = [
             mock.MagicMock(status_code=503),
             mock.MagicMock(status_code=503),
             mock.MagicMock(status_code=200, **attrs),
         ]
-        pool_name = check._process_status(instance['status_url'], None, [], None, 10, True, False)
+        pool_name = check._process_status(instance['status_url'], [], None, False)
         assert pool_name == 'www'

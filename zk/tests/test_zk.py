@@ -9,7 +9,9 @@ import pytest
 
 from datadog_checks.zk import ZookeeperCheck
 
-from . import conftest
+from . import common, conftest
+
+pytestmark = pytest.mark.integration
 
 
 def test_check(aggregator, dd_environment, get_instance):
@@ -26,12 +28,10 @@ def test_check(aggregator, dd_environment, get_instance):
 
     zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
     if zk_version and LooseVersion(zk_version) > LooseVersion("3.4.0"):
-        for mname in conftest.MNTR_METRICS:
+        for mname in common.MNTR_METRICS:
             aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
 
-    # Test service checks
-    aggregator.assert_service_check("zookeeper.ruok", status=zk_check.OK)
-    aggregator.assert_service_check("zookeeper.mode", status=zk_check.OK)
+    common.assert_service_checks_ok(aggregator)
 
     expected_mode = get_instance['expected_mode']
     mname = "zookeeper.instances.{}".format(expected_mode)

@@ -1,21 +1,18 @@
 # (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import logging
-
 import mock
 import pytest
 from six import iteritems
 
 from datadog_checks.mongo import MongoDb
 
-log = logging.getLogger('test_mongo')
-
 RATE = MongoDb.rate
 GAUGE = MongoDb.gauge
 
+pytestmark = pytest.mark.unit
 
-@pytest.mark.unit
+
 def test_build_metric_list(check):
     """
     Build the metric list according to the user configuration.
@@ -54,7 +51,6 @@ def test_build_metric_list(check):
     assert check.log.warning.call_count == 2
 
 
-@pytest.mark.unit
 def test_metric_resolution(check):
     """
     Resolve metric names and types.
@@ -77,7 +73,6 @@ def test_metric_resolution(check):
     assert (GAUGE, 'mongodb.qux.foobar') == resolve_metric('fOoBaR', metrics_to_collect, prefix="qux")
 
 
-@pytest.mark.unit
 def test_metric_normalization(check):
     """
     Metric names suffixed with `.R`, `.r`, `.W`, `.w` are renamed.
@@ -95,7 +90,6 @@ def test_metric_normalization(check):
     assert (GAUGE, 'mongodb.foobar.exclusive') == resolve_metric('foobar.W', metrics_to_collect)
 
 
-@pytest.mark.unit
 def test_state_translation(check):
     """
     Check that resolving replset member state IDs match to names and descriptions properly.
@@ -112,7 +106,6 @@ def test_state_translation(check):
     assert unknown_desc.find('500') != -1
 
 
-@pytest.mark.unit
 def test_server_uri_sanitization(check):
     _parse_uri = check._parse_uri
 

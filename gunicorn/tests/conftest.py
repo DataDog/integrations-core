@@ -22,7 +22,7 @@ log = logging.getLogger('test_gunicorn')
 def dd_environment():
     os.environ['PROC_NAME'] = PROC_NAME
     compose_file = os.path.join(COMPOSE, 'docker-compose.yaml')
-    with docker_run(compose_file, log_patterns=['Booting worker with pid']):
+    with docker_run(compose_file, log_patterns=['Booting worker with pid'], build=True):
         yield INSTANCE
 
 

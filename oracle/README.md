@@ -8,6 +8,8 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying these instructions.
+
 ### Installation
 
 #### Prerequisite
@@ -184,3 +186,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [10]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations
