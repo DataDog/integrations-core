@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import subprocess
 
 import pytest
 
@@ -29,10 +28,10 @@ def dd_environment():
     env['CONTAINER_PORT'] = common.PORT
 
     with docker_run(
-            compose_file,
-            service_name=common.CASSANDRA_CONTAINER_NAME,
-            log_patterns=['Listening for thrift clients'],
-            build=True,
+        compose_file,
+        service_name=common.CASSANDRA_CONTAINER_NAME,
+        log_patterns=['Listening for thrift clients'],
+        build=True,
     ):
         cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
         env['CASSANDRA_SEEDS'] = cassandra_seed
