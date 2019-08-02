@@ -7,9 +7,6 @@ Get metrics from Microsoft Exchange Server
 * Visualize and monitor Exchange server performance
 
 ## Setup
-
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to apply those instructions to a containerized environment.
-
 ### Installation
 
 The Exchange check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your servers.
@@ -41,7 +38,6 @@ The Exchange server check does not include any events.
 The Exchange server check does not include any service checks.
 
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent

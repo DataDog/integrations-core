@@ -19,16 +19,7 @@ from six import iteritems, itervalues, string_types, text_type
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.containers import hash_mutable
 
-from .constants import (
-    CONTEXT_UPPER_BOUND,
-    DEFAULT_KAFKA_RETRIES,
-    DEFAULT_KAFKA_TIMEOUT,
-    DEFAULT_ZK_TIMEOUT,
-    KAFKA_NO_ERROR,
-    KAFKA_NOT_LEADER_FOR_PARTITION,
-    KAFKA_UNKNOWN_ERROR,
-    KAFKA_UNKNOWN_TOPIC_OR_PARTITION,
-)
+from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_RETRIES, DEFAULT_KAFKA_TIMEOUT, DEFAULT_ZK_TIMEOUT
 
 
 class LegacyKafkaCheck_0_10_2(AgentCheck):
@@ -253,35 +244,37 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             topic = tp[0]
             partitions = tp[1]
             for partition, error_code, offsets in partitions:
-                if error_code == KAFKA_NO_ERROR:
+                error_type = kafka_errors.for_code(error_code)
+                if error_type is kafka_errors.NoError:
                     highwater_offsets[(topic, partition)] = offsets[0]
                     # Valid error codes:
                     # https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-PossibleErrorCodes.2
-                elif error_code == KAFKA_UNKNOWN_ERROR:
-                    self.log.error(
-                        "Kafka broker returned UNKNOWN (error_code -1) for topic: %s, partition: %s. "
-                        "This should never happen.",
-                        topic,
-                        partition,
-                    )
-                elif error_code == KAFKA_UNKNOWN_TOPIC_OR_PARTITION:
+                elif error_type is kafka_errors.NotLeaderForPartitionError:
                     self.log.warn(
-                        "Kafka broker returned UNKNOWN_TOPIC_OR_PARTITION (error_code 3) for "
-                        "topic: %s, partition: %s. This should only happen if the topic is "
-                        "currently being deleted.",
-                        topic,
-                        partition,
-                    )
-                elif error_code == KAFKA_NOT_LEADER_FOR_PARTITION:
-                    self.log.warn(
-                        "Kafka broker returned NOT_LEADER_FOR_PARTITION (error_code 6) for "
-                        "topic: %s, partition: %s. This should only happen if the broker that "
-                        "was the partition leader when kafka_client.cluster last fetched metadata "
-                        "is no longer the leader.",
+                        "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
+                        "if the broker that was the partition leader when kafka_admin_client last fetched metadata is "
+                        "no longer the leader.",
+                        error_type.message,
+                        error_type.errno,
                         topic,
                         partition,
                     )
                     topic_partitions_without_a_leader.append((topic, partition))
+                elif error_type is kafka_errors.UnknownTopicOrPartitionError:
+                    self.log.warn(
+                        "Kafka broker returned %s (error_code %s) for topic: %s, partition: %s. This should only "
+                        "happen if the topic is currently being deleted or the check configuration lists non-existent "
+                        "topic partitions.",
+                        error_type.message,
+                        error_type.errno,
+                        topic,
+                        partition,
+                    )
+                else:
+                    raise error_type(
+                        "Unexpected error encountered while attempting to fetch the highwater offsets for topic: %s, "
+                        "partition: %s." % (topic, partition)
+                    )
 
         return highwater_offsets, topic_partitions_without_a_leader
 

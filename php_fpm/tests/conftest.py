@@ -27,7 +27,7 @@ INSTANCE_FASTCGI = {
 
 @pytest.fixture
 def check():
-    return PHPFPMCheck('php_fpm', {}, {})
+    return PHPFPMCheck('php_fpm', {}, [DEFAULT_INSTANCE])
 
 
 @pytest.fixture

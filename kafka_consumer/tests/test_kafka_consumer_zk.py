@@ -5,7 +5,6 @@ import copy
 import time
 
 import pytest
-from six import iteritems
 
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.kafka_consumer import KafkaCheck
@@ -30,8 +29,8 @@ def test_check_zk(aggregator, zk_instance):
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [{}])
     kafka_consumer_check.check(zk_instance)
 
-    for name, consumer_group in iteritems(zk_instance['consumer_groups']):
-        for topic, partitions in iteritems(consumer_group):
+    for name, consumer_group in zk_instance['consumer_groups'].items():
+        for topic, partitions in consumer_group.items():
             for partition in partitions:
                 tags = ["topic:{}".format(topic), "partition:{}".format(partition)]
                 for mname in BROKER_METRICS:
@@ -77,8 +76,8 @@ def test_multiple_servers_zk(aggregator, zk_instance):
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [{}])
     kafka_consumer_check.check(multiple_server_zk_instance)
 
-    for name, consumer_group in iteritems(multiple_server_zk_instance['consumer_groups']):
-        for topic, partitions in iteritems(consumer_group):
+    for name, consumer_group in multiple_server_zk_instance['consumer_groups'].items():
+        for topic, partitions in consumer_group.items():
             for partition in partitions:
                 tags = ["topic:{}".format(topic), "partition:{}".format(partition)]
                 for mname in BROKER_METRICS:

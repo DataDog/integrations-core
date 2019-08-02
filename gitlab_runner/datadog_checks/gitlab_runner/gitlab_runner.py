@@ -8,9 +8,7 @@ import requests
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.config import _is_affirmative
 from datadog_checks.errors import CheckException
-from datadog_checks.utils.headers import headers
 
 
 class GitlabRunnerCheck(OpenMetricsBaseCheck):
@@ -25,6 +23,15 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
     DEFAULT_CONNECT_TIMEOUT = 5
     DEFAULT_RECEIVE_TIMEOUT = 15
     DEFAULT_METRIC_LIMIT = 0
+
+    HTTP_CONFIG_REMAPPER = {
+        'receive_timeout': {'name': 'read_timeout', 'default': DEFAULT_RECEIVE_TIMEOUT},
+        'connect_timeout': {'name': 'connect_timeout', 'default': DEFAULT_CONNECT_TIMEOUT},
+        'gitlab_user': {'name': 'username'},
+        'gitlab_password': {'name': 'password'},
+        'ssl_cert_validation': {'name': 'tls_verify'},
+        'ssl_ca_certs': {'name': 'tls_ca_cert'},
+    }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
 
@@ -104,26 +111,9 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         service_check_tags = ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)]
         service_check_tags.extend(tags)
 
-        # Load the ssl configuration
-        ssl_cert_validation = _is_affirmative(instance.get('ssl_cert_validation', True))
-        ssl_ca_certs = instance.get('ssl_ca_certs', True)
-
-        verify_ssl = ssl_ca_certs if ssl_cert_validation else False
-
-        # Timeout settings
-        timeouts = (
-            int(instance.get('connect_timeout', GitlabRunnerCheck.DEFAULT_CONNECT_TIMEOUT)),
-            int(instance.get('receive_timeout', GitlabRunnerCheck.DEFAULT_RECEIVE_TIMEOUT)),
-        )
-
-        # Auth settings
-        auth = None
-        if 'gitlab_user' in instance and 'gitlab_password' in instance:
-            auth = (instance['gitlab_user'], instance['gitlab_password'])
-
         try:
             self.log.debug("checking connectivity against {}".format(url))
-            r = requests.get(url, auth=auth, verify=verify_ssl, timeout=timeouts, headers=headers(self.agentConfig))
+            r = self.http.get(url)
             if r.status_code != 200:
                 self.service_check(
                     self.MASTER_SERVICE_CHECK_NAME,

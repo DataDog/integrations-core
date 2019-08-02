@@ -8,9 +8,6 @@ Get metrics from ASP.NET service in real time to:
 * Be notified about ASP.NET failovers and events.
 
 ## Setup
-
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][1] to learn how to apply those instructions to a containerized environment.
-
 ### Installation
 
 The ASP.NET check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your servers.
@@ -41,7 +38,6 @@ The ASP.NET check does not include any service checks.
 ## Troubleshooting
 Need help? Contact [Datadog support][8].
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/aspdotnet/datadog_checks/aspdotnet/data/conf.yaml.example
