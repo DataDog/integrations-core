@@ -20,16 +20,6 @@ init_config:
   #
   # kafka_retries: 3
 
-  ## @param min_collection_interval - integer - optional - default: 600
-  ## Customize the number of seconds that must elapse between running this check.
-  ## When checking Kafka offsets stored in Zookeeper, a single run of this check
-  ## must stat zookeeper more than the number of consumers * topic_partitions
-  ## that you're monitoring. If that number is greater than 100, it's recommended
-  ## to increase this value to avoid hitting zookeeper too hard.
-  ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-  #
-  # min_collection_interval: 600
-
 instances:
 
     ## @param kafka_connect_str - list of strings - required
