@@ -48,7 +48,7 @@ def test_check(aggregator, instance):
     for metric in itervalues(METRIC_MAP):
         aggregator.assert_metric('etcd.{}'.format(metric), tags=tags, at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.missing_metrics)
+    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
 
 
 @preview
@@ -62,7 +62,7 @@ def test_check_no_leader_tag(aggregator, instance):
     for metric in itervalues(METRIC_MAP):
         aggregator.assert_metric('etcd.{}'.format(metric), tags=[], at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.missing_metrics)
+    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
 
 
 @preview

@@ -16,4 +16,4 @@ def test_check(aggregator, instance):
     for metric in itervalues(METRIC_MAP):
         aggregator.assert_metric('cockroachdb.{}'.format(metric), at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 80, 'Missing metrics {}'.format(aggregator.missing_metrics)
+    assert aggregator.metrics_asserted_pct > 80, 'Missing metrics {}'.format(aggregator.not_asserted())
