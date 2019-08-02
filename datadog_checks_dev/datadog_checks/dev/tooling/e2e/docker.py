@@ -5,8 +5,10 @@ from __future__ import absolute_import  # To be able to import docker client
 
 import re
 from contextlib import contextmanager
+
 from docker import client as docker_client
 from docker.types.services import Mount
+
 from datadog_checks.dev.docker import run_in_container
 
 from ...subprocess import run_command

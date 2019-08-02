@@ -4,6 +4,7 @@
 import os
 
 import click
+import docker
 import pyperclip
 
 from ....utils import dir_exists, file_exists, path_join
@@ -12,7 +13,6 @@ from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import get_available_tox_envs, get_tox_env_python_version
 from ...utils import get_tox_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-import docker
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Start an environment')
