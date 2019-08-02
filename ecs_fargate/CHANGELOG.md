@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 2.3.0 / 2019-08-02
+
+* [Added] Update with proxy settings and request wrapper. See [#3477](https://github.com/DataDog/integrations-core/pull/3477).
+
 ## 2.2.2 / 2019-07-17
 
 * [Fixed] Use tagger with container_id prefix. See [#4126](https://github.com/DataDog/integrations-core/pull/4126).
