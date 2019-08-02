@@ -27,8 +27,9 @@ def test_bad_ping(aggregator):
     instance = {'ping_url': 'http://foo:9001/ping', 'tags': ['some_tag']}
     check = PHPFPMCheck('php_fpm', {}, [instance])
     check.check(instance)
-    aggregator.assert_service_check('php_fpm.can_ping', status=check.CRITICAL,
-                                    tags=['ping_url:http://foo:9001/ping', 'some_tag'])
+    aggregator.assert_service_check(
+        'php_fpm.can_ping', status=check.CRITICAL, tags=['ping_url:http://foo:9001/ping', 'some_tag']
+    )
     aggregator.all_metrics_asserted()
 
 
