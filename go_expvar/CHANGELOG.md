@@ -1,5 +1,9 @@
 # CHANGELOG - go_expvar
 
+## 1.5.0 / 2019-08-02
+
+* [Added] Add proxy settings support. See [#3743](https://github.com/DataDog/integrations-core/pull/3743).
+
 ## 1.4.0 / 2019-06-27
 
 * [Added] Add monotonic_counter support to go_expvar. See [#3992](https://github.com/DataDog/integrations-core/pull/3992).
