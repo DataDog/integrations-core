@@ -18,10 +18,10 @@ instances:
     #
     hostname: <HOSTNAME>
 
-    ## @param nameserver - string - required
+    ## @param nameserver - string - optional
     ## IP address of the name server to query.
     #
-    nameserver: 127.0.0.1
+    nameserver: <NAMESERVER>
 
     ## @param nameserver_port - string - optional - default: 53
     ## Port for the name server.
