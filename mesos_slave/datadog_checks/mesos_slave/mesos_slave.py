@@ -130,7 +130,7 @@ class MesosSlave(AgentCheck):
 
         return r.json()
 
-    def send_service_check(self, url, response, status, failure_expected=False, tags=None, message=None):
+    def _send_service_check(self, url, response, status, failure_expected=False, tags=None, message=None):
         if status is AgentCheck.CRITICAL and failure_expected:
             status = AgentCheck.OK
             message = "Got %s when hitting %s" % (response.status_code, url)
