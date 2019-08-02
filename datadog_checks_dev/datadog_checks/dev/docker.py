@@ -6,6 +6,7 @@ from __future__ import absolute_import  # To be able to import docker client
 import os
 from contextlib import contextmanager
 
+from datadog_checks.base import ensure_unicode
 from docker import client as docker_client
 from six import string_types
 from six.moves.urllib.parse import urlparse
@@ -58,7 +59,7 @@ def run_in_container(container_name, command, check=True, interactive=False):
     code, out = container.exec_run(command_line, stdin=interactive)
     if check and code != 0:
         raise Exception(out)
-    return code, out
+    return code, ensure_unicode(out)
 
 
 @contextmanager
