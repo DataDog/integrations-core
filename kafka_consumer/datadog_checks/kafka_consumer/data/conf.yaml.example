@@ -15,11 +15,6 @@ init_config:
   #
   # kafka_timeout: 5
 
-  ## @param kafka_retries - integer - optional - default: 3
-  ## Customizes the max number of retries per failed query to Kafka.
-  #
-  # kafka_retries: 3
-
 instances:
 
     ## @param kafka_connect_str - list of strings - required
