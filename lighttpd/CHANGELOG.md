@@ -1,5 +1,9 @@
 # CHANGELOG - lighttpd
 
+## 1.5.0 / 2019-08-02
+
+* [Added] Add requests wrapper to lighttpd. See [#4220](https://github.com/DataDog/integrations-core/pull/4220).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3532](https://github.com/DataDog/integrations-core/pull/3532).
