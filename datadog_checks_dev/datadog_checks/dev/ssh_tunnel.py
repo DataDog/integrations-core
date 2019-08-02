@@ -40,6 +40,7 @@ def get_ip():
 
 
 def run_background_command(command, pid_filename):
+    """Run `command` in the background, writing its PID in `pid_filename`."""
     if ON_WINDOWS:
         process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
     else:
