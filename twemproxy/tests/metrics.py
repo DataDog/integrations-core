@@ -5,12 +5,7 @@ GLOBAL_STATS = {'curr_connections', 'total_connections'}
 
 POOL_STATS = {'client_connections', 'server_ejects'}
 
-POOL_STATS_2 = {
-    'client_eof',
-    'client_err',
-    'forward_error',
-    'fragments',
-}
+POOL_STATS_2 = {'client_eof', 'client_err', 'forward_error', 'fragments'}
 
 SERVER_STATS = {'server_connections', 'server_timedout'}
 
