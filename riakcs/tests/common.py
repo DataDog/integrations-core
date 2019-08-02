@@ -6,6 +6,7 @@ import copy
 import os
 
 from datadog_checks.dev import get_here, run_command
+from datadog_checks.dev.docker import run_in_container
 
 CHECK_NAME = "riakcs"
 HERE = get_here()
@@ -286,28 +287,17 @@ EXPECTED_METRICS = [
 
 
 def generate_config_with_creds():
-    access_id = run_command(
-        [
-            "docker",
-            "exec",
-            "dd-test-riakcs",
-            "bash",
-            "-c",
-            "grep admin_key /etc/riak-cs/advanced.config | cut -d '\"' -f2",
-        ],
-        capture="out",
-    ).stdout.strip()
-    access_secret = run_command(
-        [
-            "docker",
-            "exec",
-            "dd-test-riakcs",
-            "bash",
-            "-c",
-            "grep admin_secret /etc/riak-cs/advanced.config | cut -d '\"' -f2",
-        ],
-        capture="out",
-    ).stdout.strip()
+    _, access_id = run_in_container(
+        "dd-test-riakcs",
+        "bash -c \"grep admin_key /etc/riak-cs/advanced.config | cut -d '\\\"' -f2\""
+    )
+    access_id = access_id.strip()
+
+    _, access_secret = run_in_container(
+        "dd-test-riakcs",
+        "bash -c \"grep admin_secret /etc/riak-cs/advanced.config | cut -d '\\\"' -f2\"",
+    )
+    access_secret = access_secret.strip()
 
     config = copy.deepcopy(CONFIG_21)
     config["access_id"] = access_id
