@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import TempDir, docker_run
 from datadog_checks.dev.structures import TempDir
 from datadog_checks.nagios import NagiosCheck
 
