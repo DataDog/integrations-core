@@ -1,5 +1,10 @@
 # CHANGELOG - sqlserver
 
+## 1.13.1 / 2019-08-02
+
+* [Fixed] Fix sqlserver metrics tests. See [#4134](https://github.com/DataDog/integrations-core/pull/4134).
+* [Fixed] Add test for sqlserver config `adoprovider`. See [#4143](https://github.com/DataDog/integrations-core/pull/4143).
+
 ## 1.13.0 / 2019-07-13
 
 * [Added] Allow SQLNCLI11 provider in SQL server. See [#4097](https://github.com/DataDog/integrations-core/pull/4097).
