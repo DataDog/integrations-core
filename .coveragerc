@@ -6,6 +6,7 @@ disable_warnings =
 
 # All paths are relative to each tox.ini
 omit =
+    */tests/*
     */test_bench.py
 
     # These are things that are simply stored in the base package
