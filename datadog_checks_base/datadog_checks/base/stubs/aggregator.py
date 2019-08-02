@@ -285,13 +285,10 @@ class AggregatorStub(object):
             else:
                 return 0
 
-        # If it there have been assertions with at_least=0 the length of the two collections can match
+        # If it there have been assertions with at_least=0 the length of the num_metrics and num_asserted can match
         # even if there are different metrics in each set
         not_asserted = self.not_asserted()
-        if not_asserted:
-            return (num_metrics - len(not_asserted)) / num_metrics * 100
-
-        return num_asserted / num_metrics * 100
+        return (num_metrics - len(not_asserted)) / num_metrics * 100
 
     @property
     def metric_names(self):
