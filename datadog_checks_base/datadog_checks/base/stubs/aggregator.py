@@ -185,7 +185,8 @@ class AggregatorStub(object):
             msg = "Expected count value for '{}': {}, got {}".format(name, value, got)
             condition = value == got
         elif count is not None:
-            msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
+            msg = "Needed exactly {} candidates for '[{} tags:{} hostname:{}]', got {}".format(
+                count, name, tags, hostname, len(candidates))
             condition = len(candidates) == count
         else:
             msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))

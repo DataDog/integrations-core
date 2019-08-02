@@ -7,11 +7,12 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_docker_hostname
 from datadog_checks.tokumx import TokuMX
 from datadog_checks.tokumx.vendor import pymongo
 
 from . import common
+from .common import HOST
 
 
 @pytest.fixture(scope="session")
@@ -23,7 +24,6 @@ def dd_environment():
     up.
     """
     compose_dir = os.path.join(common.HERE, 'compose')
-
     with docker_run(
         compose_file=os.path.join(compose_dir, 'docker-compose.yaml'),
         log_patterns='admin web console waiting for connections',
@@ -41,6 +41,11 @@ def check():
 @pytest.fixture
 def instance():
     return deepcopy(common.INSTANCE)
+
+
+@pytest.fixture
+def docker_host():
+    return get_docker_hostname()
 
 
 def set_up_tokumx():
