@@ -1,5 +1,9 @@
 # CHANGELOG - fluentd
 
+## 1.3.0 / 2019-08-02
+
+* [Added] Add support for proxy settings. See [#3479](https://github.com/DataDog/integrations-core/pull/3479).
+
 ## 1.2.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3507](https://github.com/DataDog/integrations-core/pull/3507).
