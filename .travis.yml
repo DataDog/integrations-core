@@ -272,6 +272,8 @@ jobs:
     - stage: test
       env: CHECK=system_swap PYTHON3=true
     - stage: test
+      env: CHECK=systemd PYTHON3=true
+    - stage: test
       env: CHECK=tcp_check PYTHON3=true
     - stage: test
       env: CHECK=teamcity PYTHON3=true
