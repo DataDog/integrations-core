@@ -14,14 +14,6 @@ from datadog_checks.nagios import NagiosCheck
 from .common import HERE, INSTANCE_INTEGRATION
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 @pytest.fixture(scope="session")
 def dd_environment():
     nagios_conf = os.path.join(HERE, 'compose', 'nagios4', 'nagios.cfg')
