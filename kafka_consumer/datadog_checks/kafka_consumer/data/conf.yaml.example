@@ -63,12 +63,6 @@ instances:
     - localhost:2181
     # - <ZOOKEEPER_ENDPOINT>:2181
 
-    ## @param zk_iteration_ival - integer - optional
-    ## Set how many seconds the check should wait between two ZK consumer offset
-    ## collections. If kafka consumer offsets is disabled, this has no effect.
-    #
-    # zk_iteration_ival: 1
-
     ## @param zk_prefix - string - optional
     ## Zookeeper chroot prefix under which kafka data is living in zookeeper.
     ## If kafka is connecting to `my-zookeeper:2181/kafka` then the `zk_prefix` is `/kafka`.
