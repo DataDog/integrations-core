@@ -6,10 +6,11 @@ from __future__ import absolute_import  # To be able to import docker client
 import os
 from contextlib import contextmanager
 
-from datadog_checks.base import ensure_unicode
 from docker import client as docker_client
 from six import string_types
 from six.moves.urllib.parse import urlparse
+
+from datadog_checks.base import ensure_unicode
 
 from .conditions import CheckDockerLogs
 from .env import environment_run

@@ -64,6 +64,7 @@ class DockerInterface(object):
 
         if self.agent_build and self.metadata.get('use_jmx', False):
             self.agent_build = '{}-jmx'.format(self.agent_build)
+        self.docker_client = docker_client.from_env()
 
     @property
     def agent_version(self):
@@ -180,11 +181,10 @@ class DockerInterface(object):
 
     def update_agent(self):
         if self.agent_build:
-            run_command(['docker', 'pull', self.agent_build], capture=True, check=True)
+            self.docker_client.images.pull(self.agent_build)
 
     def start_agent(self):
         if self.agent_build:
-            client = docker_client.from_env()
             environment = {
                 # Agent 6 will simply fail without an API key
                 'DD_API_KEY': self.api_key,
@@ -216,7 +216,7 @@ class DockerInterface(object):
                 # Mount the check directory
                 volumes.append(Mount(source=self.base_package, target=self.base_mount_dir, type='bind'))
 
-            container = client.containers.run(
+            container = self.docker_client.containers.run(
                 # The chosen tag
                 self.agent_build,
                 # Keep it up
