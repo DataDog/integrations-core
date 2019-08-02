@@ -1,5 +1,9 @@
 # CHANGELOG - openldap
 
+## 1.4.1 / 2019-08-02
+
+* [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).
+
 ## 1.4.0 / 2019-07-08
 
 * [Added] Add log section. See [#3974](https://github.com/DataDog/integrations-core/pull/3974).
