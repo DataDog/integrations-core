@@ -8,12 +8,33 @@ from datadog_checks.dev import get_docker_hostname
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 
-DEFAULT_INSTANCE = {
-    'url': 'ldap://{}:3890'.format(HOST),
-    'username': 'cn=monitor,dc=example,dc=org',
-    'password': 'monitor',
-    'custom_queries': [
-        {'name': 'stats', 'search_base': 'cn=statistics,cn=monitor', 'search_filter': '(!(cn=Statistics))'}
+INSTANCE = {
+    'unit_names': [
+        'dbus.service',
+        'dbus.socket',
     ],
-    'tags': ['test:integration'],
+    'tags': ['test:e2e'],
 }
+
+UNIT_METRICS = [
+    'systemd.unit.uptime',
+    'systemd.unit.loaded',
+    'systemd.unit.active',
+]
+
+SOCKET_METRICS = [
+    'systemd.socket.n_connections',
+    'systemd.socket.n_accepted',
+]
+
+SERVICE_METRICS = [
+    'systemd.service.cpu_usage_n_sec',
+    'systemd.service.memory_current',
+    'systemd.service.tasks_current',
+    'systemd.service.n_restarts',
+]
+
+ALL_UNIT_METRICS = [
+    'systemd.unit.count',
+    'systemd.unit.loaded.count'
+]
