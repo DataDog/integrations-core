@@ -11,8 +11,6 @@ HERE = path.abspath(path.dirname(__file__))
 
 # Get version info
 ABOUT = {}
-with open(path.join(HERE, "datadog_checks", "openldap", "__about__.py")) as f:
-    exec(f.read(), ABOUT)
 
 # Get the long description from the README file
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
@@ -28,9 +26,9 @@ def get_requirements(fpath):
 CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 
 setup(
-    name='datadog-openldap',
-    version=ABOUT["__version__"],
-    description='The OpenLDAP integration collect metrics from your OpenLDAP server using the monitor backend',
+    name='datadog-systemd',
+    version=None,
+    description='This check monitors Systemd and the units it manages through the Datadog Agent',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent check',
@@ -48,10 +46,10 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
     ],
-    packages=['datadog_checks.openldap'],
+    packages=[],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
     # Extra files to ship with the wheel package
-    package_data={'datadog_checks.openldap': ['conf.yaml.example']},
+    package_data={},
     include_package_data=True,
 )
