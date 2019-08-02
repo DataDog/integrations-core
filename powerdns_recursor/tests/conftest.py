@@ -7,7 +7,6 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
 
 from . import common
 
@@ -20,8 +19,3 @@ def dd_environment():
         log_patterns="Listening for HTTP requests",
     ):
         yield common.CONFIG if common._get_pdns_version() == 3 else common.CONFIG_V4
-
-
-@pytest.fixture()
-def check():
-    return PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])
