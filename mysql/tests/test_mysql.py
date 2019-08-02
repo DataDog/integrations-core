@@ -8,11 +8,13 @@ from os import environ
 import mock
 import psutil
 import pytest
+from pkg_resources import parse_version
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.mysql import MySql
 
 from . import common, tags, variables
+from .common import MYSQL_VERSION_PARSED
 
 
 @pytest.mark.integration
@@ -44,14 +46,20 @@ def test_complex_config(aggregator, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[instance_complex])
     mysql_check.check(instance_complex)
 
+    _assert_complex_config(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance_complex):
+    aggregator = dd_agent_check(instance_complex)
+
+    _assert_complex_config(aggregator)
+
+
+def _assert_complex_config(aggregator):
     # Test service check
     aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, tags=tags.SC_TAGS, count=1)
-
     aggregator.assert_service_check('mysql.replication.slave_running', status=MySql.OK, tags=tags.SC_TAGS, at_least=1)
-
-    ver = map(lambda x: int(x), mysql_check.mysql_version[mysql_check._get_host_key()])
-    ver = tuple(ver)
-
     testable_metrics = (
         variables.STATUS_VARS
         + variables.VARIABLES_VARS
@@ -62,7 +70,7 @@ def test_complex_config(aggregator, instance_complex):
         + variables.SYNTHETIC_VARS
     )
 
-    if ver >= (5, 6, 0) and environ.get('MYSQL_FLAVOR') != 'mariadb':
+    if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
         testable_metrics.extend(variables.PERFORMANCE_VARS)
 
     # Test metrics

@@ -6,6 +6,8 @@ Use the OpenLDAP integration to get metrics from the `cn=Monitor` backend of you
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying these instructions.
+
 ### Installation
 
 The OpenLDAP integration is packaged with the Agent. To start gathering your OpenLDAP metrics, you need to:
@@ -140,3 +142,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
 [6]: https://docs.datadoghq.com/help
+[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations

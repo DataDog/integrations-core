@@ -14,9 +14,6 @@ Gunicorn itself can provide further metrics via DogStatsD, including those for:
 * Log message rate by log level (critical, error, warning, exception)
 
 ## Setup
-
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][2] to learn how to apply those instructions to a containerized environment.
-
 ### Installation
 
 The Datadog Agent's Gunicorn check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Gunicorn servers.
@@ -158,7 +155,6 @@ ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/gunicorn/images/gunicorn-dash.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [4]: https://pypi.python.org/pypi/setproctitle
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory

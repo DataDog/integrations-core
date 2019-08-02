@@ -24,4 +24,4 @@ def dd_environment():
 
 @pytest.fixture()
 def check():
-    return PowerDNSRecursorCheck("powerdns_recursor", {}, {})
+    return PowerDNSRecursorCheck("powerdns_recursor", {}, [common.CONFIG])

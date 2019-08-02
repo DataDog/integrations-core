@@ -7,6 +7,9 @@ This check monitors the availability and uptime of non-Datadog StatsD servers. I
 This check does **NOT** forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying these instructions.
+
 ### Installation
 
 The StatsD check is included in the [Datadog Agent][1] package, so you don't need to install anything else on any servers that run StatsD.
@@ -71,3 +74,4 @@ To get a better idea of how (or why) to visualize StatsD metrics with Counts Gra
 [7]: https://docs.datadoghq.com/help
 [8]: https://www.datadoghq.com/blog/statsd
 [9]: https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing
+[10]: https://docs.datadoghq.com/agent/autodiscovery/integrations
