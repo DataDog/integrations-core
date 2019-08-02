@@ -12,7 +12,6 @@ from datadog_checks.tokumx import TokuMX
 from datadog_checks.tokumx.vendor import pymongo
 
 from . import common
-from .common import HOST
 
 
 @pytest.fixture(scope="session")
