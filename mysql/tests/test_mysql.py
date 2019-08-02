@@ -181,7 +181,7 @@ def test_complex_config_replica(aggregator, instance_complex):
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=1)
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:performance_schema'], count=1)
         else:
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=0)
 
     # test custom query metrics
     aggregator.assert_metric('alice.age', value=25)
