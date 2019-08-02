@@ -1,0 +1,3981 @@
+{
+    "entries": [
+        {
+            "attributes": {
+                "cn": [
+                    "Monitor"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subtree contains monitoring/managing objects.",
+                    "This object contains information about this server.",
+                    "Most of the information is held in operational attributes, which must be explicitly requested."
+                ],
+                "entryDN": "cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "OpenLDAP: slapd  (Ubuntu) (May 22 2018 13:54:12)"
+                ],
+                "objectClass": [
+                    "monitorServer"
+                ],
+                "structuralObjectClass": "monitorServer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Monitor"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subtree contains monitoring/managing objects.",
+                    "This object contains information about this server.",
+                    "Most of the information is held in operational attributes, which must be explicitly requested."
+                ],
+                "entryDN": [
+                    "cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "OpenLDAP: slapd  (Ubuntu) (May 22 2018 13:54:12)"
+                ],
+                "objectClass": [
+                    "monitorServer"
+                ],
+                "structuralObjectClass": [
+                    "monitorServer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Backends"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about available backends."
+                ],
+                "entryDN": "cn=Backends,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "config",
+                    "ldif",
+                    "mdb",
+                    "monitor"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Backends,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Backends"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about available backends."
+                ],
+                "entryDN": [
+                    "cn=Backends,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "config",
+                    "ldif",
+                    "mdb",
+                    "monitor"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Backend 0"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Backend 0,cn=Backends,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorRuntimeConfig": [
+                    "TRUE"
+                ],
+                "monitoredInfo": [
+                    "config"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "seeAlso": [
+                    "cn=Database 0,cn=Databases,cn=Monitor"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema",
+                "supportedControl": [
+                    "2.16.840.1.113730.3.4.2"
+                ]
+            },
+            "dn": "cn=Backend 0,cn=Backends,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Backend 0"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Backend 0,cn=Backends,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorRuntimeConfig": [
+                    "TRUE"
+                ],
+                "monitoredInfo": [
+                    "config"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "seeAlso": [
+                    "cn=Database 0,cn=Databases,cn=Monitor"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ],
+                "supportedControl": [
+                    "2.16.840.1.113730.3.4.2"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Backend 1"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Backend 1,cn=Backends,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorRuntimeConfig": [
+                    "TRUE"
+                ],
+                "monitoredInfo": [
+                    "ldif"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema",
+                "supportedControl": [
+                    "2.16.840.1.113730.3.4.2"
+                ]
+            },
+            "dn": "cn=Backend 1,cn=Backends,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Backend 1"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Backend 1,cn=Backends,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorRuntimeConfig": [
+                    "TRUE"
+                ],
+                "monitoredInfo": [
+                    "ldif"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ],
+                "supportedControl": [
+                    "2.16.840.1.113730.3.4.2"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Backend 2"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Backend 2,cn=Backends,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorRuntimeConfig": [
+                    "TRUE"
+                ],
+                "monitoredInfo": [
+                    "mdb"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "seeAlso": [
+                    "cn=Database 1,cn=Databases,cn=Monitor"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema",
+                "supportedControl": [
+                    "1.3.6.1.1.12",
+                    "2.16.840.1.113730.3.4.2",
+                    "1.3.6.1.4.1.4203.666.5.2",
+                    "1.2.840.113556.1.4.319",
+                    "1.3.6.1.1.13.1",
+                    "1.3.6.1.1.13.2",
+                    "1.3.6.1.4.1.4203.1.10.1",
+                    "1.2.840.113556.1.4.1413"
+                ]
+            },
+            "dn": "cn=Backend 2,cn=Backends,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Backend 2"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Backend 2,cn=Backends,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorRuntimeConfig": [
+                    "TRUE"
+                ],
+                "monitoredInfo": [
+                    "mdb"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "seeAlso": [
+                    "cn=Database 1,cn=Databases,cn=Monitor"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ],
+                "supportedControl": [
+                    "1.3.6.1.1.12",
+                    "2.16.840.1.113730.3.4.2",
+                    "1.3.6.1.4.1.4203.666.5.2",
+                    "1.2.840.113556.1.4.319",
+                    "1.3.6.1.1.13.1",
+                    "1.3.6.1.1.13.2",
+                    "1.3.6.1.4.1.4203.1.10.1",
+                    "1.2.840.113556.1.4.1413"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Backend 3"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Backend 3,cn=Backends,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorRuntimeConfig": [
+                    "TRUE"
+                ],
+                "monitoredInfo": [
+                    "monitor"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "seeAlso": [
+                    "cn=Database 2,cn=Databases,cn=Monitor"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema",
+                "supportedControl": [
+                    "2.16.840.1.113730.3.4.2"
+                ]
+            },
+            "dn": "cn=Backend 3,cn=Backends,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Backend 3"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Backend 3,cn=Backends,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorRuntimeConfig": [
+                    "TRUE"
+                ],
+                "monitoredInfo": [
+                    "monitor"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "seeAlso": [
+                    "cn=Database 2,cn=Databases,cn=Monitor"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ],
+                "supportedControl": [
+                    "2.16.840.1.113730.3.4.2"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Connections"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about connections."
+                ],
+                "entryDN": "cn=Connections,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Connections,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Connections"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about connections."
+                ],
+                "entryDN": [
+                    "cn=Connections,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Connection 3452"
+                ],
+                "createTimestamp": "2018-07-12 10:22:38+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Connection 3452,cn=Connections,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-12 10:22:38+00:00",
+                "monitorConnectionActivityTime": [
+                    "20180712102238Z"
+                ],
+                "monitorConnectionAuthzDN": [
+                    "cn=monitor,dc=datadoghq,dc=com"
+                ],
+                "monitorConnectionGet": [
+                    "6"
+                ],
+                "monitorConnectionListener": [
+                    "ldap:///"
+                ],
+                "monitorConnectionLocalAddress": [
+                    "IP=0.0.0.0:389"
+                ],
+                "monitorConnectionMask": [
+                    "rx"
+                ],
+                "monitorConnectionNumber": [
+                    "3452"
+                ],
+                "monitorConnectionOpsCompleted": [
+                    "5"
+                ],
+                "monitorConnectionOpsExecuting": [
+                    "1"
+                ],
+                "monitorConnectionOpsPending": [
+                    "0"
+                ],
+                "monitorConnectionOpsReceived": [
+                    "6"
+                ],
+                "monitorConnectionPeerAddress": [
+                    "IP=127.0.0.1:38466"
+                ],
+                "monitorConnectionPeerDomain": [
+                    "unknown"
+                ],
+                "monitorConnectionProtocol": [
+                    "3"
+                ],
+                "monitorConnectionRead": [
+                    "6"
+                ],
+                "monitorConnectionStartTime": [
+                    "20180712102238Z"
+                ],
+                "monitorConnectionWrite": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorConnection"
+                ],
+                "structuralObjectClass": "monitorConnection",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Connection 3452,cn=Connections,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Connection 3452"
+                ],
+                "createTimestamp": [
+                    "20180712102238Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Connection 3452,cn=Connections,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180712102238Z"
+                ],
+                "monitorConnectionActivityTime": [
+                    "20180712102238Z"
+                ],
+                "monitorConnectionAuthzDN": [
+                    "cn=monitor,dc=datadoghq,dc=com"
+                ],
+                "monitorConnectionGet": [
+                    "6"
+                ],
+                "monitorConnectionListener": [
+                    "ldap:///"
+                ],
+                "monitorConnectionLocalAddress": [
+                    "IP=0.0.0.0:389"
+                ],
+                "monitorConnectionMask": [
+                    "rx"
+                ],
+                "monitorConnectionNumber": [
+                    "3452"
+                ],
+                "monitorConnectionOpsCompleted": [
+                    "5"
+                ],
+                "monitorConnectionOpsExecuting": [
+                    "1"
+                ],
+                "monitorConnectionOpsPending": [
+                    "0"
+                ],
+                "monitorConnectionOpsReceived": [
+                    "6"
+                ],
+                "monitorConnectionPeerAddress": [
+                    "IP=127.0.0.1:38466"
+                ],
+                "monitorConnectionPeerDomain": [
+                    "unknown"
+                ],
+                "monitorConnectionProtocol": [
+                    "3"
+                ],
+                "monitorConnectionRead": [
+                    "6"
+                ],
+                "monitorConnectionStartTime": [
+                    "20180712102238Z"
+                ],
+                "monitorConnectionWrite": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorConnection"
+                ],
+                "structuralObjectClass": [
+                    "monitorConnection"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Max File Descriptors"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Max File Descriptors,cn=Connections,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorCounter": [
+                    "1024"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": "monitorCounterObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Max File Descriptors,cn=Connections,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Max File Descriptors"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Max File Descriptors,cn=Connections,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorCounter": [
+                    "1024"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": [
+                    "monitorCounterObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Total"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Total,cn=Connections,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorCounter": [
+                    "3453"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": "monitorCounterObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Total,cn=Connections,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Total"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Total,cn=Connections,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorCounter": [
+                    "3453"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": [
+                    "monitorCounterObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Current"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Current,cn=Connections,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorCounter": [
+                    "1"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": "monitorCounterObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Current,cn=Connections,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Current"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Current,cn=Connections,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorCounter": [
+                    "1"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": [
+                    "monitorCounterObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Databases"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about configured databases."
+                ],
+                "entryDN": "cn=Databases,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorContext": [
+                    "cn=Monitor"
+                ],
+                "namingContexts": [
+                    "",
+                    "cn=config",
+                    "dc=datadoghq,dc=com"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Databases,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Databases"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about configured databases."
+                ],
+                "entryDN": [
+                    "cn=Databases,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorContext": [
+                    "cn=Monitor"
+                ],
+                "namingContexts": [
+                    "",
+                    "cn=config",
+                    "dc=datadoghq,dc=com"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Frontend"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Frontend,cn=Databases,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorIsShadow": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "frontend"
+                ],
+                "namingContexts": [
+                    ""
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Frontend,cn=Databases,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Frontend"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Frontend,cn=Databases,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorIsShadow": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "frontend"
+                ],
+                "namingContexts": [
+                    ""
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Database 0"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Database 0,cn=Databases,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorIsShadow": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "config"
+                ],
+                "namingContexts": [
+                    "cn=config"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "seeAlso": [
+                    "cn=Backend 0,cn=Backends,cn=Monitor"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Database 0,cn=Databases,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Database 0"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Database 0,cn=Databases,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorIsShadow": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "config"
+                ],
+                "namingContexts": [
+                    "cn=config"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "seeAlso": [
+                    "cn=Backend 0,cn=Backends,cn=Monitor"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Database 1"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Database 1,cn=Databases,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorIsShadow": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "mdb"
+                ],
+                "namingContexts": [
+                    "dc=datadoghq,dc=com"
+                ],
+                "objectClass": [
+                    "monitoredObject",
+                    "olmMDBDatabase"
+                ],
+                "olmDbDirectory": [
+                    "/var/lib/ldap/"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "seeAlso": [
+                    "cn=Backend 2,cn=Backends,cn=Monitor"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Database 1,cn=Databases,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Database 1"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Database 1,cn=Databases,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorIsShadow": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "mdb"
+                ],
+                "namingContexts": [
+                    "dc=datadoghq,dc=com"
+                ],
+                "objectClass": [
+                    "monitoredObject",
+                    "olmMDBDatabase"
+                ],
+                "olmDbDirectory": [
+                    "/var/lib/ldap/"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "seeAlso": [
+                    "cn=Backend 2,cn=Backends,cn=Monitor"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Database 2"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Database 2,cn=Databases,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorContext": [
+                    "cn=Monitor"
+                ],
+                "monitorIsShadow": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "monitor"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "seeAlso": [
+                    "cn=Backend 3,cn=Backends,cn=Monitor"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Database 2,cn=Databases,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Database 2"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Database 2,cn=Databases,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorContext": [
+                    "cn=Monitor"
+                ],
+                "monitorIsShadow": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "monitor"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "readOnly": [
+                    "FALSE"
+                ],
+                "seeAlso": [
+                    "cn=Backend 3,cn=Backends,cn=Monitor"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Listeners"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about active listeners."
+                ],
+                "entryDN": "cn=Listeners,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Listeners,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Listeners"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about active listeners."
+                ],
+                "entryDN": [
+                    "cn=Listeners,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Listener 0"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Listener 0,cn=Listeners,cn=Monitor",
+                "hasSubordinates": false,
+                "labeledURI": [
+                    "ldap:///"
+                ],
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorConnectionLocalAddress": [
+                    "IP=0.0.0.0:389"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Listener 0,cn=Listeners,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Listener 0"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Listener 0,cn=Listeners,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "labeledURI": [
+                    "ldap:///"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorConnectionLocalAddress": [
+                    "IP=0.0.0.0:389"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Listener 1"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Listener 1,cn=Listeners,cn=Monitor",
+                "hasSubordinates": false,
+                "labeledURI": [
+                    "ldap:///"
+                ],
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorConnectionLocalAddress": [
+                    "IP=[::]:389"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Listener 1,cn=Listeners,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Listener 1"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Listener 1,cn=Listeners,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "labeledURI": [
+                    "ldap:///"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorConnectionLocalAddress": [
+                    "IP=[::]:389"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Listener 2"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Listener 2,cn=Listeners,cn=Monitor",
+                "hasSubordinates": false,
+                "labeledURI": [
+                    "ldaps:///"
+                ],
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorConnectionLocalAddress": [
+                    "IP=0.0.0.0:636"
+                ],
+                "monitoredInfo": [
+                    "TLS"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Listener 2,cn=Listeners,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Listener 2"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Listener 2,cn=Listeners,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "labeledURI": [
+                    "ldaps:///"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorConnectionLocalAddress": [
+                    "IP=0.0.0.0:636"
+                ],
+                "monitoredInfo": [
+                    "TLS"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Listener 3"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Listener 3,cn=Listeners,cn=Monitor",
+                "hasSubordinates": false,
+                "labeledURI": [
+                    "ldaps:///"
+                ],
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorConnectionLocalAddress": [
+                    "IP=[::]:636"
+                ],
+                "monitoredInfo": [
+                    "TLS"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Listener 3,cn=Listeners,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Listener 3"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Listener 3,cn=Listeners,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "labeledURI": [
+                    "ldaps:///"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorConnectionLocalAddress": [
+                    "IP=[::]:636"
+                ],
+                "monitoredInfo": [
+                    "TLS"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Listener 4"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Listener 4,cn=Listeners,cn=Monitor",
+                "hasSubordinates": false,
+                "labeledURI": [
+                    "ldapi:///"
+                ],
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorConnectionLocalAddress": [
+                    "PATH=/var/run/slapd/ldapi"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Listener 4,cn=Listeners,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Listener 4"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Listener 4,cn=Listeners,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "labeledURI": [
+                    "ldapi:///"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorConnectionLocalAddress": [
+                    "PATH=/var/run/slapd/ldapi"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Log"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about logging.",
+                    "Set the attribute \"managedInfo\" to the desired log levels."
+                ],
+                "entryDN": "cn=Log,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Log,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Log"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about logging.",
+                    "Set the attribute \"managedInfo\" to the desired log levels."
+                ],
+                "entryDN": [
+                    "cn=Log,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Operations"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about performed operations."
+                ],
+                "entryDN": "cn=Operations,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "41398"
+                ],
+                "monitorOpInitiated": [
+                    "41399"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Operations"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about performed operations."
+                ],
+                "entryDN": [
+                    "cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "41398"
+                ],
+                "monitorOpInitiated": [
+                    "41399"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Bind"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Bind,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "9734"
+                ],
+                "monitorOpInitiated": [
+                    "9734"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Bind,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Bind"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Bind,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "9734"
+                ],
+                "monitorOpInitiated": [
+                    "9734"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Unbind"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Unbind,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "2452"
+                ],
+                "monitorOpInitiated": [
+                    "2452"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Unbind,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Unbind"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Unbind,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "2452"
+                ],
+                "monitorOpInitiated": [
+                    "2452"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Search"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Search,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "29212"
+                ],
+                "monitorOpInitiated": [
+                    "29213"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Search,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Search"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Search,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "29212"
+                ],
+                "monitorOpInitiated": [
+                    "29213"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Compare"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Compare,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Compare,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Compare"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Compare,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Modify"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Modify,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Modify,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Modify"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Modify,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Modrdn"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Modrdn,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Modrdn,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Modrdn"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Modrdn,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Add"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Add,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Add,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Add"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Add,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Delete"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Delete,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Delete,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Delete"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Delete,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Abandon"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Abandon,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Abandon,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Abandon"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Abandon,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Extended"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Extended,cn=Operations,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": "monitorOperation",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Extended,cn=Operations,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Extended"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Extended,cn=Operations,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorOpCompleted": [
+                    "0"
+                ],
+                "monitorOpInitiated": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorOperation"
+                ],
+                "structuralObjectClass": [
+                    "monitorOperation"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Overlays"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about available overlays."
+                ],
+                "entryDN": "cn=Overlays,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "glue"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Overlays,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Overlays"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about available overlays."
+                ],
+                "entryDN": [
+                    "cn=Overlays,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "glue"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Overlay 0"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Overlay 0,cn=Overlays,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorRuntimeConfig": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "glue"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Overlay 0,cn=Overlays,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Overlay 0"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Overlay 0,cn=Overlays,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorRuntimeConfig": [
+                    "FALSE"
+                ],
+                "monitoredInfo": [
+                    "glue"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "SASL"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about SASL."
+                ],
+                "entryDN": "cn=SASL,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=SASL,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "SASL"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about SASL."
+                ],
+                "entryDN": [
+                    "cn=SASL,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Statistics"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains statistics."
+                ],
+                "entryDN": "cn=Statistics,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Statistics,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Statistics"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains statistics."
+                ],
+                "entryDN": [
+                    "cn=Statistics,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Bytes"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Bytes,cn=Statistics,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorCounter": [
+                    "796449497"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": "monitorCounterObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Bytes,cn=Statistics,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Bytes"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Bytes,cn=Statistics,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorCounter": [
+                    "796449497"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": [
+                    "monitorCounterObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "PDU"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=PDU,cn=Statistics,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorCounter": [
+                    "217327"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": "monitorCounterObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=PDU,cn=Statistics,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "PDU"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=PDU,cn=Statistics,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorCounter": [
+                    "217327"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": [
+                    "monitorCounterObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Entries"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Entries,cn=Statistics,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorCounter": [
+                    "178382"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": "monitorCounterObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Entries,cn=Statistics,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Entries"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Entries,cn=Statistics,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorCounter": [
+                    "178382"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": [
+                    "monitorCounterObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Referrals"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Referrals,cn=Statistics,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorCounter": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": "monitorCounterObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Referrals,cn=Statistics,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Referrals"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Referrals,cn=Statistics,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorCounter": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": [
+                    "monitorCounterObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Threads"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about threads."
+                ],
+                "entryDN": "cn=Threads,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Threads"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about threads."
+                ],
+                "entryDN": [
+                    "cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Max"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "Maximum number of threads as configured"
+                ],
+                "entryDN": "cn=Max,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "16"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Max,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Max"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "Maximum number of threads as configured"
+                ],
+                "entryDN": [
+                    "cn=Max,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "16"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Max Pending"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "Maximum number of pending threads"
+                ],
+                "entryDN": "cn=Max Pending,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Max Pending,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Max Pending"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "Maximum number of pending threads"
+                ],
+                "entryDN": [
+                    "cn=Max Pending,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Open"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "Number of open threads"
+                ],
+                "entryDN": "cn=Open,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "3"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Open,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Open"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "Number of open threads"
+                ],
+                "entryDN": [
+                    "cn=Open,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "3"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Starting"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "Number of threads being started"
+                ],
+                "entryDN": "cn=Starting,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Starting,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Starting"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "Number of threads being started"
+                ],
+                "entryDN": [
+                    "cn=Starting,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Active"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "Number of active threads"
+                ],
+                "entryDN": "cn=Active,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "1"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Active,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Active"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "Number of active threads"
+                ],
+                "entryDN": [
+                    "cn=Active,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "1"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Pending"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "Number of pending threads"
+                ],
+                "entryDN": "cn=Pending,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Pending,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Pending"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "Number of pending threads"
+                ],
+                "entryDN": [
+                    "cn=Pending,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Backload"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "Number of active plus pending threads"
+                ],
+                "entryDN": "cn=Backload,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "1"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Backload,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Backload"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "Number of active plus pending threads"
+                ],
+                "entryDN": [
+                    "cn=Backload,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "1"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "State"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "Thread pool state"
+                ],
+                "entryDN": "cn=State,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "unknown"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=State,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "State"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "Thread pool state"
+                ],
+                "entryDN": [
+                    "cn=State,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "unknown"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Runqueue"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "Queue of running threads - besides those handling operations"
+                ],
+                "entryDN": "cn=Runqueue,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Runqueue,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Runqueue"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "Queue of running threads - besides those handling operations"
+                ],
+                "entryDN": [
+                    "cn=Runqueue,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Tasklist"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "List of running plus standby threads - besides those handling operations"
+                ],
+                "entryDN": "cn=Tasklist,cn=Threads,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "{0}mdb_checkpoint(dc=datadoghq,dc=com)"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Tasklist,cn=Threads,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Tasklist"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "List of running plus standby threads - besides those handling operations"
+                ],
+                "entryDN": [
+                    "cn=Tasklist,cn=Threads,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "{0}mdb_checkpoint(dc=datadoghq,dc=com)"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Time"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about time."
+                ],
+                "entryDN": "cn=Time,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Time,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Time"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about time."
+                ],
+                "entryDN": [
+                    "cn=Time,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Start"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Start,cn=Time,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Start,cn=Time,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Start"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Start,cn=Time,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Current"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Current,cn=Time,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorTimestamp": [
+                    "20180712102238Z"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Current,cn=Time,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Current"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Current,cn=Time,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorTimestamp": [
+                    "20180712102238Z"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Uptime"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Uptime,cn=Time,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitoredInfo": [
+                    "159182"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": "monitoredObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Uptime,cn=Time,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Uptime"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Uptime,cn=Time,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitoredInfo": [
+                    "159182"
+                ],
+                "objectClass": [
+                    "monitoredObject"
+                ],
+                "structuralObjectClass": [
+                    "monitoredObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "TLS"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about TLS."
+                ],
+                "entryDN": "cn=TLS,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=TLS,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "TLS"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about TLS."
+                ],
+                "entryDN": [
+                    "cn=TLS,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Waiters"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "description": [
+                    "This subsystem contains information about read/write waiters."
+                ],
+                "entryDN": "cn=Waiters,cn=Monitor",
+                "hasSubordinates": true,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": "monitorContainer",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Waiters,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Waiters"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "description": [
+                    "This subsystem contains information about read/write waiters."
+                ],
+                "entryDN": [
+                    "cn=Waiters,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "TRUE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "objectClass": [
+                    "monitorContainer"
+                ],
+                "structuralObjectClass": [
+                    "monitorContainer"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Read"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Read,cn=Waiters,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorCounter": [
+                    "1"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": "monitorCounterObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Read,cn=Waiters,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Read"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Read,cn=Waiters,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorCounter": [
+                    "1"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": [
+                    "monitorCounterObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        },
+        {
+            "attributes": {
+                "cn": [
+                    "Write"
+                ],
+                "createTimestamp": "2018-07-10 14:09:36+00:00",
+                "creatorsName": "",
+                "entryDN": "cn=Write,cn=Waiters,cn=Monitor",
+                "hasSubordinates": false,
+                "modifiersName": "",
+                "modifyTimestamp": "2018-07-10 14:09:36+00:00",
+                "monitorCounter": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": "monitorCounterObject",
+                "subschemaSubentry": "cn=Subschema"
+            },
+            "dn": "cn=Write,cn=Waiters,cn=Monitor",
+            "raw": {
+                "cn": [
+                    "Write"
+                ],
+                "createTimestamp": [
+                    "20180710140936Z"
+                ],
+                "creatorsName": [
+                    ""
+                ],
+                "entryDN": [
+                    "cn=Write,cn=Waiters,cn=Monitor"
+                ],
+                "hasSubordinates": [
+                    "FALSE"
+                ],
+                "modifiersName": [
+                    ""
+                ],
+                "modifyTimestamp": [
+                    "20180710140936Z"
+                ],
+                "monitorCounter": [
+                    "0"
+                ],
+                "objectClass": [
+                    "monitorCounterObject"
+                ],
+                "structuralObjectClass": [
+                    "monitorCounterObject"
+                ],
+                "subschemaSubentry": [
+                    "cn=Subschema"
+                ]
+            }
+        }
+    ]
+}
