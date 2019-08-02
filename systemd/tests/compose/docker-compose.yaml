@@ -1,12 +1,9 @@
 version: "3.5"
 
 services:
-  openldap:
-    image: "datadog/docker-library:openldap_${OPENLDAP_VERSION}"
-    ports:
-      - "3890:389"
-      - "6360:636"
-    environment:
-      - LDAP_TLS_VERIFY_CLIENT=never
+  systemd2:
+    privileged: true
+    image: "centos/systemd:latest"
     volumes:
-      - ${HOST_SOCKET_DIR}:/var/run/slapd/
+      - ${HOST_SOCKET_DIR}/systemd_run:/run
+      - ${HOST_SOCKET_DIR}/run_dbus:/var/run/dbus
