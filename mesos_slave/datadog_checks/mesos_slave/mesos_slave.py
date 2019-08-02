@@ -124,16 +124,22 @@ class MesosSlave(AgentCheck):
             status = AgentCheck.CRITICAL
         finally:
             self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
-            if self.service_check_needed and not failure_expected:
-                self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
-                self.service_check_needed = False
-            if status is AgentCheck.CRITICAL:
-                raise CheckException('Cannot connect to mesos. Error: {0}'.format(msg))
-
+            self.send_service_check(url, r, status, failure_expected=failure_expected, tags=tags, message=msg)
         if r.encoding is None:
             r.encoding = 'UTF8'
 
         return r.json()
+
+    def send_service_check(self, url, response, status, failure_expected=False, tags=None, message=None):
+        if status is AgentCheck.CRITICAL and failure_expected:
+            status = AgentCheck.OK
+            message = "Got %s when hitting %s" % (response.status_code, url)
+            raise CheckException(message)
+        elif status is AgentCheck.CRITICAL and not failure_expected:
+            raise CheckException('Cannot connect to mesos. Error: {0}'.format(message))
+        if self.service_check_needed:
+            self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=message)
+            self.service_check_needed = False
 
     def _get_state(self, url, timeout, verify, tags):
         try:
