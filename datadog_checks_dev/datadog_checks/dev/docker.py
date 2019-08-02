@@ -10,8 +10,6 @@ from docker import client as docker_client
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import ensure_unicode
-
 from .conditions import CheckDockerLogs
 from .env import environment_run
 from .structures import LazyFunction
@@ -60,7 +58,7 @@ def run_in_container(container_name, command, check=True, interactive=False):
     code, out = container.exec_run(command_line, stdin=interactive)
     if check and code != 0:
         raise Exception(out)
-    return code, ensure_unicode(out)
+    return code, out.decode('utf-8')
 
 
 @contextmanager
