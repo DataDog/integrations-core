@@ -26,13 +26,13 @@ def test_metrics(mocked_check, aggregator, instance):
         aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS)
 
 
-def test_service_checks(check, aggregator, instance):
+def test_service_checks(check, aggregator):
+    instance = {"access_id": "foo", "access_secret": "bar", 'host': 'foo.proxy.com', "tags": ["optional:tag1"]}
+    tags = ['aggregation_key:foo.proxy.com:8080', 'optional:tag1']
     with pytest.raises(SocketError):
         check.check(instance)
 
-    aggregator.assert_service_check(
-        common.SERVICE_CHECK_NAME, status=check.CRITICAL, tags=common.EXPECTED_TAGS, count=1
-    )
+    aggregator.assert_service_check(common.SERVICE_CHECK_NAME, status=check.CRITICAL, tags=tags, count=1)
 
 
 def test_21_parser(mocked_check21):
