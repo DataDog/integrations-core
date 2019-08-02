@@ -124,7 +124,7 @@ class MesosSlave(AgentCheck):
             status = AgentCheck.CRITICAL
         finally:
             self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
-            self.send_service_check(url, r, status, failure_expected=failure_expected, tags=tags, message=msg)
+            self._send_service_check(url, r, status, failure_expected=failure_expected, tags=tags, message=msg)
         if r.encoding is None:
             r.encoding = 'UTF8'
 
