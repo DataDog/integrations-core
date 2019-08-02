@@ -1,5 +1,9 @@
 # CHANGELOG - cisco_aci
 
+## 1.7.2 / 2019-08-02
+
+* [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).
+
 ## 1.7.1 / 2019-07-08
 
 * [Fixed] Fix event submission call. See [#4044](https://github.com/DataDog/integrations-core/pull/4044).
