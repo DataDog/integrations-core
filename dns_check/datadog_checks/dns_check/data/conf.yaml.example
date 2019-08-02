@@ -21,7 +21,7 @@ instances:
     ## @param nameserver - string - optional
     ## IP address of the name server to query.
     #
-    nameserver: <NAMESERVER>
+    # nameserver: <NAMESERVER>
 
     ## @param nameserver_port - string - optional - default: 53
     ## Port for the name server.
