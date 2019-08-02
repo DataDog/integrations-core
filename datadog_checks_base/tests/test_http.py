@@ -567,6 +567,14 @@ class TestRemapper:
 
         assert http.options['verify'] is True
 
+    def test_invert_without_explicit_default(self):
+        instance = {}
+        init_config = {}
+        remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True}}
+        http = RequestsWrapper(instance, init_config, remapper)
+
+        assert http.options['verify'] is True
+
     def test_standard_override(self):
         instance = {'disable_ssl_validation': True, 'tls_verify': False}
         init_config = {}
