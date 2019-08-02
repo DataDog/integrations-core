@@ -1,5 +1,10 @@
 # CHANGELOG - teamcity
 
+## 1.5.0 / 2019-08-02
+
+* [Fixed] Fix wording for config option description. See [#4217](https://github.com/DataDog/integrations-core/pull/4217).
+* [Added] Add requests wrapper to teamcity. See [#4209](https://github.com/DataDog/integrations-core/pull/4209).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3575](https://github.com/DataDog/integrations-core/pull/3575).
