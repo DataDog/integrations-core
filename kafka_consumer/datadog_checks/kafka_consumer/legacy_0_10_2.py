@@ -17,9 +17,8 @@ from kazoo.exceptions import NoNodeError
 from six import iteritems, itervalues, string_types, text_type
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from datadog_checks.base.utils.containers import hash_mutable
 
-from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_RETRIES, DEFAULT_KAFKA_TIMEOUT, DEFAULT_ZK_TIMEOUT
+from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_RETRIES, DEFAULT_KAFKA_TIMEOUT
 
 
 class LegacyKafkaCheck_0_10_2(AgentCheck):
@@ -35,11 +34,10 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(LegacyKafkaCheck_0_10_2, self).__init__(name, init_config, instances)
-        self._zk_timeout = int(init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
+        self._zk_timeout = int(init_config.get('zk_timeout', 5))
         self._kafka_timeout = int(init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
         self.context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
         self._broker_retries = int(init_config.get('kafka_retries', DEFAULT_KAFKA_RETRIES))
-        self._zk_last_ts = {}
 
         self.kafka_clients = {}
 
@@ -55,7 +53,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         # Fetch consumer group offsets from Zookeeper
         zk_hosts_ports = instance.get('zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
-        zk_interval = int(instance.get('zk_iteration_ival', 0))
         get_kafka_consumer_offsets = is_affirmative(instance.get('kafka_consumer_offsets', zk_hosts_ports is None))
 
         custom_tags = instance.get('tags', [])
@@ -69,7 +66,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             self._validate_explicit_consumer_groups(consumer_groups)
 
         zk_consumer_offsets = None
-        if zk_hosts_ports and self._should_zk(zk_hosts_ports, zk_interval, get_kafka_consumer_offsets):
+        if zk_hosts_ports:
             zk_consumer_offsets, consumer_groups = self._get_zk_consumer_offsets(
                 zk_hosts_ports, consumer_groups, zk_prefix
             )
@@ -516,20 +513,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     consumer_offsets[(topic, partition)] = offset
 
         return consumer_offsets
-
-    def _should_zk(self, zk_hosts_ports, interval, kafka_collect=False):
-        if not kafka_collect or not interval:
-            return True
-        zk_hosts_ports_hash = hash_mutable(zk_hosts_ports)
-        now = time()
-        last = self._zk_last_ts.get(zk_hosts_ports_hash, 0)
-
-        should_zk = False
-        if now - last >= interval:
-            self._zk_last_ts[zk_hosts_ports_hash] = last
-            should_zk = True
-
-        return should_zk
 
     @classmethod
     def _validate_explicit_consumer_groups(cls, val):

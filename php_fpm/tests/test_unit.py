@@ -4,7 +4,7 @@
 import mock
 import pytest
 
-from datadog_checks.php_fpm.php_fpm import BadConfigError
+from datadog_checks.php_fpm.php_fpm import BadConfigError, PHPFPMCheck
 
 
 class FooException(Exception):
@@ -16,15 +16,20 @@ def test_bad_config(check):
         check.check({})
 
 
-def test_bad_status(check, aggregator):
+def test_bad_status(aggregator):
     instance = {'status_url': 'http://foo:9001/status', 'tags': ['expectedbroken']}
+    check = PHPFPMCheck('php_fpm', {}, [instance])
     check.check(instance)
     assert len(aggregator.metric_names) == 0
 
 
-def test_bad_ping(check, instance, aggregator, ping_url_tag):
+def test_bad_ping(aggregator):
+    instance = {'ping_url': 'http://foo:9001/ping', 'tags': ['some_tag']}
+    check = PHPFPMCheck('php_fpm', {}, [instance])
     check.check(instance)
-    aggregator.assert_service_check('php_fpm.can_ping', status=check.CRITICAL, tags=[ping_url_tag])
+    aggregator.assert_service_check(
+        'php_fpm.can_ping', status=check.CRITICAL, tags=['ping_url:http://foo:9001/ping', 'some_tag']
+    )
     aggregator.all_metrics_asserted()
 
 
