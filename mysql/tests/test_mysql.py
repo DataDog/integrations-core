@@ -17,6 +17,7 @@ from . import common, tags, variables
 from .common import MYSQL_VERSION_PARSED
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_minimal_config(aggregator, instance_basic):
     mysql_check = MySql(common.CHECK_NAME, {}, {})
@@ -39,6 +40,7 @@ def test_minimal_config(aggregator, instance_basic):
         aggregator.assert_metric(mname, at_least=0)
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config(aggregator, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[instance_complex])
@@ -114,6 +116,7 @@ def _assert_complex_config(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_failure(aggregator, instance_error):
     """
@@ -129,6 +132,7 @@ def test_connection_failure(aggregator, instance_error):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config_replica(aggregator, instance_complex):
     mysql_check = MySql(common.CHECK_NAME, {}, {})
@@ -156,6 +160,9 @@ def test_complex_config_replica(aggregator, instance_complex):
         + variables.SYNTHETIC_VARS
     )
 
+    if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
+        testable_metrics.extend(variables.PERFORMANCE_VARS)
+
     # Test metrics
     for mname in testable_metrics:
         # These two are currently not guaranteed outside of a Linux
@@ -166,9 +173,8 @@ def test_complex_config_replica(aggregator, instance_complex):
             continue
         if mname == 'mysql.performance.cpu_time' and Platform.is_windows():
             continue
-
         if mname == 'mysql.performance.query_run_time.avg':
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], at_least=1)
         elif mname == 'mysql.info.schema.size':
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:testdb'], count=1)
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=1)

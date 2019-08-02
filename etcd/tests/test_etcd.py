@@ -35,6 +35,8 @@ STORE_METRICS = [
     'watchers',
 ]
 
+pytestmark = pytest.mark.integration
+
 
 @preview
 def test_check(aggregator, instance):
@@ -44,12 +46,9 @@ def test_check(aggregator, instance):
     tags = ['is_leader:{}'.format('true' if is_leader(URL) else 'false')]
 
     for metric in itervalues(METRIC_MAP):
-        try:
-            aggregator.assert_metric(metric, tags=tags)
-        except AssertionError:
-            pass
+        aggregator.assert_metric('etcd.{}'.format(metric), tags=tags, at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 80
+    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
 
 
 @preview
@@ -61,12 +60,9 @@ def test_check_no_leader_tag(aggregator, instance):
     check.check(instance)
 
     for metric in itervalues(METRIC_MAP):
-        try:
-            aggregator.assert_metric(metric, tags=[])
-        except AssertionError:
-            pass
+        aggregator.assert_metric('etcd.{}'.format(metric), tags=[], at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 80
+    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
 
 
 @preview
