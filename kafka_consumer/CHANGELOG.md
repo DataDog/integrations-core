@@ -1,5 +1,10 @@
 # CHANGELOG - kafka_consumer
 
+## 1.11.0 / 2019-08-02
+
+* [Added] Bump Kazoo to 2.6.1 to pull in some minor bugfixes. See [#4260](https://github.com/DataDog/integrations-core/pull/4260). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Remove unnecessary constants and cleanup error handling. See [#4256](https://github.com/DataDog/integrations-core/pull/4256). Thanks [jeffwidman](https://github.com/jeffwidman).
+
 ## 1.10.0 / 2019-06-19
 
 * [Added] Refactor check to support different versions easily. See [#3929](https://github.com/DataDog/integrations-core/pull/3929).
