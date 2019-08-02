@@ -158,8 +158,10 @@ def test_complex_config_replica(aggregator, instance_complex):
         + variables.SYSTEM_METRICS
         + variables.SCHEMA_VARS
         + variables.SYNTHETIC_VARS
-        + variables.PERFORMANCE_VARS
     )
+
+    if MYSQL_VERSION_PARSED >= parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb':
+        testable_metrics.extend(variables.PERFORMANCE_VARS)
 
     # Test metrics
     for mname in testable_metrics:
@@ -179,7 +181,7 @@ def test_complex_config_replica(aggregator, instance_complex):
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:information_schema'], count=1)
             aggregator.assert_metric(mname, tags=tags.METRIC_TAGS + ['schema:performance_schema'], count=1)
         else:
-            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=0)
+            aggregator.assert_metric(mname, tags=tags.METRIC_TAGS, at_least=1)
 
     # test custom query metrics
     aggregator.assert_metric('alice.age', value=25)
