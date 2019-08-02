@@ -1,5 +1,20 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.3.0 / 2019-08-02
+
+* [Added] Pin pyasn1-modules. See [#4275](https://github.com/DataDog/integrations-core/pull/4275).
+* [Added] Bump Kazoo to 2.6.1 to pull in some minor bugfixes. See [#4260](https://github.com/DataDog/integrations-core/pull/4260). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Support memory profiling metrics. See [#4239](https://github.com/DataDog/integrations-core/pull/4239).
+* [Added] Set timeout from init_config in requests wrapper as default. See [#4226](https://github.com/DataDog/integrations-core/pull/4226).
+* [Fixed] Fix prometheus and openmetric unicode labels. See [#4157](https://github.com/DataDog/integrations-core/pull/4157).
+* [Added] Add the version of an AgentCheck as a property. See [#4228](https://github.com/DataDog/integrations-core/pull/4228).
+* [Added] Upgrade JPype1 to 0.7.0. See [#4211](https://github.com/DataDog/integrations-core/pull/4211).
+* [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).
+* [Added] Add option for specifying extra headers in RequestsWrapper. See [#4208](https://github.com/DataDog/integrations-core/pull/4208).
+* [Added] Add the ability to debug memory usage. See [#4166](https://github.com/DataDog/integrations-core/pull/4166).
+* [Fixed] Fix openmetrics telemetry memory usage in mixins. See [#4193](https://github.com/DataDog/integrations-core/pull/4193).
+* [Added] Add tuple timeout format to Request Remapper. See [#4172](https://github.com/DataDog/integrations-core/pull/4172).
+
 ## 9.2.1 / 2019-07-19
 
 * [Fixed] Fix openmetrics mixins telemetry metrics. See [#4155](https://github.com/DataDog/integrations-core/pull/4155).
