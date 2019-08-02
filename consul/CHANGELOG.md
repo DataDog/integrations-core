@@ -1,5 +1,9 @@
 # CHANGELOG - consul
 
+## 1.8.1 / 2019-08-02
+
+* [Fixed] Fix Consul event timestamp. See [#4173](https://github.com/DataDog/integrations-core/pull/4173).
+
 ## 1.8.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3491](https://github.com/DataDog/integrations-core/pull/3491).
