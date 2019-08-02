@@ -18,7 +18,7 @@ from six import iteritems, itervalues, string_types, text_type
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_RETRIES, DEFAULT_KAFKA_TIMEOUT, DEFAULT_ZK_TIMEOUT
+from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_RETRIES, DEFAULT_KAFKA_TIMEOUT
 
 
 class LegacyKafkaCheck_0_10_2(AgentCheck):
@@ -34,7 +34,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(LegacyKafkaCheck_0_10_2, self).__init__(name, init_config, instances)
-        self._zk_timeout = int(init_config.get('zk_timeout', DEFAULT_ZK_TIMEOUT))
+        self._zk_timeout = int(init_config.get('zk_timeout', 5))
         self._kafka_timeout = int(init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
         self.context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
         self._broker_retries = int(init_config.get('kafka_retries', DEFAULT_KAFKA_RETRIES))
