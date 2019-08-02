@@ -43,6 +43,7 @@ class DockerInterface(object):
         api_key=None,
         python_version=DEFAULT_PYTHON_VERSION,
     ):
+        self.docker_client = docker_client.from_env()
         self.check = check
         self.env = env
         self.env_vars = env_vars or {}
@@ -64,7 +65,6 @@ class DockerInterface(object):
 
         if self.agent_build and self.metadata.get('use_jmx', False):
             self.agent_build = '{}-jmx'.format(self.agent_build)
-        self.docker_client = docker_client.from_env()
 
     @property
     def agent_version(self):
