@@ -93,6 +93,7 @@ Returns `CRITICAL` if the Agent cannot connect to PgBouncer to collect metrics, 
 Need help? Contact [Datadog support][8].
 
 
+[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/datadog_checks/pgbouncer/data/conf.yaml.example
