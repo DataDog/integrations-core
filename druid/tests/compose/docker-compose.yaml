@@ -1,25 +1,33 @@
-version: '3'
+version: '3.5'
 services:
-#  postgres:
-#    image: "postgres:${POSTGRES_VERSION}-alpine"
-#    ports:
-#      - 5432:5432
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready -U datadog -d datadog_test && if [[ ! -e /tmp/container_ready.txt ]]; then exit 1; fi"]
-#      interval: 1s
-#      timeout: 5s
-#      retries: 5
-#    volumes:
-#      - ./resources:/docker-entrypoint-initdb.d/
+  zookeeper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["bin/run-zk", "conf"]
+    volumes:
+      - ./conf:/usr/local/druid/conf
 
   druid-broker:
     build:
       context: .
       dockerfile: Dockerfile
     command: ["bin/run-druid", "broker", "conf/druid/single-server/micro-quickstart"]
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./conf:/usr/local/druid/conf
+    ports:
+      - 8082:8082
 
   druid-coordinator:
     build:
       context: .
       dockerfile: Dockerfile
     command: ["bin/run-druid", "coordinator-overlord", "conf/druid/single-server/micro-quickstart"]
+    depends_on:
+      - zookeeper
+    volumes:
+      - ./conf:/usr/local/druid/conf
+    ports:
+      - 8081:8081
