@@ -9,3 +9,9 @@ class DruidCheck(AgentCheck):
 
     def check(self, instance):
         pass
+
+# TAGS:
+#   - druid service name e.g. druid/broker
+
+# TODO: Handle version
+# etcd.server.version,gauge,,item,,Which version is running. 1 for 'server_version' label with current version.,0,etcd,
