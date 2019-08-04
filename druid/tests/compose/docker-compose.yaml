@@ -9,11 +9,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["bin/run-druid", "broker", "conf/druid/single-server/micro-quickstart"]
+    command: ["bin/run-druid", "broker", "/opt/druid_conf"]
     depends_on:
       - zookeeper
     volumes:
-      - ./conf:/usr/local/druid/conf
+      - ./conf:/opt/druid_conf
     ports:
       - 8082:8082
 
@@ -21,10 +21,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["bin/run-druid", "coordinator-overlord", "conf/druid/single-server/micro-quickstart"]
+    command: ["bin/run-druid", "coordinator-overlord", "/opt/druid_conf"]
     depends_on:
       - zookeeper
     volumes:
-      - ./conf:/usr/local/druid/conf
+      - ./conf:/opt/druid_conf
     ports:
       - 8081:8081
