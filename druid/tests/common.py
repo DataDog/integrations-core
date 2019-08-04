@@ -8,3 +8,7 @@ PORT = '5432'
 USER = 'datadog'
 PASSWORD = 'datadog'
 DB_NAME = 'datadog_test'
+
+
+COORDINATOR_URL = 'http://localhost:8081'
+BROKER_URL = 'http://localhost:8082'

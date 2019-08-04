@@ -1,42 +1,60 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from urllib.parse import urlparse
+from requests import HTTPError, Timeout
 
 from datadog_checks.base import AgentCheck
 
-SERVICE_CHECK_NAME = 'druid.can_connect'
+SERVICE_CHECK_PROCESS_CAN_CONNECT = 'druid.process.can_connect'
+SERVICE_CHECK_PROCESS_STATUS = 'druid.process.status'
+
 
 class DruidCheck(AgentCheck):
-    # TODO: Use http.RequestsWrapper
-
     def check(self, instance):
         custom_tags = instance.get('tags', [])
 
-        url = instance.get('process_url')
+        base_url = instance.get('process_url')
 
-        service_check_tags = tags_from_url(url=url, prefix='process') + custom_tags
+        process_properties = self._get_process_properties(base_url, custom_tags)
+
+        druid_service = process_properties['druid.service']
+        tags = custom_tags + ['process:{}'.format(druid_service)]
+
+        self._submit_status_service_check(base_url, tags)
+
+    def _submit_status_service_check(self, base_url, tags):
+        url = base_url + "/status/health"
+        service_check_tags = ['url:{}'.format(url)] + tags
+
+        resp = self._make_request(url)
+        if resp is True:
+            self.service_check(SERVICE_CHECK_PROCESS_STATUS, AgentCheck.OK, tags=service_check_tags)
+        else:
+            self.service_check(SERVICE_CHECK_PROCESS_STATUS, AgentCheck.CRITICAL, tags=service_check_tags)
+
+    def _get_process_properties(self, base_url, tags):
+        url = base_url + "/status/properties"
+        service_check_tags = ['url:{}'.format(url)] + tags
         try:
             r = self.http.get(url)
             r.raise_for_status()
         except Exception:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(SERVICE_CHECK_PROCESS_CAN_CONNECT, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
-        else:
-            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+        self.service_check(SERVICE_CHECK_PROCESS_CAN_CONNECT, AgentCheck.OK, tags=service_check_tags)
+        return r.json()
 
-# TODO: move to utils
-@staticmethod
-def tags_from_url(url, prefix=None):
-    if prefix:
-        prefix = prefix + '_'
-    parsed_url = urlparse(url)
-    gitlab_host = parsed_url.hostname
-    gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
-    return [
-        '{}host:{}'.format(prefix, gitlab_host),
-        '{}port:{}'.format(prefix, gitlab_port),
-    ]
+    def _make_request(self, url):
+        try:
+            resp = self.http.get(url)
+            return resp.json()
+        except (HTTPError, ConnectionError) as e:
+            self.warning(
+                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable".format(url, e)
+            )
+        except Timeout:
+            self.warning("Connection timeout when connecting to {}".format(url))
+
 
 # TAGS:
 #   - druid service name e.g. druid/broker

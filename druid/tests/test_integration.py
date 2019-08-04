@@ -3,13 +3,26 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.druid import DruidCheck
+
+from .common import BROKER_URL
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_relations_metrics(aggregator, pg_instance):
-    check = DruidCheck('druid', {}, [pg_instance])
-    check.check(pg_instance)
+def test_status_checks(aggregator):
+    instance = {'process_url': BROKER_URL, 'tags': ['foo:bar']}
+    check = DruidCheck('druid', {}, [instance])
+    check.check(instance)
+
+    aggregator.assert_service_check(
+        'druid.process.can_connect', AgentCheck.OK, ['url:http://localhost:8082/status/properties', 'foo:bar']
+    )
+    aggregator.assert_service_check(
+        'druid.process.status',
+        AgentCheck.OK,
+        ['url:http://localhost:8082/status/health', 'foo:bar', 'process:druid/broker'],
+    )
 
     aggregator.assert_all_metrics_covered()

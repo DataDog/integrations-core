@@ -66,7 +66,7 @@ def test_backoff_success(check, instance, aggregator, payload):
     """
     instance['ping_url'] = None
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
-        attrs = {'json.return_value': payload}
+        attrs = {}
         r.get.side_effect = [
             mock.MagicMock(status_code=503),
             mock.MagicMock(status_code=503),

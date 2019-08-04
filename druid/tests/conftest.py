@@ -3,20 +3,14 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-import mock
-import psycopg2
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run
-from datadog_checks.druid import DruidCheck
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckEndpoints
 
-from .common import DB_NAME, HOST, PASSWORD, PORT, USER
+from .common import BROKER_URL, COORDINATOR_URL
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-
-
-def connect_to_pg():
-    psycopg2.connect(host=HOST, dbname=DB_NAME, user=USER, password=PASSWORD)
 
 
 @pytest.fixture(scope='session')
@@ -24,23 +18,21 @@ def dd_environment(e2e_instance):
     """
     Start a standalone postgres server requiring authentication.
     """
-    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yaml'), conditions=[WaitFor(connect_to_pg)]):
+    with docker_run(
+        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+        conditions=[
+            CheckEndpoints(COORDINATOR_URL + '/status', attempts=200),
+            CheckEndpoints(BROKER_URL + '/status', attempts=200),
+        ],
+    ):
         yield e2e_instance
 
 
-@pytest.fixture
-def check():
-    c = DruidCheck('postgres', {}, {})
-    c._is_9_2_or_above = mock.MagicMock()
-    DruidCheck._known_servers = set()  # reset the global state
-    return c
-
-
-@pytest.fixture
-def pg_instance():
-    return {'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}
+@pytest.fixture(scope='session')
+def instance():
+    return {'process_url': BROKER_URL}
 
 
 @pytest.fixture(scope='session')
 def e2e_instance():
-    return {'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}
+    return {'process_url': BROKER_URL}
