@@ -18,7 +18,14 @@ class Fluentd(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(Fluentd, self).__init__(name, init_config, instances)
-        self.default_timeout = init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
+        if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
+            # `default_timeout` config option will be removed with Agent 5
+            self.http.options['timeout'] = (
+                self.instance.get('timeout')
+                or self.init_config.get('timeout')
+                or self.init_config.get('default_timeout')
+                or self.DEFAULT_TIMEOUT
+            )
 
     """Tracks basic fluentd metrics via the monitor_agent plugin
     * number of retry_count
