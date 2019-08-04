@@ -28,7 +28,7 @@ class AmbariCheck(AgentCheck):
         base_tags = instance.get("tags", [])
         whitelisted_services = instance.get("services", [])
 
-        clusters = self.get_clusters(base_url)
+        clusters = self.get_clusters(base_url, base_tags)
         self.get_host_metrics(base_url, clusters, base_tags)
 
         collect_service_metrics = self._should_collect_service_metrics()
@@ -44,17 +44,17 @@ class AmbariCheck(AgentCheck):
     def _should_collect_service_status(self):
         return self.init_config.get("collect_service_status", False)
 
-    def get_clusters(self, base_url):
+    def get_clusters(self, base_url, tags):
         clusters_endpoint = common.CLUSTERS_URL.format(base_url=base_url)
-
+        service_check_tags = tags + ["url:{}".format(base_url)]
         resp = self._make_request(clusters_endpoint)
         if resp is None:
-            self._submit_service_checks("can_connect", self.CRITICAL, ["url:{}".format(base_url)])
+            self._submit_service_checks("can_connect", self.CRITICAL, service_check_tags)
             raise CheckException(
                 "Couldn't connect to URL: {}. Please verify the address is reachable".format(clusters_endpoint)
             )
 
-        self._submit_service_checks("can_connect", self.OK, ["url:{}".format(base_url)])
+        self._submit_service_checks("can_connect", self.OK, service_check_tags)
         return self._get_response_clusters(resp)
 
     def _get_response_clusters(self, resp):
