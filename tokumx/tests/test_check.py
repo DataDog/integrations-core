@@ -7,6 +7,7 @@ import pytest
 from datadog_checks.base import AgentCheck
 
 from . import common, metrics
+from .common import HOST
 
 
 @pytest.mark.integration
@@ -59,8 +60,7 @@ def test_e2e(dd_agent_check, instance, docker_host):
             aggregator.assert_metric(
                 'tokumx.stats.db.{}'.format(msuff),
                 count=2,
-                tags=[server_tag, 'db:{}'.format(dbname), "optional:tag1"],
-                hostname='linuxkit-025000000001',
+                tags=[server_tag, 'db:{}'.format(dbname), "optional:tag1"]
             )
 
     sc_tags = ['db:admin', 'host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'optional:tag1']
