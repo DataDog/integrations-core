@@ -290,12 +290,12 @@ def generate_config_with_creds():
     result = run_in_container(
         "dd-test-riakcs", "bash -c \"grep admin_key /etc/riak-cs/advanced.config | cut -d '\\\"' -f2\""
     )
-    access_id = result.output.strip()
+    access_id = result.output.decode('utf-8').strip()
 
     result = run_in_container(
         "dd-test-riakcs", "bash -c \"grep admin_secret /etc/riak-cs/advanced.config | cut -d '\\\"' -f2\""
     )
-    access_secret = result.output.strip()
+    access_secret = result.output.decode('utf-8').strip()
 
     config = copy.deepcopy(CONFIG_21)
     config["access_id"] = access_id
