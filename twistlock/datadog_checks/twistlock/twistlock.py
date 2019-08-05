@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import re
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -82,8 +83,18 @@ class TwistlockCheck(AgentCheck):
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             raise e
 
+        expiration_date_str = license.get("expiration_date")
+
+        # %f only matches microseconds. This will look for milliseconds and drop the last 3 digits.
+        match_milliseconds = re.match('(.*\.\d{6})(?:\d{3})(Z)', expiration_date_str)
+        if match_milliseconds:
+            expiration_date_str = ""
+            for group in match_milliseconds.groups():
+                expiration_date_str += group
+
+        expiration_date = datetime.strptime(expiration_date_str, LICENSE_DATE_FORMAT)
+
         # alert if your license will expire in 30 days and then in a week
-        expiration_date = datetime.strptime(license.get("expiration_date"), LICENSE_DATE_FORMAT)
         current_date = datetime.utcnow()
         warning_date = current_date + timedelta(days=30)
         critical_date = current_date + timedelta(days=7)
