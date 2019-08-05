@@ -214,9 +214,9 @@ class DockerInterface(object):
 
             if 'proxy' in self.metadata:
                 if 'http' in self.metadata['proxy']:
-                    command.extend(['-e', 'DD_PROXY_HTTP={}'.format(self.metadata['proxy']['http'])])
+                    environment['DD_PROXY_HTTP'] = self.metadata['proxy']['http']
                 if 'https' in self.metadata['proxy']:
-                    command.extend(['-e', 'DD_PROXY_HTTPS={}'.format(self.metadata['proxy']['https'])])
+                    environment['DD_PROXY_HTTPS'] = self.metadata['proxy']['https']
 
             if self.base_package:
                 # Mount the check directory
