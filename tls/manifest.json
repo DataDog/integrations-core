@@ -24,7 +24,9 @@
   "integration_id": "tls",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "TLS Overview": "assets/dashboards/overview.json"
+     },
     "service_checks": "assets/service_checks.json"
   }
 }
