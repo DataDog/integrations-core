@@ -10,7 +10,6 @@ from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.headers import headers
 
 from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 
