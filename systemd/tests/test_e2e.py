@@ -4,7 +4,7 @@
 
 import pytest
 
-from .common import INSTANCE, ALL_METRICS
+from .common import ALL_METRICS, INSTANCE
 
 
 @pytest.mark.e2e
