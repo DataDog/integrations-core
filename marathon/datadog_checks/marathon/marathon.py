@@ -8,8 +8,6 @@ from six import iteritems
 from six.moves.urllib.parse import urljoin
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
-
 
 class Marathon(AgentCheck):
 
@@ -44,9 +42,25 @@ class Marathon(AgentCheck):
 
     QUEUE_PREFIX = 'marathon.queue'
 
+    HTTP_CONFIG_REMAPPER = {
+        'user': {'name': 'username'},
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}
+    }
+
+    def __init__(self, name, init_config, instances):
+        super(Marathon, self).__init__(name, init_config, instances)
+        if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
+            # `default_timeout` config option will be removed with Agent 5
+            self.http.options['timeout'] = (
+                self.instance.get('timeout')
+                or self.init_config.get('timeout')
+                or self.init_config.get('default_timeout')
+                or self.DEFAULT_TIMEOUT
+            )
+
     def check(self, instance):
         try:
-            (url, auth, acs_url, ssl_verify, group, instance_tags, label_tags, timeout) = self.get_instance_config(
+            (url, acs_url, group, instance_tags, label_tags) = self.get_instance_config(
                 instance
             )
         except Exception as e:
@@ -54,20 +68,21 @@ class Marathon(AgentCheck):
             raise e
 
         self.apps_response = None
-        self.process_apps(url, timeout, auth, acs_url, ssl_verify, instance_tags, label_tags, group)
-        self.process_deployments(url, timeout, auth, acs_url, ssl_verify, instance_tags)
-        self.process_queues(url, timeout, auth, acs_url, ssl_verify, instance_tags, label_tags)
+        self.process_apps(url, acs_url, instance_tags, label_tags, group)
+        self.process_deployments(url, acs_url, instance_tags)
+        self.process_queues(url, acs_url, instance_tags, label_tags)
 
-    def refresh_acs_token(self, auth, acs_url, tags=None):
+    def refresh_acs_token(self, acs_url, tags=None):
         if tags is None:
             tags = []
 
         try:
-            auth_body = {'uid': auth[0], 'password': auth[1]}
-            r = requests.post(urljoin(acs_url, "acs/api/v1/auth/login"), json=auth_body, verify=False)
+            if self.http.options['auth'] is not None:
+                auth_body = {'uid': self.http.options['auth'][0], 'password': self.http.options['auth'][1]}
+            r = self.http.post(urljoin(acs_url, "acs/api/v1/auth/login"), json=auth_body, verify=False)
             r.raise_for_status()
             token = r.json()['token']
-            self.ACS_TOKEN = token
+            self.http.options['headers']['authorization'] = token
             return token
         except requests.exceptions.HTTPError:
             self.service_check(
@@ -78,31 +93,23 @@ class Marathon(AgentCheck):
             )
             raise Exception("Got %s when hitting %s" % (r.status_code, acs_url))
 
-    def get_json(self, url, timeout, auth, acs_url, verify, tags=None):
+    def get_json(self, url, acs_url, tags=None):
         if tags is None:
             tags = []
 
-        params = {'timeout': timeout, 'headers': {}, 'auth': auth, 'verify': verify}
-        if acs_url:
-            # If the ACS token has not been set, go get it
-            if not self.ACS_TOKEN:
-                self.refresh_acs_token(auth, acs_url, tags)
-            params['headers']['authorization'] = 'token=%s' % self.ACS_TOKEN
-            del params['auth']
-
         try:
-            r = requests.get(url, **params)
+            r = self.http.get(url)
             # If got unauthorized and using acs auth, refresh the token and try again
             if r.status_code == 401 and acs_url:
-                self.refresh_acs_token(auth, acs_url, tags)
-                r = requests.get(url, **params)
+                self.refresh_acs_token(acs_url, tags)
+                r = self.http.get(url)
             r.raise_for_status()
         except requests.exceptions.Timeout:
             # If there's a timeout
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="{} timed out after {} seconds.".format(url, timeout),
+                message="{} timed out after {} seconds.".format(url, self.http.options['timeout']),
                 tags=["url:{}".format(url)] + tags,
             )
             raise Exception("Timeout when hitting {}".format(url))
@@ -136,24 +143,15 @@ class Marathon(AgentCheck):
 
         # Load values from the instance config
         url = instance['url']
-        user = instance.get('user')
-        password = instance.get('password')
         acs_url = instance.get('acs_url')
-        if user is not None and password is not None:
-            auth = (user, password)
-        else:
-            auth = None
-        ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
         group = instance.get('group')
 
         tags = instance.get('tags', [])
         label_tags = instance.get('label_tags', [])
-        default_timeout = self.init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
-        timeout = float(instance.get('timeout', default_timeout))
 
-        return url, auth, acs_url, ssl_verify, group, tags, label_tags, timeout
+        return url, acs_url, group, tags, label_tags
 
-    def get_apps_json(self, url, timeout, auth, acs_url, ssl_verify, tags, group):
+    def get_apps_json(self, url, acs_url, tags, group):
         """
         The dictionary containing the apps is cached during collection and reset
         at every `check()` call.
@@ -171,11 +169,11 @@ class Marathon(AgentCheck):
                 url, "v2/groups/{}?embed=group.groups".format(group) + "&embed=group.apps&embed=group.apps.counts"
             )
 
-        self.apps_response = self.get_json(marathon_path, timeout, auth, acs_url, ssl_verify, tags)
+        self.apps_response = self.get_json(marathon_path, acs_url, tags)
         return self.apps_response
 
-    def process_apps(self, url, timeout, auth, acs_url, ssl_verify, tags, label_tags, group):
-        response = self.get_apps_json(url, timeout, auth, acs_url, ssl_verify, tags, group)
+    def process_apps(self, url, acs_url, tags, label_tags, group):
+        response = self.get_apps_json(url, acs_url, tags, group)
         if response is None:
             return
 
@@ -186,14 +184,14 @@ class Marathon(AgentCheck):
                 if attr in app:
                     self.gauge('marathon.' + attr, app[attr], tags=app_tags)
 
-    def process_deployments(self, url, timeout, auth, acs_url, ssl_verify, tags=None):
+    def process_deployments(self, url, acs_url, tags=None):
         # Number of running/pending deployments
-        response = self.get_json(urljoin(url, "v2/deployments"), timeout, auth, acs_url, ssl_verify, tags)
+        response = self.get_json(urljoin(url, "v2/deployments"), acs_url, tags)
         if response is not None:
             self.gauge('marathon.deployments', len(response), tags=tags)
 
-    def process_queues(self, url, timeout, auth, acs_url, ssl_verify, tags=None, label_tags=None, group=None):
-        response = self.get_json(urljoin(url, "v2/queue"), timeout, auth, acs_url, ssl_verify, tags)
+    def process_queues(self, url, acs_url, tags=None, label_tags=None, group=None):
+        response = self.get_json(urljoin(url, "v2/queue"), acs_url, tags)
         if response is None:
             return
 
@@ -237,7 +235,7 @@ class Marathon(AgentCheck):
                     except (KeyError, TypeError):
                         self.log.warn("Metric unavailable skipping: {}".format(metric_name))
 
-        self.ensure_queue_count(queued, url, timeout, auth, acs_url, ssl_verify, tags, label_tags, group)
+        self.ensure_queue_count(queued, url, acs_url, tags, label_tags, group)
 
     def get_app_tags(self, app, tags=None, label_tags=None):
         if tags is None:
@@ -260,15 +258,13 @@ class Marathon(AgentCheck):
 
         return basic_tags
 
-    def ensure_queue_count(
-        self, queued, url, timeout, auth, acs_url, ssl_verify, tags=None, label_tags=None, group=None
-    ):
+    def ensure_queue_count(self, queued, url, acs_url, tags=None, label_tags=None, group=None):
         """
         Ensure `marathon.queue.count` is reported as zero for apps without queued instances.
         """
         metric_name = '{}.count'.format(self.QUEUE_PREFIX)
 
-        apps_response = self.get_apps_json(url, timeout, auth, acs_url, ssl_verify, tags, group)
+        apps_response = self.get_apps_json(url, acs_url, tags, group)
 
         for app in apps_response['apps']:
             if app['id'] not in queued:
