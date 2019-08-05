@@ -25,6 +25,7 @@ REQUIRES = [
     'coverage>=4.5.1',
     'docker>=3.6.0',
     'mock',
+    'psutil',
     'PyYAML>=5.1',
     'pytest',
     'pytest-benchmark>=3.2.1',
@@ -32,6 +33,8 @@ REQUIRES = [
     'pytest-mock',
     'requests>=2.22.0',
     'six',
+    "shutilwhich==1.1.0; python_version < '3.0'",
+    "subprocess32==3.5.4; python_version < '3.0'",
 ]
 
 

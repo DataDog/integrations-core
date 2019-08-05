@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 from six import iteritems
 
@@ -91,3 +93,16 @@ def replay_check_run(agent_collector, stub_aggregator):
 
     if runner['LastError']:
         raise Exception(runner['LastError'])
+
+
+def serialize_data(data):
+    data = json.dumps(data, separators=(',', ':'))
+    # Using base64 ensures:
+    # 1. Printing to stdout won't fail
+    # 2. Easy parsing since there are no spaces
+    return urlsafe_b64encode(data.encode('utf-8')).decode('utf-8')
+
+
+def deserialize_data(data):
+    decoded = urlsafe_b64decode(data.encode('utf-8'))
+    return json.loads(decoded.decode('utf-8'))

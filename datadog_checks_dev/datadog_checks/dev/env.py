@@ -4,7 +4,7 @@
 import time
 from contextlib import contextmanager
 
-from ._env import set_up_env, tear_down_env
+from ._env import deserialize_data, get_env_vars, serialize_data, set_env_vars, set_up_env, tear_down_env
 from .conditions import CheckEndpoints
 from .structures import EnvVars
 from .utils import mock_context_manager
@@ -45,16 +45,25 @@ def environment_run(up, down, sleep=None, endpoints=None, conditions=None, env_v
     result = None
     with env_vars, wrapper:
         try:
+            # Create an environment variable to store setup result
+            key = 'environment_result_{}'.format(up.__class__.__name__.lower())
             if set_up_env():
                 result = up()
+                # Store the serialized data in the environment
+                set_env_vars({key: serialize_data(result)})
 
                 for condition in conditions:
                     condition()
 
                 if sleep:
                     time.sleep(sleep)
+                yield result
+            else:
+                # If we don't setup, retrieve the data and deserialize it
+                result = get_env_vars().get(key)
+                if result:
+                    yield deserialize_data(result)
 
-            yield result
         finally:
             if tear_down_env():
                 down()

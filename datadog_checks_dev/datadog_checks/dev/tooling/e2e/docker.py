@@ -212,6 +212,12 @@ class DockerInterface(object):
             for key, value in sorted(self.env_vars.items()):
                 environment[key] = value
 
+            if 'proxy' in self.metadata:
+                if 'http' in self.metadata['proxy']:
+                    command.extend(['-e', 'DD_PROXY_HTTP={}'.format(self.metadata['proxy']['http'])])
+                if 'https' in self.metadata['proxy']:
+                    command.extend(['-e', 'DD_PROXY_HTTPS={}'.format(self.metadata['proxy']['https'])])
+
             if self.base_package:
                 # Mount the check directory
                 volumes.append(Mount(source=self.base_package, target=self.base_mount_dir, type='bind'))
