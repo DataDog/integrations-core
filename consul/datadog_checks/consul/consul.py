@@ -77,8 +77,8 @@ class ConsulCheck(AgentCheck):
         'ca_bundle_file': {'name': 'tls_ca_cert', 'default': True, 'invert': False},
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(ConsulCheck, self).__init__(name, init_config, instances)
 
         self._instance_states = defaultdict(lambda: ConsulCheckInstanceState())
 
