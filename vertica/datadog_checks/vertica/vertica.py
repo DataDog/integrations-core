@@ -152,15 +152,18 @@ class VerticaCheck(AgentCheck):
 
         # Will only be 1 system
         for system in self.iter_rows(views.System):
-            allowed_nodes = self._view[views.Licenses][0]['node_restriction']
             total_nodes = system['node_count']
-            self.gauge('node.allowed', allowed_nodes, tags=self._tags)
             self.gauge('node.total', total_nodes, tags=self._tags)
-            self.gauge('node.available', allowed_nodes - total_nodes, tags=self._tags)
             self.gauge('node.down', system['node_down_count'], tags=self._tags)
 
             self.gauge('ksafety.current', system['current_fault_tolerance'], tags=self._tags)
             self.gauge('ksafety.intended', system['designed_fault_tolerance'], tags=self._tags)
+
+            # Is is possible for there to be no restriction
+            allowed_nodes = self._view[views.Licenses][0]['node_restriction']
+            if allowed_nodes is not None:
+                self.gauge('node.allowed', allowed_nodes, tags=self._tags)
+                self.gauge('node.available', allowed_nodes - total_nodes, tags=self._tags)
 
     def query_nodes(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/CATALOG/NODES.htm
