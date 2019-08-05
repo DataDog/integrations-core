@@ -86,7 +86,7 @@ class TwistlockCheck(AgentCheck):
         expiration_date_str = license.get("expiration_date")
 
         # %f only matches microseconds. This will look for milliseconds and drop the last 3 digits.
-        match_milliseconds = re.match('(.*\.\d{6})(?:\d{3})(Z)', expiration_date_str)
+        match_milliseconds = re.match('(.*\.\d{6})(?:\d+)(Z)', expiration_date_str)
         if match_milliseconds:
             expiration_date_str = ""
             for group in match_milliseconds.groups():
