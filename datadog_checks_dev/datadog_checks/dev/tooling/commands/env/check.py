@@ -71,13 +71,20 @@ def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_p
     if config_file:
         config = json.loads(read_file(config_file))
         with environment.use_config(config):
-            environment.run_check(**check_args)
+            _run_check(environment, check_args)
     else:
-        environment.run_check(**check_args)
-
+        _run_check(environment, check_args)
         if not rate:
             echo_success('Note: ', nl=False)
             echo_info(
                 'If some metrics are missing, you may want to try again with the -r / --rate flag '
                 'for a classic integration.'
             )
+
+
+def _run_check(environment, check_args):
+    result = environment.run_check(**check_args)
+    if result.exit_code != 0:
+        echo_failure(result.output.decode('utf-8'))
+    else:
+        echo_info(result.output.decode('utf-8'))

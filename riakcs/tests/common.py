@@ -287,15 +287,15 @@ EXPECTED_METRICS = [
 
 
 def generate_config_with_creds():
-    _, access_id = run_in_container(
+    result = run_in_container(
         "dd-test-riakcs", "bash -c \"grep admin_key /etc/riak-cs/advanced.config | cut -d '\\\"' -f2\""
     )
-    access_id = access_id.strip()
+    access_id = result.output.strip()
 
-    _, access_secret = run_in_container(
+    result = run_in_container(
         "dd-test-riakcs", "bash -c \"grep admin_secret /etc/riak-cs/advanced.config | cut -d '\\\"' -f2\""
     )
-    access_secret = access_secret.strip()
+    access_secret = result.output.strip()
 
     config = copy.deepcopy(CONFIG_21)
     config["access_id"] = access_id

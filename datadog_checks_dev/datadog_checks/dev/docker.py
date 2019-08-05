@@ -55,10 +55,10 @@ def run_in_container(container_name, command, check=True, interactive=False):
     except TypeError as e:
         print(command)
         raise e
-    code, out = container.exec_run(command_line, stdin=interactive)
-    if check and code != 0:
-        raise Exception(out)
-    return code, out.decode('utf-8')
+    result = container.exec_run(command_line, stdin=interactive)
+    if check and result.exit_code != 0:
+        raise Exception(result.output)
+    return result
 
 
 @contextmanager
