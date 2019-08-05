@@ -70,8 +70,7 @@ class Nginx(AgentCheck):
 
     """
 
-    HTTP_CONFIG_REMAPPER = {
-        'ssl_validation': {'name': 'tls_verify'}, 'user': {'name': 'username'}}
+    HTTP_CONFIG_REMAPPER = {'ssl_validation': {'name': 'tls_verify'}, 'user': {'name': 'username'}}
 
     def check(self, instance):
         if 'nginx_status_url' not in instance:
