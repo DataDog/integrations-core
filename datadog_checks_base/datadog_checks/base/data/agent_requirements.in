@@ -65,5 +65,5 @@ six==1.12.0
 supervisor==4.0.1
 tuf==0.11.2.dev3
 uptime==3.0.1
-vertica-python==0.9.2
+vertica-python==0.9.4
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'
