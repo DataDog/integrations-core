@@ -18,7 +18,7 @@
   ],
   "type": "check",
   "integration_id": "systemd",
-  "is_public": true,
+  "is_public": false,
   "assets": {
     "monitors": {},
     "dashboards": {
