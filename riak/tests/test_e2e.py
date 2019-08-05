@@ -1,8 +1,6 @@
-# (C) Datadog, Inc. 2010-2018
+# (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-import socket
 
 import pytest
 
@@ -11,10 +9,9 @@ from datadog_checks.riak import Riak
 from . import common
 
 
-@pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator, check, instance):
-    check.check(instance)
-    check.check(instance)
+@pytest.mark.e2e
+def test_check(dd_agent_check, instance):
+    aggregator = dd_agent_check(instance, rate=True)
     tags = ['my_tag']
     sc_tags = tags + ['url:' + instance['url']]
 
@@ -27,12 +24,3 @@ def test_check(aggregator, check, instance):
         aggregator.assert_metric(gauge, count=1)
 
     aggregator.all_metrics_asserted()
-
-
-@pytest.mark.usefixtures('dd_environment')
-def test_bad_config(aggregator, check):
-    with pytest.raises(socket.error):
-        check.check({"url": "http://localhost:5985"})
-
-    sc_tags = ['url:http://localhost:5985']
-    aggregator.assert_service_check(common.SERVICE_CHECK_NAME, status=Riak.CRITICAL, tags=sc_tags)
