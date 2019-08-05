@@ -28,8 +28,6 @@ DEPLOYMENTS = [
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    if not os.environ.get('TF_VAR_account_json'):
-        pytest.skip('TF_VAR_account_json not set')
     with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
         kubeconfig = outputs['kubeconfig']['value']
         with ExitStack() as stack:

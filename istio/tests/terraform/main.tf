@@ -2,12 +2,12 @@ variable "account_json" {
   type = string
 }
 
-resource "random_id" "password" {
-  byte_length = 16
+variable "user" {
+  type = string
 }
 
-locals {
-  user = "user"
+resource "random_id" "password" {
+  byte_length = 16
 }
 
 resource "random_shuffle" "az" {
@@ -30,20 +30,20 @@ provider "google" {
 }
 
 resource "google_compute_network" "vpc_network" {
-  name = "istio-network-${random_string.suffix.result}"
+  name = replace("istio-network-${var.user}-${random_string.suffix.result}", ".", "-")
 }
 
 resource "local_file" "kubeconfig" {
-  content  = "${data.template_file.kubeconfig.rendered}"
+  content = "${data.template_file.kubeconfig.rendered}"
   filename = "${path.module}/kubeconfig"
 }
 
 resource "google_container_cluster" "gke_cluster" {
-  name               = "istio-terraform-test-${random_string.suffix.result}"
-  location           = random_shuffle.az.result[0]
-  node_version       = "1.13.7-gke.8"
+  name = replace("istio-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
+  location = random_shuffle.az.result[0]
+  node_version = "1.13.7-gke.8"
   min_master_version = "1.13.7-gke.8"
-  network            = google_compute_network.vpc_network.name
+  network = google_compute_network.vpc_network.name
 
   lifecycle {
     ignore_changes = ["node_pool"]
@@ -52,7 +52,7 @@ resource "google_container_cluster" "gke_cluster" {
   initial_node_count = 4
 
   master_auth {
-    username = local.user
+    username = "user"
     password = "${random_id.password.hex}"
   }
 
@@ -73,12 +73,12 @@ data "template_file" "kubeconfig" {
   template = "${file("${path.module}/kubeconfig-template.yaml")}"
 
   vars = {
-    cluster_name    = "${google_container_cluster.gke_cluster.name}"
-    user_name       = "${google_container_cluster.gke_cluster.master_auth.0.username}"
-    user_password   = "${google_container_cluster.gke_cluster.master_auth.0.password}"
-    endpoint        = "${google_container_cluster.gke_cluster.endpoint}"
-    cluster_ca      = "${google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate}"
-    client_cert     = "${google_container_cluster.gke_cluster.master_auth.0.client_certificate}"
+    cluster_name = "${google_container_cluster.gke_cluster.name}"
+    user_name = "${google_container_cluster.gke_cluster.master_auth.0.username}"
+    user_password = "${google_container_cluster.gke_cluster.master_auth.0.password}"
+    endpoint = "${google_container_cluster.gke_cluster.endpoint}"
+    cluster_ca = "${google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate}"
+    client_cert = "${google_container_cluster.gke_cluster.master_auth.0.client_certificate}"
     client_cert_key = "${google_container_cluster.gke_cluster.master_auth.0.client_key}"
   }
 }
@@ -88,7 +88,7 @@ resource "null_resource" "startup" {
     command = "./script.sh"
     environment = {
       KUBECONFIG = "${local_file.kubeconfig.filename}"
-      ISTIO_VERSION  = "1.2.0"
+      ISTIO_VERSION = "1.2.0"
     }
   }
 }

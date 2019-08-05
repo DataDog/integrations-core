@@ -7,7 +7,7 @@ import os
 from contextlib import contextmanager
 
 from .env import environment_run
-from .ssh_tunnel import KillProcess, find_free_port, run_background_command, get_ip
+from .ssh_tunnel import KillProcess, find_free_port, get_ip, run_background_command
 from .structures import LazyFunction, TempDir
 from .utils import chdir
 
@@ -20,6 +20,7 @@ def _build_temp_key(namespace, deployment, remote_port):
 
 @contextmanager
 def port_forward(kubeconfig, namespace, deployment, remote_port):
+    """Use `kubectl` to forward a remote port locally."""
     set_up = PortForwardUp(kubeconfig, namespace, deployment, remote_port)
     key = _build_temp_key(namespace, deployment, remote_port)
     tear_down = KillProcess(key, PID_FILE)
@@ -29,6 +30,8 @@ def port_forward(kubeconfig, namespace, deployment, remote_port):
 
 
 class PortForwardUp(LazyFunction):
+    """Setup `kubectl port-forward`."""
+
     def __init__(self, kubeconfig, namespace, deployment, remote_port):
         self.kubeconfig = kubeconfig
         self.namespace = namespace
@@ -40,8 +43,8 @@ class PortForwardUp(LazyFunction):
         with TempDir(key) as temp_dir:
             # Run in the temp dir to put kube cache files there
             with chdir(temp_dir):
-                local_port = find_free_port()
                 ip = get_ip()
+                local_port = find_free_port(ip)
                 command = [
                     'kubectl',
                     'port-forward',
