@@ -88,6 +88,7 @@ def _test_service_checks(aggregator, services=None, count=1):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check(aggregator, check, instance):
+    check = check(instance)
     check.check(instance)
 
     shared_tag = ["instance_url:{0}".format(STATS_URL)]
@@ -106,7 +107,7 @@ def test_check(aggregator, check, instance):
 def test_check_service_check(aggregator, check, instance):
     # Add the enable service check
     instance.update({"enable_service_check": True})
-
+    check = check(instance)
     check.check(instance)
 
     shared_tag = ["instance_url:{0}".format(STATS_URL)]
@@ -129,6 +130,7 @@ def test_check_service_check(aggregator, check, instance):
 def test_check_service_filter(aggregator, check, instance):
     instance['services_include'] = ['datadog']
     instance['services_exclude'] = ['.*']
+    check = check(instance)
     check.check(instance)
     shared_tag = ["instance_url:{0}".format(STATS_URL)]
 
@@ -144,6 +146,7 @@ def test_wrong_config(aggregator, check, instance):
     instance['username'] = 'fake_username'
 
     with pytest.raises(Exception):
+        check = check(instance)
         check.check(instance)
 
     aggregator.assert_all_metrics_covered()
@@ -152,6 +155,7 @@ def test_wrong_config(aggregator, check, instance):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_open_config(aggregator, check):
+    check = check(CHECK_CONFIG_OPEN)
     check.check(CHECK_CONFIG_OPEN)
 
     shared_tag = ["instance_url:{0}".format(STATS_URL_OPEN)]
@@ -171,6 +175,7 @@ def test_open_config(aggregator, check):
 )
 def test_tcp_socket(aggregator, check):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
+    check = check(config)
     check.check(config)
 
     shared_tag = ["instance_url:{0}".format(STATS_SOCKET)]
@@ -188,6 +193,7 @@ def test_unixsocket_config(aggregator, check, dd_environment):
     config = copy.deepcopy(CONFIG_UNIXSOCKET)
     unixsocket_url = dd_environment["unixsocket_url"]
     config['url'] = unixsocket_url
+    check = check(config)
     check.check(config)
 
     shared_tag = ["instance_url:{0}".format(unixsocket_url)]
