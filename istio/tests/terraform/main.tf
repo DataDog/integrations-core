@@ -85,10 +85,10 @@ data "template_file" "kubeconfig" {
 
 resource "null_resource" "startup" {
   provisioner "local-exec" {
-    command = "./script.sh"
+    command = "./script.py"
     environment = {
       KUBECONFIG = "${local_file.kubeconfig.filename}"
-      ISTIO_VERSION = "1.2.0"
+      ISTIO_VERSION = "1.2.3"
     }
   }
 }
