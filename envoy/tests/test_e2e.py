@@ -4,8 +4,9 @@
 
 import pytest
 
-from .common import HOST
+from datadog_checks.envoy import Envoy
 
+from .common import HOST
 
 METRICS = [
     'envoy.cluster.bind_errors',
@@ -168,3 +169,4 @@ def test_e2e(dd_agent_check):
     for metric in METRICS:
         aggregator.assert_metric(metric)
     # We can't assert all covered, as some aren't received every time
+    aggregator.assert_service_check('envoy.can_connect', Envoy.OK)
