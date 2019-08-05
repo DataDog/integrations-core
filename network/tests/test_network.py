@@ -11,6 +11,7 @@ import mock
 import pytest
 from six import PY3, iteritems
 
+from datadog_checks.dev import EnvVars
 from datadog_checks.network import Network
 
 from . import common
@@ -290,3 +291,18 @@ def test_parse_protocol_psutil(aggregator, check):
     conn.family = socket.AF_INET
     protocol = check._parse_protocol_psutil(conn)
     assert protocol == 'udp4'
+
+
+@pytest.mark.parametrize(
+    "proc_location, envs, expected_net_proc_base_location",
+    [
+        ("/something/proc", {'DOCKER_DD_AGENT': 'true'}, "/something/proc/1"),
+        ("/something/proc", {}, "/something/proc"),
+        ("/proc", {'DOCKER_DD_AGENT': 'true'}, "/proc"),
+        ("/proc", {}, "/proc"),
+    ],
+)
+def test_get_net_proc_base_location(aggregator, check, proc_location, envs, expected_net_proc_base_location):
+    with EnvVars(envs):
+        actual = check._get_net_proc_base_location(proc_location)
+        assert expected_net_proc_base_location == actual

@@ -14,6 +14,7 @@ from urllib3.exceptions import InsecureRequestWarning
 
 from ...config import is_affirmative
 from ...errors import CheckException
+from ...utils.common import to_string
 from .. import AgentCheck
 
 if PY3:
@@ -295,7 +296,12 @@ class OpenMetricsScraperMixin(object):
         Poll the data from prometheus and return the metrics as a generator.
         """
         response = self.poll(scraper_config)
-        self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, len(response.content), scraper_config)
+        if scraper_config['telemetry']:
+            if 'content-length' in response.headers:
+                content_len = int(response.headers['content-length'])
+            else:
+                content_len = len(response.content)
+            self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, content_len, scraper_config)
         try:
             # no dry run if no label joins
             if not scraper_config['label_joins']:
@@ -627,7 +633,7 @@ class OpenMetricsScraperMixin(object):
                     hostname=custom_hostname,
                 )
             else:
-                sample[self.SAMPLE_LABELS]["quantile"] = float(sample[self.SAMPLE_LABELS]["quantile"])
+                sample[self.SAMPLE_LABELS]["quantile"] = str(float(sample[self.SAMPLE_LABELS]["quantile"]))
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self.gauge(
                     "{}.{}.quantile".format(scraper_config['namespace'], metric_name),
@@ -669,7 +675,7 @@ class OpenMetricsScraperMixin(object):
                 and sample[self.SAMPLE_NAME].endswith("_bucket")
                 and "Inf" not in sample[self.SAMPLE_LABELS]["le"]
             ):
-                sample[self.SAMPLE_LABELS]["le"] = float(sample[self.SAMPLE_LABELS]["le"])
+                sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                 self.gauge(
                     "{}.{}.count".format(scraper_config['namespace'], metric_name),
@@ -685,7 +691,7 @@ class OpenMetricsScraperMixin(object):
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
             if label_name not in scraper_config['exclude_labels']:
                 tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
-                _tags.append('{}:{}'.format(tag_name, label_value))
+                _tags.append('{}:{}'.format(to_string(tag_name), to_string(label_value)))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, sample, custom_tags=custom_tags, hostname=hostname
         )

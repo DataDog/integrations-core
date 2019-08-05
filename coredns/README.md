@@ -4,6 +4,9 @@
 Get metrics from CoreDNS in real time to visualize and monitor DNS failures and cache hits/misses.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying these instructions.
+
 ### Installation
 
 The CoreDNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
@@ -65,3 +68,4 @@ for more details about how to test and develop Agent based integrations.
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://github.com/DataDog/integrations-core/blob/master/coredns/metadata.csv
 [6]: http://docs.datadoghq.com/help
+[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations

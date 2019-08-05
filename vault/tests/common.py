@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import requests
+
 from datadog_checks.dev import get_docker_hostname
 
 HOST = get_docker_hostname()
@@ -19,9 +21,13 @@ INSTANCES = {
 
 
 class MockResponse:
-    def __init__(self, j):
+    def __init__(self, j, status_code=200):
         self.j = j
-        self.status_code = 200
+        self.status_code = status_code
 
     def json(self):
         return self.j
+
+    def raise_for_status(self):
+        if self.status_code >= 300:
+            raise requests.exceptions.HTTPError

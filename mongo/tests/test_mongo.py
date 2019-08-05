@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import itervalues
 
-from datadog_checks.base import to_string
+from datadog_checks.mongo import MongoDb
 
 from . import common
 
@@ -44,92 +43,60 @@ METRIC_VAL_CHECKS_OLD = {
 }
 
 
-@pytest.mark.usefixtures('dd_environment')
+pytestmark = pytest.mark.usefixtures('dd_environment')
+
+
 def test_mongo(aggregator, check, instance_authdb):
-    # Run the check against our running server
     check.check(instance_authdb)
 
-    # Metric assertions
-    metrics = list(itervalues(aggregator._metrics))
-    assert metrics
+    metric_names = aggregator.metric_names
+    assert metric_names
 
-    assert isinstance(metrics, list)
-    assert len(metrics) > 0
-
-    for m in metrics:
-        metric = m[0]
-        metric_name = metric.name
+    for metric_name in metric_names:
         if metric_name in METRIC_VAL_CHECKS:
+            metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_mongo2(aggregator, check, instance_user):
-    # Run the check against our running server
     check.check(instance_user)
 
-    # Service checks
-    service_checks = list(itervalues(aggregator._service_checks))
-    service_checks_count = len(service_checks)
-    assert service_checks_count > 0
-    assert len(service_checks[0]) == 1
-    # Assert that all service checks have the proper tags: host and port
-    for sc in service_checks[0]:
-        assert to_string('host:{}'.format(common.HOST)) in sc.tags
-        assert (
-            to_string('port:{}'.format(common.PORT1)) in sc.tags or to_string('port:{}'.format(common.PORT2)) in sc.tags
-        )
-        assert 'db:test' in sc.tags
+    tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT1), 'db:test']
+    aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
 
-    # Metric assertions
-    metrics = list(itervalues(aggregator._metrics))
-    assert metrics
-    assert len(metrics) > 0
+    metric_names = aggregator.metric_names
+    assert metric_names
 
-    for m in metrics:
-        metric = m[0]
-        metric_name = metric.name
+    for metric_name in metric_names:
         if metric_name in METRIC_VAL_CHECKS:
+            metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_mongo_old_config(aggregator, check, instance):
-    # Run the check against our running server
     check.check(instance)
 
-    # Metric assertions
-    metrics = list(itervalues(aggregator._metrics))
-    assert metrics
-    assert isinstance(metrics, list)
-    assert len(metrics) > 0
+    metric_names = aggregator.metric_names
+    assert metric_names
 
-    for m in metrics:
-        metric = m[0]
-        metric_name = metric.name
+    for metric_name in metric_names:
         if metric_name in METRIC_VAL_CHECKS_OLD:
+            metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_mongo_old_config_2(aggregator, check, instance):
-    # Run the check against our running server
     check.check(instance)
 
-    # Metric assertions
-    metrics = list(itervalues(aggregator._metrics))
-    assert metrics
-    assert isinstance(metrics, list)
-    assert len(metrics) > 0
+    metric_names = aggregator.metric_names
+    assert metric_names
 
-    for m in metrics:
-        metric = m[0]
-        metric_name = metric.name
+    for metric_name in metric_names:
         if metric_name in METRIC_VAL_CHECKS_OLD:
+            metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_mongo_1valid_and_1invalid_custom_queries(aggregator, check, instance_1valid_and_1invalid_custom_queries):
     # Run the check against our running server
     check.check(instance_1valid_and_1invalid_custom_queries)
@@ -139,7 +106,6 @@ def test_mongo_1valid_and_1invalid_custom_queries(aggregator, check, instance_1v
     aggregator.assert_metric("dd.custom.mongo.query_a.amount", count=0)
 
 
-@pytest.mark.usefixtures('dd_environment')
 def test_mongo_custom_queries(aggregator, check, instance_custom_queries):
     # Run the check against our running server
     check.check(instance_custom_queries)

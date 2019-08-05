@@ -172,19 +172,19 @@ instances:
 #     sourcecategory: database
 #     service: <SERVICE_NAME>
 #
-#  - type: file
-#    path: /var/log/mysql/mysql-slow.log
-#    source: mysql
-#    sourcecategory: database
-#    service: <SERVICE_NAME>
+#   - type: file
+#     path: /var/log/mysql/mysql-slow.log
+#     source: mysql
+#     sourcecategory: database
+#     service: <SERVICE_NAME>
 #
-#  - type: file
-#    path: /var/log/mysql/mysql.log
-#    source: mysql
-#    sourcecategory: database
-#    service: <SERVICE_NAME>
+#   - type: file
+#     path: /var/log/mysql/mysql.log
+#     source: mysql
+#     sourcecategory: database
+#     service: <SERVICE_NAME>
 ## For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
-#    log_processing_rules:
-#      - type: multi_line
-#        name: new_log_start_with_date
-#        pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+#     log_processing_rules:
+#       - type: multi_line
+#         name: new_log_start_with_date
+#         pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])

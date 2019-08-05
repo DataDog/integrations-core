@@ -34,7 +34,7 @@ class CiscoACICheck(AgentCheck):
 
     def check(self, instance):
         self.log.info("Starting Cisco Check")
-        start = datetime.datetime.now()
+        start = datetime.datetime.utcnow()
         aci_url = instance.get('aci_url')
         aci_urls = instance.get('aci_urls', [])
         if aci_url:
@@ -147,7 +147,7 @@ class CiscoACICheck(AgentCheck):
         self.set_external_tags(self.get_external_host_tags())
 
         api.close()
-        end = datetime.datetime.now()
+        end = datetime.datetime.utcnow()
         log_line = "finished running Cisco Check"
         if _is_affirmative(instance.get('report_timing', False)):
             log_line += ", took {}".format(end - start)

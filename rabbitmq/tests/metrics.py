@@ -6,6 +6,7 @@ COMMON_METRICS = [
     'rabbitmq.node.fd_used',
     'rabbitmq.node.disk_free',
     'rabbitmq.node.mem_used',
+    'rabbitmq.node.mem_limit',
     'rabbitmq.node.run_queue',
     'rabbitmq.node.sockets_used',
     'rabbitmq.node.partitions',

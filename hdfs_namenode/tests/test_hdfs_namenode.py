@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import pytest
 from six import iteritems
 
 from datadog_checks.hdfs_namenode import HDFSNameNode
@@ -15,6 +15,8 @@ from .common import (
     HDFS_NAMESYSTEM_MUTUAL_METRICS_VALUES,
     HDFS_NAMESYSTEM_STATE_METRICS_VALUES,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_check(aggregator, mocked_request):

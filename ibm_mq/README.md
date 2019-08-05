@@ -6,6 +6,8 @@ This check monitors [IBM MQ][1].
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying these instructions.
+
 ### Installation
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
@@ -216,3 +218,4 @@ Additional helpful documentation, links, and articles:
 [7]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
+[10]: https://docs.datadoghq.com/agent/autodiscovery/integrations

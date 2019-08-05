@@ -7,6 +7,9 @@
 This check collects resource usage metrics from your vSphere cluster-CPU, disk, memory, and network usage. It also watches your vCenter server for events and emits them to Datadog.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying these instructions.
+
 ### Installation
 
 The vSphere check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your vCenter server.
@@ -111,3 +114,4 @@ See our [blog post][10] on monitoring vSphere environments with Datadog.
 [8]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
 [9]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
 [10]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
+[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations

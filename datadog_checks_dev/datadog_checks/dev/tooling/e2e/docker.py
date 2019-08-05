@@ -52,9 +52,10 @@ class DockerInterface(object):
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
 
-        self.env_vars['DD_PYTHON_VERSION'] = self.python_version
+        if self.agent_build and 'py' not in self.agent_build:
+            self.agent_build = '{}-py{}'.format(self.agent_build, self.python_version)
 
-        if self.metadata.get('use_jmx', False):
+        if self.agent_build and self.metadata.get('use_jmx', False):
             self.agent_build = '{}-jmx'.format(self.agent_build)
 
     @property
@@ -78,6 +79,9 @@ class DockerInterface(object):
 
         if kwargs.pop('interactive', False):
             cmd += ' -it'
+
+        if command.startswith('pip '):
+            command = command.replace('pip', ' '.join(get_pip_exe(self.python_version)), 1)
 
         cmd += ' {}'.format(self.container_name)
         cmd += ' {}'.format(command)
@@ -200,6 +204,15 @@ class DockerInterface(object):
                 # Agent 6 will simply fail without an API key
                 '-e',
                 'DD_API_KEY={}'.format(self.api_key),
+                # Run expvar on a random port
+                '-e',
+                'DD_EXPVAR_PORT=0',
+                # Run API on a random port
+                '-e',
+                'DD_CMD_PORT=0',
+                # Disable trace agent
+                '-e',
+                'DD_APM_ENABLED=false',
                 # Mount the config directory, not the file, to ensure updates are propagated
                 # https://github.com/moby/moby/issues/15793#issuecomment-135411504
                 '-v',
@@ -217,6 +230,12 @@ class DockerInterface(object):
             # Any environment variables passed to the start command
             for key, value in sorted(self.env_vars.items()):
                 command.extend(['-e', '{}={}'.format(key, value)])
+
+            if 'proxy' in self.metadata:
+                if 'http' in self.metadata['proxy']:
+                    command.extend(['-e', 'DD_PROXY_HTTP={}'.format(self.metadata['proxy']['http'])])
+                if 'https' in self.metadata['proxy']:
+                    command.extend(['-e', 'DD_PROXY_HTTPS={}'.format(self.metadata['proxy']['https'])])
 
             if self.base_package:
                 # Mount the check directory

@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.1.1 / 2019-07-29
+
+* [Fixed] Fix ibm_mq e2e import issue. See [#4140](https://github.com/DataDog/integrations-core/pull/4140).
+
 ## 3.1.0 / 2019-07-04
 
 * [Fixed] Use MQCMD_INQUIRE_Q instead of queue.inquire. See [#3997](https://github.com/DataDog/integrations-core/pull/3997).

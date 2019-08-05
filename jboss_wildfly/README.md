@@ -6,7 +6,7 @@ This check monitors [JBoss][1] and [WildFly][2] applications.
 
 ## Setup
 
-Find below instructions to install and configure the check when running the Agent on a host. See the [Autodiscovery Integration Templates documentation][3] to learn how to apply those instructions to a containerized environment.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
 ### Installation
 

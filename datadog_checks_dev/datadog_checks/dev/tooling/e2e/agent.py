@@ -43,8 +43,6 @@ def get_agent_exe(agent_version, platform=LINUX):
 def get_pip_exe(python_version, platform=LINUX):
     if platform == WINDOWS:
         return [r'C:\Program Files\Datadog\Datadog Agent\embedded{}\python.exe'.format(python_version), '-m', 'pip']
-    elif platform == MAC:
-        pass
     else:
         return ['/opt/datadog-agent/embedded/bin/pip{}'.format(python_version)]
 

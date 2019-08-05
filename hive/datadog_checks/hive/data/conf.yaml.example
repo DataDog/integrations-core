@@ -67,7 +67,7 @@ instances:
     ## trust_store_password should be set if ssl is enabled
     ## password for your TrustStore.jks file
     #
-    # trust_store_password: password
+    # trust_store_password: <PASSWORD>
 
     ## @param key_store_path - string - optional
     ## key_store_path should be set if client authentication is enabled on the target JVM.
@@ -155,7 +155,7 @@ init_config:
           Value:
             alias: hive.server.session.open
             metric_type: gauge
-    
+
     - include:
         bean: metrics:name=hs2_avg_open_session_time
         attribute:
@@ -234,7 +234,7 @@ init_config:
           Count:
             alias: hive.server.api.queries.executing.active_call
             metric_type: gauge
-    
+
     - include:
         bean: metrics:name=hs2_executing_queries
         attribute:
@@ -336,7 +336,7 @@ init_config:
           MeanRate:
             alias: hive.server.api.sql_operation.running.meanrate
             metric_type: rate
-    
+
     # Completed
     - include:
         bean: metrics:name=hs2_completed_sql_operation_CLOSED
@@ -570,7 +570,7 @@ init_config:
           Count:
             alias: hive.metastore.db.deleted
             metric_type: monotonic_count
-      
+
     - include:
         bean: metrics:name=init_total_count_dbs
         attribute:
@@ -591,7 +591,7 @@ init_config:
           Count:
             alias: hive.metastore.table.deleted
             metric_type: monotonic_count
-    
+
     - include:
         bean: metrics:name=init_total_count_tables
         attribute:
@@ -612,7 +612,7 @@ init_config:
           Count:
             alias: hive.metastore.partition.deleted
             metric_type: monotonic_count
-    
+
     - include:
         bean: metrics:name=init_total_count_partitions
         attribute:

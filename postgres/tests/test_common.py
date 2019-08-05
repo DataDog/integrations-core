@@ -53,9 +53,9 @@ ACTIVITY_METRICS = [
 ]
 
 
-def check_common_metrics(aggregator, expected_tags):
+def check_common_metrics(aggregator, expected_tags, count=1):
     for name in COMMON_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
+        aggregator.assert_metric(name, count=count, tags=expected_tags)
 
 
 def check_bgw_metrics(aggregator, expected_tags):

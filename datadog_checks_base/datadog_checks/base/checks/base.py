@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import importlib
 import inspect
 import json
 import logging
@@ -16,7 +17,6 @@ from six import PY3, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
-from ..utils.agent.debug import enter_pdb
 from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
@@ -134,6 +134,9 @@ class __AgentCheck(object):
         # Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         self._http = None
 
+        # Save the dynamically detected integration version
+        self._check_version = None
+
         # TODO: Remove with Agent 5
         # Set proxy settings
         self.proxies = self._get_requests_proxy()
@@ -201,6 +204,19 @@ class __AgentCheck(object):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
+
+    @property
+    def check_version(self):
+        if self._check_version is None:
+            # 'datadog_checks.<PACKAGE>.<MODULE>...'
+            module_parts = self.__module__.split('.')
+            package_path = '.'.join(module_parts[:2])
+            package = importlib.import_module(package_path)
+
+            # Provide a default just in case
+            self._check_version = getattr(package, '__version__', '0.0.0')
+
+        return self._check_version
 
     @property
     def in_developer_mode(self):
@@ -498,7 +514,20 @@ class __AgentCheck(object):
             instance = copy.deepcopy(self.instances[0])
 
             if 'set_breakpoint' in self.init_config:
+                from ..utils.agent.debug import enter_pdb
+
                 enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
+            elif 'profile_memory' in self.init_config:
+                from ..utils.agent.memory import TRACE_LOCK, profile_memory
+
+                with TRACE_LOCK:
+                    metrics = profile_memory(
+                        self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
+                    )
+
+                tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
+                for m in metrics:
+                    self.gauge(m.name, m.value, tags=tags)
             else:
                 self.check(instance)
 

@@ -6,6 +6,8 @@ This check monitors [IBM Websphere Application Server (WAS)][1] through the Data
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying these instructions.
+
 The IBM WAS Datadog integration collects enabled PMI Counters from the WebSphere Application Server environment. Setup requires enabling the PerfServlet, which provides a way for Datadog to retrieve performance data from WAS.
 
 By default, this check collects JDBC, JVM, thread pool, and Servlet Session Manager metrics. You may optionally specify additional metrics to collect in the "custom_queries" section. See the [sample check configuration][2] for examples.
@@ -86,3 +88,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
 [7]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations

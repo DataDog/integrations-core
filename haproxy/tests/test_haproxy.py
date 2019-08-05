@@ -30,15 +30,15 @@ from .common import (
 )
 
 
-def _test_frontend_metrics(aggregator, shared_tag):
+def _test_frontend_metrics(aggregator, shared_tag, count=1):
     haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
     frontend_tags = shared_tag + ['type:FRONTEND', 'service:public']
     for metric_name, min_version in FRONTEND_CHECK:
         if haproxy_version >= min_version:
-            aggregator.assert_metric(metric_name, tags=frontend_tags, count=1)
+            aggregator.assert_metric(metric_name, tags=frontend_tags, count=count)
 
 
-def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=False, check_aggregates=False):
+def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=False, check_aggregates=False, count=1):
     backend_tags = shared_tag + ['type:BACKEND']
     haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
     if not services:
@@ -49,7 +49,7 @@ def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=Fa
         if check_aggregates:
             for metric_name, min_version in BACKEND_AGGREGATE_ONLY_CHECK:
                 if haproxy_version >= min_version:
-                    aggregator.assert_metric(metric_name, tags=tags, count=1)
+                    aggregator.assert_metric(metric_name, tags=tags, count=count)
 
         for backend in BACKEND_LIST:
             tags = backend_tags + ['service:' + service, 'backend:' + backend]
@@ -59,18 +59,18 @@ def _test_backend_metrics(aggregator, shared_tag, services=None, add_addr_tag=Fa
 
             for metric_name, min_version in BACKEND_CHECK:
                 if haproxy_version >= min_version:
-                    aggregator.assert_metric(metric_name, tags=tags, count=1)
+                    aggregator.assert_metric(metric_name, tags=tags, count=count)
 
 
-def _test_backend_hosts(aggregator):
+def _test_backend_hosts(aggregator, count=1):
     for service in BACKEND_SERVICES:
         available_tag = ['available:true', 'service:' + service]
         unavailable_tag = ['available:false', 'service:' + service]
-        aggregator.assert_metric(BACKEND_HOSTS_METRIC, tags=available_tag, count=1)
-        aggregator.assert_metric(BACKEND_HOSTS_METRIC, tags=unavailable_tag, count=1)
+        aggregator.assert_metric(BACKEND_HOSTS_METRIC, tags=available_tag, count=count)
+        aggregator.assert_metric(BACKEND_HOSTS_METRIC, tags=unavailable_tag, count=count)
 
         status_no_check_tags = ['service:' + service, 'status:no_check']
-        aggregator.assert_metric(BACKEND_STATUS_METRIC, tags=status_no_check_tags, count=1)
+        aggregator.assert_metric(BACKEND_STATUS_METRIC, tags=status_no_check_tags, count=count)
 
 
 def _test_service_checks(aggregator, services=None, count=1):
@@ -194,5 +194,18 @@ def test_unixsocket_config(aggregator, check, dd_environment):
 
     _test_frontend_metrics(aggregator, shared_tag)
     _test_backend_metrics(aggregator, shared_tag, add_addr_tag=True)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance):
+    aggregator = dd_agent_check(CHECK_CONFIG_OPEN, rate=True)
+
+    shared_tag = ["instance_url:{0}".format(STATS_URL_OPEN)]
+
+    _test_frontend_metrics(aggregator, shared_tag, count=None)
+    _test_backend_metrics(aggregator, shared_tag, count=None)
+    _test_backend_hosts(aggregator, count=2)
 
     aggregator.assert_all_metrics_covered()
