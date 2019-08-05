@@ -3,9 +3,9 @@ nginx.net.writing,gauge,,connection,,The number of connections waiting on upstre
 nginx.net.waiting,gauge,,connection,,The number of keep-alive connections waiting for work.,0,nginx,conns waiting
 nginx.net.reading,gauge,,connection,,The number of connections reading client requests.,0,nginx,conns reading
 nginx.net.connections,gauge,,connection,,The total number of active connections.,0,nginx,conns
-nginx.net.request_per_s,gauge,,request,second,Rate of requests processed.,0,nginx,req/s
-nginx.net.conn_opened_per_s,gauge,,connection,second,Rate of connections opened.,0,nginx,conns opened/s
-nginx.net.conn_dropped_per_s,gauge,,connection,second,Rate of connections dropped.,-1,nginx,conns dropped/s
+nginx.net.request_per_s,rate,,request,second,Rate of requests processed.,0,nginx,req/s
+nginx.net.conn_opened_per_s,rate,,connection,second,Rate of connections opened.,0,nginx,conns opened/s
+nginx.net.conn_dropped_per_s,rate,,connection,second,Rate of connections dropped.,-1,nginx,conns dropped/s
 nginx.cache.bypass.bytes,gauge,,byte,,The total number of bytes read from the proxied server,0,nginx,cache bypass bytes
 nginx.cache.bypass.bytes_count,count,,byte,,The total number of bytes read from the proxied server (shown as count),0,nginx,cache bypass bytes
 nginx.cache.bypass.bytes_written,gauge,,byte,,The total number of bytes written to the cache,0,nginx,cache bypass bytes_written
