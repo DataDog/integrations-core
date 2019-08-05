@@ -4,5 +4,5 @@ cryptography==2.7
 enum34==1.1.6
 ipaddress==1.0.22; python_version < '3.0'
 paramiko==2.1.5
-pyasn1==0.4.2
+pyasn1==0.4.6
 pycparser==2.18
