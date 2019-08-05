@@ -28,7 +28,7 @@ INSTANCE_UNIT = {
 
 @pytest.fixture(scope="session")
 def instance():
-    return INSTANCE_E2E.copy()
+    return INSTANCE_UNIT.copy()
 
 
 @pytest.fixture(scope="session")
