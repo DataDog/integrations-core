@@ -190,11 +190,10 @@ def test_integration(aggregator, dd_environment):
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, e2e_instance):
-    import pdb; pdb.set_trace()
-    aggregator = dd_agent_check(e2e_instance)
+    aggregator = dd_agent_check(e2e_instance, rate=True)
     aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.sum', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.count', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.quantile', metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(CHECK_NAME + '.go_memstats_mallocs_total', metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(CHECK_NAME + '.go_memstats_mallocs_total', metric_type=aggregator.COUNT)
 
     aggregator.assert_all_metrics_covered()
