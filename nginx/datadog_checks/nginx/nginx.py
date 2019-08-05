@@ -71,9 +71,7 @@ class Nginx(AgentCheck):
     """
 
     HTTP_CONFIG_REMAPPER = {
-        'ssl_validation': {'name': 'tls_verify'},
-        'user': {'name': 'username'},
-    }
+        'ssl_validation': {'name': 'tls_verify'}, 'user': {'name': 'username'}}
 
     def check(self, instance):
         if 'nginx_status_url' not in instance:
@@ -99,9 +97,7 @@ class Nginx(AgentCheck):
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
             for endpoint, nest in chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS)):
-                response = self._get_plus_api_data(
-                    url, plus_api_version, endpoint, nest
-                )
+                response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
                 self.log.debug(u"Nginx Plus API version {} `response`: {}".format(plus_api_version, response))
                 metrics.extend(self.parse_json(response, tags))
 
