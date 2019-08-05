@@ -98,7 +98,7 @@ class HAProxy(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {
         'headers': {'name': 'extra_headers'},
-        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True},
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False},
     }
 
     def check(self, instance):
