@@ -4,10 +4,13 @@
 
 import pytest
 
+from datadog_checks.powerdns_recursor import PowerDNSRecursorCheck
+
 from . import common
 
 
-def test_bad_config(aggregator, check):
+def test_bad_config(aggregator):
+    check = PowerDNSRecursorCheck("powerdns_recursor", {}, [common.BAD_CONFIG])
     with pytest.raises(Exception):
         check.check(common.BAD_CONFIG)
 
@@ -16,8 +19,9 @@ def test_bad_config(aggregator, check):
     assert len(aggregator._metrics) == 0
 
 
-def test_very_bad_config(aggregator, check):
+def test_very_bad_config(aggregator):
     for config in [{}, {"host": "localhost"}, {"port": 1000}, {"host": "localhost", "port": 1000}]:
+        check = PowerDNSRecursorCheck("powerdns_recursor", {}, [config])
         with pytest.raises(Exception):
             check.check(config)
 

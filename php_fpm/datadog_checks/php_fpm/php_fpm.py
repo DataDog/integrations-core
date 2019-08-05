@@ -5,14 +5,12 @@ import json
 import random
 import time
 
-import requests
 from flup.client.fcgi_app import FCGIApp
 from six import PY3, StringIO, iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
-from datadog_checks.utils.headers import headers
 
 # Relax param filtering
 FCGIApp._environPrefixes.extend(('DOCUMENT_', 'SCRIPT_'))
@@ -67,25 +65,24 @@ class PHPFPMCheck(AgentCheck):
         'slow requests': 'php_fpm.requests.slow',
     }
 
+    HTTP_CONFIG_REMAPPER = {
+        'user': {'name': 'username'},
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False},
+    }
+
+    def __init__(self, name, init_config, instances):
+        super(PHPFPMCheck, self).__init__(name, init_config, instances)
+        if 'http_host' in self.instance:
+            self.http.options['headers']['Host'] = self.instance['http_host']
+
     def check(self, instance):
         status_url = instance.get('status_url')
         ping_url = instance.get('ping_url')
         use_fastcgi = is_affirmative(instance.get('use_fastcgi', False))
         ping_reply = instance.get('ping_reply')
 
-        auth = None
-        user = instance.get('user')
-        password = instance.get('password')
-
         tags = instance.get('tags', [])
         http_host = instance.get('http_host')
-
-        timeout = instance.get('timeout', DEFAULT_TIMEOUT)
-
-        disable_ssl_validation = is_affirmative(instance.get('disable_ssl_validation', False))
-
-        if user and password:
-            auth = (user, password)
 
         if status_url is None and ping_url is None:
             raise BadConfigError("No status_url or ping_url specified for this instance")
@@ -93,18 +90,14 @@ class PHPFPMCheck(AgentCheck):
         pool = None
         if status_url is not None:
             try:
-                pool = self._process_status(
-                    status_url, auth, tags, http_host, timeout, disable_ssl_validation, use_fastcgi
-                )
+                pool = self._process_status(status_url, tags, http_host, use_fastcgi)
             except Exception as e:
                 self.log.error("Error running php_fpm check: {}".format(e))
 
         if ping_url is not None:
-            self._process_ping(
-                ping_url, ping_reply, auth, tags, pool, http_host, timeout, disable_ssl_validation, use_fastcgi
-            )
+            self._process_ping(ping_url, ping_reply, tags, pool, http_host, use_fastcgi)
 
-    def _process_status(self, status_url, auth, tags, http_host, timeout, disable_ssl_validation, use_fastcgi):
+    def _process_status(self, status_url, tags, http_host, use_fastcgi):
         data = {}
         try:
             if use_fastcgi:
@@ -114,14 +107,7 @@ class PHPFPMCheck(AgentCheck):
                 # informations, which could be nice to parse and output as metrics
                 max_attempts = 3
                 for i in range(max_attempts):
-                    resp = requests.get(
-                        status_url,
-                        auth=auth,
-                        timeout=timeout,
-                        headers=headers(self.agentConfig, http_host=http_host),
-                        verify=not disable_ssl_validation,
-                        params={'json': True},
-                    )
+                    resp = self.http.get(status_url, params={'json': True})
 
                     # Exponential backoff, wait at most (max_attempts - 1) times in case we get a 503.
                     # Delay in seconds is (2^i + random amount of seconds between 0 and 1)
@@ -160,9 +146,7 @@ class PHPFPMCheck(AgentCheck):
         # return pool, to tag the service check with it if we have one
         return pool_name
 
-    def _process_ping(
-        self, ping_url, ping_reply, auth, tags, pool_name, http_host, timeout, disable_ssl_validation, use_fastcgi
-    ):
+    def _process_ping(self, ping_url, ping_reply, tags, pool_name, http_host, use_fastcgi):
         if ping_reply is None:
             ping_reply = 'pong'
 
@@ -176,13 +160,7 @@ class PHPFPMCheck(AgentCheck):
             if use_fastcgi:
                 response = self.request_fastcgi(ping_url).decode('utf-8')
             else:
-                resp = requests.get(
-                    ping_url,
-                    auth=auth,
-                    timeout=timeout,
-                    headers=headers(self.agentConfig, http_host=http_host),
-                    verify=not disable_ssl_validation,
-                )
+                resp = self.http.get(ping_url)
                 resp.raise_for_status()
                 response = resp.text
 

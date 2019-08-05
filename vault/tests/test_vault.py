@@ -14,14 +14,14 @@ from .common import INSTANCES, MockResponse
 class TestVault:
     def test_bad_config(self, aggregator):
         instance = INSTANCES['invalid']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.check(instance)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, count=0)
 
     def test_unsupported_api_version_fallback(self, aggregator):
         instance = INSTANCES['unsupported_api']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         assert not instance['api_url'].endswith(Vault.DEFAULT_API_VERSION)
         config = c.get_config(instance)
@@ -32,14 +32,14 @@ class TestVault:
 
     def test_service_check_connect_ok(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.check(instance)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
 
     def test_service_check_connect_ok_all_tags(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         config = c.get_config(instance)
 
@@ -80,7 +80,7 @@ class TestVault:
 
     def test_service_check_connect_fail(self, aggregator):
         instance = INSTANCES['bad_url']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
         with pytest.raises(ApiUnreachable):
             c.check(instance)
 
@@ -90,7 +90,7 @@ class TestVault:
 
     def test_service_check_500_fail(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         with pytest.raises(ApiUnreachable):
             with mock.patch('requests.get', return_value=MockResponse('', status_code=500)):
@@ -102,14 +102,14 @@ class TestVault:
 
     def test_service_check_unsealed_ok(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.check(instance)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.OK, count=1)
 
     def test_service_check_unsealed_ok_all_tags(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         config = c.get_config(instance)
 
@@ -150,7 +150,7 @@ class TestVault:
 
     def test_service_check_unsealed_fail(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         config = c.get_config(instance)
 
@@ -181,14 +181,14 @@ class TestVault:
 
     def test_service_check_initialized_ok(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.check(instance)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, count=1)
 
     def test_service_check_initialized_ok_all_tags(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         config = c.get_config(instance)
 
@@ -229,7 +229,7 @@ class TestVault:
 
     def test_service_check_initialized_fail(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         config = c.get_config(instance)
 
@@ -260,7 +260,7 @@ class TestVault:
 
     def test_event_leader_change(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         config = c.get_config(instance)
         config['leader'] = 'foo'
@@ -291,7 +291,7 @@ class TestVault:
 
     def test_is_leader_metric_true(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         config = c.get_config(instance)
 
@@ -312,7 +312,7 @@ class TestVault:
 
     def test_is_leader_metric_false(self, aggregator):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, None, {}, [instance])
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         config = c.get_config(instance)
 

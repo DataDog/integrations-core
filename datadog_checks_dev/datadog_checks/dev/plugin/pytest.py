@@ -19,6 +19,7 @@ from .._env import (
     format_config,
     get_env_vars,
     replay_check_run,
+    serialize_data,
 )
 
 __aggregator = None
@@ -89,15 +90,9 @@ def dd_environment_runner(request):
 
     data = {'config': config, 'metadata': metadata}
 
-    # Serialize to json
-    data = json.dumps(data, separators=(',', ':'))
+    message = serialize_data(data)
 
-    # Using base64 ensures:
-    # 1. Printing to stdout won't fail
-    # 2. Easy parsing since there are no spaces
-    message = urlsafe_b64encode(data.encode('utf-8'))
-
-    message = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'.format(message.decode('utf-8'))
+    message = 'DDEV_E2E_START_MESSAGE {} DDEV_E2E_END_MESSAGE'.format(message)
 
     if testing_plugin:
         return message
@@ -114,7 +109,7 @@ def dd_agent_check(request, aggregator):
     # Lazily import to reduce plugin load times for everyone
     from datadog_checks.dev import TempDir, run_command
 
-    def run_check(config, **kwargs):
+    def run_check(config=None, **kwargs):
         root = os.path.dirname(request.module.__file__)
         while True:
             if os.path.isfile(os.path.join(root, 'setup.py')):
@@ -127,27 +122,20 @@ def dd_agent_check(request, aggregator):
 
             root = new_root
 
-        config = format_config(config)
-        env = os.environ['TOX_ENV_NAME']
         python_path = os.environ[E2E_PARENT_PYTHON]
-        config_file = os.path.join(temp_dir, '{}-{}-{}.json'.format(check, env, urlsafe_b64encode(os.urandom(6))))
+        env = os.environ['TOX_ENV_NAME']
 
-        with open(config_file, 'wb') as f:
-            output = json.dumps(config).encode('utf-8')
-            f.write(output)
+        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
 
-        check_command = [
-            python_path,
-            '-m',
-            'datadog_checks.dev',
-            'env',
-            'check',
-            check,
-            env,
-            '--config',
-            config_file,
-            '--json',
-        ]
+        if config:
+            config = format_config(config)
+            config_file = os.path.join(temp_dir, '{}-{}-{}.json'.format(check, env, urlsafe_b64encode(os.urandom(6))))
+
+            with open(config_file, 'wb') as f:
+                output = json.dumps(config).encode('utf-8')
+                f.write(output)
+            check_command.extend(['--config', config_file])
+
         for key, value in kwargs.items():
             if value is not False:
                 check_command.append('--{}'.format(key.replace('_', '-')))

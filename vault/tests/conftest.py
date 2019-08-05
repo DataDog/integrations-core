@@ -26,7 +26,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    check = Vault('vault', {}, {}, [INSTANCES['main']])
+    check = Vault('vault', {}, [INSTANCES['main']])
     return check
 
 
