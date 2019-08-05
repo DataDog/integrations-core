@@ -870,13 +870,28 @@ GROUP BY datid, datname
             try:
                 if host == 'localhost' and password == '':
                     # Use ident method
-                    connection = psycopg2.connect("user=%s dbname=%s" % (user, dbname))
+                    connection = psycopg2.connect(
+                        "user=%s dbname=%s, application_name=%s" % (user, dbname, "datadog-agent")
+                    )
                 elif port != '':
                     connection = psycopg2.connect(
-                        host=host, port=port, user=user, password=password, database=dbname, sslmode=ssl
+                        host=host,
+                        port=port,
+                        user=user,
+                        password=password,
+                        database=dbname,
+                        sslmode=ssl,
+                        application_name="datadog-agent",
                     )
                 else:
-                    connection = psycopg2.connect(host=host, user=user, password=password, database=dbname, sslmode=ssl)
+                    connection = psycopg2.connect(
+                        host=host,
+                        user=user,
+                        password=password,
+                        database=dbname,
+                        sslmode=ssl,
+                        application_name="datadog-agent",
+                    )
                 self.dbs[key] = connection
                 return connection
             except Exception as e:
