@@ -21,7 +21,7 @@ def read_fixture(name):
 
 @pytest.fixture
 def check():
-    check = MesosMaster(CHECK_NAME, {}, {})
+    check = MesosMaster(CHECK_NAME, {}, [])
     check._get_master_roles = lambda v, x: json.loads(read_fixture('roles.json'))
     check._get_master_stats = lambda v, x: json.loads(read_fixture('stats.json'))
     check._get_master_state = lambda v, x: json.loads(read_fixture('state.json'))
