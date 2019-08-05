@@ -139,19 +139,18 @@ class MesosMaster(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(MesosMaster, self).__init__(name, init_config, instances)
-        for instance in instances or []:
-            url = instance.get('url', '')
-            parsed_url = urlparse(url)
-            if not self.http.options['verify'] and parsed_url.scheme == 'https':
-                self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
-            if not ('read_timeout' in instance or 'connect_timeout' in instance):
-                # `default_timeout` config option will be removed with Agent 5
-                self.http.options['timeout'] = (
-                    instance.get('timeout')
-                    or self.init_config.get('timeout')
-                    or self.init_config.get('default_timeout')
-                    or self.DEFAULT_TIMEOUT
-                )
+        url = self.instance.get('url', '')
+        parsed_url = urlparse(url)
+        if not self.http.options['verify'] and parsed_url.scheme == 'https':
+            self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
+        if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
+            # `default_timeout` config option will be removed with Agent 5
+            self.http.options['timeout'] = (
+                self.instance.get('timeout')
+                or self.init_config.get('timeout')
+                or self.init_config.get('default_timeout')
+                or self.DEFAULT_TIMEOUT
+            )
 
     def _get_json(self, url, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
