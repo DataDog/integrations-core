@@ -4,6 +4,7 @@
 import os
 
 import click
+import docker
 import pyperclip
 
 from ....utils import dir_exists, file_exists, path_join
@@ -136,10 +137,11 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
     echo_success('success!')
 
     echo_waiting('Starting the Agent... ', nl=False)
-    result = environment.start_agent()
-    if result.code:
+    try:
+        environment.start_agent()
+    except docker.errors.ContainerError as e:
         click.echo()
-        echo_info(result.stdout + result.stderr)
+        echo_info(e)
         echo_failure('An error occurred.')
         echo_waiting('Stopping the environment...')
         stop_environment(check, env, metadata=metadata)
@@ -152,10 +154,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
         echo_waiting('Running extra start-up commands... ', nl=False)
 
         for command in start_commands:
-            result = environment.exec_command(command, capture=True)
-            if result.code:
+            code, out = environment.exec_command(command, capture=True)
+            if code:
                 click.echo()
-                echo_info(result.stdout + result.stderr)
+                echo_info(out)
                 echo_failure('An error occurred.')
                 echo_waiting('Stopping the environment...')
                 stop_environment(check, env, metadata=metadata)
