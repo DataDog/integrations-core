@@ -53,7 +53,6 @@ def run_in_container(container_name, command, check=True, interactive=False):
     try:
         command_line = ' '.join(command) if isinstance(command, list) else command
     except TypeError as e:
-        print(command)
         raise e
     result = container.exec_run(command_line, stdin=interactive)
     if check and result.exit_code != 0:
