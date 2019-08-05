@@ -23,7 +23,7 @@ CONFIG = {
 
 @pytest.mark.integration
 def test_build_event(aggregator):
-    teamcity = TeamCityCheck('teamcity', {}, {})
+    teamcity = TeamCityCheck('teamcity', {}, [CONFIG])
 
     with patch('requests.get', get_mock_first_build):
         teamcity.check(CONFIG['instances'][0])

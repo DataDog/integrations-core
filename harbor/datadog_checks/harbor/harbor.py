@@ -14,8 +14,8 @@ STATUS = 'harbor.status'
 
 
 class HarborCheck(AgentCheck):
-    def __init__(self, *args, **kwargs):
-        super(HarborCheck, self).__init__(*args, **kwargs)
+    def __init__(self, name, init_config, instances):
+        super(HarborCheck, self).__init__(name, init_config, instances)
 
         # Prevent the use of Basic Auth using `username` and `password` from the config file.
         del self.http.options['auth']
