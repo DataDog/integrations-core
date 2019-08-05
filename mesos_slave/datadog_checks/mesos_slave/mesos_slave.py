@@ -98,15 +98,15 @@ class MesosSlave(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(MesosSlave, self).__init__(name, init_config, instances)
         self.cluster_name = None
-        for instance in instances or []:
-            url = instance.get('url', '')
+        if self.instance is not None:
+            url = self.instance.get('url', '')
             parsed_url = urlparse(url)
             if self.http.options['tls_verify'] and parsed_url.scheme == 'https':
                 self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
-            if not ('read_timeout' in instance or 'connect_timeout' in instance):
+            if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
                 # `default_timeout` config option will be removed with Agent 5
                 self.http.options['timeout'] = (
-                    instance.get('timeout')
+                    self.instance.get('timeout')
                     or self.init_config.get('timeout')
                     or self.init_config.get('default_timeout')
                     or self.DEFAULT_TIMEOUT
