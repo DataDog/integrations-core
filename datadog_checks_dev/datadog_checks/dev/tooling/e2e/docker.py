@@ -85,7 +85,7 @@ class DockerInterface(object):
     def exec_command(self, command, **kwargs):
         if command.startswith('pip '):
             command = command.replace('pip', ' '.join(get_pip_exe(self.python_version)), 1)
-        run_in_container(self.container_name, command, interactive=kwargs.pop('interactive', False))
+        return run_in_container(self.container_name, command, interactive=kwargs.pop('interactive', False))
 
     def run_check(
         self,
