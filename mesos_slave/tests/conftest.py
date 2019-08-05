@@ -27,7 +27,7 @@ def instance():
 
 @pytest.fixture
 def check():
-    return MesosSlave(common.CHECK_NAME, {}, {})
+    return MesosSlave(common.CHECK_NAME, {}, [])
 
 
 @pytest.fixture
