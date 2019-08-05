@@ -7,3 +7,4 @@ services:
     volumes:
       - ${HOST_SOCKET_DIR}/systemd_run:/run
       - ${HOST_SOCKET_DIR}/run_dbus:/var/run/dbus
+      - ./conf/system.conf:/etc/systemd/system.conf

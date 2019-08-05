@@ -28,13 +28,17 @@ SOCKET_METRICS = [
 ]
 
 SERVICE_METRICS = [
-    'systemd.service.cpu_usage_n_sec',
     'systemd.service.memory_current',
     'systemd.service.tasks_current',
-    'systemd.service.n_restarts',
+
+    # centos/systemd:latest contains systemd v219, it does not contain CPUUsageNSec and NRestarts yet
+    # 'systemd.service.cpu_usage_n_sec',
+    # 'systemd.service.n_restarts',
 ]
 
-ALL_UNIT_METRICS = [
+AGGREGATE_UNIT_METRICS = [
     'systemd.unit.count',
     'systemd.unit.loaded.count'
 ]
+
+ALL_METRICS = UNIT_METRICS + SOCKET_METRICS + AGGREGATE_UNIT_METRICS + SERVICE_METRICS

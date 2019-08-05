@@ -4,15 +4,14 @@
 
 import pytest
 
-from .common import INSTANCE, ALL_UNIT_METRICS, SOCKET_METRICS, UNIT_METRICS
+from .common import INSTANCE, ALL_METRICS
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(INSTANCE)
 
-    # TODO: Add SERVICE_METRICS
-    for metric in UNIT_METRICS + SOCKET_METRICS + ALL_UNIT_METRICS:
+    for metric in ALL_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
