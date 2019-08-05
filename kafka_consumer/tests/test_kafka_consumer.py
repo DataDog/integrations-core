@@ -22,7 +22,7 @@ def test_check_kafka(aggregator, kafka_instance):
     """
     Testing Kafka_consumer check.
     """
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [{}])
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
     kafka_consumer_check.check(kafka_instance)
 
     for name, consumer_group in kafka_instance['consumer_groups'].items():

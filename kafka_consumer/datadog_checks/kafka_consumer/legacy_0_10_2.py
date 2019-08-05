@@ -13,7 +13,7 @@ from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy
 from kafka.structs import TopicPartition
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
-from six import iteritems, itervalues, string_types, text_type
+from six import iteritems, string_types, text_type
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
@@ -35,8 +35,8 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         super(LegacyKafkaCheck_0_10_2, self).__init__(name, init_config, instances)
         self._zk_timeout = int(init_config.get('zk_timeout', 5))
         self._kafka_timeout = int(init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
+        self._kafka_client = self._create_kafka_client()
         self.context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
-        self.kafka_clients = {}
 
     def check(self, instance):
         # For calculating lag, we have to fetch offsets from both kafka and
@@ -71,8 +71,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         topics = defaultdict(set)
         kafka_consumer_offsets = None
 
-        cli = self._get_kafka_client(instance)
-        cli._maybe_refresh_metadata()
+        self._kafka_client._maybe_refresh_metadata()
 
         if get_kafka_consumer_offsets:
             # For now, consumer groups are mandatory if not using ZK
@@ -87,7 +86,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             # non-deterministic result.
             #
             # Kafka 0.8.2 added support for storing consumer offsets in Kafka.
-            if cli.config.get('api_version') >= (0, 8, 2):
+            if self._kafka_client.config.get('api_version') >= (0, 8, 2):
                 kafka_consumer_offsets, topics = self._get_kafka_consumer_offsets(instance, consumer_groups)
 
         if not topics:
@@ -109,7 +108,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         # Fetch the broker highwater offsets
         try:
-            highwater_offsets, topic_partitions_without_a_leader = self._get_broker_offsets(instance, topics)
+            highwater_offsets, topic_partitions_without_a_leader = self._get_broker_offsets(topics)
         except Exception:
             self.log.exception('There was a problem collecting the high watermark offsets')
             return
@@ -135,61 +134,49 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 tags=custom_tags + ['source:kafka'],
             )
 
-    def stop(self):
-        """
-        cleanup kafka connections (to all brokers) to avoid leaving
-        stale connections in older kafkas.
-        """
-        for cli in itervalues(self.kafka_clients):
-            cli.close()
-
-    def _get_kafka_client(self, instance):
-        kafka_conn_str = instance.get('kafka_connect_str')
+    def _create_kafka_client(self):
+        kafka_conn_str = self.instance.get('kafka_connect_str')
         if not isinstance(kafka_conn_str, (string_types, list)):
             raise ConfigurationError('kafka_connect_str should be string or list of strings')
-
-        instance_key = tuple(kafka_conn_str)  # cast to tuple in case it's a list
-        if instance_key not in self.kafka_clients:
+        return KafkaClient(
+            bootstrap_servers=kafka_conn_str,
+            client_id='dd-agent',
+            request_timeout_ms=self.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
+            api_version=self.instance.get('kafka_client_api_version'),
             # While we check for SSL params, if not present they will default
             # to the kafka-python values for plaintext connections
-            cli = KafkaClient(
-                bootstrap_servers=kafka_conn_str,
-                client_id='dd-agent',
-                security_protocol=instance.get('security_protocol', 'PLAINTEXT'),
-                sasl_mechanism=instance.get('sasl_mechanism'),
-                sasl_plain_username=instance.get('sasl_plain_username'),
-                sasl_plain_password=instance.get('sasl_plain_password'),
-                sasl_kerberos_service_name=instance.get('sasl_kerberos_service_name', 'kafka'),
-                sasl_kerberos_domain_name=instance.get('sasl_kerberos_domain_name'),
-                ssl_cafile=instance.get('ssl_cafile'),
-                ssl_check_hostname=instance.get('ssl_check_hostname', True),
-                ssl_certfile=instance.get('ssl_certfile'),
-                ssl_keyfile=instance.get('ssl_keyfile'),
-                ssl_crlfile=instance.get('ssl_crlfile'),
-                ssl_password=instance.get('ssl_password'),
-            )
-            self.kafka_clients[instance_key] = cli
+            security_protocol=self.instance.get('security_protocol', 'PLAINTEXT'),
+            sasl_mechanism=self.instance.get('sasl_mechanism'),
+            sasl_plain_username=self.instance.get('sasl_plain_username'),
+            sasl_plain_password=self.instance.get('sasl_plain_password'),
+            sasl_kerberos_service_name=self.instance.get('sasl_kerberos_service_name', 'kafka'),
+            sasl_kerberos_domain_name=self.instance.get('sasl_kerberos_domain_name'),
+            ssl_cafile=self.instance.get('ssl_cafile'),
+            ssl_check_hostname=self.instance.get('ssl_check_hostname', True),
+            ssl_certfile=self.instance.get('ssl_certfile'),
+            ssl_keyfile=self.instance.get('ssl_keyfile'),
+            ssl_crlfile=self.instance.get('ssl_crlfile'),
+            ssl_password=self.instance.get('ssl_password'),
+        )
 
-        return self.kafka_clients[instance_key]
-
-    def _make_blocking_req(self, client, request, node_id=None):
+    def _make_blocking_req(self, request, node_id=None):
         if node_id is None:
-            node_id = client.least_loaded_node()
+            node_id = self._kafka_client.least_loaded_node()
 
-        while not client.ready(node_id):
+        while not self._kafka_client.ready(node_id):
             # poll until the connection to broker is ready, otherwise send()
             # will fail with NodeNotReadyError
-            self._client.poll()
+            self._kafka_client.poll()
 
-        future = client.send(node_id, request)
-        client.poll(future=future)  # block until we get response.
+        future = self._kafka_client.send(node_id, request)
+        self._kafka_client.poll(future=future)  # block until we get response.
         assert future.succeeded()
         response = future.value
         return response
 
-    def _get_group_coordinator(self, client, group):
+    def _get_group_coordinator(self, group):
         request = GroupCoordinatorRequest[0](group)
-        response = self._make_blocking_req(client, request)
+        response = self._make_blocking_req(request)
         error_type = kafka_errors.for_code(response.error_code)
         if error_type is kafka_errors.NoError:
             return response.coordinator_id
@@ -236,7 +223,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         return highwater_offsets, topic_partitions_without_a_leader
 
-    def _get_broker_offsets(self, instance, topics):
+    def _get_broker_offsets(self, topics):
         """
         Fetch highwater offsets for each topic/partition from Kafka cluster.
 
@@ -259,19 +246,18 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         highwater_offsets = {}
         topic_partitions_without_a_leader = []
         topics_to_fetch = defaultdict(set)
-        cli = self._get_kafka_client(instance)
 
         for topic, partitions in iteritems(topics):
             # if no partitions are provided
             # we're falling back to all available partitions (?)
             if len(partitions) == 0:
-                partitions = cli.cluster.available_partitions_for_topic(topic)
+                partitions = self._kafka_client.cluster.available_partitions_for_topic(topic)
             topics_to_fetch[topic].update(partitions)
 
         leader_tp = defaultdict(lambda: defaultdict(set))
         for topic, partitions in iteritems(topics_to_fetch):
             for partition in partitions:
-                partition_leader = cli.cluster.leader_for_partition(TopicPartition(topic, partition))
+                partition_leader = self._kafka_client.cluster.leader_for_partition(TopicPartition(topic, partition))
                 if partition_leader is not None and partition_leader >= 0:
                     leader_tp[partition_leader][topic].add(partition)
 
@@ -286,7 +272,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 ],
             )
 
-            response = self._make_blocking_req(cli, request, node_id=node_id)
+            response = self._make_blocking_req(request, node_id=node_id)
             offsets, unled = self._process_highwater_offsets(response)
             highwater_offsets.update(offsets)
             topic_partitions_without_a_leader.extend(unled)
@@ -428,13 +414,11 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         consumer_offsets = {}
         topics = defaultdict(set)
 
-        cli = self._get_kafka_client(instance)
-
         for consumer_group, topic_partitions in iteritems(consumer_groups):
             try:
-                coordinator_id = self._get_group_coordinator(cli, consumer_group)
+                coordinator_id = self._get_group_coordinator(consumer_group)
                 if coordinator_id is not None:
-                    offsets = self._get_consumer_offsets(cli, consumer_group, topic_partitions, coordinator_id)
+                    offsets = self._get_consumer_offsets(consumer_group, topic_partitions, coordinator_id)
                     for (topic, partition), offset in iteritems(offsets):
                         topics[topic].update([partition])
                         key = (consumer_group, topic, partition)
@@ -446,11 +430,11 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         return consumer_offsets, topics
 
-    def _get_consumer_offsets(self, client, consumer_group, topic_partitions, coord_id):
+    def _get_consumer_offsets(self, consumer_group, topic_partitions, coord_id):
         tps = defaultdict(set)
         for topic, partitions in iteritems(topic_partitions):
             if len(partitions) == 0:
-                partitions = client.cluster.available_partitions_for_topic(topic)
+                partitions = self._kafka_client.cluster.available_partitions_for_topic(topic)
             tps[topic] = tps[text_type(topic)].union(set(partitions))
 
         consumer_offsets = {}
@@ -459,7 +443,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         # https://kafka.apache.org/protocol#The_Messages_OffsetFetch
         # https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-OffsetFetchRequest
         request = OffsetFetchRequest[1](consumer_group, list(iteritems(tps)))
-        response = self._make_blocking_req(client, request, node_id=coord_id)
+        response = self._make_blocking_req(request, node_id=coord_id)
         for (topic, partition_offsets) in response.topics:
             for partition, offset, _, error_code in partition_offsets:
                 if error_code != 0:
