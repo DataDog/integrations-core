@@ -99,3 +99,8 @@ else:  # windows
 
 
 EXPECTED_METRICS = CHECK_RATES
+
+
+def _test_check(aggregator, instance):
+    for metric in EXPECTED_METRICS:
+        aggregator.assert_metric_has_tag(metric, instance["tags"][0])
