@@ -30,7 +30,7 @@ instances:
     ## @param rabbit_api_url - string - required
     ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
     ## url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
-    #
+    # if https is used and cert chain verification should be skipped, include ssl_verify: False
   - rabbitmq_api_url: http://localhost:15672/api/
 
     ## @param tag_families - boolean - optional - default: false
@@ -119,7 +119,7 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
-    
+
     ## @param username - string - optional
     ## If the API endpoint is behind basic auth, enter here the required username.
     #
