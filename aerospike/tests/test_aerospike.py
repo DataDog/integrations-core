@@ -17,6 +17,7 @@ def test_check(aggregator, instance):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
+
     _test_check(aggregator)
 
 
@@ -35,6 +36,7 @@ def _test_check(aggregator):
     aggregator.assert_metric(
         'aerospike.set.stop_writes_count', 0, tags=['namespace:test', 'set:characters', 'tag:value']
     )
+    aggregator.assert_metric('aerospike.namespace.tps.write', at_least=0)
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('aerospike.can_connect', AerospikeCheck.OK)
