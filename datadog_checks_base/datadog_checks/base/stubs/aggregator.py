@@ -235,7 +235,10 @@ class AggregatorStub(object):
         assert condition, new_msg
 
     def assert_all_metrics_covered(self):
-        assert self.metrics_asserted_pct >= 100.0
+        missing_metrics = ''
+        if self.metrics_asserted_pct < 100.0:
+            missing_metrics = self.not_asserted()
+        assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
 
     def reset(self):
         """
@@ -250,12 +253,8 @@ class AggregatorStub(object):
         assert self.metrics_asserted_pct >= 100.0
 
     def not_asserted(self):
-        metrics_not_asserted = []
-        for metric in self._metrics:
-            metric = ensure_unicode(metric)
-            if metric not in self._asserted:
-                metrics_not_asserted.append(metric)
-        return metrics_not_asserted
+        present_metrics = {ensure_unicode(m) for m in self._metrics}
+        return present_metrics - set(self._asserted)
 
     def assert_metric_has_tag_prefix(self, metric_name, tag_prefix, count=None, at_least=1):
         candidates = []
@@ -286,7 +285,10 @@ class AggregatorStub(object):
             else:
                 return 0
 
-        return num_asserted / num_metrics * 100
+        # If it there have been assertions with at_least=0 the length of the num_metrics and num_asserted can match
+        # even if there are different metrics in each set
+        not_asserted = self.not_asserted()
+        return (num_metrics - len(not_asserted)) / num_metrics * 100
 
     @property
     def metric_names(self):
