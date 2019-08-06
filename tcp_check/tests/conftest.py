@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from copy import deepcopy
+
 import pytest
 
 from datadog_checks.tcp_check import TCPCheck
@@ -16,3 +18,8 @@ def dd_environment():
 @pytest.fixture
 def check():
     return TCPCheck(common.CHECK_NAME, {}, {})
+
+
+@pytest.fixture
+def instance():
+    deepcopy(common.INSTANCE)
