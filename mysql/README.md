@@ -13,7 +13,7 @@ The Datadog Agent can collect many metrics from MySQL databases, including (but 
 
 You can also create your own metrics using custom SQL queries.
 
-**Note:** This integration is also compatible with [MariaDB](https://mariadb.org/), as it serves as a ["drop-in replacement"](https://mariadb.com/kb/en/library/mariadb-vs-mysql-compatibility/) for MySQL.
+**Note:** This integration is also compatible with [MariaDB](https://mariadb.org/), as it serves as a ["drop-in replacement"][24] for MySQL.
 
 ## Setup
 
@@ -398,3 +398,4 @@ Read our [series of blog posts][23] about monitoring MySQL with Datadog.
 [21]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges
 [22]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-with-sql-stored-procedure
 [23]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
+[24]: https://mariadb.com/kb/en/library/mariadb-vs-mysql-compatibility
