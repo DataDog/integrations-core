@@ -21,7 +21,7 @@ Note that if you're using the [agent in a container][8], you need to attach the 
 docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
               -v /proc/:/host/proc/:ro \
               -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-              -v /run/systemd/private:/run/systemd/private:ro \
+              -v /var/run/dbus/system_bus_socket:/host/var/run/dbus/system_bus_socket:ro \
               -e DD_API_KEY=<YOUR_API_KEY> \
               datadog/agent:latest
 ```
