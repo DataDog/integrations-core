@@ -10,5 +10,3 @@ from . import common
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
     common._test_check(aggregator)
-
-
