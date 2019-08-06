@@ -13,7 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def dd_environment(instance):
     with docker_run(os.path.join(DOCKER_DIR, 'docker-compose.yaml'), endpoints=instance['prometheus_url']):
         yield instance
