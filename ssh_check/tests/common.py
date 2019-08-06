@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import threading
 
+from datadog_checks.ssh_check import CheckSSH
+
 THREAD_TIMEOUT = 10
 
 INSTANCES = {
@@ -51,3 +53,9 @@ def wait_for_threads():
             thread.join(THREAD_TIMEOUT)
         except RuntimeError:
             pass
+
+
+def _test_check(aggregator, instance):
+    expected_tags = ["instance:{}-{}".format(instance.get("host"), instance.get("port", 22))]
+    aggregator.assert_metric("sftp.response_time", tags=expected_tags)
+    aggregator.assert_service_check(CheckSSH.SSH_SERVICE_CHECK_NAME, CheckSSH.OK)

@@ -9,9 +9,4 @@ from . import common
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
-
-    expected_tags = ["instance:{}-{}".format(instance.get("host"), instance.get("port", 22))]
-
-    aggregator.assert_metric("sftp.response_time", tags=expected_tags)
-
-    common.wait_for_threads()
+    common._test_check(aggregator, instance)
