@@ -46,15 +46,15 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 Some metrics are reported only if the respective configurations are enable:
 
-- `systemd.service.cpu_usage_n_sec` requires Systemd configuration `CPUAccounting` to be enabled
-- `systemd.service.memory_current` requires Systemd configuration `MemoryAccounting` to be enabled
-- `systemd.service.tasks_current` requires Systemd configuration `TasksAccounting` to be enabled
+- `systemd.service.cpu_time_consumed` requires Systemd configuration `CPUAccounting` to be enabled
+- `systemd.service.memory_usage` requires Systemd configuration `MemoryAccounting` to be enabled
+- `systemd.service.task_count` requires Systemd configuration `TasksAccounting` to be enabled
 
 Some metrics are only available from specific version of Systemd:
 
-- `systemd.service.cpu_usage_n_sec` requires Systemd v220
-- `systemd.service.n_restarts` requires Systemd v235
-- `systemd.socket.n_refused` requires Systemd v239
+- `systemd.service.cpu_time_consumed` requires Systemd v220
+- `systemd.service.restart_count` requires Systemd v235
+- `systemd.socket.connection_refused_count` requires Systemd v239
 
 ### Service Checks
 
