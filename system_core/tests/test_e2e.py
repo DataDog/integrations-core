@@ -1,18 +1,15 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
-
 import pytest
 
 from . import common
 
-pytestmark = pytest.mark.integration
 
-
-@pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
-    check.check(instance)
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance):
+    aggregator = dd_agent_check(instance, rate=True)
 
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric_has_tag(metric, instance["tags"][0])
+
