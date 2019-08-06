@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from copy import deepcopy
 
 import pytest
 
@@ -26,3 +27,8 @@ def dd_environment():
 @pytest.fixture
 def check():
     return CheckSSH("ssh_check", {}, {})
+
+
+@pytest.fixture
+def instance():
+    return deepcopy(common.INSTANCE_INTEGRATION)

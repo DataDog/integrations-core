@@ -5,12 +5,10 @@ import pytest
 
 from . import common
 
-pytestmark = pytest.mark.integration
 
-
-@pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
-    check.check(instance)
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance):
+    aggregator = dd_agent_check(instance, rate=True)
 
     expected_tags = ["instance:{}-{}".format(instance.get("host"), instance.get("port", 22))]
 
