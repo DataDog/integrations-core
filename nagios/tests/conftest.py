@@ -8,7 +8,6 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import TempDir, docker_run
-from datadog_checks.nagios import NagiosCheck
 
 from .common import HERE, INSTANCE_INTEGRATION
 
@@ -30,11 +29,6 @@ def dd_environment():
             build=True,
         ):
             yield INSTANCE_INTEGRATION, e2e_metadata
-
-
-@pytest.fixture
-def check():
-    return NagiosCheck('nagios', {}, {}, instances=[INSTANCE_INTEGRATION])
 
 
 @pytest.fixture
