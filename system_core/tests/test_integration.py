@@ -13,6 +13,4 @@ pytestmark = pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator, check, instance):
     check.check(instance)
-
-    for metric in common.EXPECTED_METRICS:
-        aggregator.assert_metric_has_tag(metric, instance["tags"][0])
+    common._test_check(aggregator, instance)

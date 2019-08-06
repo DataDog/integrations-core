@@ -9,7 +9,4 @@ from . import common
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
-
-    for metric in common.EXPECTED_METRICS:
-        aggregator.assert_metric_has_tag(metric, instance["tags"][0])
-
+    common._test_check(aggregator, instance)
