@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from . import common
+
 pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixture("dd_environment")
 def test_check(aggregator, check, instance):
     check.check(instance)
-
-    aggregator.assert_metric('system.swap.swapped_in', tags=instance.get("tags"))
-    aggregator.assert_metric('system.swap.swapped_out', tags=instance.get("tags"))
+    common._test_check(aggregator, instance)
