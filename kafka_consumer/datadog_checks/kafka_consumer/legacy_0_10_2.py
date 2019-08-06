@@ -174,13 +174,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         response = future.value
         return response
 
-    def _get_group_coordinator(self, group):
-        request = GroupCoordinatorRequest[0](group)
-        response = self._make_blocking_req(request)
-        error_type = kafka_errors.for_code(response.error_code)
-        if error_type is kafka_errors.NoError:
-            return response.coordinator_id
-
     def _process_highwater_offsets(self, response):
         highwater_offsets = {}
         topic_partitions_without_a_leader = []
@@ -408,47 +401,57 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def _get_kafka_consumer_offsets(self, instance, consumer_groups):
         """
-        retrieve consumer offsets via the new consumer api. Offsets in this version are stored directly
-        in kafka (__consumer_offsets topic) rather than in zookeeper
+        Get offsets for all consumer groups from Kafka.
+
+        These offsets are stored in the __consumer_offsets topic rather than in Zookeeper.
         """
         consumer_offsets = {}
         topics = defaultdict(set)
 
         for consumer_group, topic_partitions in iteritems(consumer_groups):
             try:
-                coordinator_id = self._get_group_coordinator(consumer_group)
-                if coordinator_id is not None:
-                    offsets = self._get_consumer_offsets(consumer_group, topic_partitions, coordinator_id)
-                    for (topic, partition), offset in iteritems(offsets):
-                        topics[topic].update([partition])
-                        key = (consumer_group, topic, partition)
-                        consumer_offsets[key] = offset
-                else:
-                    self.log.info("unable to find group coordinator for %s", consumer_group)
+                single_group_offsets = self._get_single_group_offsets_from_kafka(consumer_group, topic_partitions)
+                for (topic, partition), offset in iteritems(single_group_offsets):
+                    topics[topic].update([partition])
+                    key = (consumer_group, topic, partition)
+                    consumer_offsets[key] = offset
             except Exception:
-                self.log.exception('Could not read consumer offsets from kafka.')
+                self.log.exception('Could not read consumer offsets from kafka for group: ' % consumer_group)
 
         return consumer_offsets, topics
 
-    def _get_consumer_offsets(self, consumer_group, topic_partitions, coord_id):
+    def _get_group_coordinator(self, group):
+        """Determine which broker is the Group Coordinator for a specific consumer group."""
+        request = GroupCoordinatorRequest[0](group)
+        response = self._make_blocking_req(request)
+        error_type = kafka_errors.for_code(response.error_code)
+        if error_type is kafka_errors.NoError:
+            return response.coordinator_id
+
+    def _get_single_group_offsets_from_kafka(self, consumer_group, topic_partitions):
+        """Get offsets for a single consumer group from Kafka"""
+        consumer_offsets = {}
         tps = defaultdict(set)
         for topic, partitions in iteritems(topic_partitions):
             if len(partitions) == 0:
                 partitions = self._kafka_client.cluster.available_partitions_for_topic(topic)
             tps[topic] = tps[text_type(topic)].union(set(partitions))
 
-        consumer_offsets = {}
-
-        # Kafka protocol uses OffsetFetchRequests to retrieve consumer offsets:
-        # https://kafka.apache.org/protocol#The_Messages_OffsetFetch
-        # https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-OffsetFetchRequest
-        request = OffsetFetchRequest[1](consumer_group, list(iteritems(tps)))
-        response = self._make_blocking_req(request, node_id=coord_id)
-        for (topic, partition_offsets) in response.topics:
-            for partition, offset, _, error_code in partition_offsets:
-                if error_code != 0:
-                    continue
-                consumer_offsets[(topic, partition)] = offset
+        coordinator_id = self._get_group_coordinator(consumer_group)
+        if coordinator_id is not None:
+            # Kafka protocol uses OffsetFetchRequests to retrieve consumer offsets:
+            # https://kafka.apache.org/protocol#The_Messages_OffsetFetch
+            # https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-OffsetFetchRequest
+            request = OffsetFetchRequest[1](consumer_group, list(iteritems(tps)))
+            response = self._make_blocking_req(request, node_id=coordinator_id)
+            for (topic, partition_offsets) in response.topics:
+                for partition, offset, _, error_code in partition_offsets:
+                    error_type = kafka_errors.for_code(error_code)
+                    if error_type is not kafka_errors.NoError:
+                        continue
+                    consumer_offsets[(topic, partition)] = offset
+        else:
+            self.log.info("unable to find group coordinator for %s", consumer_group)
 
         return consumer_offsets
 
