@@ -222,7 +222,7 @@ def test_get_devices_label():
 
 def test_min_disk_size():
     instance = {
-        '_min_disk_size': 6,
+        'min_disk_size': 6,
     }
     c = Disk('disk', None, {}, [instance])
 
@@ -234,6 +234,4 @@ def test_min_disk_size():
 
     with mock_output:
         c.check(instance)
-
         # need help here - not sure how to check that the proper devices were excluded
-
