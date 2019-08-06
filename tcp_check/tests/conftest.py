@@ -22,4 +22,4 @@ def check():
 
 @pytest.fixture
 def instance():
-    deepcopy(common.INSTANCE)
+    return deepcopy(common.INSTANCE)
