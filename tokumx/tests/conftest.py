@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_docker_hostname
+from datadog_checks.dev import docker_run
 from datadog_checks.tokumx import TokuMX
 from datadog_checks.tokumx.vendor import pymongo
 
@@ -40,11 +40,6 @@ def check():
 @pytest.fixture
 def instance():
     return deepcopy(common.INSTANCE)
-
-
-@pytest.fixture
-def docker_host():
-    return get_docker_hostname()
 
 
 def set_up_tokumx():
