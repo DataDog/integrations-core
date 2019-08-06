@@ -13,6 +13,8 @@ The Datadog Agent can collect many metrics from MySQL databases, including (but 
 
 You can also create your own metrics using custom SQL queries.
 
+**Note:** This integration is also compatible with [MariaDB](https://mariadb.org/), as it serves as a ["drop-in replacement"](https://mariadb.com/kb/en/library/mariadb-vs-mysql-compatibility/) for MySQL.
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
