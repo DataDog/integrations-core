@@ -21,7 +21,7 @@ def set_up_cacti():
         'php /opt/cacti/lib/poller.php --force',
     ]
     for c in commands:
-        run_in_container(CONTAINER_NAME, c)
+        run_in_container(CONTAINER_NAME, c, check=True)
 
 
 @pytest.fixture(scope="session")
