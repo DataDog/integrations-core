@@ -8,5 +8,5 @@ from . import common
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(instance, rate=True)
     common._test_check(aggregator, instance)
