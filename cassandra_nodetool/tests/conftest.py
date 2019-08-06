@@ -3,12 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import subprocess
 
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.docker import get_container_ip, run_in_container
 
 from . import common
 
@@ -29,7 +28,10 @@ def dd_environment():
     env['CONTAINER_PORT'] = common.PORT
 
     with docker_run(
-        compose_file, service_name=common.CASSANDRA_CONTAINER_NAME, log_patterns=['Listening for thrift clients']
+        compose_file,
+        service_name=common.CASSANDRA_CONTAINER_NAME,
+        log_patterns=['Listening for thrift clients'],
+        build=True,
     ):
         cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
         env['CASSANDRA_SEEDS'] = cassandra_seed
@@ -38,15 +40,11 @@ def dd_environment():
             service_name=common.CASSANDRA_CONTAINER_NAME_2,
             log_patterns=['All sessions completed', 'Starting listening for CQL clients'],
         ):
-            subprocess.check_call(
-                [
-                    "docker",
-                    "exec",
-                    common.CASSANDRA_CONTAINER_NAME,
-                    "cqlsh",
-                    "-e",
-                    "CREATE KEYSPACE IF NOT EXISTS test \
-                WITH REPLICATION={'class':'SimpleStrategy', 'replication_factor':2}",
-                ]
-            )
+            command = [
+                "cqlsh",
+                "-e",
+                "\"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION"
+                "={'class':'SimpleStrategy', 'replication_factor':2}\"",
+            ]
+            run_in_container(common.CASSANDRA_CONTAINER_NAME, command)
             yield common.CONFIG_INSTANCE, E2E_METADATA

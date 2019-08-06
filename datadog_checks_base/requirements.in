@@ -4,7 +4,6 @@ ddtrace==0.13.0
 kubernetes==8.0.1
 prometheus-client==0.3.0
 protobuf==3.7.0
-pyasn1-modules==0.2.5
 pysocks==1.7.0
 pywin32==224; sys_platform == 'win32'
 pyyaml==5.1

@@ -3,14 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import subprocess
 from copy import deepcopy
 
 import pytest
 import requests
 
 from datadog_checks.dev import WaitFor, docker_run
-from datadog_checks.dev.docker import get_container_ip
+from datadog_checks.dev.docker import get_container_ip, run_in_container
 
 from .common import (
     BUCKET_NAME,
@@ -24,6 +23,8 @@ from .common import (
     URL,
     USER,
 )
+
+COUCHBASE_DOCKER_COMMAND = 'couchbase-cli {} -c localhost:' + PORT + ' -u ' + USER + ' -p ' + PASSWORD
 
 
 @pytest.fixture
@@ -75,23 +76,11 @@ def couchbase_setup():
     """
     Setup couchbase using its CLI tool
     """
-
     # Resources used:
     #   https://developer.couchbase.com/documentation/server/5.1/install/init-setup.html
-
     # create bucket
-    create_bucket_args = [
-        'docker',
-        'exec',
-        CB_CONTAINER_NAME,
-        'couchbase-cli',
-        'bucket-create',
-        '-c',
-        'localhost:{}'.format(PORT),
-        '-u',
-        USER,
-        '-p',
-        PASSWORD,
+    command = [
+        COUCHBASE_DOCKER_COMMAND.format('bucket-create'),
         '--bucket',
         BUCKET_NAME,
         '--bucket-type',
@@ -99,27 +88,15 @@ def couchbase_setup():
         '--bucket-ramsize',
         '100',
     ]
-    subprocess.check_call(create_bucket_args)
+    run_in_container(CB_CONTAINER_NAME, command)
 
 
 def couchbase_container():
     """
     Wait for couchbase to start
     """
-    status_args = [
-        'docker',
-        'exec',
-        CB_CONTAINER_NAME,
-        'couchbase-cli',
-        'server-info',
-        '-c',
-        'localhost:{}'.format(PORT),
-        '-u',
-        USER,
-        '-p',
-        PASSWORD,
-    ]
-    return subprocess.call(status_args) == 0
+    command = COUCHBASE_DOCKER_COMMAND.format('server-info')
+    run_in_container(CB_CONTAINER_NAME, command)
 
 
 def couchbase_init():
@@ -128,10 +105,7 @@ def couchbase_init():
     """
 
     # initialize the database
-    init_args = [
-        'docker',
-        'exec',
-        CB_CONTAINER_NAME,
+    command = [
         'couchbase-cli',
         'cluster-init',
         '-c',
@@ -147,7 +121,7 @@ def couchbase_init():
         '--cluster-fts-ramsize',
         '256',
     ]
-    subprocess.check_call(init_args)
+    run_in_container(CB_CONTAINER_NAME, command)
 
     r = requests.get('{}/pools/default'.format(URL), auth=(USER, PASSWORD))
     return r.status_code == requests.codes.ok

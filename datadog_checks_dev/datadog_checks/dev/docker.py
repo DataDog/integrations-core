@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import absolute_import  # To be able to import docker client
+
 import os
 from contextlib import contextmanager
 
+from docker import client as docker_client
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
@@ -19,15 +22,9 @@ def get_docker_hostname():
 
 def get_container_ip(container_id_or_name):
     """Get a Docker container's IP address from its id or name."""
-    command = [
-        'docker',
-        'inspect',
-        '-f',
-        '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}',
-        container_id_or_name,
-    ]
-
-    return run_command(command, capture='out', check=True).stdout.strip()
+    client = docker_client.from_env()
+    inspect = client.api.inspect_container(container_id_or_name)
+    return inspect["NetworkSettings"]["Networks"]["compose_default"]["IPAddress"]
 
 
 def compose_file_active(compose_file):
@@ -39,6 +36,28 @@ def compose_file_active(compose_file):
             return len(lines[i:]) >= 1
 
     return False
+
+
+def run_in_container(container_name, command, check=True, interactive=False):
+    """Runs a command in the given container. This is useful for WaitFor conditions in `docker_run`
+
+    :param container_name: The name of the container
+    :param command: command line to run in the container
+    :param check: Whether or not to raise an exception on non-zero exit codes. Default: ``True``
+    :param interactive: Attach to stdin. Default: ``False``
+    """
+    client = docker_client.from_env()
+    container = client.containers.get(container_name)
+    if not container:
+        raise Exception("Could not find container {}".format(container_name))
+    try:
+        command_line = ' '.join(command) if isinstance(command, list) else command
+    except TypeError as e:
+        raise e
+    result = container.exec_run(command_line, stdin=interactive)
+    if check and result.exit_code != 0:
+        raise Exception(result.output)
+    return result
 
 
 @contextmanager

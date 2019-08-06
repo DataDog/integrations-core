@@ -142,9 +142,9 @@ class MesosMaster(AgentCheck):
             parsed_url = urlparse(url)
             ssl_verify = not _is_affirmative(instance.get('disable_ssl_validation', False))
             if not ssl_verify and parsed_url.scheme == 'https':
-                self.log.warning('Skipping SSL cert validation for %s based on configuration.' % url)
+                self.log.warning('Skipping SSL cert validation for {0} based on configuration.'.format(url))
 
-    def _get_json(self, url, timeout, verify=True, tags=None):
+    def _get_json(self, url, timeout, verify=True, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
         msg = None
         status = None
@@ -165,37 +165,60 @@ class MesosMaster(AgentCheck):
             status = AgentCheck.CRITICAL
         finally:
             self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
-            if self.service_check_needed:
-                self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
-                self.service_check_needed = False
-            if status is AgentCheck.CRITICAL:
-                self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
-                raise CheckException('Cannot connect to mesos. Error: {0}'.format(msg))
+            self._send_service_check(url, r, status, failure_expected=failure_expected, tags=tags, message=msg)
 
         if r.encoding is None:
             r.encoding = 'UTF8'
 
         return r.json()
 
+    def _send_service_check(self, url, response, status, failure_expected=False, tags=None, message=None):
+        if status is AgentCheck.CRITICAL and failure_expected:
+            status = AgentCheck.OK
+            message = "Got %s when hitting %s" % (response.status_code, url)
+            raise CheckException(message)
+        elif status is AgentCheck.CRITICAL and not failure_expected:
+            raise CheckException('Cannot connect to mesos. Error: {0}'.format(message))
+        if self.service_check_needed:
+            self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=message)
+            self.service_check_needed = False
+
     def _get_master_state(self, url, timeout, verify, tags):
-        return self._get_json(url + '/state.json', timeout, verify, tags)
+        try:
+            # Mesos version >= 0.25
+            endpoint = url + '/state'
+            master_state = self._get_json(endpoint, timeout, verify=verify, failure_expected=True, tags=tags)
+        except CheckException:
+            # Mesos version < 0.25
+            old_endpoint = endpoint + '.json'
+            self.log.info(
+                'Unable to fetch state from {0}. Retrying with the deprecated endpoint: {1}.'.format(
+                    endpoint, old_endpoint
+                )
+            )
+            master_state = self._get_json(old_endpoint, timeout, verify=verify, tags=tags)
+        return master_state
 
     def _get_master_stats(self, url, timeout, verify, tags):
         if self.version >= [0, 22, 0]:
-            endpoint = '/metrics/snapshot'
+            endpoint = url + '/metrics/snapshot'
         else:
-            endpoint = '/stats.json'
-        return self._get_json(url + endpoint, timeout, verify, tags)
+            endpoint = url + '/stats.json'
+        return self._get_json(endpoint, timeout, verify, tags)
 
     def _get_master_roles(self, url, timeout, verify, tags):
-        return self._get_json(url + '/roles.json', timeout, verify, tags)
+        if self.version >= [1, 8, 0]:
+            endpoint = url + '/roles'
+        else:
+            endpoint = url + '/roles.json'
+        return self._get_json(endpoint, timeout, verify, tags)
 
     def _check_leadership(self, url, timeout, verify, tags=None):
         state_metrics = self._get_master_state(url, timeout, verify, tags)
         self.leader = False
 
         if state_metrics is not None:
-            self.version = list(map(int, state_metrics['version'].split('.')))
+            self.version = [int(i) for i in state_metrics['version'].split('.')]
             if state_metrics['leader'] == state_metrics['pid']:
                 self.leader = True
 
