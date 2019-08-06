@@ -58,4 +58,5 @@ def wait_for_threads():
 def _test_check(aggregator, instance):
     expected_tags = ["instance:{}-{}".format(instance.get("host"), instance.get("port", 22))]
     aggregator.assert_metric("sftp.response_time", tags=expected_tags)
+    aggregator.assert_all_metrics_covered()
     aggregator.assert_service_check(CheckSSH.SSH_SERVICE_CHECK_NAME, CheckSSH.OK)
