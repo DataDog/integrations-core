@@ -28,6 +28,7 @@ def test_default_options():
     assert check._tag_by_filesystem is False
     assert check._device_tag_re == []
     assert check._service_check_rw is False
+    assert check._min_disk_size == 0
 
 
 def test_bad_config():
@@ -218,3 +219,21 @@ def test_get_devices_label():
     ):
         labels = c._get_devices_label()
         assert labels.get("/dev/mapper/vagrant--vg-root") == "label:DATA"
+
+def test_min_disk_size():
+    instance = {
+        '_min_disk_size': 6,
+    }
+    c = Disk('disk', None, {}, [instance])
+
+    mock_output = mock.patch(
+        'datadog_checks.disk.disk.get_subprocess_output',
+        return_value=mock_df_output('freebsd-df-Tk'),
+        __name__='get_subprocess_output',
+    )
+
+    with mock_output:
+        c.check(instance)
+
+        # need help here - not sure how to check that the proper devices were excluded
+
