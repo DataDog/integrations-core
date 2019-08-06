@@ -27,16 +27,16 @@ check_call(["kubectl", "label", "namespace", "default", "istio-injection=enabled
 
 istio = "istio-{}".format(version)
 
-for f in glob.glob(opj([istio, "install", "kubernetes", "helm", "istio-init", "files", "crd*.yaml"])):
+for f in glob.glob(opj(istio, "install", "kubernetes", "helm", "istio-init", "files", "crd*.yaml")):
     check_call(["kubectl", "apply", "-f", f])
 
-check_call(["kubectl", "apply", "-f", opj([istio, "install", "kubernetes", "istio-demo-auth.yaml"])])
+check_call(["kubectl", "apply", "-f", opj(istio, "install", "kubernetes", "istio-demo-auth.yaml")])
 check_call(
     ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "istio-system", "--timeout=300s"]
 )
 
-check_call(["kubectl", "apply", "-f", opj([istio, "samples", "bookinfo", "platform", "kube", "bookinfo.yaml"])])
+check_call(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "platform", "kube", "bookinfo.yaml")])
 check_call(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
 
-check_call(["kubectl", "apply", "-f", opj([istio, "samples", "bookinfo", "networking", "bookinfo-gateway.yaml"])])
+check_call(["kubectl", "apply", "-f", opj(istio, "samples", "bookinfo", "networking", "bookinfo-gateway.yaml")])
 check_call(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s"])
