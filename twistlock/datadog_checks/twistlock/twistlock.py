@@ -5,16 +5,13 @@
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta
+from dateutil.parser import isoparse
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
 
 from .config import Config
-
-REGISTRY_SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-SCAN_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-LICENSE_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 DOCKERIO_PREFIX = "docker.io/"
 
@@ -83,7 +80,7 @@ class TwistlockCheck(AgentCheck):
             raise e
 
         # alert if your license will expire in 30 days and then in a week
-        expiration_date = datetime.strptime(license.get("expiration_date"), LICENSE_DATE_FORMAT)
+        expiration_date = isoparse(license.get("expiration_date"))
         current_date = datetime.utcnow()
         warning_date = current_date + timedelta(days=30)
         critical_date = current_date + timedelta(days=7)
@@ -121,7 +118,6 @@ class TwistlockCheck(AgentCheck):
             self._report_service_check(
                 image,
                 namespace,
-                REGISTRY_SCAN_DATE_FORMAT,
                 tags=image_tags,
                 message="Last scan: " + image.get("scanTime"),
             )
@@ -155,7 +151,7 @@ class TwistlockCheck(AgentCheck):
 
             self._report_layer_count(image, namespace, image_tags)
             self._report_service_check(
-                image, namespace, SCAN_DATE_FORMAT, tags=image_tags, message="Last scan: " + image.get("scanTime")
+                image, namespace, tags=image_tags, message="Last scan: " + image.get("scanTime")
             )
             self._report_vuln_info(namespace, image, image_tags)
             self._report_compliance_information(namespace, image, image_tags)
@@ -180,7 +176,7 @@ class TwistlockCheck(AgentCheck):
             host_tags = ["scanned_host:" + hostname] + self.config.tags
 
             self._report_service_check(
-                host, namespace, SCAN_DATE_FORMAT, tags=host_tags, message="Last scan: " + host.get("scanTime")
+                host, namespace, tags=host_tags, message="Last scan: " + host.get("scanTime")
             )
             self._report_vuln_info(namespace, host, host_tags)
             self._report_compliance_information(namespace, host, host_tags)
@@ -214,7 +210,6 @@ class TwistlockCheck(AgentCheck):
             self._report_service_check(
                 container,
                 namespace,
-                SCAN_DATE_FORMAT,
                 tags=container_tags,
                 message="Last scan: " + container.get("scanTime"),
             )
@@ -315,7 +310,7 @@ class TwistlockCheck(AgentCheck):
 
     def _report_service_check(self, data, prefix, format, tags=None, message=""):
         # Last scan service check
-        scan_date = datetime.strptime(data.get("scanTime"), format)
+        scan_date = isoparse(data.get("scanTime"))
         scan_status = AgentCheck.OK
         if scan_date < self.warning_date:
             scan_status = AgentCheck.WARNING
