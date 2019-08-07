@@ -117,7 +117,7 @@ class Etcd(OpenMetricsBaseCheck):
 
         response = {}
         try:
-            r = requests.post(endpoint)
+            r = self.http.post(endpoint)
             response.update(r.json())
         except Exception as e:
             self.log.debug('Error accessing GRPC gateway: {}'.format(e))
@@ -273,7 +273,7 @@ class Etcd(OpenMetricsBaseCheck):
         return self._get_json(url, "/v2/stats/leader", tags)
 
     def _perform_request(self, url, path):
-        return requests.get(url + path)
+        return self.http.get(url + path)
 
     def _get_json(self, url, path, tags):
         try:
