@@ -9,10 +9,21 @@ from datadog_checks.cockroachdb.metrics import METRIC_MAP
 
 
 @pytest.mark.integration
-def test_check(aggregator, instance):
+@pytest.mark.usefixtures("dd_environment")
+def test_integration(aggregator, instance):
     check = CockroachdbCheck('cockroachdb', {}, {}, [instance])
     check.check(instance)
 
+    _test_check(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance):
+    aggregator = dd_agent_check(instance, rate=True)
+    _test_check(aggregator)
+
+
+def _test_check(aggregator):
     for metric in itervalues(METRIC_MAP):
         aggregator.assert_metric('cockroachdb.{}'.format(metric), at_least=0)
 
