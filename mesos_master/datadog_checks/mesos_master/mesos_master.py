@@ -215,14 +215,14 @@ class MesosMaster(AgentCheck):
             endpoint = url + '/metrics/snapshot'
         else:
             endpoint = url + '/stats.json'
-        return self._get_json(endpoint, tags)
+        return self._get_json(endpoint, tags=tags)
 
     def _get_master_roles(self, url, tags):
         if self.version >= [1, 8, 0]:
             endpoint = url + '/roles'
         else:
             endpoint = url + '/roles.json'
-        return self._get_json(endpoint, tags)
+        return self._get_json(endpoint, tags=tags)
 
     def _check_leadership(self, url, tags=None):
         state_metrics = self._get_master_state(url, tags)
