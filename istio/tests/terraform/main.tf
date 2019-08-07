@@ -29,10 +29,6 @@ provider "google" {
   zone = random_shuffle.az.result[0]
 }
 
-resource "google_compute_network" "vpc_network" {
-  name = replace("istio-network-${var.user}-${random_string.suffix.result}", ".", "-")
-}
-
 resource "local_file" "kubeconfig" {
   content = "${data.template_file.kubeconfig.rendered}"
   filename = "${path.module}/kubeconfig"
@@ -43,7 +39,6 @@ resource "google_container_cluster" "gke_cluster" {
   location = random_shuffle.az.result[0]
   node_version = "1.13.7-gke.8"
   min_master_version = "1.13.7-gke.8"
-  network = google_compute_network.vpc_network.name
 
   lifecycle {
     ignore_changes = ["node_pool"]
@@ -85,7 +80,7 @@ data "template_file" "kubeconfig" {
 
 resource "null_resource" "startup" {
   provisioner "local-exec" {
-    command = "./script.py"
+    command = "python ./script.py"
     environment = {
       KUBECONFIG = "${local_file.kubeconfig.filename}"
       ISTIO_VERSION = "1.2.3"
