@@ -17,7 +17,7 @@ log = logging.getLogger(__file__)
 
 
 def test_get_nodes_with_service(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
     consul_check.check(consul_mocks.MOCK_CONFIG)
 
@@ -42,7 +42,7 @@ def test_get_nodes_with_service(aggregator):
 
 def test_get_peers_in_cluster(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     consul_mocks.mock_check(consul_check, my_mocks)
     consul_check.check(consul_mocks.MOCK_CONFIG)
 
@@ -58,7 +58,7 @@ def test_get_peers_in_cluster(aggregator):
 
 def test_count_all_nodes(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     consul_mocks.mock_check(consul_check, my_mocks)
     consul_check.check(consul_mocks.MOCK_CONFIG)
 
@@ -66,7 +66,7 @@ def test_count_all_nodes(aggregator):
 
 
 def test_get_nodes_with_service_warning(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_warning
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -90,7 +90,7 @@ def test_get_nodes_with_service_warning(aggregator):
 
 
 def test_get_nodes_with_service_critical(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_critical
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -114,7 +114,7 @@ def test_get_nodes_with_service_critical(aggregator):
 
 
 def test_consul_request(aggregator, instance):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     with mock.patch("datadog_checks.consul.consul.requests.get") as mock_requests_get:
         consul_check.consul_request(instance, "foo")
         url = "{}/{}".format(instance["url"], "foo")
@@ -134,7 +134,7 @@ def test_consul_request(aggregator, instance):
 
 
 def test_service_checks(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['consul_request'] = consul_mocks.mock_get_health_check
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -174,7 +174,7 @@ def test_service_checks(aggregator):
 
 
 def test_cull_services_list():
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     consul_mocks.mock_check(consul_check, my_mocks)
     consul_check.check(consul_mocks.MOCK_CONFIG_LEADER_CHECK)
@@ -230,7 +230,7 @@ def test_cull_services_list():
 
 
 def test_new_leader_event(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['_get_cluster_leader'] = consul_mocks.mock_get_cluster_leader_B
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -248,7 +248,7 @@ def test_new_leader_event(aggregator):
 
 
 def test_self_leader_event(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK])
     my_mocks = consul_mocks._get_consul_mocks()
 
     instance_hash = hash_mutable(consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK)
@@ -295,7 +295,7 @@ def test_self_leader_event(aggregator):
 
 
 def test_network_latency_checks(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     consul_mocks.mock_check(consul_check, my_mocks)
 
