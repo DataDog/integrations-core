@@ -50,7 +50,7 @@ class Disk(AgentCheck):
         self._device_tag_re = instance.get('device_tag_re', {})
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
-        self._min_disk_size = instance.get('min_disk_size', 0) * 1000000
+        self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
 
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
@@ -62,9 +62,6 @@ class Disk(AgentCheck):
         """Get disk space/inode stats"""
         if self._tag_by_label and Platform.is_linux():
             self.devices_label = self._get_devices_label()
-        if not isinstance(self._min_disk_size, int):
-            self.log.warning('min_disk_size must be an integer; exiting check.')
-            return
 
         # Windows and Mac will always have psutil
         # (we have packaged for both of them)
