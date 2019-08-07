@@ -95,8 +95,8 @@ The configuration for this integration's `logs` section is:
 ## Data Collected
 
 ### Metrics
-{{< get-metrics-from-git "redisdb" >}}
 
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
