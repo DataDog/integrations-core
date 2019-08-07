@@ -383,10 +383,13 @@ def test_pod_phase_gauges(aggregator, instance, check):
 def test_extract_timestamp(check):
     job_name = "hello2-1509998340"
     job_name2 = "hello-2-1509998340"
+    job_name3 = "hello2"
     result = check._extract_job_timestamp(job_name)
     assert result == 1509998340
     result = check._extract_job_timestamp(job_name2)
     assert result == 1509998340
+    result = check._extract_job_timestamp(job_name3)
+    assert result == 0
 
 def test_job_counts(aggregator, instance, check):
     for _ in range(2):
