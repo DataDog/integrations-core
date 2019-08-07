@@ -91,9 +91,8 @@ class ConsulCheck(AgentCheck):
             },
         }
 
-        if self.instance is not None:
-            if 'acl_token' in self.instance:
-                self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
+        if 'acl_token' in self.instance:
+            self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
 
     def consul_request(self, instance, endpoint):
         url = urljoin(instance.get('url'), endpoint)
