@@ -98,19 +98,18 @@ class MesosSlave(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(MesosSlave, self).__init__(name, init_config, instances)
         self.cluster_name = None
-        if self.instance is not None:
-            url = self.instance.get('url', '')
-            parsed_url = urlparse(url)
-            if self.http.options['tls_verify'] and parsed_url.scheme == 'https':
-                self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
-            if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
-                # `default_timeout` config option will be removed with Agent 5
-                self.http.options['timeout'] = (
-                    self.instance.get('timeout')
-                    or self.init_config.get('timeout')
-                    or self.init_config.get('default_timeout')
-                    or self.DEFAULT_TIMEOUT
-                )
+        url = self.instance.get('url', '')
+        parsed_url = urlparse(url)
+        if self.http.options['verify'] and parsed_url.scheme == 'https':
+            self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
+        if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
+            # `default_timeout` config option will be removed with Agent 5
+            self.http.options['timeout'] = (
+                self.instance.get('timeout')
+                or self.init_config.get('timeout')
+                or self.init_config.get('default_timeout')
+                or self.DEFAULT_TIMEOUT
+            )
 
     def _get_json(self, url, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
