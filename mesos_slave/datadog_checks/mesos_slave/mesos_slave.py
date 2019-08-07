@@ -135,6 +135,7 @@ class MesosSlave(AgentCheck):
         finally:
             self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
             self._send_service_check(url, r, status, failure_expected=failure_expected, tags=tags, message=msg)
+
         if r.encoding is None:
             r.encoding = 'UTF8'
 
@@ -172,7 +173,7 @@ class MesosSlave(AgentCheck):
             endpoint = url + '/metrics/snapshot'
         else:
             endpoint = '/stats.json'
-        return self._get_json(url + endpoint, tags)
+        return self._get_json(url + endpoint, tags=tags)
 
     def _get_constant_attributes(self, url, master_port, tags):
         state_metrics = None
