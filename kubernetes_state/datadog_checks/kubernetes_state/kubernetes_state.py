@@ -406,14 +406,8 @@ class KubernetesState(OpenMetricsBaseCheck):
         """
         Extract timestamp of job names if they match -(\\^.+\\-) - match everything until a `-`
         """
-        pattern = r"(^.+\-)"
-        job_ts = 0
-        try:
-            job_ts = int(re.sub(pattern, '', name))
-        except ValueError:
-            msg = 'Cannot extract ts from job name {}'.format(name)
-            self.log.debug(msg)
-        return job_ts
+        ts = name.split('-')[-1]
+        return int(ts) if ts.isdigit() else 0
 
     # Labels attached: namespace, pod
     # As a message the phase=Pending|Running|Succeeded|Failed|Unknown
