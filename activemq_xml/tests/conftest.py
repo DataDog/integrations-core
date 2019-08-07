@@ -13,7 +13,7 @@ from datadog_checks.dev import TempDir, docker_run
 from .common import CONFIG, HERE, URL
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def dd_environment():
     # use os.path.realpath to avoid mounting issues of symlinked /var -> /private/var in Docker on macOS
     with TempDir() as tmp_dir:
