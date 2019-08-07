@@ -115,12 +115,7 @@ class TwistlockCheck(AgentCheck):
             image_tags = ["scanned_image:" + image_name] + self.config.tags
 
             self._report_layer_count(image, namespace, image_tags)
-            self._report_service_check(
-                image,
-                namespace,
-                tags=image_tags,
-                message="Last scan: " + image.get("scanTime"),
-            )
+            self._report_service_check(image, namespace, tags=image_tags, message="Last scan: " + image.get("scanTime"))
             self._report_vuln_info(namespace, image, image_tags)
             self._report_compliance_information(namespace, image, image_tags)
 
@@ -150,9 +145,7 @@ class TwistlockCheck(AgentCheck):
             image_tags = ["scanned_image:" + image_name] + self.config.tags
 
             self._report_layer_count(image, namespace, image_tags)
-            self._report_service_check(
-                image, namespace, tags=image_tags, message="Last scan: " + image.get("scanTime")
-            )
+            self._report_service_check(image, namespace, tags=image_tags, message="Last scan: " + image.get("scanTime"))
             self._report_vuln_info(namespace, image, image_tags)
             self._report_compliance_information(namespace, image, image_tags)
 
@@ -175,9 +168,7 @@ class TwistlockCheck(AgentCheck):
             hostname = host['hostname']
             host_tags = ["scanned_host:" + hostname] + self.config.tags
 
-            self._report_service_check(
-                host, namespace, tags=host_tags, message="Last scan: " + host.get("scanTime")
-            )
+            self._report_service_check(host, namespace, tags=host_tags, message="Last scan: " + host.get("scanTime"))
             self._report_vuln_info(namespace, host, host_tags)
             self._report_compliance_information(namespace, host, host_tags)
 
@@ -208,10 +199,7 @@ class TwistlockCheck(AgentCheck):
             container_tags += self.config.tags
 
             self._report_service_check(
-                container,
-                namespace,
-                tags=container_tags,
-                message="Last scan: " + container.get("scanTime"),
+                container, namespace, tags=container_tags, message="Last scan: " + container.get("scanTime")
             )
             self._report_compliance_information(namespace, container, container_tags)
 
