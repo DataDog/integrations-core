@@ -172,8 +172,8 @@ class MesosSlave(AgentCheck):
         if self.version >= [0, 22, 0]:
             endpoint = url + '/metrics/snapshot'
         else:
-            endpoint = '/stats.json'
-        return self._get_json(url + endpoint, tags=tags)
+            endpoint = url + '/stats.json'
+        return self._get_json(endpoint, tags=tags)
 
     def _get_constant_attributes(self, url, master_port, tags):
         state_metrics = None
