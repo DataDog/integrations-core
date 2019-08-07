@@ -17,7 +17,7 @@ from .common import CONTAINER_NAME, E2E_METADATA, HERE, INSTANCE_INTEGRATION, RR
 def set_up_cacti():
     commands = ['/sbin/restore', 'mysql -u root -e "flush privileges;"', 'php /opt/cacti/lib/poller.php --force']
     for c in commands:
-        run_in_container(CONTAINER_NAME, c)
+        run_in_container(CONTAINER_NAME, c, check=True)
 
 
 @pytest.fixture(scope="session")
