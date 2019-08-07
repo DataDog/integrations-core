@@ -8,20 +8,16 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.cacti import CactiCheck
-from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
+from datadog_checks.dev import TempDir, WaitFor, docker_run
+from datadog_checks.dev.docker import run_in_container
 
 from .common import CONTAINER_NAME, E2E_METADATA, HERE, INSTANCE_INTEGRATION, RRD_PATH
 
 
 def set_up_cacti():
-    commands = [
-        ['/sbin/restore'],
-        ['mysql', '-u', 'root', '-e', "flush privileges;"],
-        ['php', '/opt/cacti/lib/poller.php', '--force'],
-    ]
+    commands = ['/sbin/restore', 'mysql -u root -e "flush privileges;"', 'php /opt/cacti/lib/poller.php --force']
     for c in commands:
-        command = ['docker', 'exec', CONTAINER_NAME] + c
-        run_command(command, capture=True, check=True)
+        run_in_container(CONTAINER_NAME, c, check=True)
 
 
 @pytest.fixture(scope="session")
