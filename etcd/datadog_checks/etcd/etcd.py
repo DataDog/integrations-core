@@ -64,23 +64,18 @@ class Etcd(OpenMetricsBaseCheck):
     }
 
     HTTP_CONFIG_REMAPPER = {
+        'prometheus_timeout': {'name': 'timeout'},
         'ssl_cert': {'name': 'tls_cert'},
         'ssl_private_key': {'name': 'tls_private_key'},
         'ssl_ca_cert': {'name': 'tls_ca_cert'},
         'ssl_verify': {'name': 'tls_verify'},
     }
 
-    def __init__(self, name, init_config, instances):
-        if instances is not None:
-            for instance in instances:
-                # For legacy check ensure prometheus_url is set so
-                # OpenMetricsBaseCheck instantiation succeeds
-                if not is_affirmative(instance.get('use_preview', False)):
-                    instance.setdefault('prometheus_url', '')
-
+    def __init__(self, name, init_config, agentConfig, instances):
         super(Etcd, self).__init__(
             name,
             init_config,
+            agentConfig,
             instances,
             default_instances={
                 'etcd': {
@@ -92,6 +87,19 @@ class Etcd(OpenMetricsBaseCheck):
             },
             default_namespace='etcd',
         )
+
+        if self.instance is not None:
+            # For legacy check ensure prometheus_url is set so
+            # OpenMetricsBaseCheck instantiation succeeds
+            if not is_affirmative(self.instance.get('use_preview', False)):
+                self.instance.setdefault('prometheus_url', '')
+                self.HTTP_CONFIG_REMAPPER = {
+                    'timeout': {'name': 'timeout', 'default': self.DEFAULT_TIMEOUT},
+                    'ssl_keyfile': {'name': 'tls_private_key'},
+                    'ssl_certfile': {'name': 'tls_cert'},
+                    'ssl_cert_validation': {'name': 'tls_verify'},
+                    'ssl_ca_certs': {'name': 'tls_ca_cert'},
+                }
 
     def check(self, instance):
         if is_affirmative(instance.get('use_preview', False)):
@@ -107,28 +115,9 @@ class Etcd(OpenMetricsBaseCheck):
         url = urlparse(scraper_config['prometheus_url'])
         endpoint = '{}://{}{}'.format(url.scheme, url.netloc, path)
 
-        timeout = scraper_config['prometheus_timeout']
-
-        username = scraper_config['username']
-        password = scraper_config['password']
-        auth = (username, password) if username and password else None
-
-        cert = None
-        if isinstance(scraper_config['ssl_cert'], string_types):
-            if isinstance(scraper_config['ssl_private_key'], string_types):
-                cert = (scraper_config['ssl_cert'], scraper_config['ssl_private_key'])
-            else:
-                cert = scraper_config['ssl_cert']
-
-        verify = True
-        if isinstance(scraper_config['ssl_ca_cert'], string_types):
-            verify = scraper_config['ssl_ca_cert']
-        elif not is_affirmative(scraper_config['ssl_verify']):
-            verify = False
-
         response = {}
         try:
-            r = requests.post(endpoint, data=data, timeout=timeout, auth=auth, verify=verify, cert=cert)
+            r = requests.post(endpoint)
             response.update(r.json())
         except Exception as e:
             self.log.debug('Error accessing GRPC gateway: {}'.format(e))
@@ -152,6 +141,8 @@ class Etcd(OpenMetricsBaseCheck):
             tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
 
     def check_post_v3(self, instance):
+        if 'url' in instance:
+            instance['prometheus_url'] = instance['url']
         scraper_config = self.get_scraper_config(instance)
 
         if 'prometheus_url' not in scraper_config:
@@ -181,36 +172,23 @@ class Etcd(OpenMetricsBaseCheck):
         url = instance['url']
         instance_tags = instance.get('tags', [])
 
-        # Load the ssl configuration
-        ssl_params = {
-            'ssl_keyfile': instance.get('ssl_keyfile'),
-            'ssl_certfile': instance.get('ssl_certfile'),
-            'ssl_cert_validation': is_affirmative(instance.get('ssl_cert_validation', True)),
-            'ssl_ca_certs': instance.get('ssl_ca_certs'),
-        }
-
-        for key, param in list(iteritems(ssl_params)):
-            if param is None:
-                del ssl_params[key]
-
         # Get a copy of tags for the CRIT statuses
         critical_tags = list(instance_tags)
 
         # Append the instance's URL in case there are more than one, that
         # way they can tell the difference!
         instance_tags.append('url:{}'.format(url))
-        timeout = float(instance.get('timeout', self.DEFAULT_TIMEOUT))
         is_leader = False
 
         # Gather self health status
         sc_state = self.UNKNOWN
-        health_status = self._get_health_status(url, ssl_params, timeout)
+        health_status = self._get_health_status(url)
         if health_status is not None:
             sc_state = self.OK if self._is_healthy(health_status) else self.CRITICAL
         self.service_check(self.HEALTH_SERVICE_CHECK_NAME, sc_state, tags=instance_tags)
 
         # Gather self metrics
-        self_response = self._get_self_metrics(url, ssl_params, timeout, critical_tags)
+        self_response = self._get_self_metrics(url, critical_tags)
         if self_response is not None:
             if self_response['state'] == 'StateLeader':
                 is_leader = True
@@ -233,7 +211,7 @@ class Etcd(OpenMetricsBaseCheck):
                     self.log.warn('Missing key {} in stats.'.format(key))
 
         # Gather store metrics
-        store_response = self._get_store_metrics(url, ssl_params, timeout, critical_tags)
+        store_response = self._get_store_metrics(url, critical_tags)
         if store_response is not None:
             for key in self.STORE_RATES:
                 if key in store_response:
@@ -249,7 +227,7 @@ class Etcd(OpenMetricsBaseCheck):
 
         # Gather leader metrics
         if is_leader:
-            leader_response = self._get_leader_metrics(url, ssl_params, timeout, critical_tags)
+            leader_response = self._get_leader_metrics(url, critical_tags)
             if leader_response is not None and len(leader_response.get("followers", {})) > 0:
                 # Get the followers
                 followers = leader_response.get("followers")
@@ -273,41 +251,33 @@ class Etcd(OpenMetricsBaseCheck):
         if self_response is not None and store_response is not None:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=instance_tags)
 
-    def _get_health_status(self, url, ssl_params, timeout):
+    def _get_health_status(self, url):
         """
         Don't send the "can connect" service check if we have troubles getting
         the health status
         """
         try:
-            r = self._perform_request(url, "/health", ssl_params, timeout)
+            r = self._perform_request(url, "/health")
             # we don't use get() here so we can report a KeyError
             return r.json()[self.HEALTH_KEY]
         except Exception as e:
             self.log.debug("Can't determine health status: {}".format(e))
 
-    def _get_self_metrics(self, url, ssl_params, timeout, tags):
-        return self._get_json(url, "/v2/stats/self", ssl_params, timeout, tags)
+    def _get_self_metrics(self, url, tags):
+        return self._get_json(url, "/v2/stats/self", tags)
 
-    def _get_store_metrics(self, url, ssl_params, timeout, tags):
-        return self._get_json(url, "/v2/stats/store", ssl_params, timeout, tags)
+    def _get_store_metrics(self, url, tags):
+        return self._get_json(url, "/v2/stats/store", tags)
 
-    def _get_leader_metrics(self, url, ssl_params, timeout, tags):
-        return self._get_json(url, "/v2/stats/leader", ssl_params, timeout, tags)
+    def _get_leader_metrics(self, url, tags):
+        return self._get_json(url, "/v2/stats/leader", tags)
 
-    def _perform_request(self, url, path, ssl_params, timeout):
-        certificate = None
-        if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
-            certificate = (ssl_params['ssl_certfile'], ssl_params['ssl_keyfile'])
+    def _perform_request(self, url, path):
+        return requests.get(url + path)
 
-        verify = ssl_params.get('ssl_ca_certs', True) if ssl_params['ssl_cert_validation'] else False
-
-        return requests.get(
-            url + path, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig)
-        )
-
-    def _get_json(self, url, path, ssl_params, timeout, tags):
+    def _get_json(self, url, path, tags):
         try:
-            r = self._perform_request(url, path, ssl_params, timeout)
+            r = self._perform_request(url, path)
         except requests.exceptions.Timeout:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
