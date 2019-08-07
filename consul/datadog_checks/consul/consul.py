@@ -71,24 +71,24 @@ class ConsulCheck(AgentCheck):
 
     STATUS_SEVERITY = {AgentCheck.UNKNOWN: 0, AgentCheck.OK: 1, AgentCheck.WARNING: 2, AgentCheck.CRITICAL: 3}
 
-
     def __init__(self, name, init_config, instances):
         super(ConsulCheck, self).__init__(name, init_config, instances)
 
         self._instance_states = defaultdict(lambda: ConsulCheckInstanceState())
 
         self.HTTP_CONFIG_REMAPPER = {
-        'client_cert_file': {
-            'name': 'tls_cert',
-            'default': self.init_config.get('tls_cert') or self.init_config.get('client_cert_file') or False
+            'client_cert_file': {
+                'name': 'tls_cert',
+                'default': self.init_config.get('tls_cert') or self.init_config.get('client_cert_file') or False,
             },
-        'private_key_file': {
-            'name': 'tls_private_key',
-            'default': self.init_config.get('tls_private_key') or self.init_config.get('private_key_file') or False
+            'private_key_file': {
+                'name': 'tls_private_key',
+                'default': self.init_config.get('tls_private_key') or self.init_config.get('private_key_file') or False,
             },
-        'ca_bundle_file': {
-            'name': 'tls_ca_cert',
-            'default': self.init_config.get('tls_ca_cert') or self.init_config.get('ca_bundle_file') or False},
+            'ca_bundle_file': {
+                'name': 'tls_ca_cert',
+                'default': self.init_config.get('tls_ca_cert') or self.init_config.get('ca_bundle_file') or False,
+            },
         }
 
         if self.instance is not None:

@@ -35,7 +35,7 @@ def test_check(aggregator, instance, dd_environment):
     """
     Testing Consul Integration
     """
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [instance])
     consul_check.check(instance)
 
     for m in METRICS:
@@ -49,7 +49,7 @@ def test_check(aggregator, instance, dd_environment):
 
 @pytest.mark.integration
 def test_single_node_install(aggregator, instance_single_node_install, dd_environment):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [instance_single_node_install])
     consul_check.check(instance_single_node_install)
 
     for m in METRICS:
@@ -66,7 +66,7 @@ def test_acl_forbidden(instance_bad_token, dd_environment):
     """
     Testing Consul Integration with wrong ACL token
     """
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [instance_bad_token])
 
     got_error_403 = False
     try:

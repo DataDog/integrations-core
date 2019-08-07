@@ -248,7 +248,7 @@ def test_new_leader_event(aggregator):
 
 
 def test_self_leader_event(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK])
     my_mocks = consul_mocks._get_consul_mocks()
 
     instance_hash = hash_mutable(consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK)
