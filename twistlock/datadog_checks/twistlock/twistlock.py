@@ -5,8 +5,8 @@
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta
-from dateutil.parser import isoparse
 
+from dateutil import parser, tz
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -38,7 +38,7 @@ class TwistlockCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        self.last_run = datetime.utcnow()
+        self.last_run = datetime.now(tz.tzutc())
 
         self.config = None
         if instances:
@@ -56,7 +56,7 @@ class TwistlockCheck(AgentCheck):
 
         # alert if a scan hasn't been able to run in a few hours and then in a day
         # only calculate this once per check run
-        self.current_date = datetime.utcnow()
+        self.current_date = datetime.now(tz.tzutc())
         self.warning_date = self.current_date - timedelta(hours=7)
         self.critical_date = self.current_date - timedelta(days=1)
 
@@ -68,7 +68,7 @@ class TwistlockCheck(AgentCheck):
 
         self.report_vulnerabilities()
 
-        self.last_run = datetime.utcnow()
+        self.last_run = datetime.now(tz.tzutc())
 
     def report_license_expiration(self):
         service_check_name = self.NAMESPACE + ".license_ok"
@@ -80,8 +80,8 @@ class TwistlockCheck(AgentCheck):
             raise e
 
         # alert if your license will expire in 30 days and then in a week
-        expiration_date = isoparse(license.get("expiration_date"))
-        current_date = datetime.utcnow()
+        expiration_date = parser.isoparse(license.get("expiration_date"))
+        current_date = datetime.now(tz.tzutc())
         warning_date = current_date + timedelta(days=30)
         critical_date = current_date + timedelta(days=7)
 
@@ -310,7 +310,7 @@ class TwistlockCheck(AgentCheck):
 
     def _report_service_check(self, data, prefix, format, tags=None, message=""):
         # Last scan service check
-        scan_date = isoparse(data.get("scanTime"))
+        scan_date = parser.isoparse(data.get("scanTime"))
         scan_status = AgentCheck.OK
         if scan_date < self.warning_date:
             scan_status = AgentCheck.WARNING
