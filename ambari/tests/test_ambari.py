@@ -64,10 +64,12 @@ def test_cant_connect(init_config, instance, aggregator):
     ambari._make_request = MagicMock(return_value=None)
 
     try:
-        ambari.get_clusters('localhost')
+        ambari.get_clusters('localhost', ['foo:bar'])
     except CheckException:
         pass
-    aggregator.assert_service_check(name="ambari.can_connect", status=AgentCheck.CRITICAL)
+    aggregator.assert_service_check(
+        name="ambari.can_connect", status=AgentCheck.CRITICAL, tags=['foo:bar', 'url:localhost']
+    )
 
 
 def test_get_clusters(init_config, instance, aggregator):
@@ -79,10 +81,10 @@ def test_get_clusters(init_config, instance, aggregator):
         }
     )
 
-    clusters = ambari.get_clusters('localhost')
+    clusters = ambari.get_clusters('localhost', ['foo:bar'])
 
     ambari._make_request.assert_called_with('localhost/api/v1/clusters')
-    aggregator.assert_service_check(name="ambari.can_connect", status=AgentCheck.OK)
+    aggregator.assert_service_check(name="ambari.can_connect", status=AgentCheck.OK, tags=['foo:bar', 'url:localhost'])
     assert clusters == ['LabCluster']
 
 
