@@ -246,6 +246,8 @@ class __AgentCheck(object):
         tags = self._normalize_tags_type(tags, device_name, name)
         if hostname is None:
             hostname = ''
+        if device_name is None:
+            device_name = ''
 
         if self.metric_limiter:
             if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
