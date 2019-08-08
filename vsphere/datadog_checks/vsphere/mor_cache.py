@@ -6,6 +6,8 @@ import time
 
 from six import iteritems
 
+from datadog_checks.vsphere.common import REALTIME_RESOURCES
+
 
 class MorNotFoundError(Exception):
     pass
@@ -17,9 +19,10 @@ class MorCache:
     For each instance key, the cache maps: mor_name --> mor_dict_object
     """
 
-    def __init__(self):
+    def __init__(self, log):
         self._mor = {}
         self._mor_lock = threading.RLock()
+        self.log = log
 
     def init_instance(self, key):
         """
@@ -88,7 +91,7 @@ class MorCache:
             for k, v in iteritems(self._mor.get(key, {})):
                 yield k, v
 
-    def mors_batch(self, key, batch_size):
+    def mors_batch(self, key, batch_size, max_historical_metrics=None):
         """
         Generator returning as many dictionaries containing `batch_size` Mor
         objects as needed to iterate all the content of the cache. This has
@@ -97,18 +100,48 @@ class MorCache:
             for batch in cache.mors_batch('key', 100):
                 for name, mor in batch:
                     # use the Mor object here
+        If max_historical_metrics is specified, the function will also limit
+        the size of the batch so that the integration never makes an API call
+        with more than this given amount of historical metrics.
         """
+        if max_historical_metrics is None:
+            max_historical_metrics = float('inf')
         with self._mor_lock:
-            mors_dict = self._mor.get(key)
+            mors_dict = self._mor.get(key, {})
             if mors_dict is None:
-                yield {}
+                raise StopIteration
 
-            mor_names = list(mors_dict)
-            mor_names.sort()
-            total = len(mor_names)
-            for idx in range(0, total, batch_size):
-                names_chunk = mor_names[idx : min(idx + batch_size, total)]
-                yield {name: mors_dict[name] for name in names_chunk}
+            batch = {}
+            nb_hist_metrics = 0
+            for mor_name, mor in iteritems(mors_dict):
+                if mor['mor_type'] not in REALTIME_RESOURCES and mor.get('metrics'):
+                    # Those metrics are historical, let's make sure we don't have too
+                    # many of them in the same batch.
+                    if len(mor['metrics']) >= max_historical_metrics:
+                        # Too much metrics to query for a single mor, ignore it
+                        self.log.warning(
+                            "Metrics for '{}' are ignored because there are more ({}) than what you allowed ({}) on vCenter Server".format(  # noqa: E501
+                                mor_name, len(mor['metrics']), max_historical_metrics
+                            )
+                        )
+                        continue
+
+                    nb_hist_metrics += len(mor['metrics'])
+                    if nb_hist_metrics >= max_historical_metrics:
+                        # Adding those metrics to the batch would make it too big, yield it now
+                        yield batch
+                        batch = {}
+                        nb_hist_metrics = len(mor['metrics'])
+
+                batch[mor_name] = mor
+
+                if len(batch) == batch_size:
+                    yield batch
+                    batch = {}
+                    nb_hist_metrics = 0
+
+            if batch:
+                yield batch
 
     def purge(self, key, ttl):
         """

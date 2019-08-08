@@ -98,13 +98,6 @@ instances:
     #
     # include_only_marked: false
 
-    ## @param all_metrics - boolean - optional - default: false
-    ## This parameter has been deprecated in favor of `collection_level`
-    ## Please set `collection_level: 4` if you want to collect all the metrics
-    ## available on your system.
-    #
-    # all_metrics: false
-
     ## @param collection_level - integer - optional - default: 1
     ## A number between 1 and 4 to specify how many metrics will be sent
     ## 1: Only basic metrics - 4: every metric available.
@@ -113,13 +106,20 @@ instances:
     #
     # collection_level: 1
 
-    ## @param collect_realtime_only - boolean - optional - default: true
-    ## Set to true to collect only host and VM metrics. Set to false to collect
-    ## cluster, datastore and datacenter metrics as well.
-    ## Collecting non realtime metrics will decrease performance as it
-    ## requires computation from the vCenter server.
+    ## @param collect_historical_only - boolean - optional - default: false
+    ## By default the check collects metrics from realtime resources (hosts and VMs).
+    ## Set this to true to only collect metrics from historical resources
+    ## (cluster, datastore and datacenter).
+    ## In order to collect metrics from those two types of resources, create two
+    ## 'instances' in this config file pointing to the same vcenter server, one with this flag
+    ## to false, the other with this flag to true.
+    ## The reason for this requirement is that collecting historical resources decreases
+    ## the performance of the check; having two instances allows realtime metrics collection
+    ## not to be slowed down by the collection of historical metrics.
+    ## Note: An instance with this flag set to true does not submit any service check, events or host tags.
+    ##       It is designed to be used only when next to another instance of the check.
     #
-    # collect_realtime_only: true
+    # collect_historical_only: false
 
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name

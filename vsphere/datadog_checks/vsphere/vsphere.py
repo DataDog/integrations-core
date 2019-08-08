@@ -26,7 +26,7 @@ from datadog_checks.base.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.base.config import is_affirmative
 
 from .cache_config import CacheConfig
-from .common import SOURCE_TYPE
+from .common import REALTIME_RESOURCES, SOURCE_TYPE
 from .errors import BadConfigError, ConnectionError
 from .event import VSphereEvent
 from .metadata_cache import MetadataCache, MetadataNotFoundError
@@ -39,6 +39,8 @@ REAL_TIME_INTERVAL = 20
 VM_MONITORING_FLAG = 'DatadogMonitored'
 # The size of the ThreadPool used to process the request queue
 DEFAULT_SIZE_POOL = 4
+# The maximum number of historical metrics allowed to be queried
+DEFAULT_MAX_HIST_METRICS = 64
 # The interval in seconds between two refresh of the entities list
 REFRESH_MORLIST_INTERVAL = 3 * 60
 # The interval in seconds between two refresh of metrics metadata (id<->name)
@@ -49,9 +51,10 @@ BATCH_MORLIST_SIZE = 50
 # is significantly lower than the size of the queryPerf response, so allow specifying a different value.
 BATCH_COLLECTOR_SIZE = 500
 
-REALTIME_RESOURCES = {'vm', 'host'}
+RESOURCE_TYPE_METRICS_REALTIME = (vim.VirtualMachine, vim.HostSystem)
+RESOURCE_TYPE_METRICS_HISTORICAL = (vim.Datacenter, vim.Datastore, vim.ClusterComputeResource)
 
-RESOURCE_TYPE_METRICS = (vim.VirtualMachine, vim.Datacenter, vim.HostSystem, vim.Datastore, vim.ClusterComputeResource)
+RESOURCE_TYPE_METRICS = RESOURCE_TYPE_METRICS_REALTIME + RESOURCE_TYPE_METRICS_HISTORICAL
 
 RESOURCE_TYPE_NO_METRIC = (vim.ComputeResource, vim.Folder)
 
@@ -131,7 +134,7 @@ class VSphereCheck(AgentCheck):
         self.mor_objects_queue = ObjectsQueue()
 
         # Cache of processed Mor objects
-        self.mor_cache = MorCache()
+        self.mor_cache = MorCache(self.log)
 
         # managed entity raw view
         self.registry = {}
@@ -148,6 +151,23 @@ class VSphereCheck(AgentCheck):
         if self.exception_printed < 10:
             self.log.error(msg)
             self.exception_printed += 1
+
+    @staticmethod
+    def _is_main_instance(instance):
+        """The 'main' instance is the one reporting events, service_checks, external host tags and realtime metrics.
+        Note: the main instance can also report `historical` metric for legacy reasons.
+        """
+        return not is_affirmative(instance.get('collect_historical_only', False))
+
+    @staticmethod
+    def _should_collect_historical(instance):
+        """Whether or not this instance should collect and report historical metrics. This is true if the instance
+        is a 'sidecar' for another instance (and in such case only report historical metrics). This is also true
+        for legacy reasons if `collect_realtime_only` is set to False.
+        """
+        if is_affirmative(instance.get('collect_historical_only', False)):
+            return True
+        return not is_affirmative(instance.get('collect_realtime_only', True))
 
     def start_pool(self):
         self.log.info("Starting Thread Pool")
@@ -248,7 +268,10 @@ class VSphereCheck(AgentCheck):
             )
         except Exception as e:
             err_msg = "Connection to {} failed: {}".format(ensure_unicode(instance.get('host')), e)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=err_msg)
+            if self._is_main_instance(instance):
+                self.service_check(
+                    self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=err_msg
+                )
             raise ConnectionError(err_msg)
 
         # Check that we have sufficient permission for the calls we need to make
@@ -258,7 +281,10 @@ class VSphereCheck(AgentCheck):
             err_msg = (
                 "A connection to {} can be established, but performing operations on the server fails: {}"
             ).format(ensure_unicode(instance.get('host')), e)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=err_msg)
+            if self._is_main_instance(instance):
+                self.service_check(
+                    self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=err_msg
+                )
             raise ConnectionError(err_msg)
 
         return server_instance
@@ -281,7 +307,8 @@ class VSphereCheck(AgentCheck):
             # Test if the connection is working
             try:
                 self.server_instances[i_key].CurrentTime()
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+                if self._is_main_instance(instance):
+                    self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
             except Exception:
                 # Try to reconnect. If the connection is definitely broken,
                 # this will send CRITICAL service check and raise
@@ -653,7 +680,17 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Objects queue is not initialized yet for instance %s, skipping processing", i_key)
             return
 
-        for resource_type in RESOURCE_TYPE_METRICS:
+        # Simply move the realtime mors from the queue to the cache
+        for resource_type in RESOURCE_TYPE_METRICS_REALTIME:
+            while self.mor_objects_queue.size(i_key, resource_type):
+                mor = self.mor_objects_queue.pop(i_key, resource_type)
+                if self._is_main_instance(instance):
+                    mor_name = str(mor['mor'])
+                    mor['interval'] = REAL_TIME_INTERVAL
+                    self.mor_cache.set_mor(i_key, mor_name, mor)
+
+        # Move the mors with historical metrics from the queue to the cache and also fetch their list of metrics.
+        for resource_type in RESOURCE_TYPE_METRICS_HISTORICAL:
             # Batch size can prevent querying large payloads at once if the environment is too large
             # If batch size is set to 0, process everything at once
             batch_size = self.batch_morlist_size or self.mor_objects_queue.size(i_key, resource_type)
@@ -666,19 +703,14 @@ class VSphereCheck(AgentCheck):
                         break
 
                     mor_name = str(mor['mor'])
-                    mor['interval'] = REAL_TIME_INTERVAL if mor['mor_type'] in REALTIME_RESOURCES else None
-                    # Always update the cache to account for Mors that might have changed parent
-                    # in the meantime (e.g. a migrated VM).
                     self.mor_cache.set_mor(i_key, mor_name, mor)
 
                     # Only do this for non real-time resources i.e. datacenter, datastore and cluster
                     # For hosts and VMs, we can rely on a precomputed list of metrics
-                    realtime_only = is_affirmative(instance.get("collect_realtime_only", True))
-                    if mor["mor_type"] not in REALTIME_RESOURCES and not realtime_only:
-                        mors.append(mor)
+                    mors.append(mor)
 
                 # We will actually schedule jobs for non realtime resources only.
-                if mors:
+                if self._should_collect_historical(instance):
                     self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, mors))
 
     def _cache_metrics_metadata(self, instance):
@@ -847,13 +879,26 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Not collecting metrics for instance '%s', nothing to do yet.", i_key)
             return
 
+        server_instance = self._get_server_instance(instance)
+        max_historical_metrics = DEFAULT_MAX_HIST_METRICS
+
+        if self._should_collect_historical(instance):
+            try:
+                vcenter_settings = server_instance.content.setting.QueryOptions("config.vpxd.stats.maxQueryMetrics")
+                max_historical_metrics = int(vcenter_settings[0].value)
+                if max_historical_metrics < 0:
+                    max_historical_metrics = float('inf')
+            except Exception:
+                pass
+
         vm_count = 0
         custom_tags = instance.get('tags', [])
         tags = ["vcenter_server:{}".format(ensure_unicode(instance.get('name')))] + custom_tags
 
         n_mors = self.mor_cache.instance_size(i_key)
         if not n_mors:
-            self.gauge('vsphere.vm.count', vm_count, tags=tags)
+            if self._is_main_instance(instance):
+                self.gauge('vsphere.vm.count', vm_count, tags=tags)
             self.log.debug("No Mor objects to process for instance '%s', skip...", i_key)
             return
 
@@ -862,7 +907,7 @@ class VSphereCheck(AgentCheck):
         # Request metrics for several objects at once. We can limit the number of objects with batch_size
         # If batch_size is 0, process everything at once
         batch_size = self.batch_morlist_size or n_mors
-        for batch in self.mor_cache.mors_batch(i_key, batch_size):
+        for batch in self.mor_cache.mors_batch(i_key, batch_size, max_historical_metrics):
             query_specs = []
             for _, mor in iteritems(batch):
                 if mor['mor_type'] == 'vm':
@@ -872,7 +917,7 @@ class VSphereCheck(AgentCheck):
 
                 query_spec = vim.PerformanceManager.QuerySpec()
                 query_spec.entity = mor["mor"]
-                query_spec.intervalId = mor["interval"]
+                query_spec.intervalId = mor.get("interval")
                 query_spec.maxSample = 1
                 if mor['mor_type'] in REALTIME_RESOURCES:
                     query_spec.metricId = self.metadata_cache.get_metric_ids(i_key)
@@ -883,11 +928,11 @@ class VSphereCheck(AgentCheck):
             if query_specs:
                 self.pool.apply_async(self._collect_metrics_async, args=(instance, query_specs))
 
-        self.gauge('vsphere.vm.count', vm_count, tags=tags)
+        if self._is_main_instance(instance):
+            self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
         try:
-            self.start_pool()
             self.exception_printed = 0
 
             # First part: make sure our object repository is neat & clean
@@ -897,19 +942,23 @@ class VSphereCheck(AgentCheck):
             if self._should_cache(instance, CacheConfig.Morlist):
                 self._cache_morlist_raw(instance)
 
+            # Processing the mor queue is in the main thread, only the collection of the list of metrics
+            # for historical resources is made asynchronously.
+            self.start_pool()
             self._process_mor_objects_queue(instance)
-
             # Remove old objects that might be gone from the Mor cache
             self.mor_cache.purge(self._instance_key(instance), self.clean_morlist_interval)
+            self.stop_pool()
 
             # Second part: do the job
+            self.start_pool()
             self.collect_metrics(instance)
-
-            self._query_event(instance)
-
-            self.set_external_tags(self.get_external_host_tags())
+            if self._is_main_instance(instance):
+                self._query_event(instance)
+                self.set_external_tags(self.get_external_host_tags())
 
             self.stop_pool()
+
             if self.exception_printed > 0:
                 self.log.error("One thread in the pool crashed, check the logs")
         except Exception:
