@@ -81,7 +81,7 @@ class Marathon(AgentCheck):
             r = self.http.post(urljoin(acs_url, "acs/api/v1/auth/login"), json=auth_body, verify=False)
             r.raise_for_status()
             token = r.json()['token']
-            self.http.options['headers']['authorization'] = token
+            self.ACS_TOKEN = token
             return token
         except requests.exceptions.HTTPError:
             self.service_check(
@@ -95,6 +95,12 @@ class Marathon(AgentCheck):
     def get_json(self, url, acs_url, tags=None):
         if tags is None:
             tags = []
+
+        if acs_url:
+            # If the ACS token has not been set, go get it
+            if not self.ACS_TOKEN:
+                self.refresh_acs_token(acs_url, tags)
+            self.http.options['headers']['authorization'] = 'token={}'.format(self.ACS_TOKEN)
 
         try:
             r = self.http.get(url)
