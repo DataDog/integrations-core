@@ -487,3 +487,19 @@ def test_profile_by_file(aggregator):
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
     aggregator.assert_all_metrics_covered()
+
+
+def test_profile_sys_object(aggregator):
+    instance = common.generate_instance_config([])
+    init_config = {
+        'profiles': {
+            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysObjectID': '1.3.6.1.4.1.8072.3.2.10'}
+        }
+    }
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_all_metrics_covered()

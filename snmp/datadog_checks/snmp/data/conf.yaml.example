@@ -87,12 +87,15 @@ init_config:
   ## Specify profiles to be able to reference a set of metrics by name.
   ## One of definition_file or definition needs to be defined.
   ## definition_file points to a file with the same structure as
-  ## global_metrics, whereas defintion inlines it directly here.
+  ## global_metrics, whereas definition inlines it directly here.
+  ## sysObjectID can be set to match the devices that are going to
+  ## automatically use this profile.
   #
   # profiles:
   #   profile1:
   #   	definition_file: <PROFILE_FILE>
-  #   	defintion: <PROFILE>
+  #   	definition: <PROFILE>
+  #   	sysObjectID: <OID>
 
 instances:
 
