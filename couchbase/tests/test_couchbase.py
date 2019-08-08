@@ -48,6 +48,16 @@ def test_metrics(aggregator, instance, couchbase_container_ip):
     assert_basic_couchbase_metrics(aggregator, couchbase_container_ip)
 
 
+@pytest.mark.e2e
+@pytest.mark.usefixtures("dd_environment")
+def test_e2e(dd_agent_check, instance, couchbase_container_ip):
+    """
+    Test couchbase metrics not including 'couchbase.query.'
+    """
+    aggregator = dd_agent_check(instance, rate=True)
+    assert_basic_couchbase_metrics(aggregator, couchbase_container_ip)
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_query_monitoring_metrics(aggregator, instance_query, couchbase_container_ip):
@@ -85,12 +95,20 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
     ]
 
     NODE_STATS = [
+        'cmd_get',
         'curr_items',
         'curr_items_tot',
         'couch_docs_data_size',
         'couch_docs_actual_disk_size',
+        'couch_spatial_data_size',
+        'couch_spatial_disk_size',
         'couch_views_data_size',
         'couch_views_actual_disk_size',
+        'ep_bg_fetched',
+        'get_hits',
+        'mem_used',
+        'ops',
+        'vb_active_num_non_resident',
         'vb_replica_curr_items',
     ]
     for mname in NODE_STATS:
@@ -106,7 +124,11 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
         'ram.used',
         'ram.total',
         'ram.quota_total',
+        'ram.quota_total_per_node',
+        'ram.quota_used_per_node',
+        'ram.quota_used',
         'ram.used_by_data',
     ]
     for mname in TOTAL_STATS:
         aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)
+    aggregator.assert_all_metrics_covered()

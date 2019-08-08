@@ -60,8 +60,7 @@ class Couchbase(AgentCheck):
         # Get bucket metrics
         for bucket_name, bucket_stats in data['buckets'].items():
             metric_tags = [] if tags is None else tags[:]
-            metric_tags.append('bucket:{}'.format(bucket_name))
-            metric_tags.append('device:{}'.format(bucket_name))
+            metric_tags.extend(['bucket:{}'.format(bucket_name), 'device:{}'.format(bucket_name)])
             for metric_name, val in bucket_stats.items():
                 if val is not None:
                     norm_metric_name = self.camel_case_to_joined_lower(metric_name)
