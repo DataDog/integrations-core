@@ -18,7 +18,7 @@ class TestSimilarAssertionMessages(object):
         check.gauge('test.very_very_different', 0)
 
         expected_metric = MetricStub("test.similar_metric", None, None, None, None, None)
-        actual_msg = similar.build_similar_elements_msg(expected_metric, aggregator._metrics)
+        actual_msg = similar.build_similar_elements_msg(expected_metric, aggregator._metrics).strip()
 
         expected_msg = '''
 Expected:
@@ -29,9 +29,9 @@ Score   Most similar
 0.83    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='', device='')
 0.62    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='', device='')
 0.42    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='', device='')
-        '''
-        delta = difflib.ndiff([expected_msg.strip()], [actual_msg.strip()])
-        assert expected_msg.strip() == actual_msg.strip(), delta
+        '''.strip()
+        delta = difflib.ndiff([expected_msg], [actual_msg])
+        assert expected_msg == actual_msg, delta
 
     def test__build_similar_elements__metric_name(self, aggregator):
         check = AgentCheck()
