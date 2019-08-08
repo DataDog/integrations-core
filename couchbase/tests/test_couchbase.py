@@ -55,7 +55,7 @@ def test_e2e(dd_agent_check, instance, couchbase_container_ip):
     Test couchbase metrics not including 'couchbase.query.'
     """
     aggregator = dd_agent_check(instance, rate=True)
-    assert_basic_couchbase_metrics(aggregator, couchbase_container_ip)
+    assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_device=True)
 
 
 @pytest.mark.integration
@@ -71,7 +71,7 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
 
 
-def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
+def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_device=False):
     """
     Assert each type of metric (buckets, nodes, totals) except query
     """
@@ -79,11 +79,17 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
     #  Because some metrics are deprecated, we can just see if we get an arbitrary number
     #  of bucket metrics. If there are more than that number, we assume that we're getting
     #  all the bucket metrics we should be getting
-    tags = CHECK_TAGS + ['device:{}'.format(BUCKET_NAME), 'bucket:{}'.format(BUCKET_NAME)]
+    tags = CHECK_TAGS + ['bucket:{}'.format(BUCKET_NAME)]
+
+    device = 'device:{}'.format(BUCKET_NAME)
+    if not extract_device:
+        tags.append(device)
+        device = None
+
     bucket_metric_count = 0
     for bucket_metric in aggregator.metric_names:
         if bucket_metric.find('couchbase.by_bucket.') == 0:
-            aggregator.assert_metric(bucket_metric, tags=tags, count=1)
+            aggregator.assert_metric(bucket_metric, tags=tags, count=1, device=device)
             bucket_metric_count += 1
 
     assert bucket_metric_count > 10

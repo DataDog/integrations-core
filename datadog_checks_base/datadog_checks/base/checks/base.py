@@ -269,7 +269,7 @@ class __AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname)
+        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname, device_name)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         """Sample a gauge metric.
