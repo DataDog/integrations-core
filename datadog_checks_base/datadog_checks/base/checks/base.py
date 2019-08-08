@@ -243,6 +243,9 @@ class __AgentCheck(object):
             # ignore metric sample
             return
 
+        # make sure the value (bucket count) is an integer
+        value = int(value)
+
         tags = self._normalize_tags_type(tags, metric_name=name)
         if hostname is None:
             hostname = ''
