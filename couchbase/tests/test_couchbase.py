@@ -54,7 +54,7 @@ def test_e2e(dd_agent_check, instance, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
     """
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(instance, rate=True)
     assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_device=True)
 
 
@@ -90,7 +90,7 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_d
     bucket_metric_count = 0
     for bucket_metric in aggregator.metric_names:
         if bucket_metric.find('couchbase.by_bucket.') == 0:
-            aggregator.assert_metric(bucket_metric, tags=tags, count=1, device=device)
+            aggregator.assert_metric(bucket_metric, tags=tags, at_least=1, device=device)
             bucket_metric_count += 1
 
     assert bucket_metric_count > 10
@@ -121,7 +121,7 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_d
         'vb_replica_curr_items',
     ]
     for mname in NODE_STATS:
-        aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=tags, count=1, device=device)
+        aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=tags, at_least=1, device=device)
 
     # Assert 'couchbase.' metrics
     TOTAL_STATS = [
@@ -139,5 +139,5 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_d
         'ram.used_by_data',
     ]
     for mname in TOTAL_STATS:
-        aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)
+        aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, at_least=1)
     aggregator.assert_all_metrics_covered()
