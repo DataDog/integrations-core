@@ -1,10 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import difflib
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs import similar
 from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
-import difflib
 
 
 class TestSimilarAssertionMessages(object):
@@ -40,7 +41,9 @@ Score   Most similar
         check.gauge('test.most_similar_metric', 0)
         check.gauge('test.very_very_different', 0)
 
-        expected_metric = MetricStub("test.similar_metric", type=None, value=None, tags=None, hostname=None, device=None)
+        expected_metric = MetricStub(
+            "test.similar_metric", type=None, value=None, tags=None, hostname=None, device=None
+        )
         similar_metrics = similar._build_similar_elements(expected_metric, aggregator._metrics)
 
         expected_most_similar_metric = similar_metrics[0][1]
