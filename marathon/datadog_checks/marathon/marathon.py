@@ -45,7 +45,7 @@ class Marathon(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {
         'user': {'name': 'username'},
-        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False},
     }
 
     def __init__(self, name, init_config, instances):
@@ -61,9 +61,7 @@ class Marathon(AgentCheck):
 
     def check(self, instance):
         try:
-            (url, acs_url, group, instance_tags, label_tags) = self.get_instance_config(
-                instance
-            )
+            (url, acs_url, group, instance_tags, label_tags) = self.get_instance_config(instance)
         except Exception as e:
             self.log.error("Invalid instance configuration.")
             raise e
