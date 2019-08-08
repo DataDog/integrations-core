@@ -38,7 +38,7 @@ class TwistlockCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
-        self.last_run = datetime.now(tz.tzutc())
+        self.last_run = datetime.utcnow()
 
         self.config = None
         if instances:
@@ -68,7 +68,7 @@ class TwistlockCheck(AgentCheck):
 
         self.report_vulnerabilities()
 
-        self.last_run = datetime.now(tz.tzutc())
+        self.last_run = datetime.utcnow()
 
     def report_license_expiration(self):
         service_check_name = self.NAMESPACE + ".license_ok"
