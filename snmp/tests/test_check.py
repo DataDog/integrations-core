@@ -2,7 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import ipaddress
 import os
+import socket
+import time
 
 import mock
 import pytest
@@ -523,3 +526,28 @@ def test_profile_sys_object_no_metrics(aggregator):
     instance = common.generate_instance_config([])
     with pytest.raises(ConfigurationError):
         SnmpCheck('snmp', {}, [instance])
+
+
+def test_discovery(aggregator):
+    host = socket.gethostbyname(common.HOST)
+    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    instance = {'name': 'snmp_conf', 'network_address': network, 'port': common.PORT, 'community_string': 'public'}
+    init_config = {
+        'profiles': {
+            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
+        }
+    }
+    check = SnmpCheck('snmp', init_config, [instance])
+    try:
+        for _ in range(30):
+            check.check(instance)
+            if aggregator.metric_names:
+                break
+            time.sleep(1)
+    finally:
+        check._running = False
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_all_metrics_covered()

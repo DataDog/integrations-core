@@ -15,6 +15,7 @@ class InstanceConfig:
     DEFAULT_TIMEOUT = 1
 
     def __init__(self, instance, warning, global_metrics, mibs_path, profiles, profiles_by_oid):
+        self.instance = instance
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
         profile = instance.get('profile')
@@ -26,12 +27,24 @@ class InstanceConfig:
             self.metrics.extend(profiles[profile]['definition'])
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self.snmp_engine, self.mib_view_controller = self.create_snmp_engine(mibs_path)
+        self.ip_address = None
+        self.network_address = None
+        self.discovered_instances = {}
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
-        self.transport = self.get_transport_target(instance, timeout, retries)
 
-        self.ip_address = instance['ip_address']
+        if 'ip_address' not in instance and 'network_address' not in instance:
+            raise ConfigurationError('An IP address or a network address needs to be specified')
+
+        if 'ip_address' in instance:
+            self.transport = self.get_transport_target(instance, timeout, retries)
+
+            self.ip_address = instance['ip_address']
+            self.tags.append('snmp_device:{}'.format(self.ip_address))
+
+        if 'network_address' in instance:
+            self.network_address = instance['network_address']
 
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
@@ -39,7 +52,7 @@ class InstanceConfig:
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
             self.metrics, self.enforce_constraints, warning
         )
-        self.tags.append('snmp_device:{}'.format(self.ip_address))
+
         self.auth_data = self.get_auth_data(instance)
         self.context_data = hlapi.ContextData(*self.get_context_data(instance))
 
@@ -70,8 +83,6 @@ class InstanceConfig:
         """
         Generate a Transport target object based on the instance's configuration
         """
-        if 'ip_address' not in instance:
-            raise ConfigurationError('An IP address needs to be specified')
         ip_address = instance['ip_address']
         port = int(instance.get('port', 161))  # Default SNMP port
         return hlapi.UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)

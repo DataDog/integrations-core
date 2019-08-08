@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import ipaddress
+import threading
+import time
 from collections import defaultdict
 
 import pysnmp.proto.rfc1902 as snmp_type
@@ -47,6 +50,7 @@ class SnmpCheck(AgentCheck):
     SC_STATUS = 'snmp.can_check'
     _error = None
     _severity = None
+    _running = True
 
     def __init__(self, name, init_config, instances):
         super(SnmpCheck, self).__init__(name, init_config, instances)
@@ -83,6 +87,10 @@ class SnmpCheck(AgentCheck):
             self.profiles,
             self.profiles_by_oid,
         )
+        if self._config.network_address:
+            self._thread = threading.Thread(target=self.discover_instances)
+            self._thread.daemon = True
+            self._thread.start()
 
     def _get_instance_key(self, instance):
         key = instance.get('name')
@@ -98,13 +106,49 @@ class SnmpCheck(AgentCheck):
 
         return key
 
+    def discover_instances(self):
+        network = ipaddress.ip_network(self._config.network_address)
+        discovery_interval = self._config.instance.get('discovery_interval', 3600)
+        discovery_pause = self._config.instance.get('discovery_pause', 1)
+        while self._running:
+            start_time = time.time()
+            for host in network.hosts():
+                host = str(host)
+                if host in self._config.discovered_instances:
+                    continue
+                instance = self._config.instance.copy()
+                instance.pop('network_address')
+                instance['ip_address'] = host
+
+                config = InstanceConfig(
+                    instance,
+                    self.warning,
+                    self.init_config.get('global_metrics', []),
+                    self.mibs_path,
+                    self.profiles,
+                    self.profiles_by_oid,
+                )
+                try:
+                    sys_object_oid = self.fetch_sysobject_oid(config)
+                except Exception:
+                    continue
+                if sys_object_oid not in self.profiles_by_oid:
+                    self.log.warn("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
+                profile = self.profiles_by_oid[sys_object_oid]
+                config.refresh_with_profile(self.profiles[profile], self.warning)
+                self._config.discovered_instances[host] = config
+                time.sleep(discovery_pause)
+            time_elapsed = time.time() - start_time
+            if time_elapsed - discovery_interval > 0:
+                time.sleep(time_elapsed - discovery_interval)
+
     def raise_on_error_indication(self, error_indication, ip_address):
         if error_indication:
             message = '{} for instance {}'.format(error_indication, ip_address)
             self._error = message
             raise CheckException(message)
 
-    def check_table(self, oids, lookup_names, enforce_constraints):
+    def check_table(self, config, oids, lookup_names, enforce_constraints):
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -123,8 +167,6 @@ class SnmpCheck(AgentCheck):
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
 
         # Set aliases for snmpget and snmpgetnext with logging
-        config = self._config
-
         first_oid = 0
         all_binds = []
         results = defaultdict(dict)
@@ -242,7 +284,14 @@ class SnmpCheck(AgentCheck):
         """
         # Reset errors
         self._error = self._severity = None
-        config = self._config
+        if instance.get('network_address'):
+            for discovered in list(self._config.discovered_instances.values()):
+                self._check_with_config(discovered)
+        else:
+            self._check_with_config(self._config)
+
+    def _check_with_config(self, config):
+        instance = config.instance
         try:
             if not (config.table_oids or config.raw_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
@@ -254,13 +303,13 @@ class SnmpCheck(AgentCheck):
             if config.table_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.table_oids))
                 table_results = self.check_table(
-                    config.table_oids, lookup_names=True, enforce_constraints=config.enforce_constraints
+                    config, config.table_oids, lookup_names=True, enforce_constraints=config.enforce_constraints
                 )
                 self.report_table_metrics(config.metrics, table_results, config.tags)
 
             if config.raw_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.raw_oids))
-                raw_results = self.check_table(config.raw_oids, lookup_names=False, enforce_constraints=False)
+                raw_results = self.check_table(config, config.raw_oids, lookup_names=False, enforce_constraints=False)
                 self.report_raw_metrics(config.metrics, raw_results, config.tags)
         except Exception as e:
             if not self._error:
