@@ -54,7 +54,7 @@ def test_e2e(dd_agent_check, instance, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
     """
-    aggregator = dd_agent_check(instance, rate=True)
+    aggregator = dd_agent_check(instance)
     assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_device=True)
 
 
@@ -81,9 +81,10 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_d
     #  all the bucket metrics we should be getting
     tags = CHECK_TAGS + ['bucket:{}'.format(BUCKET_NAME)]
 
-    device = 'device:{}'.format(BUCKET_NAME)
-    if not extract_device:
-        tags.append(device)
+    if extract_device:
+        device = BUCKET_NAME
+    else:
+        tags.append('device:{}'.format(BUCKET_NAME))
         device = None
 
     bucket_metric_count = 0
@@ -95,10 +96,12 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_d
     assert bucket_metric_count > 10
 
     # Assert 'couchbase.by_node.' metrics
-    tags = CHECK_TAGS + [
-        'device:{}:{}'.format(couchbase_container_ip, PORT),
-        'node:{}:{}'.format(couchbase_container_ip, PORT),
-    ]
+    tags = CHECK_TAGS + ['node:{}:{}'.format(couchbase_container_ip, PORT)]
+    if extract_device:
+        device = '{}:{}'.format(couchbase_container_ip, PORT)
+    else:
+        tags.append('device:{}:{}'.format(couchbase_container_ip, PORT))
+        device = None
 
     NODE_STATS = [
         'cmd_get',
@@ -118,7 +121,7 @@ def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip, extract_d
         'vb_replica_curr_items',
     ]
     for mname in NODE_STATS:
-        aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=tags, count=1)
+        aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=tags, count=1, device=device)
 
     # Assert 'couchbase.' metrics
     TOTAL_STATS = [

@@ -169,8 +169,6 @@ class AggregatorStub(object):
                 continue
 
             if expected_tags and expected_tags != sorted(metric.tags):
-                print("Expected tags", expected_tags)
-                print("Metrics tags", metric.tags)
                 continue
 
             if hostname and hostname != metric.hostname:
