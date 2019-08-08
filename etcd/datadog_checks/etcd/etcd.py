@@ -63,14 +63,6 @@ class Etcd(OpenMetricsBaseCheck):
         'standardDeviation': 'etcd.leader.latency.stddev',
     }
 
-    HTTP_CONFIG_REMAPPER = {
-        'prometheus_timeout': {'name': 'timeout'},
-        'ssl_cert': {'name': 'tls_cert'},
-        'ssl_private_key': {'name': 'tls_private_key'},
-        'ssl_ca_cert': {'name': 'tls_ca_cert'},
-        'ssl_verify': {'name': 'tls_verify'},
-    }
-
     def __init__(self, name, init_config, agentConfig, instances):
         super(Etcd, self).__init__(
             name,
