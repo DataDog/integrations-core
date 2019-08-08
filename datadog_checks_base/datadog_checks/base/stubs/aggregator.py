@@ -75,7 +75,7 @@ class AggregatorStub(object):
                 stub.value,
                 normalize_tags(stub.tags),
                 ensure_unicode(stub.hostname),
-                stub.device
+                stub.device,
             )
             for stub in self._metrics.get(to_string(name), [])
         ]
@@ -155,7 +155,9 @@ class AggregatorStub(object):
         else:
             assert len(candidates) >= at_least, msg
 
-    def assert_metric(self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None):
+    def assert_metric(
+        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
+    ):
         """
         Assert a metric was processed by this stub
         """
