@@ -44,7 +44,7 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-Some metrics are reported only if the respective configurations are enable:
+Some metrics are reported only if the respective configuration are enabled:
 
 - `systemd.service.cpu_time_consumed` requires Systemd configuration `CPUAccounting` to be enabled
 - `systemd.service.memory_usage` requires Systemd configuration `MemoryAccounting` to be enabled
