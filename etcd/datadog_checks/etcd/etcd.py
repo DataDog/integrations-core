@@ -88,18 +88,17 @@ class Etcd(OpenMetricsBaseCheck):
             default_namespace='etcd',
         )
 
-        if self.instance is not None:
-            # For legacy check ensure prometheus_url is set so
-            # OpenMetricsBaseCheck instantiation succeeds
-            if not is_affirmative(self.instance.get('use_preview', False)):
-                self.instance.setdefault('prometheus_url', '')
-                self.HTTP_CONFIG_REMAPPER = {
-                    'timeout': {'name': 'timeout', 'default': self.DEFAULT_TIMEOUT},
-                    'ssl_keyfile': {'name': 'tls_private_key'},
-                    'ssl_certfile': {'name': 'tls_cert'},
-                    'ssl_cert_validation': {'name': 'tls_verify'},
-                    'ssl_ca_certs': {'name': 'tls_ca_cert'},
-                }
+        # For legacy check ensure prometheus_url is set so
+        # OpenMetricsBaseCheck instantiation succeeds
+        if not is_affirmative(self.instance.get('use_preview', False)):
+            self.instance.setdefault('prometheus_url', '')
+            self.HTTP_CONFIG_REMAPPER = {
+                'timeout': {'name': 'timeout', 'default': self.DEFAULT_TIMEOUT},
+                'ssl_keyfile': {'name': 'tls_private_key'},
+                'ssl_certfile': {'name': 'tls_cert'},
+                'ssl_cert_validation': {'name': 'tls_verify'},
+                'ssl_ca_certs': {'name': 'tls_ca_cert'},
+            }
 
     def check(self, instance):
         if is_affirmative(instance.get('use_preview', False)):
@@ -141,8 +140,6 @@ class Etcd(OpenMetricsBaseCheck):
             tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
 
     def check_post_v3(self, instance):
-        if 'url' in instance:
-            instance['prometheus_url'] = instance['url']
         scraper_config = self.get_scraper_config(instance)
 
         if 'prometheus_url' not in scraper_config:
