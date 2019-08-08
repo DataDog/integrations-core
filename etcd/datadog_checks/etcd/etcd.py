@@ -116,7 +116,7 @@ class Etcd(OpenMetricsBaseCheck):
 
         response = {}
         try:
-            r = self.http.post(endpoint)
+            r = self.http.post(endpoint, data=data)
             response.update(r.json())
         except Exception as e:
             self.log.debug('Error accessing GRPC gateway: {}'.format(e))
