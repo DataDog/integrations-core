@@ -14,11 +14,16 @@ class InstanceConfig:
     DEFAULT_RETRIES = 5
     DEFAULT_TIMEOUT = 1
 
-    def __init__(self, instance, warning, global_metrics, mibs_path):
+    def __init__(self, instance, warning, global_metrics, mibs_path, profiles):
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
+        self.profile = instance.get('profile')
         if is_affirmative(instance.get('use_global_metrics', True)):
             self.metrics.extend(global_metrics)
+        if self.profile:
+            if self.profile not in profiles:
+                raise ConfigurationError("Unknown profile '{}'".format(self.profile))
+            self.metrics.extend(profiles[self.profile]['definition'])
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self.snmp_engine, self.mib_view_controller = self.create_snmp_engine(mibs_path)
 

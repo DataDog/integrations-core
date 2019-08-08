@@ -83,6 +83,14 @@ init_config:
   #     metric_tags:
   #       - TCP
 
+  ## @param profiles - dictionary - optional
+  ## Specify profiles to be able to reference a set of metrics by name.
+  ## It points to a file with the same structure as global_metrics.
+  #
+  # profiles:
+  #   profile1:
+  #   	definition: profile1.yaml
+
 instances:
 
     ## @param ip_address - string - required
@@ -175,6 +183,11 @@ instances:
     ## Whether or not global_metrics should be included for this instance.
     #
     # use_global_metrics: true
+
+    ## @param profile - string - optional
+    ## Name of the profile to use, if any.
+    #
+    # profile: <PROFILE_NAME>
 
     ## @param metrics - list of elements - optional
     ## Specify metrics you want to monitor by using MIBS for Counter and Gauge.

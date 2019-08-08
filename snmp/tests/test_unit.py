@@ -2,10 +2,17 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import os
+
 import mock
 import pytest
 
+from datadog_checks.base import ConfigurationError
+from datadog_checks.dev import temp_dir
+from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
+
+from . import common
 
 pytestmark = pytest.mark.unit
 
@@ -98,3 +105,22 @@ def test_parse_metrics(hlapi_mock):
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "baz")
     hlapi_mock.reset_mock()
+
+
+def test_profile_error():
+    instance = common.generate_instance_config([])
+    instance['profile'] = 'profile1'
+    with pytest.raises(ConfigurationError):
+        SnmpCheck('snmp', {}, [instance])
+
+    init_config = {'profiles': {'profile1': {'definition': 'doesntexistfile'}}}
+    with pytest.raises(ConfigurationError):
+        SnmpCheck('snmp', init_config, [instance])
+
+    with temp_dir() as tmp:
+        profile_file = os.path.join(tmp, 'profile1.yaml')
+        with open(profile_file, 'w') as f:
+            f.write("not yaml: {")
+        init_config = {'profiles': {'profile1': {'definition': profile_file}}}
+        with pytest.raises(ConfigurationError):
+            SnmpCheck('snmp', init_config, [instance])

@@ -4,6 +4,7 @@
 from collections import defaultdict
 
 import pysnmp.proto.rfc1902 as snmp_type
+import yaml
 from pyasn1.codec.ber import decoder
 from pysnmp import hlapi
 from pysnmp.error import PySnmpError
@@ -56,10 +57,19 @@ class SnmpCheck(AgentCheck):
         # Load Custom MIB directory
         self.mibs_path = init_config.get('mibs_folder')
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
+        self.profiles = init_config.get('profiles', {})
+        for profile, profile_data in list(self.profiles.items()):
+            filename = profile_data['definition']
+            try:
+                with open(filename) as f:
+                    data = yaml.safe_load(f)
+            except Exception:
+                raise ConfigurationError("Couldn't read profile '{}' in '{}'".format(profile, filename))
+            self.profiles[profile] = {'definition': data}
 
         self.instance['name'] = self._get_instance_key(self.instance)
         self._config = InstanceConfig(
-            self.instance, self.warning, self.init_config.get('global_metrics', []), self.mibs_path
+            self.instance, self.warning, self.init_config.get('global_metrics', []), self.mibs_path, self.profiles
         )
 
     def _get_instance_key(self, instance):

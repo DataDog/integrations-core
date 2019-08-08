@@ -2,9 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import os
+
 import mock
 import pytest
+import yaml
 
+from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
@@ -453,3 +457,20 @@ def test_cast_metrics(aggregator):
     aggregator.assert_metric('snmp.cpuload2', value=0.06)
 
     aggregator.all_metrics_asserted()
+
+
+def test_profile(aggregator):
+    instance = common.generate_instance_config([])
+    instance['profile'] = 'profile1'
+    with temp_dir() as tmp:
+        profile_file = os.path.join(tmp, 'profile1.yaml')
+        with open(profile_file, 'w') as f:
+            f.write(yaml.safe_dump(common.SUPPORTED_METRIC_TYPES))
+        init_config = {'profiles': {'profile1': {'definition': profile_file}}}
+        check = SnmpCheck('snmp', init_config, [instance])
+        check.check(instance)
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_all_metrics_covered()
