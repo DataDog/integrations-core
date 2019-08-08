@@ -20,6 +20,58 @@ The Harbor check is included in the [Datadog Agent][3] package. No additional in
 
 You can specify any type of user in the config but an account with admin permissions is required to fetch disk metrics. The metric `harbor.projects.count` only reflects the number of projects the provided user can access.
 
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `harbor.d/conf.yaml` file to start collecting your Harbor logs:
+
+    ```yaml
+    logs:
+    - type: file
+        path: /var/log/harbor/core.log
+        source: harbor
+        service: <SERVICE_NAME>
+    - type: file
+        path: /var/log/harbor/proxy.log
+        source: harbor
+        service: <SERVICE_NAME>
+    - type: file
+        path: /var/log/harbor/portal.log
+        source: harbor
+        service: <SERVICE_NAME>
+    - type: file
+        path: /var/log/harbor/registry.log
+        source: harbor
+        service: <SERVICE_NAME>
+    - type: file
+        path: /var/log/harbor/registryctl.log
+        source: harbor
+        service: <SERVICE_NAME>
+    - type: file
+        path: /var/log/harbor/jobservice.log
+        source: harbor
+        service: <SERVICE_NAME>
+    - type: file
+        path: /var/log/harbor/postgresql.log
+        source: harbor
+        service: <SERVICE_NAME>
+    - type: file
+        path: /var/log/harbor/redis.log
+        source: harbor
+        service: <SERVICE_NAME>
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample harbor.d/conf.yaml][5] for all available configuration options.
+
+3. [Restart the Agent][6].
+
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `harbor` under the Checks section.
