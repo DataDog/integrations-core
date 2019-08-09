@@ -1,15 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import absolute_import  # To be able to import docker client
-
 import re
 from contextlib import contextmanager
-
-from docker import client as docker_client
-from docker.types.services import Mount
-
-from datadog_checks.dev.docker import run_in_container
 
 from ...subprocess import run_command
 from ...utils import path_join
@@ -43,7 +36,6 @@ class DockerInterface(object):
         api_key=None,
         python_version=DEFAULT_PYTHON_VERSION,
     ):
-        self.docker_client = docker_client.from_env()
         self.check = check
         self.env = env
         self.env_vars = env_vars or {}
@@ -83,9 +75,18 @@ class DockerInterface(object):
         return get_agent_exe(self.agent_version)
 
     def exec_command(self, command, **kwargs):
+        cmd = 'docker exec'
+
+        if kwargs.pop('interactive', False):
+            cmd += ' -it'
+
         if command.startswith('pip '):
             command = command.replace('pip', ' '.join(get_pip_exe(self.python_version)), 1)
-        return run_in_container(self.container_name, command, interactive=kwargs.pop('interactive', False))
+
+        cmd += ' {}'.format(self.container_name)
+        cmd += ' {}'.format(command)
+
+        return run_command(cmd, **kwargs)
 
     def run_check(
         self,
@@ -172,69 +173,79 @@ class DockerInterface(object):
             self.metadata['agent_version'] = self.agent_version
 
     def update_check(self):
-        command = get_pip_exe(self.python_version) + ['install', '-e', self.check_mount_dir]
-        run_in_container(self.container_name, command)
+        command = ['docker', 'exec', self.container_name]
+        command.extend(get_pip_exe(self.python_version))
+        command.extend(('install', '-e', self.check_mount_dir))
+        run_command(command, capture=True, check=True)
 
     def update_base_package(self):
-        command = get_pip_exe(self.python_version) + ['install', '-e', self.base_mount_dir]
-        run_in_container(self.container_name, command)
+        command = ['docker', 'exec', self.container_name]
+        command.extend(get_pip_exe(self.python_version))
+        command.extend(('install', '-e', self.base_mount_dir))
+        run_command(command, capture=True, check=True)
 
     def update_agent(self):
         if self.agent_build:
-            self.docker_client.images.pull(self.agent_build)
+            run_command(['docker', 'pull', self.agent_build], capture=True, check=True)
 
     def start_agent(self):
         if self.agent_build:
-            environment = {
+            command = [
+                'docker',
+                'run',
+                # Keep it up
+                '-d',
+                # Ensure consistent naming
+                '--name',
+                self.container_name,
+                # Ensure access to host network
+                '--network',
+                'host',
                 # Agent 6 will simply fail without an API key
-                'DD_API_KEY': self.api_key,
+                '-e',
+                'DD_API_KEY={}'.format(self.api_key),
                 # Run expvar on a random port
-                'DD_EXPVAR_PORT': 0,
+                '-e',
+                'DD_EXPVAR_PORT=0',
                 # Run API on a random port
-                'DD_CMD_PORT': 0,
+                '-e',
+                'DD_CMD_PORT=0',
                 # Disable trace agent
-                'DD_APM_ENABLED': 'false',
-            }
-            volumes = [
+                '-e',
+                'DD_APM_ENABLED=false',
                 # Mount the config directory, not the file, to ensure updates are propagated
                 # https://github.com/moby/moby/issues/15793#issuecomment-135411504
-                Mount(source=self.config_dir, target=get_agent_conf_dir(self.check, self.agent_version), type='bind'),
+                '-v',
+                '{}:{}'.format(self.config_dir, get_agent_conf_dir(self.check, self.agent_version)),
                 # Mount the check directory
-                Mount(source=path_join(get_root(), self.check), target=self.check_mount_dir, type='bind'),
+                '-v',
+                '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
                 # Mount the /proc directory
-                Mount(source='/proc', target='/host/proc', type='bind'),
+                '-v',
+                '/proc:/host/proc',
             ]
             for volume in self.metadata.get('docker_volumes', []):
-                source, target = volume.split(':')
-                volumes.append(Mount(source=source, target=target, type='bind'))
+                command.extend(['-v', volume])
 
             # Any environment variables passed to the start command
             for key, value in sorted(self.env_vars.items()):
-                environment[key] = value
+                command.extend(['-e', '{}={}'.format(key, value)])
 
             if 'proxy' in self.metadata:
                 if 'http' in self.metadata['proxy']:
-                    environment['DD_PROXY_HTTP'] = self.metadata['proxy']['http']
+                    command.extend(['-e', 'DD_PROXY_HTTP={}'.format(self.metadata['proxy']['http'])])
                 if 'https' in self.metadata['proxy']:
-                    environment['DD_PROXY_HTTPS'] = self.metadata['proxy']['https']
+                    command.extend(['-e', 'DD_PROXY_HTTPS={}'.format(self.metadata['proxy']['https'])])
 
             if self.base_package:
                 # Mount the check directory
-                volumes.append(Mount(source=self.base_package, target=self.base_mount_dir, type='bind'))
+                command.append('-v')
+                command.append('{}:{}'.format(self.base_package, self.base_mount_dir))
 
-            container = self.docker_client.containers.run(
-                # The chosen tag
-                self.agent_build,
-                # Keep it up
-                detach=True,
-                # Ensure consistent naming
-                name=self.container_name,
-                # Ensure access to host network
-                network='host',
-                environment=environment,
-                mounts=volumes,
-            )
-            return container
+            # The chosen tag
+            command.append(self.agent_build)
+
+            return run_command(command, capture=True)
 
     def stop_agent(self):
         # Only error for exit code if config actually exists

@@ -9,7 +9,7 @@ import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.dev.docker import run_in_container
+from datadog_checks.dev.subprocess import run_command
 
 from .common import BASIC_CONFIG, HERE
 
@@ -33,7 +33,9 @@ def dd_environment():
         sleep=5,  # Let's wait just a little bit after ceph got spawned to remove flakyness
     ):
         # Clean the disk space warning
-        run_in_container('dd-test-ceph', ['ceph', 'tell', 'mon.*', 'injectargs', '--mon_data_avail_warn', '5'])
+        run_command(
+            ['docker', 'exec', 'dd-test-ceph', 'ceph', 'tell', 'mon.*', 'injectargs', '--mon_data_avail_warn', '5']
+        )
         # Wait a bit for the change to take effect
         time.sleep(5)
         yield BASIC_CONFIG, E2E_METADATA
