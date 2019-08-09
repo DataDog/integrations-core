@@ -55,8 +55,8 @@ class AggregatorStub(object):
     def is_aggregate(cls, mtype):
         return mtype in cls.AGGREGATE_TYPES
 
-    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, device):
-        self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
+    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
+        self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
@@ -75,7 +75,6 @@ class AggregatorStub(object):
                 stub.value,
                 normalize_tags(stub.tags),
                 ensure_unicode(stub.hostname),
-                stub.device,
             )
             for stub in self._metrics.get(to_string(name), [])
         ]
@@ -155,22 +154,20 @@ class AggregatorStub(object):
         else:
             assert len(candidates) >= at_least, msg
 
-    def assert_metric(
-        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
-    ):
+    def assert_metric(self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None):
         """
         Assert a metric was processed by this stub
         """
 
         self._asserted.add(name)
-        expected_tags = normalize_tags(tags, sort=True)
+        tags = normalize_tags(tags, sort=True)
 
         candidates = []
         for metric in self.metrics(name):
             if value is not None and not self.is_aggregate(metric.type) and value != metric.value:
                 continue
 
-            if expected_tags and expected_tags != sorted(metric.tags):
+            if tags and tags != sorted(metric.tags):
                 continue
 
             if hostname and hostname != metric.hostname:
@@ -179,12 +176,9 @@ class AggregatorStub(object):
             if metric_type is not None and metric_type != metric.type:
                 continue
 
-            if device is not None and device != metric.device:
-                continue
-
             candidates.append(metric)
 
-        expected_metric = MetricStub(name, metric_type, value, tags, hostname, device)
+        expected_metric = MetricStub(name, metric_type, value, tags, hostname)
 
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
