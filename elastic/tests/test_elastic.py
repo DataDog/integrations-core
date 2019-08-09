@@ -77,10 +77,10 @@ def test__get_urls(elastic_check):
 @pytest.mark.integration
 def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(instance)
-    _test_check(elastic_check,instance, aggregator, cluster_tags, node_tags)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
 
 
-def _test_check(elastic_check,instance, aggregator, cluster_tags, node_tags):
+def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
     config = from_instance(instance)
     es_version = elastic_check._get_es_version(config)
 
@@ -174,4 +174,4 @@ def test_health_event(dd_environment, aggregator, elastic_check):
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags):
     aggregator = dd_agent_check(instance, rate=True)
-    _test_check(elastic_check,instance, aggregator, cluster_tags, node_tags)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
