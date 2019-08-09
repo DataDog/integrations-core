@@ -2,7 +2,7 @@ from difflib import SequenceMatcher
 
 from six import iteritems
 
-from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub, HistogramBucketStub
+from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 
 '''
 Build similar message for better test assertion failure message.
@@ -100,6 +100,7 @@ def _get_similarity_score_for_service_check(expected_service_check, candidate_se
         scores.append((score, 1))
 
     return _compute_score(scores)
+
 
 def _get_similarity_score_for_histogram_bucket(expected_histogram_bucket, candidate_histogram_bucket):
     # Tuple of (score, weight)

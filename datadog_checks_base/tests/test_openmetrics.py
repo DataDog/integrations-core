@@ -383,11 +383,10 @@ def test_submit_histogram(aggregator, mocked_prometheus_check, mocked_prometheus
     aggregator.assert_metric('prometheus.custom.histogram.count', 3, tags=['upper_bound:432400000.0'], count=1)
     aggregator.assert_all_metrics_covered()
 
+
 def test_submit_histogram_bucket(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
-    _histo.add_metric(
-        [], buckets=[("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
-    )
+    _histo.add_metric([], buckets=[("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337)
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['send_distribution_buckets'] = True
     mocked_prometheus_scraper_config['non_cumulative_buckets'] = True
@@ -395,10 +394,42 @@ def test_submit_histogram_bucket(aggregator, mocked_prometheus_check, mocked_pro
     aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
     aggregator.assert_metric('prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1)
     # assert buckets
-    aggregator.assert_histogram_bucket('custom.histogram', 1, 0.0, 1.0, True, "", tags=['lower_bound:0.0', 'upper_bound:1.0'], count=None, at_least=1)
-    aggregator.assert_histogram_bucket('custom.histogram', 1, 1.0, 31104000.0, True, "", tags=['lower_bound:1.0', 'upper_bound:31104000.0'], count=None, at_least=1)
-    aggregator.assert_histogram_bucket('custom.histogram', 1, 31104000.0, 432400000.0, True, "", tags=['lower_bound:31104000.0', 'upper_bound:432400000.0'], count=None, at_least=1)
-    aggregator.assert_histogram_bucket('custom.histogram', 1, 432400000.0, float('inf'), True, "", tags=['lower_bound:432400000.0', 'upper_bound:inf'], count=None, at_least=1)
+    aggregator.assert_histogram_bucket(
+        'custom.histogram', 1, 0.0, 1.0, True, "", tags=['lower_bound:0.0', 'upper_bound:1.0'], count=None, at_least=1
+    )
+    aggregator.assert_histogram_bucket(
+        'custom.histogram',
+        1,
+        1.0,
+        31104000.0,
+        True,
+        "",
+        tags=['lower_bound:1.0', 'upper_bound:31104000.0'],
+        count=None,
+        at_least=1,
+    )
+    aggregator.assert_histogram_bucket(
+        'custom.histogram',
+        1,
+        31104000.0,
+        432400000.0,
+        True,
+        "",
+        tags=['lower_bound:31104000.0', 'upper_bound:432400000.0'],
+        count=None,
+        at_least=1,
+    )
+    aggregator.assert_histogram_bucket(
+        'custom.histogram',
+        1,
+        432400000.0,
+        float('inf'),
+        True,
+        "",
+        tags=['lower_bound:432400000.0', 'upper_bound:inf'],
+        count=None,
+        at_least=1,
+    )
 
 
 def test_submit_rate(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -831,29 +862,76 @@ def test_decumulate_histogram_buckets(p_check, mocked_prometheus_scraper_config)
     assert 1 == len(metrics)
 
     expected_metric = HistogramMetricFamily(
-        'rest_client_request_latency_seconds_bucket',
-        'The latency distributions of fsync called by wal.'
+        'rest_client_request_latency_seconds_bucket', 'The latency distributions of fsync called by wal.'
     )
-    expected_metric.samples = [('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.004', 'lower_bound': '0.002', 'verb': 'GET'}, 81.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.001', 'lower_bound': '0', 'verb': 'GET'}, 254.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.002', 'lower_bound': '0.001', 'verb': 'GET'}, 367.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.008', 'lower_bound': '0.004', 'verb': 'GET'}, 25.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.016', 'lower_bound': '0.008', 'verb': 'GET'}, 11.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.032', 'lower_bound': '0.016', 'verb': 'GET'}, 6.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.064', 'lower_bound': '0.032', 'verb': 'GET'}, 4.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.128', 'lower_bound': '0.064', 'verb': 'GET'}, 6.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.256', 'lower_bound': '0.128', 'verb': 'GET'}, 1.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '0.512', 'lower_bound': '0.256', 'verb': 'GET'}, 0.0),
-     ('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '0.512', 'verb': 'GET'}, 0.0),
-     ('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 2.185820220000001),
-     ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0)]
+    expected_metric.samples = [
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.004', 'lower_bound': '0.002', 'verb': 'GET'},
+            81.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.001', 'lower_bound': '0', 'verb': 'GET'},
+            254.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.002', 'lower_bound': '0.001', 'verb': 'GET'},
+            367.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.008', 'lower_bound': '0.004', 'verb': 'GET'},
+            25.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.016', 'lower_bound': '0.008', 'verb': 'GET'},
+            11.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.032', 'lower_bound': '0.016', 'verb': 'GET'},
+            6.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.064', 'lower_bound': '0.032', 'verb': 'GET'},
+            4.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.128', 'lower_bound': '0.064', 'verb': 'GET'},
+            6.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.256', 'lower_bound': '0.128', 'verb': 'GET'},
+            1.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '0.512', 'lower_bound': '0.256', 'verb': 'GET'},
+            0.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '0.512', 'verb': 'GET'},
+            0.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_sum',
+            {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
+            2.185820220000001,
+        ),
+        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+    ]
 
     current_metric = metrics[0]
     check._decumulate_histogram_buckets(current_metric)
 
-    assert sorted(expected_metric.samples, key=lambda i: i[0]) == sorted(
-        current_metric.samples, key=lambda i: i[0]
-    )
+    assert sorted(expected_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
 
 
 def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_scraper_config):
@@ -873,19 +951,26 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
     assert 1 == len(metrics)
 
     expected_metric = HistogramMetricFamily(
-        'rest_client_request_latency_seconds_bucket',
-        'The latency distributions of fsync called by wal.'
+        'rest_client_request_latency_seconds_bucket', 'The latency distributions of fsync called by wal.'
     )
-    expected_metric.samples = [('rest_client_request_latency_seconds_bucket', {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '0', 'verb': 'GET'}, 755.0),
-     ('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 2.185820220000001),
-     ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0)]
+    expected_metric.samples = [
+        (
+            'rest_client_request_latency_seconds_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '0', 'verb': 'GET'},
+            755.0,
+        ),
+        (
+            'rest_client_request_latency_seconds_sum',
+            {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
+            2.185820220000001,
+        ),
+        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+    ]
 
     current_metric = metrics[0]
     check._decumulate_histogram_buckets(current_metric)
 
-    assert sorted(expected_metric.samples, key=lambda i: i[0]) == sorted(
-        current_metric.samples, key=lambda i: i[0]
-    )
+    assert sorted(expected_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
 
 
 def test_decumulate_histogram_buckets_no_buckets(p_check, mocked_prometheus_scraper_config):
@@ -904,18 +989,21 @@ def test_decumulate_histogram_buckets_no_buckets(p_check, mocked_prometheus_scra
     assert 1 == len(metrics)
 
     expected_metric = HistogramMetricFamily(
-        'rest_client_request_latency_seconds_bucket',
-        'The latency distributions of fsync called by wal.'
+        'rest_client_request_latency_seconds_bucket', 'The latency distributions of fsync called by wal.'
     )
-    expected_metric.samples = [('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 2.185820220000001),
-     ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0)]
+    expected_metric.samples = [
+        (
+            'rest_client_request_latency_seconds_sum',
+            {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
+            2.185820220000001,
+        ),
+        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+    ]
 
     current_metric = metrics[0]
     check._decumulate_histogram_buckets(current_metric)
 
-    assert sorted(expected_metric.samples, key=lambda i: i[0]) == sorted(
-        current_metric.samples, key=lambda i: i[0]
-    )
+    assert sorted(expected_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
 
 
 def test_parse_one_summary(p_check, mocked_prometheus_scraper_config):

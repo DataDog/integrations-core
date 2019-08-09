@@ -7,7 +7,7 @@ from collections import OrderedDict, defaultdict
 
 from six import binary_type, iteritems
 
-from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub, HistogramBucketStub
+from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from datadog_checks.base.stubs.similar import build_similar_elements_msg
 
 from ..utils.common import ensure_unicode, to_string
@@ -65,8 +65,12 @@ class AggregatorStub(object):
     def submit_event(self, check, check_id, event):
         self._events.append(event)
 
-    def submit_histogram_bucket(self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags):
-        self._histogram_buckets[name].append(HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags))
+    def submit_histogram_bucket(
+        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+    ):
+        self._histogram_buckets[name].append(
+            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+        )
 
     def metrics(self, name):
         """
@@ -175,7 +179,9 @@ class AggregatorStub(object):
         else:
             assert len(candidates) >= at_least, msg
 
-    def assert_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1):
+    def assert_histogram_bucket(
+        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
+    ):
         candidates = []
         for bucket in self.histogram_bucket(name):
             if value is not None and value != bucket.value:

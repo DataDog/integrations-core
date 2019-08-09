@@ -250,7 +250,9 @@ class __AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        aggregator.submit_histogram_bucket(self, self.check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+        aggregator.submit_histogram_bucket(
+            self, self.check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+        )
 
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
         if value is None:
