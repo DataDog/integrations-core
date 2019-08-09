@@ -19,10 +19,8 @@ else:
 EXPECTED_METRICS = [
     {"metric": "system.disk.free", "device": "tmpfs"},
     {"metric": "system.fs.inodes.total", "device": "shm"},
-    {"metric": "system.fs.inodes.free", "device": "osxfs"},
     {"metric": "system.disk.total", "device": "shm"},
     {"metric": "system.disk.free", "device": "/dev/sda1"},
-    {"metric": "system.disk.used", "device": "osxfs"},
     {"metric": "system.disk.used", "device": "tmpfs"},
     {"metric": "system.fs.inodes.in_use", "device": "shm"},
     {"metric": "system.fs.inodes.in_use", "device": "/dev/sda1"},
@@ -32,21 +30,15 @@ EXPECTED_METRICS = [
     {"metric": "system.fs.inodes.total", "device": "tmpfs"},
     {"metric": "system.disk.total", "device": "/dev/sda1"},
     {"metric": "system.disk.total", "device": "tmpfs"},
-    {"metric": "system.disk.in_use", "device": "osxfs"},
-    {"metric": "system.fs.inodes.used", "device": "osxfs"},
     {"metric": "system.fs.inodes.free", "device": "/dev/sda1"},
-    {"metric": "system.fs.inodes.in_use", "device": "osxfs"},
     {"metric": "system.disk.used", "device": "/dev/sda1"},
     {"metric": "system.disk.in_use", "device": "/dev/sda1"},
-    {"metric": "system.fs.inodes.total", "device": "osxfs"},
     {"metric": "system.fs.inodes.in_use", "device": "tmpfs"},
     {"metric": "system.disk.used", "device": "shm"},
     {"metric": "system.disk.in_use", "device": "shm"},
     {"metric": "system.fs.inodes.free", "device": "shm"},
     {"metric": "system.fs.inodes.used", "device": "/dev/sda1"},
     {"metric": "system.fs.inodes.used", "device": "tmpfs"},
-    {"metric": "system.disk.total", "device": "osxfs"},
-    {"metric": "system.disk.free", "device": "osxfs"},
     {"metric": "system.disk.free", "device": "overlay"},
     {"metric": "system.fs.inodes.total", "device": "overlay"},
     {"metric": "system.disk.in_use", "device": "tmpfs"},
@@ -58,3 +50,15 @@ EXPECTED_METRICS = [
     {"metric": "system.disk.in_use", "device": "overlay"},
     {"metric": "system.fs.inodes.in_use", "device": "overlay"},
 ]
+
+
+OSX_METRICS = {
+    {"metric": "system.fs.inodes.free", "device": "osxfs"},
+    {"metric": "system.disk.used", "device": "osxfs"},
+    {"metric": "system.disk.in_use", "device": "osxfs"},
+    {"metric": "system.fs.inodes.used", "device": "osxfs"},
+    {"metric": "system.fs.inodes.in_use", "device": "osxfs"},
+    {"metric": "system.fs.inodes.total", "device": "osxfs"},
+    {"metric": "system.disk.total", "device": "osxfs"},
+    {"metric": "system.disk.free", "device": "osxfs"},
+}
