@@ -5,5 +5,5 @@ from __future__ import division
 
 from collections import namedtuple
 
-MetricStub = namedtuple('MetricStub', 'name type value tags hostname device')
+MetricStub = namedtuple('MetricStub', 'name type value tags hostname')
 ServiceCheckStub = namedtuple('ServiceCheckStub', 'check_id name status tags hostname message')
