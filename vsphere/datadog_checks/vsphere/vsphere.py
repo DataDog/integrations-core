@@ -664,9 +664,8 @@ class VSphereCheck(AgentCheck):
                 continue
 
         # TEST-INSTRUMENTATION
-        self.histogram(
-            'datadog.agent.vsphere.morlist_process_atomic.time', time.time() - t, tags=instance.get('tags', [])
-        )
+        custom_tags = instance.get('tags', []) + ['instance:{}'.format(i_key)]
+        self.histogram('datadog.agent.vsphere.morlist_process_atomic.time', time.time() - t, tags=custom_tags)
 
     def _process_mor_objects_queue(self, instance):
         """
@@ -727,7 +726,6 @@ class VSphereCheck(AgentCheck):
         self.log.info("Warming metrics metadata cache for instance %s", i_key)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
-        custom_tags = instance.get('tags', [])
 
         new_metadata = {}
         metric_ids = []
@@ -754,6 +752,7 @@ class VSphereCheck(AgentCheck):
         self.cache_config.set_last(CacheConfig.Metadata, i_key, time.time())
 
         # ## <TEST-INSTRUMENTATION>
+        custom_tags = instance.get('tags', []) + ['instance:{}'.format(i_key)]
         self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
@@ -812,7 +811,6 @@ class VSphereCheck(AgentCheck):
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
         perfManager = server_instance.content.perfManager
-        custom_tags = instance.get('tags', [])
         results = perfManager.QueryPerf(query_specs)
         if results:
             for mor_perfs in results:
@@ -859,13 +857,14 @@ class VSphereCheck(AgentCheck):
                     else:
                         hostname = to_string(hostname)
 
-                    tags.extend(custom_tags)
+                    tags.extend(instance.get('tags', []))
 
                     # vsphere "rates" should be submitted as gauges (rate is
                     # precomputed).
                     self.gauge("vsphere.{}".format(ensure_unicode(metric_name)), value, hostname=hostname, tags=tags)
 
         # ## <TEST-INSTRUMENTATION>
+        custom_tags = instance.get('tags', []) + ['instance:{}'.format(i_key)]
         self.histogram('datadog.agent.vsphere.metric_colection.time', t.total(), tags=custom_tags)
         # ## </TEST-INSTRUMENTATION>
 
