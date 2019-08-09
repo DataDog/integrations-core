@@ -1,0 +1,19 @@
+ad_identifiers:
+  - externaldns-amd64
+  - k8s-dns-external-dns-amd64
+
+init_config:
+
+instances:
+    ## @param prometheus_url - string - required
+    ## The URL where your application metrics are exposed by Prometheus.
+    #
+  - prometheus_url: "http://%%host%%:7979/metrics"
+
+    ## @param tags - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    tags:
+      - "externaldns-pod:%%host%%"

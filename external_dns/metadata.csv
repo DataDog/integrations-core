@@ -1,0 +1,5 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+external_dns.registry.errors_total,gauge,,error,,Number of registry errors,-1,external_dns,registry errors
+external_dns.registry.endpoints_total,gauge,,resource,,Number of registry endpoints,-1,external_dns,registry endpoints
+external_dns.source.errors_total,gauge,,error,,Number of source errors,-1,external_dns,source errors
+external_dns.source.endpoints_total,gauge,,resource,,Number of source endpoints,-1,external_dns,source endpoints
