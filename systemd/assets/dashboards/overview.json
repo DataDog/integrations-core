@@ -309,7 +309,7 @@
         "requests": [
           {
             "display_type": "line",
-            "q": "sum:systemd.service.cpu_time_consumed{unit:cron.service,$scope}",
+            "q": "avg:systemd.service.cpu_time_consumed{unit:cron.service,$scope}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -345,7 +345,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "sum:systemd.service.restart_count{$scope,unit:ssh.service}",
+            "q": "avg:systemd.service.restart_count{$scope,unit:ssh.service}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -408,7 +408,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "sum:systemd.service.task_count{$scope,unit:ssh.service}",
+            "q": "avg:systemd.service.task_count{$scope,unit:ssh.service}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -467,7 +467,7 @@
         "requests": [
           {
             "display_type": "line",
-            "q": "sum:systemd.socket.connection_accepted_count{unit:syslog.socket}",
+            "q": "avg:systemd.socket.connection_accepted_count{unit:syslog.socket}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -499,7 +499,7 @@
         "requests": [
           {
             "display_type": "line",
-            "q": "sum:systemd.socket.connection_count{unit:syslog.socket}",
+            "q": "avg:systemd.socket.connection_count{unit:syslog.socket}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
