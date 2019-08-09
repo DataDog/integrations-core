@@ -52,7 +52,7 @@ EXPECTED_METRICS = [
 ]
 
 
-OSX_METRICS = {
+OSX_METRICS = [
     {"metric": "system.fs.inodes.free", "device": "osxfs"},
     {"metric": "system.disk.used", "device": "osxfs"},
     {"metric": "system.disk.in_use", "device": "osxfs"},
@@ -61,4 +61,4 @@ OSX_METRICS = {
     {"metric": "system.fs.inodes.total", "device": "osxfs"},
     {"metric": "system.disk.total", "device": "osxfs"},
     {"metric": "system.disk.free", "device": "osxfs"},
-}
+]
