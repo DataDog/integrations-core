@@ -164,7 +164,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "sum:systemd.units_by_state{$scope} by {active_state}",
+            "q": "sum:systemd.units_by_state{$scope} by {state}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
