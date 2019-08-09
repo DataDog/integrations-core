@@ -89,7 +89,7 @@
         "requests": [
           {
             "display_type": "line",
-            "q": "avg:systemd.unit.count{$scope}",
+            "q": "sum:systemd.units_by_state{$scope}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -125,7 +125,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:systemd.unit.loaded.count{$scope}",
+            "q": "sum:systemd.units_loaded_count{$scope}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -164,7 +164,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:systemd.unit.count{$scope} by {active_state}",
+            "q": "sum:systemd.units_by_state{$scope} by {active_state}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -276,7 +276,7 @@
         "requests": [
           {
             "display_type": "line",
-            "q": "avg:systemd.service.memory_usage{unit:cron.service,$scope}",
+            "q": "sum:systemd.service.memory_usage{unit:cron.service,$scope}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -309,7 +309,7 @@
         "requests": [
           {
             "display_type": "line",
-            "q": "avg:systemd.service.cpu_time_consumed{unit:cron.service,$scope}",
+            "q": "sum:systemd.service.cpu_time_consumed{unit:cron.service,$scope}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -345,7 +345,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:systemd.service.restart_count{$scope,unit:ssh.service}",
+            "q": "sum:systemd.service.restart_count{$scope,unit:ssh.service}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -408,7 +408,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:systemd.service.task_count{$scope,unit:ssh.service}",
+            "q": "sum:systemd.service.task_count{$scope,unit:ssh.service}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -467,7 +467,7 @@
         "requests": [
           {
             "display_type": "line",
-            "q": "avg:systemd.socket.connection_accepted_count{unit:syslog.socket}",
+            "q": "sum:systemd.socket.connection_accepted_count{unit:syslog.socket}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -499,7 +499,7 @@
         "requests": [
           {
             "display_type": "line",
-            "q": "avg:systemd.socket.connection_count{unit:syslog.socket}",
+            "q": "sum:systemd.socket.connection_count{unit:syslog.socket}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -535,7 +535,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:systemd.unit.loaded{$scope,unit:cron.service}",
+            "q": "sum:systemd.unit.loaded{$scope,unit:cron.service}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
@@ -574,7 +574,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:systemd.unit.active{$scope,unit:cron.service}",
+            "q": "sum:systemd.unit.active{$scope,unit:cron.service}",
             "style": {
               "line_type": "solid",
               "line_width": "normal",
