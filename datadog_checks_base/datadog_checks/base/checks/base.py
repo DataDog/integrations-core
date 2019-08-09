@@ -246,6 +246,8 @@ class __AgentCheck(object):
         tags = self._normalize_tags_type(tags, device_name, name)
         if hostname is None:
             hostname = ''
+        if device_name is None:
+            device_name = ''
 
         if self.metric_limiter:
             if mtype in ONE_PER_CONTEXT_METRIC_TYPES:
@@ -269,7 +271,9 @@ class __AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname)
+        aggregator.submit_metric(
+            self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname, device_name
+        )
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None):
         """Sample a gauge metric.
