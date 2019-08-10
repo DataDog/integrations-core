@@ -9,6 +9,7 @@ from six import binary_type, iteritems
 
 from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
 from datadog_checks.base.stubs.similar import build_similar_elements_msg
+from datadog_checks.dev._env import e2e_testing
 
 from ..utils.common import ensure_unicode, to_string
 
@@ -154,10 +155,29 @@ class AggregatorStub(object):
         else:
             assert len(candidates) >= at_least, msg
 
-    def assert_metric(self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None):
+    def assert_metric(
+        self,
+        name,
+        value=None,
+        tags=None,
+        count=None,
+        at_least=1,
+        hostname=None,
+        metric_type=None,
+    ):
         """
         Assert a metric was processed by this stub
         """
+
+        if e2e_testing():
+            if count is not None:
+                if metric_type is None:
+                    raise Exception("assert_metric: `metric_type` must be set when using `count` in e2e")
+                if metric_type == self.RATE:
+                    count -= 1
+            if metric_type is not None:
+                if metric_type == self.RATE:
+                    metric_type = self.GAUGE
 
         self._asserted.add(name)
         tags = normalize_tags(tags, sort=True)
