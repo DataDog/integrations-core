@@ -45,12 +45,17 @@ class HTTPCheck(NetworkCheck):
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
 
+        self.HTTP_CONFIG_REMAPPER = {
+            'client_cert': {'name': 'tls_cert'},
+            'client_key': {'name': 'tls_private_key'},
+            'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': True},
+            'ca_certs': {'name': 'tls_ca_cert', 'default': self.ca_certs},
+            'ignore_ssl_warning': {'name': 'tls_ignore_warning'},
+        }
+
     def _check(self, instance):
         (
             addr,
-            ntlm_domain,
-            username,
-            password,
             client_cert,
             client_key,
             method,
@@ -63,13 +68,10 @@ class HTTPCheck(NetworkCheck):
             content_match,
             reverse_content_match,
             tags,
-            disable_ssl_validation,
             ssl_expire,
             instance_ca_certs,
             weakcipher,
             check_hostname,
-            ignore_ssl_warning,
-            skip_proxy,
             allow_redirects,
             stream,
         ) = from_instance(instance, self.ca_certs)
@@ -99,35 +101,7 @@ class HTTPCheck(NetworkCheck):
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to {}".format(addr))
 
-            suppress_warning = False
-            if disable_ssl_validation and parsed_uri.scheme == "https":
-                explicit_validation = 'disable_ssl_validation' in instance
-                if ignore_ssl_warning:
-                    if explicit_validation:
-                        suppress_warning = True
-                else:
-                    # Log if we're skipping SSL validation for HTTPS URLs
-                    if explicit_validation:
-                        self.log.debug("Skipping SSL certificate validation for {} based on configuration".format(addr))
-
-                    # Emit a warning if disable_ssl_validation is not explicitly set and we're not ignoring warnings
-                    else:
-                        self.warning(
-                            "Parameter disable_ssl_validation for {} is not explicitly set, "
-                            "defaults to true".format(addr)
-                        )
-
-            instance_proxy = self.get_instance_proxy(instance, addr)
-            self.log.debug("Proxies used for {} - {}".format(addr, instance_proxy))
-
-            auth = None
-            if password is not None:
-                if username is not None:
-                    auth = (username, password)
-                elif ntlm_domain is not None:
-                    auth = HttpNtlmAuth(ntlm_domain, password)
-
-            sess = requests.Session()
+            sess = self.http.session()
             sess.trust_env = False
             if weakcipher:
                 base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
@@ -138,26 +112,15 @@ class HTTPCheck(NetworkCheck):
                     )
                 )
 
-            with warnings.catch_warnings():
-                # Suppress warnings from urllib3 only if disable_ssl_validation is explicitly set to True
-                #  and ignore_ssl_warning is True
-                if suppress_warning:
-                    warnings.simplefilter('ignore', InsecureRequestWarning)
-
                 # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
                 if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
-                    headers['Content-Type'] = 'application/x-www-form-urlencoded'
-
+                    self.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
+                
                 r = sess.request(
                     method.upper(),
                     addr,
-                    auth=auth,
-                    timeout=timeout,
-                    headers=headers,
-                    proxies=instance_proxy,
                     allow_redirects=allow_redirects,
                     stream=stream,
-                    verify=False if disable_ssl_validation else instance_ca_certs,
                     json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
                     data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
                     cert=(client_cert, client_key) if client_cert and client_key else None,
