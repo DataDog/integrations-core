@@ -246,27 +246,35 @@ class Etcd(OpenMetricsBaseCheck):
         the health status
         """
         try:
-            r = self._perform_request(url, "/health")
+            r = self._perform_request(url, "/health", self.http.options['verify'], self.http.options['timeout'])
             # we don't use get() here so we can report a KeyError
             return r.json()[self.HEALTH_KEY]
         except Exception as e:
             self.log.debug("Can't determine health status: {}".format(e))
 
     def _get_self_metrics(self, url, tags):
-        return self._get_json(url, "/v2/stats/self", tags)
+        return self._get_json(url, "/v2/stats/self", tags, self.http.options['verify'], self.http.options['timeout'])
 
     def _get_store_metrics(self, url, tags):
-        return self._get_json(url, "/v2/stats/store", tags)
+        return self._get_json(url, "/v2/stats/store", tags, self.http.options['verify'], self.http.options['timeout'])
 
     def _get_leader_metrics(self, url, tags):
-        return self._get_json(url, "/v2/stats/leader", tags)
+        return self._get_json(url, "/v2/stats/leader", tags, self.http.options['verify'], self.http.options['timeout'])
 
-    def _perform_request(self, url, path):
-        return self.http.get(url + path)
+    def _perform_request(self, url, path, ssl_params, timeout):
+        certificate = None
+        if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
+            certificate = (ssl_params['ssl_certfile'], ssl_params['ssl_keyfile'])
 
-    def _get_json(self, url, path, tags):
+        verify = ssl_params.get('ssl_ca_certs', True) if ssl_params['ssl_cert_validation'] else False
+
+        return requests.get(
+            url + path, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig)
+        )
+
+    def _get_json(self, url, path, tags, ssl_params, timeout):
         try:
-            r = self._perform_request(url, path)
+            r = self._perform_request(url, path, ssl_params, timeout)
         except requests.exceptions.Timeout:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
