@@ -136,6 +136,9 @@ jobs:
       env: CHECK=exchange_server PYTHON3=true
     - stage: test
       env: CHECK=fluentd PYTHON3=true
+      before_script:
+        - echo before script
+        - ls
     - stage: test
       env: CHECK=gearmand PYTHON3=true
     - stage: test
