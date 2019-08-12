@@ -24,7 +24,7 @@ def test_from_instance():
 
     # defaults
     params = from_instance({'url': 'https://example.com', 'name': 'UpService'})
-    assert len(params) == 25
+    assert len(params) == 18
 
     # `url` is mandatory
     assert params[0] == 'https://example.com'
