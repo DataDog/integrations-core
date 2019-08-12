@@ -306,7 +306,7 @@ install:
   - bash .travis/install_rrdtool.sh
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files, so we'll use find and -delete
-before_cache:
-  - find $HOME/.cache/pip -name *.pyc -delete
+#before_cache:
+#  - find $HOME/.cache/pip -name *.pyc -delete
 after_script:
   - if [[ $(docker ps -a -q) ]]; then docker stop $(docker ps -a -q); fi
