@@ -35,7 +35,7 @@ metadata:
 
 **Remarks:**
 
- - Notice the "dns-pod" tag that will keep track of the target dns
+ - The "dns-pod" tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
    pod IP. The other tags will be related to the dd-agent that is polling the
    informations using the service discovery.
  - The service discovery annotations need to be done on the pod. In case of a deployment,
