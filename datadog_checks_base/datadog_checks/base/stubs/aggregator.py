@@ -155,16 +155,7 @@ class AggregatorStub(object):
         else:
             assert len(candidates) >= at_least, msg
 
-    def assert_metric(
-        self,
-        name,
-        value=None,
-        tags=None,
-        count=None,
-        at_least=1,
-        hostname=None,
-        metric_type=None,
-    ):
+    def assert_metric(self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None):
         """
         Assert a metric was processed by this stub
         """
