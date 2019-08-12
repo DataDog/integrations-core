@@ -23,6 +23,8 @@ class Lighttpd(AgentCheck):
 
     URL_SUFFIX_PER_VERSION = {1: '?auto', 2: '?format=plain', 'Unknown': '?auto'}
 
+
+
     GAUGES = {
         b'IdleServers': 'lighttpd.performance.idle_server',
         b'BusyServers': 'lighttpd.performance.busy_servers',
