@@ -15,7 +15,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
-Note that if you're using the [agent in a container][8], you need to attach the `/run/systemd/private` socket as volume. The [go-systemd][9] library used internally need this socket to retrieve Systemd data. For Example:
+Note that if you're using the [agent in a container][8], you need to mount the `/run/systemd/` folder, it contains the socket `/run/systemd/private` needed to to retrieve Systemd data. For Example:
 
 ```bash
 docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
