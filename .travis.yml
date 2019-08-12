@@ -5,11 +5,7 @@ services:
 language: python
 python:
   - '2.7.15'
-addons:
-  apt:
-    packages:
-      - tdsodbc
-      - unixodbc-dev
+
 cache:
   directories:
     - "$HOME/.cache/pip"
@@ -136,6 +132,9 @@ jobs:
       env: CHECK=exchange_server PYTHON3=true
     - stage: test
       env: CHECK=fluentd PYTHON3=true
+      before_script:
+        - echo before script
+        - ls
     - stage: test
       env: CHECK=gearmand PYTHON3=true
     - stage: test
@@ -304,6 +303,7 @@ install:
   # since on PRs it only runs test_changed we have to do this globally
   - bash .travis/install_ibm_mq.sh
   - bash .travis/install_rrdtool.sh
+  - bash .travis/install_odbc.sh
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files, so we'll use find and -delete
 before_cache:
