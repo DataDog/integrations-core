@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs import similar
-from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
+from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 
 
 class TestSimilarAssertionMessages(object):
@@ -178,3 +178,18 @@ Score   Most similar
 
         # expect similar metrics in a similarity order
         assert similar_service_checks[0][1].name == 'test.similar3'
+
+    def test__build_similar_elements__histogram_buckets(self, aggregator):
+        check = AgentCheck()
+
+        check.submit_histogram_bucket('check', 'histogram.bucket', 1, 10.0, 125.0, True, "hostname", ["tag2"])
+        check.submit_histogram_bucket('check', 'histogram.bucket', 1, 125.0, 312.0, True, "hostname", ["tag1"])
+        check.submit_histogram_bucket('check', 'histogram.bucket', 1, 0.0, 10.0, True, "hostname", ["tag1"])
+
+        expected_histogram_bucket = HistogramBucketStub('histogram.bucket', 1, 0.0, 10.0, True, "hostname", ["tag1"])
+        similar_histogram_bucket = similar._build_similar_elements(
+            expected_histogram_bucket, aggregator._histogram_buckets
+        )
+
+        # expect similar metrics in a similarity order
+        assert similar_histogram_bucket[0][1].name == 'histogram.bucket'

@@ -992,9 +992,7 @@ def test_decumulate_histogram_buckets_negative_buckets(p_check, mocked_prometheu
 
     assert 1 == len(metrics)
 
-    expected_metric = HistogramMetricFamily(
-        'random_histogram_bucket', 'Nonsense histogram.'
-    )
+    expected_metric = HistogramMetricFamily('random_histogram_bucket', 'Nonsense histogram.')
     expected_metric.samples = [
         (
             'random_histogram_bucket',
@@ -1021,11 +1019,7 @@ def test_decumulate_histogram_buckets_negative_buckets(p_check, mocked_prometheu
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '15.0', 'verb': 'GET'},
             5.0,
         ),
-        (
-            'random_histogram_sum',
-            {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
-            3.14,
-        ),
+        ('random_histogram_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 3.14),
         ('random_histogram_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 70.0),
     ]
 

@@ -238,7 +238,7 @@ class __AgentCheck(object):
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
-    def _submit_histogram_bucket(self, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags):
+    def submit_histogram_bucket(self, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags):
         if value is None:
             # ignore metric sample
             return

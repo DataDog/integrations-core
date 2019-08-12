@@ -745,16 +745,14 @@ class OpenMetricsScraperMixin(object):
             return
         sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
         sample[self.SAMPLE_LABELS]["lower_bound"] = str(float(sample[self.SAMPLE_LABELS]["lower_bound"]))
-        if sample[self.SAMPLE_LABELS]["le"] ==  sample[self.SAMPLE_LABELS]["lower_bound"]:
+        if sample[self.SAMPLE_LABELS]["le"] == sample[self.SAMPLE_LABELS]["lower_bound"]:
             # this can happen for -inf/-inf bucket that we don't want to send (always 0)
             self.log.warning(
-                "Metric: {} has bucket boundaries equal, skipping: {}".format(
-                    metric_name, sample[self.SAMPLE_LABELS]
-                )
+                "Metric: {} has bucket boundaries equal, skipping: {}".format(metric_name, sample[self.SAMPLE_LABELS])
             )
             return
         tags = self._metric_tags(metric_name, sample[self.SAMPLE_VALUE], sample, scraper_config, hostname)
-        self._submit_histogram_bucket(
+        self.submit_histogram_bucket(
             self.check_id,
             metric_name,
             sample[self.SAMPLE_VALUE],
