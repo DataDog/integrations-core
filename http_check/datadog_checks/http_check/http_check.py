@@ -110,18 +110,18 @@ class HTTPCheck(NetworkCheck):
                     )
                 )
 
-            with warnings.catch_warnings():
-                # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
-                if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
-                    self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
+            # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
+            if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
+                self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
 
-                r = getattr(self.http, method.lower())(
-                    addr,
-                    allow_redirects=allow_redirects,
-                    stream=stream,
-                    json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
-                    data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
-                )
+            r = getattr(self.http, method.lower())(
+                addr,
+                persist=True,
+                allow_redirects=allow_redirects,
+                stream=stream,
+                json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
+                data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
+            )
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
             self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
