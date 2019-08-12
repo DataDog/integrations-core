@@ -65,3 +65,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/external_dns/metadata.csv
 [6]: https://docs.datadoghq.com/help
+[7]: https://github.com/kubernetes-incubator/external-dns 
