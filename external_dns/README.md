@@ -54,7 +54,7 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 The external DNS check does not include any events.
 
 ### Service Checks
-The External-DNS check does not include any service checks.
+The external DNS check does not include any service checks.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][6].
