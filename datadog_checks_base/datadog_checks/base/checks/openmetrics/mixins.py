@@ -715,8 +715,12 @@ class OpenMetricsScraperMixin(object):
         bucket_tuples_by_upper_bound = {}
         for i, v in enumerate(sorted_buckets):
             if i == 0:
-                # TODO: handle negative buckets
-                bucket_tuples_by_upper_bound[v] = (0, v, bucket_values_by_upper_bound[v])
+                if v > 0:
+                    # positive buckets starts at zero
+                    bucket_tuples_by_upper_bound[v] = (0, v, bucket_values_by_upper_bound[v])
+                else:
+                    # negative buckets starts at -inf
+                    bucket_tuples_by_upper_bound[v] = (float("-inf"), v, bucket_values_by_upper_bound[v])
                 continue
             tmp = bucket_values_by_upper_bound[v] - bucket_values_by_upper_bound[sorted_buckets[i - 1]]
             bucket_tuples_by_upper_bound[v] = (sorted_buckets[i - 1], v, tmp)
@@ -741,6 +745,14 @@ class OpenMetricsScraperMixin(object):
             return
         sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
         sample[self.SAMPLE_LABELS]["lower_bound"] = str(float(sample[self.SAMPLE_LABELS]["lower_bound"]))
+        if sample[self.SAMPLE_LABELS]["le"] ==  sample[self.SAMPLE_LABELS]["lower_bound"]:
+            # this can happen for -inf/-inf bucket that we don't want to send (always 0)
+            self.log.warning(
+                "Metric: {} has bucket boundaries equal, skipping: {}".format(
+                    metric_name, sample[self.SAMPLE_LABELS]
+                )
+            )
+            return
         tags = self._metric_tags(metric_name, sample[self.SAMPLE_VALUE], sample, scraper_config, hostname)
         self._submit_histogram_bucket(
             self.check_id,

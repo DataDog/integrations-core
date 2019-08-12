@@ -862,7 +862,7 @@ def test_decumulate_histogram_buckets(p_check, mocked_prometheus_scraper_config)
     assert 1 == len(metrics)
 
     expected_metric = HistogramMetricFamily(
-        'rest_client_request_latency_seconds_bucket', 'The latency distributions of fsync called by wal.'
+        'rest_client_request_latency_seconds_bucket', 'Request latency in seconds. Broken down by verb and URL.'
     )
     expected_metric.samples = [
         (
@@ -951,7 +951,7 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
     assert 1 == len(metrics)
 
     expected_metric = HistogramMetricFamily(
-        'rest_client_request_latency_seconds_bucket', 'The latency distributions of fsync called by wal.'
+        'rest_client_request_latency_seconds_bucket', 'Request latency in seconds. Broken down by verb and URL.'
     )
     expected_metric.samples = [
         (
@@ -965,6 +965,68 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
             2.185820220000001,
         ),
         ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+    ]
+
+    current_metric = metrics[0]
+    check._decumulate_histogram_buckets(current_metric)
+
+    assert sorted(expected_metric.samples, key=lambda i: i[0]) == sorted(current_metric.samples, key=lambda i: i[0])
+
+
+def test_decumulate_histogram_buckets_negative_buckets(p_check, mocked_prometheus_scraper_config):
+    text_data = (
+        '# HELP random_histogram Nonsense histogram.\n'
+        '# TYPE random_histogram histogram\n'
+        'random_histogram_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="-Inf"} 0\n'
+        'random_histogram_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="-10.0"} 50\n'
+        'random_histogram_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="-2.0"} 55\n'
+        'random_histogram_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="15.0"} 65\n'
+        'random_histogram_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="+Inf"} 70\n'
+        'random_histogram_sum{url="http://127.0.0.1:8080/api",verb="GET"} 3.14\n'
+        'random_histogram_count{url="http://127.0.0.1:8080/api",verb="GET"} 70\n'
+    )
+
+    response = MockResponse(text_data, text_content_type)
+    check = p_check
+    metrics = [k for k in check.parse_metric_family(response, mocked_prometheus_scraper_config)]
+
+    assert 1 == len(metrics)
+
+    expected_metric = HistogramMetricFamily(
+        'random_histogram_bucket', 'Nonsense histogram.'
+    )
+    expected_metric.samples = [
+        (
+            'random_histogram_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '-Inf', 'lower_bound': '-inf', 'verb': 'GET'},
+            0.0,
+        ),
+        (
+            'random_histogram_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '-10.0', 'lower_bound': '-inf', 'verb': 'GET'},
+            50.0,
+        ),
+        (
+            'random_histogram_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '-2.0', 'lower_bound': '-10.0', 'verb': 'GET'},
+            5.0,
+        ),
+        (
+            'random_histogram_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '15.0', 'lower_bound': '-2.0', 'verb': 'GET'},
+            10.0,
+        ),
+        (
+            'random_histogram_bucket',
+            {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '15.0', 'verb': 'GET'},
+            5.0,
+        ),
+        (
+            'random_histogram_sum',
+            {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
+            3.14,
+        ),
+        ('random_histogram_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 70.0),
     ]
 
     current_metric = metrics[0]
@@ -989,7 +1051,7 @@ def test_decumulate_histogram_buckets_no_buckets(p_check, mocked_prometheus_scra
     assert 1 == len(metrics)
 
     expected_metric = HistogramMetricFamily(
-        'rest_client_request_latency_seconds_bucket', 'The latency distributions of fsync called by wal.'
+        'random_histogram_bucket', 'Request latency in seconds. Broken down by verb and URL.'
     )
     expected_metric.samples = [
         (
