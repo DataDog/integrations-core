@@ -16,14 +16,12 @@ class Lighttpd(AgentCheck):
     """Tracks basic connection/requests/workers metrics
 
     See http://redmine.lighttpd.net/projects/1/wiki/Docs_ModStatus for Lighttpd details
-    See http://redmine.lighttpd.net/projects/lighttpd2/wiki/Mod_status for Lighttpd2 details
+    See http://redmine.lighttpd.net/projects/lighttpd2/wiki/Mod_status for Lighttpd2  details
     """
 
     SERVICE_CHECK_NAME = 'lighttpd.can_connect'
 
     URL_SUFFIX_PER_VERSION = {1: '?auto', 2: '?format=plain', 'Unknown': '?auto'}
-
-
 
     GAUGES = {
         b'IdleServers': 'lighttpd.performance.idle_server',
