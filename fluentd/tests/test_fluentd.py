@@ -7,24 +7,7 @@ import copy
 import pytest
 
 from datadog_checks.fluentd import Fluentd
-
-from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, HOST
-
-CHECK_GAUGES = ['retry_count', 'buffer_total_queued_size', 'buffer_queue_length']
-
-
-@pytest.mark.usefixtures("dd_environment")
-def test_fluentd(aggregator, check):
-    instance = copy.deepcopy(DEFAULT_INSTANCE)
-    instance["plugin_ids"] = ["plg1"]
-    check.check(instance)
-
-    sc_tags = ['fluentd_host:{}'.format(HOST), 'fluentd_port:24220']
-    aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Fluentd.OK, tags=sc_tags, count=1)
-    for m in CHECK_GAUGES:
-        aggregator.assert_metric('{0}.{1}'.format(CHECK_NAME, m), tags=['plugin_id:plg1'])
-
-    aggregator.assert_all_metrics_covered()
+from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, HOST, EXPECTED_GAUGES
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -47,7 +30,7 @@ def test_fluentd_with_tag_by_type(aggregator, check):
 
     check.check(instance)
 
-    for m in CHECK_GAUGES:
+    for m in EXPECTED_GAUGES:
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
         aggregator.assert_metric(metric_name)
 
@@ -66,7 +49,7 @@ def test_fluentd_with_tag_by_plugin_id(aggregator, check):
 
     check.check(instance)
 
-    for m in CHECK_GAUGES:
+    for m in EXPECTED_GAUGES:
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
         aggregator.assert_metric(metric_name, tags=['plugin_id:plg1'])
         aggregator.assert_metric(metric_name, tags=['plugin_id:plg2'])
@@ -85,7 +68,7 @@ def test_fluentd_with_custom_tags(aggregator, check):
 
     check.check(instance)
 
-    for m in CHECK_GAUGES:
+    for m in EXPECTED_GAUGES:
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
         aggregator.assert_metric(metric_name, tags=['plugin_id:plg1'] + custom_tags)
         aggregator.assert_metric(metric_name, tags=['plugin_id:plg2'] + custom_tags)
