@@ -4,7 +4,6 @@
 
 Get metrics from the external DNS service in real time to visualize and monitor DNS metrics collected with the Kubernetes external DNS Prometheus add on.
 
-  through Prometheus
 
 See https://github.com/kubernetes-incubator/external-dns for
 more informations about external-dns
