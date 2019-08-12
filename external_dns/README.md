@@ -39,7 +39,6 @@ metadata:
    pod IP. The other tags will be related to the dd-agent that is polling the
    informations using the service discovery.
  - The service discovery annotations are done on the pod. To deploy, add the annotations to the metadata of the template's specification.
-   add the annotations to the metadata of the template's spec.
 
 
 ### Validation
