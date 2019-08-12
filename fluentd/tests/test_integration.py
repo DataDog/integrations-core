@@ -7,7 +7,8 @@ import copy
 import pytest
 
 from datadog_checks.fluentd import Fluentd
-from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, HOST, EXPECTED_GAUGES
+
+from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, EXPECTED_GAUGES, HOST
 
 
 @pytest.mark.usefixtures("dd_environment")

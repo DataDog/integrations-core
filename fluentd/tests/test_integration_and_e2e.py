@@ -7,7 +7,8 @@ import copy
 import pytest
 
 from datadog_checks.fluentd import Fluentd
-from .common import CHECK_NAME, HOST, EXPECTED_GAUGES, INSTANCE_WITH_PLUGIN
+
+from .common import CHECK_NAME, EXPECTED_GAUGES, HOST, INSTANCE_WITH_PLUGIN
 
 
 def assert_basic_case(aggregator):
