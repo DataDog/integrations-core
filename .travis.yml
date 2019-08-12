@@ -11,8 +11,8 @@ addons:
       - tdsodbc
       - unixodbc-dev
 cache:
+  pip: true
   directories:
-    - "$HOME/.cache/pip"
     - /opt/mqm
 git:
   depth: 3
