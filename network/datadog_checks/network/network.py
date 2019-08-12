@@ -12,12 +12,39 @@ import socket
 from collections import defaultdict
 
 import psutil
-from six import PY3, iteritems
+from six import PY3, iteritems, itervalues
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.common import pattern_filter
-from datadog_checks.utils.platform import Platform
-from datadog_checks.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.common import pattern_filter
+from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+
+try:
+    # Try first the non-C, non-io version on py2. This is the one that will
+    # handle unicode properly, without copy.
+    from StringIO import StringIO
+except ImportError:
+    # We don't have the same thing on py3, so reimplement a small subset for
+    # what we need
+    class StringIO:
+        def __init__(self, buf):
+            self.buf = buf
+            self.len = len(buf)
+            self.pos = 0
+
+        def readline(self, length=None):
+            i = self.buf.find('\n', self.pos)
+            if i < 0:
+                newpos = self.len
+            else:
+                newpos = i + 1
+            if length is not None and length >= 0:
+                if self.pos + length < newpos:
+                    newpos = self.pos + length
+            r = self.buf[self.pos : newpos]
+            self.pos = newpos
+            return r
+
 
 if PY3:
     long = int
@@ -299,8 +326,6 @@ class Network(AgentCheck):
                         output, _, _ = get_subprocess_output(
                             ["ss", "-n", "-{0}".format(protocol[0]), "-a", "-{0}".format(ip_version)], self.log
                         )
-                        lines = output.splitlines()
-
                         # State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
                         # UNCONN     0      0              127.0.0.1:8125                  *:*
                         # ESTAB      0      0              127.0.0.1:37036         127.0.0.1:8125
@@ -309,9 +334,21 @@ class Network(AgentCheck):
                         # LISTEN     0      0       ::ffff:127.0.0.1:33217  ::ffff:127.0.0.1:7199
                         # ESTAB      0      0       ::ffff:127.0.0.1:58975  ::ffff:127.0.0.1:2181
 
-                        metrics = self._parse_linux_cx_state(
-                            lines[1:], self.tcp_states['ss'], 0, protocol=protocol, ip_version=ip_version
-                        )
+                        # Use a StringIO to split the lines without copy.
+                        data = StringIO(output)
+
+                        metrics = self._get_metrics()
+                        # Skip the first line
+                        line = data.readline()
+                        line = data.readline()
+                        while line:
+                            metric = self._parse_linux_cx_state_line(
+                                line, self.tcp_states['ss'], 0, protocol=protocol, ip_version=ip_version
+                            )
+                            if metric:
+                                metrics[metric] += 1
+                            line = data.readline()
+
                         # Only send the metrics which match the loop iteration's ip version
                         for stat, metric in iteritems(self.cx_state_gauge):
                             if stat[0].endswith(ip_version) and stat[0].startswith(protocol):
@@ -320,7 +357,6 @@ class Network(AgentCheck):
             except OSError:
                 self.log.info("`ss` not found: using `netstat` as a fallback")
                 output, _, _ = get_subprocess_output(["netstat", "-n", "-u", "-t", "-a"], self.log)
-                lines = output.splitlines()
                 # Active Internet connections (w/o servers)
                 # Proto Recv-Q Send-Q Local Address           Foreign Address         State
                 # tcp        0      0 46.105.75.4:80          79.220.227.193:2032     SYN_RECV
@@ -330,8 +366,18 @@ class Network(AgentCheck):
                 # tcp6       0      0 46.105.75.4:80          79.220.227.193:2029     ESTABLISHED
                 # udp        0      0 0.0.0.0:123             0.0.0.0:*
                 # udp6       0      0 :::41458                :::*
+                metrics = self._get_metrics()
+                data = StringIO(output)
+                # Skip the first 2 lines
+                line = data.readline()
+                line = data.readline()
+                line = data.readline()
+                while line:
+                    metric = self._parse_linux_cx_state_line(line, self.tcp_states['netstat'], 5)
+                    if metric:
+                        metrics[metric] += 1
+                    line = data.readline()
 
-                metrics = self._parse_linux_cx_state(lines[2:], self.tcp_states['netstat'], 5)
                 for metric, value in iteritems(metrics):
                     self.gauge(metric, value, tags=custom_tags)
             except SubprocessOutputEmptyError:
@@ -493,27 +539,22 @@ class Network(AgentCheck):
         except SubprocessOutputEmptyError:
             self.log.debug("Couldn't use {} to get conntrack stats".format(conntrack_path))
 
-    def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
+    def _get_metrics(self):
+        return {val: 0 for val in itervalues(self.cx_state_gauge)}
+
+    def _parse_linux_cx_state_line(self, line, tcp_states, state_col, protocol=None, ip_version=None):
         """
         Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
-        Returns a dict metric_name -> value
+        Returns a metric.
         """
-        metrics = {}
-        for _, val in iteritems(self.cx_state_gauge):
-            metrics[val] = 0
-        for l in lines:
-            cols = l.split()
-            if cols[0].startswith('tcp') or protocol == 'tcp':
-                proto = "tcp{0}".format(ip_version) if ip_version else ("tcp4", "tcp6")[cols[0] == "tcp6"]
-                if cols[state_col] in tcp_states:
-                    metric = self.cx_state_gauge[proto, tcp_states[cols[state_col]]]
-                    metrics[metric] += 1
-            elif cols[0].startswith('udp') or protocol == 'udp':
-                proto = "udp{0}".format(ip_version) if ip_version else ("udp4", "udp6")[cols[0] == "udp6"]
-                metric = self.cx_state_gauge[proto, 'connections']
-                metrics[metric] += 1
-
-        return metrics
+        cols = line.split()
+        if cols[0].startswith('tcp') or protocol == 'tcp':
+            proto = "tcp{0}".format(ip_version) if ip_version else ("tcp4", "tcp6")[cols[0] == "tcp6"]
+            if cols[state_col] in tcp_states:
+                return self.cx_state_gauge[proto, tcp_states[cols[state_col]]]
+        elif cols[0].startswith('udp') or protocol == 'udp':
+            proto = "udp{0}".format(ip_version) if ip_version else ("udp4", "udp6")[cols[0] == "udp6"]
+            return self.cx_state_gauge[proto, 'connections']
 
     def _check_bsd(self, instance):
         netstat_flags = ['-i', '-b']

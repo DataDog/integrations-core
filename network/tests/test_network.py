@@ -104,6 +104,25 @@ def test_cx_state(aggregator, check):
             aggregator.assert_metric(metric, value=value)
 
 
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_cx_state_mocked(is_linux, aggregator, check):
+    instance = {'collect_connection_state': True}
+    with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
+        out.side_effect = ss_subprocess_mock
+        check._collect_cx_state = True
+        check._is_collect_cx_state_runnable = lambda x: True
+        check._get_net_proc_base_location = lambda x: FIXTURE_DIR
+        check.check(instance)
+        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+            aggregator.assert_metric(metric, value=value)
+        aggregator.reset()
+
+        out.side_effect = netstat_subprocess_mock
+        check.check(instance)
+        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+            aggregator.assert_metric(metric, value=value)
+
+
 def test_add_conntrack_stats_metrics(aggregator, check):
     mocked_conntrack_stats = (
         "cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 "
