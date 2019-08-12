@@ -51,7 +51,7 @@ metadata:
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
-The External-DNS check does not include any events.
+The external DNS check does not include any events.
 
 ### Service Checks
 The External-DNS check does not include any service checks.
