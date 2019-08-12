@@ -38,7 +38,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     class JobCount:
         def __init__(self):
             self.count = 0
-            self.last_job_ts = 0
+            self.last_jobs_ts = []
 
     DEFAULT_METRIC_LIMIT = 0
 
@@ -535,9 +535,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            if job_ts != 0 and job_ts > self.failed_job_counts[frozenset(tags)].last_job_ts:
+            if job_ts != 0 and job_ts not in self.failed_job_counts[frozenset(tags)].last_jobs_ts:
+                print("Add value to fail")
                 self.failed_job_counts[frozenset(tags)].count += sample[self.SAMPLE_VALUE]
-                self.failed_job_counts[frozenset(tags)].last_job_ts = job_ts
+                self.failed_job_counts[frozenset(tags)].last_jobs_ts.append(job_ts)
 
     def kube_job_status_succeeded(self, metric, scraper_config):
         for sample in metric.samples:
@@ -550,9 +551,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            if job_ts != 0 and job_ts > self.succeeded_job_counts[frozenset(tags)].last_job_ts:
+            if job_ts != 0 and job_ts not in self.succeeded_job_counts[frozenset(tags)].last_jobs_ts:
+                print("Add value to success")
                 self.succeeded_job_counts[frozenset(tags)].count += sample[self.SAMPLE_VALUE]
-                self.succeeded_job_counts[frozenset(tags)].last_job_ts = job_ts
+                self.succeeded_job_counts[frozenset(tags)].last_jobs_ts.append(job_ts)
 
     def kube_node_status_condition(self, metric, scraper_config):
         """ The ready status of a cluster node. v1.0+"""
