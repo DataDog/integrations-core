@@ -39,6 +39,10 @@ instances:
     #
     # event_priority: normal
 
+    ## FILTERS
+    ## At least one filter is required:
+    ## `log_file`, `source_name`, `type`, `event_id`, `message_filters`
+
     ## @param log_file - list of strings - optional
     ## The `log_file` filter instructs the check to only capture events
     ## that belong to one of the specified LogFiles (Application, System, Setup, Security,
