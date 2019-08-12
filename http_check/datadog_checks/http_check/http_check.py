@@ -38,6 +38,13 @@ class HTTPCheck(NetworkCheck):
     SC_STATUS = 'http.can_connect'
     SC_SSL_CERT = 'http.ssl_cert'
 
+    HTTP_CONFIG_REMAPPER = {
+        'client_cert': {'name': 'tls_cert'},
+        'client_key': {'name': 'tls_private_key'},
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': True},
+        'ignore_ssl_warning': {'name': 'tls_ignore_warning'},
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         NetworkCheck.__init__(self, name, init_config, agentConfig, instances)
 
@@ -45,13 +52,7 @@ class HTTPCheck(NetworkCheck):
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
 
-        self.HTTP_CONFIG_REMAPPER = {
-            'client_cert': {'name': 'tls_cert'},
-            'client_key': {'name': 'tls_private_key'},
-            'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': True},
-            'ca_certs': {'name': 'tls_ca_cert', 'default': self.ca_certs},
-            'ignore_ssl_warning': {'name': 'tls_ignore_warning'},
-        }
+        self.HTTP_CONFIG_REMAPPER['ca_certs']= {'name': 'tls_ca_cert', 'default': self.ca_certs}
 
     def _check(self, instance):
         (
@@ -61,7 +62,6 @@ class HTTPCheck(NetworkCheck):
             method,
             data,
             http_response_status_code,
-            timeout,
             include_content,
             headers,
             response_time,
@@ -75,7 +75,7 @@ class HTTPCheck(NetworkCheck):
             allow_redirects,
             stream,
         ) = from_instance(instance, self.ca_certs)
-
+        timeout = self.http.options['timeout'][0]
         start = time.time()
 
         def send_status_up(logMsg):
@@ -100,31 +100,28 @@ class HTTPCheck(NetworkCheck):
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to {}".format(addr))
-
-            sess = self.http.session()
-            sess.trust_env = False
+            self.http.session.trust_env = False
             if weakcipher:
                 base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-                sess.mount(base_addr, WeakCiphersAdapter())
+                self.http.session.mount(base_addr, WeakCiphersAdapter())
                 self.log.debug(
                     "Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
                         base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS
                     )
                 )
 
-                # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
-                if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
-                    self.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
-                
-                r = sess.request(
-                    method.upper(),
-                    addr,
-                    allow_redirects=allow_redirects,
-                    stream=stream,
-                    json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
-                    data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
-                    cert=(client_cert, client_key) if client_cert and client_key else None,
-                )
+            # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
+            if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
+                self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
+
+            r = getattr(self.http, method.lower())(
+                addr,
+                allow_redirects=allow_redirects,
+                stream=stream,
+                json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
+                data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
+                cert=(client_cert, client_key) if client_cert and client_key else None,
+            )
 
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
@@ -211,6 +208,8 @@ class HTTPCheck(NetworkCheck):
         finally:
             if r is not None:
                 r.close()
+            # resets the wrapper Session object
+            self.http._session = None
 
         # Report status metrics as well
         if service_checks:
