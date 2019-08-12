@@ -12,8 +12,6 @@ from datetime import datetime
 
 import _strptime  # noqa
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from requests_ntlm import HttpNtlmAuth
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
@@ -43,16 +41,17 @@ class HTTPCheck(NetworkCheck):
         'client_key': {'name': 'tls_private_key'},
         'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': True},
         'ignore_ssl_warning': {'name': 'tls_ignore_warning'},
+        'ca_certs': {'name': 'tls_ca_cert'},
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        NetworkCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(HTTPCheck, self).__init__(name, init_config, instances)
 
         self.ca_certs = init_config.get('ca_certs')
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
 
-        self.HTTP_CONFIG_REMAPPER['ca_certs']= {'name': 'tls_ca_cert', 'default': self.ca_certs}
+        self.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = self.ca_certs
 
     def _check(self, instance):
         (
@@ -77,6 +76,7 @@ class HTTPCheck(NetworkCheck):
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options['timeout'][0]
         start = time.time()
+        self.http.options['headers'] = headers
 
         def send_status_up(logMsg):
             # TODO: A6 log needs bytes and cannot handle unicode
@@ -121,7 +121,6 @@ class HTTPCheck(NetworkCheck):
                     stream=stream,
                     json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
                     data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
-                    cert=(client_cert, client_key) if client_cert and client_key else None,
                 )
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
