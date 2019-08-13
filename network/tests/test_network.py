@@ -64,13 +64,13 @@ else:
 
 
 def ss_subprocess_mock(*args, **kwargs):
-    if '-u -a -4' in args[0][2]:
+    if '--udp --all --ipv4' in args[0][2]:
         return '3', None, None
-    elif '-u -a -6' in args[0][2]:
+    elif '--udp --all --ipv6' in args[0][2]:
         return '4', None, None
-    elif '-t -a -4' in args[0][2]:
+    elif '--tcp --all --ipv4' in args[0][2]:
         file_name = 'ss_ipv4_tcp_short'
-    elif '-t -a -6' in args[0][2]:
+    elif '--tcp --all --ipv6' in args[0][2]:
         file_name = 'ss_ipv6_tcp_short'
 
     with open(os.path.join(FIXTURE_DIR, file_name), 'rb') as f:

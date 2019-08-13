@@ -297,7 +297,7 @@ class Network(AgentCheck):
                     # Also calls `ss` for each protocol, because on some systems (e.g. Ubuntu 14.04), there is a
                     # bug that print `tcp` even if it's `udp`
                     # The `-H` flag isn't available on old versions of `ss`.
-                    cmd = "ss -n -t -a -{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
+                    cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
                     output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
 
                     # 7624 CLOSE-WAIT
@@ -309,7 +309,7 @@ class Network(AgentCheck):
 
                     self._parse_short_state_lines(lines, metrics, self.tcp_states['ss'], ip_version=ip_version)
 
-                    cmd = "ss -n -u -a -{} | wc -l".format(ip_version)
+                    cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
                     output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
