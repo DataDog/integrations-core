@@ -6,12 +6,10 @@
 import os
 
 import mock
-import pytest
 
 from datadog_checks.http_check import HTTPCheck
 
 from .common import (
-    CONFIG,
     CONFIG_CUSTOM_NAME,
     CONFIG_DATA_METHOD,
     CONFIG_DONT_CHECK_EXP,
@@ -22,22 +20,6 @@ from .common import (
     FAKE_CERT,
     HERE,
 )
-
-
-@pytest.mark.unit
-def test__init__():
-    # empty values should be ignored
-    init_config = {'ca_certs': ''}
-    # `get_ca_certs_path` needs to be mocked because it's used as fallback when
-    # init_config doesn't contain `ca_certs`
-    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path', return_value='bar'):
-        http_check = HTTPCheck('http_check', init_config, {})
-        assert http_check.ca_certs == 'bar'
-
-    # normal case
-    init_config = {'ca_certs': 'foo'}
-    http_check = HTTPCheck('http_check', init_config, {})
-    assert http_check.ca_certs == 'foo'
 
 
 def test_check_cert_expiration(http_check):
@@ -100,63 +82,6 @@ def test_check_cert_expiration(http_check):
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
     assert status == 'WARNING'
     assert 0 < seconds_left < seconds_warning
-
-
-def test_check(aggregator, http_check):
-    """
-    Check coverage.
-    """
-
-    # Run the check for all the instances in the config
-    for instance in CONFIG['instances']:
-        http_check.check(instance)
-
-    # HTTP connection error
-    connection_err_tags = ['url:https://thereisnosuchlink.com', 'instance:conn_error']
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=connection_err_tags, count=1)
-
-    # Wrong HTTP response status code
-    status_code_err_tags = ['url:http://httpbin.org/404', 'instance:http_error_status_code']
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=status_code_err_tags, count=1)
-
-    # HTTP response status code match
-    status_code_match_tags = ['url:http://httpbin.org/404', 'instance:status_code_match', 'foo:bar']
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=status_code_match_tags, count=1)
-
-    # Content match & mismatching
-    content_match_tags = ['url:https://github.com', 'instance:cnt_match']
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=content_match_tags, count=1)
-
-    content_mismatch_tags = ['url:https://github.com', 'instance:cnt_mismatch']
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=content_mismatch_tags, count=1)
-
-    unicode_content_match_tags = ['url:https://ja.wikipedia.org/', 'instance:cnt_match_unicode']
-    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=unicode_content_match_tags, count=1)
-
-    unicode_content_mismatch_tags = ['url:https://ja.wikipedia.org/', 'instance:cnt_mismatch_unicode']
-    aggregator.assert_service_check(
-        HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=unicode_content_mismatch_tags, count=1
-    )
-
-    reverse_content_match_tags = ['url:https://github.com', 'instance:cnt_match_reverse']
-    aggregator.assert_service_check(
-        HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=reverse_content_match_tags, count=1
-    )
-
-    reverse_content_mismatch_tags = ['url:https://github.com', 'instance:cnt_mismatch_reverse']
-    aggregator.assert_service_check(
-        HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=reverse_content_mismatch_tags, count=1
-    )
-
-    unicode_reverse_content_match_tags = ['url:https://ja.wikipedia.org/', 'instance:cnt_match_unicode_reverse']
-    aggregator.assert_service_check(
-        HTTPCheck.SC_STATUS, status=HTTPCheck.CRITICAL, tags=unicode_reverse_content_match_tags, count=1
-    )
-
-    unicode_reverse_content_mismatch_tags = ['url:https://ja.wikipedia.org/', 'instance:cnt_mismatch_unicode_reverse']
-    aggregator.assert_service_check(
-        HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=unicode_reverse_content_mismatch_tags, count=1
-    )
 
 
 def test_check_ssl(aggregator, http_check):

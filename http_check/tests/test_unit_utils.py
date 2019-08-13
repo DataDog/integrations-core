@@ -11,7 +11,6 @@ from datadog_checks.dev import temp_dir
 from datadog_checks.http_check.utils import _get_ca_certs_paths, get_ca_certs_path
 
 
-@pytest.mark.unit
 def test_get_ca_certs_path():
     with mock.patch('datadog_checks.http_check.utils._get_ca_certs_paths') as gp:
         # no certs found
@@ -24,7 +23,6 @@ def test_get_ca_certs_path():
         assert get_ca_certs_path() == __file__
 
 
-@pytest.mark.unit
 def test__get_ca_certs_paths_ko():
     """
     When `embedded` folder is not found, it should raise OSError
@@ -33,7 +31,6 @@ def test__get_ca_certs_paths_ko():
         _get_ca_certs_paths()
 
 
-@pytest.mark.unit
 def test__get_ca_certs_paths(embedded_dir):
     with mock.patch('datadog_checks.http_check.utils.os.path.dirname') as dirname:
         # create a tmp `embedded` folder
