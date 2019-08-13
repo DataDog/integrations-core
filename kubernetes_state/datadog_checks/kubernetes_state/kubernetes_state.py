@@ -91,9 +91,6 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.succeeded_job_counts = defaultdict(KubernetesState.JobCount)
 
     def check(self, instance):
-        self.last_failed_ts = defaultdict(int)
-        self.last_succeeded_ts = defaultdict(int)
-
         endpoint = instance.get('kube_state_url')
 
         scraper_config = self.config_map[endpoint]
