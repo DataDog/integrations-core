@@ -112,8 +112,7 @@ def test_check_ssl(aggregator, http_check):
 def test_check_ssl_expire_error(aggregator, http_check):
     with mock.patch('ssl.SSLSocket.getpeercert', side_effect=Exception()):
         # Run the check for the one instance configured with days left
-        #http_check = HTTPCheck('', {}, [CONFIG_EXPIRED_SSL['instances'][0]])
-        #import pdb; pdb.set_trace()
+        http_check = HTTPCheck('', {}, [CONFIG_EXPIRED_SSL['instances'][0]])
         http_check.check(CONFIG_EXPIRED_SSL['instances'][0])
 
     expired_cert_tags = ['url:https://github.com', 'instance:expired_cert']

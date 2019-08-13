@@ -7,7 +7,6 @@ import re
 import socket
 import ssl
 import time
-import warnings
 from datetime import datetime
 
 import _strptime  # noqa
@@ -15,7 +14,7 @@ import requests
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import ensure_unicode
+from datadog_checks.base import ensure_unicode, is_affirmative
 from datadog_checks.base.checks import NetworkCheck, Status
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
@@ -52,6 +51,9 @@ class HTTPCheck(NetworkCheck):
             self.ca_certs = get_ca_certs_path()
 
         self.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = self.ca_certs
+
+        if is_affirmative(self.instance.get('disable_ssl_validation', True)):
+            self.http.options['verify'] = False
 
     def _check(self, instance):
         (
