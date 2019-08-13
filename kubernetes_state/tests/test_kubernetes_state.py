@@ -423,10 +423,12 @@ def test_job_counts(aggregator, instance):
     # Edit the payload and rerun the check
     payload = payload.replace(
         b'kube_job_status_succeeded{job="hello-1509998340",namespace="default"} 1',
-        b'kube_job_status_succeeded{job="hello-1509998500",namespace="default"} 1')
+        b'kube_job_status_succeeded{job="hello-1509998500",namespace="default"} 1'
+    )
     payload = payload.replace(
         b'kube_job_status_failed{job="hello-1509998340",namespace="default"} 0',
-        b'kube_job_status_failed{job="hello-1509998510",namespace="default"} 1')
+        b'kube_job_status_failed{job="hello-1509998510",namespace="default"} 1'
+    )
 
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
     for _ in range(1):
