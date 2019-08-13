@@ -110,6 +110,8 @@ class OpenStackControllerCheck(AgentCheck):
 
     HYPERVISOR_CACHE_EXPIRY = 120  # seconds
 
+    HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}, 'request_timeout': {'name': 'timeout'}}
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         super(OpenStackControllerCheck, self).__init__(name, init_config, agentConfig, instances)
         # We cache all api instances.

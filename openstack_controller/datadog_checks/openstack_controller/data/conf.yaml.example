@@ -78,11 +78,6 @@ instances:
     #
     # paginated_limit: 1000
 
-    ## @param request_timeout - integer - optional - default: 10
-    ## request_timeout sets the timeout in second used when making api calls.
-    #
-    # request_timeout: 10
-
     ## @param openstack_config_file_path - string - optional
     ## Absolute path of the configuration file for the connection to openstack with openstacksdk.
     #

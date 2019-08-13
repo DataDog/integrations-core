@@ -5,6 +5,7 @@ import os
 
 import pytest
 
+from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.ssh_tunnel import socks_proxy
 from datadog_checks.dev.terraform import terraform_run
 from datadog_checks.dev.utils import get_here
@@ -26,3 +27,9 @@ def dd_environment():
             socks_ip, socks_port = socks
             agent_config = {'proxy': {'http': 'socks5://{}:{}'.format(socks_ip, socks_port)}}
             yield instance, agent_config
+
+
+@pytest.fixture(scope='session')
+def requests_wrapper():
+    instance = {'timeout': 10, 'ssl_verify': False}
+    yield RequestsWrapper(instance, {})
