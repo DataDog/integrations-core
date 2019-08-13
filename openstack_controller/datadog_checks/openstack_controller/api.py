@@ -32,7 +32,7 @@ UNSCOPED_AUTH = 'unscoped'
 
 class ApiFactory(object):
     @staticmethod
-    def create(logger, proxies, instance_config):
+    def create(logger, instance_config, requests_wrapper):
         ssl_verify = is_affirmative(instance_config.get("ssl_verify", True))
         paginated_limit = instance_config.get('paginated_limit', DEFAULT_PAGINATED_LIMIT)
         request_timeout = instance_config.get('request_timeout', DEFAULT_API_REQUEST_TIMEOUT)
@@ -49,7 +49,6 @@ class ApiFactory(object):
                 keystone_server_url,
                 timeout=request_timeout,
                 ssl_verify=ssl_verify,
-                proxies=proxies,
                 limit=paginated_limit,
             )
             api.connect(user)
@@ -269,17 +268,13 @@ class SimpleApi(AbstractApi):
         self,
         logger,
         keystone_endpoint,
-        ssl_verify=False,
-        proxies=None,
-        timeout=DEFAULT_API_REQUEST_TIMEOUT,
+        requests_wrapper,
         limit=DEFAULT_PAGINATED_LIMIT,
     ):
         super(SimpleApi, self).__init__(logger)
-
+        self.http = requests_wrapper
         self.keystone_endpoint = keystone_endpoint
-        self.ssl_verify = ssl_verify
-        self.proxies = proxies
-        self.timeout = timeout
+        self.timeout = self.http.options['timeout'][0]
         self.paginated_limit = limit
         self.nova_endpoint = None
         self.neutron_endpoint = None
@@ -290,7 +285,12 @@ class SimpleApi(AbstractApi):
 
     def connect(self, user):
         credentials = Authenticator.from_config(
-            self.logger, self.keystone_endpoint, user, self.ssl_verify, self.proxies, self.timeout
+            self.logger,
+            self.keystone_endpoint,
+            user,
+            self.http.options['verify'],
+            self.http.options['proxies'],
+            self.timeout,
         )
         self.logger.debug("Nova Url: %s", credentials.nova_endpoint)
         self.nova_endpoint = credentials.nova_endpoint
