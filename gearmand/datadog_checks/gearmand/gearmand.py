@@ -105,7 +105,7 @@ class Gearman(AgentCheck):
         client = self._get_client(host, port)
         self.log.debug("Connected to gearman")
 
-        tags += service_check_tags
+        tags = tags + service_check_tags
 
         try:
             tasks = client.get_status()

@@ -2,33 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import logging
-
 import pytest
 
 from datadog_checks.gearmand import Gearman
 
 from . import common
-
-log = logging.getLogger('test_gearmand')
-
-
-@pytest.mark.usefixtures("dd_environment")
-def test_metrics(check, aggregator):
-    tags = ['first_tag', 'second_tag']
-    service_checks_tags = ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
-
-    assert_tags = tags + service_checks_tags
-
-    check.check(common.INSTANCE)
-
-    aggregator.assert_metric('gearman.unique_tasks', value=0.0, tags=assert_tags, count=1)
-    aggregator.assert_metric('gearman.running', value=0.0, tags=assert_tags, count=1)
-    aggregator.assert_metric('gearman.queued', value=0.0, tags=assert_tags, count=1)
-    aggregator.assert_metric('gearman.workers', value=0.0, tags=assert_tags, count=1)
-
-    aggregator.assert_service_check('gearman.can_connect', status=Gearman.OK, tags=assert_tags, count=1)
-    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures("dd_environment")
