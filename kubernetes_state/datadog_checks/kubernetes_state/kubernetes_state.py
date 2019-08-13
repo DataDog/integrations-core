@@ -38,8 +38,8 @@ class KubernetesState(OpenMetricsBaseCheck):
     class JobCount:
         def __init__(self):
             self.count = 0
-            self.last_job_ts = 0
-            self.last_job_ts_current = 0
+            self.previous_run_max_ts = 0
+            self.current_run_max_ts = 0
 
     DEFAULT_METRIC_LIMIT = 0
 
@@ -98,15 +98,15 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         for job_tags, job in iteritems(self.failed_job_counts):
             self.monotonic_count(scraper_config['namespace'] + '.job.failed', job.count, list(job_tags))
-            if job.last_job_ts_current > 0:
-                job.last_job_ts = job.last_job_ts_current
-                job.last_job_ts_current = 0
+            if job.current_run_max_ts > 0:
+                job.previous_run_max_ts = job.current_run_max_ts
+                job.current_run_max_ts = 0
 
         for job_tags, job in iteritems(self.succeeded_job_counts):
             self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job.count, list(job_tags))
-            if job.last_job_ts_current > 0:
-                job.last_job_ts = job.last_job_ts_current
-                job.last_job_ts_current = 0
+            if job.current_run_max_ts > 0:
+                job.previous_run_max_ts = job.current_run_max_ts
+                job.current_run_max_ts = 0
 
     def _filter_metric(self, metric, scraper_config):
         if scraper_config['telemetry']:
@@ -543,10 +543,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            if job_ts != 0 and job_ts > self.failed_job_counts[frozenset(tags)].last_job_ts:
+            if job_ts != 0 and job_ts > self.failed_job_counts[frozenset(tags)].previous_run_max_ts:
                 self.failed_job_counts[frozenset(tags)].count += sample[self.SAMPLE_VALUE]
-                if job_ts > self.failed_job_counts[frozenset(tags)].last_job_ts_current:
-                    self.failed_job_counts[frozenset(tags)].last_job_ts_current = job_ts
+                if job_ts > self.failed_job_counts[frozenset(tags)].current_run_max_ts:
+                    self.failed_job_counts[frozenset(tags)].current_run_max_ts = job_ts
 
     def kube_job_status_succeeded(self, metric, scraper_config):
         for sample in metric.samples:
@@ -559,10 +559,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            if job_ts != 0 and job_ts > self.succeeded_job_counts[frozenset(tags)].last_job_ts:
+            if job_ts != 0 and job_ts > self.succeeded_job_counts[frozenset(tags)].previous_run_max_ts:
                 self.succeeded_job_counts[frozenset(tags)].count += sample[self.SAMPLE_VALUE]
-                if job_ts > self.succeeded_job_counts[frozenset(tags)].last_job_ts_current:
-                    self.succeeded_job_counts[frozenset(tags)].last_job_ts_current = job_ts
+                if job_ts > self.succeeded_job_counts[frozenset(tags)].current_run_max_ts:
+                    self.succeeded_job_counts[frozenset(tags)].current_run_max_ts = job_ts
 
     def kube_node_status_condition(self, metric, scraper_config):
         """ The ready status of a cluster node. v1.0+"""
