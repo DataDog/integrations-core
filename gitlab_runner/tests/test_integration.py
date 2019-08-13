@@ -6,6 +6,7 @@ import pytest
 from requests.exceptions import ConnectionError
 
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
+
 from .common import BAD_CONFIG, CUSTOM_TAGS, HOST
 
 

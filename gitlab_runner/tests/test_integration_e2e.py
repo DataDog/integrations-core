@@ -5,6 +5,7 @@
 import pytest
 
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
+
 from .common import ALLOWED_METRICS, CONFIG, CUSTOM_TAGS, GITLAB_RUNNER_TAGS
 
 
