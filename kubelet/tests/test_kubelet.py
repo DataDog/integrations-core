@@ -561,7 +561,7 @@ def test_pod_expiration(monkeypatch, aggregator, tagger):
 
 class MockResponse(mock.Mock):
     @staticmethod
-    def iter_lines():
+    def iter_lines(decode_unicode=False):
         return []
 
 
