@@ -282,8 +282,13 @@ class Disk(AgentCheck):
         self.log.debug(df_out)
 
         for device in self._list_devices(df_out):
-            self.log.debug("Passed: {}".format(device))
             device_name = device[-1] if self._use_mount else device[0]
+            if float(device[2]) <= self._min_disk_size:
+                if float(device[2]) > 0:
+                    self.log.info('Excluding device {} with total disk size {}'.format(device_name, device[2]))
+                continue
+            
+            self.log.debug("Passed: {}".format(device))
 
             tags = [device[1], 'filesystem:{}'.format(device[1])] if self._tag_by_filesystem else []
             tags.extend(self._custom_tags)

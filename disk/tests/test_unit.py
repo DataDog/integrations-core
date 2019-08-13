@@ -220,18 +220,29 @@ def test_get_devices_label():
         labels = c._get_devices_label()
         assert labels.get("/dev/mapper/vagrant--vg-root") == "label:DATA"
 
-def test_min_disk_size():
+def test_no_psutil_min_disk_size(aggregator, gauge_metrics):
     instance = {
-        'min_disk_size': 6,
+        'min_disk_size': 1,
     }
     c = Disk('disk', None, {}, [instance])
+    c._psutil = lambda: False
 
+    mock_statvfs = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__='statvfs')
     mock_output = mock.patch(
         'datadog_checks.disk.disk.get_subprocess_output',
-        return_value=mock_df_output('freebsd-df-Tk'),
+        return_value=mock_df_output('debian-df-Tk'),
         __name__='get_subprocess_output',
     )
 
-    with mock_output:
+    with mock_output, mock_statvfs:
         c.check(instance)
-        # need help here - not sure how to check that the proper devices were excluded
+
+    for device in ['udev']: #expected devices
+        for name in gauge_metrics:
+            aggregator.assert_metric(name, tags=['device:{}'.format(device)])
+
+    for device in ['/dev/sda1', 'tmpfs']: #excluded devices
+        for name in gauge_metrics:
+            aggregator.assert_metric(name, tags=['device:{}'.format(device)], count=0)
+
+    aggregator.assert_all_metrics_covered()
