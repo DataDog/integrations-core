@@ -9,7 +9,6 @@ from datadog_checks.gearmand import Gearman
 from . import common
 
 
-@pytest.mark.usefixtures("dd_environment")
 def test_service_check_broken(check, aggregator):
     tags = ['server:{}'.format(common.HOST), 'port:{}'.format(common.BAD_PORT)] + common.TAGS2
 
