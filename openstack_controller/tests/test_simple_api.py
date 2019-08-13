@@ -163,7 +163,7 @@ PROJECTS_RESPONSE = [
 PROJECT_RESPONSE = [{"domain_id": "1111", "id": "3333", "name": "name 1"}]
 
 
-def test_from_config():
+def test_from_config(requests_wrapper):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -173,7 +173,7 @@ def test_from_config():
         with mock.patch(
             'datadog_checks.openstack_controller.api.Authenticator._get_auth_projects', return_value=PROJECTS_RESPONSE
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
             assert isinstance(cred, Credential)
             assert cred.auth_token == "fake_token"
             assert cred.name == "name 2"
@@ -183,7 +183,7 @@ def test_from_config():
             assert cred.neutron_endpoint == "http://10.0.2.15:9292"
 
 
-def test_from_config_with_missing_name():
+def test_from_config_with_missing_name(requests_wrapper):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -197,11 +197,11 @@ def test_from_config_with_missing_name():
             'datadog_checks.openstack_controller.api.Authenticator._get_auth_projects',
             return_value=project_response_without_name,
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
             assert cred is None
 
 
-def test_from_config_with_missing_id():
+def test_from_config_with_missing_id(requests_wrapper):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -215,7 +215,7 @@ def test_from_config_with_missing_id():
             'datadog_checks.openstack_controller.api.Authenticator._get_auth_projects',
             return_value=project_response_without_name,
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
             assert cred is None
 
 

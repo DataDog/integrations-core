@@ -18,7 +18,6 @@ from .exceptions import (
     RetryLimitExceeded,
 )
 from .settings import (
-    DEFAULT_API_REQUEST_TIMEOUT,
     DEFAULT_KEYSTONE_API_VERSION,
     DEFAULT_MAX_RETRY,
     DEFAULT_NEUTRON_API_VERSION,
@@ -267,14 +266,7 @@ class SimpleApi(AbstractApi):
         self.cache = {}
 
     def connect(self, user):
-        credentials = Authenticator.from_config(
-            self.logger,
-            self.keystone_endpoint,
-            user,
-            self.http.options['verify'],
-            self.http.options['proxies'],
-            self.timeout,
-        )
+        credentials = Authenticator.from_config(self.logger, self.keystone_endpoint, user, self.http)
         self.logger.debug("Nova Url: %s", credentials.nova_endpoint)
         self.nova_endpoint = credentials.nova_endpoint
         self.logger.debug("Neutron Url: %s", credentials.neutron_endpoint)
@@ -435,26 +427,16 @@ class Authenticator(object):
         pass
 
     @classmethod
-    def from_config(
-        cls, logger, keystone_endpoint, user, ssl_verify=False, proxies=None, timeout=DEFAULT_API_REQUEST_TIMEOUT
-    ):
+    def from_config(cls, logger, keystone_endpoint, user, requests_wrapper):
         # Make Token authentication with explicit unscoped authorization
         identity = cls._get_user_identity(user)
         post_auth_token_resp = cls._post_auth_token(
-            logger,
-            keystone_endpoint,
-            identity,
-            ssl_verify=ssl_verify,
-            proxies=proxies,
-            timeout=timeout,
-            scope=UNSCOPED_AUTH,
+            logger, keystone_endpoint, identity, requests_wrapper, scope=UNSCOPED_AUTH
         )
         keystone_auth_token = post_auth_token_resp.headers.get('X-Subject-Token')
         # List all projects using retrieved auth token
-        headers = {'X-Auth-Token': keystone_auth_token}
-        projects = cls._get_auth_projects(
-            logger, keystone_endpoint, headers=headers, ssl_verify=ssl_verify, proxies=proxies, timeout=timeout
-        )
+        requests_wrapper.options['headers']['X-Auth-Token'] = keystone_auth_token
+        projects = cls._get_auth_projects(logger, keystone_endpoint, requests_wrapper)
 
         # For each project, we create an OpenStackProject object that we add to the `project_scopes` dict
         last_auth_token = None
@@ -465,15 +447,7 @@ class Authenticator(object):
             identity = {"methods": ['token'], "token": {"id": keystone_auth_token}}
             scope = {'project': {'id': project.get('id')}}
             # Make Token authentication with project id scoped authorization
-            token_resp = cls._post_auth_token(
-                logger,
-                keystone_endpoint,
-                identity,
-                ssl_verify=ssl_verify,
-                proxies=proxies,
-                timeout=timeout,
-                scope=scope,
-            )
+            token_resp = cls._post_auth_token(logger, keystone_endpoint, identity, requests_wrapper, scope=scope)
 
             # Retrieved token, nova and neutron endpoints
             auth_token = token_resp.headers.get('X-Subject-Token')
@@ -501,23 +475,12 @@ class Authenticator(object):
         return None
 
     @staticmethod
-    def _post_auth_token(
-        logger,
-        keystone_endpoint,
-        identity,
-        ssl_verify=False,
-        proxies=None,
-        timeout=DEFAULT_API_REQUEST_TIMEOUT,
-        scope=UNSCOPED_AUTH,
-    ):
+    def _post_auth_token(logger, keystone_endpoint, identity, requests_wrapper, scope=UNSCOPED_AUTH):
         auth_url = urljoin(keystone_endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         try:
             payload = {'auth': {'identity': identity, 'scope': scope}}
-            headers = {'Content-Type': 'application/json'}
-
-            resp = requests.post(
-                auth_url, headers=headers, data=json.dumps(payload), verify=ssl_verify, timeout=timeout, proxies=proxies
-            )
+            requests_wrapper.options['headers']['Content-Type'] = 'application/json'
+            resp = requests_wrapper.post(auth_url, data=json.dumps(payload))
             resp.raise_for_status()
             logger.debug("url: %s || response: %s", auth_url, resp.json())
             return resp
@@ -530,13 +493,11 @@ class Authenticator(object):
             raise KeystoneUnreachable(msg)
 
     @staticmethod
-    def _get_auth_projects(
-        logger, keystone_endpoint, headers=None, ssl_verify=False, proxies=None, timeout=DEFAULT_API_REQUEST_TIMEOUT
-    ):
+    def _get_auth_projects(logger, keystone_endpoint, requests_wrapper):
         auth_url = ""
         try:
             auth_url = urljoin(keystone_endpoint, "{}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
-            resp = requests.get(auth_url, headers=headers, verify=ssl_verify, timeout=timeout, proxies=proxies)
+            resp = requests_wrapper.get(auth_url)
             resp.raise_for_status()
             jresp = resp.json()
             logger.debug("url: %s || response: %s", auth_url, jresp)
