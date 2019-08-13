@@ -479,8 +479,7 @@ class Authenticator(object):
         auth_url = urljoin(keystone_endpoint, "{}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         try:
             payload = {'auth': {'identity': identity, 'scope': scope}}
-            requests_wrapper.options['headers']['Content-Type'] = 'application/json'
-            resp = requests_wrapper.post(auth_url, data=json.dumps(payload))
+            resp = requests_wrapper.post(auth_url, json=payload)
             resp.raise_for_status()
             logger.debug("url: %s || response: %s", auth_url, resp.json())
             return resp
