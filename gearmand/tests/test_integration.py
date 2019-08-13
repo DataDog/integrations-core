@@ -11,13 +11,9 @@ from . import common
 
 @pytest.mark.usefixtures("dd_environment")
 def test_service_check(check, aggregator):
-    service_checks_tags_ok = ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
-
-    service_checks_tags_ok += common.TAGS2
+    tags = ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)] + common.TAGS2
 
     check.check(common.INSTANCE2)
-
-    tags = service_checks_tags_ok
 
     aggregator.assert_metric('gearman.unique_tasks', value=0.0, tags=tags, count=1)
     aggregator.assert_metric('gearman.running', value=0.0, tags=tags, count=1)
@@ -31,12 +27,10 @@ def test_service_check(check, aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_service_check_broken(check, aggregator):
-    service_checks_tags_not_ok = ['server:{}'.format(common.HOST), 'port:{}'.format(common.BAD_PORT)]
-    service_checks_tags_not_ok += common.TAGS2
+    tags = ['server:{}'.format(common.HOST), 'port:{}'.format(common.BAD_PORT)] + common.TAGS2
+
     with pytest.raises(Exception):
         check.check(common.BAD_INSTANCE)
 
-    aggregator.assert_service_check(
-        'gearman.can_connect', status=Gearman.CRITICAL, tags=service_checks_tags_not_ok, count=1
-    )
+    aggregator.assert_service_check('gearman.can_connect', status=Gearman.CRITICAL, tags=tags, count=1)
     aggregator.assert_all_metrics_covered()

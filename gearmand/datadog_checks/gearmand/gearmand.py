@@ -99,13 +99,12 @@ class Gearman(AgentCheck):
     def check(self, instance):
         self.log.debug("Gearman check start")
 
-        host, port, task_filter, tags = self._get_conf(instance)
-        service_check_tags = ["server:{0}".format(host), "port:{0}".format(port)]
+        host, port, task_filter, instance_tags = self._get_conf(instance)
+
+        tags = ["server:{0}".format(host), "port:{0}".format(port)] + instance_tags
 
         client = self._get_client(host, port)
         self.log.debug("Connected to gearman")
-
-        tags = tags + service_check_tags
 
         try:
             tasks = client.get_status()

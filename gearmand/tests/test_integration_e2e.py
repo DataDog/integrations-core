@@ -10,15 +10,13 @@ from . import common
 
 
 def assert_metrics(aggregator):
-    tags = ['first_tag', 'second_tag']
-    service_checks_tags = ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)]
-    assert_tags = tags + service_checks_tags
+    tags = ['server:{}'.format(common.HOST), 'port:{}'.format(common.PORT)] + common.TAGS
 
-    aggregator.assert_metric('gearman.unique_tasks', value=0.0, tags=assert_tags, count=2)
-    aggregator.assert_metric('gearman.running', value=0.0, tags=assert_tags, count=2)
-    aggregator.assert_metric('gearman.queued', value=0.0, tags=assert_tags, count=2)
-    aggregator.assert_metric('gearman.workers', value=0.0, tags=assert_tags, count=2)
-    aggregator.assert_service_check('gearman.can_connect', status=Gearman.OK, tags=assert_tags, count=2)
+    aggregator.assert_metric('gearman.unique_tasks', value=0.0, tags=tags, count=2)
+    aggregator.assert_metric('gearman.running', value=0.0, tags=tags, count=2)
+    aggregator.assert_metric('gearman.queued', value=0.0, tags=tags, count=2)
+    aggregator.assert_metric('gearman.workers', value=0.0, tags=tags, count=2)
+    aggregator.assert_service_check('gearman.can_connect', status=Gearman.OK, tags=tags, count=2)
     aggregator.assert_all_metrics_covered()
 
 
