@@ -12,6 +12,7 @@ from six import iteritems
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 @pytest.mark.usefixtures("dd_environment")
 def test_integration(check, instance, aggregator):
+    check = check({}, instance)
     check.check(instance)
     metrics = {}
     for d in (

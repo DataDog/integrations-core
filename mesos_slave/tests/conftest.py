@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import os
 
 import pytest
@@ -27,17 +26,4 @@ def instance():
 
 @pytest.fixture
 def check():
-    return MesosSlave(common.CHECK_NAME, {}, [common.INSTANCE])
-
-
-@pytest.fixture
-def check_mock(check):
-    check._get_stats = lambda v, x: json.loads(read_fixture('stats.json'))
-    check._get_state = lambda v, x: json.loads(read_fixture('state.json'))
-
-    return check
-
-
-def read_fixture(name):
-    with open(os.path.join(common.FIXTURE_DIR, name)) as f:
-        return f.read()
+    return lambda init_config, instance: MesosSlave(common.CHECK_NAME, init_config, [instance])
