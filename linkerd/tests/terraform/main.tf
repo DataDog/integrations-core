@@ -44,7 +44,6 @@ resource "google_compute_instance" "linkerd-init" {
   machine_type = "n1-standard-2"
 
   tags = ["linkerd", "lab"]
-  depends_on = [google_container_cluster.gke_cluster]
   boot_disk {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-1804-lts"
