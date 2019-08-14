@@ -1,6 +1,6 @@
 # CHANGELOG - network
 
-## 1.11.2 / 2019-08-14
+## 1.11.3 / 2019-08-14
 
 * [Fixed] Drastically reduce `ss` output. See [#4346](https://github.com/DataDog/integrations-core/pull/4346).
 
