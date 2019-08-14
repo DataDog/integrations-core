@@ -146,12 +146,15 @@ class MesosMaster(AgentCheck):
                 self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
             if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
                 # `default_timeout` config option will be removed with Agent 5
-                self.HTTP_CONFIG_REMAPPER['default_timeout'] = {
-                    'name': 'timeout',
-                    'default': self.init_config.get(
-                        'timeout', self.init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
-                    ),
-                }
+                timeout = (
+                    self.instance.get('timeout')
+                    or self.instance.get('default_timeout')
+                    or self.init_config.get('timeout')
+                    or self.init_config.get('default_timeout')
+                    or self.DEFAULT_TIMEOUT
+                )
+
+                self.http.options['timeout'] = (timeout, timeout)
 
     def _get_json(self, url, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]

@@ -20,7 +20,7 @@ def dd_environment():
         yield common.INSTANCE
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def check():
     return lambda init_config, instance: MesosMaster(common.CHECK_NAME, init_config, [instance])
 
