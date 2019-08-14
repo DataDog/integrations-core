@@ -411,8 +411,7 @@ def test_job_counts(aggregator, instance):
     )
 
     # Re-run check to make sure we don't count the same jobs
-    for _ in range(1):
-        check.check(instance)
+    check.check(instance)
     aggregator.assert_metric(
         NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=0
     )
@@ -431,8 +430,7 @@ def test_job_counts(aggregator, instance):
     )
 
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
-    for _ in range(1):
-        check.check(instance)
+    check.check(instance)
     aggregator.assert_metric(
         NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=1
     )
