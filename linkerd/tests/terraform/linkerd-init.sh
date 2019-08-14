@@ -10,4 +10,4 @@ linkerd check # will wait for linkerd to be available
 curl -sL https://run.linkerd.io/emojivoto.yml | kubectl apply -f -
 kubectl wait pods -n emojivoto --all --for=condition=Ready --timeout=300s
 kubectl get -n emojivoto deploy -o yaml | linkerd inject - | kubectl apply -f -
-kubectl wait pods -n emojivoto --all --for=condition=Ready --timeout=300s
+linkerd -n emojivoto check --proxy
