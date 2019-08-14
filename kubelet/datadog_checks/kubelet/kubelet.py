@@ -313,7 +313,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         try:
             req = self.perform_kubelet_query(url)
-            for line in req.iter_lines():
+            for line in req.iter_lines(decode_unicode=True):
                 # avoid noise; this check is expected to fail since we override the container hostname
                 if line.find('hostname') != -1:
                     continue
