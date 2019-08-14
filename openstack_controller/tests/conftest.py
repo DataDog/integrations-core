@@ -29,7 +29,7 @@ def dd_environment():
             yield instance, agent_config
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def requests_wrapper():
     instance = {'timeout': 10, 'ssl_verify': False}
     yield RequestsWrapper(instance, {})
