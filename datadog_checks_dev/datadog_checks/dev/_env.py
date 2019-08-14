@@ -92,9 +92,9 @@ def replay_check_run(agent_collector, stub_aggregator):
             )
 
         if runner['LastError']:
-            errors.append(runner['LastError'])
+            errors.extend(json.loads(runner['LastError']))
     if errors:
-        raise Exception(errors)
+        raise Exception("\n".join("Message: {}\n{}".format(err['message'], err['traceback']) for err in errors))
 
 
 def serialize_data(data):
