@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+
 from six import iteritems
 
 from .utils import read_fixture
@@ -52,20 +53,17 @@ def test_default_timeout(check, instance):
 
 def test_init_config_old_timeout(check, instance):
     # test init_config timeout
-    init_config = {'default_timeout': 2}
-    check = check(init_config, instance)
+    check = check({'default_timeout': 2}, instance)
     check._get_master_roles = lambda v, x: json.loads(read_fixture('roles.json'))
     check._get_master_stats = lambda v, x: json.loads(read_fixture('stats.json'))
     check._get_master_state = lambda v, x: json.loads(read_fixture('state.json'))
     check.check(instance)
-
     assert check.http.options['timeout'] == (2, 2)
 
 
 def test_init_config_timeout(check, instance):
     # test init_config timeout
-    init_config = {'timeout': 7}
-    check = check(init_config, instance)
+    check = check({'timeout': 7}, instance)
     check._get_master_roles = lambda v, x: json.loads(read_fixture('roles.json'))
     check._get_master_stats = lambda v, x: json.loads(read_fixture('stats.json'))
     check._get_master_state = lambda v, x: json.loads(read_fixture('state.json'))
@@ -76,13 +74,13 @@ def test_init_config_timeout(check, instance):
 
 def test_instance_old_timeout(check, instance):
     # test instance default_timeout
-    default_timeout = instance
-    default_timeout['default_timeout'] = 13
+    instance['default_timeout'] = 13
     check = check({'default_timeout': 9}, instance)
     check._get_master_roles = lambda v, x: json.loads(read_fixture('roles.json'))
     check._get_master_stats = lambda v, x: json.loads(read_fixture('stats.json'))
     check._get_master_state = lambda v, x: json.loads(read_fixture('state.json'))
-    check.check(default_timeout)
+    check.check(instance)
+
     assert check.http.options['timeout'] == (13, 13)
 
 

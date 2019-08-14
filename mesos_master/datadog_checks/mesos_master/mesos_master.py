@@ -150,18 +150,8 @@ class MesosMaster(AgentCheck):
                     'name': 'timeout',
                     'default': self.init_config.get(
                         'timeout', self.init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
-                    )
-                    # or self.init_config.get('default_timeout')
-                    # or self.DEFAULT_TIMEOUT,
+                    ),
                 }
-            '''
-            self.http.options['timeout'] = (
-                self.instance.get('timeout')
-                or self.init_config.get('timeout')
-                or self.init_config.get('default_timeout')
-                or self.DEFAULT_TIMEOUT
-            )
-            '''
 
     def _get_json(self, url, failure_expected=False, tags=None):
         tags = tags + ["url:%s" % url] if tags else ["url:%s" % url]
