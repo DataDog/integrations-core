@@ -6,9 +6,6 @@
 
 Collects metrics from mesos master node, only the leader is sending metrics.
 """
-
-from copy import deepcopy
-
 import requests
 from six import iteritems
 from six.moves.urllib.parse import urlparse

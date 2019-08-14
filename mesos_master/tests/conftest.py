@@ -2,9 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
 import os
-
 import pytest
 
 from datadog_checks.dev import docker_run
@@ -23,8 +21,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    check = lambda init_config, instance: MesosMaster(common.CHECK_NAME, init_config, [instance])
-    return check
+    return lambda init_config, instance: MesosMaster(common.CHECK_NAME, init_config, [instance])
 
 
 @pytest.fixture

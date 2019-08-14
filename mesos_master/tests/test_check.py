@@ -3,12 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-import os
-
-import pytest
 from six import iteritems
-
-from datadog_checks.mesos_master import MesosMaster
 
 from .utils import read_fixture
 
@@ -46,18 +41,25 @@ def test_check(check, instance, aggregator):
 
 def test_default_timeout(check, instance):
     # test default timeout
-    check1 = check({}, instance)
-    check1._get_master_roles = lambda v, x: json.loads(read_fixture('roles.json'))
-    check1._get_master_stats = lambda v, x: json.loads(read_fixture('stats.json'))
-    check1._get_master_state = lambda v, x: json.loads(read_fixture('state.json'))
-    check1.check(instance)
+    check = check({}, instance)
+    check._get_master_roles = lambda v, x: json.loads(read_fixture('roles.json'))
+    check._get_master_stats = lambda v, x: json.loads(read_fixture('stats.json'))
+    check._get_master_state = lambda v, x: json.loads(read_fixture('state.json'))
+    check.check(instance)
 
-    assert check1.http.options['timeout'] == (5, 5)
+    assert check.http.options['timeout'] == (5, 5)
 
 
 def test_init_config_old_timeout(check, instance):
     # test init_config timeout
     init_config = {'default_timeout': 2}
+    check = check(init_config, instance)
+    check._get_master_roles = lambda v, x: json.loads(read_fixture('roles.json'))
+    check._get_master_stats = lambda v, x: json.loads(read_fixture('stats.json'))
+    check._get_master_state = lambda v, x: json.loads(read_fixture('state.json'))
+    check.check(instance)
+
+    assert check.http.options['timeout'] == (2, 2)
 
 
 def test_init_config_timeout(check, instance):
