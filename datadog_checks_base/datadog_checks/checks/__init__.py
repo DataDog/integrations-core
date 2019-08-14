@@ -3,3 +3,5 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # flake8: noqa
 from ..base.checks import *
+from . import AgentCheck
+from ..errors import CheckException
