@@ -107,9 +107,7 @@ class MorCache:
         if max_historical_metrics is None:
             max_historical_metrics = float('inf')
         with self._mor_lock:
-            mors_dict = self._mor.get(key, {})
-            if mors_dict is None:
-                raise StopIteration
+            mors_dict = self._mor.get(key) or {}
 
             batch = {}
             nb_hist_metrics = 0
@@ -118,11 +116,12 @@ class MorCache:
                     # Those metrics are historical, let's make sure we don't have too
                     # many of them in the same batch.
                     if len(mor['metrics']) >= max_historical_metrics:
-                        # Too much metrics to query for a single mor, ignore it
+                        # Too many metrics to query for a single mor, ignore it
                         self.log.warning(
-                            "Metrics for '{}' are ignored because there are more ({}) than what you allowed ({}) on vCenter Server".format(  # noqa: E501
-                                mor_name, len(mor['metrics']), max_historical_metrics
-                            )
+                            "Metrics for '{}' are ignored because there are more ({}) than what you allowed ({}) on vCenter Server",  # noqa: E501
+                            mor_name,
+                            len(mor['metrics']),
+                            max_historical_metrics,
                         )
                         continue
 

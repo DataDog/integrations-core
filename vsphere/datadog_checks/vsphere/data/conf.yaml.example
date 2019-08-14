@@ -146,3 +146,14 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param collect_realtime_only - boolean - optional - default: true
+    ## DEPRECATED: Tries to collect realtime and historical metrics together
+    ##             and has a significant impact on performance.
+    ##             Use 'collect_historical_only' and two instances instead.
+    ## Set to true to collect only host and VM metrics. Set to false to collect
+    ## cluster, datastore and datacenter metrics as well.
+    ## Collecting non realtime metrics will decrease performance as it
+    ## requires computation from the vCenter server.
+    #
+    # collect_realtime_only: true

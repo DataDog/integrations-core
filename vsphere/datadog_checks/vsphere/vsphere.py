@@ -14,7 +14,7 @@ from datetime import timedelta
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
 from pyVmomi import vmodl  # pylint: disable=E0611
-from six import iteritems
+from six import itervalues
 from six.moves import range
 
 from datadog_checks.base import ensure_unicode, to_string
@@ -694,7 +694,7 @@ class VSphereCheck(AgentCheck):
             # If batch size is set to 0, process everything at once
             batch_size = self.batch_morlist_size or self.mor_objects_queue.size(i_key, resource_type)
             while self.mor_objects_queue.size(i_key, resource_type):
-                mors = []
+                hist_mors = []
                 for _ in range(batch_size):
                     mor = self.mor_objects_queue.pop(i_key, resource_type)
                     if mor is None:
@@ -704,13 +704,11 @@ class VSphereCheck(AgentCheck):
                     mor_name = str(mor['mor'])
                     self.mor_cache.set_mor(i_key, mor_name, mor)
 
-                    # Only do this for non real-time resources i.e. datacenter, datastore and cluster
-                    # For hosts and VMs, we can rely on a precomputed list of metrics
-                    mors.append(mor)
+                    hist_mors.append(mor)
 
                 # We will actually schedule jobs for non realtime resources only.
                 if self._should_collect_historical(instance):
-                    self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, mors))
+                    self.pool.apply_async(self._process_mor_objects_queue_async, args=(instance, hist_mors))
 
     def _cache_metrics_metadata(self, instance):
         """
@@ -908,7 +906,7 @@ class VSphereCheck(AgentCheck):
         batch_size = self.batch_morlist_size or n_mors
         for batch in self.mor_cache.mors_batch(i_key, batch_size, max_historical_metrics):
             query_specs = []
-            for _, mor in iteritems(batch):
+            for mor in itervalues(batch):
                 if mor['mor_type'] == 'vm':
                     vm_count += 1
                 if mor['mor_type'] not in REALTIME_RESOURCES and ('metrics' not in mor or not mor['metrics']):
