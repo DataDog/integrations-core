@@ -23,12 +23,10 @@ def test_parse_counter(aggregator, check):
 def test_parse_instance(aggregator, check):
     # instance with defaults
     instance = {"name": "ok_instance"}
-    name, host, port, cachemgr_user, cachemgr_passwd, custom_tags = check.parse_instance(instance)
+    name, host, port, custom_tags = check.parse_instance(instance)
     assert name == "ok_instance"
     assert host == "localhost"
     assert port == 3128
-    assert cachemgr_user == ""
-    assert cachemgr_passwd == ""
     assert custom_tags == []
 
     # instance with no defaults
@@ -40,12 +38,10 @@ def test_parse_instance(aggregator, check):
         "cachemgr_password": "pass",
         "tags": ["foo:bar"],
     }
-    name, host, port, cachemgr_user, cachemgr_passwd, custom_tags = check.parse_instance(instance)
+    name, host, port, custom_tags = check.parse_instance(instance)
     assert name == "ok_instance"
     assert host == "host"
     assert port == 1234
-    assert cachemgr_user == "datadog"
-    assert cachemgr_passwd == "pass"
     assert custom_tags == ["foo:bar"]
 
     # instance with no name
@@ -64,7 +60,7 @@ def test_get_counters(check):
     with mock.patch('datadog_checks.squid.squid.requests.get') as g:
         g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
         check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
-        check.get_counters('host', 'port', 'user', 'pass', [])
+        check.get_counters('host', 'port', [])
         # we assert `parse_counter` was called only once despite the raw text
         # containing multiple `\n` chars
         check.parse_counter.assert_called_once()

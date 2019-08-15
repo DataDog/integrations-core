@@ -7,7 +7,7 @@ from six import PY2
 
 from datadog_checks.checks import AgentCheck
 
-# Python 3 compatability is a different library
+# Python 3 compatibility is a different library
 # It's a drop in replacement but has a different name
 # This will enable the check to use the new library
 if PY2:
@@ -99,13 +99,12 @@ class Gearman(AgentCheck):
     def check(self, instance):
         self.log.debug("Gearman check start")
 
-        host, port, task_filter, tags = self._get_conf(instance)
-        service_check_tags = ["server:{0}".format(host), "port:{0}".format(port)]
+        host, port, task_filter, instance_tags = self._get_conf(instance)
+
+        tags = ["server:{0}".format(host), "port:{0}".format(port)] + instance_tags
 
         client = self._get_client(host, port)
         self.log.debug("Connected to gearman")
-
-        tags += service_check_tags
 
         try:
             tasks = client.get_status()

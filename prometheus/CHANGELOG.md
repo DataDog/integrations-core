@@ -1,5 +1,10 @@
 # CHANGELOG - Prometheus
 
+## 3.2.0 / 2019-05-14
+
+* [Fixed] Fix type override values in example config. See [#3717](https://github.com/DataDog/integrations-core/pull/3717).
+* [Added] Adhere to code style. See [#3560](https://github.com/DataDog/integrations-core/pull/3560).
+
 ## 3.1.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#3048](https://github.com/DataDog/integrations-core/pull/3048).

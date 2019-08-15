@@ -8,6 +8,8 @@ import pytest
 from six import PY3
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base import __version__ as base_package_version
+from datadog_checks.base.checks.base import datadog_agent
 
 
 def test_instance():
@@ -25,6 +27,12 @@ def test_instance():
     check = AgentCheck(init_config=init_config, instances=instances)
     assert check.init_config == {'foo': 'bar'}
     assert check.instances == [{'bar': 'baz'}]
+
+
+def test_check_version():
+    check = AgentCheck()
+
+    assert check.check_version == base_package_version
 
 
 def test_load_config():
@@ -100,6 +108,14 @@ class TestMetricNormalization:
 
 
 class TestMetrics:
+    def test_namespace(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        check.gauge('metric', 0)
+
+        aggregator.assert_metric('test.metric')
+
     def test_non_float_metric(self, aggregator):
         check = AgentCheck()
         metric_name = 'test_metric'
@@ -120,6 +136,19 @@ class TestEvents:
         }
         check.event(event)
         aggregator.assert_event('test event test event')
+
+    def test_namespace(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+        event = {
+            'event_type': 'new.event',
+            'msg_title': 'new test event',
+            'aggregation_key': 'test.event',
+            'msg_text': 'test event test event',
+            'tags': None,
+        }
+        check.event(event)
+        aggregator.assert_event('test event test event', source_type_name='test')
 
 
 class TestServiceChecks:
@@ -146,6 +175,13 @@ class TestServiceChecks:
 
         check.service_check("testservicecheckwithnonemessage", AgentCheck.OK, message=None)
         aggregator.assert_service_check("testservicecheckwithnonemessage", status=AgentCheck.OK)
+
+    def test_namespace(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        check.service_check('service_check', AgentCheck.OK)
+        aggregator.assert_service_check('test.service_check', status=AgentCheck.OK)
 
 
 class TestTags:
@@ -221,12 +257,13 @@ class TestTags:
         in_str.encode.side_effect = Exception
         assert check._to_bytes(in_str) is None
 
-    def test_none_value(self):
+    def test_none_value(self, caplog):
         check = AgentCheck()
         tags = [None, 'tag:foo']
 
         normalized_tags = check._normalize_tags_type(tags, None)
         assert normalized_tags == ['tag:foo']
+        assert 'Error encoding tag' not in caplog.text
 
     def test_external_host_tag_normalization(self):
         """
@@ -237,6 +274,16 @@ class TestTags:
         with mock.patch.object(check, '_normalize_tags_type', return_value=['normalize:tag']):
             check.set_external_tags(external_host_tags)
             assert external_host_tags == [('hostname', {'src_name': ['normalize:tag']})]
+
+    def test_external_hostname(self):
+        check = AgentCheck()
+        external_host_tags = [(u'hostnam\xe9', {'src_name': ['key1:val1']})]
+        with mock.patch.object(datadog_agent, 'set_external_tags') as set_external_tags:
+            check.set_external_tags(external_host_tags)
+            if PY3:
+                set_external_tags.assert_called_with([(u'hostnam\xe9', {'src_name': ['key1:val1']})])
+            else:
+                set_external_tags.assert_called_with([('hostnam\xc3\xa9', {'src_name': ['key1:val1']})])
 
 
 class LimitedCheck(AgentCheck):

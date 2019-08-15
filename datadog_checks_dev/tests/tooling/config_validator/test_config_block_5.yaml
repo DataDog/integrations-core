@@ -1,0 +1,15 @@
+## @param some_random_text
+## Some documentation
+## again
+#
+# commented_var: value
+
+## Multi-line comment
+## starting here
+## key: value
+## - 1
+## - 2
+
+## Comment with
+ ## a mistake in indentation
+## must still be read as a comment

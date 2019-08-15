@@ -1,5 +1,9 @@
 # CHANGELOG - Hyper-V
 
+## 1.1.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3517](https://github.com/DataDog/integrations-core/pull/3517).
+
 ## 1.0.1 / 2019-03-29
 
 * [Fixed] Add tags option to hyperv. See [#3337](https://github.com/DataDog/integrations-core/pull/3337).

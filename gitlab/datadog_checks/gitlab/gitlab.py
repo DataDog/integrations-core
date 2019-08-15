@@ -7,9 +7,7 @@ import requests
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.config import _is_affirmative
 from datadog_checks.errors import CheckException
-from datadog_checks.utils.headers import headers
 
 
 class GitlabCheck(OpenMetricsBaseCheck):
@@ -25,6 +23,15 @@ class GitlabCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     PROMETHEUS_SERVICE_CHECK_NAME = 'gitlab.prometheus_endpoint_up'
+
+    HTTP_CONFIG_REMAPPER = {
+        'receive_timeout': {'name': 'read_timeout', 'default': DEFAULT_RECEIVE_TIMEOUT},
+        'connect_timeout': {'name': 'connect_timeout', 'default': DEFAULT_CONNECT_TIMEOUT},
+        'gitlab_user': {'name': 'username'},
+        'gitlab_password': {'name': 'password'},
+        'ssl_cert_validation': {'name': 'tls_verify'},
+        'ssl_ca_certs': {'name': 'tls_ca_cert'},
+    }
 
     def __init__(self, name, init_config, agentConfig, instances=None):
 
@@ -86,13 +93,6 @@ class GitlabCheck(OpenMetricsBaseCheck):
 
         return gitlab_instance
 
-    def _verify_ssl(self, instance):
-        # Load the ssl configuration
-        ssl_cert_validation = _is_affirmative(instance.get('ssl_cert_validation', True))
-        ssl_ca_certs = instance.get('ssl_ca_certs', True)
-
-        return ssl_ca_certs if ssl_cert_validation else False
-
     def _service_check_tags(self, url):
         parsed_url = urlparse(url)
         gitlab_host = parsed_url.hostname
@@ -119,19 +119,6 @@ class GitlabCheck(OpenMetricsBaseCheck):
 
         service_check_tags = self._service_check_tags(url)
         service_check_tags.extend(tags)
-        verify_ssl = self._verify_ssl(instance)
-
-        # Timeout settings
-        timeouts = (
-            int(instance.get('connect_timeout', GitlabCheck.DEFAULT_CONNECT_TIMEOUT)),
-            int(instance.get('receive_timeout', GitlabCheck.DEFAULT_RECEIVE_TIMEOUT)),
-        )
-
-        # Auth settings
-        auth = None
-        if 'gitlab_user' in instance and 'gitlab_password' in instance:
-            auth = (instance['gitlab_user'], instance['gitlab_password'])
-
         # These define which endpoint is hit and which type of check is actually performed
         # TODO: parse errors and report for single sub-service failure?
         service_check_name = 'gitlab.{}'.format(check_type)
@@ -139,9 +126,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
 
         try:
             self.log.debug("checking {} against {}".format(check_type, check_url))
-            r = requests.get(
-                check_url, auth=auth, verify=verify_ssl, timeout=timeouts, headers=headers(self.agentConfig)
-            )
+            r = self.http.get(check_url)
             if r.status_code != 200:
                 self.service_check(
                     service_check_name,

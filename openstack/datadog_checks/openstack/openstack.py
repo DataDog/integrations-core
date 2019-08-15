@@ -14,16 +14,7 @@ import simplejson as json
 from six import iteritems
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-
-try:
-    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
-    from datadog_agent import set_external_tags
-except ImportError:
-    # Agent < 6.0: the Agent pulls tags invoking `OpenStackCheck.get_external_host_tags`
-    set_external_tags = None
-
+from datadog_checks.base import AgentCheck, is_affirmative
 
 SOURCE_TYPE = 'openstack'
 
@@ -1048,12 +1039,12 @@ class OpenStackCheck(AgentCheck):
         assert entry in ["aggregates", "physical_hosts", "hypervisors"]
         ttl = self.CACHE_TTL.get(entry)
         last_fetch_time = getattr(self, self.FETCH_TIME_ACCESSORS.get(entry))
-        return datetime.now() - last_fetch_time > timedelta(seconds=ttl)
+        return datetime.utcnow() - last_fetch_time > timedelta(seconds=ttl)
 
     def _get_and_set_aggregate_list(self):
         if not self._aggregate_list or self._is_expired("aggregates"):
             self._aggregate_list = self.get_all_aggregate_hypervisors()
-            self._last_aggregate_fetch_time = datetime.now()
+            self._last_aggregate_fetch_time = datetime.utcnow()
 
         return self._aggregate_list
 
@@ -1270,8 +1261,7 @@ class OpenStackCheck(AgentCheck):
             # For now, monitor all networks
             self.get_network_stats(custom_tags)
 
-            if set_external_tags is not None:
-                set_external_tags(self.get_external_host_tags())
+            self.set_external_tags(self.get_external_host_tags())
 
         except IncompleteConfig as e:
             if isinstance(e, IncompleteAuthScope):

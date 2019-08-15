@@ -48,23 +48,17 @@ class Ceph(AgentCheck):
             test_sudo = os.system('setsid sudo -l < /dev/null')
             if test_sudo != 0:
                 raise Exception('The dd-agent user does not have sudo access')
-            ceph_args = ['sudo', ceph_cmd]
+            ceph_args = 'sudo {}'.format(ceph_cmd)
         else:
-            ceph_args = [ceph_cmd]
+            ceph_args = ceph_cmd
 
-        ceph_args += ['--cluster', ceph_cluster]
-
-        args = ceph_args + ['version']
-        try:
-            output, _, _ = get_subprocess_output(args, self.log)
-        except Exception as e:
-            raise Exception('Unable to run cmd=%s: %s' % (' '.join(args), str(e)))
+        ceph_args = '{} --cluster {}'.format(ceph_args, ceph_cluster)
 
         raw = {}
         for cmd in ('mon_status', 'status', 'df detail', 'osd pool stats', 'osd perf', 'health detail'):
             try:
-                args = ceph_args + cmd.split() + ['-fjson']
-                output, _, _ = get_subprocess_output(args, self.log)
+                args = '{} {} -fjson'.format(ceph_args, cmd)
+                output, _, _ = get_subprocess_output(args.split(), self.log)
                 res = json.loads(output)
             except Exception as e:
                 self.log.warning('Unable to parse data from cmd=%s: %s' % (cmd, str(e)))

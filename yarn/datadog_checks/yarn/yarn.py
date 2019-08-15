@@ -1,22 +1,11 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
-import requests
-import requests_kerberos
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError, Timeout
 from six import iteritems
 from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
-
-KERBEROS_STRATEGIES = {
-    'required': requests_kerberos.REQUIRED,
-    'optional': requests_kerberos.OPTIONAL,
-    'disabled': requests_kerberos.DISABLED,
-}
-
 
 # Default settings
 DEFAULT_RM_URI = 'http://localhost:8088'
@@ -79,6 +68,18 @@ YARN_CLUSTER_METRICS = {
 
 # Application metrics for YARN
 YARN_APP_METRICS = {
+    'progress': ('yarn.apps.progress_gauge', GAUGE),
+    'startedTime': ('yarn.apps.started_time_gauge', GAUGE),
+    'finishedTime': ('yarn.apps.finished_time_gauge', GAUGE),
+    'elapsedTime': ('yarn.apps.elapsed_time_gauge', GAUGE),
+    'allocatedMB': ('yarn.apps.allocated_mb_gauge', GAUGE),
+    'allocatedVCores': ('yarn.apps.allocated_vcores_gauge', GAUGE),
+    'runningContainers': ('yarn.apps.running_containers_gauge', GAUGE),
+    'memorySeconds': ('yarn.apps.memory_seconds_gauge', GAUGE),
+    'vcoreSeconds': ('yarn.apps.vcore_seconds_gauge', GAUGE),
+}
+# These are deprecated because increment is the wrong type as it becomes a RATE on the dogweb side
+DEPRECATED_YARN_APP_METRICS = {
     'progress': ('yarn.apps.progress', INCREMENT),
     'startedTime': ('yarn.apps.started_time', INCREMENT),
     'finishedTime': ('yarn.apps.finished_time', INCREMENT),
@@ -139,6 +140,8 @@ class YarnCheck(AgentCheck):
     Extract statistics from YARN's ResourceManger REST API
     """
 
+    HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
+
     _ALLOWED_APPLICATION_TAGS = ['applicationTags', 'applicationType', 'name', 'queue', 'user']
 
     def check(self, instance):
@@ -177,17 +180,17 @@ class YarnCheck(AgentCheck):
         tags.append('cluster_name:{}'.format(cluster_name))
 
         # Get metrics from the Resource Manager
-        self._yarn_cluster_metrics(rm_address, instance, tags)
+        self._yarn_cluster_metrics(rm_address, tags)
         if is_affirmative(instance.get('collect_app_metrics', DEFAULT_COLLECT_APP_METRICS)):
-            self._yarn_app_metrics(rm_address, instance, app_tags, tags)
-        self._yarn_node_metrics(rm_address, instance, tags)
-        self._yarn_scheduler_metrics(rm_address, instance, tags, queue_blacklist)
+            self._yarn_app_metrics(rm_address, app_tags, tags)
+        self._yarn_node_metrics(rm_address, tags)
+        self._yarn_scheduler_metrics(rm_address, tags, queue_blacklist)
 
-    def _yarn_cluster_metrics(self, rm_address, instance, addl_tags):
+    def _yarn_cluster_metrics(self, rm_address, addl_tags):
         """
         Get metrics related to YARN cluster
         """
-        metrics_json = self._rest_request_to_json(rm_address, instance, YARN_CLUSTER_METRICS_PATH, addl_tags)
+        metrics_json = self._rest_request_to_json(rm_address, YARN_CLUSTER_METRICS_PATH, addl_tags)
 
         if metrics_json:
 
@@ -196,13 +199,11 @@ class YarnCheck(AgentCheck):
             if yarn_metrics is not None:
                 self._set_yarn_metrics_from_json(addl_tags, yarn_metrics, YARN_CLUSTER_METRICS)
 
-    def _yarn_app_metrics(self, rm_address, instance, app_tags, addl_tags):
+    def _yarn_app_metrics(self, rm_address, app_tags, addl_tags):
         """
         Get metrics for running applications
         """
-        metrics_json = self._rest_request_to_json(
-            rm_address, instance, YARN_APPS_PATH, addl_tags, states=YARN_APPLICATION_STATES
-        )
+        metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags, states=YARN_APPLICATION_STATES)
 
         if metrics_json and metrics_json['apps'] is not None and metrics_json['apps']['app'] is not None:
 
@@ -219,13 +220,14 @@ class YarnCheck(AgentCheck):
 
                 tags.extend(addl_tags)
 
+                self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
                 self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
-    def _yarn_node_metrics(self, rm_address, instance, addl_tags):
+    def _yarn_node_metrics(self, rm_address, addl_tags):
         """
         Get metrics related to YARN nodes
         """
-        metrics_json = self._rest_request_to_json(rm_address, instance, YARN_NODES_PATH, addl_tags)
+        metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH, addl_tags)
 
         if metrics_json and metrics_json['nodes'] is not None and metrics_json['nodes']['node'] is not None:
 
@@ -237,11 +239,11 @@ class YarnCheck(AgentCheck):
 
                 self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
 
-    def _yarn_scheduler_metrics(self, rm_address, instance, addl_tags, queue_blacklist):
+    def _yarn_scheduler_metrics(self, rm_address, addl_tags, queue_blacklist):
         """
         Get metrics from YARN scheduler
         """
-        metrics_json = self._rest_request_to_json(rm_address, instance, YARN_SCHEDULER_PATH, addl_tags)
+        metrics_json = self._rest_request_to_json(rm_address, YARN_SCHEDULER_PATH, addl_tags)
 
         try:
             metrics_json = metrics_json['scheduler']['schedulerInfo']
@@ -318,7 +320,7 @@ class YarnCheck(AgentCheck):
         else:
             self.log.error('Metric type "{}" unknown'.format(metric_type))
 
-    def _rest_request_to_json(self, url, instance, object_path, tags, *args, **kwargs):
+    def _rest_request_to_json(self, url, object_path, tags, *args, **kwargs):
         """
         Query the given URL and return the JSON response
         """
@@ -333,33 +335,6 @@ class YarnCheck(AgentCheck):
             for directory in args:
                 url = self._join_url_dir(url, directory)
 
-        auth = None
-
-        # Authenticate our connection to JMX endpoint if required
-        kerberos = instance.get('kerberos')
-        username = instance.get('username')
-        password = instance.get('password')
-        if username is not None and password is not None:
-            auth = (username, password)
-        elif kerberos is not None:
-            if kerberos not in KERBEROS_STRATEGIES:
-                raise Exception('Invalid Kerberos strategy `{}`'.format(kerberos))
-
-            auth = requests_kerberos.HTTPKerberosAuth(
-                mutual_authentication=KERBEROS_STRATEGIES[kerberos],
-                delegate=is_affirmative(instance.get('kerberos_delegate', False)),
-                force_preemptive=is_affirmative(instance.get('kerberos_force_initiate', False)),
-                hostname_override=instance.get('kerberos_hostname'),
-                principal=instance.get('kerberos_principal'),
-            )
-
-        ssl_verify = is_affirmative(instance.get('ssl_verify', True))
-
-        old_keytab_path = None
-        if 'kerberos_keytab' in instance:
-            old_keytab_path = os.getenv('KRB5_CLIENT_KTNAME')
-            os.environ['KRB5_CLIENT_KTNAME'] = instance['kerberos_keytab']
-
         self.log.debug('Attempting to connect to "{}"'.format(url))
 
         # Add kwargs as arguments
@@ -368,7 +343,7 @@ class YarnCheck(AgentCheck):
             url = urljoin(url, '?' + query)
 
         try:
-            response = requests.get(url, auth=auth, verify=ssl_verify, timeout=self.default_integration_http_timeout)
+            response = self.http.get(url)
             response.raise_for_status()
             response_json = response.json()
 
@@ -403,10 +378,6 @@ class YarnCheck(AgentCheck):
             )
 
             return response_json
-
-        finally:
-            if old_keytab_path is not None:
-                os.environ['KRB5_CLIENT_KTNAME'] = old_keytab_path
 
     def _join_url_dir(self, url, *args):
         """

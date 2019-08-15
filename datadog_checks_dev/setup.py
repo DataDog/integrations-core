@@ -24,13 +24,16 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 REQUIRES = [
     'coverage>=4.5.1',
     'mock',
-    'PyYAML>=3.13',
+    'psutil',
+    'PyYAML>=5.1',
     'pytest',
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
     'pytest-mock',
-    'requests>=2.20.0',
+    'requests>=2.22.0',
     'six',
+    "shutilwhich==1.1.0; python_version < '3.0'",
+    "subprocess32==3.5.4; python_version < '3.0'",
 ]
 
 
@@ -76,7 +79,7 @@ setup(
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',
-            'tox>=3.7.0',
+            'tox>=3.12.1',
             'twine>=1.11.0',
             'wheel>=0.31.0',
         ]

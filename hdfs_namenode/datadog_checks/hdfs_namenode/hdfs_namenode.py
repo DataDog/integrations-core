@@ -3,25 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-import os
-
-import requests
-import requests_kerberos
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import AgentCheck, is_affirmative
-
-KERBEROS_STRATEGIES = {
-    'required': requests_kerberos.REQUIRED,
-    'optional': requests_kerberos.OPTIONAL,
-    'disabled': requests_kerberos.DISABLED,
-}
+from datadog_checks.base import AgentCheck
 
 
 class HDFSNameNode(AgentCheck):
+    HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'default': False, 'invert': True}}
+
     # Service check names
     JMX_SERVICE_CHECK = 'hdfs.namenode.jmx.can_connect'
 
@@ -77,8 +69,8 @@ class HDFSNameNode(AgentCheck):
         tags.append("namenode_url:{}".format(jmx_address))
         tags = list(set(tags))
 
-        hdfs_system_state_beans = self._get_jmx_data(instance, jmx_address, self.HDFS_NAME_SYSTEM_STATE_BEAN, tags)
-        hdfs_system_beans = self._get_jmx_data(instance, jmx_address, self.HDFS_NAME_SYSTEM_BEAN, tags)
+        hdfs_system_state_beans = self._get_jmx_data(jmx_address, self.HDFS_NAME_SYSTEM_STATE_BEAN, tags)
+        hdfs_system_beans = self._get_jmx_data(jmx_address, self.HDFS_NAME_SYSTEM_BEAN, tags)
 
         # Process the JMX data and send out metrics
         if hdfs_system_state_beans:
@@ -95,12 +87,12 @@ class HDFSNameNode(AgentCheck):
             message="Connection to {} was successful".format(jmx_address),
         )
 
-    def _get_jmx_data(self, instance, jmx_address, bean_name, tags):
+    def _get_jmx_data(self, jmx_address, bean_name, tags):
         """
         Get namenode beans data from JMX endpoint
         """
 
-        response = self._rest_request_to_json(instance, jmx_address, self.JMX_PATH, {"qry": bean_name}, tags=tags)
+        response = self._rest_request_to_json(jmx_address, self.JMX_PATH, {"qry": bean_name}, tags=tags)
         beans = response.get("beans", [])
         return beans
 
@@ -137,7 +129,7 @@ class HDFSNameNode(AgentCheck):
         else:
             self.log.error('Metric type "{}" unknown'.format(metric_type))
 
-    def _rest_request_to_json(self, instance, url, object_path, query_params, tags=None):
+    def _rest_request_to_json(self, url, object_path, query_params, tags=None):
         """
         Query the given URL and return the JSON response
         """
@@ -149,39 +141,10 @@ class HDFSNameNode(AgentCheck):
             query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(query_params)])
             url = urljoin(url, '?' + query)
 
-        auth = None
-
-        # Authenticate our connection to JMX endpoint if required
-        kerberos = instance.get('kerberos')
-        username = instance.get('username')
-        password = instance.get('password')
-        if username is not None and password is not None:
-            auth = (username, password)
-        elif kerberos is not None:
-            if kerberos not in KERBEROS_STRATEGIES:
-                raise Exception('Invalid Kerberos strategy `{}`'.format(kerberos))
-
-            auth = requests_kerberos.HTTPKerberosAuth(
-                mutual_authentication=KERBEROS_STRATEGIES[kerberos],
-                delegate=is_affirmative(instance.get('kerberos_delegate', False)),
-                force_preemptive=is_affirmative(instance.get('kerberos_force_initiate', False)),
-                hostname_override=instance.get('kerberos_hostname'),
-                principal=instance.get('kerberos_principal'),
-            )
-
-        disable_ssl_validation = instance.get('disable_ssl_validation', False)
-
-        old_keytab_path = None
-        if 'kerberos_keytab' in instance:
-            old_keytab_path = os.getenv('KRB5_CLIENT_KTNAME')
-            os.environ['KRB5_CLIENT_KTNAME'] = instance['kerberos_keytab']
-
         self.log.debug('Attempting to connect to "{}"'.format(url))
 
         try:
-            response = requests.get(
-                url, auth=auth, timeout=self.default_integration_http_timeout, verify=not disable_ssl_validation
-            )
+            response = self.http.get(url)
             response.raise_for_status()
             response_json = response.json()
 
@@ -212,10 +175,6 @@ class HDFSNameNode(AgentCheck):
 
         else:
             return response_json
-
-        finally:
-            if old_keytab_path is not None:
-                os.environ['KRB5_CLIENT_KTNAME'] = old_keytab_path
 
     @classmethod
     def _join_url_dir(cls, url, *args):

@@ -1,5 +1,17 @@
 # CHANGELOG - spark
 
+## 1.8.1 / 2019-07-18
+
+* [Fixed] Remove unused configs and code for spark check. See [#4133](https://github.com/DataDog/integrations-core/pull/4133).
+
+## 1.8.0 / 2019-07-09
+
+* [Added] Use the new RequestsWrapper for connecting to services. See [#4058](https://github.com/DataDog/integrations-core/pull/4058).
+
+## 1.7.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3566](https://github.com/DataDog/integrations-core/pull/3566).
+
 ## 1.6.0 / 2019-01-08
 
 * [Added] Allow disabling of streaming metrics. See [#2889][1].

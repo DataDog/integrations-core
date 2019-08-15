@@ -1,5 +1,13 @@
 # CHANGELOG - couchbase
 
+## 1.8.1 / 2019-07-12
+
+* [Fixed] Change `couchbase.by_bucket.avg_bg_wait_time` metric unit from second to microsecond. See [#4078](https://github.com/DataDog/integrations-core/pull/4078).
+
+## 1.8.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3494](https://github.com/DataDog/integrations-core/pull/3494).
+
 ## 1.7.1 / 2019-03-29
 
 * [Fixed] Fixed a typo in the example config file. See [#3173](https://github.com/DataDog/integrations-core/pull/3173).

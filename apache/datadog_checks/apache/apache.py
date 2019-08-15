@@ -3,23 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import warnings
 
-import requests
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
-from datadog_checks.checks import AgentCheck
-
-# compatability layer
-try:
-    from config import _is_affirmative
-except ImportError:
-    from datadog_checks.config import _is_affirmative
-
-# compatability layer
-try:
-    from util import headers
-except ImportError:
-    from datadog_checks.utils.headers import headers
+from datadog_checks.base import AgentCheck, is_affirmative
 
 
 class Apache(AgentCheck):
@@ -43,6 +30,14 @@ class Apache(AgentCheck):
 
     RATES = {'Total kBytes': 'apache.net.bytes_per_s', 'Total Accesses': 'apache.net.request_per_s'}
 
+    HTTP_CONFIG_REMAPPER = {
+        'apache_user': {'name': 'username'},
+        'apache_password': {'name': 'password'},
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False},
+        'receive_timeout': {'name': 'read_timeout', 'default': 15},
+        'connect_timeout': {'name': 'connect_timeout', 'default': 5},
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.assumed_url = {}
@@ -52,17 +47,7 @@ class Apache(AgentCheck):
             raise Exception("Missing 'apache_status_url' in Apache config")
 
         url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
-
-        connect_timeout = int(instance.get('connect_timeout', 5))
-        receive_timeout = int(instance.get('receive_timeout', 15))
-
         tags = instance.get('tags', [])
-
-        disable_ssl_validation = _is_affirmative(instance.get('disable_ssl_validation', False))
-
-        auth = None
-        if 'apache_user' in instance and 'apache_password' in instance:
-            auth = (instance['apache_user'], instance['apache_password'])
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
@@ -72,19 +57,14 @@ class Apache(AgentCheck):
         service_check_tags = ['host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
             self.log.debug(
-                'apache check initiating request, connect timeout %d receive %d' % (connect_timeout, receive_timeout)
+                'apache check initiating request, connect timeout %d receive %d'
+                % (self.http.options['timeout'][0], self.http.options['timeout'][1])
             )
             with warnings.catch_warnings():
-                if _is_affirmative(instance.get('tls_ignore_warning', False)):
+                if is_affirmative(instance.get('tls_ignore_warning', False)):
                     warnings.simplefilter('ignore', InsecureRequestWarning)
 
-                r = requests.get(
-                    url,
-                    auth=auth,
-                    headers=headers(self.agentConfig),
-                    verify=not disable_ssl_validation,
-                    timeout=(connect_timeout, receive_timeout),
-                )
+                r = self.http.get(url)
             r.raise_for_status()
 
         except Exception as e:

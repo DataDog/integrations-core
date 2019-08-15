@@ -1,5 +1,17 @@
 # CHANGELOG - elastic
 
+## 1.13.1 / 2019-07-18
+
+* [Fixed] Add missing HTTP options to example config. See [#4129](https://github.com/DataDog/integrations-core/pull/4129).
+
+## 1.13.0 / 2019-07-13
+
+* [Added] Use the new RequestsWrapper for connecting to services. See [#4100](https://github.com/DataDog/integrations-core/pull/4100).
+
+## 1.12.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3504](https://github.com/DataDog/integrations-core/pull/3504).
+
 ## 1.11.0 / 2019-02-18
 
 * [Added] Support unicode for Python 3 bindings. See [#2869](https://github.com/DataDog/integrations-core/pull/2869).

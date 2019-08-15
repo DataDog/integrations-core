@@ -12,6 +12,7 @@ pytestmark = pytest.mark.skipif(not USING_VTS, reason='Not using VTS')
 
 @pytest.mark.usefixtures('dd_environment')
 def test_vts(check, instance_vts, aggregator):
+    check = check(instance_vts)
     check.check(instance_vts)
 
     # skip metrics that are difficult to reproduce in a test environment

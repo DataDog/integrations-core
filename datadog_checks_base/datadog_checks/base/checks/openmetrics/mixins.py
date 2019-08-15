@@ -4,6 +4,7 @@
 
 from fnmatch import fnmatchcase
 from math import isinf, isnan
+from os.path import isfile
 
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
@@ -13,6 +14,7 @@ from urllib3.exceptions import InsecureRequestWarning
 
 from ...config import is_affirmative
 from ...errors import CheckException
+from ...utils.common import to_string
 from .. import AgentCheck
 
 if PY3:
@@ -30,7 +32,15 @@ class OpenMetricsScraperMixin(object):
     SAMPLE_LABELS = 1
     SAMPLE_VALUE = 2
 
+    TELEMETRY_GAUGE_MESSAGE_SIZE = "payload.size"
+    TELEMETRY_COUNTER_METRICS_BLACKLIST_COUNT = "metrics.blacklist.count"
+    TELEMETRY_COUNTER_METRICS_INPUT_COUNT = "metrics.input.count"
+    TELEMETRY_COUNTER_METRICS_IGNORE_COUNT = "metrics.ignored.count"
+    TELEMETRY_COUNTER_METRICS_PROCESS_COUNT = "metrics.processed.count"
+
     METRIC_TYPES = ['counter', 'gauge', 'summary', 'histogram']
+
+    KUBERNETES_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
 
     def __init__(self, *args, **kwargs):
         # Initialize AgentCheck's base class
@@ -131,7 +141,7 @@ class OpenMetricsScraperMixin(object):
         # Some metrics are ignored because they are duplicates or introduce a
         # very high cardinality. Metrics included in this list will be silently
         # skipped without a 'Unable to handle metric' debug line in the logs
-        config['ignore_metrics'] = []
+        config['ignore_metrics'] = instance.get('ignore_metrics', default_instance.get('ignore_metrics', []))
 
         # If you want to send the buckets as tagged values when dealing with histograms,
         # set send_histograms_buckets to True, set to False otherwise.
@@ -218,7 +228,24 @@ class OpenMetricsScraperMixin(object):
         # List of strings to filter the input text payload on. If any line contains
         # one of these strings, it will be filtered out before being parsed.
         # INTERNAL FEATURE, might be removed in future versions
-        config['_text_filter_blacklist'] = instance.get('_text_filter_blacklist', [])
+        config['_text_filter_blacklist'] = []
+
+        # Whether or not to use the service account bearer token for authentication
+        # if 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
+        # as a default path to get the token.
+        config['bearer_token_auth'] = is_affirmative(
+            instance.get('bearer_token_auth', default_instance.get('bearer_token_auth', False))
+        )
+
+        # Can be used to get a service account bearer token from files
+        # other than /var/run/secrets/kubernetes.io/serviceaccount/token
+        # 'bearer_token_auth' should be enabled.
+        config['bearer_token_path'] = instance.get('bearer_token_path', default_instance.get('bearer_token_path', None))
+
+        # The service account bearer token to be used for authentication
+        config['_bearer_token'] = self._get_bearer_token(config['bearer_token_auth'], config['bearer_token_path'])
+
+        config['telemetry'] = is_affirmative(instance.get('telemetry', default_instance.get('telemetry', False)))
 
         return config
 
@@ -234,6 +261,9 @@ class OpenMetricsScraperMixin(object):
             input_gen = self._text_filter_input(input_gen, scraper_config)
 
         for metric in text_fd_to_metric_families(input_gen):
+            self._send_telemetry_counter(
+                self.TELEMETRY_COUNTER_METRICS_INPUT_COUNT, len(metric.samples), scraper_config
+            )
             metric.type = scraper_config['type_overrides'].get(metric.name, metric.type)
             if metric.type not in self.METRIC_TYPES:
                 continue
@@ -251,6 +281,7 @@ class OpenMetricsScraperMixin(object):
         for line in input_gen:
             for item in scraper_config['_text_filter_blacklist']:
                 if item in line:
+                    self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_BLACKLIST_COUNT, 1, scraper_config)
                     break
             else:
                 # No blacklist matches, passing the line through
@@ -265,6 +296,12 @@ class OpenMetricsScraperMixin(object):
         Poll the data from prometheus and return the metrics as a generator.
         """
         response = self.poll(scraper_config)
+        if scraper_config['telemetry']:
+            if 'content-length' in response.headers:
+                content_len = int(response.headers['content-length'])
+            else:
+                content_len = len(response.content)
+            self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, content_len, scraper_config)
         try:
             # no dry run if no label joins
             if not scraper_config['label_joins']:
@@ -298,6 +335,29 @@ class OpenMetricsScraperMixin(object):
         """
         for metric in self.scrape_metrics(scraper_config):
             self.process_metric(metric, scraper_config, metric_transformers=metric_transformers)
+
+    def _telemetry_metric_name_with_namespace(self, metric_name, scraper_config):
+        return '{}.{}.{}'.format(scraper_config['namespace'], 'telemetry', metric_name)
+
+    def _send_telemetry_gauge(self, metric_name, val, scraper_config):
+        if scraper_config['telemetry']:
+            metric_name_with_namespace = self._telemetry_metric_name_with_namespace(metric_name, scraper_config)
+            # Determine the tags to send
+            custom_tags = scraper_config['custom_tags']
+            tags = list(custom_tags)
+            tags.extend(scraper_config['_metric_tags'])
+            self.gauge(metric_name_with_namespace, val, tags=tags)
+
+    def _send_telemetry_counter(self, metric_name, val, scraper_config, extra_tags=None):
+        if scraper_config['telemetry']:
+            metric_name_with_namespace = self._telemetry_metric_name_with_namespace(metric_name, scraper_config)
+            # Determine the tags to send
+            custom_tags = scraper_config['custom_tags']
+            tags = list(custom_tags)
+            tags.extend(scraper_config['_metric_tags'])
+            if extra_tags:
+                tags.extend(extra_tags)
+            self.count(metric_name_with_namespace, val, tags=tags)
 
     def _store_labels(self, metric, scraper_config):
         # If targeted metric, store labels
@@ -358,6 +418,14 @@ class OpenMetricsScraperMixin(object):
         self._store_labels(metric, scraper_config)
 
         if metric.name in scraper_config['ignore_metrics']:
+            self._send_telemetry_counter(
+                self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
+            )
+            return  # Ignore the metric
+
+        self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, len(metric.samples), scraper_config)
+
+        if self._filter_metric(metric, scraper_config):
             return  # Ignore the metric
 
         # Filter metric to see if we can enrich with joined labels
@@ -440,6 +508,12 @@ class OpenMetricsScraperMixin(object):
         if 'accept-encoding' not in headers:
             headers['accept-encoding'] = 'gzip'
         headers.update(scraper_config['extra_headers'])
+
+        # Add the bearer token to headers
+        bearer_token = scraper_config['_bearer_token']
+        if bearer_token is not None:
+            auth_header = {'Authorization': 'Bearer {}'.format(bearer_token)}
+            headers.update(auth_header)
 
         # Determine the SSL verification settings
         cert = None
@@ -559,7 +633,7 @@ class OpenMetricsScraperMixin(object):
                     hostname=custom_hostname,
                 )
             else:
-                sample[self.SAMPLE_LABELS]["quantile"] = float(sample[self.SAMPLE_LABELS]["quantile"])
+                sample[self.SAMPLE_LABELS]["quantile"] = str(float(sample[self.SAMPLE_LABELS]["quantile"]))
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self.gauge(
                     "{}.{}.quantile".format(scraper_config['namespace'], metric_name),
@@ -588,6 +662,8 @@ class OpenMetricsScraperMixin(object):
                 )
             elif sample[self.SAMPLE_NAME].endswith("_count"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
+                if scraper_config['send_histograms_buckets']:
+                    tags.append("upper_bound:none")
                 self.gauge(
                     "{}.{}.count".format(scraper_config['namespace'], metric_name),
                     val,
@@ -599,7 +675,7 @@ class OpenMetricsScraperMixin(object):
                 and sample[self.SAMPLE_NAME].endswith("_bucket")
                 and "Inf" not in sample[self.SAMPLE_LABELS]["le"]
             ):
-                sample[self.SAMPLE_LABELS]["le"] = float(sample[self.SAMPLE_LABELS]["le"])
+                sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                 self.gauge(
                     "{}.{}.count".format(scraper_config['namespace'], metric_name),
@@ -615,10 +691,34 @@ class OpenMetricsScraperMixin(object):
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
             if label_name not in scraper_config['exclude_labels']:
                 tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
-                _tags.append('{}:{}'.format(tag_name, label_value))
+                _tags.append('{}:{}'.format(to_string(tag_name), to_string(label_value)))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, sample, custom_tags=custom_tags, hostname=hostname
         )
 
     def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
+
+    def _get_bearer_token(self, bearer_token_auth, bearer_token_path):
+        if bearer_token_auth is False:
+            return None
+
+        path = None
+        if bearer_token_path is not None:
+            if isfile(bearer_token_path):
+                path = bearer_token_path
+            else:
+                self.log.error("File not found: {}".format(bearer_token_path))
+        elif isfile(self.KUBERNETES_TOKEN_PATH):
+            path = self.KUBERNETES_TOKEN_PATH
+
+        if path is None:
+            self.log.error("Cannot get bearer token from bearer_token_path or auto discovery")
+            raise IOError("Cannot get bearer token from bearer_token_path or auto discovery")
+
+        try:
+            with open(path, 'r') as f:
+                return f.read().rstrip()
+        except Exception as err:
+            self.log.error("Cannot get bearer token from path: {} - error: {}".format(path, err))
+            raise

@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 1.6.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3537](https://github.com/DataDog/integrations-core/pull/3537).
+
 ## 1.5.0 / 2019-02-18
 
 * [Added] Finish Python 3 support. See [#2915](https://github.com/DataDog/integrations-core/pull/2915).

@@ -1,5 +1,9 @@
 # CHANGELOG - activemq
 
+## 1.2.0 / 2019-07-04
+
+* [Added] Add log section. See [#4013](https://github.com/DataDog/integrations-core/pull/4013).
+
 ## 1.1.0 / 2018-10-12
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][1].

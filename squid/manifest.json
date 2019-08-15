@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "squid.",
-  "metric_to_check": "squid.cpu_time",
+  "metric_to_check": "squid.cachemgr.cpu_time",
   "name": "squid",
   "public_title": "Datadog-Squid Integration",
   "short_description": "Track metrics from your squid-cache servers with Datadog",
@@ -21,5 +21,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "squid"
+  "integration_id": "squid",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

@@ -33,6 +33,7 @@ EXPECTED_METRICS = [
     'hdfs.namenode.capacity_total',
     'hdfs.namenode.capacity_used',
     'hdfs.namenode.capacity_remaining',
+    'hdfs.namenode.capacity_in_use',
     'hdfs.namenode.total_load',
     'hdfs.namenode.blocks_total',
     'hdfs.namenode.max_objects',
@@ -50,6 +51,8 @@ EXPECTED_METRICS = [
     'hdfs.namenode.num_decommissioning_data_nodes',
     'hdfs.namenode.num_stale_data_nodes',
     'hdfs.namenode.num_stale_storages',
+    'hdfs.namenode.missing_blocks',
+    'hdfs.namenode.corrupt_blocks',
 ]
 
 HDFS_NAMENODE_AUTH_CONFIG = {

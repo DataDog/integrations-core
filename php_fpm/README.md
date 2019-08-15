@@ -7,13 +7,16 @@
 The PHP-FPM check monitors the state of your FPM pool and tracks request performance.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
+
 ### Installation
 
-The PHP-FPM check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your servers that use PHP-FPM.
+The PHP-FPM check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your servers that use PHP-FPM.
 
 ### Configuration
 
-Edit the `php_fpm.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample php_fpm.d/conf.yaml][4] for all available configuration options:
+Edit the `php_fpm.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample php_fpm.d/conf.yaml][5] for all available configuration options:
 
 ```
 init_config:
@@ -39,7 +42,7 @@ Configuration Options:
 * `password` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
 
-[Restart the Agent][5] to start sending PHP-FPM metrics to Datadog.
+[Restart the Agent][6] to start sending PHP-FPM metrics to Datadog.
 
 #### Multiple pools
 
@@ -85,12 +88,12 @@ instances:
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `php_fpm` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `php_fpm` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 The PHP-FPM check does not include any events.
@@ -102,13 +105,14 @@ The PHP-FPM check does not include any events.
 Returns CRITICAL if the Agent cannot ping PHP-FPM at the configured `ping_url`, otherwise OK.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/php_fpm/images/phpfpmoverview.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/datadog_checks/php_fpm/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/datadog_checks/php_fpm/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/php_fpm/metadata.csv
+[9]: https://docs.datadoghq.com/help

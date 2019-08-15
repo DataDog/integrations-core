@@ -11,6 +11,7 @@ from .utils import mocked_perform_request
 
 
 def test_flatten_json(check):
+    check = check({})
     with open(os.path.join(FIXTURES_PATH, 'nginx_plus_in.json')) as f:
         parsed = check.parse_json(f.read())
         parsed.sort()
@@ -23,6 +24,7 @@ def test_flatten_json(check):
 
 
 def test_flatten_json_timestamp(check):
+    check = check({})
     assert (
         check.parse_json(
             """
@@ -36,6 +38,7 @@ def test_flatten_json_timestamp(check):
 def test_plus_api(check, instance, aggregator):
     instance = deepcopy(instance)
     instance['use_plus_api'] = True
+    check = check(instance)
     check._perform_request = mock.MagicMock(side_effect=mocked_perform_request)
     check.check(instance)
 
@@ -46,6 +49,7 @@ def test_plus_api(check, instance, aggregator):
 
 
 def test_nest_payload(check):
+    check = check({})
     keys = ["foo", "bar"]
     payload = {"key1": "val1", "key2": "val2"}
 

@@ -14,6 +14,7 @@ def test_connect(check, instance, aggregator):
     """
     Testing that connection will work with instance
     """
+    check = check(instance)
     check.check(instance)
     aggregator.assert_metric("nginx.net.connections", tags=TAGS, count=1)
     extra_tags = ['host:{}'.format(HOST), 'port:{}'.format(PORT)]
@@ -26,10 +27,12 @@ def test_connect_ssl(check, instance_ssl, aggregator):
     Testing ssl connection
     """
     instance_ssl['ssl_validation'] = False
-    check.check(instance_ssl)
+    check_no_ssl = check(instance_ssl)
+    check_no_ssl.check(instance_ssl)
     aggregator.assert_metric("nginx.net.connections", tags=TAGS, count=1)
 
     # assert ssl validation throws an error
     with pytest.raises(requests.exceptions.SSLError):
         instance_ssl['ssl_validation'] = True
-        check.check(instance_ssl)
+        check_ssl = check(instance_ssl)
+        check_ssl.check(instance_ssl)

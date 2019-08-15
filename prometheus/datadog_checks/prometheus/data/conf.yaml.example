@@ -53,9 +53,9 @@ instances:
     #   flavor: origin
 
     ## @param type_overrides - list of key:value element - optional
-    ## Type override allows you to override a type in the prometheus the payload
+    ## Type override allows you to override a type in the prometheus payload
     ## or type an untyped metrics (they're ignored by default)
-    ## Supported <METRIC_TYPE> are `gauge`, `count`, `rate`
+    ## Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
     #
     # type_overrides:
     #   <METRIC_NAME>: <METRIC_TYPE>
@@ -69,7 +69,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param send_histogram_buckets - boolean - optional - default: true
+    ## @param send_histograms_buckets - boolean - optional - default: true
     ## Set send_histograms_buckets to true to send the histograms bucket.
     #
     # send_histograms_buckets: true

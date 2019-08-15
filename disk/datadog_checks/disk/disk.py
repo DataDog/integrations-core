@@ -11,7 +11,7 @@ from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
 
 try:
@@ -19,14 +19,7 @@ try:
 except ImportError:
     psutil = None
 
-try:
-    import datadog_agent  # noqa: F401
-
-    is_agent_6 = True
-except ImportError:
-    is_agent_6 = False
-
-
+# See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
 IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
 
 
@@ -44,6 +37,7 @@ class Disk(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
 
         instance = instances[0]
+        self._use_mount = is_affirmative(instance.get('use_mount', False))
         self._all_partitions = is_affirmative(instance.get('all_partitions', False))
         self._file_system_whitelist = instance.get('file_system_whitelist', [])
         self._file_system_blacklist = instance.get('file_system_blacklist', [])
@@ -52,39 +46,21 @@ class Disk(AgentCheck):
         self._mount_point_whitelist = instance.get('mount_point_whitelist', [])
         self._mount_point_blacklist = instance.get('mount_point_blacklist', [])
         self._tag_by_filesystem = is_affirmative(instance.get('tag_by_filesystem', False))
+        self._tag_by_label = is_affirmative(instance.get('tag_by_label', True))
         self._device_tag_re = instance.get('device_tag_re', {})
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
 
-        # TODO Remove this v5/v6 fork when agent 5 will be fully deprecated
-        if is_agent_6:
-            self._use_mount = is_affirmative(instance.get('use_mount', False))
-        else:
-            # FIXME: 6.x, drop use_mount option in datadog.conf
-            self._load_legacy_option(instance, 'use_mount', False, operation=is_affirmative)
-
-            # FIXME: 6.x, drop device_blacklist_re option in datadog.conf
-            self._load_legacy_option(
-                instance, 'excluded_disk_re', '^$', legacy_name='device_blacklist_re', operation=re.compile
-            )
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
+        self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
 
-    def _load_legacy_option(self, instance, option, default, legacy_name=None, operation=lambda l: l):
-        value = instance.get(option, default)
-        legacy_name = legacy_name or option
-
-        if value == default and legacy_name in self.agentConfig:
-            self.log.warning(
-                'Using `{}` in datadog.conf has been deprecated '
-                'in favor of `{}` in disk.yaml'.format(legacy_name, option)
-            )
-            value = self.agentConfig.get(legacy_name) or default
-
-        setattr(self, '_{}'.format(option), operation(value))
+        self.devices_label = {}
 
     def check(self, instance):
         """Get disk space/inode stats"""
+        if self._tag_by_label and Platform.is_linux():
+            self.devices_label = self._get_devices_label()
         # Windows and Mac will always have psutil
         # (we have packaged for both of them)
         if self._psutil():
@@ -133,6 +109,9 @@ class Disk(AgentCheck):
             for regex, device_tags in self._device_tag_re:
                 if regex.match(device_name):
                     tags.extend(device_tags)
+
+            if self.devices_label.get(device_name):
+                tags.append(self.devices_label.get(device_name))
 
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
@@ -284,6 +263,8 @@ class Disk(AgentCheck):
                 write_time_pct = disk.write_time * 100 / 1000
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
                 metric_tags.append('device:{}'.format(disk_name))
+                if self.devices_label.get(disk_name):
+                    metric_tags.append(self.devices_label.get(disk_name))
                 self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'), write_time_pct, tags=metric_tags)
             except AttributeError as e:
@@ -308,6 +289,10 @@ class Disk(AgentCheck):
                 if regex.match(device_name):
                     tags += device_tags
             tags.append('device:{}'.format(device_name))
+
+            if self.devices_label.get(device_name):
+                tags.append(self.devices_label.get(device_name))
+
             for metric_name, value in iteritems(self._collect_metrics_manually(device)):
                 self.gauge(metric_name, value, tags=tags)
 
@@ -455,3 +440,24 @@ class Disk(AgentCheck):
             except TypeError:
                 self.log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
         self._device_tag_re = device_tag_list
+
+    def _get_devices_label(self):
+        """
+        Get every label to create tags
+        """
+        devices_label = {}
+        try:
+            blkid_out, _, _ = get_subprocess_output(['blkid'], self.log)
+            all_devices = [l.split(':', 1) for l in blkid_out.splitlines()]
+
+            for d in all_devices:
+                # Line sample
+                # /dev/sda1: LABEL="MYLABEL" UUID="5eea373d-db36-4ce2-8c71-12ce544e8559" TYPE="ext4"
+                labels = self._blkid_label_re.findall(d[1])
+                if labels:
+                    devices_label[d[0]] = 'label:{}'.format(labels[0])
+
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use blkid to have device labels")
+
+        return devices_label

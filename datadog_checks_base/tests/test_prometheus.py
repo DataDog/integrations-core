@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # (C) Datadog, Inc. 2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -360,12 +362,27 @@ def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
     _l2 = ref_gauge.metric[0].label.add()
     _l2.name = 'my_2nd_label'
     _l2.value = 'my_2nd_label_value'
+    _l3 = ref_gauge.metric[0].label.add()
+    _l3.name = 'labél'
+    _l3.value = 'my_labél_value'
+    _l4 = ref_gauge.metric[0].label.add()
+    _l4.name = 'labél_mix'
+    _l4.value = u'my_labél_value🇫🇷🇪🇸🇺🇸'
+    _l5 = ref_gauge.metric[0].label.add()
+    _l5.name = u'labél_unicode'
+    _l5.value = u'my_labél_value'
     check = mocked_prometheus_check
     check._submit(check.metrics_mapper[ref_gauge.name], ref_gauge)
     check.gauge.assert_called_with(
         'prometheus.process.vm.bytes',
         39211008.0,
-        ['my_1st_label:my_1st_label_value', 'my_2nd_label:my_2nd_label_value'],
+        [
+            'my_1st_label:my_1st_label_value',
+            'my_2nd_label:my_2nd_label_value',
+            'labél:my_labél_value',
+            'labél_mix:my_labél_value🇫🇷🇪🇸🇺🇸',
+            'labél_unicode:my_labél_value',
+        ],
         hostname=None,
     )
 
@@ -556,7 +573,7 @@ def test_submit_histogram(mocked_prometheus_check):
     check._submit('custom.histogram', _histo)
     check.gauge.assert_has_calls(
         [
-            mock.call('prometheus.custom.histogram.count', 42, [], hostname=None),
+            mock.call('prometheus.custom.histogram.count', 42, ['upper_bound:none'], hostname=None),
             mock.call('prometheus.custom.histogram.sum', 3.14, [], hostname=None),
             mock.call('prometheus.custom.histogram.count', 33, ['upper_bound:12.7'], hostname=None),
             mock.call('prometheus.custom.histogram.count', 666, ['upper_bound:18.2'], hostname=None),

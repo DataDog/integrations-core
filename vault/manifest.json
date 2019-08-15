@@ -13,6 +13,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "vault.",
+  "metric_to_check": "vault.is_leader",
   "name": "vault",
   "public_title": "Datadog-Vault Integration",
   "short_description": "Vault is a secrets management service application",
@@ -23,5 +24,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "vault"
+  "integration_id": "vault",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

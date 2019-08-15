@@ -1,5 +1,18 @@
 # CHANGELOG - http_check
 
+## 4.1.1 / 2019-07-22
+
+* [Fixed] Fix detection of the embedded Agent directory. See [#4158](https://github.com/DataDog/integrations-core/pull/4158).
+
+## 4.1.0 / 2019-07-04
+
+* [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
+
+## 4.0.0 / 2019-05-14
+
+* [Changed] Remove every default header except `User-Agent`. See [#3644](https://github.com/DataDog/integrations-core/pull/3644).
+* [Added] Adhere to code style. See [#3516](https://github.com/DataDog/integrations-core/pull/3516).
+
 ## 3.2.1 / 2019-03-29
 
 * [Fixed] Fix Python 3.7 support. See [#3293](https://github.com/DataDog/integrations-core/pull/3293).

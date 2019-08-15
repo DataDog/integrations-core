@@ -20,5 +20,10 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "cisco-aci"
+  "integration_id": "cisco-aci",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

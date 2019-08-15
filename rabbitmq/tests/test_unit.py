@@ -7,12 +7,14 @@ import pytest
 import requests
 
 from datadog_checks.rabbitmq import RabbitMQ
-from datadog_checks.rabbitmq.rabbitmq import RabbitMQException
+from datadog_checks.rabbitmq.rabbitmq import NODE_TYPE, RabbitMQException
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.unit
 def test__get_data(check):
-    with mock.patch('datadog_checks.rabbitmq.rabbitmq.requests') as r:
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
         with pytest.raises(RabbitMQException) as e:
             check._get_data('')
@@ -67,7 +69,7 @@ def test__check_aliveness(check, aggregator):
 
     # only one vhost should be OK
     check._get_data.side_effect = [{"status": "ok"}, {}]
-    check._check_aliveness(instance, '', vhosts=['foo', 'bar'], custom_tags=[])
+    check._check_aliveness('', vhosts=['foo', 'bar'], custom_tags=[])
     sc = aggregator.service_checks('rabbitmq.aliveness')
     assert len(sc) == 2
     aggregator.assert_service_check('rabbitmq.aliveness', status=RabbitMQ.OK)
@@ -78,3 +80,12 @@ def test__check_aliveness(check, aggregator):
     with pytest.raises(RabbitMQException) as e:
         check._get_vhosts(instance, '')
         assert isinstance(e, RabbitMQException)
+
+
+@pytest.mark.unit
+def test__get_metrics(check, aggregator):
+    data = {'fd_used': 3.14, 'disk_free': 4242, 'mem_used': 9000}
+
+    assert check._get_metrics(data, NODE_TYPE, []) == 3
+    assert check._get_metrics(data, NODE_TYPE, [], 2) == 2
+    assert check._get_metrics(data, NODE_TYPE, [], 5) == 3

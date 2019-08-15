@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 1.10.0 / 2019-05-14
+
+* [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
+
 ## 1.9.0 / 2019-04-15
 
 * [Fixed] Do not return prematurely when calling `memory_info` on windows and solaris. See [#3618](https://github.com/DataDog/integrations-core/pull/3618).

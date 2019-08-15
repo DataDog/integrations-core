@@ -1,5 +1,19 @@
 # CHANGELOG - vsphere
 
+## 4.1.3 / 2019-06-19
+
+* [Fixed] Filters VMs in excluded hosts. See [#3933](https://github.com/DataDog/integrations-core/pull/3933).
+
+## 4.1.2 / 2019-06-17
+
+* [Fixed] [vsphere] update metric_to_check. See [#3904](https://github.com/DataDog/integrations-core/pull/3904).
+* [Fixed] Fix handling of gray events. See [#3864](https://github.com/DataDog/integrations-core/pull/3864).
+
+## 4.1.1 / 2019-06-01
+
+* [Fixed] Fix event alarms publishing. See [#3831](https://github.com/DataDog/integrations-core/pull/3831).
+* [Fixed] Fix unit for vsphere.mem.usage.avg. See [#3827](https://github.com/DataDog/integrations-core/pull/3827).
+
 ## 4.1.0 / 2019-04-25
 
 * [Added] Adhere to code style. See [#3581](https://github.com/DataDog/integrations-core/pull/3581).

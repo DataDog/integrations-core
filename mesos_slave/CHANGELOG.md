@@ -1,5 +1,13 @@
 # CHANGELOG - mesos_slave
 
+## 1.4.1 / 2019-06-01
+
+* [Fixed] Fix code style. See [#3838](https://github.com/DataDog/integrations-core/pull/3838).
+
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3539](https://github.com/DataDog/integrations-core/pull/3539).
+
 ## 1.3.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#2874](https://github.com/DataDog/integrations-core/pull/2874).

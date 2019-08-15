@@ -72,7 +72,7 @@ RE_LINE_EXT = re.compile(r'^\[(\d+)\] ([^:]+): (.*)$')
 SOURCE_TYPE_NAME = 'Nagios'
 
 
-class Nagios(AgentCheck):
+class NagiosCheck(AgentCheck):
 
     NAGIOS_CONF_KEYS = [
         re.compile(r'^(?P<key>log_file)\s*=\s*(?P<value>.+)$'),
@@ -84,9 +84,9 @@ class Nagios(AgentCheck):
 
     def gauge(self, *args, **kwargs):
         """
-        Compatability wrapper for Agents that do not submit gauge metrics with custom timestamps
+        Compatibility wrapper for Agents that do not submit gauge metrics with custom timestamps
         """
-        orig_gauge = super(Nagios, self).gauge
+        orig_gauge = super(NagiosCheck, self).gauge
         # remove 'timestamp' arg if the base class' gauge function does not accept a 'timestamp' arg
         if 'timestamp' in kwargs and 'timestamp' not in getargspec(orig_gauge).args:
             del kwargs['timestamp']
@@ -256,12 +256,12 @@ class NagiosTailer(object):
         self._line_parsed = 0
         # read until the end of file
         try:
-            self.log.debug("Start nagios check for file %s" % (self.log_path))
+            self.log.debug("Start nagios check for file %s" % self.log_path)
             next(self.gen)
             self.log.debug("Done nagios check for file %s (parsed %s line(s))" % (self.log_path, self._line_parsed))
         except StopIteration as e:
             self.log.exception(e)
-            self.log.warning("Can't tail %s file" % (self.log_path))
+            self.log.warning("Can't tail %s file" % self.log_path)
 
     def compile_file_template(self, file_template):
         try:
@@ -338,7 +338,7 @@ class NagiosEventLogTailer(NagiosTailer):
 
             return True
         except Exception:
-            self.log.exception("Unable to create a nagios event from line: [%s]" % (line))
+            self.log.exception("Unable to create a nagios event from line: [%s]" % line)
             return False
 
     def create_event(self, timestamp, event_type, hostname, fields, tags=None):
@@ -351,7 +351,7 @@ class NagiosEventLogTailer(NagiosTailer):
         event_payload = fields._asdict()
 
         msg_text = {
-            'event_type': event_payload.pop('event_type', None),
+            'event_type': event_type,
             'event_soft_hard': event_payload.pop('event_soft_hard', None),
             'check_name': event_payload.pop('check_name', None),
             'event_state': event_payload.pop('event_state', None),
@@ -405,15 +405,22 @@ class NagiosPerfDataTailer(NagiosTailer):
 
     def _parse_line(self, line):
         matched = self.line_pattern.match(line)
-        if matched:
+        if not matched:
+            self.log.debug("Non matching line found %s" % line)
+        else:
             self.log.debug("Matching line found %s" % line)
             data = matched.groupdict()
             metric_prefix = self._get_metric_prefix(data)
 
             # Parse the prefdata values, which are a space-delimited list of:
             #   'label'=value[UOM];[warn];[crit];[min];[max]
-            perf_data = data.get(self.perfdata_field, '').split(' ')
-            for pair in perf_data:
+            perf_data = data.get(self.perfdata_field, '')
+            if not perf_data:
+                self.log.warning(
+                    'Could not find field {} in {}, check your perfdata_format'.format(self.perfdata_field, line)
+                )
+                return
+            for pair in perf_data.split(' '):
                 pair_match = self.pair_pattern.match(pair)
                 if not pair_match:
                     continue

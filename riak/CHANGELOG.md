@@ -1,5 +1,13 @@
 # CHANGELOG - riak
 
+## 1.6.0 / 2019-07-12
+
+* [Added] Add logs section. See [#3995](https://github.com/DataDog/integrations-core/pull/3995).
+
+## 1.5.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3563](https://github.com/DataDog/integrations-core/pull/3563).
+
 ## 1.4.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2774][1].

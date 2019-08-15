@@ -1,5 +1,10 @@
 # CHANGELOG - win32_event_log
 
+## 2.0.0 / 2019-05-14
+
+* [Changed] Require the use of filters. See [#3652](https://github.com/DataDog/integrations-core/pull/3652).
+* [Added] Adhere to code style. See [#3582](https://github.com/DataDog/integrations-core/pull/3582).
+
 ## 1.4.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#3040](https://github.com/DataDog/integrations-core/pull/3040).

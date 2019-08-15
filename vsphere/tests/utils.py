@@ -131,7 +131,7 @@ def get_mocked_server():
     # mock pyvmomi stuff
     all_mors = create_topology(os.path.join(HERE, 'fixtures', 'vsphere_topology.json'))
     root_folder_mock = next(mor for mor in all_mors if mor.name == "rootFolder")
-    event_mock = MagicMock(createdTime=datetime.now())
+    event_mock = MagicMock(createdTime=datetime.utcnow())
     eventmanager_mock = MagicMock(latestEvent=event_mock)
     property_collector_mock = MagicMock()
     property_collector_mock.RetrievePropertiesEx.return_value = retrieve_properties_mock(all_mors)

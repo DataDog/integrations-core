@@ -19,8 +19,8 @@ class TrelloClient:
             'Trace': '5bcf3ffbe0651642ae029038',
         }
         self.label_team_map = {
+            'team/agent-apm': 'Trace',
             'team/agent-core': 'Agent',
-            'team/apm': 'Trace',
             'team/burrito': 'Process',
             'team/containers': 'Containers',
             'team/integrations': 'Integrations',

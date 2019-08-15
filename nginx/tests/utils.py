@@ -16,7 +16,7 @@ def mocked_perform_request(*args, **kwargs):
     A mocked version of _perform_request
     """
     response = mock.MagicMock()
-    url = args[1]
+    url = args[0]
 
     if '/2/nginx' in url:
         file_contents = read_file(os.path.join(FIXTURES_PATH, 'plus_api_nginx.json'))

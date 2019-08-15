@@ -8,6 +8,8 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying these instructions.
+
 ### Installation
 
 #### Prerequisite
@@ -124,7 +126,7 @@ Providing custom queries is also supported. Each query must have 3 parameters:
 | Parameter | Description |
 | ----      | ---         |
 | `metric_prefix`  | This is what each metric starts with. |
-| `query`  | This is the SQL to execute. It can be a simple statement or a multi-line script. Only the first row of the result is read. |
+| `query`  | This is the SQL to execute. It can be a simple statement or a multi-line script. All rows of the result are evaluated. |
 | `columns` | This is a list representing each column, ordered sequentially from left to right. There are 2 required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix to append to the `metric_prefix` in order to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
 
 Optionally use the `tags` parameter to apply a list of tags to each metric collected.
@@ -184,3 +186,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [10]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations

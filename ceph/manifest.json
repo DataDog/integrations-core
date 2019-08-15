@@ -1,7 +1,8 @@
 {
   "categories": [
     "data store",
-    "os & system"
+    "os & system",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "Ceph",
@@ -25,5 +26,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "ceph"
+  "integration_id": "ceph",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

@@ -16,7 +16,7 @@ def test_check(check, aggregator, mocker):
     server_mock = ldap3.Server("fake_server")
     conn_mock = ldap3.Connection(server_mock, client_strategy=ldap3.MOCK_SYNC, collect_usage=True)
     # usage.last_received_time is not populated when using mock connection, let's set a value
-    conn_mock.usage.last_received_time = datetime.datetime.now()
+    conn_mock.usage.last_received_time = datetime.datetime.utcnow()
     conn_mock.strategy.entries_from_json(os.path.join(HERE, "fixtures", "monitor.json"))
     instance = {
         "url": "fake_server",

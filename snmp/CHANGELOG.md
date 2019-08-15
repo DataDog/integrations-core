@@ -1,5 +1,17 @@
 # CHANGELOG - snmp
 
+## 1.9.0 / 2019-07-13
+
+* [Added] Add support for string types. See [#4087](https://github.com/DataDog/integrations-core/pull/4087).
+
+## 1.8.0 / 2019-07-04
+
+* [Added] Match OIDs with leading dots. See [#3854](https://github.com/DataDog/integrations-core/pull/3854).
+
+## 1.7.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3565](https://github.com/DataDog/integrations-core/pull/3565).
+
 ## 1.6.0 / 2019-03-29
 
 * [Added] Add metrics config globally. See [#3230](https://github.com/DataDog/integrations-core/pull/3230).

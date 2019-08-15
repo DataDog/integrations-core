@@ -3,12 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
 
+import os
+
 import tox
 import tox.config
 
 STYLE_CHECK_ENV_NAME = 'style'
 STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
+E2E_READY_CONDITION = 'e2e ready if'
 
 
 @tox.hookimpl
@@ -19,10 +22,6 @@ def tox_configure(config):
     """
     sections = config._cfg.sections
 
-    # Cache these
-    make_envconfig = None
-    reader = None
-
     # Default to false so:
     # 1. we don't affect other projects using tox
     # 2. check migrations can happen gradually
@@ -30,11 +29,23 @@ def tox_configure(config):
         # Disable flake8 since we already include that
         config.envlist[:] = [env for env in config.envlist if not env.endswith('flake8')]
 
-        make_envconfig = get_make_envconfig(make_envconfig)
-        reader = get_reader(reader, config)
+        make_envconfig = get_make_envconfig()
+        reader = get_reader(config)
 
         add_style_checker(config, sections, make_envconfig, reader)
         add_style_formatter(config, sections, make_envconfig, reader)
+
+    # Conditionally set 'e2e ready' depending on env variables
+    description = sections.get('testenv', {}).get('description')
+    if description and E2E_READY_CONDITION in description:
+        data, var = description.split(' if ')
+        if var in os.environ:
+            description = data
+        else:
+            description = '{} is missing'.format(var)
+        for cfg in config.envconfigs.values():
+            if E2E_READY_CONDITION in cfg.description:
+                cfg.description = description
 
 
 def add_style_checker(config, sections, make_envconfig, reader):
@@ -42,7 +53,8 @@ def add_style_checker(config, sections, make_envconfig, reader):
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
     sections[section] = {
         'platform': 'linux|darwin|win32',
-        # These tools only support Python 3+
+        # These tools require Python 3.6+
+        # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
         'deps': 'flake8\nflake8-bugbear\nblack\nisort[pyproject]>=4.3.15',
@@ -56,7 +68,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
 
     # Intentionally add to envlist when seeing what is available
     if config.option.env is None or config.option.env == STYLE_CHECK_ENV_NAME:
-        config.envlist.append(STYLE_CHECK_ENV_NAME)
+        config.envlist_default.append(STYLE_CHECK_ENV_NAME)
 
 
 def add_style_formatter(config, sections, make_envconfig, reader):
@@ -64,7 +76,8 @@ def add_style_formatter(config, sections, make_envconfig, reader):
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
     sections[section] = {
         'platform': 'linux|darwin|win32',
-        # These tools only support Python 3+
+        # These tools require Python 3.6+
+        # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
         'deps': 'black\nisort[pyproject]>=4.3.15',
@@ -79,28 +92,26 @@ def add_style_formatter(config, sections, make_envconfig, reader):
 
     # Intentionally add to envlist when seeing what is available
     if config.option.env is None or config.option.env == STYLE_FORMATTER_ENV_NAME:
-        config.envlist.append(STYLE_FORMATTER_ENV_NAME)
+        config.envlist_default.append(STYLE_FORMATTER_ENV_NAME)
 
 
-def get_make_envconfig(make_envconfig):
-    if make_envconfig is None:
-        make_envconfig = tox.config.ParseIni.make_envconfig
+def get_make_envconfig():
+    make_envconfig = tox.config.ParseIni.make_envconfig
 
-        # Make this a non-bound method for Python 2 compatibility
-        make_envconfig = getattr(make_envconfig, '__func__', make_envconfig)
+    # Make this a non-bound method for Python 2 compatibility
+    make_envconfig = getattr(make_envconfig, '__func__', make_envconfig)
 
     return make_envconfig
 
 
-def get_reader(reader, config):
-    if reader is None:
-        # This is just boilerplate necessary to create a valid reader
-        reader = tox.config.SectionReader('tox', config._cfg)
-        reader.addsubstitutions(toxinidir=config.toxinidir, homedir=config.homedir)
-        reader.addsubstitutions(toxworkdir=config.toxworkdir)
-        config.distdir = reader.getpath('distdir', '{toxworkdir}/dist')
-        reader.addsubstitutions(distdir=config.distdir)
-        config.distshare = reader.getpath('distshare', '{homedir}/.tox/distshare')
-        reader.addsubstitutions(distshare=config.distshare)
+def get_reader(config):
+    # This is just boilerplate necessary to create a valid reader
+    reader = tox.config.SectionReader('tox', config._cfg)
+    reader.addsubstitutions(toxinidir=config.toxinidir, homedir=config.homedir)
+    reader.addsubstitutions(toxworkdir=config.toxworkdir)
+    config.distdir = reader.getpath('distdir', '{toxworkdir}/dist')
+    reader.addsubstitutions(distdir=config.distdir)
+    config.distshare = reader.getpath('distshare', '{homedir}/.tox/distshare')
+    reader.addsubstitutions(distshare=config.distshare)
 
     return reader

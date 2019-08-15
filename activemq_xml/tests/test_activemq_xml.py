@@ -1,21 +1,33 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from itertools import product
+
+import pytest
 
 from datadog_checks.activemq_xml import ActiveMQXML
 
 from .common import CHECK_NAME, CONFIG, GENERAL_METRICS, QUEUE_METRICS, SUBSCRIBER_METRICS, TOPIC_METRICS, URL
 
 
-def test_check(aggregator):
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_integration(aggregator):
     """
     Collect ActiveMQ metrics
     """
-    check = ActiveMQXML(CHECK_NAME, {}, {})
+    check = ActiveMQXML(CHECK_NAME, {}, [CONFIG])
     check.check(CONFIG)
+    _test_check(aggregator)
 
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check):
+    aggregator = dd_agent_check(CONFIG)
+    _test_check(aggregator)
+
+
+def _test_check(aggregator):
     tags = ["url:{}".format(URL)]
 
     # Test metrics

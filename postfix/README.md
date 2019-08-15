@@ -7,9 +7,12 @@
 This check monitors the size of all your Postfix queues.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
+
 ### Installation
 
-The Postfix check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Postfix servers.
+The Postfix check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Postfix servers.
 
 ## Configuration
 This check can be configured to use the `find` command which requires granting the dd-agent user sudo access to get a count of messages in the `incoming`, `active`, and `deferred` mail queues.
@@ -19,7 +22,7 @@ Optionally, you can configure the agent to use a built in `postqueue -p` command
 **WARNING**: Using `postqueue` to monitor the mail queues will not report a count of messages for the `incoming` queue.
 
 ### Using sudo
-Edit the file `postfix.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample postfix.d/conf.yaml][4] for all available configuration options:
+Edit the file `postfix.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample postfix.d/conf.yaml][5] for all available configuration options:
 
 ```
 init_config:
@@ -48,7 +51,7 @@ dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type 
 ```
 
 ### Using postqueue
-Edit the `postfix.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]:
+Edit the `postfix.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]:
 
 ```
 init_config:
@@ -76,9 +79,9 @@ authorized_mailq_users (static:anyone)
 ```
 List of users who are authorized to view the queue.
 
-[Restart the Agent][5] to start sending Postfix metrics to Datadog.
+[Restart the Agent][6] to start sending Postfix metrics to Datadog.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
@@ -92,35 +95,31 @@ The naming convention and log file destinations are configurable:
     mail.debug                                  /var/log/maillog
 ```
 
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-* Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+    ```yaml
+      logs_enabled: true
+    ```
 
-  ```
-  logs_enabled: true
-  ```
+2. Add the following configuration block to your `postfix.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample postfix.d/conf.yaml][6] for all available configuration options.
 
-* Add the following configuration block to your `postfix.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample postfix.d/conf.yaml][5] for all available configuration options.
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/mail.log
+          source: postfix
+          service: myapp
+    ```
 
-  ```
-  logs:
-    - type: file
-      path: /var/log/mail.log
-      source: postfix
-      service: myapp
-  ```
-
-* [Restart the Agent][6].
-
-**Learn more about log collection [in the log documentation][7]**
-
+3. [Restart the Agent][7].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `postfix` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `postfix` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][9] for a list of metrics provided by this check.
+See [metadata.csv][10] for a list of metrics provided by this check.
 
 ### Events
 The Postfix check does not include any events.
@@ -129,20 +128,22 @@ The Postfix check does not include any events.
 The Postfix check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-* [Monitor Postfix queue performance][6]
+Additional helpful documentation, links, and articles:
+
+* [Monitor Postfix queue performance][7]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postfix/images/postfixgraph.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/postfix/datadog_checks/postfix/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://www.datadoghq.com/blog/monitor-postfix-queues
-[7]: https://docs.datadoghq.com/logs
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
-[10]: https://docs.datadoghq.com/help
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/postfix/datadog_checks/postfix/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[7]: https://www.datadoghq.com/blog/monitor-postfix-queues
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[10]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
+[11]: https://docs.datadoghq.com/help

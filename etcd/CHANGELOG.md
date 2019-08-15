@@ -1,5 +1,9 @@
 # CHANGELOG - etcd
 
+## 1.8.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3505](https://github.com/DataDog/integrations-core/pull/3505).
+
 ## 1.7.0 / 2019-02-18
 
 * [Fixed] Use alpha grpc gateway endpoint. See [#3125](https://github.com/DataDog/integrations-core/pull/3125).

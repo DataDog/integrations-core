@@ -6,6 +6,7 @@ COMMON_METRICS = [
     'rabbitmq.node.fd_used',
     'rabbitmq.node.disk_free',
     'rabbitmq.node.mem_used',
+    'rabbitmq.node.mem_limit',
     'rabbitmq.node.run_queue',
     'rabbitmq.node.sockets_used',
     'rabbitmq.node.partitions',
@@ -19,6 +20,14 @@ E_METRICS = [
     'rabbitmq.exchange.messages.publish_in.rate',
     'rabbitmq.exchange.messages.publish_out.count',
     'rabbitmq.exchange.messages.publish_out.rate',
+]
+
+# Only present in 3.5
+E_METRICS_35 = [
+    'rabbitmq.exchange.messages.confirm.count',
+    'rabbitmq.exchange.messages.confirm.rate',
+    'rabbitmq.exchange.messages.return_unroutable.count',
+    'rabbitmq.exchange.messages.return_unroutable.rate',
 ]
 
 Q_METRICS = [

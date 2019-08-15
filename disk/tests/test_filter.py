@@ -7,7 +7,7 @@ from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.disk.disk import IGNORE_CASE, Disk
 
 from .mocks import MockPart
-from .utils import requires_windows
+from .utils import assert_regex_equal, requires_windows
 
 
 def test_default_casing():
@@ -34,12 +34,12 @@ def test_bad_config_string_regex():
     }
     c = Disk('disk', None, {}, [instance])
 
-    assert c._file_system_whitelist == re.compile('test', re.I)
-    assert c._file_system_blacklist == re.compile('test|iso9660$', re.I)
-    assert c._device_whitelist == re.compile('test', IGNORE_CASE)
-    assert c._device_blacklist == re.compile('test', IGNORE_CASE)
-    assert c._mount_point_whitelist == re.compile('test', IGNORE_CASE)
-    assert c._mount_point_blacklist == re.compile('test', IGNORE_CASE)
+    assert_regex_equal(c._file_system_whitelist, re.compile('test', re.I))
+    assert_regex_equal(c._file_system_blacklist, re.compile('test|iso9660$', re.I))
+    assert_regex_equal(c._device_whitelist, re.compile('test', IGNORE_CASE))
+    assert_regex_equal(c._device_blacklist, re.compile('test', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_whitelist, re.compile('test', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_blacklist, re.compile('test', IGNORE_CASE))
 
 
 def test_ignore_empty_regex():
@@ -53,12 +53,12 @@ def test_ignore_empty_regex():
     }
     c = Disk('disk', None, {}, [instance])
 
-    assert c._file_system_whitelist == re.compile('test', re.I)
-    assert c._file_system_blacklist == re.compile('test|iso9660$', re.I)
-    assert c._device_whitelist == re.compile('test', IGNORE_CASE)
-    assert c._device_blacklist == re.compile('test', IGNORE_CASE)
-    assert c._mount_point_whitelist == re.compile('test', IGNORE_CASE)
-    assert c._mount_point_blacklist == re.compile('test', IGNORE_CASE)
+    assert_regex_equal(c._file_system_whitelist, re.compile('test', re.I))
+    assert_regex_equal(c._file_system_blacklist, re.compile('test|iso9660$', re.I))
+    assert_regex_equal(c._device_whitelist, re.compile('test', IGNORE_CASE))
+    assert_regex_equal(c._device_blacklist, re.compile('test', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_whitelist, re.compile('test', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_blacklist, re.compile('test', IGNORE_CASE))
 
 
 def test_exclude_bad_devices():
@@ -189,9 +189,9 @@ def test_legacy_config():
     }
     c = Disk('disk', None, {}, [instance])
 
-    assert c._file_system_blacklist == re.compile('iso9660$|test$', re.I)
-    assert c._device_blacklist == re.compile('test1$|test2', IGNORE_CASE)
-    assert c._mount_point_blacklist == re.compile('test', IGNORE_CASE)
+    assert_regex_equal(c._file_system_blacklist, re.compile('iso9660$|test$', re.I))
+    assert_regex_equal(c._device_blacklist, re.compile('test1$|test2', IGNORE_CASE))
+    assert_regex_equal(c._mount_point_blacklist, re.compile('test', IGNORE_CASE))
 
 
 def test_legacy_exclude_disk():

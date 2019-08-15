@@ -42,4 +42,4 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return GoExpvar(common.CHECK_NAME, {}, {})
+    return GoExpvar(common.CHECK_NAME, {}, [common.INSTANCE])

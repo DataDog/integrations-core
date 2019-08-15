@@ -1,18 +1,23 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+import os
 from collections import OrderedDict
 
 import mock
 import pytest
 import requests
+import requests_kerberos
+import requests_ntlm
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
 from datadog_checks.dev import EnvVars
+from datadog_checks.dev.utils import running_on_appveyor
 
 pytestmark = pytest.mark.http
 
@@ -39,14 +44,28 @@ class TestTimeout:
         # Assert the timeout is slightly larger than a multiple of 3,
         # which is the default TCP packet retransmission window. See:
         # https://tools.ietf.org/html/rfc2988
-        assert 0 < http.options['timeout'] % 3 <= 1
+        assert 0 < http.options['timeout'][0] % 3 <= 1
 
     def test_config_timeout(self):
         instance = {'timeout': 24.5}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['timeout'] == 24.5
+        assert http.options['timeout'] == (24.5, 24.5)
+
+    def test_config_multiple_timeouts(self):
+        instance = {'read_timeout': 4, 'connect_timeout': 10}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['timeout'] == (10, 4)
+
+    def test_config_init_config_override(self):
+        instance = {}
+        init_config = {'timeout': 16}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['timeout'] == (16, 16)
 
 
 class TestHeaders:
@@ -55,7 +74,7 @@ class TestHeaders:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['headers'] is None
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0'}
 
     def test_config_headers(self):
         headers = OrderedDict((('key1', 'value1'), ('key2', 'value2')))
@@ -71,6 +90,23 @@ class TestHeaders:
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['headers'] == {'answer': '42'}
+
+    def test_config_extra_headers(self):
+        headers = OrderedDict((('key1', 'value1'), ('key2', 'value2')))
+        instance = {'extra_headers': headers}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        complete_headers = OrderedDict({'User-Agent': 'Datadog Agent/0.0.0'})
+        complete_headers.update(headers)
+        assert list(iteritems(http.options['headers'])) == list(iteritems(complete_headers))
+
+    def test_config_extra_headers_string_values(self):
+        instance = {'extra_headers': {'answer': 42}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
 
 
 class TestVerify:
@@ -154,6 +190,132 @@ class TestAuth:
         http = RequestsWrapper(instance, init_config)
 
         assert http.options['auth'] is None
+
+    def test_config_kerberos(self):
+        instance = {'kerberos_auth': 'required'}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_kerberos.HTTPKerberosAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with(
+                mutual_authentication=requests_kerberos.REQUIRED,
+                delegate=False,
+                force_preemptive=False,
+                hostname_override=None,
+                principal=None,
+            )
+
+        with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
+            RequestsWrapper({'kerberos_auth': 'optional'}, init_config)
+
+            m.assert_called_once_with(
+                mutual_authentication=requests_kerberos.OPTIONAL,
+                delegate=False,
+                force_preemptive=False,
+                hostname_override=None,
+                principal=None,
+            )
+
+        with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
+            RequestsWrapper({'kerberos_auth': 'disabled'}, init_config)
+
+            m.assert_called_once_with(
+                mutual_authentication=requests_kerberos.DISABLED,
+                delegate=False,
+                force_preemptive=False,
+                hostname_override=None,
+                principal=None,
+            )
+
+    def test_config_kerberos_shortcut(self):
+        instance = {'kerberos_auth': True}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_kerberos.HTTPKerberosAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with(
+                mutual_authentication=requests_kerberos.REQUIRED,
+                delegate=False,
+                force_preemptive=False,
+                hostname_override=None,
+                principal=None,
+            )
+
+    def test_config_kerberos_unknown(self):
+        instance = {'kerberos_auth': 'unknown'}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError):
+            RequestsWrapper(instance, init_config)
+
+    def test_config_kerberos_keytab_file(self):
+        instance = {'kerberos_keytab': '/test/file'}
+        init_config = {}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert os.environ.get('KRB5_CLIENT_KTNAME') is None
+
+        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
+            assert http.get('https://www.google.com') == '/test/file'
+
+        assert os.environ.get('KRB5_CLIENT_KTNAME') is None
+
+    def test_config_kerberos_keytab_file_rollback(self):
+        instance = {'kerberos_keytab': '/test/file'}
+        init_config = {}
+
+        http = RequestsWrapper(instance, init_config)
+
+        with EnvVars({'KRB5_CLIENT_KTNAME': 'old'}):
+            assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
+
+            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5_CLIENT_KTNAME')):
+                assert http.get('https://www.google.com') == '/test/file'
+
+            assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
+
+    def test_config_kerberos_legacy_remap(self):
+        instance = {'kerberos': True}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_kerberos.HTTPKerberosAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with(
+                mutual_authentication=requests_kerberos.REQUIRED,
+                delegate=False,
+                force_preemptive=False,
+                hostname_override=None,
+                principal=None,
+            )
+
+    def test_config_ntlm(self):
+        instance = {'ntlm_domain': 'domain\\user', 'password': 'pass'}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_ntlm.HttpNtlmAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_ntlm.HttpNtlmAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with('domain\\user', 'pass')
 
 
 class TestProxies:
@@ -293,6 +455,14 @@ class TestProxies:
 
         http.get('https://www.google.com')
 
+    @pytest.mark.skipif(running_on_appveyor(), reason="Cannot run on appveyor")
+    def test_socks5_proxy(self, socks5_proxy):
+        instance = {'proxy': {'http': 'socks5h://{}'.format(socks5_proxy)}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        http.get('http://www.google.com')
+        http.get('http://nginx')
+
 
 class TestIgnoreTLSWarning:
     def test_config_default(self):
@@ -387,12 +557,20 @@ class TestRemapper:
         remapper = {'prometheus_timeout': {'name': 'timeout'}}
         http = RequestsWrapper(instance, init_config, remapper)
 
-        assert http.options['timeout'] == STANDARD_FIELDS['timeout']
+        assert http.options['timeout'] == (STANDARD_FIELDS['timeout'], STANDARD_FIELDS['timeout'])
 
     def test_invert(self):
         instance = {'disable_ssl_validation': False}
         init_config = {}
         remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'default': False, 'invert': True}}
+        http = RequestsWrapper(instance, init_config, remapper)
+
+        assert http.options['verify'] is True
+
+    def test_invert_without_explicit_default(self):
+        instance = {}
+        init_config = {}
+        remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True}}
         http = RequestsWrapper(instance, init_config, remapper)
 
         assert http.options['verify'] is True
@@ -412,6 +590,64 @@ class TestRemapper:
         http = RequestsWrapper(instance, init_config, remapper)
 
         assert http.options['verify'] is True
+
+
+class TestLogger:
+    def test_default(self, caplog):
+        check = AgentCheck('test', {}, [{}])
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            check.http.get('https://www.google.com')
+
+        expected_message = 'Sending GET request to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
+
+    def test_instance(self, caplog):
+        instance = {'log_requests': True}
+        init_config = {}
+        check = AgentCheck('test', init_config, [instance])
+
+        assert check.http.logger is check.log
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            check.http.get('https://www.google.com')
+
+        expected_message = 'Sending GET request to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.DEBUG and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
+
+    def test_init_config(self, caplog):
+        instance = {}
+        init_config = {'log_requests': True}
+        check = AgentCheck('test', init_config, [instance])
+
+        assert check.http.logger is check.log
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            check.http.get('https://www.google.com')
+
+        expected_message = 'Sending GET request to https://www.google.com'
+        for _, level, message in caplog.record_tuples:
+            if level == logging.DEBUG and message == expected_message:
+                break
+        else:
+            raise AssertionError('Expected DEBUG log with message `{}`'.format(expected_message))
+
+    def test_instance_override(self, caplog):
+        instance = {'log_requests': False}
+        init_config = {'log_requests': True}
+        check = AgentCheck('test', init_config, [instance])
+
+        with caplog.at_level(logging.DEBUG), mock.patch('requests.get'):
+            check.http.get('https://www.google.com')
+
+        expected_message = 'Sending GET request to https://www.google.com'
+        for _, _, message in caplog.record_tuples:
+            assert message != expected_message
 
 
 class TestAPI:

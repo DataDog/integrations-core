@@ -6,13 +6,15 @@ Monitor the up/down status of local or remote HTTP endpoints. The HTTP check can
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
+
 ### Installation
 
-The HTTP check is included in the [Datadog Agent][1] package, so you don't need to install anything else on the servers from which you will probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
+The HTTP check is included in the [Datadog Agent][2] package, so you don't need to install anything else on the servers from which you will probe your HTTP sites. Though many metrics-oriented checks are best run on the same host(s) as the monitored service, you may want to run this status-oriented check from hosts that do not run the monitored sites.
 
 ### Configuration
 
-Edit the `http_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample http_check.d/conf.yaml][3] for all available configuration options:
+Edit the `http_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample http_check.d/conf.yaml][4] for all available configuration options:
 
 ```
 init_config:
@@ -32,9 +34,9 @@ instances:
 
 The HTTP check has more configuration options than many checks - many more than are shown above. Most options are opt-in, e.g. the Agent will not check SSL validation unless you configure the requisite options. Notably, the Agent _will_ check for soon-to-expire SSL certificates by default.
 
-This check runs on every run of the Agent collector, which defaults to every 15 seconds. To set a custom run frequency for this check, refer to the [collection interval][4] section of the custom check documentation.
+This check runs on every run of the Agent collector, which defaults to every 15 seconds. To set a custom run frequency for this check, refer to the [collection interval][5] section of the custom check documentation.
 
-See the [sample http_check.d/conf.yaml][3] for a full list and description of available options, here is a list of them:
+See the [sample http_check.d/conf.yaml][4] for a full list and description of available options, here is a list of them:
 
 | Setting                          | Description                                                                                                                                                                                                                                                                                                                 |
 | ---                              | ---                                                                                                                                                                                                                                                                                                                         |
@@ -56,23 +58,23 @@ See the [sample http_check.d/conf.yaml][3] for a full list and description of av
 | `days_warning` & `days_critical` | When `check_certificate_expiration` is enabled, these settings will raise a warning or critical alert when the SSL certificate is within the specified number of days from expiration.                                                                                                                                      |
 | `check_hostname`                 | When `check_certificate_expiration` is enabled, this setting will raise a warning if the hostname on the SSL certificate does not match the host of the given URL.                                                                                                                                                          |
 | `ssl_server_name`                | When `check_certificate_expiration` is enabled, this setting specifies the hostname of the service to connect to and it also overrides the host to match with if check_hostname is enabled.                                                                                                                                 |
-| `headers`                        | This parameter allows you to send additional headers with the request. See the [example YAML file][5] for additional information and caveats.                                                     |
+| `headers`                        | This parameter allows you to send additional headers with the request. See the [example YAML file][6] for additional information and caveats.                                                     |
 | `skip_proxy`                     | If set, the check will bypass proxy settings and attempt to reach the check url directly. This defaults to `false`.                                                                                                                                                                                                         |
 | `allow_redirects`                | This setting allows the service check to follow HTTP redirects and defaults to `true`.                                                                                                                                                                                                                                      |
-| `tags`                           | A list of arbitrary tags that will be associated with the check. For more information about tags, see our [Guide to tagging][6] and blog post, [The power of tagged metrics][7]                                                                                                                                      |
+| `tags`                           | A list of arbitrary tags that will be associated with the check. For more information about tags, see our [Guide to tagging][7] and blog post, [The power of tagged metrics][8]                                                                                                                                      |
 
 
-When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent][8] to begin sending HTTP service checks and response times to Datadog.
+When you have finished configuring `http_check.d/conf.yaml`, [restart the Agent][9] to begin sending HTTP service checks and response times to Datadog.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][9] and look for `http_check` under the Checks section.
+[Run the Agent's `status` subcommand][10] and look for `http_check` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this integration.
+See [metadata.csv][11] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -80,7 +82,7 @@ The HTTP check does not include any events.
 
 ### Service Checks
 
-To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][11] page, not 'Integration'.
+To create alert conditions on these service checks in Datadog, select 'Network' on the [Create Monitor][12] page, not 'Integration'.
 
 **`http.can_connect`**:
 
@@ -107,17 +109,18 @@ Otherwise, returns `UP`.
 To disable this check, set `check_certificate_expiration` to false.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][12].
+Need help? Contact [Datadog support][13].
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[3]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/developers/write_agent_check/?tab=agentv6#collection-interval
-[5]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/getting_started/tagging
-[7]: https://www.datadoghq.com/blog/the-power-of-tagged-metrics
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
-[11]: https://app.datadoghq.com/monitors#/create
-[12]: https://docs.datadoghq.com/help
+[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/developers/write_agent_check/?tab=agentv6#collection-interval
+[6]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
+[7]: https://docs.datadoghq.com/getting_started/tagging
+[8]: https://www.datadoghq.com/blog/the-power-of-tagged-metrics
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
+[12]: https://app.datadoghq.com/monitors#/create
+[13]: https://docs.datadoghq.com/help

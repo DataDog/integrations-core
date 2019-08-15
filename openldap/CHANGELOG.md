@@ -1,5 +1,13 @@
 # CHANGELOG - openldap
 
+## 1.4.0 / 2019-07-08
+
+* [Added] Add log section. See [#3974](https://github.com/DataDog/integrations-core/pull/3974).
+
+## 1.3.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3548](https://github.com/DataDog/integrations-core/pull/3548).
+
 ## 1.2.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2760][1].
