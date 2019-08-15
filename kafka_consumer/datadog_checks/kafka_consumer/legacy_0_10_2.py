@@ -35,7 +35,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         super(LegacyKafkaCheck_0_10_2, self).__init__(name, init_config, instances)
         self._context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
         self._custom_tags = self.instance.get('tags', [])
-        self._kafka_timeout = int(init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
         self._kafka_client = self._create_kafka_client()
         self._zk_timeout = int(init_config.get('zk_timeout', 5))
 
