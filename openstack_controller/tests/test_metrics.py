@@ -11,7 +11,7 @@ from datadog_checks.openstack_controller import OpenStackControllerCheck
 from . import common
 
 
-def make_request_responses(url, header, params=None, timeout=None):
+def make_request_responses(url, params=None, timeout=None):
     if url == "http://10.0.2.15:5000/v3/projects":
         mock_path = "v3_projects.json"
     elif url == "http://10.0.2.15:9696":

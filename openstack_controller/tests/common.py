@@ -24,7 +24,7 @@ CONFIG_FILE_INSTANCE = {
     'openstack_cloud_name': 'test_cloud',
 }
 
-KEYSTONE_INSTACE = {
+KEYSTONE_INSTANCE = {
     'name': 'test_name',
     'keystone_server_url': 'http://10.0.2.15:5000',
     'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
@@ -32,7 +32,7 @@ KEYSTONE_INSTACE = {
     'exclude_network_ids': EXCLUDED_NETWORK_IDS,
 }
 
-MOCK_CONFIG = {'init_config': {}, 'instances': [KEYSTONE_INSTACE]}
+MOCK_CONFIG = {'init_config': {}, 'instances': [KEYSTONE_INSTANCE]}
 
 EXAMPLE_AUTH_RESPONSE = {
     u'token': {
