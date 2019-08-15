@@ -2,11 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import requests
-from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
-from datadog_checks.base.utils.headers import headers
 
 from .metrics import METRIC_MAP
 
@@ -63,7 +61,29 @@ class Etcd(OpenMetricsBaseCheck):
         'standardDeviation': 'etcd.leader.latency.stddev',
     }
 
-    def __init__(self, name, init_config, agentConfig, instances):
+    def __init__(self, name, init_config, agentConfig, instances=None):
+
+        if instances is not None:
+            for instance in instances:
+                # For legacy check ensure prometheus_url is set so
+                # OpenMetricsBaseCheck instantiation succeeds
+                if not is_affirmative(instance.get('use_preview', False)):
+                    instance.setdefault('prometheus_url', '')
+                    self.HTTP_CONFIG_REMAPPER = {
+                        'ssl_keyfile': {'name': 'tls_private_key'},
+                        'ssl_certfile': {'name': 'tls_cert'},
+                        'ssl_cert_validation': {'name': 'tls_verify'},
+                        'ssl_ca_certs': {'name': 'tls_ca_cert'},
+                    }
+                else:
+                    self.HTTP_CONFIG_REMAPPER = {
+                        'ssl_cert': {'name': 'tls_cert'},
+                        'ssl_private_key': {'name': 'tls_private_key'},
+                        'ssl_ca_cert': {'name': 'tls_ca_cert'},
+                        'ssl_verify': {'name': 'tls_verify'},
+                        'prometheus_timeout': {'name': 'timeout'},
+                    }
+
         super(Etcd, self).__init__(
             name,
             init_config,
@@ -79,18 +99,6 @@ class Etcd(OpenMetricsBaseCheck):
             },
             default_namespace='etcd',
         )
-
-        # For legacy check ensure prometheus_url is set so
-        # OpenMetricsBaseCheck instantiation succeeds
-        if not is_affirmative(self.instance.get('use_preview', False)):
-            self.instance.setdefault('prometheus_url', '')
-            self.HTTP_CONFIG_REMAPPER = {
-                'timeout': {'name': 'timeout', 'default': self.DEFAULT_TIMEOUT},
-                'ssl_keyfile': {'name': 'tls_private_key'},
-                'ssl_certfile': {'name': 'tls_cert'},
-                'ssl_cert_validation': {'name': 'tls_verify'},
-                'ssl_ca_certs': {'name': 'tls_ca_cert'},
-            }
 
     def check(self, instance):
         if is_affirmative(instance.get('use_preview', False)):
@@ -167,11 +175,12 @@ class Etcd(OpenMetricsBaseCheck):
         # Append the instance's URL in case there are more than one, that
         # way they can tell the difference!
         instance_tags.append('url:{}'.format(url))
+        timeout = float(instance.get('timeout', self.DEFAULT_TIMEOUT))
         is_leader = False
 
         # Gather self health status
         sc_state = self.UNKNOWN
-        health_status = self._get_health_status(url)
+        health_status = self._get_health_status(url, timeout)
         if health_status is not None:
             sc_state = self.OK if self._is_healthy(health_status) else self.CRITICAL
         self.service_check(self.HEALTH_SERVICE_CHECK_NAME, sc_state, tags=instance_tags)
@@ -240,41 +249,33 @@ class Etcd(OpenMetricsBaseCheck):
         if self_response is not None and store_response is not None:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=instance_tags)
 
-    def _get_health_status(self, url):
+    def _get_health_status(self, url, timeout):
         """
         Don't send the "can connect" service check if we have troubles getting
         the health status
         """
         try:
-            r = self._perform_request(url, "/health", self.http.options['verify'], self.http.options['timeout'])
+            r = self._perform_request(url, "/health")
             # we don't use get() here so we can report a KeyError
             return r.json()[self.HEALTH_KEY]
         except Exception as e:
             self.log.debug("Can't determine health status: {}".format(e))
 
     def _get_self_metrics(self, url, tags):
-        return self._get_json(url, "/v2/stats/self", tags, self.http.options['verify'], self.http.options['timeout'])
+        return self._get_json(url, "/v2/stats/self", tags)
 
     def _get_store_metrics(self, url, tags):
-        return self._get_json(url, "/v2/stats/store", tags, self.http.options['verify'], self.http.options['timeout'])
+        return self._get_json(url, "/v2/stats/store", tags)
 
     def _get_leader_metrics(self, url, tags):
-        return self._get_json(url, "/v2/stats/leader", tags, self.http.options['verify'], self.http.options['timeout'])
+        return self._get_json(url, "/v2/stats/leader", tags)
 
-    def _perform_request(self, url, path, ssl_params, timeout):
-        certificate = None
-        if 'ssl_certfile' in ssl_params and 'ssl_keyfile' in ssl_params:
-            certificate = (ssl_params['ssl_certfile'], ssl_params['ssl_keyfile'])
+    def _perform_request(self, url, path):
+        return self.http.get(url + path)
 
-        verify = ssl_params.get('ssl_ca_certs', True) if ssl_params['ssl_cert_validation'] else False
-
-        return requests.get(
-            url + path, verify=verify, cert=certificate, timeout=timeout, headers=headers(self.agentConfig)
-        )
-
-    def _get_json(self, url, path, tags, ssl_params, timeout):
+    def _get_json(self, url, path, tags):
         try:
-            r = self._perform_request(url, path, ssl_params, timeout)
+            r = self._perform_request(url, path)
         except requests.exceptions.Timeout:
             self.service_check(
                 self.SERVICE_CHECK_NAME,

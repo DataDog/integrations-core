@@ -71,7 +71,7 @@ def test_check_no_leader_tag(aggregator, instance):
 
 @preview
 def test_service_check(aggregator, instance):
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     tags = ['endpoint:{}'.format(instance['prometheus_url'])]
@@ -83,7 +83,7 @@ def test_service_check(aggregator, instance):
 def test_bad_config(aggregator):
     bad_url = '{}/test'.format(URL)
     instance = {'url': bad_url}
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
 
     with pytest.raises(Exception):
         check.check(instance)
@@ -94,7 +94,7 @@ def test_bad_config(aggregator):
 
 @legacy
 def test_metrics(instance, aggregator):
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
@@ -108,7 +108,7 @@ def test_metrics(instance, aggregator):
 
 @legacy
 def test_service_checks(instance, aggregator):
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
@@ -138,7 +138,7 @@ def test_followers(aggregator):
     followers = list(response.json().get('followers', {}).keys())
 
     instance = {'url': url}
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     common_leader_tags = ['url:{}'.format(url), 'etcd_state:leader']
