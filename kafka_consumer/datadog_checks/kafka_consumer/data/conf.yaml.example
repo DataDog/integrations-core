@@ -36,6 +36,17 @@ instances:
     - localhost:9092
     # - <KAFKA_BROKER_ENDPOINT>:9092
 
+    ## @param kafka_client_api_version - string - optional
+    ## Specify the highest client protocol version supported by all brokers in the cluster.
+    ##
+    ## This is a performance optimization. If this is not set, then the check automatically probes
+    ## the cluster for broker version during the connection bootstrapping process. Explicitly setting
+    ## this bypasses that probe, saving 3-5 network calls depending on the broker version. Note that
+    ## probing randomly picks a broker to probe, so in a mixed-version cluster, probing returns a
+    ## non-deterministic result.
+    #
+    # kafka_client_api_version: "2.3.0"
+
     ## @param consumer_groups - object - optional
     ## When using Kafka to store consumer offsets each level is mandatory.
     ## When using zookeeper to store consumer offsets each level is optional.
