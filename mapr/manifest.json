@@ -1,0 +1,29 @@
+{
+  "display_name": "mapr",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "mapr",
+  "metric_prefix": "mapr.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "7d1de422-85a6-47cc-9962-427a9499d109",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-mapr Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "mapr",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
