@@ -33,10 +33,11 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(LegacyKafkaCheck_0_10_2, self).__init__(name, init_config, instances)
-        self._zk_timeout = int(init_config.get('zk_timeout', 5))
+        self._context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
+        self._custom_tags = self.instance.get('tags', [])
         self._kafka_timeout = int(init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
         self._kafka_client = self._create_kafka_client()
-        self.context_limit = int(init_config.get('max_partition_contexts', CONTEXT_UPPER_BOUND))
+        self._zk_timeout = int(init_config.get('zk_timeout', 5))
 
     def check(self, instance):
         # For calculating lag, we have to fetch offsets from both kafka and
@@ -51,8 +52,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         zk_hosts_ports = instance.get('zk_connect_str')
         zk_prefix = instance.get('zk_prefix', '')
         get_kafka_consumer_offsets = is_affirmative(instance.get('kafka_consumer_offsets', zk_hosts_ports is None))
-
-        custom_tags = instance.get('tags', [])
 
         # If monitor_unlisted_consumer_groups is True, fetch all groups stored in ZK
         consumer_groups = None
@@ -99,10 +98,10 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                        number of contexts permitted by the check. Please narrow your
                        target by specifying in your YAML what consumer groups, topics
                        and partitions you wish to monitor."""
-        if zk_consumer_offsets and len(zk_consumer_offsets) > self.context_limit:
+        if zk_consumer_offsets and len(zk_consumer_offsets) > self._context_limit:
             self.warning(warn_msg % len(zk_consumer_offsets))
             return
-        if kafka_consumer_offsets and len(kafka_consumer_offsets) > self.context_limit:
+        if kafka_consumer_offsets and len(kafka_consumer_offsets) > self._context_limit:
             self.warning(warn_msg % len(kafka_consumer_offsets))
             return
 
@@ -115,23 +114,18 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         # Report the broker highwater offset
         for (topic, partition), highwater_offset in iteritems(highwater_offsets):
-            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition] + custom_tags
+            broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
+            broker_tags.extend(self._custom_tags)
             self.gauge('kafka.broker_offset', highwater_offset, tags=broker_tags)
 
         # Report the consumer group offsets and consumer lag
         if zk_consumer_offsets:
             self._report_consumer_metrics(
-                highwater_offsets,
-                zk_consumer_offsets,
-                topic_partitions_without_a_leader,
-                tags=custom_tags + ['source:zk'],
+                highwater_offsets, zk_consumer_offsets, 'zk', topic_partitions_without_a_leader
             )
         if kafka_consumer_offsets:
             self._report_consumer_metrics(
-                highwater_offsets,
-                kafka_consumer_offsets,
-                topic_partitions_without_a_leader,
-                tags=custom_tags + ['source:kafka'],
+                highwater_offsets, kafka_consumer_offsets, 'kafka', topic_partitions_without_a_leader
             )
 
     def _create_kafka_client(self):
@@ -272,11 +266,11 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         return highwater_offsets, list(set(topic_partitions_without_a_leader))
 
-    def _report_consumer_metrics(self, highwater_offsets, consumer_offsets, unled_topic_partitions=None, tags=None):
+    def _report_consumer_metrics(
+        self, highwater_offsets, consumer_offsets, consumer_offsets_source, unled_topic_partitions=None
+    ):
         if unled_topic_partitions is None:
             unled_topic_partitions = []
-        if tags is None:
-            tags = []
         for (consumer_group, topic, partition), consumer_offset in iteritems(consumer_offsets):
             # Report the consumer group offsets and consumer lag
             if (topic, partition) not in highwater_offsets:
@@ -297,8 +291,13 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     )
                 continue
 
-            consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
-            consumer_group_tags.extend(tags)
+            consumer_group_tags = [
+                'topic:%s' % topic,
+                'partition:%s' % partition,
+                'consumer_group:%s' % consumer_group,
+                'source:%s' % consumer_offsets_source,
+            ]
+            consumer_group_tags.extend(self._custom_tags)
             self.gauge('kafka.consumer_offset', consumer_offset, tags=consumer_group_tags)
 
             consumer_lag = highwater_offsets[(topic, partition)] - consumer_offset
