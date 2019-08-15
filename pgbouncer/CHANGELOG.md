@@ -1,5 +1,15 @@
 # CHANGELOG - pgbouncer
 
+## 1.7.0 / 2019-07-04
+
+* [Added] Add logs section. See [#3961](https://github.com/DataDog/integrations-core/pull/3961).
+
+## 1.6.0 / 2019-05-14
+
+* [Fixed] Use name instead of db to identify databases from SHOW DATABASES. See [#3459](https://github.com/DataDog/integrations-core/pull/3459). Thanks [joekohlsdorf](https://github.com/joekohlsdorf).
+* [Added] Upgrade psycopg2-binary to 2.8.2. See [#3649](https://github.com/DataDog/integrations-core/pull/3649).
+* [Added] Adhere to code style. See [#3554](https://github.com/DataDog/integrations-core/pull/3554).
+
 ## 1.5.0 / 2019-02-18
 
 * [Added] Add support for database metrics. See [#2777](https://github.com/DataDog/integrations-core/pull/2777). Thanks [joekohlsdorf](https://github.com/joekohlsdorf).

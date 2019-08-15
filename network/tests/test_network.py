@@ -11,6 +11,7 @@ import mock
 import pytest
 from six import PY3, iteritems
 
+from datadog_checks.dev import EnvVars
 from datadog_checks.network import Network
 
 from . import common
@@ -63,14 +64,14 @@ else:
 
 
 def ss_subprocess_mock(*args, **kwargs):
-    if args[0][-1] == '-4' and args[0][-3] == '-u':
-        file_name = 'ss_ipv4_udp'
-    elif args[0][-1] == '-4' and args[0][-3] == '-t':
-        file_name = 'ss_ipv4_tcp'
-    elif args[0][-1] == '-6' and args[0][-3] == '-u':
-        file_name = 'ss_ipv6_udp'
-    elif args[0][-1] == '-6' and args[0][-3] == '-t':
-        file_name = 'ss_ipv6_tcp'
+    if '--udp --all --ipv4' in args[0][2]:
+        return '3', None, None
+    elif '--udp --all --ipv6' in args[0][2]:
+        return '4', None, None
+    elif '--tcp --all --ipv4' in args[0][2]:
+        file_name = 'ss_ipv4_tcp_short'
+    elif '--tcp --all --ipv6' in args[0][2]:
+        file_name = 'ss_ipv6_tcp_short'
 
     with open(os.path.join(FIXTURE_DIR, file_name), 'rb') as f:
         contents = f.read()
@@ -78,8 +79,8 @@ def ss_subprocess_mock(*args, **kwargs):
 
 
 def netstat_subprocess_mock(*args, **kwargs):
-    if args[0][0] == 'ss':
-        raise OSError
+    if args[0][0] == 'sh':
+        raise OSError()
     elif args[0][0] == 'netstat':
         with open(os.path.join(FIXTURE_DIR, 'netstat'), 'rb') as f:
             contents = f.read()
@@ -92,6 +93,25 @@ def test_cx_state(aggregator, check):
     with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
         check._collect_cx_state = True
+        check.check(instance)
+        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+            aggregator.assert_metric(metric, value=value)
+        aggregator.reset()
+
+        out.side_effect = netstat_subprocess_mock
+        check.check(instance)
+        for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
+            aggregator.assert_metric(metric, value=value)
+
+
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_cx_state_mocked(is_linux, aggregator, check):
+    instance = {'collect_connection_state': True}
+    with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
+        out.side_effect = ss_subprocess_mock
+        check._collect_cx_state = True
+        check._is_collect_cx_state_runnable = lambda x: True
+        check._get_net_proc_base_location = lambda x: FIXTURE_DIR
         check.check(instance)
         for metric, value in iteritems(CX_STATE_GAUGES_VALUES):
             aggregator.assert_metric(metric, value=value)
@@ -290,3 +310,18 @@ def test_parse_protocol_psutil(aggregator, check):
     conn.family = socket.AF_INET
     protocol = check._parse_protocol_psutil(conn)
     assert protocol == 'udp4'
+
+
+@pytest.mark.parametrize(
+    "proc_location, envs, expected_net_proc_base_location",
+    [
+        ("/something/proc", {'DOCKER_DD_AGENT': 'true'}, "/something/proc/1"),
+        ("/something/proc", {}, "/something/proc"),
+        ("/proc", {'DOCKER_DD_AGENT': 'true'}, "/proc"),
+        ("/proc", {}, "/proc"),
+    ],
+)
+def test_get_net_proc_base_location(aggregator, check, proc_location, envs, expected_net_proc_base_location):
+    with EnvVars(envs):
+        actual = check._get_net_proc_base_location(proc_location)
+        assert expected_net_proc_base_location == actual

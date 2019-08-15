@@ -1,5 +1,31 @@
 # CHANGELOG - kubelet
 
+## 3.3.2 / 2019-08-14
+
+* [Fixed] Enforce unicode output in requests.iter_lines call. See [#4360](https://github.com/DataDog/integrations-core/pull/4360).
+
+## 3.3.1 / 2019-07-16
+
+* [Fixed] Update tagger usage to match prefix update. See [#4109](https://github.com/DataDog/integrations-core/pull/4109).
+
+## 3.3.0 / 2019-07-04
+
+* [Added] Add swap memory checks to cadvisor kubelet checks. See [#3808](https://github.com/DataDog/integrations-core/pull/3808). Thanks [adammw](https://github.com/adammw).
+
+## 3.2.1 / 2019-06-28
+
+* [Fixed] Make the kubelet and ECS fargate checks resilient to the tagger returning None. See [#4004](https://github.com/DataDog/integrations-core/pull/4004).
+
+## 3.2.0 / 2019-06-13
+
+* [Fixed] Revert "Collect network usage metrics (#3740)". See [#3914](https://github.com/DataDog/integrations-core/pull/3914).
+
+## 3.1.0 / 2019-05-14
+
+* [Added] Collect network usage metrics. See [#3740](https://github.com/DataDog/integrations-core/pull/3740).
+* [Added] add useful prometheus labels to metric tags. See [#3735](https://github.com/DataDog/integrations-core/pull/3735).
+* [Added] Adhere to code style. See [#3525](https://github.com/DataDog/integrations-core/pull/3525).
+
 ## 3.0.1 / 2019-04-04
 
 * [Fixed] Fix podlist multiple iterations when using pod expiration. See [#3456](https://github.com/DataDog/integrations-core/pull/3456).
@@ -104,9 +130,9 @@
 [24]: https://github.com/DataDog/integrations-core/pull/1727
 [25]: https://github.com/DataDog/integrations-core/pull/1648
 [26]: https://github.com/DataDog/integrations-core/pull/1581
-[27]: 
-[28]: 
-[29]: 
-[30]: 
-[31]: 
-[32]: 
+[27]:
+[28]:
+[29]:
+[30]:
+[31]:
+[32]:

@@ -11,10 +11,10 @@ from . import common
 
 
 def setup_post_data():
-    requests.put('http://localhost:2379/v2/keys/services/redis/01', data={'value': 'redis1:6101'})
-    requests.put('http://localhost:2379/v2/keys/services/redis/02', data={'value': 'redis2:6102'})
-    requests.put('http://localhost:2379/v2/keys/services/twemproxy/port', data={'value': '6100'})
-    requests.put('http://localhost:2379/v2/keys/services/twemproxy/host', data={'value': 'localhost'})
+    requests.put('http://{}:2379/v2/keys/services/redis/01'.format(common.HOST), data={'value': 'redis1:6101'})
+    requests.put('http://{}:2379/v2/keys/services/redis/02'.format(common.HOST), data={'value': 'redis2:6102'})
+    requests.put('http://{}:2379/v2/keys/services/twemproxy/port'.format(common.HOST), data={'value': '6100'})
+    requests.put('http://{}:2379/v2/keys/services/twemproxy/host'.format(common.HOST), data={'value': 'localhost'})
 
 
 @pytest.fixture(scope="session")
@@ -34,6 +34,11 @@ def dd_environment():
 def check():
     check = Twemproxy('twemproxy', {}, {})
     return check
+
+
+@pytest.fixture
+def instance():
+    return common.INSTANCE
 
 
 @pytest.fixture

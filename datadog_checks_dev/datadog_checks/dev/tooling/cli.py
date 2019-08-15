@@ -8,7 +8,7 @@ import click
 from ..compat import PermissionError
 from ..utils import dir_exists
 from .commands import ALL_COMMANDS
-from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning
+from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning, set_color
 from .config import CONFIG_FILE, config_file_exists, load_config, restore_config
 from .constants import set_root
 
@@ -18,10 +18,11 @@ from .constants import set_root
 @click.option('--extras', '-e', is_flag=True, help='Work on `integrations-extras`.')
 @click.option('--agent', '-a', is_flag=True, help='Work on `datadog-agent`.')
 @click.option('--here', '-x', is_flag=True, help='Work on the current location.')
+@click.option('--color/--no-color', default=None, help='Whether or not to display colored output (default true).')
 @click.option('--quiet', '-q', is_flag=True)
 @click.version_option()
 @click.pass_context
-def ddev(ctx, core, extras, agent, here, quiet):
+def ddev(ctx, core, extras, agent, here, color, quiet):
     if not quiet and not config_file_exists():
         echo_waiting('No config file found, creating one with default settings now...')
 
@@ -37,8 +38,12 @@ def ddev(ctx, core, extras, agent, here, quiet):
     config = load_config()
 
     repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
-
     config['repo_choice'] = repo_choice
+
+    if color is not None:
+        config['color'] = color
+
+    # https://click.palletsprojects.com/en/7.x/api/#click.Context.obj
     ctx.obj = config
 
     root = os.path.expanduser(config.get(repo_choice, ''))
@@ -50,6 +55,7 @@ def ddev(ctx, core, extras, agent, here, quiet):
         root = os.getcwd()
 
     set_root(root)
+    set_color(config['color'])
 
     if not ctx.invoked_subcommand:
         click.echo(ctx.get_help())

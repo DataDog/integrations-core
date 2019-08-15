@@ -1,5 +1,9 @@
 # CHANGELOG - kafka
 
+## 2.0.0 / 2019-06-01
+
+* [Changed] Fix unit type of `kafka.request.produce.time.avg` & `kafka.request.produce.time.99percentile`. See [#3834](https://github.com/DataDog/integrations-core/pull/3834).
+
 ## 1.4.0 / 2019-02-18
 
 * [Added] Add extra Kafka broker metrics. See [#2484](https://github.com/DataDog/integrations-core/pull/2484). Thanks [jalaziz](https://github.com/jalaziz).

@@ -3,11 +3,8 @@ version: '3'
 services:
 
   front-envoy:
-    build:
-      context: .
-      dockerfile: Dockerfile-frontenvoy
-      args:
-        ENVOY_VERSION: ${ENVOY_VERSION}
+    image: envoyproxy/envoy:${ENVOY_VERSION}
+    command: ["/usr/local/bin/envoy", "-c", "/etc/front-envoy.yaml", "--service-cluster", "front-proxy"]
     volumes:
       - ./front-envoy.yaml:/etc/front-envoy.yaml
     networks:

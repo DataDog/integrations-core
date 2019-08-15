@@ -295,7 +295,7 @@ def test_replication_metrics(aggregator, check, gauges, instance):
         r.raise_for_status()
         count = len(r.json())
 
-    check = CouchDb(common.CHECK_NAME, {}, {})
+    check = CouchDb(common.CHECK_NAME, {}, {}, instances=[instance])
     for config in [common.NODE1, common.NODE2, common.NODE3]:
         check.check(config)
 
@@ -318,7 +318,7 @@ def test_compaction_metrics(aggregator, check, gauges, instance):
 
     update_url = '{}/{}'.format(url, body['_id'])
 
-    for _ in range(50):
+    for _ in range(100):
         rev = r.json()['rev']
         body['data'] = str(time.time())
         body['_rev'] = rev
@@ -368,7 +368,7 @@ def test_indexing_metrics(aggregator, check, gauges, active_tasks):
 
     check.checker = couch.CouchDB2(check)
 
-    def _get(url, instance, tags, run_check=False):
+    def _get(url, tags, run_check=False):
         if '_active_tasks' in url:
             return active_tasks
         return {}

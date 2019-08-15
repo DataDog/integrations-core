@@ -35,22 +35,6 @@ STAT_METRICS = [
     'zookeeper.packets.sent',
 ]
 
-MNTR_METRICS = [
-    'zookeeper.packets_sent',
-    'zookeeper.approximate_data_size',
-    'zookeeper.num_alive_connections',
-    'zookeeper.open_file_descriptor_count',
-    'zookeeper.avg_latency',
-    'zookeeper.znode_count',
-    'zookeeper.outstanding_requests',
-    'zookeeper.min_latency',
-    'zookeeper.ephemerals_count',
-    'zookeeper.watch_count',
-    'zookeeper.max_file_descriptor_count',
-    'zookeeper.packets_received',
-    'zookeeper.max_latency',
-]
-
 STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']
 
 

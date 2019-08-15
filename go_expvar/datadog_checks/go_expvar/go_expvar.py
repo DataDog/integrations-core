@@ -6,11 +6,10 @@
 import re
 from collections import defaultdict
 
-import requests
-from six import iteritems, string_types
+from six import iteritems
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 DEFAULT_MAX_METRICS = 350
 PATH = "path"
@@ -21,10 +20,16 @@ TAGS = "tags"
 GAUGE = "gauge"
 RATE = "rate"
 COUNTER = "counter"
+MONOTONIC_COUNTER = "monotonic_counter"
 DEFAULT_TYPE = GAUGE
 
 
-SUPPORTED_TYPES = {GAUGE: AgentCheck.gauge, RATE: AgentCheck.rate, COUNTER: AgentCheck.increment}
+SUPPORTED_TYPES = {
+    GAUGE: AgentCheck.gauge,
+    RATE: AgentCheck.rate,
+    COUNTER: AgentCheck.increment,
+    MONOTONIC_COUNTER: AgentCheck.monotonic_count,
+}
 
 DEFAULT_METRIC_NAMESPACE = "go_expvar"
 
@@ -61,35 +66,19 @@ GO_EXPVAR_URL_PATH = "/debug/vars"
 
 
 class GoExpvar(AgentCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_verify': {'name': 'tls_verify', 'default': None},
+        'ssl_certfile': {'name': 'tls_cert', 'default': None},
+        'ssl_keyfile': {'name': 'tls_private_key', 'default': None},
+    }
+
+    def __init__(self, name, init_config, instances):
+        super(GoExpvar, self).__init__(name, init_config, instances)
+        self._regexes = {}
         self._last_gc_count = defaultdict(int)
 
     def _get_data(self, url, instance):
-        ssl_params = {
-            'ssl_keyfile': instance.get('ssl_keyfile'),
-            'ssl_certfile': instance.get('ssl_certfile'),
-            'ssl_verify': instance.get('ssl_verify'),
-        }
-        for key, param in list(iteritems(ssl_params)):
-            if param is None:
-                del ssl_params[key]
-
-        # Load SSL configuration, if available.
-        # ssl_verify can be a bool or a string
-        # (http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification)
-        if isinstance(ssl_params.get('ssl_verify'), bool) or isinstance(ssl_params.get('ssl_verify'), string_types):
-            verify = ssl_params.get('ssl_verify')
-        else:
-            verify = None
-        if ssl_params.get('ssl_certfile') and ssl_params.get('ssl_keyfile'):
-            cert = (ssl_params.get('ssl_certfile'), ssl_params.get('ssl_keyfile'))
-        elif ssl_params.get('ssl_certfile'):
-            cert = ssl_params.get('ssl_certfile')
-        else:
-            cert = None
-
-        resp = requests.get(url, timeout=10, verify=verify, cert=cert)
+        resp = self.http.get(url)
         resp.raise_for_status()
         return resp.json()
 
@@ -227,16 +216,26 @@ class GoExpvar(AgentCheck):
             return [(traversed_path, content)]
 
         key = keys[0]
-        regex = "".join(["^", key, "$"])
-        try:
-            key_rex = re.compile(regex)
-        except Exception:
-            self.warning("Cannot compile regex: %s" % regex)
-            return []
+        if key.isalnum():
+            # key is not a regex, simply match for equality
+            matcher = key.__eq__
+        else:
+            # key might be a regex
+            key_regex = self._regexes.get(key)
+            if key_regex is None:
+                # we don't have it cached, compile it
+                regex = "^{}$".format(key)
+                try:
+                    key_regex = re.compile(regex)
+                except Exception:
+                    self.warning("Cannot compile regex: %s" % regex)
+                    return []
+                self._regexes[key] = key_regex
+            matcher = key_regex.match
 
         results = []
         for new_key, new_content in self.items(content):
-            if key_rex.match(new_key):
+            if matcher(new_key):
                 results.extend(self.deep_get(new_content, keys[1:], traversed_path + [str(new_key)]))
         return results
 

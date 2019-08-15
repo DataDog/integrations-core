@@ -24,5 +24,12 @@
     "windows"
   ],
   "type": "check",
-  "integration_id": "nginx"
+  "integration_id": "nginx",
+  "assets": {
+    "monitors": {},
+    "dashboards": {
+      "NGINX Plus base overview": "assets/dashboards/plus_overview.json"
+    },
+    "service_checks": "assets/service_checks.json"
+  }
 }

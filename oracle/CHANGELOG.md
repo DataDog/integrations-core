@@ -1,5 +1,18 @@
 # CHANGELOG - oracle
 
+## 1.9.0 / 2019-07-08
+
+* [Added] Upgrade dependencies for Python 3.7 binary wheels. See [#4030](https://github.com/DataDog/integrations-core/pull/4030).
+
+## 1.8.0 / 2019-06-01
+
+* [Added] Support multiple results in custom queries. See [#3765](https://github.com/DataDog/integrations-core/pull/3765).
+
+## 1.7.0 / 2019-05-14
+
+* [Added] Turn an info log into debug. See [#3661](https://github.com/DataDog/integrations-core/pull/3661).
+* [Added] Adhere to code style. See [#3552](https://github.com/DataDog/integrations-core/pull/3552).
+
 ## 1.6.0 / 2019-03-29
 
 * [Added] Add custom_queries config globally. See [#3231](https://github.com/DataDog/integrations-core/pull/3231).

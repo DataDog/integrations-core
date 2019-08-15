@@ -6,6 +6,8 @@ This check monitors [IBM MQ][1].
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying these instructions.
+
 ### Installation
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
@@ -89,7 +91,7 @@ Update the bindings.
 sudo ldconfig
 ```
 
-#### Permissions and Authentication
+#### Permissions and authentication
 
 There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
 
@@ -118,9 +120,9 @@ All valid MQSC commands were processed.
    Agent's configuration directory to start collecting your IBM MQ performance data.
    See the [sample ibm_mq.d/conf.yaml][4] for all available configuration options.
 
-2. [Restart the Agent][5]
+2. [Restart the Agent][5].
 
-#### Metric Collection
+#### Metric collection
 
 There are a number of options to configure IBM MQ, depending on how you're using it.
 
@@ -141,30 +143,35 @@ queues:
   - ADMIN.QUEUE.1
 ```
 
-#### Log Collection
+#### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
-```
-    logs_enabled: true
-```
+**Available for Agent >6.0**
 
-Next, point the config file to the proper MQ log files. You can uncomment the lines at the bottom of the MQ integration's config file, and amend them as you see fit:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-```yaml
-logs:
-  - type: file
-    path: /var/mqm/log/<APPNAME>/active/AMQERR01.LOG
-    service: <APPNAME>
-    source: ibm_mq
-    log_processing_rules:
-      - type: multi_line
-        name: new_log_start_with_date
-        pattern: "\d{2}/\d{2}/\d{4}"
-```
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Next, point the config file to the proper MQ log files. You can uncomment the lines at the bottom of the MQ integration's config file, and amend them as you see fit:
+
+    ```
+      logs:
+        - type: file
+          path: /var/mqm/log/<APPNAME>/active/AMQERR01.LOG
+          service: <APPNAME>
+          source: ibm_mq
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: "\d{2}/\d{2}/\d{4}"
+    ```
+
+3. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `ibm_mq` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `ibm_mq` under the Checks section.
 
 ## Data Collected
 
@@ -174,11 +181,20 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-There are three service checks:
+**ibm_mq.can_connect**:<br/>
+Returns `CRITICAL` if the Agent cannot connect to the MQ server for any reason, otherwise returns `OK`.
 
-`ibm_mq.can_connect`: checks if we can connect to IBM MQ
-`ibm_mq.queue_manager`: checks if the Queue Manager is working
-`ibm_mq.queue`: checks if the queue exists
+**ibm_mq.queue_manager**:<br/>
+Returns `CRITICAL` if the Agent cannot retrieve stats from the queue manager, otherwise returns `OK`.
+
+**ibm_mq.queue**:<br/>
+Returns `CRITICAL` if the Agent cannot retrieve queue stats, otherwise returns `OK`.
+
+**ibm_mq.channel**:<br/>
+Returns `CRITICAL` if the Agent cannot retrieve channel stats, otherwise returns `OK`.
+
+**ibm_mq.channel.status**:<br/>
+Return `CRITICAL` if the status is INACTIVE/STOPPED/STOPPING. Returns `OK` if the status is RUNNING. Returns `WARNING` if the status might lead to running.
 
 ### Events
 
@@ -202,3 +218,4 @@ Additional helpful documentation, links, and articles:
 [7]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
+[10]: https://docs.datadoghq.com/agent/autodiscovery/integrations

@@ -1,5 +1,9 @@
 # CHANGELOG - php_fpm
 
+## 1.5.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3555](https://github.com/DataDog/integrations-core/pull/3555).
+
 ## 1.4.1 / 2019-03-29
 
 * [Fixed] Properly ship flup on Python 3. See [#3304](https://github.com/DataDog/integrations-core/pull/3304).

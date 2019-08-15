@@ -93,6 +93,20 @@ instances:
     #
     # collections_indexes_stats: false
 
+    ## @param custom_queries - list - optional
+    ## Define custom queries to collect custom metrics on your Mongo
+    ## See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
+    #
+    # custom_queries:
+    #   - metric_prefix: mongo
+    #     query: <MONGO_COMMAND_QUERY>
+    #     fields:
+    #       - field_name: <FIELD_NAME>
+    #         name: <METRIC_SUFFIX>
+    #         type: <METRIC_TYPE>
+    #     tags:
+    #       - test:mongodb
+
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)

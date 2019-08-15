@@ -2,6 +2,22 @@ init_config:
 
 instances:
 
+    ## @param host - string - optional
+    ## Host that the Datadog PDH check connects to.
+    ## "." means the current host
+    #
+    # host: <HOST>
+
+    ## @param username - string - optional
+    ## Username from the credentials needed to connect to the host.
+    #
+    # username: <USER_NAME>
+
+    ## @param password - string - optional
+    ## Password from the credentials needed to connect to the host.
+    #
+    # password: <PASSWORD>
+
     ## The following example fetches the number of processes and users:
     ##
     ## - countersetname: Processor
@@ -27,3 +43,23 @@ instances:
     #
     metrics:
       - ['<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
+
+    ## @param counter_data_types - list of strings - optional
+    ## counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> element that
+    ## allows the precision with which counters are queried on a per metric basis
+    ## <METRIC_NAME>: Name of your metric
+    ## <DATA_TYPE>  : Type of your metric, can be int, float
+    #
+    # counter_data_types:
+    #   - <METRIC_NAME>,<DATA_TYPE>
+    #   - active_directory.dra.inbound.bytes.total,int
+    #   - active_directory.ldap.bind_time,float
+
+    ## @param tags - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>

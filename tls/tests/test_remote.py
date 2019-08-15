@@ -192,6 +192,20 @@ def test_hostname_mismatch(aggregator, instance_remote_hostname_mismatch):
     aggregator.assert_all_metrics_covered()
 
 
+def test_self_signed_ok(aggregator, instance_remote_self_signed_ok):
+    c = TLSCheck('tls', {}, [instance_remote_self_signed_ok])
+    c.check(None)
+
+    aggregator.assert_service_check(c.SERVICE_CHECK_CAN_CONNECT, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(c.SERVICE_CHECK_VERSION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(c.SERVICE_CHECK_VALIDATION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(c.SERVICE_CHECK_EXPIRATION, status=c.OK, tags=c._tags, count=1)
+
+    aggregator.assert_metric('tls.days_left', count=1)
+    aggregator.assert_metric('tls.seconds_left', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
 def test_cert_expired(aggregator, instance_remote_cert_expired):
     c = TLSCheck('tls', {}, [instance_remote_cert_expired])
     c.check(None)

@@ -1,5 +1,9 @@
 # CHANGELOG - varnish
 
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3579](https://github.com/DataDog/integrations-core/pull/3579).
+
 ## 1.3.1 / 2019-03-29
 
 * [Fixed] ensure_unicode with normalize for py3 compatibility. See [#3218](https://github.com/DataDog/integrations-core/pull/3218).

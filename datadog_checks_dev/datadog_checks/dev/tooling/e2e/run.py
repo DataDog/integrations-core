@@ -12,7 +12,7 @@ def start_environment(check, env):
     command = 'tox --develop -e {}'.format(env)
     env_vars = {
         E2E_TEAR_DOWN: 'false',
-        'PYTEST_ADDOPTS': '--benchmark-skip',
+        'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
         'TOX_TESTENV_PASSENV': '{} PYTEST_ADDOPTS'.format(E2E_TEAR_DOWN),
     }
 
@@ -26,7 +26,7 @@ def stop_environment(check, env, metadata=None):
     command = 'tox --develop -e {}'.format(env)
     env_vars = {
         E2E_SET_UP: 'false',
-        'PYTEST_ADDOPTS': '--benchmark-skip',
+        'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
         'TOX_TESTENV_PASSENV': '{}* {} PYTEST_ADDOPTS'.format(E2E_ENV_VAR_PREFIX, E2E_SET_UP),
     }
     env_vars.update((metadata or {}).get('env_vars', {}))

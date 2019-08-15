@@ -18,5 +18,10 @@
     "linux"
   ],
   "type": "check",
-  "integration_id": "cri"
+  "integration_id": "cri",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

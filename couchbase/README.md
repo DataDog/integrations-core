@@ -16,35 +16,37 @@ And many more.
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
+
 ### Installation
 
-The Couchbase check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Couchbase nodes.
+The Couchbase check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Couchbase nodes.
 
 ### Configuration
 
-1. Edit the `couchbase.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Couchbase performance data.
-	See the [sample couchbase.d/conf.yaml][4] for all available configuration options.
+1. Edit the `couchbase.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Couchbase performance data.
+	See the [sample couchbase.d/conf.yaml][5] for all available configuration options.
 
-```
-init_config:
+    ```
+    init_config:
 
-instances:
-  - server: http://localhost:8091 # or wherever your Couchbase is listening
-    #user: <your_username>
-    #password: <your_password>
-```
+    instances:
+      - server: http://localhost:8091 # or wherever your Couchbase is listening
+        #user: <your_username>
+        #password: <your_password>
+    ```
 
-2. [Restart the Agent][5] to begin sending Couchbase metrics to Datadog.
+2. [Restart the Agent][6] to begin sending Couchbase metrics to Datadog.
 
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `couchbase` under the Checks section.
+[Run the Agent's `status` subcommand][7] and look for `couchbase` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -67,19 +69,20 @@ Returns `Ok` otherwise.
 Returns `Critical` if the node is unhealthy. Returns `Ok` otherwise.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-* [Monitor key Couchbase metrics][9].
+* [Monitor key Couchbase metrics][10].
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/couchbase/images/couchbase_graph.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/couchbase/datadog_checks/couchbase/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv
-[8]: https://docs.datadoghq.com/help
-[9]: https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/couchbase/datadog_checks/couchbase/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv
+[9]: https://docs.datadoghq.com/help
+[10]: https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog

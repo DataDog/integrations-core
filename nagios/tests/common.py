@@ -4,7 +4,18 @@
 
 import os
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+from datadog_checks.dev import get_docker_hostname, get_here
+
+HERE = get_here()
+HOST = get_docker_hostname()
+
+CONTAINER_NAME = "dd-test-nagios"
+
+INSTANCE_INTEGRATION = {
+    'nagios_conf': '/opt/nagios/etc/nagios.cfg',
+    'collect_host_performance_data': True,
+    'collect_service_performance_data': True,
+}
 
 CHECK_NAME = 'nagios'
 CUSTOM_TAGS = ['optional:tag1']

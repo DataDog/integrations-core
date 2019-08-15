@@ -58,7 +58,7 @@ instances:
     ## acces to the full command line of processes running under a different user. This option
     ## cannot be used in such cases.
     ## https://docs.datadoghq.com/integrations/process/#configuration
-    ## Regex is also supported when this flag is set to False.
+    ## Regex is also supported when this flag is set to `false`.
     #
     # exact_match: true
 
@@ -69,11 +69,13 @@ instances:
     # ignore_denied_access: true
 
     ## @param thresholds - object - optional
-    ## The threshold paramter is composed of two ranges: critical and warning
+    ## The threshold parameter is composed of two ranges: critical and warning
     ##   * warning: (optional) List of two values: If the number of processes found is below the first value or
-    ##             above the second one, the process check will return WARNING.
+    ##             above the second one, the process check returns WARNING. To make an semi-unbounded interval, 
+    ##             use `.inf` for the upper bound.
     ##   * critical: (optional) List of two values: If the number of processes found is below the first value or
-    ##             above the second one, the process check will return CRITICAL.
+    ##             above the second one, the process check returns CRITICAL. To make an semi-unbounded interval, 
+    ##             use `.inf` for the upper bound.
     #
     # thresholds:
     #   warning: [<BELOW_VALUE> , <TOP_VALUE>]
@@ -93,7 +95,7 @@ instances:
     # user: <USER_NAME>
 
     ## @param try_sudo - boolean - optional - default: false
-    ## If set to True, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
+    ## If set to `true`, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
     #
     # try_sudo: false
 

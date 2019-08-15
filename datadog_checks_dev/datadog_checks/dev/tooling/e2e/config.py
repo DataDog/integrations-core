@@ -6,6 +6,7 @@ import os
 
 import yaml
 
+from ..._env import format_config
 from ...utils import dir_exists, ensure_dir_exists, file_exists, path_join, read_file, remove_path, write_file
 from ..config import APP_DIR
 
@@ -93,16 +94,7 @@ def write_env_data(check, env, config=None, metadata=None):
 
 
 def config_to_yaml(config):
-    if 'instances' not in config:
-        config = {'instances': [config]}
-
-    # Agent 5 requires init_config
-    if 'init_config' not in config:
-        _config = {'init_config': {}}
-        _config.update(config)
-        config = _config
-
-    return yaml.safe_dump(config, default_flow_style=False)
+    return yaml.safe_dump(format_config(config), default_flow_style=False)
 
 
 def metadata_to_json(metadata):

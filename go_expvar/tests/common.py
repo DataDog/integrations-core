@@ -33,6 +33,14 @@ CHECK_GAUGES = [
 # this is a histogram
 CHECK_GAUGES_DEFAULT = ['go_expvar.memstats.pause_ns']
 
+MEMSTAT_PAUSE_HISTOGRAM = [
+    'go_expvar.memstats.pause_ns.max',
+    'go_expvar.memstats.pause_ns.avg',
+    'go_expvar.memstats.pause_ns.count',
+    'go_expvar.memstats.pause_ns.median',
+    'go_expvar.memstats.pause_ns.95percentile',
+]
+
 CHECK_RATES = [
     'go_expvar.memstats.frees',
     'go_expvar.memstats.lookups',

@@ -25,3 +25,4 @@ def test_check_ok(aggregator, check, instance):
 
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric("squid.cachemgr." + metric, tags=expected_tags)
+    aggregator.assert_all_metrics_covered()

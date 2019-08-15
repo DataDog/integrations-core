@@ -6,6 +6,7 @@ import copy
 import logging
 import os
 
+from datadog_checks.snmp import SnmpCheck
 from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger(__name__)
@@ -49,6 +50,11 @@ SUPPORTED_METRIC_TYPES = [
 
 UNSUPPORTED_METRICS = [{'OID': "1.3.6.1.2.1.25.6.3.1.5.1", 'name': "IAmString"}]  # String (not supported)
 
+CAST_METRICS = [
+    {'OID': "1.3.6.1.4.1.2021.10.1.3.1", 'name': "cpuload1"},  # OctetString
+    {'OID': "1.3.6.1.4.1.2021.10.1.6.1", 'name': "cpuload2"},  # Opaque
+]
+
 CONSTRAINED_OID = [{"MIB": "RFC1213-MIB", "symbol": "tcpRtoAlgorithm"}]
 
 DUMMY_MIB_OID = [{"MIB": "DUMMY-MIB", "symbol": "scalar"}]
@@ -65,6 +71,7 @@ INVALID_FORCED_METRICS = [
 SCALAR_OBJECTS = [
     {'OID': "1.3.6.1.2.1.7.1.0", 'name': "udpDatagrams"},
     {'OID': "1.3.6.1.2.1.6.10.0", 'name': "tcpInSegs"},
+    {'OID': ".1.3.6.1.6.3.10.2.1.3.0", 'name': "snmpEngineTime"},  # OID with leading dot
     {'MIB': "TCP-MIB", 'symbol': "tcpCurrEstab"},
 ]
 
@@ -116,3 +123,7 @@ def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_k
         instance_config['privKey'] = priv_key
 
     return instance_config
+
+
+def create_check(instance):
+    return SnmpCheck('snmp', {}, [instance])

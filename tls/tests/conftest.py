@@ -153,6 +153,11 @@ def instance_remote_hostname_mismatch():
 
 
 @pytest.fixture
+def instance_remote_self_signed_ok():
+    return {'server': 'https://self-signed.badssl.com', 'validate_cert': False}
+
+
+@pytest.fixture
 def instance_remote_cert_expired():
     return {'server': 'https://expired.badssl.com'}
 

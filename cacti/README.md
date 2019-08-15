@@ -8,9 +8,33 @@ Get metrics from cacti service in real time to:
 * Be notified about cacti failovers and events.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
+
 ### Installation
 
-The Cacti check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Cacti servers.
+The Cacti check is included in the [Datadog Agent][2] package, to start gathering metrics you first need to:
+- Install librrd headers and libraries
+- Install python bindings to rrdtool
+
+#### librrd headers and librairies
+
+On Debian/Ubuntu
+```shell
+sudo apt-get install librrd-dev
+```
+
+On RHEL/CentOS
+```shell
+sudo yum install rrdtool-devel
+```
+
+#### Python bindinges
+
+Now add the `rrdtool` Python package to the Agent with the following command.
+```shell
+sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
+```
 
 ### Configuration
 
@@ -33,7 +57,7 @@ echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
 echo -e "\033[0;31mMissing SELECT grant\033[0m"
 ```
 
-Configure the Agent to connect to MySQL, edit your `cacti.d/conf.yaml` file. See the [sample cacti.d/conf.yaml][2] for all available configuration options:
+Configure the Agent to connect to MySQL, edit your `cacti.d/conf.yaml` file. See the [sample cacti.d/conf.yaml][3] for all available configuration options:
 
 ```yaml
 init_config:
@@ -63,11 +87,11 @@ fi'
 
 ### Validation
 
-[Run the Agent's `status` subcommand][3] and look for `cacti` under the Checks section.
+[Run the Agent's `status` subcommand][4] and look for `cacti` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][4] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The Cacti check does not include any events.
@@ -76,10 +100,18 @@ The Cacti check does not include any events.
 The Cacti check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][5].
+### Known issues
+The Python library used by this integration leaks memory under certain circumstances. If you experience this, one workaround is to install the [python-rrdtool][6] package instead of rrdtool. This older package is not maintained and is not officially supported by this integration but it has helped others resolve the memory issues.
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://github.com/DataDog/integrations-core/blob/master/cacti/datadog_checks/cacti/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[4]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
-[5]: https://docs.datadoghq.com/help
+A [Github issue][7] has been opened to track this memory leak.
+
+Need help? Contact [Datadog support][8].
+
+[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://github.com/DataDog/integrations-core/blob/master/cacti/datadog_checks/cacti/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
+[6]: https://github.com/pbanaszkiewicz/python-rrdtool
+[7]: https://github.com/commx/python-rrdtool/issues/25
+[8]: https://docs.datadoghq.com/help

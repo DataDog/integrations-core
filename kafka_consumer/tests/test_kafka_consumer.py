@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-from six import iteritems
 
 from datadog_checks.kafka_consumer import KafkaCheck
 
@@ -23,11 +22,11 @@ def test_check_kafka(aggregator, kafka_instance):
     """
     Testing Kafka_consumer check.
     """
-    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, {})
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
     kafka_consumer_check.check(kafka_instance)
 
-    for name, consumer_group in iteritems(kafka_instance['consumer_groups']):
-        for topic, partitions in iteritems(consumer_group):
+    for name, consumer_group in kafka_instance['consumer_groups'].items():
+        for topic, partitions in consumer_group.items():
             for partition in partitions:
                 tags = ["topic:{}".format(topic), "partition:{}".format(partition)] + ['optional:tag1']
                 for mname in BROKER_METRICS:

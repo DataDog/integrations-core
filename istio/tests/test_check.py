@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-
 import os
 
 import mock
@@ -12,74 +11,7 @@ from requests.exceptions import HTTPError
 from datadog_checks.istio import Istio
 from datadog_checks.utils.common import ensure_unicode
 
-MESH_METRICS = [
-    'istio.mesh.request.count',
-    'istio.mesh.request.duration.count',
-    'istio.mesh.request.duration.sum',
-    'istio.mesh.request.size.count',
-    'istio.mesh.request.size.sum',
-    'istio.mesh.response.size.count',
-    'istio.mesh.response.size.sum',
-]
-
-
-MIXER_METRICS = [
-    'istio.mixer.adapter.dispatch_duration.count',
-    'istio.mixer.adapter.dispatch_duration.sum',
-    'istio.mixer.go.gc_duration_seconds.count',
-    'istio.mixer.go.gc_duration_seconds.quantile',
-    'istio.mixer.go.gc_duration_seconds.sum',
-    'istio.mixer.go.goroutines',
-    'istio.mixer.go.info',
-    'istio.mixer.go.memstats.alloc_bytes',
-    'istio.mixer.go.memstats.alloc_bytes_total',
-    'istio.mixer.go.memstats.buck_hash_sys_bytes',
-    'istio.mixer.go.memstats.frees_total',
-    'istio.mixer.go.memstats.gc_cpu_fraction',
-    'istio.mixer.go.memstats.gc_sys_bytes',
-    'istio.mixer.go.memstats.heap_alloc_bytes',
-    'istio.mixer.go.memstats.heap_idle_bytes',
-    'istio.mixer.go.memstats.heap_inuse_bytes',
-    'istio.mixer.go.memstats.heap_objects',
-    'istio.mixer.go.memstats.heap_released_bytes',
-    'istio.mixer.go.memstats.heap_sys_bytes',
-    'istio.mixer.go.memstats.last_gc_time_seconds',
-    'istio.mixer.go.memstats.lookups_total',
-    'istio.mixer.go.memstats.mallocs_total',
-    'istio.mixer.go.memstats.mcache_inuse_bytes',
-    'istio.mixer.go.memstats.mcache_sys_bytes',
-    'istio.mixer.go.memstats.mspan_inuse_bytes',
-    'istio.mixer.go.memstats.mspan_sys_bytes',
-    'istio.mixer.go.memstats.next_gc_bytes',
-    'istio.mixer.go.memstats.other_sys_bytes',
-    'istio.mixer.go.memstats.stack_inuse_bytes',
-    'istio.mixer.go.memstats.stack_sys_bytes',
-    'istio.mixer.go.memstats.sys_bytes',
-    'istio.mixer.go.threads',
-    'istio.mixer.grpc.server.handled_total',
-    'istio.mixer.grpc.server.handling_seconds.count',
-    'istio.mixer.grpc.server.handling_seconds.sum',
-    'istio.mixer.grpc.server.msg_received_total',
-    'istio.mixer.grpc.server.msg_sent_total',
-    'istio.mixer.grpc.server.started_total',
-    'istio.mixer.adapter.dispatch_count',
-    'istio.mixer.adapter.old_dispatch_count',
-    'istio.mixer.adapter.old_dispatch_duration.count',
-    'istio.mixer.adapter.old_dispatch_duration.sum',
-    'istio.mixer.config.resolve_actions.count',
-    'istio.mixer.config.resolve_actions.sum',
-    'istio.mixer.config.resolve_count',
-    'istio.mixer.config.resolve_duration.count',
-    'istio.mixer.config.resolve_duration.sum',
-    'istio.mixer.config.resolve_rules.count',
-    'istio.mixer.config.resolve_rules.sum',
-    'istio.mixer.process.cpu_seconds_total',
-    'istio.mixer.process.max_fds',
-    'istio.mixer.process.open_fds',
-    'istio.mixer.process.resident_memory_bytes',
-    'istio.mixer.process.start_time_seconds',
-    'istio.mixer.process.virtual_memory_bytes',
-]
+from .common import CITADEL_METRICS, GALLEY_METRICS, MESH_METRICS, MIXER_METRICS, NEW_MIXER_METRICS, PILOT_METRICS
 
 MESH_METRICS_MAPPER = {
     'istio_request_count': 'request.count',
@@ -141,13 +73,41 @@ MESH_MIXER_MAPPER = {
     'process_resident_memory_bytes': 'process.resident_memory_bytes',
     'process_start_time_seconds': 'process.start_time_seconds',
     'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
+    'grpc_io_server_completed_rpcs': 'grpc_io_server.completed_rpcs',
+    'grpc_io_server_received_bytes_per_rpc': 'grpc_io_server.received_bytes_per_rpc',
+    'grpc_io_server_sent_bytes_per_rpc': 'grpc_io_server.sent_bytes_per_rpc',
+    'grpc_io_server_server_latency': 'grpc_io_server.server_latency',
+    'mixer_config_attributes_total': 'config.attributes_total',
+    'mixer_config_handler_configs_total': 'config.handler_configs_total',
+    'mixer_config_instance_configs_total': 'config.instance_configs_total',
+    'mixer_config_rule_configs_total': 'config.rule_configs_total',
+    'mixer_dispatcher_destinations_per_request': 'dispatcher.destinations_per_request',
+    'mixer_dispatcher_instances_per_request': 'dispatcher.instances_per_request',
+    'mixer_handler_daemons_total': 'handler.daemons_total',
+    'mixer_handler_new_handlers_total': 'handler.new_handlers_total',
+    'mixer_mcp_sink_reconnections': 'mcp_sink.reconnections',
+    'mixer_mcp_sink_request_acks_total': 'mcp_sink.request_acks_total',
+    'mixer_runtime_dispatch_duration_seconds': 'runtime.dispatch_duration_seconds',
+    'mixer_runtime_dispatches_total': 'runtime.dispatches_total',
 }
-
 
 MOCK_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:42422/metrics',
     'mixer_endpoint': 'http://localhost:9093/metrics',
 }
+
+
+NEW_MOCK_INSTANCE = {
+    'istio_mesh_endpoint': 'http://istio-telemetry:42422/metrics',
+    'mixer_endpoint': 'http://istio-telemetry:15014/metrics',
+    'pilot_endpoint': 'http://istio-pilot:15014/metrics',
+    'galley_endpoint': 'http://istio-galley:15014/metrics',
+    'citadel_endpoint': 'http://istio-citadel:15014/metrics',
+}
+
+NEW_MOCK_PILOT_ONLY_INSTANCE = {'pilot_endpoint': 'http://istio-pilot:15014/metrics'}
+
+NEW_MOCK_GALLEY_ONLY_INSTANCE = {'galley_endpoint': 'http://istio-galley:15014/metrics'}
 
 
 class MockResponse:
@@ -174,14 +134,6 @@ class MockResponse:
 
 
 @pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
-@pytest.fixture
 def mesh_mixture_fixture():
     mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'istio', 'mesh.txt')
     mixer_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'istio', 'mixer.txt')
@@ -195,6 +147,45 @@ def mesh_mixture_fixture():
         yield
 
 
+@pytest.fixture
+def new_mesh_mixture_fixture():
+    files = ['mesh.txt', 'mixer.txt', 'pilot.txt', 'galley.txt', 'citadel.txt']
+    responses = []
+    for filename in files:
+        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        with open(file_path, 'r') as f:
+            responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
+@pytest.fixture
+def new_pilot_fixture():
+    files = ['pilot.txt']
+    responses = []
+    for filename in files:
+        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        with open(file_path, 'r') as f:
+            responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
+@pytest.fixture
+def new_galley_fixture():
+    files = ['galley.txt']
+    responses = []
+    for filename in files:
+        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        with open(file_path, 'r') as f:
+            responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
 def test_istio(aggregator, mesh_mixture_fixture):
     """
     Test the full check
@@ -203,6 +194,36 @@ def test_istio(aggregator, mesh_mixture_fixture):
     check.check(MOCK_INSTANCE)
 
     for metric in MESH_METRICS + MIXER_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_new_istio(aggregator, new_mesh_mixture_fixture):
+    check = Istio('istio', {}, {}, [NEW_MOCK_INSTANCE])
+    check.check(NEW_MOCK_INSTANCE)
+
+    for metric in MESH_METRICS + NEW_MIXER_METRICS + GALLEY_METRICS + PILOT_METRICS + CITADEL_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_pilot_only_istio(aggregator, new_pilot_fixture):
+    check = Istio('istio', {}, {}, [NEW_MOCK_PILOT_ONLY_INSTANCE])
+    check.check(NEW_MOCK_PILOT_ONLY_INSTANCE)
+
+    for metric in PILOT_METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_galley_only_istio(aggregator, new_galley_fixture):
+    check = Istio('istio', {}, {}, [NEW_MOCK_GALLEY_ONLY_INSTANCE])
+    check.check(NEW_MOCK_GALLEY_ONLY_INSTANCE)
+
+    for metric in GALLEY_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()

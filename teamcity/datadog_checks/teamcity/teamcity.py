@@ -11,8 +11,6 @@ from datadog_checks.config import _is_affirmative
 
 
 class TeamCityCheck(AgentCheck):
-    HEADERS = {"Accept": "application/json"}
-    DEFAULT_TIMEOUT = 10
 
     NEW_BUILD_URL = (
         "{server}/guestAuth/app/rest/builds/?locator=buildType:{build_conf},sinceBuild:id:{since_build},status:SUCCESS"
@@ -24,13 +22,17 @@ class TeamCityCheck(AgentCheck):
     )
     LAST_BUILD_URL_AUTHENTICATED = "{server}/httpAuth/app/rest/builds/?locator=buildType:{build_conf},count:1"
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_validation': {'name': 'tls_verify'},
+        'headers': {'name': 'headers', 'default': {"Accept": "application/json"}},
+    }
 
+    def __init__(self, name, init_config, instances):
+        super(TeamCityCheck, self).__init__(name, init_config, instances)
         # Keep track of last build IDs per instance
         self.last_build_ids = {}
 
-    def _initialize_if_required(self, instance_name, server, build_conf, ssl_validation, basic_http_authentication):
+    def _initialize_if_required(self, instance_name, server, build_conf, basic_http_authentication):
         # Already initialized
         if instance_name in self.last_build_ids:
             return
@@ -42,7 +44,7 @@ class TeamCityCheck(AgentCheck):
         else:
             build_url = self.LAST_BUILD_URL.format(server=server, build_conf=build_conf)
         try:
-            resp = requests.get(build_url, timeout=self.DEFAULT_TIMEOUT, headers=self.HEADERS, verify=ssl_validation)
+            resp = requests.get(build_url)
             resp.raise_for_status()
 
             last_build_id = resp.json().get("build")[0].get("id")
@@ -100,8 +102,6 @@ class TeamCityCheck(AgentCheck):
         if instance_name is None:
             raise Exception("Each instance must have a unique name")
 
-        ssl_validation = _is_affirmative(instance.get("ssl_validation", True))
-
         server = instance.get("server")
         if server is None:
             raise Exception("Each instance must have a server")
@@ -119,7 +119,7 @@ class TeamCityCheck(AgentCheck):
         is_deployment = _is_affirmative(instance.get("is_deployment", False))
         basic_http_authentication = _is_affirmative(instance.get("basic_http_authentication", False))
 
-        self._initialize_if_required(instance_name, server, build_conf, ssl_validation, basic_http_authentication)
+        self._initialize_if_required(instance_name, server, build_conf, basic_http_authentication)
 
         # Look for new successful builds
         if basic_http_authentication:
@@ -132,9 +132,7 @@ class TeamCityCheck(AgentCheck):
             )
 
         try:
-            resp = requests.get(
-                new_build_url, timeout=self.DEFAULT_TIMEOUT, headers=self.HEADERS, verify=ssl_validation
-            )
+            resp = self.http.get(new_build_url)
             resp.raise_for_status()
 
             new_builds = resp.json()

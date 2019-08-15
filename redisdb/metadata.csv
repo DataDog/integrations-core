@@ -10,8 +10,8 @@ redis.cpu.sys,gauge,,second,,System CPU consumed by the Redis server.,-1,redis,c
 redis.cpu.sys_children,gauge,,second,,System CPU consumed by the background processes.,-1,redis,cpu sys children
 redis.cpu.user,gauge,,second,,User CPU consumed by the Redis server.,-1,redis,cpu user
 redis.cpu.user_children,gauge,,second,,User CPU consumed by the background processes.,-1,redis,cpu user children
-redis.expires,gauge,,key,,The number of keys that have expired.,0,redis,expires
-redis.expires.percent,gauge,,percent,,Percentage of total keys that have been expired.,0,redis,expires pct
+redis.expires,gauge,,key,,The number of keys with an expiration.,0,redis,expires
+redis.expires.percent,gauge,,percent,,Percentage of total keys with an expiration.,0,redis,expires pct
 redis.info.latency_ms,gauge,,millisecond,,The latency of the redis INFO command.,0,redis,info latency
 redis.key.length,gauge,,,,"The number of elements in a given key, tagged by key, e.g. 'key:mykeyname'. Enable in Agent's redisdb.yaml with the keys option.",0,redis,key length
 redis.keys,gauge,,key,,The total number of keys.,0,redis,keys
@@ -19,10 +19,12 @@ redis.keys.evicted,gauge,,key,,The total number of keys evicted due to the maxme
 redis.keys.expired,gauge,,key,,The total number of keys expired from the db.,0,redis,keys expired
 redis.mem.fragmentation_ratio,gauge,,fraction,,Ratio between used_memory_rss and used_memory.,-1,redis,frag ratio
 redis.mem.lua,gauge,,byte,,Amount of memory used by the Lua engine.,-1,redis,mem lua
-redis.mem.maxmemory,gauge,,byte,,Maximum amount of memory alloted to the Redisdb system.,-1,redis,mem maxmemory
+redis.mem.maxmemory,gauge,,byte,,Maximum amount of memory allocated to the Redisdb system.,-1,redis,mem maxmemory
 redis.mem.peak,gauge,,byte,,The peak amount of memory used by Redis.,-1,redis,mem peak
 redis.mem.rss,gauge,,byte,,Amount of memory that Redis allocated as seen by the os.,-1,redis,mem rss
 redis.mem.used,gauge,,byte,,Amount of memory allocated by Redis.,-1,redis,mem used
+redis.mem.startup,gauge,,byte,,Amount of memory consumed by Redis at startup.,-1,redis,mem startup
+redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for managing its internal datastructures.,-1,redis,mem overhead
 redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients
 redis.net.commands,gauge,,command,,The number of commands processed by the server.,0,redis,net commands
 redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands

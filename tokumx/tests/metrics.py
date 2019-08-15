@@ -143,6 +143,8 @@ COLL_HISTS = [
     'storageSize',
 ]
 
+STATSD_HISTS = ['queries', 'deletes', 'nscanned', 'inserts', 'nscannedObjects']
+
 
 DB_STATS = [
     'avgObjSize',

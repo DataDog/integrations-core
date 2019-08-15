@@ -1,5 +1,10 @@
 # CHANGELOG - system_core
 
+## 1.5.0 / 2019-05-14
+
+* [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).
+* [Added] Adhere to code style. See [#3572](https://github.com/DataDog/integrations-core/pull/3572).
+
 ## 1.4.0 / 2019-02-18
 
 * [Added] Upgrade psutil. See [#3019](https://github.com/DataDog/integrations-core/pull/3019).

@@ -1,6 +1,7 @@
 {
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "PGBouncer",
@@ -22,5 +23,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "pgbouncer"
+  "integration_id": "pgbouncer",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

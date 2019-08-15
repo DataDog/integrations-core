@@ -25,6 +25,11 @@ instances:
     #
     # prometheus_timeout: 10
 
+    ## @param ignore_deprecated - boolean - optional - default: false
+    ## Filter deprecated metrics from the kube-controller-manager  /metrics endpoints payload
+    #
+    # ignore_deprecated: false
+
     ## @param extra_queues - list strings - optional
     ## Monitor additional queues, in addition to the default ones
     #

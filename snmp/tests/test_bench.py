@@ -4,19 +4,21 @@
 
 import pytest
 
-from .common import TABULAR_OBJECTS, generate_instance_config
+from .common import TABULAR_OBJECTS, create_check, generate_instance_config
 
 pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
-def test_tabular_enforce(benchmark, check):
+def test_tabular_enforce(benchmark):
     instance = generate_instance_config(TABULAR_OBJECTS)
+    check = create_check(instance)
 
     benchmark(check.check, instance)
 
 
-def test_tabular_no_enforce(benchmark, check):
+def test_tabular_no_enforce(benchmark):
     instance = generate_instance_config(TABULAR_OBJECTS)
     instance["enforce_mib_constraints"] = False
+    check = create_check(instance)
 
     benchmark(check.check, instance)

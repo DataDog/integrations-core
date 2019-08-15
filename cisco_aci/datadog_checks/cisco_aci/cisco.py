@@ -17,13 +17,6 @@ from .fabric import Fabric
 from .tags import CiscoTags
 from .tenant import Tenant
 
-try:
-    # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
-    from datadog_agent import set_external_tags
-except ImportError:
-    # Agent < 6.0: the Agent pulls tags invoking `CiscoACICheck.get_external_host_tags`
-    set_external_tags = None
-
 SOURCE_TYPE = 'cisco_aci'
 
 SERVICE_CHECK_NAME = 'cisco_aci.can_connect'
@@ -41,7 +34,7 @@ class CiscoACICheck(AgentCheck):
 
     def check(self, instance):
         self.log.info("Starting Cisco Check")
-        start = datetime.datetime.now()
+        start = datetime.datetime.utcnow()
         aci_url = instance.get('aci_url')
         aci_urls = instance.get('aci_urls', [])
         if aci_url:
@@ -151,11 +144,10 @@ class CiscoACICheck(AgentCheck):
 
         self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
-        if set_external_tags:
-            set_external_tags(self.get_external_host_tags())
+        self.set_external_tags(self.get_external_host_tags())
 
         api.close()
-        end = datetime.datetime.now()
+        end = datetime.datetime.utcnow()
         log_line = "finished running Cisco Check"
         if _is_affirmative(instance.get('report_timing', False)):
             log_line += ", took {}".format(end - start)

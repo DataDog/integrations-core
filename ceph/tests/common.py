@@ -10,7 +10,7 @@ CHECK_NAME = 'ceph'
 HERE = os.path.abspath(os.path.dirname(__file__))
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
-BASIC_CONFIG = {'ceph_cmd': os.path.join(FIXTURE_DIR, 'ceph_bin.sh'), 'tags': ['optional:tag1']}
+BASIC_CONFIG = {'ceph_cmd': 'docker exec dd-test-ceph ceph', 'tags': ['optional:tag1']}
 
 EXPECTED_METRICS = [
     "ceph.commit_latency_ms",
@@ -61,8 +61,8 @@ EXPECTED_SERVICE_CHECKS = [
 ]
 
 
-def mock_data(file):
-    filepath = os.path.join(FIXTURE_DIR, file)
+def mock_data(filename):
+    filepath = os.path.join(FIXTURE_DIR, filename)
     with open(filepath, "r") as f:
         data = f.read()
     return json.loads(data)

@@ -2,12 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import os
 import time
+from copy import deepcopy
 
 import mock
 import pytest
 
-from datadog_checks.cacti import Cacti
+from datadog_checks.cacti import CactiCheck
+
+from .common import HERE
 
 log = logging.getLogger()
 
@@ -104,25 +108,14 @@ CACTI_CONFIG = {'mysql_host': 'nohost', 'mysql_user': 'mocked', 'rrd_path': '/rr
 
 @pytest.fixture
 def check():
-    return Cacti(CHECK_NAME, {}, {})
+    return CactiCheck(CHECK_NAME, {}, {})
+
+
+pytestmark = pytest.mark.unit
 
 
 def test_check(aggregator, check):
-    mock_conn = mock.MagicMock()
-    mock_cursor = mock.MagicMock()
-
-    mock_cursor.fetchall.return_value = MOCK_RRD_META
-    mock_conn.cursor.return_value = mock_cursor
-
-    mocks = [
-        mock.patch('datadog_checks.cacti.cacti.rrdtool'),
-        mock.patch('datadog_checks.cacti.cacti.pymysql.connect', return_value=mock_conn),
-        mock.patch('datadog_checks.cacti.Cacti._get_rrd_info', return_value=MOCK_INFO),
-        mock.patch('datadog_checks.cacti.Cacti._get_rrd_fetch', return_value=MOCK_FETCH),
-    ]
-
-    for mock_func in mocks:
-        mock_func.start()
+    mocks = _setup_mocks()
 
     # Run the check twice to set the timestamps and capture metrics on the second run
     check.check(CACTI_CONFIG)
@@ -139,3 +132,45 @@ def test_check(aggregator, check):
     aggregator.assert_metric('cacti.rrd.count', value=5, tags=CUSTOM_TAGS)
     aggregator.assert_metric('cacti.hosts.count', value=1, tags=CUSTOM_TAGS)
     aggregator.assert_all_metrics_covered()
+
+
+def test_whitelist(aggregator, check):
+    config = deepcopy(CACTI_CONFIG)
+    config['rrd_whitelist'] = os.path.join(HERE, 'whitelist.txt')
+
+    mocks = _setup_mocks()
+
+    # Run the check twice to set the timestamps and capture metrics on the second run
+    check.check(config)
+    check.check(config)
+
+    for mock_func in mocks:
+        mock_func.stop()
+
+    # We are mocking the MySQL call so we won't have cacti.rrd.count or cacti.hosts.count metrics,
+    # check for metrics that are returned from our mock data.
+    aggregator.assert_metric('cacti.metrics.count', value=2, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('system.mem.buffered.max', value=2, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('system.mem.buffered', value=2, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('cacti.rrd.count', value=1, tags=CUSTOM_TAGS)
+    aggregator.assert_metric('cacti.hosts.count', value=1, tags=CUSTOM_TAGS)
+    aggregator.assert_all_metrics_covered()
+
+
+def _setup_mocks():
+    mock_conn = mock.MagicMock()
+    mock_cursor = mock.MagicMock()
+
+    mock_cursor.fetchall.return_value = MOCK_RRD_META
+    mock_conn.cursor.return_value = mock_cursor
+
+    mocks = [
+        mock.patch('datadog_checks.cacti.cacti.rrdtool'),
+        mock.patch('datadog_checks.cacti.cacti.pymysql.connect', return_value=mock_conn),
+        mock.patch('datadog_checks.cacti.CactiCheck._get_rrd_info', return_value=MOCK_INFO),
+        mock.patch('datadog_checks.cacti.CactiCheck._get_rrd_fetch', return_value=MOCK_FETCH),
+    ]
+
+    for mock_func in mocks:
+        mock_func.start()
+    return mocks

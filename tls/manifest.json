@@ -20,6 +20,13 @@
     "web"
   ],
   "type": "check",
-  "is_public": false,
-  "integration_id": "tls"
+  "is_public": true,
+  "integration_id": "tls",
+  "assets": {
+    "monitors": {},
+    "dashboards": {
+      "TLS Overview": "assets/dashboards/overview.json"
+     },
+    "service_checks": "assets/service_checks.json"
+  }
 }

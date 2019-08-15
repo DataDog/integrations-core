@@ -47,3 +47,11 @@ instances:
     ## Set a timeout for the prometheus query.
     #
     # prometheus_timeout: 10
+
+    ## @param telemetry - boolean - optional - default: false
+    ## To enable the telemetry check's metrics,  you must set this parameter to true.
+    ## It will generate useful internal check metrics: message payload size, the number
+    ## of metrics received, processed, ignored....
+    ## Metrics can be found under `kubernetes_state.telemetry`
+    #
+    # telemetry: false

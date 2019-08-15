@@ -64,6 +64,8 @@ class Redis(AgentCheck):
         'used_memory_lua': 'redis.mem.lua',
         'used_memory_peak': 'redis.mem.peak',
         'used_memory_rss': 'redis.mem.rss',
+        'used_memory_startup': 'redis.mem.startup',
+        'used_memory_overhead': 'redis.mem.overhead',
         'maxmemory': 'redis.mem.maxmemory',
         # replication
         'master_last_io_seconds_ago': 'redis.replication.last_io_seconds_ago',

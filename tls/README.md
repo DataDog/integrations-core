@@ -8,6 +8,8 @@ This check monitors [TLS][1] protocol versions, certificate expiration & validit
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying these instructions.
+
 ### Installation
 
 The TLS check is included in the [Datadog Agent][2] package.
@@ -29,6 +31,10 @@ No additional installation is needed on your server.
 
 See [metadata.csv][6] for a list of metrics provided by this integration.
 
+### Events
+
+TLS does not include any events.
+
 ### Service Checks
 
 See [service_checks.json][7] for a list of service checks provided by this integration.
@@ -37,10 +43,6 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 - `tls.version` - Returns `CRITICAL` if a connection is made with a protocol version that is not allowed, otherwise returns `OK`.
 - `tls.cert_validation` - Returns `CRITICAL` if the certificate is malformed or does not match the server hostname, otherwise returns `OK`.
 - `tls.cert_expiration` - Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`/`seconds_critical`, returns `WARNING` if the certificate expires in less than `days_warning`/`seconds_warning`, otherwise returns `OK`.
-
-### Events
-
-TLS does not include any events.
 
 ## Troubleshooting
 
@@ -52,5 +54,6 @@ Need help? Contact [Datadog support][8].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/tls/metadata.csv
-[7]: https://github.com/DataDog/integrations-core/blob/master/tls/service_checks.json
+[7]: https://github.com/DataDog/integrations-core/blob/master/tls/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations

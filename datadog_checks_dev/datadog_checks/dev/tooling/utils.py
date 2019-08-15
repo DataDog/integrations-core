@@ -34,9 +34,11 @@ def get_current_agent_version():
     for version in release_data:
         parts = version.split('.')
         if len(parts) > 1:
-            versions.add((parts[0], parts[1]))
+            versions.add((int(parts[0]), int(parts[1])))
 
-    return '.'.join(sorted(versions)[-1][:2])
+    most_recent = sorted(versions)[-1]
+
+    return "{}.{}".format(most_recent[0], most_recent[1])
 
 
 def is_package(d):
