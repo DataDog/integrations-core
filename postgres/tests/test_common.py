@@ -133,10 +133,10 @@ def test_locks_metrics(aggregator, check, pg_instance):
     expected_tags = pg_instance['tags'] + [
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
-        'db:{}'.format(DB_NAME),
+        'db:datadog_test',
         'lock_mode:AccessExclusiveLock',
         'table:persons',
-        'schema:datadog_test',
+        'schema:public',
     ]
     aggregator.assert_metric('postgresql.locks', count=1, tags=expected_tags)
 

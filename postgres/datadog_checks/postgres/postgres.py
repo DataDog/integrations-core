@@ -104,8 +104,8 @@ class PostgreSql(AgentCheck):
         'metrics': {'lock_count': ('postgresql.locks', GAUGE)},
         'query': """
 SELECT mode,
-       pd.datname,
        pn.nspname,
+       pd.datname,
        pc.relname,
        count(*) AS {metrics_columns}
   FROM pg_locks l
@@ -114,7 +114,7 @@ SELECT mode,
   LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
  WHERE l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg_%%'
- GROUP BY pd.datname, pn.nspname, pc.relname, mode""",
+ GROUP BY pd.datname, pc.relname, pn.nspname, mode""",
         'relation': False,
     }
 
