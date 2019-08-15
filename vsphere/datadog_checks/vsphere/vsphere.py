@@ -881,8 +881,12 @@ class VSphereCheck(AgentCheck):
 
         if self._should_collect_historical(instance):
             try:
-                vcenter_settings = server_instance.content.setting.QueryOptions("config.vpxd.stats.maxQueryMetrics")
-                max_historical_metrics = int(vcenter_settings[0].value)
+                if 'max_query_metrics' in instance:
+                    max_historical_metrics = int(instance['max_query_metrics'])
+                    self.log.info("Collecting up to %d metrics", max_historical_metrics)
+                else:
+                    vcenter_settings = server_instance.content.setting.QueryOptions("config.vpxd.stats.maxQueryMetrics")
+                    max_historical_metrics = int(vcenter_settings[0].value)
                 if max_historical_metrics < 0:
                     max_historical_metrics = float('inf')
             except Exception:

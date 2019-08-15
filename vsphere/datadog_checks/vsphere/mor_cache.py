@@ -118,7 +118,7 @@ class MorCache:
                     if len(mor['metrics']) >= max_historical_metrics:
                         # Too many metrics to query for a single mor, ignore it
                         self.log.warning(
-                            "Metrics for '{}' are ignored because there are more ({}) than what you allowed ({}) on vCenter Server",  # noqa: E501
+                            "Metrics for '%s' are ignored because there are more (%d) than what you allowed (%d) on vCenter Server",  # noqa: E501
                             mor_name,
                             len(mor['metrics']),
                             max_historical_metrics,
@@ -128,6 +128,7 @@ class MorCache:
                     nb_hist_metrics += len(mor['metrics'])
                     if nb_hist_metrics >= max_historical_metrics:
                         # Adding those metrics to the batch would make it too big, yield it now
+                        self.log.info("Will request %d hist metrics", nb_hist_metrics-len(mor['metrics']))
                         yield batch
                         batch = {}
                         nb_hist_metrics = len(mor['metrics'])
@@ -135,11 +136,13 @@ class MorCache:
                 batch[mor_name] = mor
 
                 if len(batch) == batch_size:
+                    self.log.info("Will request %d hist metrics", nb_hist_metrics)
                     yield batch
                     batch = {}
                     nb_hist_metrics = 0
 
             if batch:
+                self.log.info("Will request %d hist metrics", nb_hist_metrics)
                 yield batch
 
     def purge(self, key, ttl):
