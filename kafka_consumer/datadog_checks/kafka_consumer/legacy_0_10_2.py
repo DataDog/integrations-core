@@ -37,7 +37,23 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         self._custom_tags = self.instance.get('tags', [])
         self._kafka_timeout = int(init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT))
         self._kafka_client = self._create_kafka_client()
-        self._zk_timeout = int(init_config.get('zk_timeout', 5))
+        self._zk_hosts_ports = self.instance.get('zk_connect_str')
+
+        # If we are collecting from Zookeeper, then create a long-lived zk client
+        if self._zk_hosts_ports is not None:
+
+            # any chroot prefix gets appended onto the host string or the last item on the host list
+            chroot = self.instance.get('zk_prefix')
+            if chroot is not None:
+                if isinstance(self._zk_hosts_ports, string_types):
+                    self._zk_hosts_ports += chroot
+                elif isinstance(self._zk_hosts_ports, list):
+                    self._zk_hosts_ports.append(chroot)
+                else:
+                    raise ConfigurationError("zk_connect_str must be a string or list of strings")
+
+            self._zk_client = KazooClient(hosts=self._zk_hosts_ports, timeout=int(init_config.get('zk_timeout', 5)))
+            self._zk_client.start()
 
     def check(self, instance):
         # For calculating lag, we have to fetch offsets from both kafka and
@@ -48,11 +64,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         # understate consumer lag to the point of having negative consumer lag,
         # which just creates confusion because it's theoretically impossible.
 
-        # Fetch consumer group offsets from Zookeeper
-        zk_hosts_ports = instance.get('zk_connect_str')
-        zk_prefix = instance.get('zk_prefix', '')
-        get_kafka_consumer_offsets = is_affirmative(instance.get('kafka_consumer_offsets', zk_hosts_ports is None))
-
         # If monitor_unlisted_consumer_groups is True, fetch all groups stored in ZK
         consumer_groups = None
         if instance.get('monitor_unlisted_consumer_groups', False):
@@ -61,20 +72,20 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             consumer_groups = instance.get('consumer_groups')
             self._validate_explicit_consumer_groups(consumer_groups)
 
+        # Fetch consumer group offsets from Zookeeper
         zk_consumer_offsets = None
-        if zk_hosts_ports:
-            zk_consumer_offsets, consumer_groups = self._get_zk_consumer_offsets(
-                zk_hosts_ports, consumer_groups, zk_prefix
-            )
+        if self._zk_hosts_ports is not None:
+            zk_consumer_offsets, consumer_groups = self._get_zk_consumer_offsets(consumer_groups)
 
         topics = defaultdict(set)
-        kafka_consumer_offsets = None
 
+        kafka_consumer_offsets = None
         self._kafka_client._maybe_refresh_metadata()
 
-        if get_kafka_consumer_offsets:
+        # Fetch consumer group offsets from Kafka
+        if is_affirmative(instance.get('kafka_consumer_offsets', self._zk_hosts_ports is None)):
             # For now, consumer groups are mandatory if not using ZK
-            if not zk_hosts_ports and not consumer_groups:
+            if self._zk_hosts_ports is None and not consumer_groups:
                 raise ConfigurationError(
                     'Invalid configuration - if you are not collecting '
                     'offsets from ZK you _must_ specify consumer groups'
@@ -316,18 +327,18 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
             self.gauge('kafka.consumer_lag', consumer_lag, tags=consumer_group_tags)
 
-    def _get_zk_path_children(self, zk_conn, zk_path, name_for_error):
+    def _get_zk_path_children(self, zk_path, name_for_error):
         """Fetch child nodes for a given Zookeeper path."""
         children = []
         try:
-            children = zk_conn.get_children(zk_path)
+            children = self._zk_client.get_children(zk_path)
         except NoNodeError:
             self.log.info('No zookeeper node at %s', zk_path)
         except Exception:
             self.log.exception('Could not read %s from %s', name_for_error, zk_path)
         return children
 
-    def _get_zk_consumer_offsets(self, zk_hosts_ports, consumer_groups=None, zk_prefix=''):
+    def _get_zk_consumer_offsets(self, consumer_groups=None):
         """
         Fetch Consumer Group offsets from Zookeeper.
 
@@ -343,59 +354,48 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         # Construct the Zookeeper path pattern
         # /consumers/[groupId]/offsets/[topic]/[partitionId]
-        zk_path_consumer = zk_prefix + '/consumers/'
+        zk_path_consumer = '/consumers/'
         zk_path_topic_tmpl = zk_path_consumer + '{group}/offsets/'
         zk_path_partition_tmpl = zk_path_topic_tmpl + '{topic}/'
 
-        zk_conn = KazooClient(zk_hosts_ports, timeout=self._zk_timeout)
-        zk_conn.start()
-        try:
-            if consumer_groups is None:
-                # If consumer groups aren't specified, fetch them from ZK
-                consumer_groups = {
-                    consumer_group: None
-                    for consumer_group in self._get_zk_path_children(zk_conn, zk_path_consumer, 'consumer groups')
-                }
+        if consumer_groups is None:
+            # If consumer groups aren't specified, fetch them from ZK
+            consumer_groups = {
+                consumer_group: None
+                for consumer_group in self._get_zk_path_children(zk_path_consumer, 'consumer groups')
+            }
 
-            for consumer_group, topics in iteritems(consumer_groups):
-                if not topics:
-                    # If topics are't specified, fetch them from ZK
-                    zk_path_topics = zk_path_topic_tmpl.format(group=consumer_group)
-                    topics = {topic: None for topic in self._get_zk_path_children(zk_conn, zk_path_topics, 'topics')}
-                    consumer_groups[consumer_group] = topics
+        for consumer_group, topics in iteritems(consumer_groups):
+            if not topics:
+                # If topics are't specified, fetch them from ZK
+                zk_path_topics = zk_path_topic_tmpl.format(group=consumer_group)
+                topics = {topic: None for topic in self._get_zk_path_children(zk_path_topics, 'topics')}
+                consumer_groups[consumer_group] = topics
 
-                for topic, partitions in iteritems(topics):
-                    if partitions:
-                        partitions = set(partitions)  # defend against bad user input
-                    else:
-                        # If partitions aren't specified, fetch them from ZK
-                        zk_path_partitions = zk_path_partition_tmpl.format(group=consumer_group, topic=topic)
-                        # Zookeeper returns the partition IDs as strings because
-                        # they are extracted from the node path
-                        partitions = [
-                            int(x) for x in self._get_zk_path_children(zk_conn, zk_path_partitions, 'partitions')
-                        ]
-                        consumer_groups[consumer_group][topic] = partitions
+            for topic, partitions in iteritems(topics):
+                if partitions:
+                    partitions = set(partitions)  # defend against bad user input
+                else:
+                    # If partitions aren't specified, fetch them from ZK
+                    zk_path_partitions = zk_path_partition_tmpl.format(group=consumer_group, topic=topic)
+                    # Zookeeper returns the partition IDs as strings because
+                    # they are extracted from the node path
+                    partitions = [int(x) for x in self._get_zk_path_children(zk_path_partitions, 'partitions')]
+                    consumer_groups[consumer_group][topic] = partitions
 
-                    # Fetch consumer offsets for each partition from ZK
-                    for partition in partitions:
-                        zk_path = (zk_path_partition_tmpl + '{partition}/').format(
-                            group=consumer_group, topic=topic, partition=partition
-                        )
-                        try:
-                            consumer_offset = int(zk_conn.get(zk_path)[0])
-                            key = (consumer_group, topic, partition)
-                            zk_consumer_offsets[key] = consumer_offset
-                        except NoNodeError:
-                            self.log.info('No zookeeper node at %s', zk_path)
-                        except Exception:
-                            self.log.exception('Could not read consumer offset from %s', zk_path)
-        finally:
-            try:
-                zk_conn.stop()
-                zk_conn.close()
-            except Exception:
-                self.log.exception('Error cleaning up Zookeeper connection')
+                # Fetch consumer offsets for each partition from ZK
+                for partition in partitions:
+                    zk_path = (zk_path_partition_tmpl + '{partition}/').format(
+                        group=consumer_group, topic=topic, partition=partition
+                    )
+                    try:
+                        consumer_offset = int(self._zk_client.get(zk_path)[0])
+                        key = (consumer_group, topic, partition)
+                        zk_consumer_offsets[key] = consumer_offset
+                    except NoNodeError:
+                        self.log.info('No zookeeper node at %s', zk_path)
+                    except Exception:
+                        self.log.exception('Could not read consumer offset from %s', zk_path)
         return zk_consumer_offsets, consumer_groups
 
     def _get_kafka_consumer_offsets(self, instance, consumer_groups):
