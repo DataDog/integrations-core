@@ -190,7 +190,8 @@ SELECT schemaname, count(*) FROM
   ORDER BY schemaname, relname
   LIMIT {table_count_limit}
 ) AS subquery GROUP BY schemaname
-        """),
+        """
+        ),
     }
 
     q1 = (
@@ -568,7 +569,9 @@ GROUP BY datid, datname
 
     def _get_count_metrics(self, table_count_limit):
         metrics = dict(self.COUNT_METRICS)
-        metrics['query'] = self.COUNT_METRICS['query'].format(metrics_columns="{metrics_columns}", table_count_limit=table_count_limit)
+        metrics['query'] = self.COUNT_METRICS['query'].format(
+            metrics_columns="{metrics_columns}", table_count_limit=table_count_limit
+        )
         return metrics
 
     def _get_archiver_metrics(self, key, db):

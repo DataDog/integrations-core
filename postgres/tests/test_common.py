@@ -106,7 +106,12 @@ def test_schema_metrics(aggregator, check, pg_instance):
     pg_instance['table_count_limit'] = 1
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + ['db:{}'.format(DB_NAME), 'server:{}'.format(HOST), 'port:{}'.format(PORT), 'schema:public']
+    expected_tags = pg_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'schema:public',
+    ]
     aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.db.count', value=2, count=1)
 
