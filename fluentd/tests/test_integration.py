@@ -14,7 +14,7 @@ from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, EXPECTED_GA
 @pytest.mark.usefixtures("dd_environment")
 def test_fluentd_exception(aggregator):
     instance = {"monitor_agent_url": BAD_URL, "plugin_ids": ["plg2"], "tags": ["test"]}
-    check = Fluentd(CHECK_NAME, {}, instance)
+    check = Fluentd(CHECK_NAME, {}, [instance])
     with pytest.raises(Exception):
         check.check(instance)
 
@@ -28,7 +28,7 @@ def test_fluentd_exception(aggregator):
 def test_fluentd_with_tag_by_type(aggregator):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance["tag_by"] = "type"
-    check = Fluentd(CHECK_NAME, {}, instance)
+    check = Fluentd(CHECK_NAME, {}, [instance])
     check.check(instance)
 
     for m in EXPECTED_GAUGES:
@@ -48,7 +48,7 @@ def test_fluentd_with_tag_by_plugin_id(aggregator):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance["tag_by"] = "plugin_id"
 
-    check = Fluentd(CHECK_NAME, {}, instance)
+    check = Fluentd(CHECK_NAME, {}, [instance])
     check.check(instance)
 
     for m in EXPECTED_GAUGES:
@@ -67,7 +67,7 @@ def test_fluentd_with_custom_tags(aggregator):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     custom_tags = ['test', 'tast:tast']
     instance["tags"] = custom_tags
-    check = Fluentd(CHECK_NAME, {}, instance)
+    check = Fluentd(CHECK_NAME, {}, [instance])
 
     check.check(instance)
 
