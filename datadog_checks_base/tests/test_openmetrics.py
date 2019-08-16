@@ -395,10 +395,18 @@ def test_submit_histogram_bucket(aggregator, mocked_prometheus_check, mocked_pro
     aggregator.assert_metric('prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1)
     # assert buckets
     aggregator.assert_histogram_bucket(
-        'custom.histogram', 1, 0.0, 1.0, True, "", tags=['lower_bound:0.0', 'upper_bound:1.0'], count=None, at_least=1
+        'prometheus.custom.histogram',
+        1,
+        0.0,
+        1.0,
+        True,
+        "",
+        tags=['lower_bound:0.0', 'upper_bound:1.0'],
+        count=None,
+        at_least=1,
     )
     aggregator.assert_histogram_bucket(
-        'custom.histogram',
+        'prometheus.custom.histogram',
         1,
         1.0,
         31104000.0,
@@ -409,7 +417,7 @@ def test_submit_histogram_bucket(aggregator, mocked_prometheus_check, mocked_pro
         at_least=1,
     )
     aggregator.assert_histogram_bucket(
-        'custom.histogram',
+        'prometheus.custom.histogram',
         1,
         31104000.0,
         432400000.0,
@@ -420,7 +428,7 @@ def test_submit_histogram_bucket(aggregator, mocked_prometheus_check, mocked_pro
         at_least=1,
     )
     aggregator.assert_histogram_bucket(
-        'custom.histogram',
+        'prometheus.custom.histogram',
         1,
         432400000.0,
         float('inf'),

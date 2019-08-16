@@ -754,7 +754,7 @@ class OpenMetricsScraperMixin(object):
         tags = self._metric_tags(metric_name, sample[self.SAMPLE_VALUE], sample, scraper_config, hostname)
         self.submit_histogram_bucket(
             self.check_id,
-            metric_name,
+            "{}.{}".format(scraper_config['namespace'], metric_name),
             sample[self.SAMPLE_VALUE],
             float(sample[self.SAMPLE_LABELS]["lower_bound"]),
             float(sample[self.SAMPLE_LABELS]["le"]),
