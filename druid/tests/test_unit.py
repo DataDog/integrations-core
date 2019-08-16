@@ -57,5 +57,5 @@ def test_submit_status_service_check(aggregator, instance):
     check._submit_status_service_check('http://hello-world.com:8899', ['foo:bar'])
 
     aggregator.assert_service_check(
-        'druid.process.status', AgentCheck.CRITICAL, tags=['url:http://hello-world.com:8899/status/health', 'foo:bar']
+        'druid.process.health', AgentCheck.CRITICAL, tags=['url:http://hello-world.com:8899/status/health', 'foo:bar']
     )

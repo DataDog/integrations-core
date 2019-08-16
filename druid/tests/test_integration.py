@@ -20,7 +20,7 @@ def test_status_checks(aggregator):
         'druid.process.can_connect', AgentCheck.OK, ['url:http://localhost:8082/status/properties', 'foo:bar']
     )
     aggregator.assert_service_check(
-        'druid.process.status',
+        'druid.process.health',
         AgentCheck.OK,
         ['url:http://localhost:8082/status/health', 'foo:bar', 'process:druid/broker'],
     )

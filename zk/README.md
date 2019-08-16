@@ -128,11 +128,14 @@ The Zookeeper check does not include any events.
 
 ### Service Checks
 
-**zookeeper.ruok**:<br>
-Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN` in the case of a different response and `CRITICAL` if no response is received..
+**druid.process.can_connect**:
 
-**zookeeper.mode**:<br>
-The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when Zookeeper's actual mode matches `expected_mode`, otherwise returns `CRITICAL`.
+Returns `CRITICAL` if the check cannot connect to Druid process. Returns `OK` otherwise.
+
+**druid.process.health**:
+
+Returns `CRITICAL` if Druid process is not healthy. Returns `OK` otherwise.
+
 
 ## Troubleshooting
 Need help? Contact [Datadog support][11].

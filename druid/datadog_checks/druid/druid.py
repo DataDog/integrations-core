@@ -6,7 +6,7 @@ from requests import HTTPError, Timeout
 from datadog_checks.base import AgentCheck
 
 SERVICE_CHECK_PROCESS_CAN_CONNECT = 'druid.process.can_connect'
-SERVICE_CHECK_PROCESS_STATUS = 'druid.process.status'
+SERVICE_CHECK_PROCESS_STATUS = 'druid.process.health'
 
 
 class DruidCheck(AgentCheck):

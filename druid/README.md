@@ -119,7 +119,12 @@ Restart Druid to start sending more Druid metrics to DogStatsD.
 
 ### Service Checks
 
-(TBD)
+**zookeeper.ruok**:<br>
+Sends `ruok` to the monitored node. Returns `OK` with an `imok` response, `WARN` in the case of a different response and `CRITICAL` if no response is received..
+
+**zookeeper.mode**:<br>
+The Agent submits this service check if `expected_mode` is configured in `zk.yaml`. The check returns `OK` when Zookeeper's actual mode matches `expected_mode`, otherwise returns `CRITICAL`.
+
 
 ### Events
 
