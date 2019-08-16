@@ -36,10 +36,5 @@ def dd_environment():
 
 
 @pytest.fixture
-def check():
-    return lambda init_config, instance: Fluentd(CHECK_NAME, init_config, [instance])
-
-
-@pytest.fixture
 def instance():
     return DEFAULT_INSTANCE
