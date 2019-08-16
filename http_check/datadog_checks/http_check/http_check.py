@@ -53,6 +53,7 @@ class HTTPCheck(NetworkCheck):
         self.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = self.ca_certs
 
         if is_affirmative(self.instance.get('disable_ssl_validation', True)):
+            # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
             self.http.options['verify'] = False
 
     def _check(self, instance):
@@ -78,6 +79,7 @@ class HTTPCheck(NetworkCheck):
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options['timeout'][0]
         start = time.time()
+        # allows default headers to be included based on `include_default_headers` flag
         self.http.options['headers'] = headers
 
         def send_status_up(logMsg):

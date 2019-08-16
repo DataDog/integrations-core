@@ -337,8 +337,3 @@ instances:
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
     # log_requests: false
-
-    ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for increased performance.
-    #
-    # persist_connections: false
