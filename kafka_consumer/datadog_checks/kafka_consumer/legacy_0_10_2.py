@@ -422,7 +422,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             # Kafka protocol uses OffsetFetchRequests to retrieve consumer offsets:
             # https://kafka.apache.org/protocol#The_Messages_OffsetFetch
             # https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-OffsetFetchRequest
-            request = OffsetFetchRequest[1](consumer_group, tps.items())
+            request = OffsetFetchRequest[1](consumer_group, list(tps.items()))
             response = self._make_blocking_req(request, node_id=coordinator_id)
             for (topic, partition_offsets) in response.topics:
                 for partition, offset, _, error_code in partition_offsets:
