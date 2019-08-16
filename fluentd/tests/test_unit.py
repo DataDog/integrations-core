@@ -5,7 +5,7 @@ from .common import CHECK_NAME
 from datadog_checks.fluentd import Fluentd
 
 
-def test_default_timeout(check, instance):
+def test_default_timeout(instance):
     # test default timeout
     check = Fluentd(CHECK_NAME, {}, instance)
     check.check(instance)
@@ -13,14 +13,14 @@ def test_default_timeout(check, instance):
     assert check.http.options['timeout'] == (5, 5)
 
 
-def test_init_config_old_timeout(check, instance):
+def test_init_config_old_timeout(instance):
     # test init_config timeout
     check = Fluentd(CHECK_NAME, {'default_timeout': 2}, instance)
     check.check(instance)
     assert check.http.options['timeout'] == (2, 2)
 
 
-def test_init_config_timeout(check, instance):
+def test_init_config_timeout(instance):
     # test init_config timeout
     check = Fluentd(CHECK_NAME, {'timeout': 7}, instance)
     check.check(instance)
@@ -28,7 +28,7 @@ def test_init_config_timeout(check, instance):
     assert check.http.options['timeout'] == (7, 7)
 
 
-def test_instance_old_timeout(check, instance):
+def test_instance_old_timeout(instance):
     # test instance default_timeout
     instance['default_timeout'] = 13
     check =  Fluentd(CHECK_NAME, {'default_timeout': 9}, instance)
