@@ -4,7 +4,7 @@
 import mock
 import pytest
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.druid import DruidCheck
 
 pytestmark = pytest.mark.unit
@@ -12,6 +12,13 @@ pytestmark = pytest.mark.unit
 
 class FooException(Exception):
     pass
+
+
+def test_missing_url_config(aggregator):
+    check = DruidCheck('druid', {}, [{}])
+
+    with pytest.raises(ConfigurationError):
+        check.check({})
 
 
 def test_service_check_can_connect_success(aggregator, instance):

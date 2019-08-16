@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from requests import HTTPError, Timeout
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 SERVICE_CHECK_PROCESS_CAN_CONNECT = 'druid.process.can_connect'
 SERVICE_CHECK_PROCESS_STATUS = 'druid.process.health'
@@ -13,12 +13,14 @@ class DruidCheck(AgentCheck):
     def check(self, instance):
         custom_tags = instance.get('tags', [])
 
-        base_url = instance.get('process_url')
+        base_url = instance.get('url')
+        if not base_url:
+            raise ConfigurationError('Missing configuration: url')
 
         process_properties = self._get_process_properties(base_url, custom_tags)
 
         druid_service = process_properties['druid.service']
-        tags = custom_tags + ['process:{}'.format(druid_service)]
+        tags = custom_tags + ['service:{}'.format(druid_service)]
 
         self._submit_status_service_check(base_url, tags)
 

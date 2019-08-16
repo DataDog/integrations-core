@@ -1,4 +1,7 @@
 init_config:
 
 instances:
-  - process_url: <PROCESS_URL>
+    ## @param url - string - required
+    ## url used to connect to the Druid process.
+    #
+  - url: <DRUID_PROCESS_URL>

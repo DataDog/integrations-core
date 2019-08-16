@@ -14,7 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.fixture(scope='session')
-def dd_environment(e2e_instance):
+def dd_environment(instance):
     """
     Start a standalone postgres server requiring authentication.
     """
@@ -25,14 +25,9 @@ def dd_environment(e2e_instance):
             CheckEndpoints(BROKER_URL + '/status', attempts=200),
         ],
     ):
-        yield e2e_instance
+        yield instance
 
 
 @pytest.fixture(scope='session')
 def instance():
-    return {'process_url': BROKER_URL}
-
-
-@pytest.fixture(scope='session')
-def e2e_instance():
-    return {'process_url': BROKER_URL}
+    return {'url': BROKER_URL}

@@ -12,7 +12,7 @@ from .common import BROKER_URL
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_status_checks(aggregator):
-    instance = {'process_url': BROKER_URL, 'tags': ['foo:bar']}
+    instance = {'url': BROKER_URL, 'tags': ['foo:bar']}
     check = DruidCheck('druid', {}, [instance])
     check.check(instance)
 
@@ -22,7 +22,7 @@ def test_status_checks(aggregator):
     aggregator.assert_service_check(
         'druid.process.health',
         AgentCheck.OK,
-        ['url:http://localhost:8082/status/health', 'foo:bar', 'process:druid/broker'],
+        ['url:http://localhost:8082/status/health', 'foo:bar', 'service:druid/broker'],
     )
 
     aggregator.assert_all_metrics_covered()
