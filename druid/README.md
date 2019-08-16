@@ -4,12 +4,7 @@
 
 ## Overview
 
-The Datadog Agent collects many metrics from Druid nodes, including those for:
-
-* Service health - for a given service, how many of its nodes are up, passing, warning, critical? (TBD example from Consul)
-* Node health - for a given node, how many of its services are up, passing, warning, critical? (TBD example from Consul)
-
-_Druid_ can provide further metrics via DogStatsD. These metrics are Druid are related to queries, ingestion, and coordination:
+The Datadog Agent collects many metrics from _Druid_ via DogStatsD. These metrics are Druid are related to queries, ingestion, and coordination:
 
 * Query Metrics
 * SQL Metrics
@@ -19,7 +14,7 @@ _Druid_ can provide further metrics via DogStatsD. These metrics are Druid are r
 
 And many more. See details [here](https://druid.apache.org/docs/latest/operations/metrics.html).
 
-Finally, in addition to metrics, the Datadog Agent also sends a service check for (TBD), and an event (TBD)
+I addition to metrics, the Datadog Agent also sends a service check for Druid health.
 
 ## Setup
 
@@ -30,16 +25,15 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `druid.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your druid performance data. See the [sample druid.d/conf.yaml][2] for all available configuration options.
+#### Step 1: Configure Druid to collect service checks
+
+1. Edit the `druid.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your druid service checks. See the [sample druid.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][3].
 
-(CONFIG TBD)
+#### Step 2: Connect Druid to DogStatsD (included in the Datadog Agent) by using the extension `statsd-emitter` to collect metrics
 
-#### Connect Druid to DogStatsD by using the extension `statsd-emitter`
-
-1) Install `statsd-emitter` extension
-
+1) Install Druid extension [`statsd-emitter`](https://druid.apache.org/docs/latest/development/extensions-contrib/statsd.html) 
 
 ```
 $ java \
@@ -51,26 +45,43 @@ $ java \
   -c "org.apache.druid.extensions.contrib:statsd-emitter:0.15.0-incubating"
 ```
 
-2) Update Druid config
+More info about this step can be found on the [official guide for loading Druid extensions](https://druid.apache.org/docs/latest/operations/including-extensions.html)
 
+2) Update Druid java properties
+
+Update/Add following configs to your druid properties.
 ```
-Update this config:
+# Add `statsd-emitter` to the extensions list to be loaded 
+druid.extensions.loadList=[..., "statsd-emitter"]
+
+# By default druid emission period is 1 minute (PT1M).
+# We recommmend using 15 seconds instead as follow:
+druid.monitoring.emissionPeriod=PT15S
+
+# Use `statsd-emitter` extension as metric emitter
 druid.emitter=statsd
-Add those configs
+
+# Configure `statsd-emitter` endpoint
 druid.emitter.statsd.hostname=127.0.0.1
 druid.emitter.statsd.port:8125
+
+# Configure `statsd-emitter` to use dogstatsd format 
 druid.emitter.statsd.dogstatsd=true
+druid.emitter.statsd.dogstatsdServiceAsTag=true
 ```
 
-More info: https://druid.apache.org/docs/latest/development/extensions-contrib/statsd.html
+Important: `druid.emitter.statsd.dogstatsd` and `druid.emitter.statsd.dogstatsdServiceAsTag` must be set to `true`, otherwise tags might not be reported correctly to Datadog.
 
-Restart Druid to start sending more Druid metrics to DogStatsD.
-
+Restart Druid to start sending more Druid metrics to DogStatsD (included in the Datadog Agent).
 
 
 #### Draft notes
 
 - For metrics, Druid is emitting metrics once per minute (configurable).
+
+#### Integration Service Checks
+
+Use the default configuration of your druid.d/conf.yaml file to activate the collection of your Druid service checks. See the sample [druid.d/conf.yaml][10] for all available configuration options.
 
 #### Log Collection
 
@@ -103,19 +114,11 @@ Restart Druid to start sending more Druid metrics to DogStatsD.
 
 [Run the Agent's status subcommand][4] and look for `druid` under the Checks section.
 
-#### Integration Metrics
-
-(TBD Validating integration pulling data from Druid)
-
-#### Druid to DogStatsD
-
-(TBD Validating Dogstatsd integration)
-
 ## Data Collected
 
 ### Metrics
 
-(TBD)
+See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Service Checks
 
@@ -128,7 +131,7 @@ The Agent submits this service check if `expected_mode` is configured in `zk.yam
 
 ### Events
 
-(TBD)
+The Druid check does not include any events.
 
 ## Troubleshooting
 
@@ -140,3 +143,5 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://docs.datadoghq.com/help
+[9]: https://github.com/DataDog/integrations-core/blob/master/druid/metadata.csv
+[10]: https://github.com/DataDog/integrations-core/blob/master/presto/datadog_checks/presto/data/conf.yaml.example
