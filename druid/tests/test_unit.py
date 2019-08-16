@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
-
 import pytest
 
 from datadog_checks.base import AgentCheck
