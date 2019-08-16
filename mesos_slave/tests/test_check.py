@@ -1,11 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-
 from six import iteritems
 
-from .utils import mock_check, read_fixture
+from .utils import mock_check
 
 
 def test_fixtures(check, instance, aggregator):
