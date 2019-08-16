@@ -58,7 +58,7 @@ class SnmpCheck(AgentCheck):
         self.mibs_path = init_config.get('mibs_folder')
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
         self.profiles = init_config.get('profiles', {})
-        for profile, profile_data in list(self.profiles.items()):
+        for profile, profile_data in self.profiles.items():
             filename = profile_data.get('definition_file')
             if filename:
                 try:
