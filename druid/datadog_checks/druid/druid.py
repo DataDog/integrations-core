@@ -54,10 +54,3 @@ class DruidCheck(AgentCheck):
             )
         except Timeout:
             self.warning("Connection timeout when connecting to {}".format(url))
-
-
-# TAGS:
-#   - druid service name e.g. druid/broker
-
-# TODO: Handle version
-# etcd.server.version,gauge,,item,,Which version is running. 1 for 'server_version' label with current version.,0,etcd,
