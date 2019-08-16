@@ -22,7 +22,7 @@ def test_service_checks_integration(aggregator):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
+def test_service_checks_e2e(dd_agent_check):
     aggregator = dd_agent_check(INSTANCE)
 
     assert_service_checks(aggregator)
