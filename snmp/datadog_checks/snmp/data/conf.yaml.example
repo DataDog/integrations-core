@@ -85,11 +85,14 @@ init_config:
 
   ## @param profiles - dictionary - optional
   ## Specify profiles to be able to reference a set of metrics by name.
-  ## It points to a file with the same structure as global_metrics.
+  ## One of definition_file or definition needs to be defined.
+  ## definition_file points to a file with the same structure as
+  ## global_metrics, whereas defintion inlines it directly here.
   #
   # profiles:
   #   profile1:
-  #   	definition: profile1.yaml
+  #   	definition_file: <PROFILE_FILE>
+  #   	defintion: <PROFILE>
 
 instances:
 

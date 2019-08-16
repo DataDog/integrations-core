@@ -113,7 +113,7 @@ def test_profile_error():
     with pytest.raises(ConfigurationError):
         SnmpCheck('snmp', {}, [instance])
 
-    init_config = {'profiles': {'profile1': {'definition': 'doesntexistfile'}}}
+    init_config = {'profiles': {'profile1': {'definition_file': 'doesntexistfile'}}}
     with pytest.raises(ConfigurationError):
         SnmpCheck('snmp', init_config, [instance])
 
@@ -121,6 +121,6 @@ def test_profile_error():
         profile_file = os.path.join(tmp, 'profile1.yaml')
         with open(profile_file, 'w') as f:
             f.write("not yaml: {")
-        init_config = {'profiles': {'profile1': {'definition': profile_file}}}
+        init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         with pytest.raises(ConfigurationError):
             SnmpCheck('snmp', init_config, [instance])

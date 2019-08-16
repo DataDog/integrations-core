@@ -59,12 +59,15 @@ class SnmpCheck(AgentCheck):
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
         self.profiles = init_config.get('profiles', {})
         for profile, profile_data in list(self.profiles.items()):
-            filename = profile_data['definition']
-            try:
-                with open(filename) as f:
-                    data = yaml.safe_load(f)
-            except Exception:
-                raise ConfigurationError("Couldn't read profile '{}' in '{}'".format(profile, filename))
+            filename = profile_data.get('definition_file')
+            if filename:
+                try:
+                    with open(filename) as f:
+                        data = yaml.safe_load(f)
+                except Exception:
+                    raise ConfigurationError("Couldn't read profile '{}' in '{}'".format(profile, filename))
+            else:
+                data = profile_data['definition']
             self.profiles[profile] = {'definition': data}
 
         self.instance['name'] = self._get_instance_key(self.instance)

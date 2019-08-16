@@ -462,11 +462,24 @@ def test_cast_metrics(aggregator):
 def test_profile(aggregator):
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'
+    init_config = {'profiles': {'profile1': {'definition': common.SUPPORTED_METRIC_TYPES}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_profile_by_file(aggregator):
+    instance = common.generate_instance_config([])
+    instance['profile'] = 'profile1'
     with temp_dir() as tmp:
         profile_file = os.path.join(tmp, 'profile1.yaml')
         with open(profile_file, 'w') as f:
             f.write(yaml.safe_dump(common.SUPPORTED_METRIC_TYPES))
-        init_config = {'profiles': {'profile1': {'definition': profile_file}}}
+        init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         check = SnmpCheck('snmp', init_config, [instance])
         check.check(instance)
 
