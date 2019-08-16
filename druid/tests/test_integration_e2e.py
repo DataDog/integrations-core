@@ -8,14 +8,27 @@ from datadog_checks.druid import DruidCheck
 
 from .common import BROKER_URL
 
+INSTANCE = {'url': BROKER_URL, 'tags': ['foo:bar']}
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_status_checks(aggregator):
-    instance = {'url': BROKER_URL, 'tags': ['foo:bar']}
-    check = DruidCheck('druid', {}, [instance])
-    check.check(instance)
+def test_service_checks_integration(aggregator):
 
+    check = DruidCheck('druid', {}, [INSTANCE])
+    check.check(INSTANCE)
+
+    assert_service_checks(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check):
+    aggregator = dd_agent_check(INSTANCE)
+
+    assert_service_checks(aggregator)
+
+
+def assert_service_checks(aggregator):
     aggregator.assert_service_check(
         'druid.process.can_connect', AgentCheck.OK, ['url:http://localhost:8082/status/properties', 'foo:bar']
     )
@@ -24,5 +37,4 @@ def test_status_checks(aggregator):
         AgentCheck.OK,
         ['url:http://localhost:8082/status/health', 'foo:bar', 'service:druid/broker'],
     )
-
     aggregator.assert_all_metrics_covered()
