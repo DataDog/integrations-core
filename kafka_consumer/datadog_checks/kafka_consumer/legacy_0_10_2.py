@@ -27,7 +27,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
     This is the legacy codepath which is used when either broker version < 0.10.2 or zk_connect_str has a value.
     """
 
-    SOURCE_TYPE_NAME = 'kafka'
+    __NAMESPACE__ = 'kafka'
 
     def __init__(self, name, init_config, instances):
         super(LegacyKafkaCheck_0_10_2, self).__init__(name, init_config, instances)
@@ -75,7 +75,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         topics = defaultdict(set)
 
         kafka_consumer_offsets = None
-        self._kafka_client._maybe_refresh_metadata()
 
         # Fetch consumer group offsets from Kafka
 
@@ -113,7 +112,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         # Fetch the broker highwater offsets
         try:
-            highwater_offsets, topic_partitions_without_a_leader = self._get_broker_offsets(topics)
+            highwater_offsets = self._get_broker_offsets(topics)
         except Exception:
             self.log.exception('There was a problem collecting the high watermark offsets')
             return
@@ -122,17 +121,13 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         for (topic, partition), highwater_offset in highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_tags.extend(self._custom_tags)
-            self.gauge('kafka.broker_offset', highwater_offset, tags=broker_tags)
+            self.gauge('broker_offset', highwater_offset, tags=broker_tags)
 
         # Report the consumer group offsets and consumer lag
         if zk_consumer_offsets:
-            self._report_consumer_metrics(
-                highwater_offsets, zk_consumer_offsets, 'zk', topic_partitions_without_a_leader
-            )
+            self._report_consumer_metrics(highwater_offsets, zk_consumer_offsets, 'zk')
         if kafka_consumer_offsets:
-            self._report_consumer_metrics(
-                highwater_offsets, kafka_consumer_offsets, 'kafka', topic_partitions_without_a_leader
-            )
+            self._report_consumer_metrics(highwater_offsets, kafka_consumer_offsets, 'kafka')
 
     def _create_kafka_client(self):
         kafka_conn_str = self.instance.get('kafka_connect_str')
@@ -178,7 +173,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def _process_highwater_offsets(self, response):
         highwater_offsets = {}
-        topic_partitions_without_a_leader = []
 
         for tp in response.topics:
             topic = tp[0]
@@ -199,7 +193,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         topic,
                         partition,
                     )
-                    topic_partitions_without_a_leader.append((topic, partition))
+                    self._kafka_client.cluster.request_update()  # force metadata update on next poll()
                 elif error_type is kafka_errors.UnknownTopicOrPartitionError:
                     self.log.warn(
                         "Kafka broker returned %s (error_code %s) for topic: %s, partition: %s. This should only "
@@ -216,7 +210,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         "partition: %s." % (topic, partition)
                     )
 
-        return highwater_offsets, topic_partitions_without_a_leader
+        return highwater_offsets
 
     def _get_broker_offsets(self, topics):
         """
@@ -231,7 +225,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         # Connect to Kafka
         highwater_offsets = {}
-        topic_partitions_without_a_leader = []
         topics_to_fetch = defaultdict(set)
 
         for topic, partitions in topics.items():
@@ -260,36 +253,13 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             )
 
             response = self._make_blocking_req(request, node_id=node_id)
-            offsets, unled = self._process_highwater_offsets(response)
+            offsets = self._process_highwater_offsets(response)
             highwater_offsets.update(offsets)
-            topic_partitions_without_a_leader.extend(unled)
+        return highwater_offsets
 
-        return highwater_offsets, list(set(topic_partitions_without_a_leader))
-
-    def _report_consumer_metrics(
-        self, highwater_offsets, consumer_offsets, consumer_offsets_source, unled_topic_partitions=None
-    ):
-        if unled_topic_partitions is None:
-            unled_topic_partitions = []
+    def _report_consumer_metrics(self, highwater_offsets, consumer_offsets, consumer_offsets_source):
+        """Report the consumer group offsets and consumer lag."""
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
-            # Report the consumer group offsets and consumer lag
-            if (topic, partition) not in highwater_offsets:
-                self.log.warn(
-                    "[%s] topic: %s partition: %s was not available in the consumer - skipping consumer submission",
-                    consumer_group,
-                    topic,
-                    partition,
-                )
-                if (topic, partition) not in unled_topic_partitions:
-                    self.log.warn(
-                        "Consumer group: %s has offsets for topic: %s partition: %s, but that topic partition doesn't "
-                        "actually exist in the cluster.",
-                        consumer_group,
-                        topic,
-                        partition,
-                    )
-                continue
-
             consumer_group_tags = [
                 'topic:%s' % topic,
                 'partition:%s' % partition,
@@ -297,23 +267,43 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 'source:%s' % consumer_offsets_source,
             ]
             consumer_group_tags.extend(self._custom_tags)
-            self.gauge('kafka.consumer_offset', consumer_offset, tags=consumer_group_tags)
-
-            consumer_lag = highwater_offsets[(topic, partition)] - consumer_offset
-            if consumer_lag < 0:
-                # this will result in data loss, so emit an event for max visibility
-                title = "Negative consumer lag for group: {group}.".format(group=consumer_group)
-                message = (
-                    "Consumer lag for consumer group: {group}, topic: {topic}, "
-                    "partition: {partition} is negative. This should never happen.".format(
-                        group=consumer_group, topic=topic, partition=partition
+            if partition in self._kafka_client.cluster.partitions_for_topic(topic):
+                # report consumer offset if the partition is valid because even if leaderless the consumer offset will
+                # be valid once the leader failover completes
+                self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
+                if (topic, partition) not in highwater_offsets:
+                    self.log.warn(
+                        "Consumer group: %s has offsets for topic: %s partition: %s, but no stored highwater offset "
+                        "(likely the partition is in the middle of leader failover) so cannot calculate consumer lag.",
+                        consumer_group,
+                        topic,
+                        partition,
                     )
-                )
-                key = "{}:{}:{}".format(consumer_group, topic, partition)
-                self._send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
-                self.log.debug(message)
+                    continue
 
-            self.gauge('kafka.consumer_lag', consumer_lag, tags=consumer_group_tags)
+                consumer_lag = highwater_offsets[(topic, partition)] - consumer_offset
+                self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+
+                if consumer_lag < 0:  # this will effectively result in data loss, so emit an event for max visibility
+                    title = "Negative consumer lag for group: {}.".format(consumer_group)
+                    message = (
+                        "Consumer group: {}, topic: {}, partition: {} has negative consumer lag. This should never "
+                        "happen and will result in the consumer skipping new messages until the lag turns "
+                        "positive.".format(consumer_group, topic, partition)
+                    )
+                    key = "{}:{}:{}".format(consumer_group, topic, partition)
+                    self._send_event(title, message, consumer_group_tags, 'consumer_lag', key, severity="error")
+                    self.log.debug(message)
+
+            else:
+                self.log.warn(
+                    "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition doesn't "
+                    "appear to exist in the cluster so skipping reporting these offsets.",
+                    consumer_group,
+                    topic,
+                    partition,
+                )
+                self._kafka_client.cluster.request_update()  # force metadata update on next poll()
 
     def _get_zk_path_children(self, zk_path, name_for_error):
         """Fetch child nodes for a given Zookeeper path."""
@@ -421,7 +411,10 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         tps = defaultdict(set)
         for topic, partitions in topic_partitions.items():
             if len(partitions) == 0:
-                partitions = self._kafka_client.cluster.available_partitions_for_topic(topic)
+                # If partitions omitted, then we assume the group is consuming all partitions for the topic.
+                # Fetch consumer offsets even for unavailable partitions because those will be valid once the partition
+                # finishes leader failover.
+                partitions = self._kafka_client.cluster.partitions_for_topic(topic)
             tps[topic].update(partitions)
 
         coordinator_id = self._get_group_coordinator(consumer_group)
@@ -469,7 +462,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         """Emit an event to the Datadog Event Stream."""
         event_dict = {
             'timestamp': int(time()),
-            'source_type_name': self.SOURCE_TYPE_NAME,
             'msg_title': title,
             'event_type': event_type,
             'alert_type': severity,
