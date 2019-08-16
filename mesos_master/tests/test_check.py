@@ -2,11 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
-
 from six import iteritems
 
-from .utils import create_check, read_fixture
+from .utils import create_check
 
 
 def test_check(instance, aggregator):
