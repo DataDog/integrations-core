@@ -9,7 +9,7 @@ from time import time
 from kafka import errors as kafka_errors
 from kafka.client import KafkaClient
 from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
-from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy
+from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 from six import string_types
@@ -117,14 +117,14 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         # Report the metics
         self._report_highwater_offsets()
-        self._report_consumer_metrics_and_lag(self._zk_consumer_offsets, 'zk')
-        self._report_consumer_metrics_and_lag(self._kafka_consumer_offsets, 'kafka')
+        self._report_consumer_offsets_and_lag(self._zk_consumer_offsets, 'zk')
+        self._report_consumer_offsets_and_lag(self._kafka_consumer_offsets, 'kafka')
 
     def _create_kafka_client(self):
         kafka_conn_str = self.instance.get('kafka_connect_str')
         if not isinstance(kafka_conn_str, (string_types, list)):
             raise ConfigurationError('kafka_connect_str should be string or list of strings')
-        return KafkaClient(
+        kafka_client = KafkaClient(
             bootstrap_servers=kafka_conn_str,
             client_id='dd-agent',
             request_timeout_ms=self.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
@@ -147,6 +147,11 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             ssl_crlfile=self.instance.get('ssl_crlfile'),
             ssl_password=self.instance.get('ssl_password'),
         )
+        # Force initial population of the local cluster metadata cache
+        kafka_client.poll(future=kafka_client.cluster.request_update())
+        if kafka_client.cluster.topics(exclude_internal_topics=False) is None:
+            raise RuntimeError("Local cluster metadata cache did not populate.")
+        return kafka_client
 
     def _make_blocking_req(self, request, node_id=None):
         if node_id is None:
@@ -158,7 +163,8 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         future = self._kafka_client.send(node_id, request)
         self._kafka_client.poll(future=future)  # block until we get response.
-        assert future.succeeded()
+        if future.failed():
+            raise future.exception  # pylint: disable-msg=raising-bad-type
         response = future.value
         return response
 
@@ -218,13 +224,13 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def _process_highwater_offsets(self, response):
         """Parse an OffsetFetchResponse and save it to the highwater_offsets dict."""
+        if type(response) not in OffsetResponse:
+            raise RuntimeError("response type should be OffsetResponse, but instead was %s." % type(response))
         for topic, partitions_data in response.topics:
             for partition, error_code, offsets in partitions_data:
                 error_type = kafka_errors.for_code(error_code)
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
-                    # Valid error codes:
-                    # https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-PossibleErrorCodes.2
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
                     self.log.warn(
                         "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
@@ -259,7 +265,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             broker_tags.extend(self._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
 
-    def _report_consumer_metrics_and_lag(self, consumer_offsets, consumer_offsets_source):
+    def _report_consumer_offsets_and_lag(self, consumer_offsets, consumer_offsets_source):
         """Report the consumer group offsets and consumer lag."""
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
             consumer_group_tags = [
@@ -373,7 +379,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def _get_kafka_consumer_offsets(self):
         """
-        Get offsets for all consumer groups from Kafka.
+        Fetch Consumer Group offsets from Kafka.
 
         These offsets are stored in the __consumer_offsets topic rather than in Zookeeper.
         """
