@@ -128,6 +128,20 @@ def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, 
         check.check(instance)
 
 
+@pytest.mark.parametrize(
+    'channel_status_mapping, expected_service_check_status',
+    [({'running': 'warning'}, AgentCheck.WARNING), ({'running': 'critical'}, AgentCheck.CRITICAL)],
+)
+@pytest.mark.usefixtures("dd_environment")
+def test_integration_custom_mapping(aggregator, instance, channel_status_mapping, expected_service_check_status):
+    instance['channel_status_mapping'] = channel_status_mapping
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    check.check(instance)
+
+    aggregator.assert_service_check('ibm_mq.channel.status', expected_service_check_status)
+
+
 @pytest.mark.usefixtures("dd_environment")
 def test_check_queue_pattern(aggregator, instance_queue_pattern, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
