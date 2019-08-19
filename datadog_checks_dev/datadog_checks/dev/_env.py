@@ -83,7 +83,15 @@ def replay_check_run(agent_collector, stub_aggregator):
             for _, value in data['points']:
                 metric_type = stub_aggregator.METRIC_ENUM_MAP[data['type']]
                 stub_aggregator.submit_metric(
-                    check_name, check_id, metric_type, data['metric'], value, data['tags'], data['host'], data.get('device')
+                    # device is only present when replaying e2e tests. In integration tests it will be a tag
+                    check_name,
+                    check_id,
+                    metric_type,
+                    data['metric'],
+                    value,
+                    data['tags'],
+                    data['host'],
+                    data.get('device'),
                 )
 
         for data in aggregator.get('service_checks', []):
