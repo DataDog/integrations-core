@@ -8,7 +8,6 @@ from datadog_checks.http_check.config import DEFAULT_EXPECTED_CODE, from_instanc
 from datadog_checks.utils.headers import headers as agent_headers
 
 
-@pytest.mark.unit
 def test_from_instance():
     """
     Test the defaults and the pieces of _load_conf that actually perform some logic

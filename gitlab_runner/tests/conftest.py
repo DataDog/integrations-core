@@ -21,7 +21,7 @@ from .common import (
 )
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def dd_environment():
     """
     Spin up and initialize gitlab_runner

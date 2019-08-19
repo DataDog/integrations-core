@@ -135,12 +135,6 @@ def test_filter_log_file(mock_from_time, mock_to_time, check, mock_get_wmi_sampl
     check.check(instance)
 
 
-def test_filter_user(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
-    instance = {'user': 'user'}
-
-    check.check(instance)
-
-
 def test_filter_type(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
     instance = {'type': ['type']}
 

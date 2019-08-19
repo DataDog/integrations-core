@@ -16,10 +16,11 @@
   ],
   "public_title": "Datadog-Harbor Integration",
   "categories": [
-    "containers"
+    "containers",
+    "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "harbor",
   "assets": {
     "dashboards": {
