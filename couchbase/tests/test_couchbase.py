@@ -49,7 +49,6 @@ def test_metrics(aggregator, instance, couchbase_container_ip):
 
 
 @pytest.mark.e2e
-@pytest.mark.usefixtures("dd_environment")
 def test_e2e(dd_agent_check, instance, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
