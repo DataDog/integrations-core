@@ -8,9 +8,9 @@ from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 
 class KafkaCheck(AgentCheck):
     """
-    Check the offsets and lag of Kafka consumers.
+    Check the offsets and lag of Kafka consumers. This check also returns broker highwater offsets.
 
-    This check also returns broker highwater offsets.
+    For details about the supported options, see the associated `conf.yaml.example`.
     """
 
     __NAMESPACE__ = 'kafka'

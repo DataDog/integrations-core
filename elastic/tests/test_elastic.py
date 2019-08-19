@@ -74,11 +74,15 @@ def test__get_urls(elastic_check):
     assert pending_tasks_url == '/_cluster/pending_tasks'
 
 
+@pytest.mark.integration
 def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
+    elastic_check.check(instance)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
+
+
+def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
     config = from_instance(instance)
     es_version = elastic_check._get_es_version(config)
-
-    elastic_check.check(instance)
 
     # node stats, blacklist metrics that can't be tested in a small, single node instance
     blacklist = ['elasticsearch.indices.segments.index_writer_max_memory_in_bytes']
@@ -86,13 +90,13 @@ def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags
     for m_name in stats_for_version(es_version):
         if m_name in blacklist:
             continue
-        aggregator.assert_metric(m_name, count=1, tags=node_tags)
+        aggregator.assert_metric(m_name, at_least=1, tags=node_tags)
 
     # cluster stats
     expected_metrics = health_stats_for_version(es_version)
     expected_metrics.update(CLUSTER_PENDING_TASKS)
     for m_name in expected_metrics:
-        aggregator.assert_metric(m_name, count=1, tags=cluster_tags)
+        aggregator.assert_metric(m_name, at_least=1, tags=cluster_tags)
 
     aggregator.assert_service_check('elasticsearch.can_connect', status=ESCheck.OK, tags=config.service_check_tags)
 
@@ -107,6 +111,7 @@ def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags
         aggregator.assert_service_check('elasticsearch.cluster_health')
 
 
+@pytest.mark.integration
 def test_node_name_as_host(dd_environment, elastic_check, instance_normalize_hostname, aggregator, node_tags):
     elastic_check.check(instance_normalize_hostname)
     node_name = node_tags[-1].split(':')[1]
@@ -115,6 +120,7 @@ def test_node_name_as_host(dd_environment, elastic_check, instance_normalize_hos
         aggregator.assert_metric(m_name, count=1, tags=node_tags, hostname=node_name)
 
 
+@pytest.mark.integration
 def test_pshard_metrics(dd_environment, elastic_check, aggregator):
     instance = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
     config = from_instance(instance)
@@ -133,6 +139,7 @@ def test_pshard_metrics(dd_environment, elastic_check, aggregator):
     aggregator.assert_metric('elasticsearch.primaries.docs.count')
 
 
+@pytest.mark.integration
 def test_index_metrics(dd_environment, aggregator, elastic_check, instance, cluster_tags):
     instance['index_stats'] = True
     config = from_instance(instance)
@@ -145,6 +152,7 @@ def test_index_metrics(dd_environment, aggregator, elastic_check, instance, clus
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
 
 
+@pytest.mark.integration
 def test_health_event(dd_environment, aggregator, elastic_check):
     dummy_tags = ['elastique:recherche']
     instance = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
@@ -161,3 +169,9 @@ def test_health_event(dd_environment, aggregator, elastic_check):
         assert sorted(aggregator.events[0]['tags']) == sorted(set(['url:{}'.format(URL)] + dummy_tags + CLUSTER_TAG))
     else:
         aggregator.assert_service_check('elasticsearch.cluster_health')
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags):
+    aggregator = dd_agent_check(instance, rate=True)
+    _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)

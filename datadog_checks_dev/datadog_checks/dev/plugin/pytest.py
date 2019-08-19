@@ -141,7 +141,7 @@ def dd_agent_check(request, aggregator):
                 check_command.append('--{}'.format(key.replace('_', '-')))
 
                 if value is not True:
-                    check_command.append(value)
+                    check_command.append(str(value))
 
         result = run_command(check_command, capture=True)
         if AGENT_COLLECTOR_SEPARATOR not in result.stdout:

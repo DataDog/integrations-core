@@ -2,22 +2,16 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.prometheus import PrometheusCheck
+import pytest
 
-instance = {
-    'prometheus_url': 'http://localhost:10249/metrics',
-    'namespace': 'prometheus',
-    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
-    'send_histograms_buckets': True,
-    'send_monotonic_counter': True,
-}
+from datadog_checks.prometheus import PrometheusCheck
 
 # Constants
 CHECK_NAME = 'prometheus'
 NAMESPACE = 'prometheus'
 
 
-def test_prometheus_check(aggregator, poll_mock):
+def test_prometheus_check(aggregator, instance, poll_mock):
     """
     Testing prometheus check.
     """
@@ -38,7 +32,7 @@ def test_prometheus_check(aggregator, poll_mock):
     assert aggregator.metrics_asserted_pct == 100.0
 
 
-def test_prometheus_check_counter_gauge(aggregator, poll_mock):
+def test_prometheus_check_counter_gauge(aggregator, instance, poll_mock):
     """
     Testing prometheus check.
     """
@@ -75,7 +69,7 @@ def test_invalid_metric(aggregator, poll_mock):
     assert aggregator.metrics('metric3') == []
 
 
-def test_prometheus_wildcard(aggregator, poll_mock):
+def test_prometheus_wildcard(aggregator, instance, poll_mock):
     instance_wildcard = {
         'prometheus_url': 'http://localhost:10249/metrics',
         'namespace': 'prometheus',
@@ -188,4 +182,18 @@ def test_integration(aggregator, dd_environment):
     c.check(dd_environment)
     aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.sum', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.quantile', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(CHECK_NAME + '.go_memstats_mallocs_total', metric_type=aggregator.MONOTONIC_COUNT)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, e2e_instance):
+    aggregator = dd_agent_check(e2e_instance, rate=True)
+    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.sum', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.count', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.target_interval_seconds.quantile', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.go_memstats_mallocs_total', metric_type=aggregator.COUNT)
+
+    aggregator.assert_all_metrics_covered()
