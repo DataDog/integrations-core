@@ -9,11 +9,12 @@ Whether you use Redis as a database, cache, or message queue, this integration h
 
 The Redis check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Redis servers.
 
-### Host configuration
+### Configuration
+#### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Container configuration](#container-configuration) section below.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-#### Metric collection
+##### Metric collection
 
 1. Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. The following parameters may require updating. See the [sample redisdb.d/conf.yaml][4] for all available configuration options.
 
@@ -30,7 +31,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5].
 
-#### Log collection
+##### Log collection
 
 **Available for Agent >6.0**
 
@@ -55,34 +56,30 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 3. [Restart the Agent][5].
 
-### Container configuration
+#### Containerized
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
 
-#### Metric collection
+##### Metric collection
 
-##### `<INTEGRATION_NAME>`
-
+`<INTEGRATION_NAME>`<br>
 The name for this integration is `redisdb`.
 
-##### `<INIT_CONFIG>`
-
+`<INIT_CONFIG>`<br>
 The configuration for this integration's `init_config` section is blank or `{}`.
 
-##### `<INSTANCE_CONFIG>`
-
+`<INSTANCE_CONFIG>`<br>
 The configuration for this integration's `instances` section is:
 ```text
 {"host": "%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}
 ```
 
-#### Log collection
+##### Log collection
 
 **Available for Agent v6.5+**
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
 
-##### `<LOG_CONFIG>`
-
+`<LOG_CONFIG>`<br>
 The configuration for this integration's `logs` section is:
 ```text
 {"source": "redis", "service": "<YOUR_APP_NAME>"}
