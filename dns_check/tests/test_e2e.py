@@ -11,5 +11,4 @@ from . import common
 @pytest.mark.e2e
 def test_check(dd_agent_check):
     aggregator = dd_agent_check(deepcopy(common.INSTANCE_INTEGRATION))
-
-    aggregator.assert_metric('dns.response_time')
+    common._test_check(aggregator)
