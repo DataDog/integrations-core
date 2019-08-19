@@ -25,10 +25,10 @@ Expected:
         MetricStub(name='test.similar_metric', type=None, value=None, tags=None, hostname=None, device=None)
 Similar submitted:
 Score   Most similar
-0.88    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='', device='')
-0.83    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='', device='')
-0.62    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='', device='')
-0.42    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='', device='')
+0.88    MetricStub(name='test.most_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None)
+0.83    MetricStub(name='test.another_similar_metric', type=0, value=0.0, tags=[], hostname='', device=None)
+0.62    MetricStub(name='test.very_different_metric', type=0, value=0.0, tags=[], hostname='', device=None)
+0.42    MetricStub(name='test.very_very_different', type=0, value=0.0, tags=[], hostname='', device=None)
         '''.strip()
         delta = difflib.ndiff([expected_msg], [actual_msg])
         assert expected_msg == actual_msg, delta
@@ -93,23 +93,6 @@ Score   Most similar
 
         expected_metric = MetricStub(
             "test.test.similar_metric", type=None, value=10, tags=None, hostname='similar_host', device=None
-        )
-        similar_metrics = similar._build_similar_elements(expected_metric, aggregator._metrics)
-
-        # expect similar metrics in a similarity order
-        assert similar_metrics[0][1].name == 'test.similar_metric1'
-        assert similar_metrics[1][1].name == 'test.similar_metric2'
-        assert similar_metrics[2][1].name == 'test.similar_metric3'
-
-    def test__build_similar_elements__metric_device(self, aggregator):
-        check = AgentCheck()
-
-        check.gauge('test.similar_metric2', 10, hostname='localhost', device_name='less_similar_device')
-        check.gauge('test.similar_metric1', 10, hostname='localhost', device_name='similar_device')
-        check.gauge('test.similar_metric3', 10, hostname='localhost', device_name='different')
-
-        expected_metric = MetricStub(
-            "test.test.similar_metric", type=None, value=10, tags=None, hostname='localhost', device='similar_device'
         )
         similar_metrics = similar._build_similar_elements(expected_metric, aggregator._metrics)
 
