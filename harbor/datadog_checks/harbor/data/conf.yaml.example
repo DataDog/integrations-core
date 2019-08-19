@@ -81,36 +81,8 @@ instances:
     #
     # skip_proxy: false
 
-logs:
-  - type: file
-    path: /var/log/harbor/core.log
-    source: harbor
-    service: <SERVICE_NAME>
-  - type: file
-    path: /var/log/harbor/proxy.log
-    source: harbor
-    service: <SERVICE_NAME>
-  - type: file
-    path: /var/log/harbor/portal.log
-    source: harbor
-    service: <SERVICE_NAME>
-  - type: file
-    path: /var/log/harbor/registry.log
-    source: harbor
-    service: <SERVICE_NAME>
-  - type: file
-    path: /var/log/harbor/registryctl.log
-    source: harbor
-    service: <SERVICE_NAME>
-  - type: file
-    path: /var/log/harbor/jobservice.log
-    source: harbor
-    service: <SERVICE_NAME>
-  - type: file
-    path: /var/log/harbor/postgresql.log
-    source: harbor
-    service: <SERVICE_NAME>
-  - type: file
-    path: /var/log/harbor/redis.log
-    source: harbor
-    service: <SERVICE_NAME>
+# logs:
+#   - type: file
+#     path: /var/log/harbor/*.log
+#     source: harbor
+#     service: <SERVICE_NAME>

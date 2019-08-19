@@ -55,10 +55,10 @@ class Win32EventLogWMI(WinWMICheck):
         event_format = instance.get('event_format')
         message_filters = instance.get('message_filters', [])
 
-        if not (source_names or event_ids or message_filters or log_files or user or ltypes):
+        if not (source_names or event_ids or message_filters or log_files or ltypes):
             raise ConfigurationError(
                 'At least one of the following filters must be set: '
-                'source_name, event_id, message_filters, log_file, user, type'
+                'source_name, event_id, message_filters, log_file, type'
             )
 
         instance_hash = hash_mutable(instance)

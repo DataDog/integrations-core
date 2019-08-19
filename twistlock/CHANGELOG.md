@@ -1,5 +1,9 @@
 # CHANGELOG - Twistlock
 
+## 1.2.1 / 2019-08-13
+
+* [Fixed] Fix date format matching. See [#4304](https://github.com/DataDog/integrations-core/pull/4304).
+
 ## 1.2.0 / 2019-08-02
 
 * [Added] Add RequestsWrapper to twistlock. See [#4122](https://github.com/DataDog/integrations-core/pull/4122).
