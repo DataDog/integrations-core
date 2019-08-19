@@ -60,7 +60,7 @@ instances:
 
     ## @param ntlm_domain - string - optional
     ## If your services uses NTLM authentication, you can
-    ## specify a domain that is used in the check. For NTLM Auth,
+    ## specify a domain that is used in the check. For NTLM auth,
     ## append the username to domain, not as the `username` parameter.
     ## Example: <NTLM_DOMAIN>/<USERNAME>
     #
@@ -127,7 +127,7 @@ instances:
     # kerberos_auth: disabled
 
     ## @param kerberos_delegate - boolean - optional - default: false
-    ## Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
+    ## Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
     ## See https://github.com/requests/requests-kerberos#delegation
     #
     # kerberos_delegate: false
@@ -140,7 +140,7 @@ instances:
     # kerberos_force_initiate: false
 
     ## @param kerberos_hostname - string - optional
-    ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't match its kerberos
+    ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't match its Kerberos
     ## hostname (e.g., behind a content switch or load balancer).
     ## See https://github.com/requests/requests-kerberos#hostname-override
     #
