@@ -4,7 +4,7 @@
 from copy import deepcopy
 
 import pytest
-from common import INSTANCE
+from .common import INSTANCE
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
 
