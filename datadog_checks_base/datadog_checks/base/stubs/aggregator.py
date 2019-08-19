@@ -55,7 +55,7 @@ class AggregatorStub(object):
     def is_aggregate(cls, mtype):
         return mtype in cls.AGGREGATE_TYPES
 
-    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, device):
+    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, device=None):
         self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
