@@ -57,10 +57,10 @@ instances:
     # channels:
     #   - '<CHANNEL_NAME>'
 
-    ## @param channel_status_service_check_mapping - key:value elements - optional
+    ## @param channel_status_mapping - key:value elements - optional
     ## Custom channel status mapping for service check `ibm_mq.channel.status`.
     ##
-    ## The key is the IBM MQ Channel Status. Valid keys are: `inactive`, `binding`, `starting`, `running`, `stopping`,
+    ## The key is the IBM MQ channel status. Valid keys are: `inactive`, `binding`, `starting`, `running`, `stopping`,
     ## `retrying`, `stopped`, `requesting`, `paused`, `initializing`
     ## The value is the datadog service check level. Valid values are: `ok`, `warning`, `critical`, `unknown`
     ## If a channel status is not mapped, it will be mapped to `unknown`.
