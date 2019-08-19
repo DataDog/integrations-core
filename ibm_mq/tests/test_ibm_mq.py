@@ -43,8 +43,7 @@ def test_service_check_connection_issues(aggregator, instance, seed_data):
     aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags)
 
 
-@pytest.mark.usefixtures("dd_environment")
-def test_channel_status_service_check_default_mapping(aggregator, instance, seed_data):
+def test_channel_status_service_check_default_mapping(aggregator, instance):
     # Late import to not require it for e2e
     import pymqi
 
@@ -74,8 +73,7 @@ def test_channel_status_service_check_default_mapping(aggregator, instance, seed
         )
 
 
-@pytest.mark.usefixtures("dd_environment")
-def test_channel_status_service_check_custom_mapping(aggregator, instance, seed_data):
+def test_channel_status_service_check_custom_mapping(aggregator, instance):
     # Late import to not require it for e2e
     import pymqi
 
@@ -120,7 +118,6 @@ def test_channel_status_service_check_custom_mapping(aggregator, instance, seed_
 
 
 @pytest.mark.parametrize('channel_status_mapping', [{'inactive': 'warningXX'}, {'inactiveXX': 'warning'}])
-@pytest.mark.usefixtures("dd_environment")
 def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, instance, channel_status_mapping):
     instance = deepcopy(instance)
 
