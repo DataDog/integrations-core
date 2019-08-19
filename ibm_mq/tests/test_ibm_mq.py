@@ -77,7 +77,6 @@ def test_channel_status_service_check_custom_mapping(aggregator, instance):
     # Late import to not require it for e2e
     import pymqi
 
-    instance = deepcopy(instance)
     instance['channel_status_mapping'] = {
         'inactive': 'warning',
         'binding': 'warning',
@@ -119,8 +118,6 @@ def test_channel_status_service_check_custom_mapping(aggregator, instance):
 
 @pytest.mark.parametrize('channel_status_mapping', [{'inactive': 'warningXX'}, {'inactiveXX': 'warning'}])
 def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, instance, channel_status_mapping):
-    instance = deepcopy(instance)
-
     instance['channel_status_mapping'] = channel_status_mapping
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
