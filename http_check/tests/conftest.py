@@ -10,12 +10,14 @@ from mock import patch
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.http_check import HTTPCheck
 
-from .common import CONFIG, HERE
+from .common import CONFIG_E2E, HERE
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield dict(init_config={'ca_certs': 'no thanks'}, **CONFIG)
+    cacert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    e2e_metadata = {'docker_volumes': ['{}:/opt/cacert.pem'.format(cacert_path)]}
+    yield CONFIG_E2E, e2e_metadata
 
 
 @pytest.fixture(scope='session')
