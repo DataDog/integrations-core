@@ -14,5 +14,3 @@ pytestmark = pytest.mark.integration
 def test_check(aggregator, check):
     check.check(deepcopy(common.INSTANCE_INTEGRATION))
     common._test_check(aggregator)
-
-
