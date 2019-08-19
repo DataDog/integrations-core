@@ -143,7 +143,7 @@ class IBMMQConfig:
             custom_mapping = {}
             for ibm_mq_status_raw, service_check_status_raw in channel_status_mapping_raw.items():
                 ibm_mq_status_attr = 'MQCHS_{}'.format(ibm_mq_status_raw).upper()
-                service_check_status_attr = '{}'.format(service_check_status_raw).upper()
+                service_check_status_attr = service_check_status_raw.upper()
 
                 if service_check_status_attr not in ServiceCheck._fields:
                     raise ConfigurationError("Invalid service check status: {}".format(service_check_status_raw))
