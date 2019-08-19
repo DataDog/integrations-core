@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
-from copy import deepcopy
 
 import pytest
 from six import iteritems
