@@ -13,8 +13,8 @@ from datadog_checks.mesos_master import MesosMaster
 # Linux only: https://github.com/docker/for-mac/issues/1031
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(check, instance, aggregator):
-    check = MesosMaster('mesos_master', {}, instance)
+def test_integration(instance, aggregator):
+    check = MesosMaster('mesos_master', {}, [instance])
     check.check(instance)
     metrics = [
         'mesos.registrar.queued_operations',
