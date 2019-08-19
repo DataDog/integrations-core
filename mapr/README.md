@@ -10,8 +10,14 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The mapr check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+The mapr check is included in the [Datadog Agent][2] package. However, to be able to run it you will need to perform the following steps:
+
+1. Download and extract the [MapR Client][12]
+2. Update `LD_LIBRARY_PATH` and `DYLD_LIBRARY_PATH` as explained [here][9] (usually with `/opt/mapr/lib/)`
+3. Set `JAVA_HOME` (if running on macos you will need to install system java)
+3. Install the [mapr-streams-python][7] library.
+4. Create a password for the `dd-agent` user and have this user in every node of the cluster with the same `UID`/`GID` so that it is recognized by mapr. See [Managing users and groups][10].
+5. If security is enabled on the cluster (recommended), generate a [long-lived ticket][8] for this user.
 
 ### Configuration
 
@@ -27,7 +33,7 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-mapr does not include any metrics.
+See [metadata.csv][13] for a list of default metrics provided by this integration.
 
 ### Service Checks
 
@@ -37,13 +43,26 @@ mapr does not include any service checks.
 
 mapr does not include any events.
 
+### Logs
+
+MapR uses fluentD for logs. You can use [fluentd datadog plugin][11] to collect mapr logs.
+
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][6].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://mapr.com
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://github.com/DataDog/integrations-core/blob/master/mapr/datadog_checks/mapr/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://docs.datadoghq.com/help
+[7]: https://mapr.com/docs/52/MapR_Streams/MapRStreamsPythonExample.html
+[8]: https://docs.datadoghq.com/integrations/oracle/
+[9]: https://mapr.com/docs/60/MapR_Streams/MapRStreamCAPISetup.html
+[10]: https://mapr.com/docs/61/AdministratorGuide/c-managing-users-and-groups.html
+[11]: https://www.rubydoc.info/gems/fluent-plugin-datadog
+[12]: https://mapr.com/docs/61/AdvancedInstallation/SettingUptheClient-install-mapr-client.html
+[13]: https://github.com/DataDog/integrations-core/blob/master/mapr/metadata.csv
+

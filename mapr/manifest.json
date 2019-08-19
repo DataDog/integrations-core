@@ -6,7 +6,7 @@
   "metric_prefix": "mapr.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "MapR metrics",
   "guid": "7d1de422-85a6-47cc-9962-427a9499d109",
   "support": "core",
   "supported_os": [

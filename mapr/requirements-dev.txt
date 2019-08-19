@@ -1,1 +1,2 @@
+confluent_kafka
 -e ../datadog_checks_dev
