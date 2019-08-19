@@ -23,7 +23,7 @@ else:
     SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
 
     STATUS_MQCHS_UNKNOWN = -1
-    CHANNEL_STATUS_MAP = {
+    CHANNEL_STATUS_NAME_MAPPING = {
         pymqi.CMQCFC.MQCHS_INACTIVE: "inactive",
         pymqi.CMQCFC.MQCHS_BINDING: "binding",
         pymqi.CMQCFC.MQCHS_STARTING: "starting",
@@ -36,20 +36,6 @@ else:
         pymqi.CMQCFC.MQCHS_INITIALIZING: "initializing",
         STATUS_MQCHS_UNKNOWN: "unknown",
     }
-
-    SERVICE_CHECK_MAP = {
-        pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
-        pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
-    }
-
 
 log = logging.getLogger(__file__)
 
@@ -264,21 +250,21 @@ class IbmMqCheck(AgentCheck):
                 channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
 
                 self._submit_channel_count(channel_name, channel_status, channel_tags)
-                self._submit_status_check(channel_name, channel_status, channel_tags)
+                self._submit_status_check(channel_name, channel_status, channel_tags, config)
 
-    def _submit_status_check(self, channel_name, channel_status, channel_tags):
-        if channel_status in SERVICE_CHECK_MAP:
-            service_check_status = SERVICE_CHECK_MAP[channel_status]
+    def _submit_status_check(self, channel_name, channel_status, channel_tags, config):
+        if channel_status in config.channel_status_mapping:
+            service_check_status = config.channel_status_mapping[channel_status]
         else:
             self.log.warning("Status `{}` not found for channel `{}`".format(channel_status, channel_name))
             service_check_status = AgentCheck.UNKNOWN
         self.service_check(self.CHANNEL_STATUS_SERVICE_CHECK, service_check_status, channel_tags)
 
     def _submit_channel_count(self, channel_name, channel_status, channel_tags):
-        if channel_status not in CHANNEL_STATUS_MAP:
+        if channel_status not in CHANNEL_STATUS_NAME_MAPPING:
             self.log.warning("Status `{}` not found for channel `{}`".format(channel_status, channel_name))
             channel_status = STATUS_MQCHS_UNKNOWN
 
-        for status, status_label in iteritems(CHANNEL_STATUS_MAP):
+        for status, status_label in iteritems(CHANNEL_STATUS_NAME_MAPPING):
             status_active = int(status == channel_status)
             self.gauge(self.CHANNEL_COUNT_CHECK, status_active, tags=channel_tags + ["status:" + status_label])
