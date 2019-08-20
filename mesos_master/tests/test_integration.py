@@ -6,6 +6,8 @@ import platform
 import pytest
 from six import iteritems
 
+from .common import BASIC_METRICS
+
 
 @pytest.mark.integration
 # Linux only: https://github.com/docker/for-mac/issues/1031
@@ -13,23 +15,7 @@ from six import iteritems
 @pytest.mark.usefixtures("dd_environment")
 def test_integration(check, instance, aggregator):
     check.check(instance)
-    metrics = [
-        'mesos.registrar.queued_operations',
-        'mesos.registrar.registry_size_bytes',
-        'mesos.registrar.state_fetch_ms',
-        'mesos.registrar.state_store_ms',
-        'mesos.stats.system.cpus_total',
-        'mesos.stats.system.load_15min',
-        'mesos.stats.system.load_1min',
-        'mesos.stats.system.load_5min',
-        'mesos.stats.system.mem_free_bytes',
-        'mesos.stats.system.mem_total_bytes',
-        'mesos.stats.elected',
-        'mesos.stats.uptime_secs',
-        'mesos.role.frameworks.count',
-        'mesos.cluster.total_frameworks',
-        'mesos.role.weight',
-    ]
+    metrics = BASIC_METRICS
     for d in (
         check.ROLE_RESOURCES_METRICS,
         check.CLUSTER_TASKS_METRICS,

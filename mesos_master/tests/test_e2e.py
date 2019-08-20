@@ -1,28 +1,25 @@
 import pytest
 
-from .common import INSTANCE
+from six import iteritems
+
+from .common import BASIC_METRICS, INSTANCE
+
 
 @pytest.mark.e2e
-def test_check_ok(dd_agent_check):
+def test_check_ok(dd_agent_check, check):
     aggregator = dd_agent_check(INSTANCE, times=2)
+    metrics = BASIC_METRICS
 
-    metrics = [
-        'mesos.registrar.queued_operations',
-        'mesos.registrar.registry_size_bytes',
-        'mesos.registrar.state_fetch_ms',
-        'mesos.registrar.state_store_ms',
-        'mesos.stats.system.cpus_total',
-        'mesos.stats.system.load_15min',
-        'mesos.stats.system.load_1min',
-        'mesos.stats.system.load_5min',
-        'mesos.stats.system.mem_free_bytes',
-        'mesos.stats.system.mem_total_bytes',
-        'mesos.stats.elected',
-        'mesos.stats.uptime_secs',
-        'mesos.role.frameworks.count',
-        'mesos.cluster.total_frameworks',
-        'mesos.role.weight',
-    ]
+    for d in (
+        check.ROLE_RESOURCES_METRICS,
+        check.CLUSTER_TASKS_METRICS,
+        check.CLUSTER_SLAVES_METRICS,
+        check.CLUSTER_RESOURCES_METRICS,
+        check.CLUSTER_FRAMEWORK_METRICS,
+        check.STATS_METRICS,
+    ):
+        for _, m in iteritems(d):
+            metrics.append(m[0])
 
     for m in metrics:
         aggregator.assert_metric(m)
