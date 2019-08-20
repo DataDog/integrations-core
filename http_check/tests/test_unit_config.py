@@ -24,72 +24,51 @@ def test_from_instance():
 
     # defaults
     params = from_instance({'url': 'https://example.com', 'name': 'UpService'})
-    assert len(params) == 25
+    assert len(params) == 18
 
     # `url` is mandatory
     assert params[0] == 'https://example.com'
-    # default `ntlm_domain` is None
-    assert params[1] is None
-    # default `username` is None
-    assert params[2] is None
-    # default `password` is None
-    assert params[3] is None
     # defualt `client_cert` is None
-    assert params[4] is None
+    assert params[1] is None
     # defualt `client_key` is None
-    assert params[5] is None
+    assert params[2] is None
     # default `method` is get
-    assert params[6] == 'get'
+    assert params[3] == 'get'
     # default `data` is an empty dict
-    assert params[7] == {}
+    assert params[4] == {}
     # default `http_response_status_code`
-    assert params[8] == DEFAULT_EXPECTED_CODE
-    # default `timeout` is 10
-    assert params[9] == 10
+    assert params[5] == DEFAULT_EXPECTED_CODE
     # default `include_content` is False
-    assert params[10] is False
+    assert params[6] is False
     # default headers
-    assert params[11] == agent_headers({})
+    assert params[7] == agent_headers({})
     # default `collect_response_time` is True
-    assert params[12] is True
+    assert params[8] is True
     # default `content_match` is None
-    assert params[13] is None
+    assert params[9] is None
     # default `reverse_content_match` is False
-    assert params[14] is False
+    assert params[10] is False
     # default `tags` is an empty list
-    assert params[15] == []
-    # default `disable_ssl_validation` is True
-    assert params[16] is True
+    assert params[11] == []
     # default `check_certificate_expiration` is True
-    assert params[17] is True
+    assert params[12] is True
     # default `ca_certs`, it's mocked we don't care
-    assert params[18] != ''
+    assert params[13] != ''
     # default `weakciphers` is False
-    assert params[19] is False
+    assert params[14] is False
     # default `check_hostname` is True
-    assert params[20] is True
-    # default `ignore_ssl_warning` is False
-    assert params[21] is False
-    # default `skip_proxy` is False
-    assert params[22] is False
+    assert params[15] is True
     # default `allow_redirects` is True
-    assert params[23] is True
+    assert params[16] is True
     # default `stream` is False
-    assert params[24] is False
+    assert params[17] is False
 
     # headers
     params = from_instance(
         {'url': 'https://example.com', 'name': 'UpService', 'headers': {"X-Auth-Token": "SOME-AUTH-TOKEN"}}
     )
 
-    headers = params[11]
+    headers = params[7]
     expected_headers = agent_headers({}).get('User-Agent')
     assert headers["X-Auth-Token"] == "SOME-AUTH-TOKEN", headers
     assert expected_headers == headers.get('User-Agent'), headers
-
-    # proxy
-    params = from_instance({'url': 'https://example.com', 'name': 'UpService', 'no_proxy': True})
-    assert params[22] is True
-
-    params = from_instance({'url': 'https://example.com', 'name': 'UpService', 'no_proxy': False, 'skip_proxy': True})
-    assert params[22] is True
