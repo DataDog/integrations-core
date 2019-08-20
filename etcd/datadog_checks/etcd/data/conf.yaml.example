@@ -132,7 +132,7 @@ instances:
     # kerberos_auth: disabled
 
     ## @param kerberos_delegate - boolean - optional - default: false
-    ## Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
+    ## Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
     ## See https://github.com/requests/requests-kerberos#delegation
     #
     # kerberos_delegate: false
