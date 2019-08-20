@@ -61,17 +61,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 ##### Metric collection
 
-`<INTEGRATION_NAME>`<br>
-The name for this integration is `redisdb`.
-
-`<INIT_CONFIG>`<br>
-The configuration for this integration's `init_config` section is blank or `{}`.
-
-`<INSTANCE_CONFIG>`<br>
-The configuration for this integration's `instances` section is:
-```text
-{"host": "%%host%%","port":"6379","password":"%%env_REDIS_PASSWORD%%"}
-```
+| Parameter            | Value                                                                                       |
+|----------------------|---------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `redisdb`                                                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                               |
+| `<INSTANCE_CONFIG>`  | <pre>{"host": "%%host%%",<br> "port":"6379",<br> "password":"%%env_REDIS_PASSWORD%%"}</pre> |
 
 ##### Log collection
 
@@ -79,11 +73,9 @@ The configuration for this integration's `instances` section is:
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
 
-`<LOG_CONFIG>`<br>
-The configuration for this integration's `logs` section is:
-```text
-{"source": "redis", "service": "<YOUR_APP_NAME>"}
-```
+| Parameter      | Value                                               |
+|----------------|-----------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "redis", "service": "<YOUR_APP_NAME>"}` |
 
 ### Validation
 
