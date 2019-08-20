@@ -10,7 +10,6 @@ from .common import INSTANCE
 
 
 @pytest.mark.e2e
-@pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(deepcopy(INSTANCE))
 
