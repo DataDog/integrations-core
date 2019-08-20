@@ -3,10 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-from .common import CHECK_NAME, INSTANCE, INSTANCE_METRICS
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.pdh_check import PDHCheck
+
+from .common import CHECK_NAME, INSTANCE, INSTANCE_METRICS
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
