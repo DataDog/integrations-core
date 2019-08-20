@@ -16,5 +16,4 @@ METRICS = [
     NAMESPACE + '.proxy_request_duration.seconds.count',
     NAMESPACE + '.request_duration.seconds.sum',
     NAMESPACE + '.request_duration.seconds.count',
-    NAMESPACE + '.cache_hits_count',
 ]

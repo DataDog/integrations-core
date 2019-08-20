@@ -23,7 +23,9 @@ class TestCoreDNS:
         # check that we then get the count metrics also
         check.check(instance)
 
-        for metric in METRICS:
+        metrics = METRICS + [NAMESPACE + '.cache_hits_count']
+
+        for metric in metrics:
             aggregator.assert_metric(metric)
 
     @pytest.mark.skipif(ON_WINDOWS, reason='No `dig` utility on Windows')
@@ -35,23 +37,5 @@ class TestCoreDNS:
         check = CoreDNSCheck(CHECK_NAME, {}, {}, [dockerinstance])
         check.check(dockerinstance)
 
-        # include_metrics that can be reproduced in a docker based test environment
-        include_metrics = [
-            NAMESPACE + '.request_count',
-            NAMESPACE + '.cache_size.count',
-            NAMESPACE + '.request_type_count',
-            NAMESPACE + '.cache_misses_count',
-            NAMESPACE + '.response_code_count',
-            NAMESPACE + '.proxy_request_count',
-            NAMESPACE + '.response_size.bytes.sum',
-            NAMESPACE + '.response_size.bytes.count',
-            NAMESPACE + '.request_size.bytes.sum',
-            NAMESPACE + '.request_size.bytes.count',
-            NAMESPACE + '.proxy_request_duration.seconds.sum',
-            NAMESPACE + '.proxy_request_duration.seconds.count',
-            NAMESPACE + '.request_duration.seconds.sum',
-            NAMESPACE + '.request_duration.seconds.count',
-        ]
-
-        for metric in include_metrics:
+        for metric in METRICS:
             aggregator.assert_metric(metric)
