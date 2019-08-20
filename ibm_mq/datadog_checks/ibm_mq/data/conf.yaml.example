@@ -57,7 +57,7 @@ instances:
     # channels:
     #   - '<CHANNEL_NAME>'
 
-    ## @param channel_status_mapping - key:value elements - optional
+    ## @param channel_status_mapping - list of key:value elements - optional
     ## Custom channel status mapping for service check `ibm_mq.channel.status`.
     ##
     ## The key is the IBM MQ channel status. Valid keys are: `inactive`, `binding`, `starting`, `running`, `stopping`,
