@@ -149,7 +149,7 @@ class OpenMetricsScraperMixin(object):
             instance.get('send_histograms_buckets', default_instance.get('send_histograms_buckets', True))
         )
 
-        # If you want the bucket to be non cumulative and contains both bound tags
+        # If you want the bucket to be non cumulative and to come with upper/lower bound tags
         # set non_cumulative_buckets to True, enabled when distribution metrics are enabled.
         config['non_cumulative_buckets'] = is_affirmative(
             instance.get('non_cumulative_buckets', default_instance.get('non_cumulative_buckets', False))
@@ -713,17 +713,21 @@ class OpenMetricsScraperMixin(object):
 
         # Tuples (lower_bound, upper_bound, value)
         bucket_tuples_by_upper_bound = {}
-        for i, v in enumerate(sorted_buckets):
+        for i, upper_b in enumerate(sorted_buckets):
             if i == 0:
-                if v > 0:
-                    # positive buckets starts at zero
-                    bucket_tuples_by_upper_bound[v] = (0, v, bucket_values_by_upper_bound[v])
+                if upper_b > 0:
+                    # positive buckets start at zero
+                    bucket_tuples_by_upper_bound[upper_b] = (0, upper_b, bucket_values_by_upper_bound[upper_b])
                 else:
-                    # negative buckets starts at -inf
-                    bucket_tuples_by_upper_bound[v] = (float("-inf"), v, bucket_values_by_upper_bound[v])
+                    # negative buckets start at -inf
+                    bucket_tuples_by_upper_bound[upper_b] = (
+                        float("-inf"),
+                        upper_b,
+                        bucket_values_by_upper_bound[upper_b],
+                    )
                 continue
-            tmp = bucket_values_by_upper_bound[v] - bucket_values_by_upper_bound[sorted_buckets[i - 1]]
-            bucket_tuples_by_upper_bound[v] = (sorted_buckets[i - 1], v, tmp)
+            tmp = bucket_values_by_upper_bound[upper_b] - bucket_values_by_upper_bound[sorted_buckets[i - 1]]
+            bucket_tuples_by_upper_bound[upper_b] = (sorted_buckets[i - 1], upper_b, tmp)
 
         # modify original metric to inject lower_bound & modified value
         for i, sample in enumerate(metric.samples):
@@ -753,7 +757,6 @@ class OpenMetricsScraperMixin(object):
             return
         tags = self._metric_tags(metric_name, sample[self.SAMPLE_VALUE], sample, scraper_config, hostname)
         self.submit_histogram_bucket(
-            self.check_id,
             "{}.{}".format(scraper_config['namespace'], metric_name),
             sample[self.SAMPLE_VALUE],
             float(sample[self.SAMPLE_LABELS]["lower_bound"]),
