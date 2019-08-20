@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.coredns import CoreDNSCheck
 from datadog_checks.dev.utils import ON_WINDOWS
 
-from .common import CHECK_NAME, NAMESPACE, METRICS
+from .common import CHECK_NAME, METRICS, NAMESPACE
 
 
 class TestCoreDNS:
