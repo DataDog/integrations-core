@@ -246,3 +246,19 @@ def test_no_psutil_min_disk_size(aggregator, gauge_metrics):
             aggregator.assert_metric(name, tags=['device:{}'.format(device)], count=0)
 
     aggregator.assert_all_metrics_covered()
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_psutil_min_disk_size(aggregator, gauge_metrics, rate_metrics):
+    instance = {
+        'min_disk_size': 0.004,
+    }
+    c = Disk('disk', None, {}, [instance])
+    c.check(instance)
+
+    for device in ['/dev/sda1']: #expected devices
+        for name in gauge_metrics:
+            aggregator.assert_metric(name, tags=['device:{}'.format(device)])
+        for name in rate_metrics:
+            aggregator.assert_metric(name, tags=['device:{}'.format(device)])
+
+    aggregator.assert_all_metrics_covered()
