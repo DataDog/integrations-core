@@ -117,8 +117,10 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
         # Report the metics
         self._report_highwater_offsets()
-        self._report_consumer_offsets_and_lag(self._zk_consumer_offsets, 'zk')
-        self._report_consumer_offsets_and_lag(self._kafka_consumer_offsets, 'kafka')
+        self._report_consumer_offsets_and_lag(self._kafka_consumer_offsets)
+        # if someone is in the middle of migrating their offset storage from zookeeper to kafka, they need to identify
+        # which source is reporting which offsets. So we tag zookeeper with 'source:zk'
+        self._report_consumer_offsets_and_lag(self._zk_consumer_offsets, source='zk')
 
     def _create_kafka_client(self):
         kafka_conn_str = self.instance.get('kafka_connect_str')
@@ -265,15 +267,12 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             broker_tags.extend(self._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
 
-    def _report_consumer_offsets_and_lag(self, consumer_offsets, consumer_offsets_source):
+    def _report_consumer_offsets_and_lag(self, consumer_offsets, **kwargs):
         """Report the consumer group offsets and consumer lag."""
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
-            consumer_group_tags = [
-                'topic:%s' % topic,
-                'partition:%s' % partition,
-                'consumer_group:%s' % consumer_group,
-                'source:%s' % consumer_offsets_source,
-            ]
+            consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
+            if 'source' in kwargs:
+                consumer_group_tags.append('source:%s' % kwargs['source'])
             consumer_group_tags.extend(self._custom_tags)
             if partition in self._kafka_client.cluster.partitions_for_topic(topic):
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
