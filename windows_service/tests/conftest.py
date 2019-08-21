@@ -1,14 +1,23 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import pytest
 
 from datadog_checks.windows_service import WindowsService
 
+from . import common
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    yield common.INSTANCE_BASIC, 'local'
+
 
 @pytest.fixture
 def check():
-    return WindowsService('windows_service', {}, {}, None)
+    return lambda instance: WindowsService('windows_service', {}, [instance])
 
 
 @pytest.fixture
@@ -18,14 +27,14 @@ def instance_bad_config():
 
 @pytest.fixture
 def instance_basic():
-    return {'services': ['eventlog', 'Dnscache', 'NonExistentService'], 'tags': ['optional:tag1']}
+    return deepcopy(common.INSTANCE_BASIC)
 
 
 @pytest.fixture
 def instance_wildcard():
-    return {'host': '.', 'services': ['Event.*', 'Dns%']}
+    return deepcopy(common.INSTANCE_WILDCARD)
 
 
 @pytest.fixture
 def instance_all():
-    return {'services': ['ALL']}
+    return deepcopy(common.INSTANCE_ALL)
