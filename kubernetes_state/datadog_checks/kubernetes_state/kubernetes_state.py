@@ -206,7 +206,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_upperbound': (
                             'vpa.upperbound'
                         ),
-                        'kube_verticalpodautoscaler_spec_updatepolicy_updatemode' : 'vpa.update_mode',
+                        'kube_verticalpodautoscaler_spec_updatepolicy_updatemode': 'vpa.update_mode',
                     }
                 ],
                 'ignore_metrics': [
