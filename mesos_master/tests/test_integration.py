@@ -46,4 +46,4 @@ def assert_metric_coverage(aggregator):
 
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_service_check('mesos_master.can_connect', count=1, status=check.OK)
+    aggregator.assert_service_check('mesos_master.can_connect', status=check.OK)
