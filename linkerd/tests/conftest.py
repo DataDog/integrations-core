@@ -12,7 +12,8 @@ from .common import LINKERD_FIXTURE_METRICS, LINKERD_FIXTURE_TYPES
 @pytest.fixture(scope='session')
 def dd_environment():
     with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
-        kubeconfig = outputs['kubeconfig']['value']
+        # TODO: Remove str() when we drop Python 2
+        kubeconfig = str(outputs['kubeconfig']['value'])
 
         with port_forward(kubeconfig, 'linkerd', 'linkerd-controller', 4191) as (ip, port):
             instance = {
