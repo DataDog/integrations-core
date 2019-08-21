@@ -10,6 +10,7 @@ from datadog_checks.dev import docker_run
 from datadog_checks.mesos_slave import MesosSlave
 
 from . import common
+from .utils import read_fixture
 
 
 @pytest.fixture(scope='session')
@@ -27,17 +28,13 @@ def instance():
 
 @pytest.fixture
 def check():
-    return MesosSlave(common.CHECK_NAME, {}, {})
+    return mock
 
 
-@pytest.fixture
-def check_mock(check):
-    check._get_stats = lambda v, x, y, z: json.loads(read_fixture('stats.json'))
-    check._get_state = lambda v, x, y, z: json.loads(read_fixture('state.json'))
+def mock(init_config, instance):
+    check = MesosSlave(common.CHECK_NAME, init_config, [instance])
+
+    check._get_stats = lambda v, x: json.loads(read_fixture('stats.json'))
+    check._get_state = lambda v, x: json.loads(read_fixture('state.json'))
 
     return check
-
-
-def read_fixture(name):
-    with open(os.path.join(common.FIXTURE_DIR, name)) as f:
-        return f.read()
