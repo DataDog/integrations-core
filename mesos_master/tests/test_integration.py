@@ -6,7 +6,15 @@ import platform
 import pytest
 from six import iteritems
 
-from .common import BASIC_METRICS
+from datadog_checks.mesos_master import MesosMaster
+
+from .common import BASIC_METRICS, CHECK_NAME, INSTANCE
+
+
+@pytest.mark.e2e
+def test_check_ok(dd_agent_check):
+    aggregator = dd_agent_check(INSTANCE, rate=True)
+    assert_metric_coverage(aggregator)
 
 
 @pytest.mark.integration
@@ -15,6 +23,12 @@ from .common import BASIC_METRICS
 @pytest.mark.usefixtures("dd_environment")
 def test_integration(check, instance, aggregator):
     check.check(instance)
+
+    assert_metric_coverage(aggregator)
+
+
+def assert_metric_coverage(aggregator):
+    check = MesosMaster(CHECK_NAME, {}, {})
     metrics = BASIC_METRICS
     for d in (
         check.ROLE_RESOURCES_METRICS,
