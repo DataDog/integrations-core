@@ -1,16 +1,13 @@
 adodbapi==2.6.0.7; sys_platform == 'win32'
 aerospike==3.6.0; sys_platform != 'win32'
-asn1crypto==0.24.0
 beautifulsoup4==4.5.1
 binary==1.0.0
 boto==2.46.1
-cffi==1.11.5
 contextlib2==0.5.5
 cryptography==2.7
 cx-oracle==7.2.0
 ddtrace==0.13.0
 dnspython==1.16.0
-enum34==1.1.6
 flup==1.0.3.dev-20110405; python_version < '3.0'
 flup-py3==1.0.3; python_version > '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
@@ -25,7 +22,6 @@ kubernetes==8.0.1
 ldap3==2.5
 lxml==4.2.6
 meld3==1.0.2
-ntplib==0.3.3
 openstacksdk==0.24.0
 paramiko==2.1.5
 ply==3.10
@@ -34,7 +30,6 @@ protobuf==3.7.0
 psutil==5.6.2
 psycopg2-binary==2.8.2
 pyasn1==0.4.6
-pycparser==2.18
 pycryptodomex==3.8.2
 pymongo==3.8.0
 pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
