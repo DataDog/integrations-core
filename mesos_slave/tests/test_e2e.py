@@ -6,16 +6,17 @@ import platform
 import pytest
 from six import iteritems
 
-from .common import CHECK_NAME
 from datadog_checks.mesos_slave import MesosSlave
+
+from .common import CHECK_NAME
 
 
 @pytest.mark.e2e
 # Linux only: https://github.com/docker/for-mac/issues/1031
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 def test_e2e(dd_agent_check, instance):
-    aggregator = dd_agent_check(instance)
-    check = MesosSlave(CHECK_NAME, {}, {})
+    aggregator = dd_agent_check(instance, rate=True)
+    check = MesosSlave(CHECK_NAME, {}, [{}])
     metrics = {}
     for d in (
         check.SLAVE_TASKS_METRICS,
@@ -31,4 +32,4 @@ def test_e2e(dd_agent_check, instance):
 
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=check.OK)
+    aggregator.assert_service_check('mesos_slave.can_connect', status=check.OK)
