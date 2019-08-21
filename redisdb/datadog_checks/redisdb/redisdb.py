@@ -107,7 +107,7 @@ class Redis(AgentCheck):
                         return v
             return default
         except Exception:
-            self.log.exception("Cannot parse dictionary string: %s" % string)
+            self.log.exception("Cannot parse dictionary string: %s", string)
             return default
 
     def _generate_instance_key(self, instance):
@@ -238,18 +238,26 @@ class Redis(AgentCheck):
         Compute the length of the configured keys across all the databases
         """
         key_list = instance.get('keys')
+        instance_db = instance.get('db')
 
-        if key_list is None:
-            return
-
-        if not isinstance(key_list, list) or len(key_list) == 0:
+        if not isinstance(key_list, list) or not key_list:
             self.warning("keys in redis configuration is either not a list or empty")
             return
+
+        warn_on_missing_keys = is_affirmative(instance.get("warn_on_missing_keys", True))
 
         # get all the available databases
         databases = list(conn.info('keyspace'))
         if not databases:
             self.warning("Redis database is empty")
+            if warn_on_missing_keys:
+                for key in key_list:
+                    key_tags = ['key:{}'.format(key)]
+                    if instance_db:
+                        key_tags.append('redis_db:db{}'.format(instance_db))
+                    key_tags.extend(tags)
+                    self.gauge('redis.key.length', 0, tags=key_tags)
+                    self.warning("{} key not found in redis".format(key))
             return
 
         # convert to integer the output of `keyspace`, from `db0` to `0`
@@ -257,12 +265,11 @@ class Redis(AgentCheck):
         databases = [int(dbstring[2:]) for dbstring in databases]
 
         # user might have configured the instance to target one specific db
-        if 'db' in instance:
-            db = instance['db']
-            if db not in databases:
-                self.warning("Cannot find database {}".format(instance['db']))
+        if instance_db:
+            if instance_db not in databases:
+                self.warning("Cannot find database {}".format(instance_db))
                 return
-            databases = [db]
+            databases = [instance_db]
 
         # maps a key to the total length across databases
         lengths_overall = defaultdict(int)
@@ -333,9 +340,13 @@ class Redis(AgentCheck):
         # Warn if a key is missing from the entire redis instance.
         # Send 0 if the key is missing/empty from the entire redis instance.
         for key, total in iteritems(lengths_overall):
-            if total == 0 and instance.get("warn_on_missing_keys", True):
-                self.gauge('redis.key.length', total, tags=tags + ['key:{}'.format(key)])
-                self.warning("{0} key not found in redis".format(key))
+            if total == 0 and warn_on_missing_keys:
+                key_tags = ['key:{}'.format(key)]
+                if instance_db:
+                    key_tags.append('redis_db:db{}'.format(instance_db))
+                key_tags.extend(tags)
+                self.gauge('redis.key.length', 0, tags=key_tags)
+                self.warning("{} key not found in redis".format(key))
 
     def _check_replication(self, info, tags):
         # Save the replication delay for each slave

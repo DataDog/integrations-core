@@ -21,7 +21,8 @@ def test_check_ok(dd_agent_check):
 # Linux only: https://github.com/docker/for-mac/issues/1031
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(check, instance, aggregator):
+def test_integration(instance, aggregator):
+    check = MesosMaster('mesos_master', {}, [instance])
     check.check(instance)
 
     assert_metric_coverage(aggregator)
