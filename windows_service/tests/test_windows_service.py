@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.windows_service import WindowsService
+
 
 def test_bad_config(check, instance_bad_config):
     c = check(instance_bad_config)
@@ -44,13 +46,15 @@ def test_all(aggregator, check, instance_all):
 def test_basic_e2e(dd_agent_check, check, instance_basic):
     aggregator = dd_agent_check(instance_basic)
 
-    c = check(instance_basic)
     aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:EventLog', 'optional:tag1'], count=1
+        WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK, tags=['service:EventLog', 'optional:tag1'], count=1
     )
     aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:Dnscache', 'optional:tag1'], count=1
+        WindowsService.SERVICE_CHECK_NAME, status=WindowsService.OK, tags=['service:Dnscache', 'optional:tag1'], count=1
     )
     aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.CRITICAL, tags=['service:NonExistentService', 'optional:tag1'], count=1
+        WindowsService.SERVICE_CHECK_NAME,
+        status=WindowsService.CRITICAL,
+        tags=['service:NonExistentService', 'optional:tag1'],
+        count=1,
     )
