@@ -12,7 +12,7 @@ PORT = '5050'
 
 INSTANCE = {'url': 'http://{}:{}'.format(HOST, PORT), 'tags': ['instance:mytag1']}
 
-CHECK_NAME = "mesos_master"]
+CHECK_NAME = "mesos_master"
 
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
