@@ -16,7 +16,7 @@ from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
+from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
 
 
 class LegacyKafkaCheck_0_10_2(AgentCheck):
@@ -185,13 +185,6 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         Sends one OffsetRequest per broker to get offsets for all partitions where that broker is the leader:
         https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-OffsetAPI(AKAListOffset)
         """
-        # No sense fetching highwatever offsets for internal topics
-        internal_topics = {
-            '__consumer_offsets',
-            '__transaction_state',
-            '_schema',  # _schema is a topic used by the Confluent registry
-        }
-
         # If we aren't fetching all broker highwater offsets, then construct the unique set of topic partitions for
         # which this run of the check has at least once saved consumer offset. This is later used as a filter for
         # excluding partitions.
@@ -207,7 +200,8 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             # OffsetRequest while simultaneously filtering out partitions we want to exclude
             partitions_grouped_by_topic = defaultdict(list)
             for topic, partition in broker_led_partitions:
-                if topic not in internal_topics and (
+                # No sense fetching highwater offsets for internal topics
+                if topic not in KAFKA_INTERNAL_TOPICS and (
                     self._monitor_all_broker_highwatermarks or (topic, partition) in tps_with_consumer_offset
                 ):
                     partitions_grouped_by_topic[topic].append(partition)
