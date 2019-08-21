@@ -13,4 +13,23 @@ PORT = '5050'
 INSTANCE = {'url': 'http://{}:{}'.format(HOST, PORT), 'tags': ['instance:mytag1']}
 
 CHECK_NAME = "mesos_master"
+
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
+
+BASIC_METRICS = [
+    'mesos.registrar.queued_operations',
+    'mesos.registrar.registry_size_bytes',
+    'mesos.registrar.state_fetch_ms',
+    'mesos.registrar.state_store_ms',
+    'mesos.stats.system.cpus_total',
+    'mesos.stats.system.load_15min',
+    'mesos.stats.system.load_1min',
+    'mesos.stats.system.load_5min',
+    'mesos.stats.system.mem_free_bytes',
+    'mesos.stats.system.mem_total_bytes',
+    'mesos.stats.elected',
+    'mesos.stats.uptime_secs',
+    'mesos.role.frameworks.count',
+    'mesos.cluster.total_frameworks',
+    'mesos.role.weight',
+]

@@ -8,6 +8,14 @@ from six import iteritems
 
 from datadog_checks.mesos_master import MesosMaster
 
+from .common import BASIC_METRICS, CHECK_NAME, INSTANCE
+
+
+@pytest.mark.e2e
+def test_check_ok(dd_agent_check):
+    aggregator = dd_agent_check(INSTANCE, rate=True)
+    assert_metric_coverage(aggregator)
+
 
 @pytest.mark.integration
 # Linux only: https://github.com/docker/for-mac/issues/1031
@@ -16,23 +24,13 @@ from datadog_checks.mesos_master import MesosMaster
 def test_integration(instance, aggregator):
     check = MesosMaster('mesos_master', {}, [instance])
     check.check(instance)
-    metrics = [
-        'mesos.registrar.queued_operations',
-        'mesos.registrar.registry_size_bytes',
-        'mesos.registrar.state_fetch_ms',
-        'mesos.registrar.state_store_ms',
-        'mesos.stats.system.cpus_total',
-        'mesos.stats.system.load_15min',
-        'mesos.stats.system.load_1min',
-        'mesos.stats.system.load_5min',
-        'mesos.stats.system.mem_free_bytes',
-        'mesos.stats.system.mem_total_bytes',
-        'mesos.stats.elected',
-        'mesos.stats.uptime_secs',
-        'mesos.role.frameworks.count',
-        'mesos.cluster.total_frameworks',
-        'mesos.role.weight',
-    ]
+
+    assert_metric_coverage(aggregator)
+
+
+def assert_metric_coverage(aggregator):
+    check = MesosMaster(CHECK_NAME, {}, {})
+    metrics = BASIC_METRICS
     for d in (
         check.ROLE_RESOURCES_METRICS,
         check.CLUSTER_TASKS_METRICS,
@@ -49,4 +47,4 @@ def test_integration(instance, aggregator):
 
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_service_check('mesos_master.can_connect', count=1, status=check.OK)
+    aggregator.assert_service_check('mesos_master.can_connect', status=check.OK)
