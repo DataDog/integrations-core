@@ -24,7 +24,7 @@ def container_up(service_name, port):
     )
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def dd_environment():
     """
     Start postgres and install pgbouncer. If there's any problem executing

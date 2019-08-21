@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import psycopg2
+import pytest
 
 from datadog_checks.pgbouncer import PgBouncer
 
@@ -25,7 +26,18 @@ def test_check(instance, aggregator):
     # run the check
     check = PgBouncer('pgbouncer', {}, {})
     check.check(instance)
+    assert_metric_coverage(aggregator)
 
+
+@pytest.mark.e2e
+def test_check_e2e(dd_agent_check, instance):
+
+    # run the check
+    aggregator = dd_agent_check(instance, rate=True)
+    assert_metric_coverage(aggregator)
+
+
+def assert_metric_coverage(aggregator):
     aggregator.assert_metric('pgbouncer.pools.cl_active')
     aggregator.assert_metric('pgbouncer.pools.cl_waiting')
     aggregator.assert_metric('pgbouncer.pools.sv_active')
@@ -66,3 +78,4 @@ def test_check(instance, aggregator):
     # Service checks
     sc_tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'db:pgbouncer', 'optional:tag1']
     aggregator.assert_service_check('pgbouncer.can_connect', status=PgBouncer.OK, tags=sc_tags)
+    aggregator.assert_all_metrics_covered()
