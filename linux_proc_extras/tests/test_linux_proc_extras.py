@@ -2,10 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import pytest
 
 from mock import mock_open, patch
 
 from . import common
+
+pytestmark = pytest.mark.unit
 
 
 # Really a basic check to see if all metrics are there
