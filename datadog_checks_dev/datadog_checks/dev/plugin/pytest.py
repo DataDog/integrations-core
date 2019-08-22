@@ -145,6 +145,7 @@ def dd_agent_check(request, aggregator):
 
         result = run_command(check_command, capture=True)
         if AGENT_COLLECTOR_SEPARATOR not in result.stdout:
+            import pdb; pdb.set_trace()
             raise ValueError(
                 '{}{}\nCould find `{}` in the output'.format(result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR)
             )
