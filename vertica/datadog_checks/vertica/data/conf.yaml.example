@@ -51,7 +51,7 @@ instances:
     ## Whether or not to enable connection load balancing. This helps automatically spread
     ## the overhead caused by client connections across clusters by having hosts redirect
     ## client connections to other hosts. If the server disables connection load balancing,
-    ## load balancing requests will be ignored.
+    ## load balancing requests is ignored.
     #
     # connection_load_balance: false
 
@@ -107,9 +107,9 @@ instances:
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
     ##
-    ## 1. true - `global_custom_queries` will override `custom_queries`
-    ## 2. false - `custom_queries` will override `global_custom_queries`
-    ## 2. extend - `global_custom_queries` will be used in addition to any `custom_queries`
+    ## 1. true - `global_custom_queries` overrides `custom_queries`
+    ## 2. false - `custom_queries` overrides `global_custom_queries`
+    ## 2. extend - `global_custom_queries` is used in addition to any `custom_queries`
     #
     # use_global_custom_queries: true
 
