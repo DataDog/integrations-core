@@ -4,7 +4,6 @@
 import gc
 import linecache
 import os
-import threading
 from datetime import datetime
 
 from binary import BinaryUnits, convert_units
@@ -30,9 +29,6 @@ VALID_PACKAGE_ROOTS = ('datadog_checks', 'site-packages', 'lib', 'Lib')
 
 # Starting in Python 3.7 frames are sorted from the oldest to the most recent
 MOST_RECENT_FRAME = -1
-
-# This is required so a check runner doesn't stop memory tracing while another is collecting a snapshot
-TRACE_LOCK = threading.Lock()
 
 
 class MemoryProfileMetric(object):
@@ -103,6 +99,11 @@ def get_unit_formatter(unit):
 
 def gather_top(metrics, path, snapshot, unit_formatter, key_type, limit, cumulative):
     top_stats = snapshot.statistics(key_type, cumulative=cumulative)
+
+    if not path:
+        total = sum(stat.size for stat in top_stats)
+        metrics.append(MemoryProfileMetric('check_run_alloc', total))
+        return
 
     with open(path, 'w', encoding='utf-8') as f:
         f.write('Top {} lines\n'.format(limit))
@@ -245,16 +246,6 @@ def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
     if filters:
         snapshot = snapshot.filter_traces([tracemalloc.Filter(True, pattern) for pattern in filters.split(',')])
 
-    if namespaces:
-        # Colons can't be part of Windows file paths
-        namespaces = [n.replace(':', '_') for n in namespaces]
-        location = os.path.join(config['profile_memory'], *namespaces)
-    else:
-        location = config['profile_memory']
-
-    if not os.path.isdir(location):
-        os.makedirs(location)
-
     combine = bool(int(config.get('profile_memory_combine', DEFAULT_COMBINE)))
     sort_by = config.get('profile_memory_sort', DEFAULT_SORT_KEY)
     limit = int(config.get('profile_memory_limit', DEFAULT_KEY_LIMIT))
@@ -264,6 +255,21 @@ def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
 
     # Metrics to send
     metrics = []
+
+    # We're running on a live Agent
+    if 'profile_memory' not in config:
+        gather_top(metrics, None, snapshot, unit_formatter, sort_by, limit, combine)
+        return metrics
+
+    if namespaces:
+        # Colons can't be part of Windows file paths
+        namespaces = [n.replace(':', '_') for n in namespaces]
+        location = os.path.join(config['profile_memory'], *namespaces)
+    else:
+        location = config['profile_memory']
+
+    if not os.path.isdir(location):
+        os.makedirs(location)
 
     # First, write the prettified snapshot
     snapshot_dir = os.path.join(location, 'snapshots')

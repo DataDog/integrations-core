@@ -33,3 +33,7 @@ def debug(msg, *args, **kwargs):
 
 def set_external_tags(*args, **kwargs):
     pass
+
+
+def tracemalloc_enabled(*args, **kwargs):
+    return False
