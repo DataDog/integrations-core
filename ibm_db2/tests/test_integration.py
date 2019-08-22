@@ -20,20 +20,6 @@ def test_bad_config(aggregator, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_standard(aggregator, instance):
-    check = IbmDb2Check('ibm_db2', {}, [instance])
-    check.check(instance)
-
-    aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, check.OK)
-
-    for metric in metrics.STANDARD:
-        aggregator.assert_metric_has_tag(metric, 'db:datadog')
-        aggregator.assert_metric_has_tag(metric, 'foo:bar')
-
-    aggregator.assert_all_metrics_covered()
-
-
-@pytest.mark.usefixtures('dd_environment')
 def test_buffer_pool_tags(aggregator, instance):
     check = IbmDb2Check('ibm_db2', {}, [instance])
     check.check(instance)
