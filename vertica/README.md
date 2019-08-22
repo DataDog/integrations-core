@@ -8,7 +8,7 @@ This check monitors [Vertica][] through the Datadog Agent.
 
 ### Installation
 
-The Vertica check is included in the [Datadog Agent][] package.
+The Vertica check is included in the [Datadog Agent][] package. No additional installation is needed on your server.
 
 ### Configuration
 
