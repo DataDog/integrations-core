@@ -160,5 +160,5 @@ instances:
 # logs:
 #   - source: vertica
 #     type: file
-#     path: /catalog-path/database-name/node-name_catalog/vertica.log
+#     path: /<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log
 #     service: vertica

@@ -10,15 +10,17 @@ This check monitors [Vertica][] through the Datadog Agent.
 
 The Vertica check is included in the [Datadog Agent][] package.
 
+### Configuration
+
+Edit the `vertica.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vertica performance data. See the example [vertica.d/conf.yaml][] for all available configuration options.
+
+#### Prepare Vertica
+
 The user used to connect to the database must be granted the [SYSMONITOR][monitor role] role in order to access the monitoring system tables.
 
 Additionally, as the metrics for current license usage use the values from the most recent [audit][audit command], it is recommended to schedule it to occur as often as possible. For more information, see [this][license guide].
 
-### Configuration
-
-1. Edit the `vertica.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vertica performance data. See the example [vertica.d/conf.yaml][] for all available configuration options.
-
-2. [Restart the Agent][agent restart].
+[Restart the Agent][agent restart] to start sending Vertica metrics to Datadog.
 
 #### Log Collection
 
@@ -36,7 +38,7 @@ logs_enabled: true
 logs:
   - source: vertica
     type: file
-    path: /catalog-path/database-name/node-name_catalog/vertica.log
+    path: /<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log
     service: vertica
 ```
 

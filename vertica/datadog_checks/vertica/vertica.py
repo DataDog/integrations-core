@@ -192,8 +192,20 @@ class VerticaCheck(AgentCheck):
                 unsafe_projections += 1
 
         self.gauge('projection.total', total_projections, tags=self._tags)
+
         self.gauge('projection.unsegmented', unsegmented_projections, tags=self._tags)
+        if total_projections:
+            unsegmented_percent = unsegmented_projections / total_projections * 100
+        else:
+            unsegmented_percent = 0
+        self.gauge('projection.unsegmented_percent', unsegmented_percent, tags=self._tags)
+
         self.gauge('projection.unsafe', unsafe_projections, tags=self._tags)
+        if total_projections:
+            unsafe_percent = unsafe_projections / total_projections * 100
+        else:
+            unsafe_percent = 0
+        self.gauge('projection.unsafe_percent', unsafe_percent, tags=self._tags)
 
     def query_projection_storage(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
