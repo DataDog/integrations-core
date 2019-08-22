@@ -212,6 +212,19 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_statefulset_status_replicas_current': 'statefulset.replicas_current',
                         'kube_statefulset_status_replicas_ready': 'statefulset.replicas_ready',
                         'kube_statefulset_status_replicas_updated': 'statefulset.replicas_updated',
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_lowerbound': (
+                            'vpa.lower_bound'
+                        ),
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_target': (
+                            'vpa.target'
+                        ),
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_uncappedtarget': (
+                            'vpa.uncapped_target'
+                        ),
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_upperbound': (
+                            'vpa.upperbound'
+                        ),
+                        'kube_verticalpodautoscaler_spec_updatepolicy_updatemode': 'vpa.update_mode',
                     }
                 ],
                 'ignore_metrics': [
@@ -275,6 +288,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_job_status_active',
                     'kube_job_status_completion_time',  # We could compute the duration=completion-start as a gauge
                     'kube_job_status_start_time',
+                    'kube_verticalpodautoscaler_labels',
                 ],
                 'label_joins': {
                     'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
