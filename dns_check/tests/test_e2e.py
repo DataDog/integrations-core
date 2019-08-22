@@ -7,10 +7,8 @@ import pytest
 
 from . import common
 
-pytestmark = pytest.mark.integration
 
-
-@pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check):
-    check.check(deepcopy(common.INSTANCE_INTEGRATION))
+@pytest.mark.e2e
+def test_check(dd_agent_check):
+    aggregator = dd_agent_check(deepcopy(common.INSTANCE_INTEGRATION))
     common._test_check(aggregator)
