@@ -105,3 +105,8 @@ kubernetes_state.telemetry.metrics.input.count,counter,,,,The number of metrics 
 kubernetes_state.telemetry.metrics.blacklist.count,counter,,,,The number of metrics blacklisted by the check,0,kubernetes,k8s_state.telemetry.metrics.blacklist.count
 kubernetes_state.telemetry.metrics.ignored.count,counter,,,,The number of metrics ignored by the check,0,kubernetes,k8s_state.telemetry.metrics.ignored.count
 kubernetes_state.telemetry.collector.metrics.count,counter,,,,The number of metrics by collector (kubernetes object kind) by kubernetes namespaces,0,kubernetes,k8s_state.telemetry.collector.metrics.count
+kubernetes_state.vpa.lower_bound,gauge,,,,The vpa lower bound recommendation,0,kubernetes,k8s_state.vpa.lower_bound
+kubernetes_state.vpa.target,gauge,,,,The vpa target recommendation,0,kubernetes,k8s_state.vpa.target
+kubernetes_state.vpa.uncapped_target,gauge,,,,The vpa uncapped recommendation recommendation,0,kubernetes,k8s_state.vpa.uncapped_target
+kubernetes_state.vpa.upperbound,gauge,,,,The vpa upper bound recommendation,0,kubernetes,k8s_state.vpa.upper_bound
+kubernetes_state.vpa.update_mode,gauge,,,,The vpa update mode,0,kubernetes,k8s_state.vpa.update_mode

@@ -10,8 +10,7 @@ from six import iteritems
 from datadog_checks.disk import Disk
 
 from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
-from .mocks import MockInodesMetrics, mock_blkid_output, mock_df_output
-from .utils import requires_unix
+from .mocks import MockDiskMetrics, mock_blkid_output
 
 
 def test_default_options():
@@ -28,6 +27,7 @@ def test_default_options():
     assert check._tag_by_filesystem is False
     assert check._device_tag_re == []
     assert check._service_check_rw is False
+    assert check._min_disk_size == 0
 
 
 def test_bad_config():
@@ -40,7 +40,7 @@ def test_bad_config():
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_psutil(aggregator, gauge_metrics, rate_metrics):
+def test_default(aggregator, gauge_metrics, rate_metrics):
     """
     Mock psutil and run the check
     """
@@ -68,7 +68,7 @@ def test_psutil(aggregator, gauge_metrics, rate_metrics):
 
 
 @pytest.mark.usefixtures('psutil_mocks')
-def test_psutil_rw(aggregator):
+def test_rw(aggregator):
     """
     Check for 'ro' option in the mounts
     """
@@ -126,88 +126,6 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
     aggregator.assert_all_metrics_covered()
 
 
-@requires_unix
-def test_no_psutil_debian(aggregator, gauge_metrics):
-    instance = {'use_mount': 'no', 'excluded_filesystems': ['tmpfs'], 'tag_by_label': False}
-    c = Disk('disk', None, {}, [instance])
-    # disable psutil
-    c._psutil = lambda: False
-
-    mock_statvfs = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__='statvfs')
-    mock_output = mock.patch(
-        'datadog_checks.disk.disk.get_subprocess_output',
-        return_value=mock_df_output('debian-df-Tk'),
-        __name__='get_subprocess_output',
-    )
-
-    with mock_statvfs, mock_output:
-        c.check(instance)
-
-    for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
-        # backward compatibility with the old check
-        aggregator.assert_metric(name, tags=['device:udev'])
-
-    aggregator.assert_all_metrics_covered()
-
-
-@requires_unix
-def test_no_psutil_freebsd(aggregator, gauge_metrics):
-    instance = {
-        'use_mount': 'no',
-        'excluded_filesystems': ['devfs'],
-        'excluded_disk_re': 'zroot/.+',
-        'tag_by_label': False,
-    }
-    c = Disk('disk', None, {}, [instance])
-    # disable psutil
-    c._psutil = lambda: False
-
-    mock_statvfs = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__='statvfs')
-    mock_output = mock.patch(
-        'datadog_checks.disk.disk.get_subprocess_output',
-        return_value=mock_df_output('freebsd-df-Tk'),
-        __name__='get_subprocess_output',
-    )
-
-    with mock_statvfs, mock_output:
-        c.check(instance)
-
-    for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=['device:zroot'])
-
-    aggregator.assert_all_metrics_covered()
-
-
-@requires_unix
-def test_no_psutil_centos(aggregator, gauge_metrics):
-    instance = {
-        'use_mount': 'no',
-        'excluded_filesystems': ['devfs', 'tmpfs'],
-        'excluded_disks': ['/dev/sda1'],
-        'tag_by_label': False,
-    }
-    c = Disk('disk', None, {}, [instance])
-    # disable psutil
-    c._psutil = lambda: False
-
-    mock_statvfs = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__='statvfs')
-    mock_output = mock.patch(
-        'datadog_checks.disk.disk.get_subprocess_output',
-        return_value=mock_df_output('centos-df-Tk'),
-        __name__='get_subprocess_output',
-    )
-
-    with mock_statvfs, mock_output:
-        c.check(instance)
-
-    for device in ['/dev/sda3', '10.1.5.223:/vil/cor']:
-        for name in gauge_metrics:
-            aggregator.assert_metric(name, tags=['device:{}'.format(device)])
-
-    aggregator.assert_all_metrics_covered()
-
-
 def test_get_devices_label():
     c = Disk('disk', None, {}, [{}])
 
@@ -218,3 +136,22 @@ def test_get_devices_label():
     ):
         labels = c._get_devices_label()
         assert labels.get("/dev/mapper/vagrant--vg-root") == "label:DATA"
+
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_min_disk_size(aggregator, gauge_metrics, rate_metrics):
+    instance = {'min_disk_size': 0.001}
+    c = Disk('disk', None, {}, [instance])
+
+    m = MockDiskMetrics()
+    m.total = 0
+    with mock.patch('psutil.disk_usage', return_value=m, __name__='disk_usage'):
+        c.check(instance)
+
+    for name in gauge_metrics:
+        aggregator.assert_metric(name, count=0)
+
+    for name in rate_metrics:
+        aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
+
+    aggregator.assert_all_metrics_covered()

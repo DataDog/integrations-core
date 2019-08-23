@@ -32,7 +32,7 @@ stages:
 script:
   - ddev validate logos ${CHECK}
   - travis_retry ddev test --cov ${CHECK}
-  - ddev env test --new-env ${CHECK}
+  - travis_retry ddev env test --new-env ${CHECK}
   - ddev test ${CHECK} --bench || true
   - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
 
@@ -283,6 +283,8 @@ jobs:
       env: CHECK=varnish PYTHON3=true
     - stage: test
       env: CHECK=vault PYTHON3=true
+    - stage: test
+      env: CHECK=vertica PYTHON3=true
     - stage: test
       env: CHECK=vsphere PYTHON3=true
     - stage: test

@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "systemd",
   "metric_prefix": "systemd.",
-  "metric_to_check": "systemd.unit.count",
+  "metric_to_check": "systemd.units_by_state",
   "creates_events": false,
   "short_description": "Get metrics about Systemd and units managed by Systemd",
   "guid": "acd470e7-5413-4deb-95fc-4b034d904691",

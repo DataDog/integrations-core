@@ -92,6 +92,8 @@ CONFIG = {
     ]
 }
 
+CONFIG_E2E = {'init_config': {'ca_certs': '/opt/cacert.pem'}, 'instances': CONFIG['instances']}
+
 CONFIG_SSL_ONLY = {
     'instances': [
         {
