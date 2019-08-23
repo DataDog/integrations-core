@@ -120,15 +120,15 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
     
-    ## @param username - string - optional
+    ## @param rabbitmq_user - string - optional
     ## If the API endpoint is behind basic auth, enter here the required username.
     #
-    # username: <USERNAME>
+    # rabbitmq_user: <USERNAME>
 
-    ## @param password - string - optional
+    ## @param rabbitmq_pass - string - optional
     ## If the API endpoint is behind basic auth, enter here the required password.
     #
-    # password: <PASSWORD>
+    # rabbitmq_pass: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services uses NTLM authentication, you can
