@@ -43,6 +43,11 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
     def trace(self, msg, *args, **kwargs):
         self.log(TRACE_LEVEL, msg, *args, **kwargs)
 
+    if PY2:
+
+        def warn(self, msg, *args, **kwargs):
+            self.log(logging.WARNING, msg, *args, **kwargs)
+
 
 class AgentLogHandler(logging.Handler):
     """
