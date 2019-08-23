@@ -6,8 +6,9 @@ import platform
 import pytest
 from six import iteritems
 
-from .common import CHECK_NAME
 from datadog_checks.mesos_slave import MesosSlave
+
+from .common import CHECK_NAME
 
 
 @pytest.mark.integration
