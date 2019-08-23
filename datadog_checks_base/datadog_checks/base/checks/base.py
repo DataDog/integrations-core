@@ -238,6 +238,31 @@ class __AgentCheck(object):
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
+    def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags):
+        if value is None:
+            # ignore metric sample
+            return
+
+        # make sure the value (bucket count) is an integer
+        try:
+            value = int(value)
+        except ValueError:
+            err_msg = 'Histogram: {} has non integer value: {}. Only integer are valid bucket values (count).'.format(
+                repr(name), repr(value)
+            )
+            if using_stub_aggregator:
+                raise ValueError(err_msg)
+            self.warning(err_msg)
+            return
+
+        tags = self._normalize_tags_type(tags, metric_name=name)
+        if hostname is None:
+            hostname = ''
+
+        aggregator.submit_histogram_bucket(
+            self, self.check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+        )
+
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
         if value is None:
             # ignore metric sample
