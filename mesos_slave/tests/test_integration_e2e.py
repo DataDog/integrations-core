@@ -15,6 +15,7 @@ from datadog_checks.mesos_slave import MesosSlave
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 @pytest.mark.usefixtures("dd_environment")
 def test_integration(check, instance, aggregator):
+    check = check({}, instance)
     check.check(instance)
     check.check(instance)
     assert_metrics_covered(aggregator)
