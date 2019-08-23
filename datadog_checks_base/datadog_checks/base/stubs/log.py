@@ -26,7 +26,7 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
             self.check_id = self.check.check_id
             self.extra['_check_id'] = self.check_id or 'unknown'
 
-        kwargs['extra'] = self.extra
+        kwargs.setdefault('extra', self.extra)
         return msg, kwargs
 
     def trace(self, msg, *args, **kwargs):

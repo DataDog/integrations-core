@@ -468,7 +468,7 @@ class __AgentCheck(object):
         # only log the last part of the filename, not the full path
         filename = basename(frame.f_code.co_filename)
 
-        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename})
+        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename, '_check_id': self.check_id})
         self.warnings.append(warning_message)
 
     def get_warnings(self):
