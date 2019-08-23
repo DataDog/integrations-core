@@ -14,8 +14,8 @@ from datadog_checks.mesos_slave import MesosSlave
 # Linux only: https://github.com/docker/for-mac/issues/1031
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(check, instance, aggregator):
-    check = check({}, instance)
+def test_integration(instance, aggregator):
+    check = MesosSlave('mesos_slave', {}, [instance])
     check.check(instance)
     check.check(instance)
     assert_metrics_covered(aggregator)
