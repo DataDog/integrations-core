@@ -16,11 +16,20 @@ from . import common, metrics
 log = logging.getLogger(__file__)
 
 
+@pytest.mark.e2e
+def test_rabbitm_e2e(dd_agent_check):
+    aggregator = dd_agent_check(common.CONFIG)
+    assert_metric_covered(aggregator)
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_rabbitmq(aggregator, check):
     check.check(common.CONFIG)
+    assert_metric_covered(aggregator)
 
+
+def assert_metric_covered(aggregator):
     # Node attributes
     for mname in metrics.COMMON_METRICS:
         aggregator.assert_metric_has_tag_prefix(mname, 'rabbitmq_node', count=1)
