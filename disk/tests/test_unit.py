@@ -10,7 +10,7 @@ from six import iteritems
 from datadog_checks.disk import Disk
 
 from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
-from .mocks import MockInodesMetrics, mock_blkid_output, mock_df_output
+from .mocks import MockDiskMetrics, MockInodesMetrics, mock_blkid_output, mock_df_output
 from .utils import requires_unix
 
 
@@ -220,45 +220,21 @@ def test_get_devices_label():
         labels = c._get_devices_label()
         assert labels.get("/dev/mapper/vagrant--vg-root") == "label:DATA"
 
-def test_no_psutil_min_disk_size(aggregator, gauge_metrics):
-    instance = {
-        'min_disk_size': 1,
-    }
-    c = Disk('disk', None, {}, [instance])
-    c._psutil = lambda: False
-
-    mock_statvfs = mock.patch('os.statvfs', return_value=MockInodesMetrics(), __name__='statvfs')
-    mock_output = mock.patch(
-        'datadog_checks.disk.disk.get_subprocess_output',
-        return_value=mock_df_output('debian-df-Tk'),
-        __name__='get_subprocess_output',
-    )
-
-    with mock_output, mock_statvfs:
-        c.check(instance)
-
-    for device in ['udev']: #expected devices
-        for name in gauge_metrics:
-            aggregator.assert_metric(name, tags=['device:{}'.format(device)])
-
-    for device in ['/dev/sda1', 'tmpfs']: #excluded devices
-        for name in gauge_metrics:
-            aggregator.assert_metric(name, tags=['device:{}'.format(device)], count=0)
-
-    aggregator.assert_all_metrics_covered()
 
 @pytest.mark.usefixtures('psutil_mocks')
 def test_psutil_min_disk_size(aggregator, gauge_metrics, rate_metrics):
-    instance = {
-        'min_disk_size': 0.004,
-    }
+    instance = {'min_disk_size': 0.001}
     c = Disk('disk', None, {}, [instance])
-    c.check(instance)
 
-    for device in ['/dev/sda1']: #expected devices
-        for name in gauge_metrics:
-            aggregator.assert_metric(name, tags=['device:{}'.format(device)])
-        for name in rate_metrics:
-            aggregator.assert_metric(name, tags=['device:{}'.format(device)])
+    m = MockDiskMetrics()
+    m.total = 0
+    with mock.patch('psutil.disk_usage', return_value=m, __name__='disk_usage'):
+        c.check(instance)
+
+    for name in gauge_metrics:
+        aggregator.assert_metric(name, count=0)
+
+    for name in rate_metrics:
+        aggregator.assert_metric(name, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
 
     aggregator.assert_all_metrics_covered()
