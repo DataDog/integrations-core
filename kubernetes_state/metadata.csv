@@ -39,6 +39,7 @@ kubernetes_state.limitrange.memory.max,gauge,,,,Maximum memory limit for this ty
 kubernetes_state.limitrange.memory.default,gauge,,,,Default memory limit if not specified,0,kubernetes,k8s_state.mem.default
 kubernetes_state.limitrange.memory.default_request,gauge,,,,Default memory request if not specified,0,kubernetes,k8s_state.mem.default_request
 kubernetes_state.limitrange.memory.max_limit_request_ratio,gauge,,,,Maximum memory limit / request ratio,0,kubernetes,k8s_state.mem.max_ratio
+kubernetes_state.node.count,counter,60,node,,The number of nodes,0,kubernetes,k8s_state.node.count
 kubernetes_state.node.cpu_capacity,gauge,,cpu,,The total CPU resources of the node,0,kubernetes,k8s_state.node.cpu_capacity
 kubernetes_state.node.memory_capacity,gauge,,byte,,The total memory resources of the node,0,kubernetes,k8s_state.node.memory_capacity
 kubernetes_state.node.pods_capacity,gauge,,,,The total pod resources of the node,0,kubernetes,k8s_state.node.pods_capacity
