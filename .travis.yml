@@ -284,6 +284,8 @@ jobs:
     - stage: test
       env: CHECK=vault PYTHON3=true
     - stage: test
+      env: CHECK=vertica PYTHON3=true
+    - stage: test
       env: CHECK=vsphere PYTHON3=true
     - stage: test
       env: CHECK=yarn PYTHON3=true
