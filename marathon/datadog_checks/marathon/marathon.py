@@ -58,10 +58,13 @@ class Marathon(AgentCheck):
                 or self.init_config.get('default_timeout')
                 or self.DEFAULT_TIMEOUT
             )
+        self._auth_body = None
+        if self.http.options['auth'] is not None:
+            self._auth_body = {'uid': self.http.options['auth'][0], 'password': self.http.options['auth'][1]}
 
     def check(self, instance):
         try:
-            (url, acs_url, group, instance_tags, label_tags) = self.get_instance_config(instance)
+            url, acs_url, group, instance_tags, label_tags = self.get_instance_config(instance)
         except Exception as e:
             self.log.error("Invalid instance configuration.")
             raise e
@@ -76,9 +79,7 @@ class Marathon(AgentCheck):
             tags = []
 
         try:
-            if self.http.options['auth'] is not None:
-                auth_body = {'uid': self.http.options['auth'][0], 'password': self.http.options['auth'][1]}
-            r = self.http.post(urljoin(acs_url, "acs/api/v1/auth/login"), json=auth_body, verify=False)
+            r = self.http.post(urljoin(acs_url, "acs/api/v1/auth/login"), json=self._auth_body, verify=False)
             r.raise_for_status()
             token = r.json()['token']
             self.ACS_TOKEN = token
@@ -114,7 +115,7 @@ class Marathon(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                message="{} timed out after {} seconds.".format(url, self.http.options['timeout']),
+                message="{} timed out after {} seconds.".format(url, self.http.options['timeout'][0]),
                 tags=["url:{}".format(url)] + tags,
             )
             raise Exception("Timeout when hitting {}".format(url))
