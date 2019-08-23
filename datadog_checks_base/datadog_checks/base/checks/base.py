@@ -24,12 +24,12 @@ from ..utils.proxy import config_proxy_skip
 
 try:
     import datadog_agent
-    from ..log import init_logging
+    from ..log import CheckLoggingAdapter, init_logging
 
     init_logging()
 except ImportError:
     from ..stubs import datadog_agent
-    from ..stubs.log import init_logging
+    from ..stubs.log import CheckLoggingAdapter, init_logging
 
     init_logging()
 
@@ -127,8 +127,8 @@ class __AgentCheck(object):
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()
 
-        # the agent5 'AgentCheck' setup a log attribute.
-        self.log = logging.getLogger('{}.{}'.format(__name__, self.name))
+        logger = logging.getLogger('{}.{}'.format(__name__, self.name))
+        self.log = CheckLoggingAdapter(logger, self)
 
         # Provides logic to yield consistent network behavior based on user configuration.
         # Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.

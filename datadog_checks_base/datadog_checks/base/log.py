@@ -23,6 +23,24 @@ class AgentLogger(logging.getLoggerClass()):
             self._log(TRACE_LEVEL, msg, args, **kwargs)
 
 
+class CheckLoggingAdapter(logging.LoggerAdapter):
+    def __init__(self, logger, check):
+        super(CheckLoggingAdapter, self).__init__(logger, {})
+        self.check = check
+        self.check_id = self.check.check_id
+
+    def process(self, msg, kwargs):
+        if not self.check_id:
+            self.check_id = self.check.check_id
+            self.extra['_check_id'] = self.check_id or 'unknown'
+
+        kwargs['extra'] = self.extra
+        return msg, kwargs
+
+    def trace(self, msg, *args, **kwargs):
+        self.log(TRACE_LEVEL, msg, *args, **kwargs)
+
+
 class AgentLogHandler(logging.Handler):
     """
     This handler forwards every log to the Go backend allowing python checks to
@@ -30,9 +48,10 @@ class AgentLogHandler(logging.Handler):
     """
 
     def emit(self, record):
-        msg = "({}:{}) | {}".format(
+        msg = "({}:{}|{}) | {}".format(
             getattr(record, '_filename', record.filename),
             getattr(record, '_lineno', record.lineno),
+            getattr(record, '_check_id', 'unknown'),
             to_string(self.format(record)),
         )
         datadog_agent.log(msg, record.levelno)
