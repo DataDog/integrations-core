@@ -542,13 +542,12 @@ class __AgentCheck(object):
                 from ..utils.agent.debug import enter_pdb
 
                 enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
-            elif 'profile_memory' in self.init_config:
-                from ..utils.agent.memory import TRACE_LOCK, profile_memory
+            elif 'profile_memory' in self.init_config or datadog_agent.tracemalloc_enabled():
+                from ..utils.agent.memory import profile_memory
 
-                with TRACE_LOCK:
-                    metrics = profile_memory(
-                        self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
-                    )
+                metrics = profile_memory(
+                    self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
+                )
 
                 tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
                 for m in metrics:
