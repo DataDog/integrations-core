@@ -10,7 +10,7 @@ from six import iteritems
 from datadog_checks.disk import Disk
 
 from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
-from .mocks import MockInodesMetrics, mock_blkid_output, mock_df_output
+from .mocks import MockDiskMetrics, MockInodesMetrics, mock_blkid_output, mock_df_output
 from .utils import requires_unix
 
 
@@ -28,6 +28,7 @@ def test_default_options():
     assert check._tag_by_filesystem is False
     assert check._device_tag_re == []
     assert check._service_check_rw is False
+    assert check._min_disk_size == 0
 
 
 def test_bad_config():
@@ -218,3 +219,22 @@ def test_get_devices_label():
     ):
         labels = c._get_devices_label()
         assert labels.get("/dev/mapper/vagrant--vg-root") == "label:DATA"
+
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_psutil_min_disk_size(aggregator, gauge_metrics, rate_metrics):
+    instance = {'min_disk_size': 0.001}
+    c = Disk('disk', None, {}, [instance])
+
+    m = MockDiskMetrics()
+    m.total = 0
+    with mock.patch('psutil.disk_usage', return_value=m, __name__='disk_usage'):
+        c.check(instance)
+
+    for name in gauge_metrics:
+        aggregator.assert_metric(name, count=0)
+
+    for name in rate_metrics:
+        aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
+
+    aggregator.assert_all_metrics_covered()
