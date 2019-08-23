@@ -133,7 +133,7 @@ instances:
     #   /dev/sda3: role:db,disk_size:large
     #   "c:": volume:boot
 
-    ## @param min_disk_size - int - optional - default 0
+    ## @param min_disk_size - float - optional - default: 0
     ## Exclude devices with a total disk size less than a minimum value (in MiB)
     #
     # min_disk_size: 0
