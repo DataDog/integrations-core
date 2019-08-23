@@ -32,6 +32,8 @@ class OpenMetricsScraperMixin(object):
     SAMPLE_LABELS = 1
     SAMPLE_VALUE = 2
 
+    MINUS_INF = float("-inf")
+
     TELEMETRY_GAUGE_MESSAGE_SIZE = "payload.size"
     TELEMETRY_COUNTER_METRICS_BLACKLIST_COUNT = "metrics.blacklist.count"
     TELEMETRY_COUNTER_METRICS_INPUT_COUNT = "metrics.input.count"
@@ -709,7 +711,7 @@ class OpenMetricsScraperMixin(object):
             if sample[self.SAMPLE_NAME].endswith("_bucket"):
                 bucket_values_by_upper_bound[float(sample[self.SAMPLE_LABELS]["le"])] = sample[self.SAMPLE_VALUE]
 
-        sorted_buckets = sorted(bucket_values_by_upper_bound.keys())
+        sorted_buckets = sorted(bucket_values_by_upper_bound)
 
         # Tuples (lower_bound, upper_bound, value)
         bucket_tuples_by_upper_bound = {}
@@ -721,7 +723,7 @@ class OpenMetricsScraperMixin(object):
                 else:
                     # negative buckets start at -inf
                     bucket_tuples_by_upper_bound[upper_b] = (
-                        float("-inf"),
+                        self.MINUS_INF,
                         upper_b,
                         bucket_values_by_upper_bound[upper_b],
                     )
