@@ -30,6 +30,7 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
         self.check_id = self.check.check_id
 
     def process(self, msg, kwargs):
+        # Cache for performance
         if not self.check_id:
             self.check_id = self.check.check_id
             self.extra['_check_id'] = self.check_id or 'unknown'
