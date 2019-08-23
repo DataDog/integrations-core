@@ -15,13 +15,13 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
-Note that if you're using the [agent in a container][8], you need to attach the `/run/systemd/private` socket as volume. The [go-systemd][9] library used internally need this socket to retrieve Systemd data. For Example:
+Note that if you're using the [agent in a container][8], you need to mount the `/run/systemd/` folder, it contains the socket `/run/systemd/private` needed to to retrieve Systemd data. For Example:
 
 ```bash
 docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
               -v /proc/:/host/proc/:ro \
-              -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-              -v /run/systemd/private:/run/systemd/private:ro \
+              -v /sys/fs/cgroup/:/host/sys/fs/cgroup/:ro \
+              -v /run/systemd/:/host/run/systemd/:ro \
               -e DD_API_KEY=<YOUR_API_KEY> \
               datadog/agent:latest
 ```
@@ -44,17 +44,17 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
-Some metrics are reported only if the respective configurations are enable:
+Some metrics are reported only if the respective configuration are enabled:
 
-- `systemd.service.cpu_usage_n_sec` requires Systemd configuration `CPUAccounting` to be enabled
-- `systemd.service.memory_current` requires Systemd configuration `MemoryAccounting` to be enabled
-- `systemd.service.tasks_current` requires Systemd configuration `TasksAccounting` to be enabled
+- `systemd.service.cpu_time_consumed` requires Systemd configuration `CPUAccounting` to be enabled
+- `systemd.service.memory_usage` requires Systemd configuration `MemoryAccounting` to be enabled
+- `systemd.service.task_count` requires Systemd configuration `TasksAccounting` to be enabled
 
 Some metrics are only available from specific version of Systemd:
 
-- `systemd.service.cpu_usage_n_sec` requires Systemd v220
-- `systemd.service.n_restarts` requires Systemd v235
-- `systemd.socket.n_refused` requires Systemd v239
+- `systemd.service.cpu_time_consumed` requires Systemd v220
+- `systemd.service.restart_count` requires Systemd v235
+- `systemd.socket.connection_refused_count` requires Systemd v239
 
 ### Service Checks
 
