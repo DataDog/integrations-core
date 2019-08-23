@@ -8,18 +8,6 @@ from datadog_checks.base.constants import ServiceCheck
 pytestmark = pytest.mark.e2e
 
 
-def test_bad_ping_reply(dd_agent_check, instance, ping_url_tag):
-    instance['status_url'] = None
-    instance['ping_reply'] = 'foo'
-    instance['tags'] = ['expectedbroken']
-    expected_tags = [ping_url_tag, 'expectedbroken']
-
-    aggregator = dd_agent_check(instance)
-
-    aggregator.assert_service_check('php_fpm.can_ping', status=ServiceCheck.CRITICAL, tags=expected_tags)
-    aggregator.assert_all_metrics_covered()
-
-
 def test_status(dd_agent_check, instance, ping_url_tag):
     instance['tags'] = ['cluster:forums']
 
