@@ -33,6 +33,8 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
         # Cache for performance
         if not self.check_id:
             self.check_id = self.check.check_id
+            # Default to `unknown` for checks that log during
+            # `__init__` and therefore have no `check_id` yet
             self.extra['_check_id'] = self.check_id or 'unknown'
 
         kwargs.setdefault('extra', self.extra)
@@ -49,10 +51,11 @@ class AgentLogHandler(logging.Handler):
     """
 
     def emit(self, record):
-        msg = "({}:{}|{}) | {}".format(
+        msg = "{} | ({}:{}) | {}".format(
+            # Default to `-` for non-check logs
+            getattr(record, '_check_id', '-'),
             getattr(record, '_filename', record.filename),
             getattr(record, '_lineno', record.lineno),
-            getattr(record, '_check_id', 'unknown'),
             to_string(self.format(record)),
         )
         datadog_agent.log(msg, record.levelno)
