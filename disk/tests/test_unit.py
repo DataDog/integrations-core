@@ -235,6 +235,6 @@ def test_psutil_min_disk_size(aggregator, gauge_metrics, rate_metrics):
         aggregator.assert_metric(name, count=0)
 
     for name in rate_metrics:
-        aggregator.assert_metric(name, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
+        aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
 
     aggregator.assert_all_metrics_covered()
