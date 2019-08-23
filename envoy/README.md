@@ -102,7 +102,7 @@ static_resources:
 | `cache_metrics`    | Cache results of whitelist/blacklist to decrease CPU utilization, at the expense of some memory (default is `true`).                                                       |
 | `username`         | The username to authenticate with if behind basic auth.                                                                                                                    |
 | `password`         | The password to authenticate with if behind basic auth.                                                                                                                    |
-| `verify_ssl`       | This instructs the check to validate SSL certificates when connecting to Envoy. Defaulting to `true`, set to `false` if you want to disable SSL certificate validation.    |
+| `tls_verify`       | This instructs the check to validate TLS certificates when connecting to Envoy. Defaulting to `true`, set to `false` if you want to disable TLS certificate validation.    |
 | `skip_proxy`       | If `true`, the check bypasses any proxy settings enabled and attempt to reach Envoy directly.                                                                              |
 | `timeout`          | A custom timeout for network requests in seconds (default is 20).                                                                                                          |
 
