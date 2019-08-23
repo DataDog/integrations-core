@@ -25,7 +25,7 @@ instances:
   - status_url: http://localhost/status # or whatever pm.status_path is set to in your PHP INI
     ping_url: http://localhost/ping     # or whatever ping.path is set to in your PHP INI
     ping_reply: pong                    # the reply to expect from ping; default is 'pong'
- #  user: <YOUR_USERNAME>     # if the status and ping URLs require HTTP basic auth
+ #  username: <YOUR_USERNAME>     # if the status and ping URLs require HTTP basic auth
  #  password: <YOUR_PASSWORD> # if the status and ping URLs require HTTP basic auth
  #  http_host: <HOST>         # if your FPM pool is only accessible via a specific HTTP vhost
  #  tags:
@@ -38,7 +38,7 @@ Configuration Options:
 * `ping_url` (Required) - URL for the PHP FPM ping page defined in the fpm pool config file (ping.path)
 * `use_fastcgi` (Optional) - Communicate directly with PHP-FPM using FastCGI
 * `ping_reply` (Required) - Reply from the ping_url. Unless you define a reply, it is `pong`
-* `user` (Optional) - Used if you have set basic authentication on the status and ping pages
+* `username` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `password` (Optional) - Used if you have set basic authentication on the status and ping pages
 * `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
 
