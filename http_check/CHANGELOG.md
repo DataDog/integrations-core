@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 4.2.0 / 2019-08-24
+
+* [Added] Add request wrapper to http_check. See [#4363](https://github.com/DataDog/integrations-core/pull/4363).
+
 ## 4.1.1 / 2019-07-22
 
 * [Fixed] Fix detection of the embedded Agent directory. See [#4158](https://github.com/DataDog/integrations-core/pull/4158).

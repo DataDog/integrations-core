@@ -1,5 +1,9 @@
 # CHANGELOG - activemq_xml
 
+## 1.3.0 / 2019-08-24
+
+* [Added] Update with proxy settings . See [#3361](https://github.com/DataDog/integrations-core/pull/3361).
+
 ## 1.2.0 / 2019-03-29
 
 * [Added] Adhere to code style. See [#3323](https://github.com/DataDog/integrations-core/pull/3323).

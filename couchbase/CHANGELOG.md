@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.9.0 / 2019-08-24
+
+* [Added] Add RequestsWrapper to couchbase. See [#4119](https://github.com/DataDog/integrations-core/pull/4119).
+
 ## 1.8.1 / 2019-07-12
 
 * [Fixed] Change `couchbase.by_bucket.avg_bg_wait_time` metric unit from second to microsecond. See [#4078](https://github.com/DataDog/integrations-core/pull/4078).

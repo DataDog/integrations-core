@@ -1,5 +1,9 @@
 # CHANGELOG - dns_check
 
+## 1.4.1 / 2019-08-24
+
+* [Fixed] Make nameserver optional in the configuration. See [#4283](https://github.com/DataDog/integrations-core/pull/4283).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3501](https://github.com/DataDog/integrations-core/pull/3501).

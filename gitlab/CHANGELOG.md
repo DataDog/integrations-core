@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 2.5.0 / 2019-08-24
+
+* [Added] Add requests wrapper to gitlab. See [#4216](https://github.com/DataDog/integrations-core/pull/4216).
+
 ## 2.4.0 / 2019-07-04
 
 * [Added] Add logs. See [#3948](https://github.com/DataDog/integrations-core/pull/3948).

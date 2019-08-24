@@ -1,5 +1,11 @@
 # CHANGELOG - rabbitmq
 
+## 1.9.0 / 2019-08-24
+
+* [Added] Add mem_limit to RabbitMQ Checks. See [#4250](https://github.com/DataDog/integrations-core/pull/4250). Thanks [ParthKolekar](https://github.com/ParthKolekar).
+* [Added] Add requests wrapper to RabbitMQ. See [#4257](https://github.com/DataDog/integrations-core/pull/4257).
+* [Fixed] Fix queue, node and echange limit. See [#4108](https://github.com/DataDog/integrations-core/pull/4108).
+
 ## 1.8.0 / 2019-05-14
 
 * [Fixed] Fix default log path. See [#3611](https://github.com/DataDog/integrations-core/pull/3611).

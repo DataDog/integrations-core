@@ -1,5 +1,10 @@
 # CHANGELOG - Openstack_controller
 
+## 1.5.0 / 2019-08-24
+
+* [Added] Add requests wrapper to openstack_controller. See [#4365](https://github.com/DataDog/integrations-core/pull/4365).
+* [Added] Deployment environment with Terraform. See [#4039](https://github.com/DataDog/integrations-core/pull/4039).
+
 ## 1.4.0 / 2019-07-12
 
 * [Added] Retrieve floating IPs from network quotas. See [#4079](https://github.com/DataDog/integrations-core/pull/4079).
