@@ -180,6 +180,7 @@ WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
         'descriptors': [('schemaname', 'schema')],
         'metrics': {'pg_stat_user_tables': ('postgresql.table.count', GAUGE)},
         'relation': False,
+        'use_global_db_tag': True,
         'query': fmt.format(
             """
 SELECT schemaname, count(*) FROM
@@ -189,8 +190,7 @@ SELECT schemaname, count(*) FROM
   ORDER BY schemaname, relname
   LIMIT {table_count_limit}
 ) AS subquery GROUP BY schemaname
-        """,
-            table_count_limit=TABLE_COUNT_LIMIT,
+        """
         ),
     }
 
@@ -567,6 +567,13 @@ GROUP BY datid, datname
             'relation': False,
         }
 
+    def _get_count_metrics(self, table_count_limit):
+        metrics = dict(self.COUNT_METRICS)
+        metrics['query'] = self.COUNT_METRICS['query'].format(
+            metrics_columns="{metrics_columns}", table_count_limit=table_count_limit
+        )
+        return metrics
+
     def _get_archiver_metrics(self, key, db):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
         defined in 9.4 (first version to have this table).
@@ -766,7 +773,7 @@ GROUP BY datid, datname
             # Special-case the "db" tag, which overrides the one that is passed as instance_tag
             # The reason is that pg_stat_database returns all databases regardless of the
             # connection.
-            if not scope['relation']:
+            if not scope['relation'] and not scope.get('use_global_db_tag', False):
                 tags = [t for t in instance_tags if not t.startswith("db:")]
             else:
                 tags = [t for t in instance_tags]
@@ -794,6 +801,7 @@ GROUP BY datid, datname
         instance_tags,
         relations,
         custom_metrics,
+        table_count_limit,
         collect_function_metrics,
         collect_count_metrics,
         collect_activity_metrics,
@@ -815,7 +823,7 @@ GROUP BY datid, datname
         if collect_function_metrics:
             metric_scope.append(self.FUNCTION_METRICS)
         if collect_count_metrics:
-            metric_scope.append(self.COUNT_METRICS)
+            metric_scope.append(self._get_count_metrics(table_count_limit))
 
         # Do we need relation-specific metrics?
         relations_config = {}
@@ -1054,6 +1062,7 @@ GROUP BY datid, datname
         ssl = instance.get('ssl', False)
         if ssl not in SSL_MODES:
             ssl = 'require' if is_affirmative(ssl) else 'disable'
+        table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
         collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
@@ -1107,6 +1116,7 @@ GROUP BY datid, datname
                 tags,
                 relations,
                 custom_metrics,
+                table_count_limit,
                 collect_function_metrics,
                 collect_count_metrics,
                 collect_activity_metrics,
@@ -1124,6 +1134,7 @@ GROUP BY datid, datname
                 tags,
                 relations,
                 custom_metrics,
+                table_count_limit,
                 collect_function_metrics,
                 collect_count_metrics,
                 collect_activity_metrics,
