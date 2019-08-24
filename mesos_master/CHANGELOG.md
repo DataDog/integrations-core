@@ -1,5 +1,10 @@
 # CHANGELOG - mesos_master
 
+## 1.5.0 / 2019-08-24
+
+* [Added] Add requests wrapper to mesos_master. See [#4221](https://github.com/DataDog/integrations-core/pull/4221).
+* [Added] Add support for /state and /roles endpoints. See [#4053](https://github.com/DataDog/integrations-core/pull/4053).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3538](https://github.com/DataDog/integrations-core/pull/3538).
