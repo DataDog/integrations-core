@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 1.12.1 / 2019-08-24
+
+* [Fixed] Always publish a value for missing keys. See [#4386](https://github.com/DataDog/integrations-core/pull/4386).
+
 ## 1.12.0 / 2019-06-01
 
 * [Added] add redis.mem.overhead and redis.mem.startup. See [#3760](https://github.com/DataDog/integrations-core/pull/3760). Thanks [maximebedard](https://github.com/maximebedard).
