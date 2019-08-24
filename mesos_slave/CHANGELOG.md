@@ -1,5 +1,10 @@
 # CHANGELOG - mesos_slave
 
+## 1.5.0 / 2019-08-24
+
+* [Added] Add requests wrapper to mesos_slave. See [#4222](https://github.com/DataDog/integrations-core/pull/4222).
+* [Added] Add support for /state endpoint. See [#4054](https://github.com/DataDog/integrations-core/pull/4054).
+
 ## 1.4.1 / 2019-06-01
 
 * [Fixed] Fix code style. See [#3838](https://github.com/DataDog/integrations-core/pull/3838).
