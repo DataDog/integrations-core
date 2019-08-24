@@ -1,5 +1,10 @@
 # CHANGELOG - go_expvar
 
+## 1.5.0 / 2019-08-24
+
+* [Fixed] Update __init__ method params. See [#4243](https://github.com/DataDog/integrations-core/pull/4243).
+* [Added] Add proxy settings support. See [#3743](https://github.com/DataDog/integrations-core/pull/3743).
+
 ## 1.4.0 / 2019-06-27
 
 * [Added] Add monotonic_counter support to go_expvar. See [#3992](https://github.com/DataDog/integrations-core/pull/3992).
