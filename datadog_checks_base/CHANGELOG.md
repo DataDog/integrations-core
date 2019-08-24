@@ -4,9 +4,7 @@
 
 * [Added] Add each checks' unique ID to logs. See [#4410](https://github.com/DataDog/integrations-core/pull/4410).
 * [Added] Support continuous memory profiling metric submission. See [#4409](https://github.com/DataDog/integrations-core/pull/4409).
-* [Added] Add Vertica integration. See [#3890](https://github.com/DataDog/integrations-core/pull/3890).
 * [Fixed] Remove unused dependencies. See [#4405](https://github.com/DataDog/integrations-core/pull/4405).
-* [Fixed] Fix date format matching. See [#4304](https://github.com/DataDog/integrations-core/pull/4304).
 * [Added] Upgrade pyasn1. See [#4289](https://github.com/DataDog/integrations-core/pull/4289).
 * [Fixed] Fix http invert without explicit default. See [#4277](https://github.com/DataDog/integrations-core/pull/4277).
 * [Added] Bump Kazoo to 2.6.1 to pull in some minor bugfixes. See [#4260](https://github.com/DataDog/integrations-core/pull/4260). Thanks [jeffwidman](https://github.com/jeffwidman).
@@ -15,7 +13,6 @@
 * [Fixed] Fix prometheus and openmetric unicode labels. See [#4157](https://github.com/DataDog/integrations-core/pull/4157).
 * [Added] Add the version of an AgentCheck as a property. See [#4228](https://github.com/DataDog/integrations-core/pull/4228).
 * [Added] Upgrade JPype1 to 0.7.0. See [#4211](https://github.com/DataDog/integrations-core/pull/4211).
-* [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).
 * [Added] Add option for specifying extra headers in RequestsWrapper. See [#4208](https://github.com/DataDog/integrations-core/pull/4208).
 * [Added] Add the ability to debug memory usage. See [#4166](https://github.com/DataDog/integrations-core/pull/4166).
 * [Fixed] Fix openmetrics telemetry memory usage in mixins. See [#4193](https://github.com/DataDog/integrations-core/pull/4193).
