@@ -1,5 +1,10 @@
 # CHANGELOG - disk
 
+## 2.5.0 / 2019-08-24
+
+* [Added] Remove legacy collection method. See [#4417](https://github.com/DataDog/integrations-core/pull/4417).
+* [Added] Add `min_disk_size` option. See [#4317](https://github.com/DataDog/integrations-core/pull/4317).
+
 ## 2.4.0 / 2019-07-12
 
 * [Added] Remove legacy code. See [#4103](https://github.com/DataDog/integrations-core/pull/4103).
