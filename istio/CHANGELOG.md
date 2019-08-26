@@ -1,5 +1,9 @@
 # CHANGELOG - istio
 
+## 2.4.2 / 2019-08-26
+
+* [Fixed] Blacklist `galley_mcp_source_message_size_bytes` histogram. See [#4433](https://github.com/DataDog/integrations-core/pull/4433).
+
 ## 2.4.1 / 2019-07-16
 
 * [Fixed] Comment out mixer and mesh by default from configuration. See [#4121](https://github.com/DataDog/integrations-core/pull/4121).
