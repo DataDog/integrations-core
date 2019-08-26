@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 4.7.1 / 2019-08-26
+
+* [Fixed] Properly ignore `kube_pod_created` and `kube_pod_container_info`. See [#4435](https://github.com/DataDog/integrations-core/pull/4435).
+
 ## 4.7.0 / 2019-08-24
 
 * [Added] Grab kube_node_info as kubernetes_state.node.count. See [#4383](https://github.com/DataDog/integrations-core/pull/4383). Thanks [therc](https://github.com/therc).
