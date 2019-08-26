@@ -9,9 +9,9 @@ import pytest
 from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
 from datadog_checks.base import ensure_unicode
-from datadog_checks.dev import docker_run, get_docker_hostname, get_here
+from datadog_checks.dev import docker_run
 
-from .common import CHECK_NAME, HERE, INSTANCE
+from .common import HERE, INSTANCE
 
 
 @pytest.fixture(scope="session")
