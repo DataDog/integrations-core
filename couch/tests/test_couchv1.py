@@ -8,14 +8,23 @@ from datadog_checks.couch import CouchDb, errors
 
 from . import common
 
-pytestmark = pytest.mark.v1
+pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 1, reason='Test for version Couch v1')
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_couch(aggregator, check, instance):
-    check.check(common.BASIC_CONFIG)
+    check.check(instance)
+    _assert_check(aggregator)
 
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance):
+    aggregator = dd_agent_check(instance)
+    _assert_check(aggregator)
+
+
+def _assert_check(aggregator):
     # Metrics should have been emitted for any publicly readable databases.
     for db_name in common.DB_NAMES:
         for gauge in common.CHECK_GAUGES:
