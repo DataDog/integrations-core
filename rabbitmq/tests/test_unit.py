@@ -1,15 +1,18 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
 
 import mock
 import pytest
 import requests
 
 from datadog_checks.rabbitmq import RabbitMQ
+<<<<<<< HEAD
 from datadog_checks.rabbitmq.rabbitmq import RabbitMQException
 
+=======
+from datadog_checks.rabbitmq.rabbitmq import NODE_TYPE, RabbitMQException
+>>>>>>> Add rabbit mq config tests
 from . import common
 
 pytestmark = pytest.mark.unit
