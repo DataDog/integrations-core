@@ -329,8 +329,10 @@ class Istio(OpenMetricsBaseCheck):
                         'galley_validation_passed': 'validation.passed',
                     }
                 ],
+                'ignore_metrics': ['istio.galley.mcp_source.message_size_bytes.count'],
             }
         )
+        process_galley_instance['ignore_metrics'].extend(instance.get('ignore_metrics', []))
         process_galley_instance['metrics'][0].update(self._get_generic_metrics())
         return process_galley_instance
 
