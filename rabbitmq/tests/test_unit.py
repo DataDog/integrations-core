@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
 
 import mock
 import pytest
@@ -8,6 +9,8 @@ import requests
 
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import RabbitMQException
+
+from . import common
 
 pytestmark = pytest.mark.unit
 
@@ -80,3 +83,43 @@ def test__check_aliveness(check, aggregator):
     with pytest.raises(RabbitMQException) as e:
         check._get_vhosts(instance, '')
         assert isinstance(e, RabbitMQException)
+
+
+@pytest.mark.unit
+def test__get_metrics(check, aggregator):
+    data = {'fd_used': 3.14, 'disk_free': 4242, 'mem_used': 9000}
+
+    assert check._get_metrics(data, NODE_TYPE, []) == 3
+    assert check._get_metrics(data, NODE_TYPE, [], 2) == 2
+    assert check._get_metrics(data, NODE_TYPE, [], 5) == 3
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        (
+            "legacy auth config",
+            {'rabbitmq_user': 'legacy_foo', 'rabbitmq_pass': 'legacy_bar'},
+            {'auth': ('legacy_foo', 'legacy_bar')},
+        ),
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'ssl_verify': True}, {'verify': True}),
+        ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
+    ],
+)
+def test_config(check, test_case, extra_config, expected_http_kwargs):
+    config = {'rabbitmq_api_url': common.URL, 'queues': ['test1'], 'tags': ["tag1:1", "tag2"], 'exchanges': ['test1']}
+    config.update(extra_config)
+    check = RabbitMQ('rabbitmq', {}, instances=[config])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(config)
+
+        http_wargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_wargs.update(expected_http_kwargs)
+
+        r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)
