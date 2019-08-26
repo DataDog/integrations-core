@@ -15,20 +15,22 @@ pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 1, reason='Test fo
 @pytest.mark.integration
 def test_couch(aggregator, check, instance):
     check.check(instance)
-    _assert_check(aggregator)
+    _assert_check(aggregator, assert_device_tag=True)
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
-    _assert_check(aggregator)
+    _assert_check(aggregator, assert_device_tag=False)
 
 
-def _assert_check(aggregator):
+def _assert_check(aggregator, assert_device_tag):
     # Metrics should have been emitted for any publicly readable databases.
     for db_name in common.DB_NAMES:
         for gauge in common.CHECK_GAUGES:
-            expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name), "device:{}".format(db_name)]
+            expected_tags = common.BASIC_CONFIG_TAGS + ["db:{}".format(db_name)]
+            if assert_device_tag:
+                expected_tags.append("device:{}".format(db_name))
             aggregator.assert_metric(gauge, tags=expected_tags, count=1)
 
     # Check global metrics

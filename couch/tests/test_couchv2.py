@@ -20,6 +20,8 @@ from . import common
 
 pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 2, reason='Test for version Couch v2')
 
+INSTANCES = [common.NODE1, common.NODE2, common.NODE3]
+
 
 @pytest.fixture(scope="module")
 def gauges():
@@ -67,16 +69,23 @@ def gauges():
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check(aggregator, gauges):
+    for config in deepcopy(INSTANCES):
+        check = CouchDb(common.CHECK_NAME, {}, [config])
+        check.check(config)
+    _assert_check(aggregator, gauges)
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, gauges):
+    aggregator = dd_agent_check({'init_config': {}, 'instances': deepcopy(INSTANCES)})
+    _assert_check(aggregator, gauges)
+
+
+def _assert_check(aggregator, gauges):
     """
     Testing Couchdb2 check.
     """
-    configs = [deepcopy(common.NODE1), deepcopy(common.NODE2), deepcopy(common.NODE3)]
-
-    for config in configs:
-        check = CouchDb(common.CHECK_NAME, {}, [config])
-        check.check(config)
-
-    for config in configs:
+    for config in INSTANCES:
         expected_tags = ["instance:{}".format(config["name"])]
         for gauge in gauges["cluster_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -101,7 +110,7 @@ def test_check(aggregator, gauges):
     for node in [common.NODE2, common.NODE3]:
         expected_tags = ["instance:{}".format(node["name"])]
         # One for the server stats, the version is already loaded
-        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=2)
+        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
 
