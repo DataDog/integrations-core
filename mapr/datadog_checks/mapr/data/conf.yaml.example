@@ -2,12 +2,12 @@ init_config:
 
 instances:
     ## @param hostname - string - required
-    ## The mapR host to monitor.
+    ## The MapR host to monitor.
     #
   - mapr_host: <MAPR_HOST>
 
     ## @param topic_path - string - required
-    ## The mapR topic path
+    ## The MapR topic path.
     #
     topic_path: /var/mapr/mapr.monitoring/metricstreams
 
@@ -18,13 +18,13 @@ instances:
     - fs.*
 
     ## @param mapr_ticketfile_location - string - optional
-    ## The path to the mapR user ticket, if included it will override the MAPR_TICKETFILE_LOCATION environment variable.
+    ## The path to the MapR user ticket, if included it overrides the MAPR_TICKETFILE_LOCATION environment variable.
     ## Either the environment variable or this config option needs to be set if security is enabled on the cluster.
     #
     # mapr_ticketfile_location: <MAPR_TICKETFILE_LOCATION>
 
     ## @param tags  - list of key:value elements - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## A list of tags to attach to every metric, event, and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
