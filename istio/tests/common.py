@@ -242,8 +242,6 @@ GALLEY_METRICS = [
     'istio.galley.process.virtual_memory_bytes',
     'istio.galley.endpoint_no_pod',
     'istio.galley.mcp_source.clients_total',
-    'istio.galley.mcp_source.message_size_bytes.count',
-    'istio.galley.mcp_source.message_size_bytes.sum',
     'istio.galley.mcp_source.request_acks_total',
     'istio.galley.runtime_processor.event_span_duration_milliseconds.count',
     'istio.galley.runtime_processor.event_span_duration_milliseconds.sum',
