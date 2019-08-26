@@ -54,7 +54,6 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
       "network": "BRIDGE",
       "portMappings": [
         {"containerPort": 8125,"hostPort": 8125,"servicePort": 10000,"protocol": "udp","labels": {}},
-        {"containerPort": 9001,"hostPort": 9001,"servicePort": 10001,"protocol": "tcp","labels": {}}
       ],
       "privileged": false,
       "parameters": [
@@ -67,16 +66,14 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
   },
   "healthChecks": [
     {
-      "gracePeriodSeconds": 300,
-      "intervalSeconds": 60,
-      "timeoutSeconds": 20,
-      "maxConsecutiveFailures": 3,
-      "portIndex": 1,
-      "path": "/",
-      "protocol": "HTTP",
-      "ignoreHttp1xx": false
+        "protocol": "COMMAND",
+        "command": { "value": "/probe.sh" },
+        "gracePeriodSeconds": 300,
+        "intervalSeconds": 60,
+        "timeoutSeconds": 20,
+        "maxConsecutiveFailures": 3
     }
-  ],
+    ],
   "portDefinitions": [
     {"port": 10000,"protocol": "tcp","name": "default","labels": {}},
     {"port": 10001,"protocol": "tcp","labels": {}}
