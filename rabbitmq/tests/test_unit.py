@@ -7,12 +7,8 @@ import pytest
 import requests
 
 from datadog_checks.rabbitmq import RabbitMQ
-<<<<<<< HEAD
-from datadog_checks.rabbitmq.rabbitmq import RabbitMQException
-
-=======
 from datadog_checks.rabbitmq.rabbitmq import NODE_TYPE, RabbitMQException
->>>>>>> Add rabbit mq config tests
+
 from . import common
 
 pytestmark = pytest.mark.unit
