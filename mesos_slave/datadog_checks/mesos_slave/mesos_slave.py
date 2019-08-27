@@ -138,6 +138,9 @@ class MesosSlave(AgentCheck):
             self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
             self._send_service_check(url, response, status, failure_expected=failure_expected, tags=tags, message=msg)
 
+        if not response:
+            return None
+
         if response.encoding is None:
             response.encoding = 'UTF8'
 
@@ -145,6 +148,7 @@ class MesosSlave(AgentCheck):
 
     def _send_service_check(self, url, response, status, failure_expected=False, tags=None, message=None):
         if status is AgentCheck.CRITICAL and failure_expected:
+            status = AgentCheck.OK
             status_code = response.status_code if response else 'unknown'
             message = "Got {} status code when hitting {}".format(status_code, url)
         elif status is AgentCheck.CRITICAL and not failure_expected:

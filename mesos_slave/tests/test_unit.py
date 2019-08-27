@@ -39,23 +39,27 @@ def test_get_json_exception(instance, aggregator, exception_class):
         aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=check.CRITICAL)
 
 
-@pytest.mark.parametrize('service_check_needed, failure_expected, service_check_count', [
-    (True, True, 1),
-    (False, True, 0),
-    (True, False, 1),
-    (False, False, 0),
+@pytest.mark.parametrize('service_check_needed, failure_expected, service_check_count, should_raise_exception', [
+    (True, True, 0, False),
+    (False, True, 0, False),
+    (True, False, 1, True),
+    (False, False, 0, True),
 ])
-def test_get_json_service_check_needed(instance, aggregator, service_check_needed, failure_expected, service_check_count):
+def test_get_json_service_check_needed(instance, aggregator, service_check_needed, failure_expected, service_check_count, should_raise_exception):
     check = MesosSlave('mesos_slave', {}, [instance])
     check.service_check_needed = service_check_needed
 
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
-        req.get = MagicMock(side_effect=requests.exceptions.Timeout)
-
-        with pytest.raises(CheckException):
+        req.get = MagicMock(side_effect=Exception)
+        res = None
+        try:
             res = check._get_json("http://hello", failure_expected=failure_expected)
+            exception_raise = False
+        except CheckException:
+            exception_raise = True
 
-            assert res is None
+        assert res is None
+        assert exception_raise is should_raise_exception
 
         aggregator.assert_service_check('mesos_slave.can_connect', count=service_check_count, status=check.CRITICAL)
 
