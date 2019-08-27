@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from collections import OrderedDict
 from copy import deepcopy
 
 import mock
