@@ -118,17 +118,17 @@ class MesosSlave(AgentCheck):
         msg = None
         status = None
         timeout = self.http.options['timeout']
+        response = None
 
         try:
-            r = self.http.get(url)
-            if r.status_code != 200:
+            response = self.http.get(url)
+            if response.status_code != 200:
                 status = AgentCheck.CRITICAL
-                msg = "Got %s when hitting %s" % (r.status_code, url)
+                msg = "Got %s when hitting %s" % (response.status_code, url)
             else:
                 status = AgentCheck.OK
                 msg = "Mesos master instance detected at %s " % url
         except requests.exceptions.Timeout:
-            # If there's a timeout
             msg = "%s seconds timeout when hitting %s" % (timeout, url)
             status = AgentCheck.CRITICAL
         except Exception as e:
@@ -136,28 +136,32 @@ class MesosSlave(AgentCheck):
             status = AgentCheck.CRITICAL
         finally:
             self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
-            self._send_service_check(url, r, status, failure_expected=failure_expected, tags=tags, message=msg)
+            self._send_service_check(url, response, status, failure_expected=failure_expected, tags=tags, message=msg)
 
-        if r.encoding is None:
-            r.encoding = 'UTF8'
+        if response.encoding is None:
+            response.encoding = 'UTF8'
 
-        return r.json()
+        return response.json()
 
     def _send_service_check(self, url, response, status, failure_expected=False, tags=None, message=None):
         if status is AgentCheck.CRITICAL and failure_expected:
-            status = AgentCheck.OK
-            message = "Got %s when hitting %s" % (response.status_code, url)
+            status_code = response.status_code if response else 'unknown'
+            message = "Got %s status code when hitting %s" % (status_code, url)
             raise CheckException(message)
         elif status is AgentCheck.CRITICAL and not failure_expected:
-            raise CheckException('Cannot connect to mesos. Error: {0}'.format(message))
+            message = 'Cannot connect to mesos. Error: {0}'.format(message)
+
         if self.service_check_needed:
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=message)
             self.service_check_needed = False
 
+        if status is AgentCheck.CRITICAL:
+            raise CheckException(message)
+
     def _get_state(self, url, tags):
+        # Mesos version >= 0.25
+        endpoint = url + '/state'
         try:
-            # Mesos version >= 0.25
-            endpoint = url + '/state'
             master_state = self._get_json(endpoint, failure_expected=True, tags=tags)
         except CheckException:
             # Mesos version < 0.25

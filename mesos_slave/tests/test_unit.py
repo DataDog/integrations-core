@@ -1,0 +1,57 @@
+# (C) Datadog, Inc. 2019
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
+import pytest
+import requests
+from mock import MagicMock
+
+from datadog_checks.base.errors import CheckException
+from datadog_checks.mesos_slave import MesosSlave
+
+
+@pytest.mark.parametrize('exception_class', [requests.exceptions.Timeout, Exception])
+def test_get_json_ok_case(instance, aggregator, exception_class):
+    check = MesosSlave('mesos_slave', {}, [instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        attrs = {'json.return_value': {'foo': 'bar'}}
+        req.get.return_value = mock.MagicMock(status_code=200, **attrs)
+
+        res = check._get_json("http://hello")
+        assert res == {'foo': 'bar'}
+
+        aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=check.OK)
+
+
+@pytest.mark.parametrize('exception_class', [requests.exceptions.Timeout, Exception])
+def test_get_json_timeout_exception(instance, aggregator, exception_class):
+    check = MesosSlave('mesos_slave', {}, [instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        req.get = MagicMock(side_effect=exception_class)
+
+        with pytest.raises(CheckException):
+            res = check._get_json("http://hello")
+
+            assert res is None
+
+        aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=check.CRITICAL)
+
+
+@pytest.mark.parametrize('service_check_needed, service_check_count', [(True, 1), (False, 0)])
+def test_get_json_service_check_needed(instance, aggregator, service_check_needed, service_check_count):
+    check = MesosSlave('mesos_slave', {}, [instance])
+    check.service_check_needed = service_check_needed
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+        req.get = MagicMock(side_effect=requests.exceptions.Timeout)
+
+        with pytest.raises(CheckException):
+            res = check._get_json("http://hello")
+
+            assert res is None
+
+        aggregator.assert_service_check('mesos_slave.can_connect', count=service_check_count, status=check.CRITICAL)
+
+        assert check.service_check_needed is False
