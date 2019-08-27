@@ -413,7 +413,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 else:
                     self.log.info("unable to find group coordinator for %s", consumer_group)
             except Exception:
-                self.log.exception('Could not read consumer offsets from Kafka for group: ' % consumer_group)
+                self.log.exception('Could not read consumer offsets from Kafka for group: %s', consumer_group)
 
     def _get_group_coordinator(self, group):
         """Determine which broker is the Group Coordinator for a specific consumer group."""
