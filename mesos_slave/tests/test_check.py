@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
+import pytest
 from six import iteritems
 
 
@@ -71,3 +74,23 @@ def test_instance_timeout(check, instance):
     check.check(instance)
 
     assert check.http.options['timeout'] == (15, 15)
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("legacy disable_ssl_validation config True", {'disable_ssl_validation': True}, {'verify': False}),
+        ("legacy disable_ssl_validation config False", {'disable_ssl_validation': False}, {'verify': True}),
+        ("legacy disable_ssl_validation config default", {}, {'verify': True}),
+    ],
+)
+def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
+    instance = deepcopy(instance)
+    instance.update(extra_config)
+
+    check = check({}, instance)
+    check.check(instance)
+
+    actual = {k: v for k, v in check.http.options.items() if k in expected_http_kwargs}
+
+    assert actual == expected_http_kwargs
