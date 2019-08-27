@@ -11,7 +11,7 @@ services:
       ZK_ID: 1
 
   mesos-slave:
-    image: mesosphere/mesos-slave:1.1.0-2.0.107.ubuntu1404
+    image: mesosphere/mesos-slave:${MESOS_SLAVE_VERSION}
     network_mode: host
     pid: host
     environment:
