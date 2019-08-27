@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.0.1 / 2019-08-27
+
+* [Fixed] Fix logger call during exceptions. See [#4440](https://github.com/DataDog/integrations-core/pull/4440).
+
 ## 2.0.0 / 2019-08-24
 
 * [Changed] Drop `source:kafka` from tags.. See [#4400](https://github.com/DataDog/integrations-core/pull/4400). Thanks [jeffwidman](https://github.com/jeffwidman).
