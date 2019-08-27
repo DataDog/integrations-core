@@ -6,6 +6,7 @@ import pytest
 import requests
 from mock import MagicMock
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_slave import MesosSlave
 
@@ -39,28 +40,31 @@ def test_get_json_exception(instance, aggregator, exception_class):
         aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=check.CRITICAL)
 
 
-@pytest.mark.parametrize('service_check_needed, failure_expected, service_check_count, should_raise_exception', [
-    (True, True, 0, False),
-    (False, True, 0, False),
-    (True, False, 1, True),
-    (False, False, 0, True),
-])
-def test_get_json_service_check_needed(instance, aggregator, service_check_needed, failure_expected, service_check_count, should_raise_exception):
+@pytest.mark.parametrize(
+    'service_check_needed, failure_expected, service_check_count, service_check_status',
+    [
+        (True, True, 1, AgentCheck.OK),
+        (False, True, 0, AgentCheck.CRITICAL),
+        (True, False, 1, AgentCheck.CRITICAL),
+        (False, False, 0, AgentCheck.CRITICAL),
+    ],
+)
+def test_get_json_service_check_needed(
+    instance, aggregator, service_check_needed, failure_expected, service_check_count, service_check_status
+):
     check = MesosSlave('mesos_slave', {}, [instance])
     check.service_check_needed = service_check_needed
 
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
         req.get = MagicMock(side_effect=Exception)
-        res = None
-        try:
+
+        with pytest.raises(CheckException):
             res = check._get_json("http://hello", failure_expected=failure_expected)
-            exception_raise = False
-        except CheckException:
-            exception_raise = True
 
-        assert res is None
-        assert exception_raise is should_raise_exception
+            assert res is None
 
-        aggregator.assert_service_check('mesos_slave.can_connect', count=service_check_count, status=check.CRITICAL)
+        aggregator.assert_service_check(
+            'mesos_slave.can_connect', count=service_check_count, status=service_check_status
+        )
 
         assert check.service_check_needed is False
