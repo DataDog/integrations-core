@@ -25,7 +25,7 @@ def test_get_json_ok_case(instance, aggregator, exception_class):
 
 
 @pytest.mark.parametrize('exception_class', [requests.exceptions.Timeout, Exception])
-def test_get_json_timeout_exception(instance, aggregator, exception_class):
+def test_get_json_exception(instance, aggregator, exception_class):
     check = MesosSlave('mesos_slave', {}, [instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests') as req:
