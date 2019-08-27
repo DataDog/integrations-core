@@ -146,8 +146,7 @@ class MesosSlave(AgentCheck):
     def _send_service_check(self, url, response, status, failure_expected=False, tags=None, message=None):
         if status is AgentCheck.CRITICAL and failure_expected:
             status_code = response.status_code if response else 'unknown'
-            message = "Got %s status code when hitting %s" % (status_code, url)
-            raise CheckException(message)
+            message = "Got {} status code when hitting {}".format(status_code, url)
         elif status is AgentCheck.CRITICAL and not failure_expected:
             message = 'Cannot connect to mesos. Error: {0}'.format(message)
 

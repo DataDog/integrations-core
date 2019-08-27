@@ -39,8 +39,13 @@ def test_get_json_timeout_exception(instance, aggregator, exception_class):
         aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=check.CRITICAL)
 
 
-@pytest.mark.parametrize('service_check_needed, service_check_count', [(True, 1), (False, 0)])
-def test_get_json_service_check_needed(instance, aggregator, service_check_needed, service_check_count):
+@pytest.mark.parametrize('service_check_needed, failure_expected, service_check_count', [
+    (True, True, 1),
+    (False, True, 0),
+    (True, False, 1),
+    (False, False, 0),
+])
+def test_get_json_service_check_needed(instance, aggregator, service_check_needed, failure_expected, service_check_count):
     check = MesosSlave('mesos_slave', {}, [instance])
     check.service_check_needed = service_check_needed
 
@@ -48,7 +53,7 @@ def test_get_json_service_check_needed(instance, aggregator, service_check_neede
         req.get = MagicMock(side_effect=requests.exceptions.Timeout)
 
         with pytest.raises(CheckException):
-            res = check._get_json("http://hello")
+            res = check._get_json("http://hello", failure_expected=failure_expected)
 
             assert res is None
 
