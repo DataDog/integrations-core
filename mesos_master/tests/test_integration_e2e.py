@@ -12,9 +12,6 @@ from datadog_checks.mesos_master import MesosMaster
 
 from .common import BASIC_METRICS, CHECK_NAME, INSTANCE
 
-# Linux only: https://github.com/docker/for-mac/issues/1031
-pytestmark = pytest.mark.skipif(platform.system() != 'Linux', reason='Only runs on Unix systems')
-
 
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check):
@@ -22,6 +19,8 @@ def test_check_e2e(dd_agent_check):
     assert_metric_coverage(aggregator)
 
 
+# Linux only: https://github.com/docker/for-mac/issues/1031
+@pytest.mark.skipif(platform.system() != 'Linux', reason='Only runs on Unix systems')
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check_integration(instance, aggregator):
@@ -51,14 +50,3 @@ def assert_metric_coverage(aggregator):
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('mesos_master.can_connect', status=check.OK)
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
-def test_service_check(bad_instance, aggregator):
-    check = MesosMaster('mesos_master', {}, [bad_instance])
-
-    with pytest.raises(CheckException):
-        check.check(bad_instance)
-
-    aggregator.assert_service_check('mesos_master.can_connect', count=1, status=AgentCheck.CRITICAL)
