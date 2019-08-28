@@ -6,10 +6,7 @@ import platform
 import pytest
 from six import iteritems
 
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_master import MesosMaster
-
 from .common import BASIC_METRICS, CHECK_NAME, INSTANCE
 
 
