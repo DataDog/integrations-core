@@ -66,7 +66,7 @@ datadog-mapreduce==1.5.0
 datadog-marathon==1.9.0; sys_platform != 'win32'
 datadog-mcache==1.6.0; sys_platform != 'win32'
 datadog-mesos-master==1.5.1; sys_platform != 'win32'
-datadog-mesos-slave==1.5.0; sys_platform != 'win32'
+datadog-mesos-slave==1.5.1; sys_platform != 'win32'
 datadog-mongo==1.11.0
 datadog-mysql==1.9.0
 datadog-nagios==1.4.1
