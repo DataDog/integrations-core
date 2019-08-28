@@ -1,8 +1,14 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import mock
+import pytest
+import requests
 from six import iteritems
+
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
+from datadog_checks.mesos_master import MesosMaster
 
 
 def test_check(check, instance, aggregator):
@@ -72,3 +78,70 @@ def test_instance_timeout(check, instance):
     check.check(instance)
 
     assert check.http.options['timeout'] == (15, 15)
+
+
+@pytest.mark.parametrize(
+    'test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception',
+    [
+        (
+            'OK case for /state endpoint',
+            [mock.MagicMock(status_code=200, content='{}')],
+            AgentCheck.OK,
+            ['my:tag', 'url:http://hello.com/state'],
+            False,
+        ),
+        (
+            'OK case with failing /state due to bad status and fallback on /state.json',
+            [mock.MagicMock(status_code=500), mock.MagicMock(status_code=200, content='{}')],
+            AgentCheck.OK,
+            ['my:tag', 'url:http://hello.com/state.json'],
+            False,
+        ),
+        (
+            'OK case with failing /state due to Timeout and fallback on /state.json',
+            [requests.exceptions.Timeout, mock.MagicMock(status_code=200, content='{}')],
+            AgentCheck.OK,
+            ['my:tag', 'url:http://hello.com/state.json'],
+            False,
+        ),
+        (
+            'OK case with failing /state due to Exception and fallback on /state.json',
+            [Exception, mock.MagicMock(status_code=200, content='{}')],
+            AgentCheck.OK,
+            ['my:tag', 'url:http://hello.com/state.json'],
+            False,
+        ),
+        (
+            'NOK case with failing /state and /state.json due to timeout',
+            [requests.exceptions.Timeout, requests.exceptions.Timeout],
+            AgentCheck.CRITICAL,
+            ['my:tag', 'url:http://hello.com/state.json'],
+            True,
+        ),
+        (
+            'NOK case with failing /state and /state.json with bad status',
+            [mock.MagicMock(status_code=500), mock.MagicMock(status_code=500)],
+            AgentCheck.CRITICAL,
+            ['my:tag', 'url:http://hello.com/state.json'],
+            True,
+        ),
+    ],
+)
+@pytest.mark.integration
+def test_can_connect_service_check(
+    instance, aggregator, test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception
+):
+    check = MesosMaster('mesos_master', {}, [instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.side_effect = request_mock_side_effects
+
+        try:
+            check._get_master_state('http://hello.com', ['my:tag'])
+            exception_raised = False
+        except CheckException:
+            exception_raised = True
+
+        assert expect_exception == exception_raised
+
+    aggregator.assert_service_check('mesos_master.can_connect', count=1, status=expected_status, tags=expected_tags)
