@@ -22,6 +22,7 @@ services:
       - MESOS_HOSTNAME=127.0.0.1
       - LIBPROCESS_IP=127.0.0.1
       - MESOS_WORK_DIR=/tmp/mesos
+      - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     ports:
       - 5051:5051
     volumes:
