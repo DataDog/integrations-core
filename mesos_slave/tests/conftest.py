@@ -27,6 +27,11 @@ def instance():
 
 
 @pytest.fixture
+def bad_instance():
+    return common.BAD_INSTANCE
+
+
+@pytest.fixture
 def check():
     return mock
 
