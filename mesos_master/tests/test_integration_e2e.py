@@ -7,6 +7,7 @@ import pytest
 from six import iteritems
 
 from datadog_checks.mesos_master import MesosMaster
+
 from .common import BASIC_METRICS, CHECK_NAME, INSTANCE
 
 
