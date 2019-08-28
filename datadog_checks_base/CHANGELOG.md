@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.3.1 / 2019-08-28
+
+* [Fixed] Fix decumulating bucket on multiple contexts. See [#4446](https://github.com/DataDog/integrations-core/pull/4446).
+
 ## 9.3.0 / 2019-08-24
 
 * [Added] Add each checks' unique ID to logs. See [#4410](https://github.com/DataDog/integrations-core/pull/4410).
