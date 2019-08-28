@@ -4,13 +4,10 @@
 import platform
 
 import pytest
-from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_slave import MesosSlave
-
-from .common import CHECK_NAME
 
 # Linux only: https://github.com/docker/for-mac/issues/1031
 pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
