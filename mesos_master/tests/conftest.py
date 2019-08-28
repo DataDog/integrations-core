@@ -38,3 +38,8 @@ def mock(init_config, instance):
 @pytest.fixture
 def instance():
     return common.INSTANCE
+
+
+@pytest.fixture
+def bad_instance():
+    return common.BAD_INSTANCE
