@@ -151,7 +151,7 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
     ],
 )
 @pytest.mark.integration
-def test_can_connect_service_check_ok_case(
+def test_can_connect_service_check(
     instance, aggregator, test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
