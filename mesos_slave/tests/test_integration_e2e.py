@@ -18,7 +18,7 @@ pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix syste
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(instance, aggregator):
+def test_check_integration(instance, aggregator):
     check = MesosSlave('mesos_slave', {}, [instance])
     check.check(instance)
     check.check(instance)
@@ -26,7 +26,7 @@ def test_integration(instance, aggregator):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance):
+def test_check_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     assert_metrics_covered(aggregator)
 
