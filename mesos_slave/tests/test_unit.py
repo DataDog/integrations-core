@@ -1,10 +1,17 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import namedtuple
 from copy import deepcopy
 
+import mock
 import pytest
+import requests
 from six import iteritems
+
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
+from datadog_checks.mesos_slave import MesosSlave
 
 
 def test_fixtures(check, instance, aggregator):
@@ -94,3 +101,56 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
     actual = {k: v for k, v in check.http.options.items() if k in expected_http_kwargs}
 
     assert actual == expected_http_kwargs
+
+
+@pytest.mark.parametrize(
+    'test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception',
+    [
+        (
+            'OK case for /state endpoint',
+            [mock.MagicMock(status_code=200, content='{}')],
+            AgentCheck.OK,
+            ['my:tag', 'url:http://hello.com/state'],
+            False,
+        ),
+        (
+            'OK case with failing /state and fallback on /state.json',
+            [mock.MagicMock(status_code=500), mock.MagicMock(status_code=200, content='{}')],
+            AgentCheck.OK,
+            ['my:tag', 'url:http://hello.com/state.json'],
+            False,
+        ),
+        (
+            'OK case with failing /state timeout and fallback on /state.json',
+            [requests.exceptions.Timeout, mock.MagicMock(status_code=200, content='{}')],
+            AgentCheck.OK,
+            ['my:tag', 'url:http://hello.com/state.json'],
+            False,
+        ),
+        # (
+        #     'NOK case with failing /state and /state.json',
+        #     [requests.exceptions.Timeout, requests.exceptions.Timeout],
+        #     AgentCheck.OK,
+        #     ['my:tag', 'url:http://hello.com/state.json'],
+        #     True,
+        # ),
+    ],
+)
+@pytest.mark.integration
+def test_can_connect_service_check_ok_case(
+    instance, aggregator, test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception
+):
+    check = MesosSlave('mesos_slave', {}, [instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.side_effect = request_mock_side_effects
+
+        try:
+            check._get_state('http://hello.com', ['my:tag'])
+            exception_raised = False
+        except CheckException:
+            exception_raised = True
+
+        assert expect_exception == exception_raised
+
+    aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
