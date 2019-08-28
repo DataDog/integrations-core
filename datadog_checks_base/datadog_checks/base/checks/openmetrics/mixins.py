@@ -705,9 +705,7 @@ class OpenMetricsScraperMixin(object):
     def _compute_bucket_hash(self, tags):
         # we need the unique context for all the buckets
         # hence we remove the "le" tag
-        hash_dict = tags.copy()
-        del hash_dict["le"]
-        return hash(frozenset(sorted(iteritems(hash_dict))))
+        return hash(frozenset(sorted((k, v) for k, v in iteritems(tags) if k != 'le')))
 
     def _decumulate_histogram_buckets(self, metric):
         """
