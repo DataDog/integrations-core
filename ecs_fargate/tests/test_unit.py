@@ -223,3 +223,27 @@ def test_successful_check(check, instance, aggregator):
             aggregator.assert_metric(metric, count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'tls_verify': True}, {'verify': True}),
+        ("legacy ssl config False", {'tls_verify': False}, {'verify': False}),
+    ],
+)
+def test_config(instance, test_case, extra_config, expected_http_kwargs):
+    instance.update(extra_config)
+    check = FargateCheck('ecs_fargate', {}, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_wargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_wargs.update(expected_http_kwargs)
+        r.get.assert_called_with('http://169.254.170.2/v2/metadata', **http_wargs)
