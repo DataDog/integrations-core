@@ -189,6 +189,7 @@ class MesosMaster(AgentCheck):
     def _send_service_check(self, url, status, failure_expected=False, tags=None, message=None):
         skip_service_check = False
         if status is AgentCheck.CRITICAL and failure_expected:
+            # skip service check when failure is expected
             skip_service_check = True
             message = "Error when calling {}: {}".format(url, message)
         elif status is AgentCheck.CRITICAL and not failure_expected:
