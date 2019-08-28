@@ -13,7 +13,7 @@ from datadog_checks.mesos_master import MesosMaster
 from .common import BASIC_METRICS, CHECK_NAME, INSTANCE
 
 # Linux only: https://github.com/docker/for-mac/issues/1031
-pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
+pytestmark = pytest.mark.skipif(platform.system() != 'Linux', reason='Only runs on Unix systems')
 
 
 @pytest.mark.e2e
