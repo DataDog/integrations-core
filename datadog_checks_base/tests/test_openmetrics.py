@@ -984,12 +984,18 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
 def test_compute_bucket_hash(p_check):
     check = p_check
 
+    # two different buckets should have the same hash for the same other tags values
     tags1 = {"url": "http://127.0.0.1:8080/api", "verb": "GET", "le": "1"}
     tags2 = {"url": "http://127.0.0.1:8080/api", "verb": "GET", "le": "2"}
     assert check._compute_bucket_hash(tags1) == check._compute_bucket_hash(tags2)
 
-    tags3 = {"url": "http://127.0.0.1:8080/api", "verb": "DELETE", "le": "1"}
-    assert check._compute_bucket_hash(tags1) != check._compute_bucket_hash(tags3)
+    # tag order should not matter
+    tags3 = {"verb": "GET", "le": "+inf", "url": "http://127.0.0.1:8080/api"}
+    assert check._compute_bucket_hash(tags1) == check._compute_bucket_hash(tags3)
+
+    # changing a tag value should change the context hash
+    tags4 = {"url": "http://127.0.0.1:8080/api", "verb": "DELETE", "le": "1"}
+    assert check._compute_bucket_hash(tags1) != check._compute_bucket_hash(tags4)
 
 
 def test_decumulate_histogram_buckets_multiple_contexts(p_check, mocked_prometheus_scraper_config):
