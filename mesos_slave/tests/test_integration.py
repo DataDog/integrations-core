@@ -37,12 +37,12 @@ def test_integration(instance, aggregator):
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=AgentCheck.OK)
 
 
-# @pytest.mark.integration
-# @pytest.mark.usefixtures("dd_environment")
-# def test_service_check(bad_instance, aggregator):
-#     check = MesosSlave('mesos_slave', {}, [bad_instance])
-#
-#     with pytest.raises(CheckException):
-#         check.check(bad_instance)
-#
-#     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=AgentCheck.CRITICAL)
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_service_check(bad_instance, aggregator):
+    check = MesosSlave('mesos_slave', {}, [bad_instance])
+
+    with pytest.raises(CheckException):
+        check.check(bad_instance)
+
+    aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=AgentCheck.CRITICAL)

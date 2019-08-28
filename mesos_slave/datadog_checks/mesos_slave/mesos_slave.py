@@ -148,19 +148,23 @@ class MesosSlave(AgentCheck):
         return response.json()
 
     def _send_service_check(self, url, status, failure_expected=False, tags=None, message=None):
+        skip_service_check = False
         if status is AgentCheck.CRITICAL and failure_expected:
+            skip_service_check = True
             message = "Error when calling {}: {}".format(url, message)
-            raise CheckException(message)
         elif status is AgentCheck.CRITICAL and not failure_expected:
-            raise CheckException('Cannot connect to mesos. Error: {0}'.format(message))
-        if self.service_check_needed:
+            message = 'Cannot connect to mesos. Error: {0}'.format(message)
+        if self.service_check_needed and not skip_service_check:
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=message)
             self.service_check_needed = False
 
+        if status is AgentCheck.CRITICAL:
+            raise CheckException(message)
+
     def _get_state(self, url, tags):
+        # Mesos version >= 0.25
+        endpoint = url + '/state'
         try:
-            # Mesos version >= 0.25
-            endpoint = url + '/state'
             master_state = self._get_json(endpoint, failure_expected=True, tags=tags)
         except CheckException:
             # Mesos version < 0.25
