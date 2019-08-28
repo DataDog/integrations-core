@@ -17,14 +17,14 @@ pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix syste
 
 
 @pytest.mark.e2e
-def test_check_ok(dd_agent_check):
+def test_check_e2e(dd_agent_check):
     aggregator = dd_agent_check(INSTANCE, rate=True)
     assert_metric_coverage(aggregator)
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(instance, aggregator):
+def test_check_integration(instance, aggregator):
     check = MesosMaster('mesos_master', {}, [instance])
     check.check(instance)
 
