@@ -7,7 +7,6 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_slave import MesosSlave
 
 from .common import CHECK_NAME
@@ -49,14 +48,3 @@ def assert_metrics_covered(aggregator):
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('mesos_slave.can_connect', status=AgentCheck.OK, count=2)
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
-def test_service_check(bad_instance, aggregator):
-    check = MesosSlave('mesos_slave', {}, [bad_instance])
-
-    with pytest.raises(CheckException):
-        check.check(bad_instance)
-
-    aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=AgentCheck.CRITICAL)
