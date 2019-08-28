@@ -1,5 +1,9 @@
 # CHANGELOG - mesos_master
 
+## 1.5.1 / 2019-08-28
+
+* [Fixed] Fix mesos_master service check. See [#4452](https://github.com/DataDog/integrations-core/pull/4452).
+
 ## 1.5.0 / 2019-08-24
 
 * [Added] Add requests wrapper to mesos_master. See [#4221](https://github.com/DataDog/integrations-core/pull/4221).
