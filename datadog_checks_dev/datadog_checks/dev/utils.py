@@ -25,19 +25,21 @@ ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
-CI_IDENTIFIERS = {'appveyor': 'APPVEYOR', 'travis': 'TRAVIS'}
-
-
-def running_on_appveyor():
-    return any(ev.startswith(CI_IDENTIFIERS.get('appveyor')) for ev in os.environ)
-
-
-def running_on_travis():
-    return any(ev.startswith(CI_IDENTIFIERS.get('travis')) for ev in os.environ)
-
 
 def running_on_ci():
-    return any(ev.startswith(tuple(CI_IDENTIFIERS.values())) for ev in os.environ)
+    return 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI' in os.environ
+
+
+def running_on_windows_ci():
+    return running_on_ci() and os.environ.get('AGENT_OS') == 'Windows_NT'
+
+
+def running_on_linux_ci():
+    return running_on_ci() and os.environ.get('AGENT_OS') == 'Linux'
+
+
+def running_on_macos_ci():
+    return running_on_ci() and os.environ.get('AGENT_OS') == 'Darwin'
 
 
 if PY3:

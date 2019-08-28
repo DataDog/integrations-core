@@ -8,9 +8,9 @@ import pytest
 from datadog_checks.dev.docker import compose_file_active, docker_run
 from datadog_checks.dev.subprocess import run_command
 
-from .common import not_appveyor
+from .common import not_windows_ci
 
-pytestmark = [pytest.mark.docker, not_appveyor]
+pytestmark = [pytest.mark.docker, not_windows_ci]
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
 
