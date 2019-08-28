@@ -12,7 +12,7 @@ from datadog_checks.mesos_slave import MesosSlave
 from .common import CHECK_NAME
 
 # Linux only: https://github.com/docker/for-mac/issues/1031
-pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
+pytestmark = pytest.mark.skipif(platform.system() != 'Linux', reason='Only runs on Unix systems')
 
 
 @pytest.mark.integration
