@@ -702,41 +702,70 @@ class OpenMetricsScraperMixin(object):
                         hostname=custom_hostname,
                     )
 
+    def _compute_bucket_hash(self, tags):
+        # we need the unique context for all the buckets
+        # hence we remove the "le" tag
+        return hash(frozenset(sorted((k, v) for k, v in iteritems(tags) if k != 'le')))
+
     def _decumulate_histogram_buckets(self, metric):
         """
         Decumulate buckets in a given histogram metric and adds the lower_bound label (le being upper_bound)
         """
-        bucket_values_by_upper_bound = {}
+        bucket_values_by_context_upper_bound = {}
         for sample in metric.samples:
             if sample[self.SAMPLE_NAME].endswith("_bucket"):
-                bucket_values_by_upper_bound[float(sample[self.SAMPLE_LABELS]["le"])] = sample[self.SAMPLE_VALUE]
+                context_key = self._compute_bucket_hash(sample[self.SAMPLE_LABELS])
+                if context_key not in bucket_values_by_context_upper_bound:
+                    bucket_values_by_context_upper_bound[context_key] = {}
+                bucket_values_by_context_upper_bound[context_key][float(sample[self.SAMPLE_LABELS]["le"])] = sample[
+                    self.SAMPLE_VALUE
+                ]
 
-        sorted_buckets = sorted(bucket_values_by_upper_bound)
+        sorted_buckets_by_context = {}
+        for context in bucket_values_by_context_upper_bound:
+            sorted_buckets_by_context[context] = sorted(bucket_values_by_context_upper_bound[context])
 
         # Tuples (lower_bound, upper_bound, value)
-        bucket_tuples_by_upper_bound = {}
-        for i, upper_b in enumerate(sorted_buckets):
-            if i == 0:
-                if upper_b > 0:
-                    # positive buckets start at zero
-                    bucket_tuples_by_upper_bound[upper_b] = (0, upper_b, bucket_values_by_upper_bound[upper_b])
-                else:
-                    # negative buckets start at -inf
-                    bucket_tuples_by_upper_bound[upper_b] = (
-                        self.MINUS_INF,
-                        upper_b,
-                        bucket_values_by_upper_bound[upper_b],
-                    )
-                continue
-            tmp = bucket_values_by_upper_bound[upper_b] - bucket_values_by_upper_bound[sorted_buckets[i - 1]]
-            bucket_tuples_by_upper_bound[upper_b] = (sorted_buckets[i - 1], upper_b, tmp)
+        bucket_tuples_by_context_upper_bound = {}
+        for context in sorted_buckets_by_context:
+            for i, upper_b in enumerate(sorted_buckets_by_context[context]):
+                if i == 0:
+                    if context not in bucket_tuples_by_context_upper_bound:
+                        bucket_tuples_by_context_upper_bound[context] = {}
+                    if upper_b > 0:
+                        # positive buckets start at zero
+                        bucket_tuples_by_context_upper_bound[context][upper_b] = (
+                            0,
+                            upper_b,
+                            bucket_values_by_context_upper_bound[context][upper_b],
+                        )
+                    else:
+                        # negative buckets start at -inf
+                        bucket_tuples_by_context_upper_bound[context][upper_b] = (
+                            self.MINUS_INF,
+                            upper_b,
+                            bucket_values_by_context_upper_bound[context][upper_b],
+                        )
+                    continue
+                tmp = (
+                    bucket_values_by_context_upper_bound[context][upper_b]
+                    - bucket_values_by_context_upper_bound[context][sorted_buckets_by_context[context][i - 1]]
+                )
+                bucket_tuples_by_context_upper_bound[context][upper_b] = (
+                    sorted_buckets_by_context[context][i - 1],
+                    upper_b,
+                    tmp,
+                )
 
         # modify original metric to inject lower_bound & modified value
         for i, sample in enumerate(metric.samples):
             if not sample[self.SAMPLE_NAME].endswith("_bucket"):
                 continue
 
-            matching_bucket_tuple = bucket_tuples_by_upper_bound[float(sample[self.SAMPLE_LABELS]["le"])]
+            context_key = self._compute_bucket_hash(sample[self.SAMPLE_LABELS])
+            matching_bucket_tuple = bucket_tuples_by_context_upper_bound[context_key][
+                float(sample[self.SAMPLE_LABELS]["le"])
+            ]
             # Replacing the sample tuple
             sample[self.SAMPLE_LABELS]["lower_bound"] = str(matching_bucket_tuple[0])
             metric.samples[i] = (sample[self.SAMPLE_NAME], sample[self.SAMPLE_LABELS], matching_bucket_tuple[2])
