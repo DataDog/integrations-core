@@ -25,6 +25,18 @@ def test_check_kafka(aggregator, kafka_instance):
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
     kafka_consumer_check.check(kafka_instance)
 
+    assert_check_kafka(aggregator, kafka_instance)
+
+
+@pytest.mark.usefixtures('kafka_consumer', 'kafka_producer')
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, kafka_instance):
+    aggregator = dd_agent_check(kafka_instance)
+
+    assert_check_kafka(aggregator, kafka_instance)
+
+
+def assert_check_kafka(aggregator, kafka_instance):
     for name, consumer_group in kafka_instance['consumer_groups'].items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
@@ -33,5 +45,5 @@ def test_check_kafka(aggregator, kafka_instance):
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
-
     aggregator.assert_all_metrics_covered()
+
