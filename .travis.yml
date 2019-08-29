@@ -32,7 +32,7 @@ stages:
 script:
   - ddev validate logos ${CHECK}
   - travis_retry ddev test --cov ${CHECK}
-  - travis_retry ddev env test --new-env ${CHECK}
+  - travis_retry ddev env test --base --new-env ${CHECK}
   - ddev test ${CHECK} --bench || true
   - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
 
