@@ -23,16 +23,28 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
-    def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=None):
-        super(OpenMetricsBaseCheck, self).__init__(name, init_config, agentConfig, instances=instances)
+    def __init__(self, *args, **kwargs):
+        args = list(args)
+        default_instances = kwargs.pop('default_instances', None) or {}
+        default_namespace = kwargs.pop('default_namespace', None)
+
+        legacy_kwargs_in_args = args[4:]
+        del args[4:]
+
+        if len(legacy_kwargs_in_args) > 1:
+            default_instances = legacy_kwargs_in_args[0]
+            default_namespace = legacy_kwargs_in_args[1]
+        elif len(legacy_kwargs_in_args) > 0:
+            default_instances = legacy_kwargs_in_args[0]
+
+        super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
         self.config_map = {}
-        self.default_instances = {} if default_instances is None else default_instances
+        self.default_instances = default_instances
         self.default_namespace = default_namespace
 
         # pre-generate the scraper configurations
-        if instances is not None:
-            for instance in instances:
-                self.get_scraper_config(instance)
+        if self.instance is not None:
+            self.get_scraper_config(self.instance)
 
     def check(self, instance):
         # Get the configuration for this specific instance

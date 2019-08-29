@@ -173,7 +173,7 @@ class MockHTTPResponse(object):
 def test_scenario(make_request, aggregator):
     instance = common.MOCK_CONFIG["instances"][0]
     init_config = common.MOCK_CONFIG['init_config']
-    check = OpenStackControllerCheck('openstack_controller', init_config, {}, instances=[instance])
+    check = OpenStackControllerCheck('openstack_controller', init_config, [instance])
 
     auth_tokens_response_path = os.path.join(common.FIXTURES_DIR, "auth_tokens_response.json")
     with open(auth_tokens_response_path, 'r') as f:

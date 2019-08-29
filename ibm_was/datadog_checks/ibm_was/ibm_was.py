@@ -17,8 +17,8 @@ class IbmWasCheck(AgentCheck):
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
     METRIC_PREFIX = 'ibm_was'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(IbmWasCheck, self).__init__(name, init_config, instances)
         self.metric_type_mapping = {
             'AverageStatistic': self.gauge,
             'BoundedRangeStatistic': self.gauge,

@@ -35,8 +35,8 @@ class TwistlockCheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(TwistlockCheck, self).__init__(name, init_config, instances)
 
         self.last_run = datetime.utcnow()
 
