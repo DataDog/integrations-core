@@ -6,7 +6,7 @@ import click
 from ...e2e import get_configured_checks, get_configured_envs
 from ...testing import get_available_tox_envs
 from ...utils import get_testable_checks
-from ..console import CONTEXT_SETTINGS, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, echo_info, echo_success, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='List active or available environments')
@@ -14,11 +14,18 @@ from ..console import CONTEXT_SETTINGS, echo_info, echo_success
 def ls(checks):
     """List active or available environments."""
     if checks:
-        checks = sorted(get_testable_checks() & set(checks))
+        testable_checks = get_testable_checks()
 
         for check in checks:
-            envs = get_available_tox_envs(check, e2e_only=True)
+            if check not in testable_checks:
+                echo_warning(
+                    '{}: not a testable check. Skipped. Testable checks are: {}'.format(
+                        check, ", ".join(testable_checks)
+                    )
+                )
+                continue
 
+            envs = get_available_tox_envs(check, e2e_only=True)
             if envs:
                 echo_success('{}:'.format(check))
                 for env in envs:
