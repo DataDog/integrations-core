@@ -1,5 +1,9 @@
 # CHANGELOG - rabbitmq
 
+## 1.9.1 / 2019-08-29
+
+* [Fixed] Revert "Fix queue, node and echange limit". See [#4467](https://github.com/DataDog/integrations-core/pull/4467).
+
 ## 1.9.0 / 2019-08-24
 
 * [Added] Add mem_limit to RabbitMQ Checks. See [#4250](https://github.com/DataDog/integrations-core/pull/4250). Thanks [ParthKolekar](https://github.com/ParthKolekar).
