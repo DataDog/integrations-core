@@ -2,7 +2,7 @@
 
 ## 1.9.1 / 2019-08-29
 
-* [Fixed] Fix queue, node and echange limit. See [#4108](https://github.com/DataDog/integrations-core/pull/4108).
+* [Fixed] Revert "Fix queue, node and echange limit". See [#4467](https://github.com/DataDog/integrations-core/pull/4467).
 
 ## 1.9.0 / 2019-08-24
 
