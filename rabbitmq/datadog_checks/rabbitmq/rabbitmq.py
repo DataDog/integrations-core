@@ -503,12 +503,9 @@ class RabbitMQ(AgentCheck):
             ).format(object_type)
             self.warning(msg)
 
-        metrics_sent = 0
-        for data_line in data:
+        for data_line in data[:max_detailed]:
             # We truncate the list if it's above the limit
-            if metrics_sent >= max_detailed:
-                break
-            metrics_sent += self._get_metrics(data_line, object_type, custom_tags, max_detailed - metrics_sent)
+            self._get_metrics(data_line, object_type, custom_tags)
 
         # get a list of the number of bindings on a given queue
         # /api/queues/vhost/name/bindings
@@ -519,14 +516,9 @@ class RabbitMQ(AgentCheck):
         data = self._get_data(urljoin(base_url, "overview"))
         self._get_metrics(data, OVERVIEW_TYPE, custom_tags)
 
-    def _get_metrics(self, data, object_type, custom_tags, max_metrics=None):
+    def _get_metrics(self, data, object_type, custom_tags):
         tags = self._get_tags(data, object_type, custom_tags)
-        metrics_sent = 0
         for attribute, metric_name, operation in ATTRIBUTES[object_type]:
-            # Stop when reaching the limit
-            if max_metrics and metrics_sent >= max_metrics:
-                return metrics_sent
-
             # Walk down through the data path, e.g. foo/bar => d['foo']['bar']
             root = data
             keys = attribute.split('/')
@@ -539,14 +531,12 @@ class RabbitMQ(AgentCheck):
                     self.gauge(
                         'rabbitmq.{}.{}'.format(METRIC_SUFFIX[object_type], metric_name), operation(value), tags=tags
                     )
-                    metrics_sent += 1
                 except ValueError:
                     self.log.debug(
                         "Caught ValueError for {} {} = {}  with tags: {}".format(
                             METRIC_SUFFIX[object_type], attribute, value, tags
                         )
                     )
-        return metrics_sent
 
     def _get_queue_bindings_metrics(self, base_url, custom_tags, data, object_type):
         for item in data:
