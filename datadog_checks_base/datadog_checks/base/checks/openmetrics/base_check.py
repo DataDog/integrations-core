@@ -43,10 +43,15 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.default_namespace = default_namespace
 
         # pre-generate the scraper configurations
-        instances = kwargs.get('instances', [self.instance])
+        if 'instances' in kwargs:
+            instances = kwargs['instances']
+        elif len(args) == 4:
+            instances = args[3]
+        else:
+            instances = args[2]
+
         if instances is not None:
             for instance in instances:
-                # raise Exception('jjjjjjjjjjj')
                 self.get_scraper_config(instance)
 
     def check(self, instance):
