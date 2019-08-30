@@ -322,3 +322,54 @@ def test_network_latency_checks(aggregator):
     node = [m for m in latency if '.node.latency.' in m[0]]
     assert 16 == len(node)
     assert 0.26577747932995816 == node[0][2]
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        (
+            "new config",
+            {
+                'tls_cert': 'certfile',
+                'tls_private_key': 'keyfile',
+                'tls_ca_cert': 'file/path',
+                'acl_token': 'token',
+                'headers': {'X-foo': 'bar'},
+            },
+            {
+                'cert': ('certfile', 'keyfile'),
+                'verify': 'file/path',
+                'headers': {'X-Consul-Token': 'token', 'X-foo': 'bar', 'User-Agent': 'Datadog Agent/0.0.0'},
+            },
+        ),
+        ("default config", {}, {'cert': None, 'verify': True, 'headers': {'User-Agent': 'Datadog Agent/0.0.0'}}),
+        (
+            "legacy config",
+            {
+                'client_cert_file': 'certfile',
+                'private_key_file': 'keyfile',
+                'ca_bundle_file': 'file/path',
+                'acl_token': 'token',
+            },
+            {
+                'cert': ('certfile', 'keyfile'),
+                'verify': 'file/path',
+                'headers': {'X-Consul-Token': 'token', 'User-Agent': 'Datadog Agent/0.0.0'},
+            },
+        ),
+    ],
+)
+def test_config(test_case, extra_config, expected_http_kwargs):
+    instance = extra_config
+    check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_wargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_wargs.update(expected_http_kwargs)
+        r.get.assert_called_with('/v1/status/leader', **http_wargs)
