@@ -31,11 +31,10 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         legacy_kwargs_in_args = args[4:]
         del args[4:]
 
+        if len(legacy_kwargs_in_args) > 0:
+            default_instances = legacy_kwargs_in_args[0] or {}
         if len(legacy_kwargs_in_args) > 1:
-            default_instances = legacy_kwargs_in_args[0]
             default_namespace = legacy_kwargs_in_args[1]
-        elif len(legacy_kwargs_in_args) > 0:
-            default_instances = legacy_kwargs_in_args[0]
 
         super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
         self.config_map = {}
