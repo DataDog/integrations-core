@@ -37,9 +37,9 @@ def test_service_check_connection_issues(aggregator, instance, seed_data):
     ]
 
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags)
+    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags, count=1)
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags)
+    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags, count=1)
 
 
 def test_channel_status_service_check_default_mapping(aggregator, instance):
@@ -177,7 +177,29 @@ def test_check_all(aggregator, instance_collect_all, seed_data):
     for metric in OPTIONAL_METRICS:
         aggregator.assert_metric(metric, at_least=0)
 
+    expected_channel_status_values = {
+        "inactive": 0,
+        "binding": 0,
+        "starting": 0,
+        "running": 1,
+        "stopping": 0,
+        "retrying": 0,
+        "stopped": 0,
+        "requesting": 0,
+        "paused": 0,
+        "initializing": 0,
+        "unknown": 0,
+    }
+
+    for status, expected_value in iteritems(expected_channel_status_values):
+        aggregator.assert_metric('ibm_mq.channel.count', expected_value,
+                                 tags=['channel:DEV.ADMIN.SVRCONN', 'mq_host:localhost', 'port:11414',
+                                       'queue_manager:datadog', 'status:' + status], count=1)
+
     aggregator.assert_all_metrics_covered()
+
+    tags = ['channel:DEV.ADMIN.SVRCONN', 'mq_host:localhost', 'port:11414', 'queue_manager:datadog']
+    aggregator.assert_service_check('ibm_mq.channel.status', AgentCheck.OK, tags=tags, count=1)
 
 
 def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):

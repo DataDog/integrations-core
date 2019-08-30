@@ -221,12 +221,12 @@ class IbmMqCheck(AgentCheck):
             self.gauge(mname, channels, tags=tags)
 
         # grab all the discoverable channels
-        self._submit_channel_status(queue_manager, '*', tags, config)
+        submitted_channels = self._submit_channel_status(queue_manager, '*', tags, config)
 
         # check specific channels as well
         # if a channel is not listed in the above one, a user may want to check it specifically,
         # in this case it'll fail
-        for channel in config.channels:
+        for channel in (set(config.channels) - set(submitted_channels)):
             self._submit_channel_status(queue_manager, channel, tags, config)
 
     def _submit_channel_status(self, queue_manager, search_channel_name, tags, config):
@@ -234,6 +234,7 @@ class IbmMqCheck(AgentCheck):
         :param search_channel_name might contain wildcard characters
         """
         search_channel_tags = tags + ["channel:{}".format(search_channel_name)]
+        submitted_channels = set()
         try:
             args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(search_channel_name)}
             pcf = pymqi.PCFExecute(queue_manager)
@@ -245,12 +246,14 @@ class IbmMqCheck(AgentCheck):
         else:
             for channel_info in response:
                 channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                submitted_channels.add(channel_name)
                 channel_tags = tags + ["channel:{}".format(channel_name)]
 
                 channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
 
                 self._submit_channel_count(channel_name, channel_status, channel_tags)
                 self._submit_status_check(channel_name, channel_status, channel_tags, config)
+        return submitted_channels
 
     def _submit_status_check(self, channel_name, channel_status, channel_tags, config):
         if channel_status in config.channel_status_mapping:
