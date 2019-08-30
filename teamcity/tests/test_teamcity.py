@@ -121,13 +121,10 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = TeamCityCheck(CHECK_NAME, {}, [instance])
 
-    with patch('datadog_checks.base.utils.http.requests.get', side_effect=get_mock_first_build, autospec=True) as r:
-
+    with patch('datadog_checks.base.utils.http.requests.get') as r:
         check.check(instance)
 
-        http_wargs = dict(
-            auth=ANY, cert=ANY, headers=ANY, proxies=ANY, timeout=ANY, verify=ANY
-        )
+        http_wargs = dict(auth=ANY, cert=ANY, headers=ANY, proxies=ANY, timeout=ANY, verify=ANY)
         http_wargs.update(expected_http_kwargs)
 
-        r.get.assert_called_with(r.json()['href'], **http_wargs)
+        r.assert_called_with(ANY, **http_wargs)
