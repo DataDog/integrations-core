@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.3.2 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
 ## 9.3.1 / 2019-08-28
 
 * [Fixed] Fix decumulating bucket on multiple contexts. See [#4446](https://github.com/DataDog/integrations-core/pull/4446).

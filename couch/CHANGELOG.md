@@ -1,5 +1,9 @@
 # CHANGELOG - couch
 
+## 3.4.1 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
 ## 3.4.0 / 2019-08-24
 
 * [Added] Add RequestsWrapper to couch. See [#4118](https://github.com/DataDog/integrations-core/pull/4118).

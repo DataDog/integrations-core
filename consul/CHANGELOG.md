@@ -1,5 +1,9 @@
 # CHANGELOG - consul
 
+## 1.9.1 / 2019-08-30
+
+* [Fixed] Fix RequestsWrapper options. See [#4476](https://github.com/DataDog/integrations-core/pull/4476).
+
 ## 1.9.0 / 2019-08-24
 
 * [Added] Add support for proxy options. See [#3363](https://github.com/DataDog/integrations-core/pull/3363).
