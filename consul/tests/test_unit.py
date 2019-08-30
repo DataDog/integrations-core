@@ -339,7 +339,7 @@ def test_network_latency_checks(aggregator):
             {
                 'cert': ('certfile', 'keyfile'),
                 'verify': 'file/path',
-                'headers': {'X-Consul-Token': 'token', 'X-foo': 'bar', 'User-Agent': 'Datadog Agent/0.0.0'},
+                'headers': {'X-Consul-Token': 'token', 'X-foo': 'bar'},
             },
         ),
         ("default config", {}, {'cert': None, 'verify': True, 'headers': {'User-Agent': 'Datadog Agent/0.0.0'}}),
