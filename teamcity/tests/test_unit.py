@@ -4,9 +4,10 @@
 
 from six import iteritems
 
+from datadog_checks.teamcity import TeamCityCheck
+
 # project
 from .common import CHECK_NAME
-from datadog_checks.teamcity import TeamCityCheck
 
 # A path regularly used in the TeamCity Check
 COMMON_PATH = "guestAuth/app/rest/builds/?locator=buildType:TestProject_TestBuild,sinceBuild:id:1,status:SUCCESS"
