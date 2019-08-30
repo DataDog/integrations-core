@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 3.1.1 / 2019-08-30
+
+* [Fixed] Fix query condition. See [#4484](https://github.com/DataDog/integrations-core/pull/4484). Thanks [dpierce-aledade](https://github.com/dpierce-aledade).
+
 ## 3.1.0 / 2019-08-24
 
 * [Added] Make table_count_limit a parameter. See [#3729](https://github.com/DataDog/integrations-core/pull/3729). Thanks [fischaz](https://github.com/fischaz).
