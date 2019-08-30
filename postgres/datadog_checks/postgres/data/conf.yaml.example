@@ -112,6 +112,11 @@ instances:
     #
     # tag_replication_role: false
 
+    ## @param table_count_limit - int - optional
+    ## The maximum number of tables to collect metrics from
+    #
+    # table_count_limit: 200
+
     ## @param custom_queries - object - optional
     ## Define custom queries to collect custom metrics from your PostgreSQL
     ## See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
