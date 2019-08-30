@@ -24,9 +24,9 @@ def check():
     couch_version = env["COUCH_VERSION"][0]
 
     if couch_version == '1':
-        return CouchDb(common.CHECK_NAME, {}, {}, instances=[common.BASIC_CONFIG])
+        return CouchDb(common.CHECK_NAME, {}, instances=[common.BASIC_CONFIG])
     elif couch_version == '2':
-        return CouchDb(common.CHECK_NAME, {}, {}, instances=[common.BASIC_CONFIG_V2])
+        return CouchDb(common.CHECK_NAME, {}, instances=[common.BASIC_CONFIG_V2])
 
 
 @pytest.fixture

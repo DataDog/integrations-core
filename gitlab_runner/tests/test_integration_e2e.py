@@ -31,7 +31,7 @@ def assert_check(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator):
-    gitlab_runner = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], {}, instances=CONFIG['instances'])
+    gitlab_runner = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], instances=CONFIG['instances'])
 
     gitlab_runner.check(CONFIG['instances'][0])
     gitlab_runner.check(CONFIG['instances'][0])

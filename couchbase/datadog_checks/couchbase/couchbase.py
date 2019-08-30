@@ -42,8 +42,8 @@ class Couchbase(AgentCheck):
         def __init__(self):
             self.previous_status = None
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(Couchbase, self).__init__(name, init_config, instances)
 
         # Keep track of all instances
         self._instance_states = defaultdict(lambda: self.CouchbaseInstanceState())

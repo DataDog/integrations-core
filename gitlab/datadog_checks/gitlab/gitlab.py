@@ -33,14 +33,10 @@ class GitlabCheck(OpenMetricsBaseCheck):
         'ssl_ca_certs': {'name': 'tls_ca_cert'},
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-
-        generic_instances = []
-        if instances is not None:
-            for instance in instances:
-                generic_instances.append(self._create_gitlab_prometheus_instance(instance, init_config))
-
-        super(GitlabCheck, self).__init__(name, init_config, agentConfig, instances=generic_instances)
+    def __init__(self, name, init_config, instances):
+        super(GitlabCheck, self).__init__(
+            name, init_config, [self._create_gitlab_prometheus_instance(instances[0], init_config)]
+        )
 
     def check(self, instance):
         # Metrics collection
