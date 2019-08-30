@@ -6,8 +6,9 @@ from copy import deepcopy
 import pytest
 from mock import ANY, MagicMock, patch
 
-from .common import CHECK_NAME, CONFIG
 from datadog_checks.teamcity import TeamCityCheck
+
+from .common import CHECK_NAME, CONFIG
 
 
 @pytest.mark.integration
