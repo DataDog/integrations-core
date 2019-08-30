@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
 
 from six import iteritems
 
 # project
+from .common import CHECK_NAME
 from datadog_checks.teamcity import TeamCityCheck
 
 # A path regularly used in the TeamCity Check
@@ -37,7 +39,7 @@ def test_server_normalization():
     Make sure server URLs are being normalized correctly
     """
 
-    teamcity = TeamCityCheck("teamcity", {}, {})
+    teamcity = TeamCityCheck(CHECK_NAME, {}, {})
 
     for server, expected_server in iteritems(TEAMCITY_SERVER_VALUES):
         normalized_server = teamcity._normalize_server_url(server)
