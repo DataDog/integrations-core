@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 2.5.1 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
 ## 2.5.0 / 2019-08-24
 
 * [Added] Add requests wrapper to gitlab. See [#4216](https://github.com/DataDog/integrations-core/pull/4216).
