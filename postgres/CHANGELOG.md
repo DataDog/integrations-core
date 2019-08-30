@@ -2,7 +2,7 @@
 
 ## 3.1.1 / 2019-08-30
 
-* [Fixed] Fix query condition. See [#4484](https://github.com/DataDog/integrations-core/pull/4484).
+* [Fixed] Fix query condition. See [#4484](https://github.com/DataDog/integrations-core/pull/4484). Thanks [dpierce-aledade](https://github.com/dpierce-aledade).
 
 ## 3.1.0 / 2019-08-24
 
