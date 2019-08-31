@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 3.1.2 / 2019-08-31
+
+* [Fixed] Document new config option. See [#4480](https://github.com/DataDog/integrations-core/pull/4480).
+
 ## 3.1.1 / 2019-08-30
 
 * [Fixed] Fix query condition. See [#4484](https://github.com/DataDog/integrations-core/pull/4484). Thanks [dpierce-aledade](https://github.com/dpierce-aledade).
