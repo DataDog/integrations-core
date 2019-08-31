@@ -7,13 +7,21 @@ from datadog_checks.aerospike import AerospikeCheck
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
 def test_check(aggregator, instance):
     check = AerospikeCheck('aerospike', {}, [instance])
     check.check(instance)
+    _test_check(aggregator)
 
-    # This hasn't been working
-    # aggregator.assert_metric('aerospike.batch_error', 0)
 
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance):
+    aggregator = dd_agent_check(instance)
+
+    _test_check(aggregator)
+
+
+def _test_check(aggregator):
     aggregator.assert_metric('aerospike.cluster_size')
     aggregator.assert_metric('aerospike.namespace.objects')
     aggregator.assert_metric('aerospike.namespace.hwm_breached')
@@ -28,6 +36,8 @@ def test_check(aggregator, instance):
     aggregator.assert_metric(
         'aerospike.set.stop_writes_count', 0, tags=['namespace:test', 'set:characters', 'tag:value']
     )
+    aggregator.assert_metric('aerospike.namespace.tps.write', at_least=0)
+    aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_service_check('aerospike.can_connect', check.OK)
-    aggregator.assert_service_check('aerospike.cluster_up', check.OK)
+    aggregator.assert_service_check('aerospike.can_connect', AerospikeCheck.OK)
+    aggregator.assert_service_check('aerospike.cluster_up', AerospikeCheck.OK)

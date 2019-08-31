@@ -13,7 +13,7 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base.utils.tagging import tagger
 
-from .common import get_pod_by_uid, is_static_pending_pod, tags_for_docker, tags_for_pod
+from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix, tags_for_docker, tags_for_pod
 
 """kubernetes check
 Collects metrics from cAdvisor instance
@@ -23,7 +23,14 @@ Collects metrics from cAdvisor instance
 NAMESPACE = "kubernetes"
 DEFAULT_MAX_DEPTH = 10
 DEFAULT_ENABLED_RATES = ['diskio.io_service_bytes.stats.total', 'network.??_bytes', 'cpu.*.total']
-DEFAULT_ENABLED_GAUGES = ['memory.usage', 'memory.working_set', 'memory.rss', 'filesystem.usage']
+DEFAULT_ENABLED_GAUGES = [
+    'memory.cache',
+    'memory.usage',
+    'memory.swap',
+    'memory.working_set',
+    'memory.rss',
+    'filesystem.usage',
+]
 DEFAULT_POD_LEVEL_METRICS = ['network.*']
 
 NET_ERRORS = ['rx_errors', 'tx_errors', 'rx_dropped', 'tx_dropped']
@@ -141,7 +148,7 @@ class CadvisorScraper(object):
     def _update_container_metrics(self, instance, subcontainer, pod_list, pod_list_utils):
         is_pod = False
         in_static_pod = False
-        subcontainer_id = subcontainer.get('id')
+        subcontainer_id = replace_container_rt_prefix(subcontainer.get('id', ''))
         pod_uid = subcontainer.get('labels', {}).get('io.kubernetes.pod.uid')
         k_container_name = subcontainer.get('labels', {}).get('io.kubernetes.container.name')
 
@@ -175,7 +182,7 @@ class CadvisorScraper(object):
             if pod_list_utils.is_excluded(cid):
                 self.log.debug("Filtering out " + cid)
                 return
-            tags = tagger.tag(cid, tagger.HIGH)
+            tags = tagger.tag(replace_container_rt_prefix(cid), tagger.HIGH) or []
 
         if not tags:
             self.log.debug("Subcontainer {} doesn't have tags, skipping.".format(subcontainer_id))

@@ -20,5 +20,10 @@
     "mac_os"
   ],
   "type": "check",
-  "integration_id": "hdfs-namenode"
+  "integration_id": "hdfs-namenode",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

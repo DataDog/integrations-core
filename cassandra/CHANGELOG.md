@@ -1,5 +1,9 @@
 # CHANGELOG - cassandra
 
+## 1.3.1 / 2019-05-14
+
+* [Fixed] Fix example tags section. See [#3431](https://github.com/DataDog/integrations-core/pull/3431).
+
 ## 1.3.0 / 2018-10-12
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][1].

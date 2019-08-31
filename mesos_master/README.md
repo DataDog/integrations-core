@@ -1,6 +1,8 @@
 # Mesos_master Check
 
-![Mesos master Dashboard][1]
+This check collects metrics for Mesos masters. If you are looking for the the metrics for Mesos slave, see the [Mesos Slave Integration documentation][1].
+
+![Mesos master Dashboard][2]
 
 ## Overview
 
@@ -13,9 +15,9 @@ This check collects metrics from Mesos masters for:
 
 And many more.
 ## Setup
+
 ### Installation
-The installation is the same on Mesos with and without DC/OS.
-Run the datadog-agent container on each of your Mesos master nodes:
+The installation is the same on Mesos with and without DC/OS. Run the datadog-agent container on each of your Mesos master nodes:
 
 ```
 docker run -d --name datadog-agent \
@@ -32,15 +34,15 @@ Substitute your Datadog API key and Mesos Master's API URL into the command abov
 
 ### Configuration
 
-If you passed the correct Master URL when starting datadog-agent, the Agent is already using a default `mesos_master.d/conf.yaml` to collect metrics from your masters; you don't need to configure anything else. See the [sample mesos_master.d/conf.yaml][2] for all available configuration options.
+If you passed the correct Master URL when starting datadog-agent, the Agent is already using a default `mesos_master.d/conf.yaml` to collect metrics from your masters; you don't need to configure anything else. See the [sample mesos_master.d/conf.yaml][3] for all available configuration options.
 
 Unless your masters' API uses a self-signed certificate. In that case, set `disable_ssl_validation: true` in `mesos_master.d/conf.yaml`.
 
-### Log Collection
+#### Log collection
 
-Datadog Agent version 6 and greater can collect logs from containers. You can either collect all logs from all your containers or filter them by container image name or container label to cherry pick what logs should be collected.
+Datadog Agent >6.0 collects logs from containers. You can either collect all logs from all your containers or filter them by container image name or container label to cherry pick what logs should be collected.
 
-Add those extra variables to the Datadog Agent run command to start collecting logs:
+Add these extra variables to the Datadog Agent run command to start collecting logs:
 
 * `-e DD_LOGS_ENABLED=true`: this enables the log collection when set to `true`. The Agent now looks for log instructions in configuration files or container labels
 * `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this enables log collection for all containers
@@ -62,7 +64,7 @@ docker run -d --name datadog-agent \
   datadog/agent:latest
 ```
 
-Use the [autodiscovery feature][3] for logs to override the `service` and `source` attribute to make sure you benefit from the integration automatic setup.
+Use the [autodiscovery feature][4] for logs to override the `service` and `source` attribute to make sure you benefit from the integration automatic setup.
 
 ### Validation
 
@@ -71,28 +73,28 @@ In Datadog, search for `mesos.cluster` in the Metrics Explorer.
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][4] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 The Mesos-master check does not include any events.
 
 ### Service Checks
 
-`mesos_master.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to the Mesos Master API to collect metrics, otherwise OK.
+**mesos_master.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to the Mesos Master API to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][6].
 
 ## Further Reading
 
-* [Installing Datadog on Mesos with DC/OS][6]
+* [Installing Datadog on Mesos with DC/OS][7]
 
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_master/images/mesos_dashboard.png
-[2]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/datadog_checks/mesos_master/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-autodiscovery
-[4]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
-[5]: https://docs.datadoghq.com/help
-[6]: https://www.datadoghq.com/blog/deploy-datadog-dcos
+[1]: https://docs.datadoghq.com/integrations/mesos/#mesos-slave-integration
+[2]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_master/images/mesos_dashboard.png
+[3]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/datadog_checks/mesos_master/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-autodiscovery
+[5]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
+[6]: https://docs.datadoghq.com/help
+[7]: https://www.datadoghq.com/blog/deploy-datadog-dcos

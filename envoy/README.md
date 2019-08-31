@@ -5,6 +5,8 @@ This check collects distributed system observability metrics from [Envoy][1].
 
 ## Setup
 
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][15] for guidance on applying these instructions.
+
 ### Installation
 
 The Envoy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
@@ -89,7 +91,7 @@ static_resources:
 
 2. Check if the Datadog Agent can access Envoy's [admin endpoint][4].
 
-3. [Restart the Agent][9]
+3. [Restart the Agent][9].
 
 | Setting            | Description                                                                                                                                                                |
 | ---                | ---                                                                                                                                                                        |
@@ -131,9 +133,31 @@ If you care only about the cluster name and grpc service, you would add this to 
 
 `^cluster\.<CLUSTER_NAME>\.grpc\.<GRPC_SERVICE>\.`
 
+#### Log collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Next, edit `envoy.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Envoy log files.
+
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/envoy.log
+          source: envoy
+          service: envoy
+    ```
+
+3. [Restart the Agent][9].
+
 ### Validation
 
-[Run the Agent's `status` subcommand][11] and look for `envoy` under the Checks section.
+[Run the Agent's status subcommand][11] and look for `envoy` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -148,9 +172,8 @@ The Envoy check does not include any events.
 
 ### Service Checks
 
-`envoy.can_connect`:
-
-Returns CRITICAL if the Agent cannot connect to Envoy to collect metrics, otherwise OK.
+**envoy.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Envoy to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 
@@ -171,3 +194,4 @@ Need help? Contact [Datadog support][14].
 [12]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
 [13]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
 [14]: https://docs.datadoghq.com/help
+[15]: https://docs.datadoghq.com/agent/autodiscovery/integrations

@@ -142,10 +142,12 @@ CAPACITY_CONTEXT_METRICS = {
 }
 
 EQPT_CAPACITY_METRICS = {
+    # cisco_aci api >= 3.1
     "eqptcapacityL3TotalUsageCap5min": {
         "v4TotalEpCapCum": LEAF_CAPACITY_PREFIX + ".ipv4_endpoint.limit",
         "v6TotalEpCapCum": LEAF_CAPACITY_PREFIX + ".ipv6_endpoint.limit",
     },
+    # cisco_aci api >= 3.1
     "eqptcapacityL3TotalUsage5min": {
         "v4TotalEpCum": LEAF_CAPACITY_PREFIX + ".ipv4_endpoint.utilized",
         "v6TotalEpCum": LEAF_CAPACITY_PREFIX + ".ipv6_endpoint.utilized",

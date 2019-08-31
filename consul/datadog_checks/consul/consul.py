@@ -7,6 +7,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from itertools import islice
 from math import ceil, sqrt
+from time import time as timestamp
 
 import requests
 from six import iteritems, iterkeys, itervalues
@@ -14,8 +15,6 @@ from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import hash_mutable
-
-EPOCH = datetime(1970, 1, 1)
 
 
 # More information in https://www.consul.io/docs/internals/coordinates.html,
@@ -72,34 +71,25 @@ class ConsulCheck(AgentCheck):
 
     STATUS_SEVERITY = {AgentCheck.UNKNOWN: 0, AgentCheck.OK: 1, AgentCheck.WARNING: 2, AgentCheck.CRITICAL: 3}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(ConsulCheck, self).__init__(name, init_config, instances)
 
         self._instance_states = defaultdict(lambda: ConsulCheckInstanceState())
+
+        self.HTTP_CONFIG_REMAPPER = {
+            'client_cert_file': {'name': 'tls_cert'},
+            'private_key_file': {'name': 'tls_private_key'},
+            'ca_bundle_file': {'name': 'tls_ca_cert'},
+        }
+
+        if 'acl_token' in self.instance:
+            self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
 
     def consul_request(self, instance, endpoint):
         url = urljoin(instance.get('url'), endpoint)
         service_check_tags = ["url:{}".format(url)] + instance.get("tags", [])
         try:
-
-            clientcertfile = instance.get('client_cert_file', self.init_config.get('client_cert_file', False))
-            privatekeyfile = instance.get('private_key_file', self.init_config.get('private_key_file', False))
-            cabundlefile = instance.get('ca_bundle_file', self.init_config.get('ca_bundle_file', True))
-            acl_token = instance.get('acl_token', None)
-
-            headers = {}
-            if acl_token:
-                headers['X-Consul-Token'] = acl_token
-
-            if clientcertfile:
-                if privatekeyfile:
-                    resp = requests.get(
-                        url, cert=(clientcertfile, privatekeyfile), verify=cabundlefile, headers=headers
-                    )
-                else:
-                    resp = requests.get(url, cert=clientcertfile, verify=cabundlefile, headers=headers)
-            else:
-                resp = requests.get(url, verify=cabundlefile, headers=headers)
+            resp = self.http.get(url)
 
             resp.raise_for_status()
 
@@ -126,10 +116,10 @@ class ConsulCheck(AgentCheck):
     def _get_local_config(self, instance, instance_state):
         time_window = 0
         if instance_state.last_config_fetch_time:
-            time_window = datetime.now() - instance_state.last_config_fetch_time
+            time_window = datetime.utcnow() - instance_state.last_config_fetch_time
         if not instance_state.local_config or time_window > timedelta(seconds=self.MAX_CONFIG_TTL):
             instance_state.local_config = self.consul_request(instance, '/v1/agent/self')
-            instance_state.last_config_fetch_time = datetime.now()
+            instance_state.last_config_fetch_time = datetime.utcnow()
 
         return instance_state.local_config
 
@@ -213,7 +203,7 @@ class ConsulCheck(AgentCheck):
 
                 self.event(
                     {
-                        "timestamp": int((datetime.now() - EPOCH).total_seconds()),
+                        "timestamp": timestamp(),
                         "event_type": "consul.new_leader",
                         "source_type_name": self.SOURCE_TYPE_NAME,
                         "msg_title": "New Consul Leader Elected in consul_datacenter:{}".format(agent_dc),

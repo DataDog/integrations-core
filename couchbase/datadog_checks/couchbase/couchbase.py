@@ -13,13 +13,21 @@ import requests
 from six import string_types
 
 from datadog_checks.checks import AgentCheck
+from datadog_checks.couchbase.couchbase_consts import (
+    BUCKET_STATS,
+    COUCHBASE_STATS_PATH,
+    COUCHBASE_VITALS_PATH,
+    NODE_CLUSTER_SERVICE_CHECK_NAME,
+    NODE_HEALTH_SERVICE_CHECK_NAME,
+    NODE_HEALTH_TRANSLATION,
+    NODE_MEMBERSHIP_TRANSLATION,
+    QUERY_STATS,
+    SECONDS_VALUE_PATTERN,
+    SERVICE_CHECK_NAME,
+    SOURCE_TYPE_NAME,
+    TO_SECONDS,
+)
 from datadog_checks.utils.containers import hash_mutable
-from datadog_checks.utils.headers import headers
-
-# Constants
-COUCHBASE_STATS_PATH = '/pools/default'
-COUCHBASE_VITALS_PATH = '/admin/vitals'
-DEFAULT_TIMEOUT = 10
 
 
 class Couchbase(AgentCheck):
@@ -28,240 +36,14 @@ class Couchbase(AgentCheck):
     http://docs.couchbase.com/couchbase-manual-2.0/#using-the-rest-api
     """
 
-    # Service Checks
-    SERVICE_CHECK_NAME = 'couchbase.can_connect'
-    NODE_CLUSTER_SERVICE_CHECK_NAME = 'couchbase.by_node.cluster_membership'
-    NODE_HEALTH_SERVICE_CHECK_NAME = 'couchbase.by_node.health'
-
-    NODE_MEMBERSHIP_TRANSLATION = {
-        'active': AgentCheck.OK,
-        'inactiveAdded': AgentCheck.WARNING,
-        'activeFailed': AgentCheck.CRITICAL,
-        None: AgentCheck.UNKNOWN,
-    }
-
-    NODE_HEALTH_TRANSLATION = {
-        'healthy': AgentCheck.OK,
-        'warmup': AgentCheck.OK,
-        'unhealthy': AgentCheck.CRITICAL,
-        None: AgentCheck.UNKNOWN,
-    }
-
-    # Events
-    SOURCE_TYPE_NAME = 'couchbase'
-
-    # Selected metrics to send amongst all the bucket stats, after name normalization
-    BUCKET_STATS = set(
-        [
-            "avg_bg_wait_time",
-            "avg_disk_commit_time",
-            "avg_disk_update_time",
-            "bg_wait_total",
-            "bytes_read",
-            "bytes_written",
-            "cas_badval",
-            "cas_hits",
-            "cas_misses",
-            "cmd_get",
-            "cmd_set",
-            "couch_docs_actual_disk_size",
-            "couch_docs_data_size",
-            "couch_docs_disk_size",
-            "couch_docs_fragmentation",
-            "couch_spatial_data_size",
-            "couch_spatial_disk_size",
-            "couch_spatial_ops",
-            "couch_total_disk_size",
-            "couch_views_data_size",
-            "couch_views_disk_size",
-            "couch_views_fragmentation",
-            "couch_views_ops",
-            "cpu_idle_ms",
-            "cpu_utilization_rate",
-            "curr_connections",
-            "curr_items_tot",
-            "curr_items",
-            "decr_hits",
-            "decr_misses",
-            "delete_hits",
-            "delete_misses",
-            "disk_commit_count",
-            "disk_update_count",
-            "disk_write_queue",
-            "ep_bg_fetched",
-            "ep_cache_miss_rate",
-            "ep_cache_miss_ratio",
-            "ep_dcp_fts_backoff",
-            "ep_dcp_fts_count",
-            "ep_dcp_fts_items_remaining",
-            "ep_dcp_fts_items_sent",
-            "ep_dcp_fts_producer_count",
-            "ep_dcp_fts_total_bytes",
-            "ep_dcp_2i_backoff",
-            "ep_dcp_2i_count",
-            "ep_dcp_2i_items_remaining",
-            "ep_dcp_2i_items_sent",
-            "ep_dcp_2i_producer_count",
-            "ep_dcp_2i_total_bytes",
-            "ep_dcp_other_backoff",
-            "ep_dcp_other_count",
-            "ep_dcp_other_items_remaining",
-            "ep_dcp_other_items_sent",
-            "ep_dcp_other_producer_count",
-            "ep_dcp_other_total_bytes",
-            "ep_dcp_replica_backoff",
-            "ep_dcp_replica_count",
-            "ep_dcp_replica_items_remaining",
-            "ep_dcp_replica_items_sent",
-            "ep_dcp_replica_producer_count",
-            "ep_dcp_replica_total_bytes",
-            "ep_dcp_views_backoff",
-            "ep_dcp_views_count",
-            "ep_dcp_views_items_remaining",
-            "ep_dcp_views_items_sent",
-            "ep_dcp_views_producer_count",
-            "ep_dcp_views_total_bytes",
-            "ep_dcp_xdcr_backoff",
-            "ep_dcp_xdcr_count",
-            "ep_dcp_xdcr_items_remaining",
-            "ep_dcp_xdcr_items_sent",
-            "ep_dcp_xdcr_producer_count",
-            "ep_dcp_xdcr_total_bytes",
-            "ep_diskqueue_drain",
-            "ep_diskqueue_fill",
-            "ep_diskqueue_items",
-            "ep_flusher_todo",
-            "ep_item_commit_failed",
-            "ep_kv_size",
-            "ep_max_size",
-            "ep_mem_high_wat",
-            "ep_mem_low_wat",
-            "ep_meta_data_memory",
-            "ep_num_non_resident",
-            "ep_num_ops_del_meta",
-            "ep_num_ops_del_ret_meta",
-            "ep_num_ops_get_meta",
-            "ep_num_ops_set_meta",
-            "ep_num_ops_set_ret_meta",
-            "ep_num_value_ejects",
-            "ep_oom_errors",
-            "ep_ops_create",
-            "ep_ops_update",
-            "ep_overhead",
-            "ep_queue_size",
-            "ep_resident_items_rate",
-            "ep_tap_replica_queue_drain",
-            "ep_tap_total_queue_drain",
-            "ep_tap_total_queue_fill",
-            "ep_tap_total_total_backlog_size",
-            "ep_tmp_oom_errors",
-            "ep_vb_total",
-            "evictions",
-            "get_hits",
-            "get_misses",
-            "hibernated_requests",
-            "hibernated_waked",
-            "hit_ratio",
-            "incr_hits",
-            "incr_misses",
-            "mem_actual_free",
-            "mem_actual_used",
-            "mem_free",
-            "mem_total",
-            "mem_used",
-            "mem_used_sys",
-            "misses",
-            "ops",
-            "page_faults",
-            "replication_docs_rep_queue",
-            "replication_meta_latency_aggr",
-            "rest_requests",
-            "swap_total",
-            "swap_used",
-            "vb_active_eject",
-            "vb_active_itm_memory",
-            "vb_active_meta_data_memory",
-            "vb_active_num_non_resident",
-            "vb_active_num",
-            "vb_active_ops_create",
-            "vb_active_ops_update",
-            "vb_active_queue_age",
-            "vb_active_queue_drain",
-            "vb_active_queue_fill",
-            "vb_active_queue_size",
-            "vb_active_resident_items_ratio",
-            "vb_avg_active_queue_age",
-            "vb_avg_pending_queue_age",
-            "vb_avg_replica_queue_age",
-            "vb_avg_total_queue_age",
-            "vb_pending_curr_items",
-            "vb_pending_eject",
-            "vb_pending_itm_memory",
-            "vb_pending_meta_data_memory",
-            "vb_pending_num_non_resident",
-            "vb_pending_num",
-            "vb_pending_ops_create",
-            "vb_pending_ops_update",
-            "vb_pending_queue_age",
-            "vb_pending_queue_drain",
-            "vb_pending_queue_fill",
-            "vb_pending_queue_size",
-            "vb_pending_resident_items_ratio",
-            "vb_replica_curr_items",
-            "vb_replica_eject",
-            "vb_replica_itm_memory",
-            "vb_replica_meta_data_memory",
-            "vb_replica_num_non_resident",
-            "vb_replica_num",
-            "vb_replica_ops_create",
-            "vb_replica_ops_update",
-            "vb_replica_queue_age",
-            "vb_replica_queue_drain",
-            "vb_replica_queue_fill",
-            "vb_replica_queue_size",
-            "vb_replica_resident_items_ratio",
-            "vb_total_queue_age",
-            "xdc_ops",
-        ]
-    )
-    # Selected metrics of the query monitoring API
-    # See https://developer.couchbase.com/documentation/server/4.5/tools/query-monitoring.html
-    QUERY_STATS = set(
-        [
-            'cores',
-            'cpu_sys_percent',
-            'cpu_user_percent',
-            'gc_num',
-            'gc_pause_percent',
-            'gc_pause_time',
-            'memory_system',
-            'memory_total',
-            'memory_usage',
-            'request_active_count',
-            'request_completed_count',
-            'request_per_sec_15min',
-            'request_per_sec_1min',
-            'request_per_sec_5min',
-            'request_prepared_percent',
-            'request_time_80percentile',
-            'request_time_95percentile',
-            'request_time_99percentile',
-            'request_time_mean',
-            'request_time_median',
-            'total_threads',
-        ]
-    )
-
-    TO_SECONDS = {'ns': 1e9, 'us': 1e6, 'ms': 1e3, 's': 1}
-
-    seconds_value_pattern = re.compile(r'(\d+(\.\d+)?)(\D+)')
+    HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}, 'ssl_verify': {'name': 'tls_verify'}}
 
     class CouchbaseInstanceState(object):
         def __init__(self):
             self.previous_status = None
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(Couchbase, self).__init__(name, init_config, instances)
 
         # Keep track of all instances
         self._instance_states = defaultdict(lambda: self.CouchbaseInstanceState())
@@ -283,7 +65,7 @@ class Couchbase(AgentCheck):
             for metric_name, val in bucket_stats.items():
                 if val is not None:
                     norm_metric_name = self.camel_case_to_joined_lower(metric_name)
-                    if norm_metric_name in self.BUCKET_STATS:
+                    if norm_metric_name in BUCKET_STATS:
                         full_metric_name = 'couchbase.by_bucket.{}'.format(norm_metric_name)
                         self.gauge(full_metric_name, val[0], tags=metric_tags)
 
@@ -304,7 +86,7 @@ class Couchbase(AgentCheck):
         for metric_name, val in data['query'].items():
             if val is not None:
                 norm_metric_name = self.camel_case_to_joined_lower(metric_name)
-                if norm_metric_name in self.QUERY_STATS:
+                if norm_metric_name in QUERY_STATS:
                     # for query times, the unit is part of the value, we need to extract it
                     if isinstance(val, string_types):
                         val = self.extract_seconds_value(val)
@@ -360,13 +142,13 @@ class Couchbase(AgentCheck):
 
         # Get the membership status of the node
         cluster_membership = node_stats.get('clusterMembership', None)
-        membership_status = self.NODE_MEMBERSHIP_TRANSLATION.get(cluster_membership, AgentCheck.UNKNOWN)
-        self.service_check(self.NODE_CLUSTER_SERVICE_CHECK_NAME, membership_status, tags=cluster_health_tags)
+        membership_status = NODE_MEMBERSHIP_TRANSLATION.get(cluster_membership, AgentCheck.UNKNOWN)
+        self.service_check(NODE_CLUSTER_SERVICE_CHECK_NAME, membership_status, tags=cluster_health_tags)
 
         # Get the health status of the node
         health = node_stats.get('status', None)
-        health_status = self.NODE_HEALTH_TRANSLATION.get(health, AgentCheck.UNKNOWN)
-        self.service_check(self.NODE_HEALTH_SERVICE_CHECK_NAME, health_status, tags=cluster_health_tags)
+        health_status = NODE_HEALTH_TRANSLATION.get(health, AgentCheck.UNKNOWN)
+        self.service_check(NODE_HEALTH_SERVICE_CHECK_NAME, health_status, tags=cluster_health_tags)
 
     def _create_event(self, alert_type, msg_title, msg, server, tags=None):
         """
@@ -381,26 +163,16 @@ class Couchbase(AgentCheck):
             'msg_text': msg,
             'msg_title': msg_title,
             'alert_type': alert_type,
-            'source_type_name': self.SOURCE_TYPE_NAME,
+            'source_type_name': SOURCE_TYPE_NAME,
             'aggregation_key': server,
             'tags': tags,
         }
 
-    def _get_stats(self, url, instance):
+    def _get_stats(self, url):
         """
         Hit a given URL and return the parsed json.
         """
-
-        self.log.debug('Fetching Couchbase stats at url: {}'.format(url))
-
-        ssl_verify = instance.get('ssl_verify', True)
-        timeout = float(instance.get('timeout', DEFAULT_TIMEOUT))
-
-        auth = None
-        if 'user' in instance and 'password' in instance:
-            auth = (instance['user'], instance['password'])
-
-        r = requests.get(url, auth=auth, verify=ssl_verify, headers=headers(self.agentConfig), timeout=timeout)
+        r = self.http.get(url)
         r.raise_for_status()
         return r.json()
 
@@ -436,18 +208,18 @@ class Couchbase(AgentCheck):
             service_check_tags = list(set(service_check_tags))
         service_check_tags.append('instance:{}'.format(server))
         try:
-            overall_stats = self._get_stats(url, instance)
+            overall_stats = self._get_stats(url)
             # No overall stats? bail out now
             if overall_stats is None:
                 raise Exception("No data returned from couchbase endpoint: {}".format(url))
         except requests.exceptions.HTTPError as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         couchbase['stats'] = overall_stats
 
@@ -462,7 +234,7 @@ class Couchbase(AgentCheck):
         endpoint = overall_stats['buckets']['uri']
 
         url = '{}{}'.format(server, endpoint)
-        buckets = self._get_stats(url, instance)
+        buckets = self._get_stats(url)
 
         if buckets is not None:
             for bucket in buckets:
@@ -473,10 +245,10 @@ class Couchbase(AgentCheck):
                 url = '{}{}'.format(server, endpoint)
 
                 try:
-                    bucket_stats = self._get_stats(url, instance)
+                    bucket_stats = self._get_stats(url)
                 except requests.exceptions.HTTPError:
                     url_backup = '{}/pools/nodes/buckets/{}/stats'.format(server, bucket_name)
-                    bucket_stats = self._get_stats(url_backup, instance)
+                    bucket_stats = self._get_stats(url_backup)
 
                 bucket_samples = bucket_stats['op']['samples']
                 if bucket_samples is not None:
@@ -490,7 +262,7 @@ class Couchbase(AgentCheck):
         # Next, get all the tasks
         tasks_url = '{}{}/tasks'.format(server, COUCHBASE_STATS_PATH)
         try:
-            tasks = self._get_stats(tasks_url, instance)
+            tasks = self._get_stats(tasks_url)
             for task in tasks:
                 task_type = task['type']
 
@@ -521,9 +293,9 @@ class Couchbase(AgentCheck):
         query_data = None
         query_monitoring_url = instance.get('query_monitoring_url')
         if query_monitoring_url:
+            url = '{}{}'.format(query_monitoring_url, COUCHBASE_VITALS_PATH)
             try:
-                url = '{}{}'.format(query_monitoring_url, COUCHBASE_VITALS_PATH)
-                query_data = self._get_stats(url, instance)
+                query_data = self._get_stats(url)
             except requests.exceptions.RequestException:
                 self.log.error(
                     "Error accessing the endpoint {}, make sure you're running at least "
@@ -557,12 +329,12 @@ class Couchbase(AgentCheck):
         if value == '0':
             return 0
 
-        match = self.seconds_value_pattern.search(value)
+        match = SECONDS_VALUE_PATTERN.search(value)
 
         val, unit = match.group(1, 3)
         # They use the 'micro' symbol for microseconds so there is an encoding problem
         # so let's assume it's microseconds if we don't find the key in unit
-        if unit not in self.TO_SECONDS:
+        if unit not in TO_SECONDS:
             unit = 'us'
 
-        return float(val) / self.TO_SECONDS[unit]
+        return float(val) / TO_SECONDS[unit]

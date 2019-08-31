@@ -35,6 +35,22 @@ class KubernetesState(OpenMetricsBaseCheck):
     See https://github.com/kubernetes/kube-state-metrics
     """
 
+    class JobCount:
+        def __init__(self):
+            self.count = 0
+            self.previous_run_max_ts = 0
+            self.current_run_max_ts = 0
+
+        def set_previous_and_reset_current_ts(self):
+            if self.current_run_max_ts > 0:
+                self.previous_run_max_ts = self.current_run_max_ts
+                self.current_run_max_ts = 0
+
+        def update_current_ts_and_add_count(self, job_ts, count):
+            if job_ts != 0 and job_ts > self.previous_run_max_ts:
+                self.count += count
+                self.current_run_max_ts = max(self.current_run_max_ts, job_ts)
+
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -80,21 +96,42 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_service_spec_type': self.count_objects_by_tags,
         }
 
+        # Handling jobs succeeded/failed counts
+        self.failed_job_counts = defaultdict(KubernetesState.JobCount)
+        self.succeeded_job_counts = defaultdict(KubernetesState.JobCount)
+
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
-
-        # Job counters are monotonic: they increase at every run of the job
-        # We want to send the delta via the `monotonic_count` method
-        self.job_succeeded_count = defaultdict(int)
-        self.job_failed_count = defaultdict(int)
 
         scraper_config = self.config_map[endpoint]
         self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
 
-        for job_tags, job_count in iteritems(self.job_succeeded_count):
-            self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job_count, list(job_tags))
-        for job_tags, job_count in iteritems(self.job_failed_count):
-            self.monotonic_count(scraper_config['namespace'] + '.job.failed', job_count, list(job_tags))
+        for job_tags, job in iteritems(self.failed_job_counts):
+            self.monotonic_count(scraper_config['namespace'] + '.job.failed', job.count, list(job_tags))
+            job.set_previous_and_reset_current_ts()
+
+        for job_tags, job in iteritems(self.succeeded_job_counts):
+            self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job.count, list(job_tags))
+            job.set_previous_and_reset_current_ts()
+
+    def _filter_metric(self, metric, scraper_config):
+        if scraper_config['telemetry']:
+            # name is like "kube_pod_execution_duration"
+            name_part = metric.name.split("_", 3)
+            if len(name_part) < 2:
+                return False
+            family = name_part[1]
+            tags = ["resource_name:" + family]
+            for sample in metric.samples:
+                if "namespace" in sample[self.SAMPLE_LABELS]:
+                    ns = sample[self.SAMPLE_LABELS]["namespace"]
+                    tags.append("resource_namespace:" + ns)
+                    break
+            self._send_telemetry_counter(
+                'collector.metrics.count', len(metric.samples), scraper_config, extra_tags=tags
+            )
+        # do not filter
+        return False
 
     def _create_kubernetes_state_prometheus_instance(self, instance):
         """
@@ -133,6 +170,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_hpa_status_desired_replicas': 'hpa.desired_replicas',
                         'kube_hpa_status_current_replicas': 'hpa.current_replicas',
                         'kube_hpa_status_condition': 'hpa.condition',
+                        'kube_node_info': 'node.count',
                         'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',
                         'kube_node_status_allocatable_memory_bytes': 'node.memory_allocatable',
                         'kube_node_status_allocatable_pods': 'node.pods_allocatable',
@@ -175,6 +213,19 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_statefulset_status_replicas_current': 'statefulset.replicas_current',
                         'kube_statefulset_status_replicas_ready': 'statefulset.replicas_ready',
                         'kube_statefulset_status_replicas_updated': 'statefulset.replicas_updated',
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_lowerbound': (
+                            'vpa.lower_bound'
+                        ),
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_target': (
+                            'vpa.target'
+                        ),
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_uncappedtarget': (
+                            'vpa.uncapped_target'
+                        ),
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_upperbound': (
+                            'vpa.upperbound'
+                        ),
+                        'kube_verticalpodautoscaler_spec_updatepolicy_updatemode': 'vpa.update_mode',
                     }
                 ],
                 'ignore_metrics': [
@@ -190,9 +241,9 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_namespace_created',
                     'kube_namespace_labels',
                     'kube_node_created',
-                    'kube_node_info',
                     'kube_node_labels',
-                    'kube_pod_created' 'kube_pod_container_info',
+                    'kube_pod_created',
+                    'kube_pod_container_info',
                     'kube_pod_info',
                     'kube_pod_owner',
                     'kube_pod_start_time',
@@ -238,6 +289,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_job_status_active',
                     'kube_job_status_completion_time',  # We could compute the duration=completion-start as a gauge
                     'kube_job_status_start_time',
+                    'kube_verticalpodautoscaler_labels',
                 ],
                 'label_joins': {
                     'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
@@ -379,6 +431,18 @@ class KubernetesState(OpenMetricsBaseCheck):
         pattern = r"(-\d{4,10}$)"
         return re.sub(pattern, '', name)
 
+    def _extract_job_timestamp(self, name):
+        """
+        Extract timestamp of job names
+        """
+        ts = name.split('-')[-1]
+        if ts.isdigit():
+            return int(ts)
+        else:
+            msg = 'Cannot extract ts from job name {}'
+            self.log.debug(msg, name)
+            return 0
+
     # Labels attached: namespace, pod
     # As a message the phase=Pending|Running|Succeeded|Failed|Unknown
     # From the phase the check will update its status
@@ -491,25 +555,31 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def kube_job_status_failed(self, metric, scraper_config):
         for sample in metric.samples:
+            job_ts = 0
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
+                    job_ts = self._extract_job_timestamp(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            self.job_failed_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
+            self.failed_job_counts[frozenset(tags)].update_current_ts_and_add_count(job_ts, sample[self.SAMPLE_VALUE])
 
     def kube_job_status_succeeded(self, metric, scraper_config):
         for sample in metric.samples:
+            job_ts = 0
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
                     trimmed_job = self._trim_job_tag(label_value)
+                    job_ts = self._extract_job_timestamp(label_value)
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            self.job_succeeded_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
+            self.succeeded_job_counts[frozenset(tags)].update_current_ts_and_add_count(
+                job_ts, sample[self.SAMPLE_VALUE]
+            )
 
     def kube_node_status_condition(self, metric, scraper_config):
         """ The ready status of a cluster node. v1.0+"""

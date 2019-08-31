@@ -5,11 +5,6 @@ services:
 language: python
 python:
   - '2.7.15'
-addons:
-  apt:
-    packages:
-      - tdsodbc
-      - unixodbc-dev
 cache:
   directories:
     - "$HOME/.cache/pip"
@@ -25,7 +20,6 @@ env:
     - PIP_CACHE=$HOME/.cache/pip
     # if the c include path doesn't have the proper path pymqi will not compile
     - C_INCLUDE_PATH="/opt/mqm/inc:$C_INCLUDE_PATH"
-    - LD_LIBRARY_PATH="/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH"
     # https://github.com/travis-ci/travis-ci/issues/7940
     - BOTO_CONFIG=/dev/null
 
@@ -33,11 +27,12 @@ stages:
   - name: test_changed
     if: ((type = pull_request) AND (NOT commit_message =~ /ci run all/))
   - name: test
-    if: ((branch = master) AND (type != pull_request)) OR ((commit_message =~ /ci run all/) AND (type = pull_request))
+    if: ((branch = master) AND (type IN (cron, api))) OR ((commit_message =~ /ci run all/) AND (type = pull_request))
 
 script:
   - ddev validate logos ${CHECK}
   - travis_retry ddev test --cov ${CHECK}
+  - travis_retry ddev env test --base --new-env ${CHECK}
   - ddev test ${CHECK} --bench || true
   - if [ -n "$PYTHON3" ]; then ddev validate py3 ${CHECK}; fi
 
@@ -61,6 +56,7 @@ jobs:
         - ddev validate metadata
         - ddev validate service-checks
         - ddev test --cov
+        - ddev env test
         - ddev test --bench || true
     - stage: test
       env: CHECK=datadog_checks_base PYTHON3=true
@@ -85,8 +81,10 @@ jobs:
     - stage: test
       env: CHECK=aerospike PYTHON3=true
     - stage: test
-    # Agent <=5.x.x integration - only supporting py2 is needed
+      # Agent <=5.x.x integration - only supporting py2 is needed
       env: CHECK=agent_metrics
+    - stage: test
+      env: CHECK=ambari PYTHON3=true
     - stage: test
       env: CHECK=apache PYTHON3=true
     - stage: test
@@ -146,6 +144,8 @@ jobs:
     - stage: test
       env: CHECK=haproxy PYTHON3=true
     - stage: test
+      env: CHECK=harbor PYTHON3=true
+    - stage: test
       env: CHECK=hdfs_datanode PYTHON3=true
     - stage: test
       env: CHECK=hdfs_namenode PYTHON3=true
@@ -169,6 +169,8 @@ jobs:
       env: CHECK=kube_controller_manager PYTHON3=true
     - stage: test
       env: CHECK=kube_dns PYTHON3=true
+    - stage: test
+      env: CHECK=kube_metrics_server PYTHON3=true
     - stage: test
       env: CHECK=kube_proxy PYTHON3=true
     - stage: test
@@ -269,14 +271,20 @@ jobs:
     - stage: test
       env: CHECK=teamcity PYTHON3=true
     - stage: test
+      env: CHECK=tls PYTHON3=true
+    - stage: test
     # python 2 support only
       env: CHECK=tokumx
     - stage: test
       env: CHECK=twemproxy PYTHON3=true
     - stage: test
+      env: CHECK=twistlock PYTHON3=true
+    - stage: test
       env: CHECK=varnish PYTHON3=true
     - stage: test
       env: CHECK=vault PYTHON3=true
+    - stage: test
+      env: CHECK=vertica PYTHON3=true
     - stage: test
       env: CHECK=vsphere PYTHON3=true
     - stage: test
@@ -292,6 +300,8 @@ install:
   - ddev config set core .
   # since on PRs it only runs test_changed we have to do this globally
   - bash .travis/install_ibm_mq.sh
+  - bash .travis/install_rrdtool.sh
+  - bash .travis/install_odbc.sh
 # we should clean generated files before we save the cache
 # We don't want to save .pyc files, so we'll use find and -delete
 before_cache:

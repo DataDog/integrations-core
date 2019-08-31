@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
+
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
 from .constants import TESTABLE_FILE_EXTENSIONS, get_root
@@ -9,9 +11,19 @@ from .utils import get_testable_checks
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
+PYTHON_MAJOR_PATTERN = r'py(\d)'
 
 
-def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every=False, changed_only=False, sort=False):
+def get_tox_envs(
+    checks,
+    style=False,
+    format_style=False,
+    benchmark=False,
+    every=False,
+    changed_only=False,
+    sort=False,
+    e2e_tests_only=False,
+):
     testable_checks = get_testable_checks()
     # Run `get_changed_checks` at most once because git calls are costly
     changed_checks = get_changed_checks() if not checks or changed_only else None
@@ -29,7 +41,7 @@ def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every
             checks_seen.add(check)
 
         envs_selected = envs_selected.split(',') if envs_selected else []
-        envs_available = get_available_tox_envs(check, sort=sort)
+        envs_available = get_available_tox_envs(check, sort=sort, e2e_tests_only=e2e_tests_only)
 
         if format_style:
             envs_selected[:] = [e for e in envs_available if 'format_style' in e]
@@ -58,16 +70,28 @@ def get_tox_envs(checks, style=False, format_style=False, benchmark=False, every
         yield check, envs_selected
 
 
-def get_available_tox_envs(check, sort=False, e2e_only=False):
-    if e2e_only:
+def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=False):
+    if e2e_tests_only:
+        tox_command = 'tox --listenvs-all -v'
+    elif e2e_only:
         tox_command = 'tox --listenvs-all'
     else:
         tox_command = 'tox --listenvs'
 
     with chdir(path_join(get_root(), check)):
-        env_list = run_command(tox_command, capture='out').stdout
+        output = run_command(tox_command, capture='out').stdout
 
-    env_list = [e.strip() for e in env_list.splitlines()]
+    env_list = [e.strip() for e in output.splitlines()]
+
+    if e2e_tests_only:
+        envs = []
+        for line in env_list:
+            if '->' in line:
+                env, _, description = line.partition('->')
+                if 'e2e ready' in description.lower():
+                    envs.append(env.strip())
+
+        return envs
 
     if e2e_only:
         sort = True
@@ -98,10 +122,14 @@ def get_available_tox_envs(check, sort=False, e2e_only=False):
 
         if e2e_only:
             # No need for unit tests as they wouldn't set up a real environment
-            try:
-                env_list.remove('unit')
-            except ValueError:
-                pass
+            unit_envs = []
+
+            for e in env_list:
+                if e.endswith('unit'):
+                    unit_envs.append(e)
+
+            for e in unit_envs:
+                env_list.remove(e)
 
     return env_list
 
@@ -130,10 +158,21 @@ def fix_coverage_report(check, report_file):
 
 
 def construct_pytest_options(
-    verbose=0, enter_pdb=False, debug=False, bench=False, coverage=False, marker='', test_filter='', pytest_args=''
+    verbose=0,
+    color=None,
+    enter_pdb=False,
+    debug=False,
+    bench=False,
+    coverage=False,
+    marker='',
+    test_filter='',
+    pytest_args='',
 ):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
+
+    if color is not None:
+        pytest_options += ' --color=yes' if color else ' --color=no'
 
     if enter_pdb:
         # Drop to PDB on first failure, then end test session
@@ -160,10 +199,10 @@ def construct_pytest_options(
         )
 
     if marker:
-        pytest_options += ' -m {}'.format(marker)
+        pytest_options += ' -m "{}"'.format(marker)
 
     if test_filter:
-        pytest_options += ' -k {}'.format(test_filter)
+        pytest_options += ' -k "{}"'.format(test_filter)
 
     if pytest_args:
         pytest_options += ' {}'.format(pytest_args)
@@ -190,3 +229,9 @@ def get_changed_checks():
     changed_files[:] = testable_files(changed_files)
 
     return {line.split('/')[0] for line in changed_files}
+
+
+def get_tox_env_python_version(env):
+    match = re.match(PYTHON_MAJOR_PATTERN, env)
+    if match:
+        return int(match.group(1))

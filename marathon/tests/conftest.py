@@ -28,7 +28,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return Marathon('marathon', {}, {}, [{}])
+    return Marathon('marathon', {}, [INSTANCE_INTEGRATION])
 
 
 @pytest.fixture

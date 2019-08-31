@@ -60,8 +60,17 @@ class TestNfsstat:
 
         tags = list(instance['tags'])
         tags.extend(['nfs_server:192.168.34.1', 'nfs_export:/exports/nfs/datadog/two', 'nfs_mount:/mnt/datadog/two'])
+        tags_unicode = list(instance['tags'])
+        tags_unicode.extend(
+            [
+                u'nfs_server:192.168.34.1',
+                u'nfs_export:/exports/nfs/datadog/thr\u00E9\u00E9',
+                u'nfs_mount:/mnt/datadog/thr\u00E9\u00E9',
+            ]
+        )
 
         for metric in metrics:
             aggregator.assert_metric(metric, tags=tags)
+            aggregator.assert_metric(metric, tags=tags_unicode)
 
         assert aggregator.metrics_asserted_pct == 100.0

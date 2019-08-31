@@ -1,5 +1,22 @@
 # CHANGELOG - Envoy
 
+## 1.9.0 / 2019-08-24
+
+* [Added] Add RequestsWrapper to envoy. See [#4120](https://github.com/DataDog/integrations-core/pull/4120).
+
+## 1.8.0 / 2019-07-04
+
+* [Added] Add cluster.ssl metrics to Envoy integration. See [#3976](https://github.com/DataDog/integrations-core/pull/3976). Thanks [csssuf](https://github.com/csssuf).
+* [Added] Add Envoy upstream_rq_completed cluster metrics. See [#3955](https://github.com/DataDog/integrations-core/pull/3955). Thanks [csssuf](https://github.com/csssuf).
+
+## 1.7.0 / 2019-06-19
+
+* [Added] Add more listener metrics. See [#3922](https://github.com/DataDog/integrations-core/pull/3922).
+
+## 1.6.0 / 2019-06-18
+
+* [Added] Add logs config to envoy. See [#3918](https://github.com/DataDog/integrations-core/pull/3918).
+
 ## 1.5.0 / 2019-03-29
 
 * [Added] Adhere to style. See [#3366](https://github.com/DataDog/integrations-core/pull/3366).

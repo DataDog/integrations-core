@@ -23,13 +23,32 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
-    def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=None):
-        super(OpenMetricsBaseCheck, self).__init__(name, init_config, agentConfig, instances=instances)
+    def __init__(self, *args, **kwargs):
+        args = list(args)
+        default_instances = kwargs.pop('default_instances', None) or {}
+        default_namespace = kwargs.pop('default_namespace', None)
+
+        legacy_kwargs_in_args = args[4:]
+        del args[4:]
+
+        if len(legacy_kwargs_in_args) > 0:
+            default_instances = legacy_kwargs_in_args[0] or {}
+        if len(legacy_kwargs_in_args) > 1:
+            default_namespace = legacy_kwargs_in_args[1]
+
+        super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
         self.config_map = {}
-        self.default_instances = {} if default_instances is None else default_instances
+        self.default_instances = default_instances
         self.default_namespace = default_namespace
 
         # pre-generate the scraper configurations
+        if 'instances' in kwargs:
+            instances = kwargs['instances']
+        elif len(args) == 4:
+            instances = args[3]
+        else:
+            instances = args[2]
+
         if instances is not None:
             for instance in instances:
                 self.get_scraper_config(instance)
@@ -70,3 +89,9 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         This is generally a noop, but it can be used to change the tags before sending metrics
         """
         return _tags
+
+    def _filter_metric(self, metric, scraper_config):
+        """
+        Used to filter metrics at the begining of the processing, by default no metric is filtered
+        """
+        return False

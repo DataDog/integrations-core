@@ -1,5 +1,13 @@
 # CHANGELOG - etcd
 
+## 1.9.0 / 2019-08-24
+
+* [Added] Add requests wrapper to etcd. See [#4323](https://github.com/DataDog/integrations-core/pull/4323).
+
+## 1.8.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3505](https://github.com/DataDog/integrations-core/pull/3505).
+
 ## 1.7.0 / 2019-02-18
 
 * [Fixed] Use alpha grpc gateway endpoint. See [#3125](https://github.com/DataDog/integrations-core/pull/3125).

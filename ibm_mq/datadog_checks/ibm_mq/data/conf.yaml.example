@@ -38,17 +38,46 @@ instances:
     #   - '<QUEUE_NAME>'
 
     ## @param queue_patterns - list of string - optional
-    ## Collect from queues that match a pattern
+    ## Collect from queues that match a MQ pattern
     #
     # queue_patterns:
-    #   - 'DEV.*'
-    #   - 'SYSTEM.*'
+    #   - 'DEV.*'          # match queues starting with "DEV."
+    #   - 'SYSTEM.*'       # match queues starting with "SYSTEM."
+
+    ## @param queue_regex - list of string - optional
+    ## Collect from queues that match a regex
+    #
+    # queue_regex:
+    #   - '^DEV\..*$'          # match queues starting with "DEV."
+    #   - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
 
     ## @param channels - list of string - optional
     ## Check the status of the following channels
     #
     # channels:
     #   - '<CHANNEL_NAME>'
+
+    ## @param channel_status_mapping - list of key:value elements - optional
+    ## Custom channel status mapping for service check `ibm_mq.channel.status`.
+    ##
+    ## The key is the IBM MQ channel status. Valid keys are: `inactive`, `binding`, `starting`, `running`, `stopping`,
+    ## `retrying`, `stopped`, `requesting`, `paused`, and `initializing`.
+    ## The value is the Datadog service check level. Valid values are: `ok`, `warning`, `critical`, and `unknown`.
+    ## If a channel status is not mapped, it is mapped to `unknown`.
+    ##
+    ## Example of mapping:
+    #
+    # channel_status_mapping:
+    #     inactive: critical
+    #     binding: warning
+    #     starting: warning
+    #     running: ok
+    #     stopping: critical
+    #     retrying: warning
+    #     stopped: critical
+    #     requesting: warning
+    #     paused: warning
+    #     initializing: warning
 
     ## @param auto_discover_queues - string - optional - default: false
     ## Autodiscover the queues to monitor

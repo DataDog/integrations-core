@@ -22,14 +22,17 @@ And many more.
 Finally, in addition to metrics, the Datadog Agent also sends a service check for each of Consul's health checks, and an event after each new leader election.
 
 ## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
+
 ### Installation
 
-The Datadog Agent's Consul check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Consul nodes.
+The Datadog Agent's Consul check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Consul nodes.
 
 ### Configuration
 
-Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Consul [metrics](#metric-collection) and [logs](#log-collection).
-See the [sample consul.d/conf.yaml][4] for all available configuration options.
+Edit the `consul.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Consul [metrics](#metric-collection) and [logs](#log-collection).
+See the [sample consul.d/conf.yaml][5] for all available configuration options.
 
 #### Metric Collection
 
@@ -54,9 +57,9 @@ See the [sample consul.d/conf.yaml][4] for all available configuration options.
           network_latency_checks: true
     ```
 
-    See the [sample consul.d/conf.yaml][4] for all available configuration options.
+    See the [sample consul.d/conf.yaml][5] for all available configuration options.
 
-2. [Restart the Agent][5] to start sending Consul metrics to Datadog.
+2. [Restart the Agent][6] to start sending Consul metrics to Datadog.
 
 #### Connect Consul Agent to DogStatsD
 
@@ -74,14 +77,14 @@ In the main Consul configuration file, add your `dogstatsd_addr` nested under th
 
 Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
 
-#### Log Collection
+#### Log collection
 
 **Available for Agent >6.0**
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in `datadog.yaml` with:
 
     ```yaml
-    logs_enabled: true
+      logs_enabled: true
     ```
 
 2. Add this configuration block to your `consul.yaml` file to start collecting your Consul Logs:
@@ -94,15 +97,13 @@ Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
             service: myservice
     ```
     Change the `path` and `service` parameter values and configure them for your environment.
-    See the [sample consul.d/conf.yaml][4] for all available configuration options.
+    See the [sample consul.d/conf.yaml][5] for all available configuration options.
 
-3. [Restart the Agent][5].
-
-**Learn more about log collection [in the log documentation][6]**
+3. [Restart the Agent][6].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `consul` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `consul` under the Checks section.
 
 **Note**: If your Consul nodes have debug logging enabled, you'll see the Datadog Agent's regular polling in the Consul log:
 
@@ -128,46 +129,44 @@ udp        0      0 127.0.0.1:53874         127.0.0.1:8125          ESTABLISHED 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.
 
-See [Consul's Telemetry doc][9] for a description of metrics the Consul Agent sends to DogStatsD.
+See [Consul's Telemetry doc][10] for a description of metrics the Consul Agent sends to DogStatsD.
 
-See [Consul's Network Coordinates doc][10] if you're curious about how the network latency metrics are calculated.
+See [Consul's Network Coordinates doc][11] if you're curious about how the network latency metrics are calculated.
 
 ### Events
 
-`consul.new_leader`:
-
+**consul.new_leader**:<br>
 The Datadog Agent emits an event when the Consul cluster elects a new leader, tagging it with `prev_consul_leader`, `curr_consul_leader`, and `consul_datacenter`.
 
 ### Service Checks
 
-`consul.check`:
-
+**consul.check**:<br>
 The Datadog Agent submits a service check for each of Consul's health checks, tagging each with:
 
 * `service:<name>`, if Consul reports a `ServiceName`
 * `consul_service_id:<id>`, if Consul reports a `ServiceID`
 
 ## Troubleshooting
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 ## Further Reading
 
-* [Monitor Consul health and performance with Datadog][12]
-* [Consul at Datadog][13]
+* [Monitor Consul health and performance with Datadog][13]
+* [Consul at Datadog][14]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/consul/images/consul-dash.png
-[2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[4]: https://github.com/DataDog/integrations-core/blob/master/consul/datadog_checks/consul/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/logs
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv
-[9]: https://www.consul.io/docs/agent/telemetry.html
-[10]: https://www.consul.io/docs/internals/coordinates.html
-[11]: https://docs.datadoghq.com/help
-[12]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
-[13]: https://engineering.datadoghq.com/consul-at-datadog
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/consul/datadog_checks/consul/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv
+[10]: https://www.consul.io/docs/agent/telemetry.html
+[11]: https://www.consul.io/docs/internals/coordinates.html
+[12]: https://docs.datadoghq.com/help
+[13]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
+[14]: https://engineering.datadoghq.com/consul-at-datadog

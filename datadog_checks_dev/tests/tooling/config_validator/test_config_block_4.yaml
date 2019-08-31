@@ -1,0 +1,41 @@
+# object:
+#   key: value
+#   key2: value
+
+## @param object2 - object - optional
+## Lorem ipsum ...
+#
+# object2:
+  ## @param key - string - optional
+  ## Lorem ipsum
+  #
+  # key: value
+
+  ## @param list - list - optional
+  ## Lorem ipsum
+  #
+  # list:
+  #  - 1
+  #  - 2
+  #  - 3
+
+object:
+  key: value
+  key2: value
+
+## @param object2 - object - required
+## Lorem ipsum ...
+#
+object2:
+  ## @param key - string - required
+  ## Lorem ipsum
+  #
+  key: value
+
+  ## @param list - list - required
+  ## Lorem ipsum
+  #
+  list:
+    - 1
+    - 2
+    - 3

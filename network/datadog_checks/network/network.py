@@ -12,12 +12,12 @@ import socket
 from collections import defaultdict
 
 import psutil
-from six import PY3, iteritems
+from six import PY3, iteritems, itervalues
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.common import pattern_filter
-from datadog_checks.utils.platform import Platform
-from datadog_checks.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.common import pattern_filter
+from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 
 if PY3:
     long = int
@@ -284,39 +284,38 @@ class Network(AgentCheck):
         proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
         custom_tags = instance.get('tags', [])
 
-        if Platform.is_containerized() and proc_location != "/proc":
-            proc_location = "%s/1" % proc_location
+        net_proc_base_location = self._get_net_proc_base_location(proc_location)
 
-        if self._is_collect_cx_state_runnable(proc_location):
+        if self._is_collect_cx_state_runnable(net_proc_base_location):
             try:
                 self.log.debug("Using `ss` to collect connection state")
                 # Try using `ss` for increased performance over `netstat`
+                metrics = self._get_metrics()
                 for ip_version in ['4', '6']:
-                    for protocol in ['tcp', 'udp']:
-                        # Call `ss` for each IP version because there's no built-in way of distinguishing
-                        # between the IP versions in the output
-                        # Also calls `ss` for each protocol, because on some systems (e.g. Ubuntu 14.04), there is a
-                        # bug that print `tcp` even if it's `udp`
-                        output, _, _ = get_subprocess_output(
-                            ["ss", "-n", "-{0}".format(protocol[0]), "-a", "-{0}".format(ip_version)], self.log
-                        )
-                        lines = output.splitlines()
+                    # Call `ss` for each IP version because there's no built-in way of distinguishing
+                    # between the IP versions in the output
+                    # Also calls `ss` for each protocol, because on some systems (e.g. Ubuntu 14.04), there is a
+                    # bug that print `tcp` even if it's `udp`
+                    # The `-H` flag isn't available on old versions of `ss`.
+                    cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
 
-                        # State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
-                        # UNCONN     0      0              127.0.0.1:8125                  *:*
-                        # ESTAB      0      0              127.0.0.1:37036         127.0.0.1:8125
-                        # UNCONN     0      0        fe80::a00:27ff:fe1c:3c4:123          :::*
-                        # TIME-WAIT  0      0          90.56.111.177:56867        46.105.75.4:143
-                        # LISTEN     0      0       ::ffff:127.0.0.1:33217  ::ffff:127.0.0.1:7199
-                        # ESTAB      0      0       ::ffff:127.0.0.1:58975  ::ffff:127.0.0.1:2181
+                    # 7624 CLOSE-WAIT
+                    #   72 ESTAB
+                    #    9 LISTEN
+                    #    1 State
+                    #   37 TIME-WAIT
+                    lines = output.splitlines()
 
-                        metrics = self._parse_linux_cx_state(
-                            lines[1:], self.tcp_states['ss'], 0, protocol=protocol, ip_version=ip_version
-                        )
-                        # Only send the metrics which match the loop iteration's ip version
-                        for stat, metric in iteritems(self.cx_state_gauge):
-                            if stat[0].endswith(ip_version) and stat[0].startswith(protocol):
-                                self.gauge(metric, metrics.get(metric), tags=custom_tags)
+                    self._parse_short_state_lines(lines, metrics, self.tcp_states['ss'], ip_version=ip_version)
+
+                    cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
+                    metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
+                    metrics[metric] = int(output) - 1  # Remove header
+
+                for metric, value in iteritems(metrics):
+                    self.gauge(metric, value, tags=custom_tags)
 
             except OSError:
                 self.log.info("`ss` not found: using `netstat` as a fallback")
@@ -338,7 +337,7 @@ class Network(AgentCheck):
             except SubprocessOutputEmptyError:
                 self.log.exception("Error collecting connection stats.")
 
-        proc_dev_path = "{}/net/dev".format(proc_location)
+        proc_dev_path = "{}/net/dev".format(net_proc_base_location)
         with open(proc_dev_path, 'r') as proc:
             lines = proc.readlines()
         # Inter-|   Receive                                                 |  Transmit
@@ -364,7 +363,7 @@ class Network(AgentCheck):
 
         netstat_data = {}
         for f in ['netstat', 'snmp']:
-            proc_data_path = "{}/net/{}".format(proc_location, f)
+            proc_data_path = "{}/net/{}".format(net_proc_base_location, f)
             try:
                 with open(proc_data_path, 'r') as netstat:
                     while True:
@@ -459,6 +458,14 @@ class Network(AgentCheck):
             except IOError as e:
                 self.log.debug("Unable to read {}, skipping {}.".format(metric_file_location, e))
 
+    @staticmethod
+    def _get_net_proc_base_location(proc_location):
+        if Platform.is_containerized() and proc_location != "/proc":
+            net_proc_base_location = "%s/1" % proc_location
+        else:
+            net_proc_base_location = proc_location
+        return net_proc_base_location
+
     def _add_conntrack_stats_metrics(self, conntrack_path, tags):
         """
         Parse the output of conntrack -S
@@ -486,14 +493,23 @@ class Network(AgentCheck):
         except SubprocessOutputEmptyError:
             self.log.debug("Couldn't use {} to get conntrack stats".format(conntrack_path))
 
+    def _get_metrics(self):
+        return {val: 0 for val in itervalues(self.cx_state_gauge)}
+
+    def _parse_short_state_lines(self, lines, metrics, tcp_states, ip_version):
+        for line in lines:
+            value, state = line.split()
+            proto = "tcp{0}".format(ip_version)
+            if state in tcp_states:
+                metric = self.cx_state_gauge[proto, tcp_states[state]]
+                metrics[metric] += int(value)
+
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """
         Parse the output of the command that retrieves the connection state (either `ss` or `netstat`)
         Returns a dict metric_name -> value
         """
-        metrics = {}
-        for _, val in iteritems(self.cx_state_gauge):
-            metrics[val] = 0
+        metrics = self._get_metrics()
         for l in lines:
             cols = l.split()
             if cols[0].startswith('tcp') or protocol == 'tcp':

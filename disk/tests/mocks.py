@@ -6,12 +6,12 @@ import os
 from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT, HERE
 
 
-def mock_df_output(fname):
+def mock_blkid_output():
     """
     Load fixtures from tests/fixtures/ folder and return a tuple matching the
     return value of `get_subprocess_output`
     """
-    with open(os.path.join(HERE, 'fixtures', fname)) as f:
+    with open(os.path.join(HERE, 'fixtures', 'blkid')) as f:
         return f.read(), '', ''
 
 

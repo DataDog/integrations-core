@@ -11,7 +11,7 @@ services:
       ZK_ID: 1
 
   mesos-slave:
-    image: mesosphere/mesos-slave:1.1.0-2.0.107.ubuntu1404
+    image: mesosphere/mesos-slave:${MESOS_SLAVE_VERSION}
     network_mode: host
     pid: host
     environment:
@@ -22,11 +22,11 @@ services:
       - MESOS_HOSTNAME=127.0.0.1
       - LIBPROCESS_IP=127.0.0.1
       - MESOS_WORK_DIR=/tmp/mesos
+      - MESOS_SYSTEMD_ENABLE_SUPPORT=false
     ports:
       - 5051:5051
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
-      - /usr/local/bin/docker:/usr/bin/docker
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - zookeeper

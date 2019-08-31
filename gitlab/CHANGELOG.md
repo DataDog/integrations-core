@@ -1,5 +1,21 @@
 # CHANGELOG - gitlab
 
+## 2.5.1 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
+## 2.5.0 / 2019-08-24
+
+* [Added] Add requests wrapper to gitlab. See [#4216](https://github.com/DataDog/integrations-core/pull/4216).
+
+## 2.4.0 / 2019-07-04
+
+* [Added] Add logs. See [#3948](https://github.com/DataDog/integrations-core/pull/3948).
+
+## 2.3.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3509](https://github.com/DataDog/integrations-core/pull/3509).
+
 ## 2.2.0 / 2019-03-29
 
 * [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).

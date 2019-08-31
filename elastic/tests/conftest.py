@@ -18,6 +18,8 @@ COMPOSE_FILES_MAP = {
     '2-alpine': 'legacy.yaml',
 }
 
+INSTANCE = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS}
+
 
 def ping_elastic():
     """
@@ -41,12 +43,12 @@ def dd_environment(instance):
 
 @pytest.fixture
 def elastic_check():
-    return ESCheck('elastic', {}, {})
+    return ESCheck('elastic', {}, instances=[INSTANCE])
 
 
 @pytest.fixture(scope='session')
 def instance():
-    return {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS}
+    return INSTANCE
 
 
 @pytest.fixture(scope='session')

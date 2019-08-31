@@ -1,5 +1,15 @@
 # CHANGELOG - fluentd
 
+## 1.3.0 / 2019-08-24
+
+* [Added] Fix request wrapper timeout and add test. See [#4375](https://github.com/DataDog/integrations-core/pull/4375).
+* [Fixed] Update __init__ method params. See [#4243](https://github.com/DataDog/integrations-core/pull/4243).
+* [Added] Add support for proxy settings. See [#3479](https://github.com/DataDog/integrations-core/pull/3479).
+
+## 1.2.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3507](https://github.com/DataDog/integrations-core/pull/3507).
+
 ## 1.1.1 / 2019-03-29
 
 * [Fixed] Support fluentd v1's monitor_agent metrics. See [#2965](https://github.com/DataDog/integrations-core/pull/2965). Thanks [repeatedly](https://github.com/repeatedly).

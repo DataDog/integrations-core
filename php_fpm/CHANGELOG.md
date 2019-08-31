@@ -1,5 +1,13 @@
 # CHANGELOG - php_fpm
 
+## 1.6.0 / 2019-08-24
+
+* [Added] Add request wrappers to php_fpm. See [#4264](https://github.com/DataDog/integrations-core/pull/4264).
+
+## 1.5.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3555](https://github.com/DataDog/integrations-core/pull/3555).
+
 ## 1.4.1 / 2019-03-29
 
 * [Fixed] Properly ship flup on Python 3. See [#3304](https://github.com/DataDog/integrations-core/pull/3304).

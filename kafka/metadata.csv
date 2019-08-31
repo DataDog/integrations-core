@@ -8,8 +8,8 @@ kafka.request.channel.queue.size,gauge,10,request,,Number of queued requests.,-1
 kafka.request.fetch.failed,gauge,10,request,,Number of client fetch request failures.,-1,kafka,req fetch fail
 kafka.request.fetch.failed_per_second,gauge,10,request,second,Rate of client fetch request failures per second.,-1,kafka,req fetch fail rate
 kafka.request.handler.avg.idle.pct,gauge,10,fraction,,Average fraction of time the request handler threads are idle.,1,kafka,req handle avg idle
-kafka.request.produce.time.avg,gauge,10,request,second,Average time for a produce request.,0,kafka,req prod time avg
-kafka.request.produce.time.99percentile,gauge,10,request,second,Time for produce requests for 99th percentile.,0,kafka,req prod time 99
+kafka.request.produce.time.avg,gauge,10,millisecond,,Average time for a produce request.,0,kafka,req prod time avg
+kafka.request.produce.time.99percentile,gauge,10,millisecond,,Time for produce requests for 99th percentile.,0,kafka,req prod time 99
 kafka.request.produce.failed_per_second,gauge,10,request,second,Rate of failed produce requests per second.,-1,kafka,req prod fail rate
 kafka.request.produce.failed,gauge,10,request,,Number of failed produce requests.,-1,kafka,req prod fail
 kafka.request.fetch.time.avg,gauge,10,millisecond,,Average time per fetch request.,0,kafka,req fetch time avg
@@ -36,9 +36,9 @@ kafka.expires_sec,gauge,10,eviction,second,Rate of delayed producer request expi
 kafka.follower.expires_per_second,gauge,10,eviction,second,Rate of request expiration on followers.,-1,kafka,follow expire rate
 kafka.producer.available_buffer_bytes,gauge,10,byte,,The total amount of buffer memory that is not being used (either unallocated or in the free list),-1,kafka,available buffer bytes
 kafka.producer.batch_size_avg,gauge,10,byte,,The average number of bytes sent per partition per-request.,0,kafka,avg batch size
-kafka.producer.compression_rate_avg,rate,10,record,,The average compression rate of record batches.,0,kafka,avg compression rate
+kafka.producer.compression_rate_avg,rate,10,fraction,,The average compression rate of record batches.,0,kafka,avg compression rate
 kafka.producer.bufferpool_wait_time,gauge,10,,,The fraction of time an appender waits for space allocation.,-1,kafka,bufferpool wait time
-kafka.producer.compression_rate,gauge,10,record,second,The average compression rate of record batches for a topic,1,kafka,compression rate
+kafka.producer.compression_rate,gauge,10,fraction,,The average compression rate of record batches for a topic,1,kafka,compression rate
 kafka.producer.delayed_requests,gauge,10,request,,Number of producer requests delayed.,-1,kafka,prod expire rate
 kafka.producer.expires_per_seconds,gauge,10,eviction,second,Rate of producer request expiration.,-1,kafka,prod req expire
 kafka.producer.batch_size_max,gauge,10,byte,,The max number of bytes sent per partition per-request.,0,kafka,max batch size

@@ -1,5 +1,36 @@
 # CHANGELOG - kubernetes_state
 
+## 4.7.1 / 2019-08-26
+
+* [Fixed] Properly ignore `kube_pod_created` and `kube_pod_container_info`. See [#4435](https://github.com/DataDog/integrations-core/pull/4435).
+
+## 4.7.0 / 2019-08-24
+
+* [Added] Grab kube_node_info as kubernetes_state.node.count. See [#4383](https://github.com/DataDog/integrations-core/pull/4383). Thanks [therc](https://github.com/therc).
+* [Added] Add VPA metrics to kubernetes_state integration. See [#4353](https://github.com/DataDog/integrations-core/pull/4353). Thanks [dturn](https://github.com/dturn).
+* [Fixed] Fix KSM job metrics. See [#4224](https://github.com/DataDog/integrations-core/pull/4224).
+
+## 4.6.1 / 2019-07-19
+
+* [Fixed] Fix openmetrics mixins telemetry metrics. See [#4155](https://github.com/DataDog/integrations-core/pull/4155).
+
+## 4.6.0 / 2019-07-19
+
+* [Fixed] Fix kubernetes_state avoid tags collision. See [#4149](https://github.com/DataDog/integrations-core/pull/4149).
+* [Added] Add telemetry metrics counter by ksm collector. See [#4125](https://github.com/DataDog/integrations-core/pull/4125).
+
+## 4.5.0 / 2019-07-13
+
+* [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025). Thanks [clamoriniere](https://github.com/clamoriniere).
+
+## 4.4.1 / 2019-06-19
+
+* [Fixed] Correct service check for ksm - cronjob. See [#3937](https://github.com/DataDog/integrations-core/pull/3937).
+
+## 4.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3526](https://github.com/DataDog/integrations-core/pull/3526).
+
 ## 4.3.0 / 2019-03-29
 
 * [Added] Upgrade protobuf to 3.7.0. See [#3272](https://github.com/DataDog/integrations-core/pull/3272).

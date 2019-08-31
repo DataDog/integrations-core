@@ -1,5 +1,18 @@
 # CHANGELOG - ssh_check
 
+## 1.8.0 / 2019-08-24
+
+* [Fixed] Remove unused dependencies. See [#4405](https://github.com/DataDog/integrations-core/pull/4405).
+* [Added] Upgrade pyasn1. See [#4289](https://github.com/DataDog/integrations-core/pull/4289).
+
+## 1.7.0 / 2019-07-04
+
+* [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
+
+## 1.6.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3569](https://github.com/DataDog/integrations-core/pull/3569).
+
 ## 1.5.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2836][1].

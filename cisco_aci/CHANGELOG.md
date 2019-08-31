@@ -1,5 +1,26 @@
 # CHANGELOG - cisco_aci
 
+## 1.7.2 / 2019-08-24
+
+* [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).
+
+## 1.7.1 / 2019-07-08
+
+* [Fixed] Fix event submission call. See [#4044](https://github.com/DataDog/integrations-core/pull/4044).
+
+## 1.7.0 / 2019-07-04
+
+* [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).
+
+## 1.6.0 / 2019-06-01
+
+* [Added] Improve API logs. See [#3794](https://github.com/DataDog/integrations-core/pull/3794).
+* [Fixed] Sanitize external host tags. See [#3792](https://github.com/DataDog/integrations-core/pull/3792).
+
+## 1.5.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3489](https://github.com/DataDog/integrations-core/pull/3489).
+
 ## 1.4.0 / 2019-02-18
 
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).

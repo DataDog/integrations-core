@@ -24,6 +24,7 @@ Original discussion thread: https://github.com/DataDog/dd-agent/issues/1952
 Credits to @TheCloudlessSky (https://github.com/TheCloudlessSky)
 """
 from copy import deepcopy
+from threading import Event, Thread
 
 import pythoncom
 import pywintypes
@@ -31,7 +32,6 @@ from six import iteritems, string_types, with_metaclass
 from six.moves import zip
 from win32com.client import Dispatch
 
-from ....utils.timeout import TimeoutException, timeout
 from .counter_type import UndefinedCalculator, get_calculator, get_raw
 
 
@@ -78,20 +78,6 @@ class WMISampler(object):
     WMI Sampler.
     """
 
-    # Properties
-    _provider = None
-    _formatted_filters = None
-
-    # Type resolution state
-    _property_counter_types = None
-
-    # Samples
-    _current_sample = None
-    _previous_sample = None
-
-    # Sampling state
-    _sampling = False
-
     def __init__(
         self,
         logger,
@@ -106,6 +92,20 @@ class WMISampler(object):
         and_props=None,
         timeout_duration=10,
     ):
+        # Properties
+        self._provider = None
+        self._formatted_filters = None
+
+        # Type resolution state
+        self._property_counter_types = None
+
+        # Samples
+        self._current_sample = None
+        self._previous_sample = None
+
+        # Sampling state
+        self._sampling = False
+
         self.logger = logger
 
         # Connection information
@@ -142,7 +142,30 @@ class WMISampler(object):
         self.filters = filters
         self._and_props = and_props if and_props is not None else []
         self._timeout_duration = timeout_duration
-        self._query = timeout(timeout_duration)(self._query)
+
+        self._runSampleEvent = Event()
+        self._sampleCompleteEvent = Event()
+
+        thread = Thread(target=self._query_sample_loop, name=class_name)
+        thread.daemon = True
+        thread.start()
+
+    def _query_sample_loop(self):
+        try:
+            pythoncom.CoInitialize()
+        except Exception as e:
+            self.logger.info("exception in CoInitialize {}".format(e))
+            raise
+
+        while True:
+            self._runSampleEvent.wait()
+            self._runSampleEvent.clear()
+            if self.is_raw_perf_class and not self._previous_sample:
+                self._current_sample = self._query()
+
+            self._previous_sample = self._current_sample
+            self._current_sample = self._query()
+            self._sampleCompleteEvent.set()
 
     @property
     def provider(self):
@@ -208,18 +231,10 @@ class WMISampler(object):
         Compute new samples.
         """
         self._sampling = True
-
-        try:
-            if self.is_raw_perf_class and not self._previous_sample:
-                self._current_sample = self._query()
-
-            self._previous_sample = self._current_sample
-            self._current_sample = self._query()
-        except TimeoutException:
-            self.logger.debug(u"Query timeout after {timeout}s".format(timeout=self._timeout_duration))
-            raise
-        else:
-            self._sampling = False
+        self._runSampleEvent.set()
+        self._sampleCompleteEvent.wait()
+        self._sampleCompleteEvent.clear()
+        self._sampling = False
 
     def __len__(self):
         """
@@ -326,7 +341,6 @@ class WMISampler(object):
         # without a deep knowledge of COM's threading model). Because of this and given
         # that we run each query in its own thread, we don't cache connections
         additional_args = []
-        pythoncom.CoInitialize()
 
         if self.provider != ProviderArchitecture.DEFAULT:
             context = Dispatch("WbemScripting.SWbemNamedValueSet")

@@ -1,5 +1,13 @@
 # CHANGELOG - kyototycoon
 
+## 1.7.0 / 2019-08-24
+
+* [Added] Add Requests Wrapper to Kyototycoon. See [#4199](https://github.com/DataDog/integrations-core/pull/4199).
+
+## 1.6.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3531](https://github.com/DataDog/integrations-core/pull/3531).
+
 ## 1.5.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#3013](https://github.com/DataDog/integrations-core/pull/3013).

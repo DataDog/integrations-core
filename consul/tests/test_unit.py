@@ -11,11 +11,13 @@ from datadog_checks.utils.containers import hash_mutable
 
 from . import common, consul_mocks
 
+pytestmark = pytest.mark.unit
+
 log = logging.getLogger(__file__)
 
 
 def test_get_nodes_with_service(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
     consul_check.check(consul_mocks.MOCK_CONFIG)
 
@@ -40,7 +42,7 @@ def test_get_nodes_with_service(aggregator):
 
 def test_get_peers_in_cluster(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     consul_mocks.mock_check(consul_check, my_mocks)
     consul_check.check(consul_mocks.MOCK_CONFIG)
 
@@ -56,7 +58,7 @@ def test_get_peers_in_cluster(aggregator):
 
 def test_count_all_nodes(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     consul_mocks.mock_check(consul_check, my_mocks)
     consul_check.check(consul_mocks.MOCK_CONFIG)
 
@@ -64,7 +66,7 @@ def test_count_all_nodes(aggregator):
 
 
 def test_get_nodes_with_service_warning(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_warning
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -88,7 +90,7 @@ def test_get_nodes_with_service_warning(aggregator):
 
 
 def test_get_nodes_with_service_critical(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_critical
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -112,7 +114,7 @@ def test_get_nodes_with_service_critical(aggregator):
 
 
 def test_consul_request(aggregator, instance):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     with mock.patch("datadog_checks.consul.consul.requests.get") as mock_requests_get:
         consul_check.consul_request(instance, "foo")
         url = "{}/{}".format(instance["url"], "foo")
@@ -132,7 +134,7 @@ def test_consul_request(aggregator, instance):
 
 
 def test_service_checks(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['consul_request'] = consul_mocks.mock_get_health_check
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -172,7 +174,7 @@ def test_service_checks(aggregator):
 
 
 def test_cull_services_list():
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     consul_mocks.mock_check(consul_check, my_mocks)
     consul_check.check(consul_mocks.MOCK_CONFIG_LEADER_CHECK)
@@ -228,7 +230,7 @@ def test_cull_services_list():
 
 
 def test_new_leader_event(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['_get_cluster_leader'] = consul_mocks.mock_get_cluster_leader_B
     consul_mocks.mock_check(consul_check, my_mocks)
@@ -246,7 +248,7 @@ def test_new_leader_event(aggregator):
 
 
 def test_self_leader_event(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK])
     my_mocks = consul_mocks._get_consul_mocks()
 
     instance_hash = hash_mutable(consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK)
@@ -293,7 +295,7 @@ def test_self_leader_event(aggregator):
 
 
 def test_network_latency_checks(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, {})
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
     my_mocks = consul_mocks._get_consul_mocks()
     consul_mocks.mock_check(consul_check, my_mocks)
 
@@ -320,3 +322,54 @@ def test_network_latency_checks(aggregator):
     node = [m for m in latency if '.node.latency.' in m[0]]
     assert 16 == len(node)
     assert 0.26577747932995816 == node[0][2]
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        (
+            "new config",
+            {
+                'tls_cert': 'certfile',
+                'tls_private_key': 'keyfile',
+                'tls_ca_cert': 'file/path',
+                'acl_token': 'token',
+                'headers': {'X-foo': 'bar'},
+            },
+            {
+                'cert': ('certfile', 'keyfile'),
+                'verify': 'file/path',
+                'headers': {'X-Consul-Token': 'token', 'X-foo': 'bar'},
+            },
+        ),
+        ("default config", {}, {'cert': None, 'verify': True, 'headers': {'User-Agent': 'Datadog Agent/0.0.0'}}),
+        (
+            "legacy config",
+            {
+                'client_cert_file': 'certfile',
+                'private_key_file': 'keyfile',
+                'ca_bundle_file': 'file/path',
+                'acl_token': 'token',
+            },
+            {
+                'cert': ('certfile', 'keyfile'),
+                'verify': 'file/path',
+                'headers': {'X-Consul-Token': 'token', 'User-Agent': 'Datadog Agent/0.0.0'},
+            },
+        ),
+    ],
+)
+def test_config(test_case, extra_config, expected_http_kwargs):
+    instance = extra_config
+    check = ConsulCheck(common.CHECK_NAME, {}, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_wargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_wargs.update(expected_http_kwargs)
+        r.get.assert_called_with('/v1/status/leader', **http_wargs)

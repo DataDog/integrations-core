@@ -5,11 +5,11 @@ import os
 
 import click
 import pyperclip
-from six import string_types
 
 from ....utils import dir_exists, file_exists, path_join
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
-from ...testing import get_available_tox_envs
+from ...e2e.agent import DEFAULT_PYTHON_VERSION
+from ...testing import get_available_tox_envs, get_tox_env_python_version
 from ...utils import get_tox_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
@@ -20,12 +20,17 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 @click.option(
     '--agent',
     '-a',
-    default='6',
     help=(
         'The agent build to use e.g. a Docker image like `datadog/agent:6.5.2`. For '
         'Docker environments you can use an integer corresponding to fields in the '
         'config (agent5, agent6, etc.)'
     ),
+)
+@click.option(
+    '--python',
+    '-py',
+    type=click.INT,
+    help='The version of Python to use. Defaults to {} if no tox Python is specified.'.format(DEFAULT_PYTHON_VERSION),
 )
 @click.option('--dev/--prod', help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
@@ -39,7 +44,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     ),
 )
 @click.pass_context
-def start(ctx, check, env, agent, dev, base, env_vars):
+def start(ctx, check, env, agent, python, dev, base, env_vars):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
@@ -64,6 +69,16 @@ def start(ctx, check, env, agent, dev, base, env_vars):
         echo_info('See what is available via `ddev env ls {}`.'.format(check))
         abort()
 
+    env_python_version = get_tox_env_python_version(env)
+    if not python:
+        # Make the tox environment Python specifier influence the Agent
+        python = env_python_version or DEFAULT_PYTHON_VERSION
+    elif env_python_version and env_python_version != int(python):
+        echo_warning(
+            'The local environment `{}` does not match the expected Python. The Agent will use Python {}. '
+            'To influence the Agent Python version, use the `-py/--python` option.'.format(env, python)
+        )
+
     api_key = ctx.obj['dd_api_key']
     if api_key is None:
         echo_warning(
@@ -76,29 +91,22 @@ def start(ctx, check, env, agent, dev, base, env_vars):
     config, metadata, error = start_environment(check, env)
 
     if error:
-        echo_failure('failed!')
-        echo_waiting('Stopping the environment...')
-        stop_environment(check, env, metadata=metadata)
-        abort(error)
+        if 'does not support this platform' in error:
+            echo_warning(error)
+            abort(code=0)
+        else:
+            echo_failure('failed!')
+            echo_waiting('Stopping the environment...')
+            stop_environment(check, env, metadata=metadata)
+            abort(error)
     echo_success('success!')
 
     env_type = metadata['env_type']
-    use_jmx = metadata.get('use_jmx', False)
 
-    # Support legacy config where agent5 and agent6 were strings
-    agent_ver = ctx.obj.get('agent{}'.format(agent), agent)
-    if isinstance(agent_ver, string_types):
-        agent_build = agent_ver
-        if agent_ver != agent:
-            echo_warning(
-                'Agent fields missing from ddev config, please update to the latest config via '
-                '`ddev config update`, falling back to latest docker image...'
-            )
-    else:
-        agent_build = agent_ver.get(env_type, env_type)
-
-    if not isinstance(agent_ver, string_types) and use_jmx:
-        agent_build = '{}-jmx'.format(agent_build)
+    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', '6')
+    agent_build = ctx.obj.get('agent{}'.format(agent_ver), agent_ver)
+    if isinstance(agent_build, dict):
+        agent_build = agent_build.get(env_type, env_type)
 
     interface = derive_interface(env_type)
     if interface is None:
@@ -107,13 +115,17 @@ def start(ctx, check, env, agent, dev, base, env_vars):
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    if env_type not in E2E_SUPPORTED_TYPES and agent.isdigit():
+    if env_type not in E2E_SUPPORTED_TYPES and agent_ver.isdigit():
         echo_failure('Configuration for default Agents are only for Docker. You must specify the full build.')
         echo_waiting('Stopping the environment...')
         stop_environment(check, env, metadata=metadata)
         abort()
 
-    environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key)
+    env_vars = dict(ev.split('=', 1) for ev in env_vars)
+    for key, value in metadata.get('env_vars', {}).items():
+        env_vars.setdefault(key, value)
+
+    environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key, python)
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)
     environment.update_agent()

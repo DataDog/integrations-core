@@ -66,13 +66,14 @@ def gauges():
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check(aggregator, check, gauges, instance):
+def test_check(aggregator, gauges):
     """
     Testing Couchdb2 check.
     """
     configs = [deepcopy(common.NODE1), deepcopy(common.NODE2), deepcopy(common.NODE3)]
 
     for config in configs:
+        check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
 
     for config in configs:
@@ -100,14 +101,14 @@ def test_check(aggregator, check, gauges, instance):
     for node in [common.NODE2, common.NODE3]:
         expected_tags = ["instance:{}".format(node["name"])]
         # One for the server stats, the version is already loaded
-        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
+        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=2)
 
     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_db_whitelisting(aggregator, check, gauges, instance):
+def test_db_whitelisting(aggregator, gauges):
     configs = []
 
     for n in [common.NODE1, common.NODE2, common.NODE3]:
@@ -116,6 +117,7 @@ def test_db_whitelisting(aggregator, check, gauges, instance):
         configs.append(node)
 
     for config in configs:
+        check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
 
     for _ in configs:
@@ -131,7 +133,7 @@ def test_db_whitelisting(aggregator, check, gauges, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_db_blacklisting(aggregator, check, gauges, instance):
+def test_db_blacklisting(aggregator, gauges):
     configs = []
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
@@ -140,6 +142,7 @@ def test_db_blacklisting(aggregator, check, gauges, instance):
         configs.append(config)
 
     for config in configs:
+        check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
 
     for _ in configs:
@@ -155,9 +158,10 @@ def test_db_blacklisting(aggregator, check, gauges, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_check_without_names(aggregator, check, gauges, instance):
+def test_check_without_names(aggregator, gauges):
     config = deepcopy(common.NODE1)
     config.pop('name')
+    check = CouchDb(common.CHECK_NAME, {}, [config])
     check.check(config)
 
     configs = [common.NODE1, common.NODE2, common.NODE3]
@@ -194,11 +198,12 @@ def test_check_without_names(aggregator, check, gauges, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_only_max_nodes_are_scanned(aggregator, check, gauges, instance):
+def test_only_max_nodes_are_scanned(aggregator, gauges):
     config = deepcopy(common.NODE1)
     config.pop("name")
     config['max_nodes_per_check'] = 2
 
+    check = CouchDb(common.CHECK_NAME, {}, [config])
     check.check(config)
 
     for gauge in gauges["erlang_gauges"]:
@@ -245,7 +250,7 @@ def test_only_max_nodes_are_scanned(aggregator, check, gauges, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_only_max_dbs_are_scanned(aggregator, check, gauges, instance):
+def test_only_max_dbs_are_scanned(aggregator, gauges):
     configs = []
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
@@ -253,6 +258,7 @@ def test_only_max_dbs_are_scanned(aggregator, check, gauges, instance):
         configs.append(config)
 
     for config in configs:
+        check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
 
     for db in ['kennel', '_replicator']:
@@ -268,7 +274,7 @@ def test_only_max_dbs_are_scanned(aggregator, check, gauges, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_replication_metrics(aggregator, check, gauges, instance):
+def test_replication_metrics(aggregator, gauges):
     url = "{}/_replicator".format(common.NODE1['server'])
     replication_body = {
         '_id': 'my_replication_id',
@@ -295,8 +301,8 @@ def test_replication_metrics(aggregator, check, gauges, instance):
         r.raise_for_status()
         count = len(r.json())
 
-    check = CouchDb(common.CHECK_NAME, {}, {})
     for config in [common.NODE1, common.NODE2, common.NODE3]:
+        check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
 
     for gauge in gauges["replication_tasks_gauges"]:
@@ -305,7 +311,7 @@ def test_replication_metrics(aggregator, check, gauges, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_compaction_metrics(aggregator, check, gauges, instance):
+def test_compaction_metrics(aggregator, gauges):
     url = "{}/kennel".format(common.NODE1['server'])
     body = {'_id': 'fsdr2345fgwert249i9fg9drgsf4SDFGWE', 'data': str(time.time())}
     r = requests.post(
@@ -318,7 +324,7 @@ def test_compaction_metrics(aggregator, check, gauges, instance):
 
     update_url = '{}/{}'.format(url, body['_id'])
 
-    for _ in range(50):
+    for _ in range(100):
         rev = r.json()['rev']
         body['data'] = str(time.time())
         body['_rev'] = rev
@@ -351,6 +357,7 @@ def test_compaction_metrics(aggregator, check, gauges, instance):
     r.raise_for_status()
 
     for config in [common.NODE1, common.NODE2, common.NODE3]:
+        check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
 
     for gauge in gauges["compaction_tasks_gauges"]:
@@ -359,24 +366,23 @@ def test_compaction_metrics(aggregator, check, gauges, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_indexing_metrics(aggregator, check, gauges, active_tasks):
+def test_indexing_metrics(aggregator, gauges, active_tasks):
     """
     Testing metrics coming from a running indexer would be extremely flaky,
     let's use mock.
     """
     from datadog_checks.couch import couch
 
-    check.checker = couch.CouchDB2(check)
-
-    def _get(url, instance, tags, run_check=False):
+    def _get(url, tags, run_check=False):
         if '_active_tasks' in url:
             return active_tasks
         return {}
 
-    check.get = _get
-
     # run the check on all instances
     for config in [common.NODE1, common.NODE2, common.NODE3]:
+        check = CouchDb(common.CHECK_NAME, {}, [config])
+        check.checker = couch.CouchDB2(check)
+        check.get = _get
         check.check(config)
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
@@ -387,7 +393,7 @@ def test_indexing_metrics(aggregator, check, gauges, active_tasks):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_view_compaction_metrics(aggregator, check, gauges, instance):
+def test_view_compaction_metrics(aggregator, gauges):
     class LoadGenerator(threading.Thread):
         STOP = 0
         RUN = 1
@@ -461,6 +467,7 @@ def test_view_compaction_metrics(aggregator, check, gauges, instance):
 
             try:
                 for config in [common.NODE1, common.NODE2, common.NODE3]:
+                    check = CouchDb(common.CHECK_NAME, {}, [config])
                     check.check(config)
             except Exception:
                 time.sleep(1)
@@ -485,11 +492,12 @@ def test_view_compaction_metrics(aggregator, check, gauges, instance):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_config_tags(aggregator, check, gauges, instance):
+def test_config_tags(aggregator, gauges):
     TEST_TAG = "test_tag:test"
     config = deepcopy(common.NODE1)
     config['tags'] = [TEST_TAG]
 
+    check = CouchDb(common.CHECK_NAME, {}, [config])
     check.check(config)
 
     for gauge in gauges["erlang_gauges"]:

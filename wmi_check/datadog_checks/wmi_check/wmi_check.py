@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-# project
 from datadog_checks.checks.win.wmi import WinWMICheck
 from datadog_checks.utils.containers import hash_mutable
 from datadog_checks.utils.timeout import TimeoutException
@@ -24,6 +23,7 @@ class WMICheck(WinWMICheck):
         """
         Fetch WMI metrics.
         """
+
         # Connection information
         host = instance.get('host', "localhost")
         namespace = instance.get('namespace', "root\\cimv2")

@@ -1,5 +1,19 @@
 # CHANGELOG - teamcity
 
+## 1.5.1 / 2019-08-31
+
+* [Fixed] Fix RequestsWrapper usage. See [#4486](https://github.com/DataDog/integrations-core/pull/4486).
+
+## 1.5.0 / 2019-08-24
+
+* [Fixed] Update __init__ method params. See [#4243](https://github.com/DataDog/integrations-core/pull/4243).
+* [Fixed] Fix wording for config option description. See [#4217](https://github.com/DataDog/integrations-core/pull/4217).
+* [Added] Add requests wrapper to teamcity. See [#4209](https://github.com/DataDog/integrations-core/pull/4209).
+
+## 1.4.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3575](https://github.com/DataDog/integrations-core/pull/3575).
+
 ## 1.3.0 / 2019-02-18
 
 * [Fixed] Resolve flake8 issues. See [#3060](https://github.com/DataDog/integrations-core/pull/3060).

@@ -1,5 +1,13 @@
 # CHANGELOG - Squid
 
+## 1.3.0 / 2019-08-24
+
+* [Added] Add requests wrapper to squid. See [#4200](https://github.com/DataDog/integrations-core/pull/4200).
+
+## 1.2.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3568](https://github.com/DataDog/integrations-core/pull/3568).
+
 ## 1.1.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2788][1].

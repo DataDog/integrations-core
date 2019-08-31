@@ -5,64 +5,20 @@
 import logging
 
 import pytest
+from six import iteritems
 
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.ibm_mq import IbmMqCheck
+from datadog_checks.ibm_mq.config import IBMMQConfig
 
 from . import common
+from .common import METRICS, OPTIONAL_METRICS, QUEUE_METRICS
 
 log = logging.getLogger(__file__)
 
-QUEUE_METRICS = [
-    'ibm_mq.queue.service_interval',
-    'ibm_mq.queue.inhibit_put',
-    'ibm_mq.queue.depth_low_limit',
-    'ibm_mq.queue.inhibit_get',
-    'ibm_mq.queue.harden_get_backout',
-    'ibm_mq.queue.service_interval_event',
-    'ibm_mq.queue.trigger_control',
-    'ibm_mq.queue.usage',
-    'ibm_mq.queue.scope',
-    'ibm_mq.queue.type',
-    'ibm_mq.queue.depth_max',
-    'ibm_mq.queue.backout_threshold',
-    'ibm_mq.queue.depth_high_event',
-    'ibm_mq.queue.depth_low_event',
-    'ibm_mq.queue.trigger_message_priority',
-    'ibm_mq.queue.depth_current',
-    'ibm_mq.queue.depth_max_event',
-    'ibm_mq.queue.open_input_count',
-    'ibm_mq.queue.persistence',
-    'ibm_mq.queue.trigger_depth',
-    'ibm_mq.queue.max_message_length',
-    'ibm_mq.queue.depth_high_limit',
-    'ibm_mq.queue.priority',
-    'ibm_mq.queue.input_open_option',
-    'ibm_mq.queue.message_delivery_sequence',
-    'ibm_mq.queue.retention_interval',
-    'ibm_mq.queue.open_output_count',
-    'ibm_mq.queue.trigger_type',
-    'ibm_mq.queue.depth_percent',
-]
-
-METRICS = [
-    'ibm_mq.queue_manager.dist_lists',
-    'ibm_mq.queue_manager.max_msg_list',
-    'ibm_mq.channel.channels',
-] + QUEUE_METRICS
-
-OPTIONAL_METRICS = [
-    'ibm_mq.queue.max_channels',
-    'ibm_mq.channel.batch_size',
-    'ibm_mq.channel.batch_interval',
-    'ibm_mq.channel.long_retry_count',
-    'ibm_mq.channel.long_retry_interval',
-    'ibm_mq.channel.max_message_length',
-    'ibm_mq.channel.short_retry_count',
-]
-
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, instance, seed_data):
+def test_service_check_connection_issues(aggregator, instance, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance)
 
@@ -86,10 +42,120 @@ def test_check(aggregator, instance, seed_data):
     aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags)
 
 
-@pytest.mark.usefixtures("dd_environment")
-def test_check_pattern(aggregator, instance_pattern, seed_data):
+def test_channel_status_service_check_default_mapping(aggregator, instance):
+    # Late import to not require it for e2e
+    import pymqi
+
     check = IbmMqCheck('ibm_mq', {}, {})
-    check.check(instance_pattern)
+
+    config = IBMMQConfig(instance)
+
+    service_check_map = {
+        pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
+        pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
+        pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
+        pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
+        pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
+    }
+
+    for status in service_check_map:
+        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)], config)
+
+    for status, service_check_status in iteritems(service_check_map):
+        aggregator.assert_service_check(
+            'ibm_mq.channel.status', service_check_status, tags=["channel:my_channel_{}".format(status)]
+        )
+
+
+def test_channel_status_service_check_custom_mapping(aggregator, instance):
+    # Late import to not require it for e2e
+    import pymqi
+
+    instance['channel_status_mapping'] = {
+        'inactive': 'warning',
+        'binding': 'warning',
+        'starting': 'warning',
+        'running': 'ok',
+        'stopping': 'critical',
+        'retrying': 'warning',
+        'stopped': 'critical',
+        'requesting': 'warning',
+        'paused': 'warning',
+        # 'initializing': '',  # missing mapping are reported as unknown
+    }
+
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    config = IBMMQConfig(instance)
+
+    service_check_map = {
+        pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
+        pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
+        pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
+        pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.UNKNOWN,
+    }
+
+    for status in service_check_map:
+        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)], config)
+
+    for status, service_check_status in iteritems(service_check_map):
+        aggregator.assert_service_check(
+            'ibm_mq.channel.status', service_check_status, tags=["channel:my_channel_{}".format(status)]
+        )
+
+
+@pytest.mark.parametrize('channel_status_mapping', [{'inactive': 'warningXX'}, {'inactiveXX': 'warning'}])
+def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, instance, channel_status_mapping):
+    instance['channel_status_mapping'] = channel_status_mapping
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    with pytest.raises(ConfigurationError):
+        check.check(instance)
+
+
+@pytest.mark.parametrize(
+    'channel_status_mapping, expected_service_check_status',
+    [({'running': 'warning'}, AgentCheck.WARNING), ({'running': 'critical'}, AgentCheck.CRITICAL)],
+)
+@pytest.mark.usefixtures("dd_environment")
+def test_integration_custom_mapping(aggregator, instance, channel_status_mapping, expected_service_check_status):
+    instance['channel_status_mapping'] = channel_status_mapping
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    check.check(instance)
+
+    aggregator.assert_service_check('ibm_mq.channel.status', expected_service_check_status)
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_queue_pattern(aggregator, instance_queue_pattern, seed_data):
+    check = IbmMqCheck('ibm_mq', {}, {})
+    check.check(instance_queue_pattern)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+
+    for metric in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_queue_regex(aggregator, instance_queue_regex, seed_data):
+    check = IbmMqCheck('ibm_mq', {}, {})
+    check.check(instance_queue_regex)
 
     for metric in METRICS:
         aggregator.assert_metric(metric)
@@ -114,7 +180,7 @@ def test_check_all(aggregator, instance_collect_all, seed_data):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_regex(aggregator, instance_queue_regex_tag, seed_data):
+def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance_queue_regex_tag)
 
@@ -129,3 +195,57 @@ def test_check_regex(aggregator, instance_queue_regex_tag, seed_data):
 
     for metric in QUEUE_METRICS:
         aggregator.assert_metric(metric, tags=tags)
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_channel_count(aggregator, instance_queue_regex_tag, seed_data):
+    # Late import to not require it for e2e
+    import pymqi
+
+    metrics_to_assert = {
+        "inactive": 0,
+        "binding": 0,
+        "starting": 0,
+        "running": 1,
+        "stopping": 0,
+        "retrying": 0,
+        "stopped": 0,
+        "requesting": 0,
+        "paused": 0,
+        "initializing": 0,
+        "unknown": 0,
+    }
+
+    check = IbmMqCheck('ibm_mq', {}, {})
+    check._submit_channel_count('my_channel', pymqi.CMQCFC.MQCHS_RUNNING, ["channel:my_channel"])
+
+    for status, expected_value in iteritems(metrics_to_assert):
+        aggregator.assert_metric(
+            'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
+        )
+    aggregator.assert_metric('ibm_mq.channel.count', 0, tags=["channel:my_channel", "status:unknown"])
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_channel_count_status_unknown(aggregator, instance_queue_regex_tag, seed_data):
+    metrics_to_assert = {
+        "inactive": 0,
+        "binding": 0,
+        "starting": 0,
+        "running": 0,
+        "stopping": 0,
+        "retrying": 0,
+        "stopped": 0,
+        "requesting": 0,
+        "paused": 0,
+        "initializing": 0,
+        "unknown": 1,
+    }
+
+    check = IbmMqCheck('ibm_mq', {}, {})
+    check._submit_channel_count('my_channel', 123, ["channel:my_channel"])
+
+    for status, expected_value in iteritems(metrics_to_assert):
+        aggregator.assert_metric(
+            'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
+        )

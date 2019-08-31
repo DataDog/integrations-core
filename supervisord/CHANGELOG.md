@@ -1,5 +1,10 @@
 # CHANGELOG - supervisord
 
+## 1.2.0 / 2019-05-14
+
+* [Added] Support Python 3. See [#3605](https://github.com/DataDog/integrations-core/pull/3605).
+* [Added] Adhere to code style. See [#3571](https://github.com/DataDog/integrations-core/pull/3571).
+
 ## 1.1.4 / 2018-10-29
 
 * [Fixed] Fix AgentCheck import. See [#2482][1].

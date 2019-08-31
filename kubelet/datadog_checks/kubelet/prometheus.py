@@ -10,7 +10,7 @@ from six import iteritems
 from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
-from .common import get_pod_by_uid, is_static_pending_pod
+from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix
 
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
@@ -31,6 +31,7 @@ class CadvisorPrometheusScraperMixin(object):
         # and container_<metric-name>_limit_<metric-unit> reads it to compute <metric-name>usage_pct
         self.fs_usage_bytes = {}
         self.mem_usage_bytes = {}
+        self.swap_usage_bytes = {}
 
         self.CADVISOR_METRIC_TRANSFORMERS = {
             'container_cpu_usage_seconds_total': self.container_cpu_usage_seconds_total,
@@ -51,8 +52,11 @@ class CadvisorPrometheusScraperMixin(object):
             'container_fs_limit_bytes': self.container_fs_limit_bytes,
             'container_memory_usage_bytes': self.container_memory_usage_bytes,
             'container_memory_working_set_bytes': self.container_memory_working_set_bytes,
+            'container_memory_cache': self.container_memory_cache,
             'container_memory_rss': self.container_memory_rss,
+            'container_memory_swap': self.container_memory_swap,
             'container_spec_memory_limit_bytes': self.container_spec_memory_limit_bytes,
+            'container_spec_memory_swap_limit_bytes': self.container_spec_memory_swap_limit_bytes,
         }
 
     def _create_cadvisor_prometheus_instance(self, instance):
@@ -85,7 +89,6 @@ class CadvisorPrometheusScraperMixin(object):
                     'container_fs_writes_total',
                     'container_last_seen',
                     'container_start_time_seconds',
-                    'container_spec_memory_swap_limit_bytes',
                     'container_scrape_error',
                 ],
                 # Defaults that were set when CadvisorPrometheusScraper was based on PrometheusScraper
@@ -264,11 +267,14 @@ class CadvisorPrometheusScraperMixin(object):
                 # metric.Clear()  # Ignore this metric message
         return seen
 
-    def _process_container_metric(self, type, metric_name, metric, scraper_config):
+    def _process_container_metric(self, type, metric_name, metric, scraper_config, labels=None):
         """
         Takes a simple metric about a container, reports it as a rate or gauge.
         If several series are found for a given container, values are summed before submission.
         """
+        if labels is None:
+            labels = []
+
         if metric.type not in METRIC_TYPES:
             self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
             return
@@ -279,16 +285,21 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(c_id, tagger.HIGH)
-            tags += scraper_config['custom_tags']
+            tags = scraper_config['custom_tags'][:]
+            tags += tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH) or []
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
             pod = self._get_pod_by_metric_label(sample[self.SAMPLE_LABELS])
             if pod is not None and is_static_pending_pod(pod):
-                tags += tagger.tag('kubernetes_pod://%s' % pod["metadata"]["uid"], tagger.HIGH)
+                tags += tagger.tag('kubernetes_pod_uid://%s' % pod["metadata"]["uid"], tagger.HIGH) or []
                 tags += self._get_kube_container_name(sample[self.SAMPLE_LABELS])
                 tags = list(set(tags))
+
+            for label in labels:
+                value = sample[self.SAMPLE_LABELS].get(label)
+                if value:
+                    tags.append('%s:%s' % (label, value))
 
             val = sample[self.SAMPLE_VALUE]
 
@@ -297,11 +308,14 @@ class CadvisorPrometheusScraperMixin(object):
             elif "gauge" == type:
                 self.gauge(metric_name, val, tags)
 
-    def _process_pod_rate(self, metric_name, metric, scraper_config):
+    def _process_pod_rate(self, metric_name, metric, scraper_config, labels=None):
         """
         Takes a simple metric about a pod, reports it as a rate.
         If several series are found for a given pod, values are summed before submission.
         """
+        if labels is None:
+            labels = []
+
         if metric.type not in METRIC_TYPES:
             self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
             return
@@ -310,17 +324,24 @@ class CadvisorPrometheusScraperMixin(object):
         for pod_uid, sample in iteritems(samples):
             if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
                 continue
-            tags = tagger.tag('kubernetes_pod://%s' % pod_uid, tagger.HIGH)
+            tags = tagger.tag('kubernetes_pod_uid://%s' % pod_uid, tagger.HIGH) or []
             tags += scraper_config['custom_tags']
+            for label in labels:
+                value = sample[self.SAMPLE_LABELS].get(label)
+                if value:
+                    tags.append('%s:%s' % (label, value))
             val = sample[self.SAMPLE_VALUE]
             self.rate(metric_name, val, tags)
 
-    def _process_usage_metric(self, m_name, metric, cache, scraper_config):
+    def _process_usage_metric(self, m_name, metric, cache, scraper_config, labels=None):
         """
         Takes a metric object, a metric name, and a cache dict where it will store
         container_name --> (value, tags) so that _process_limit_metric can compute usage_pct
         it also submit said value and tags as a gauge.
         """
+        if labels is None:
+            labels = []
+
         # track containers that still exist in the cache
         seen_keys = {k: False for k in cache}
 
@@ -333,16 +354,21 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(c_id, tagger.HIGH)
-            tags += scraper_config['custom_tags']
+            tags = scraper_config['custom_tags'][:]
+            tags += tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH) or []
 
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
             pod = self._get_pod_by_metric_label(sample[self.SAMPLE_LABELS])
             if pod is not None and is_static_pending_pod(pod):
-                tags += tagger.tag('kubernetes_pod://%s' % pod["metadata"]["uid"], tagger.HIGH)
+                tags += tagger.tag('kubernetes_pod_uid://%s' % pod["metadata"]["uid"], tagger.HIGH) or []
                 tags += self._get_kube_container_name(sample[self.SAMPLE_LABELS])
                 tags = list(set(tags))
+
+            for label in labels:
+                value = sample[self.SAMPLE_LABELS].get(label)
+                if value:
+                    tags.append('%s:%s' % (label, value))
 
             val = sample[self.SAMPLE_VALUE]
             cache[c_name] = (val, tags)
@@ -367,8 +393,8 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(c_id, tagger.HIGH)
-            tags += scraper_config['custom_tags']
+            tags = scraper_config['custom_tags'][:]
+            tags += tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH) or []
 
             if m_name:
                 self.gauge(m_name, limit, tags)
@@ -420,35 +446,43 @@ class CadvisorPrometheusScraperMixin(object):
 
     def container_fs_reads_bytes_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.io.read_bytes'
-        self._process_container_metric('rate', metric_name, metric, scraper_config)
+        labels = ['device']
+        self._process_container_metric('rate', metric_name, metric, scraper_config, labels=labels)
 
     def container_fs_writes_bytes_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.io.write_bytes'
-        self._process_container_metric('rate', metric_name, metric, scraper_config)
+        labels = ['device']
+        self._process_container_metric('rate', metric_name, metric, scraper_config, labels=labels)
 
     def container_network_receive_bytes_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.network.rx_bytes'
-        self._process_pod_rate(metric_name, metric, scraper_config)
+        labels = ['interface']
+        self._process_pod_rate(metric_name, metric, scraper_config, labels=labels)
 
     def container_network_transmit_bytes_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.network.tx_bytes'
-        self._process_pod_rate(metric_name, metric, scraper_config)
+        labels = ['interface']
+        self._process_pod_rate(metric_name, metric, scraper_config, labels=labels)
 
     def container_network_receive_errors_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.network.rx_errors'
-        self._process_pod_rate(metric_name, metric, scraper_config)
+        labels = ['interface']
+        self._process_pod_rate(metric_name, metric, scraper_config, labels=labels)
 
     def container_network_transmit_errors_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.network.tx_errors'
-        self._process_pod_rate(metric_name, metric, scraper_config)
+        labels = ['interface']
+        self._process_pod_rate(metric_name, metric, scraper_config, labels=labels)
 
     def container_network_transmit_packets_dropped_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.network.tx_dropped'
-        self._process_pod_rate(metric_name, metric, scraper_config)
+        labels = ['interface']
+        self._process_pod_rate(metric_name, metric, scraper_config, labels=labels)
 
     def container_network_receive_packets_dropped_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.network.rx_dropped'
-        self._process_pod_rate(metric_name, metric, scraper_config)
+        labels = ['interface']
+        self._process_pod_rate(metric_name, metric, scraper_config, labels=labels)
 
     def container_fs_usage_bytes(self, metric, scraper_config):
         """
@@ -458,7 +492,8 @@ class CadvisorPrometheusScraperMixin(object):
         if metric.type not in METRIC_TYPES:
             self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
             return
-        self._process_usage_metric(metric_name, metric, self.fs_usage_bytes, scraper_config)
+        labels = ['device']
+        self._process_usage_metric(metric_name, metric, self.fs_usage_bytes, scraper_config, labels=labels)
 
     def container_fs_limit_bytes(self, metric, scraper_config):
         """
@@ -482,9 +517,20 @@ class CadvisorPrometheusScraperMixin(object):
         metric_name = scraper_config['namespace'] + '.memory.working_set'
         self._process_container_metric('gauge', metric_name, metric, scraper_config)
 
+    def container_memory_cache(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.memory.cache'
+        self._process_container_metric('gauge', metric_name, metric, scraper_config)
+
     def container_memory_rss(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.memory.rss'
         self._process_container_metric('gauge', metric_name, metric, scraper_config)
+
+    def container_memory_swap(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.memory.swap'
+        if metric.type not in METRIC_TYPES:
+            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            return
+        self._process_usage_metric(metric_name, metric, self.swap_usage_bytes, scraper_config)
 
     def container_spec_memory_limit_bytes(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.memory.limits'
@@ -493,3 +539,11 @@ class CadvisorPrometheusScraperMixin(object):
             self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
             return
         self._process_limit_metric(metric_name, metric, self.mem_usage_bytes, scraper_config, pct_m_name=pct_m_name)
+
+    def container_spec_memory_swap_limit_bytes(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.memory.sw_limit'
+        pct_m_name = scraper_config['namespace'] + '.memory.sw_in_use'
+        if metric.type not in METRIC_TYPES:
+            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            return
+        self._process_limit_metric(metric_name, metric, self.swap_usage_bytes, scraper_config, pct_m_name=pct_m_name)

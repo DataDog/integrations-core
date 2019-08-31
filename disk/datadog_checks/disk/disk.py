@@ -7,34 +7,21 @@ import os
 import platform
 import re
 
+import psutil
 from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
 
-try:
-    import psutil
-except ImportError:
-    psutil = None
-
-try:
-    import datadog_agent  # noqa: F401
-
-    is_agent_6 = True
-except ImportError:
-    is_agent_6 = False
-
-
+# See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
 IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
 
 
 class Disk(AgentCheck):
     """ Collects metrics about the machine's disks. """
 
-    # -T for filesystem info
-    DF_COMMAND = ['df', '-T']
     METRIC_DISK = 'system.disk.{}'
     METRIC_INODE = 'system.fs.inodes.{}'
 
@@ -44,6 +31,7 @@ class Disk(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
 
         instance = instances[0]
+        self._use_mount = is_affirmative(instance.get('use_mount', False))
         self._all_partitions = is_affirmative(instance.get('all_partitions', False))
         self._file_system_whitelist = instance.get('file_system_whitelist', [])
         self._file_system_blacklist = instance.get('file_system_blacklist', [])
@@ -52,52 +40,23 @@ class Disk(AgentCheck):
         self._mount_point_whitelist = instance.get('mount_point_whitelist', [])
         self._mount_point_blacklist = instance.get('mount_point_blacklist', [])
         self._tag_by_filesystem = is_affirmative(instance.get('tag_by_filesystem', False))
+        self._tag_by_label = is_affirmative(instance.get('tag_by_label', True))
         self._device_tag_re = instance.get('device_tag_re', {})
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
+        self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
 
-        # TODO Remove this v5/v6 fork when agent 5 will be fully deprecated
-        if is_agent_6:
-            self._use_mount = is_affirmative(instance.get('use_mount', False))
-        else:
-            # FIXME: 6.x, drop use_mount option in datadog.conf
-            self._load_legacy_option(instance, 'use_mount', False, operation=is_affirmative)
-
-            # FIXME: 6.x, drop device_blacklist_re option in datadog.conf
-            self._load_legacy_option(
-                instance, 'excluded_disk_re', '^$', legacy_name='device_blacklist_re', operation=re.compile
-            )
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
+        self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
 
-    def _load_legacy_option(self, instance, option, default, legacy_name=None, operation=lambda l: l):
-        value = instance.get(option, default)
-        legacy_name = legacy_name or option
-
-        if value == default and legacy_name in self.agentConfig:
-            self.log.warning(
-                'Using `{}` in datadog.conf has been deprecated '
-                'in favor of `{}` in disk.yaml'.format(legacy_name, option)
-            )
-            value = self.agentConfig.get(legacy_name) or default
-
-        setattr(self, '_{}'.format(option), operation(value))
+        self.devices_label = {}
 
     def check(self, instance):
         """Get disk space/inode stats"""
-        # Windows and Mac will always have psutil
-        # (we have packaged for both of them)
-        if self._psutil():
-            self.collect_metrics_psutil()
-        else:
-            # FIXME: implement all_partitions (df -a)
-            self.collect_metrics_manually()
+        if self._tag_by_label and Platform.is_linux():
+            self.devices_label = self._get_devices_label()
 
-    @classmethod
-    def _psutil(cls):
-        return psutil is not None
-
-    def collect_metrics_psutil(self):
         self._valid_disks = {}
         for part in psutil.disk_partitions(all=True):
             # we check all exclude conditions
@@ -116,8 +75,10 @@ class Disk(AgentCheck):
                 self.log.warning('Unable to get disk metrics for %s: %s', part.mountpoint, e)
                 continue
 
-            # Exclude disks with total disk size 0
-            if disk_usage.total == 0:
+            # Exclude disks with size less than min_disk_size
+            if disk_usage.total <= self._min_disk_size:
+                if disk_usage.total > 0:
+                    self.log.info('Excluding device {} with total disk size {}'.format(part.device, disk_usage.total))
                 continue
 
             # For later, latency metrics
@@ -133,6 +94,9 @@ class Disk(AgentCheck):
             for regex, device_tags in self._device_tag_re:
                 if regex.match(device_name):
                     tags.extend(device_tags)
+
+            if self.devices_label.get(device_name):
+                tags.append(self.devices_label.get(device_name))
 
             # legacy check names c: vs psutil name C:\\
             if Platform.is_win32():
@@ -284,97 +248,14 @@ class Disk(AgentCheck):
                 write_time_pct = disk.write_time * 100 / 1000
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
                 metric_tags.append('device:{}'.format(disk_name))
+                if self.devices_label.get(disk_name):
+                    metric_tags.append(self.devices_label.get(disk_name))
                 self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)
                 self.rate(self.METRIC_DISK.format('write_time_pct'), write_time_pct, tags=metric_tags)
             except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
                 self.log.debug('Latency metrics not collected for {}: {}'.format(disk_name, e))
-
-    # no psutil, let's use df
-    def collect_metrics_manually(self):
-        df_out, _, _ = get_subprocess_output(self.DF_COMMAND + ['-k'], self.log)
-        self.log.debug(df_out)
-
-        for device in self._list_devices(df_out):
-            self.log.debug("Passed: {}".format(device))
-            device_name = device[-1] if self._use_mount else device[0]
-
-            tags = [device[1], 'filesystem:{}'.format(device[1])] if self._tag_by_filesystem else []
-            tags.extend(self._custom_tags)
-
-            # apply device/mountpoint specific tags
-            for regex, device_tags in self._device_tag_re:
-                if regex.match(device_name):
-                    tags += device_tags
-            tags.append('device:{}'.format(device_name))
-            for metric_name, value in iteritems(self._collect_metrics_manually(device)):
-                self.gauge(metric_name, value, tags=tags)
-
-    def _collect_metrics_manually(self, device):
-        result = {}
-
-        used = float(device[3])
-        free = float(device[4])
-
-        # device is
-        # ["/dev/sda1", "ext4", 524288,  171642,  352646, "33%", "/"]
-        result[self.METRIC_DISK.format('total')] = float(device[2])
-        result[self.METRIC_DISK.format('used')] = used
-        result[self.METRIC_DISK.format('free')] = free
-
-        # Rather than grabbing in_use, let's calculate it to be more precise
-        result[self.METRIC_DISK.format('in_use')] = used / (used + free)
-
-        result.update(self._collect_inodes_metrics(device[-1]))
-        return result
-
-    def _keep_device(self, device):
-        # device is for Unix
-        # [/dev/disk0s2, ext4, 244277768, 88767396, 155254372, 37%, /]
-        # First, skip empty lines.
-        # then filter our fake hosts like 'map -hosts'.
-        #    Filesystem    Type   1024-blocks     Used Available Capacity  Mounted on
-        #    /dev/disk0s2  ext4     244277768 88767396 155254372    37%    /
-        #    map -hosts    tmpfs            0        0         0   100%    /net
-        # and finally filter out fake devices
-        return (
-            device
-            and len(device) > 1
-            and device[2].isdigit()
-            and not self._exclude_disk(device[0], device[1], device[6])
-        )
-
-    def _flatten_devices(self, devices):
-        # Some volumes are stored on their own line. Rejoin them here.
-        previous = None
-        for parts in devices:
-            if len(parts) == 1:
-                previous = parts[0]
-            elif previous is not None:
-                # collate with previous line
-                parts.insert(0, previous)
-                previous = None
-            else:
-                previous = None
-        return devices
-
-    def _list_devices(self, df_output):
-        """
-        Given raw output for the df command, transform it into a normalized
-        list devices. A 'device' is a list with fields corresponding to the
-        output of df output on each platform.
-        """
-        all_devices = [l.strip().split() for l in df_output.splitlines()]
-
-        # Skip the header row and empty lines.
-        raw_devices = [l for l in all_devices[1:] if l]
-
-        # Flatten the disks that appear in the mulitple lines.
-        flattened_devices = self._flatten_devices(raw_devices)
-
-        # Filter fake or unwanteddisks.
-        return [d for d in flattened_devices if self._keep_device(d)]
 
     def _compile_pattern_filters(self, instance):
         # Force exclusion of CDROM (iso9660)
@@ -455,3 +336,24 @@ class Disk(AgentCheck):
             except TypeError:
                 self.log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
         self._device_tag_re = device_tag_list
+
+    def _get_devices_label(self):
+        """
+        Get every label to create tags
+        """
+        devices_label = {}
+        try:
+            blkid_out, _, _ = get_subprocess_output(['blkid'], self.log)
+            all_devices = [l.split(':', 1) for l in blkid_out.splitlines()]
+
+            for d in all_devices:
+                # Line sample
+                # /dev/sda1: LABEL="MYLABEL" UUID="5eea373d-db36-4ce2-8c71-12ce544e8559" TYPE="ext4"
+                labels = self._blkid_label_re.findall(d[1])
+                if labels:
+                    devices_label[d[0]] = 'label:{}'.format(labels[0])
+
+        except SubprocessOutputEmptyError:
+            self.log.debug("Couldn't use blkid to have device labels")
+
+        return devices_label

@@ -1,1 +1,2 @@
+rrdtool==0.1.14
 -e ../datadog_checks_dev

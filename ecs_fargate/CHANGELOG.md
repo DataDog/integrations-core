@@ -1,5 +1,21 @@
 # CHANGELOG - ECS Fargate
 
+## 2.3.0 / 2019-08-24
+
+* [Added] Update with proxy settings and request wrapper. See [#3477](https://github.com/DataDog/integrations-core/pull/3477).
+
+## 2.2.2 / 2019-07-17
+
+* [Fixed] Use tagger with container_id prefix. See [#4126](https://github.com/DataDog/integrations-core/pull/4126).
+
+## 2.2.1 / 2019-06-28
+
+* [Fixed] Make the kubelet and ECS fargate checks resilient to the tagger returning None. See [#4004](https://github.com/DataDog/integrations-core/pull/4004).
+
+## 2.2.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3503](https://github.com/DataDog/integrations-core/pull/3503).
+
 ## 2.1.0 / 2019-02-18
 
 * [Added] Support Python 3. See [#2885](https://github.com/DataDog/integrations-core/pull/2885).

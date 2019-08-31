@@ -12,7 +12,11 @@ def log(*args, **kwargs):
 
 
 def get_config(*args, **kwargs):
-    return ""
+    return ''
+
+
+def get_version():
+    return '0.0.0'
 
 
 def warning(msg, *args, **kwargs):
@@ -29,3 +33,7 @@ def debug(msg, *args, **kwargs):
 
 def set_external_tags(*args, **kwargs):
     pass
+
+
+def tracemalloc_enabled(*args, **kwargs):
+    return False

@@ -1,5 +1,13 @@
 # CHANGELOG - powerdns_recursor
 
+## 1.4.0 / 2019-08-24
+
+* [Added] Add requests wrapper to powerdns_recursor. See [#4261](https://github.com/DataDog/integrations-core/pull/4261).
+
+## 1.3.0 / 2019-05-14
+
+* [Added] Adhere to code style. See [#3558](https://github.com/DataDog/integrations-core/pull/3558).
+
 ## 1.2.0 / 2019-01-04
 
 * [Added] Support Python 3. See [#2789][1].

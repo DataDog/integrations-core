@@ -11,7 +11,8 @@ instances:
     port: 7199
 
     ## @param cassandra_aliasing - boolean - required
-    ## XXXXXXXXXXX
+    ## Must be set to true to comply with CASSANDRA-4009.
+    ## Learn more: https://issues.apache.org/jira/browse/CASSANDRA-4009
     #
     cassandra_aliasing: true
 
@@ -77,7 +78,7 @@ instances:
     ## trust_store_password should be set if ssl is enabled
     ## password for your TrustStore.jks file
     #
-    # trust_store_password: password
+    # trust_store_password: <PASSWORD>
 
     ## @param key_store_path - string - optional
     ## key_store_path should be set if client authentication is enabled on the target JVM.
@@ -116,12 +117,12 @@ instances:
 
 init_config:
 
-  ## @param is_jmx - boolean - required - default: true
+  ## @param is_jmx - boolean - required
   ## Whether or not this file is a configuration for a JMX integration
   #
   is_jmx: true
 
-  ## @param collect_default_metrics - boolean - required - default: true
+  ## @param collect_default_metrics - boolean - required
   ## Whether or not the check should collect all default metrics for this integration.
   #
   collect_default_metrics: true

@@ -4,12 +4,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 # 3rd party
-import requests
 from six.moves.urllib.parse import urlparse
 
 # project
 from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.headers import headers
 
 
 class Fluentd(AgentCheck):
@@ -18,9 +16,18 @@ class Fluentd(AgentCheck):
     GAUGES = ['retry_count', 'buffer_total_queued_size', 'buffer_queue_length']
     _AVAILABLE_TAGS = frozenset(['plugin_id', 'type'])
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        self.default_timeout = init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
+    def __init__(self, name, init_config, instances):
+        super(Fluentd, self).__init__(name, init_config, instances)
+        if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
+            # `default_timeout` config option will be removed with Agent 5
+            timeout = (
+                self.instance.get('timeout')
+                or self.instance.get('default_timeout')
+                or self.init_config.get('timeout')
+                or self.init_config.get('default_timeout')
+                or self.DEFAULT_TIMEOUT
+            )
+            self.http.options['timeout'] = (timeout, timeout)
 
     """Tracks basic fluentd metrics via the monitor_agent plugin
     * number of retry_count
@@ -52,9 +59,7 @@ class Fluentd(AgentCheck):
                 'fluentd_port:%s' % monitor_agent_port,
             ] + custom_tags
 
-            timeout = float(instance.get('timeout', self.default_timeout))
-
-            r = requests.get(url, headers=headers(self.agentConfig), timeout=timeout)
+            r = self.http.get(url)
             r.raise_for_status()
             status = r.json()
 

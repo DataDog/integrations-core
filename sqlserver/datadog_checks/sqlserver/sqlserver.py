@@ -102,7 +102,7 @@ class SQLServer(AgentCheck):
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
     ]
     valid_connectors = []
-    valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL']
+    valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'SQLNCLI11']
     default_adoprovider = 'SQLOLEDB'
     if adodbapi is not None:
         valid_connectors.append('adodbapi')
@@ -396,8 +396,8 @@ class SQLServer(AgentCheck):
         elif conn_key:
             _, host, username, password, database, _ = conn_key.split(":")
 
-        p = self._get_adoprovider(instance)
-        conn_str = 'Provider={};Data Source={};Initial Catalog={};'.format(p, host, database)
+        provider = self._get_adoprovider(instance)
+        conn_str = 'Provider={};Data Source={};Initial Catalog={};'.format(provider, host, database)
 
         if username:
             conn_str += 'User ID={};'.format(username)
@@ -928,7 +928,7 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
             return None, None
 
         placeholder = '?'
-        placeholders = ', '.join(placeholder for unused in counters_list)
+        placeholders = ', '.join(placeholder for _ in counters_list)
         query_base = '''
             select * from sys.dm_os_memory_clerks where type in ({})
             '''.format(

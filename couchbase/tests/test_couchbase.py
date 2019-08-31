@@ -6,6 +6,12 @@
 import pytest
 
 from datadog_checks.couchbase import Couchbase
+from datadog_checks.couchbase.couchbase_consts import (
+    NODE_CLUSTER_SERVICE_CHECK_NAME,
+    NODE_HEALTH_SERVICE_CHECK_NAME,
+    QUERY_STATS,
+    SERVICE_CHECK_NAME,
+)
 
 from .common import BUCKET_NAME, CHECK_TAGS, PORT
 
@@ -16,18 +22,18 @@ def test_service_check(aggregator, instance, couchbase_container_ip):
     """
     Assert the OK service check
     """
-    couchbase = Couchbase('couchbase', {}, {})
+    couchbase = Couchbase('couchbase', {}, instances=[instance])
     couchbase.check(instance)
 
     NODE_HOST = '{}:{}'.format(couchbase_container_ip, PORT)
     NODE_TAGS = ['node:{}'.format(NODE_HOST)]
 
-    aggregator.assert_service_check(Couchbase.SERVICE_CHECK_NAME, tags=CHECK_TAGS, status=Couchbase.OK, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_NAME, tags=CHECK_TAGS, status=Couchbase.OK, count=1)
     aggregator.assert_service_check(
-        Couchbase.NODE_CLUSTER_SERVICE_CHECK_NAME, tags=CHECK_TAGS + NODE_TAGS, status=Couchbase.OK, count=1
+        NODE_CLUSTER_SERVICE_CHECK_NAME, tags=CHECK_TAGS + NODE_TAGS, status=Couchbase.OK, count=1
     )
     aggregator.assert_service_check(
-        Couchbase.NODE_HEALTH_SERVICE_CHECK_NAME, tags=CHECK_TAGS + NODE_TAGS, status=Couchbase.OK, count=1
+        NODE_HEALTH_SERVICE_CHECK_NAME, tags=CHECK_TAGS + NODE_TAGS, status=Couchbase.OK, count=1
     )
 
 
@@ -37,7 +43,7 @@ def test_metrics(aggregator, instance, couchbase_container_ip):
     """
     Test couchbase metrics not including 'couchbase.query.'
     """
-    couchbase = Couchbase('couchbase', {}, {})
+    couchbase = Couchbase('couchbase', {}, instances=[instance])
     couchbase.check(instance)
     assert_basic_couchbase_metrics(aggregator, couchbase_container_ip)
 
@@ -48,10 +54,10 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
     """
     Test system vitals metrics (prefixed "couchbase.query.")
     """
-    couchbase = Couchbase('couchbase', {}, {})
+    couchbase = Couchbase('couchbase', {}, instances=[instance_query])
     couchbase.check(instance_query)
 
-    for mname in Couchbase.QUERY_STATS:
+    for mname in QUERY_STATS:
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
 
 

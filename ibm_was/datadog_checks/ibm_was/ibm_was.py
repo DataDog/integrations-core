@@ -17,8 +17,8 @@ class IbmWasCheck(AgentCheck):
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
     METRIC_PREFIX = 'ibm_was'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(IbmWasCheck, self).__init__(name, init_config, instances)
         self.metric_type_mapping = {
             'AverageStatistic': self.gauge,
             'BoundedRangeStatistic': self.gauge,
@@ -96,11 +96,18 @@ class IbmWasCheck(AgentCheck):
         metric_name = self.normalize(
             ensure_unicode(child.get('name')), prefix='{}.{}'.format(self.METRIC_PREFIX, prefix), fix_case=True
         )
+
+        # includes deprecated JVM metrics that were reporting as count instead of gauge
         self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
+
+        # creates new JVM metrics correctly as gauges
+        if prefix == "jvm":
+            jvm_metric_name = "{}_gauge".format(metric_name)
+            self.gauge(jvm_metric_name, value, tags=tags)
 
     def make_request(self, instance, url, tags):
         try:
-            resp = requests.get(url, proxies=self.get_instance_proxy(instance, url))
+            resp = self.http.get(url)
             resp.raise_for_status()
             self.submit_service_checks(tags, AgentCheck.OK)
         except (requests.HTTPError, requests.ConnectionError) as e:

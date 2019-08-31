@@ -2,83 +2,90 @@
 
 ## Overview
 
-Whether you use Redis as a database, cache, or message queue, this integration helps you track problems with your Redis servers and the parts of your infrastructure that they serve. The Datadog Agent's Redis check collects a wealth of metrics related to performance, memory usage, blocked clients, slave connections, disk persistence, expired and evicted keys, and many more.
+Whether you use Redis as a database, cache, or message queue, this integration helps you track problems with your Redis servers and the parts of your infrastructure that they serve. The Datadog Agent's Redis check collects metrics related to performance, memory usage, blocked clients, slave connections, disk persistence, expired and evicted keys, and many more.
 
 ## Setup
-
 ### Installation
 
-The Redis check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Redis servers.
+The Redis check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Redis servers.
 
 ### Configuration
+#### Host
 
-Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Redis [metrics](#metric-collection) and [logs](#log-collection).
-See the [sample redis.d/conf.yaml][3] for all available configuration options.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-#### Metric Collection
+##### Metric collection
 
-Add this configuration block to your `redisdb.d/conf.yaml` file to start gathering your [Redis metrics](#metrics):
+1. Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. The following parameters may require updating. See the [sample redisdb.d/conf.yaml][4] for all available configuration options.
 
-```
-init_config:
+    ```yaml
+      init_config:
+      instances:
+        ## @param host - string - required
+        ## Enter the host to connect to.
+        - host: localhost
+          ## @param port - integer - required
+          ## Enter the port of the host to connect to.
+          port: 6379
+      ```
 
-instances:
-  - host: localhost
-    port: 6379 # or wherever your Redis listens
-  # unix_socket_path: /var/run/redis/redis.sock # if your Redis uses a socket instead of TCP
-  # password: myredispassword                   # if your Redis requires auth
-```
+2. [Restart the Agent][5].
 
-Configuration Options:
-
-* `unix_socket_path` - (Optional) - Can be used instead of `host` and `port`.
-* `db`, `password`, and `socket_timeout` - (Optional) - Additional connection options.
-* `warn_on_missing_keys` - (Optional) - Display a warning in the info page if the keys we're tracking are missing.
-* `slowlog-max-len` - (Optional) - Maximum number of entries to fetch from the slow query log. By default, the check will
-        read this value from the Redis config. If it's above 128, it will default to 128 due to potential increased latency
-        to retrieve more than 128 slowlog entries every 15 seconds. If you need to get more entries from the slow query logs
-        set the value here. Warning: It may impact the performance of your Redis instance
-* `command_stats` - (Optional) - Collect INFO COMMANDSTATS output as metrics.
-
-See the [sample redisdb.d/conf.yaml][3] for all available configuration options.
-
-[Restart the Agent][4] to begin sending Redis metrics to Datadog.
-
-#### Log Collection
+##### Log collection
 
 **Available for Agent >6.0**
 
-* Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```
-  logs_enabled: true
-  ```
+    ```yaml
+      logs_enabled: true
+    ```
 
-* Add this configuration block to your `redisdb.d/conf.yaml` file to start collecting your Redis Logs:
+2. Uncomment and edit this configuration block at the bottom of your `redisdb.d/conf.yaml`:
 
-  ```
-    logs:
-        - type: file
-          path: /var/log/redis_6379.log
-          source: redis
-          sourcecategory: database
-          service: myapplication
-  ```
+    ```yaml
+      logs:
+          - type: file
+            path: /var/log/redis_6379.log
+            source: redis
+            sourcecategory: database
+            service: myapplication
+    ```
 
-  Change the `path` and `service` parameter values and configure them for your environment.
-  See the [sample redisdb.yaml][3] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample redisdb.yaml][4] for all available configuration options.
 
-* [Restart the Agent][4] to begin sending Redis logs to Datadog.
+3. [Restart the Agent][5].
+
+#### Containerized
+For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                                                                       |
+|----------------------|---------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `redisdb`                                                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                               |
+| `<INSTANCE_CONFIG>`  | <pre>{"host": "%%host%%",<br> "port":"6379",<br> "password":"%%env_REDIS_PASSWORD%%"}</pre> |
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
+
+| Parameter      | Value                                               |
+|----------------|-----------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "redis", "service": "<YOUR_APP_NAME>"}` |
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `redisdb` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `redisdb` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -86,17 +93,15 @@ The Redis check does not include any events.
 
 ### Service Checks
 
-**redis.can_connect**:
+**redis.can_connect**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Redis to collect metrics, otherwise returns `OK`.
 
-Returns CRITICAL if the Agent cannot connect to Redis to collect metrics, otherwise OK.
-
-**redis.replication.master_link_status**
-
-Returns `CRITICAL` if this Redis instance is unable to connect to its master instance. Returns `OK` otherwise.
+**redis.replication.master_link_status**:<br>
+Returns `CRITICAL` if this Redis instance is unable to connect to its master instance, otherwise returns `OK`.
 
 ## Troubleshooting
 
-* [Redis Integration Error: "unknown command 'CONFIG'"][7]
+* [Redis Integration Error: "unknown command 'CONFIG'"][8]
 
 ### Agent cannot connect
 
@@ -120,115 +125,21 @@ Check that the connection info in `redisdb.yaml` is correct.
 
 Configure a `password` in `redisdb.yaml`.
 
-## Development
-
-See the [main documentation][8] for more details about how to test and develop Agent based integrations.
-
-### Testing Guidelines
-
-This check has 2 test matrix, one detailing the test type:
-
-* unit tests (no need for a Redis instance running)
-* integration tests (a Redis instance must run locally)
-
-another matrix defines the Redis versions to be used with integration tests:
-
-* redis 3.2
-* redis 4.0
-
-The first matrix is handled by pytest using `mark`: tests that need a running redis instance must be decorated like this:
-
-```python
-@pytest.mark.integration
-def test_something_requiring_redis_running():
-  pass
-```
-
-Running the tests with `pytest -m"integration"` will run *only* integration tests while `pytest -m"not integration"` will run whatever was not marked as an integration test.
-
-The second matrix is defined with `tox` like this:
-
-```ini
-envlist = unit, redis{32,40}, flake8
-
-...
-
-[testenv:redis32]
-setenv = REDIS_VERSION=3.2
-...
-
-[testenv:redis40]
-setenv = REDIS_VERSION=4.0
-...
-```
-
-#### Integration tests
-
-Redis instances are orchestrated with `docker-compose` which is now a dependency
-to run the integration tests. It's `pytest` responsible to start/stop/dispose an
-instance using the `fixture` concept.
-
-This is how a fixture orchestrating Redis instances looks like:
-
-```python
-@pytest.fixture(scope="session")
-def redis_auth():
-    # omitted docker-compose invokation setup here ...
-    subprocess.check_call(args + ["up", "-d"], env=env)
-    yield
-    subprocess.check_call(args + ["down"], env=env)
-```
-
-the basic concept is that `docker-compose up` is run right after the fixture
-is made available to the test function (it blocks on `yield`). When the test
-has done, `yield` unblocks and `docker-compose down` is called. Notice the
-`scope=session` argument passed to the fixture decorator, it allows the
-`yield` to block only once for **all the tests** , unblocking only after the
-last test: this is useful to avoid having `docker-compose up` and `down`
-called at every test. One caveat with this approach is that if you have data
-in Redis, some test might operate on a dirty database - this is not an issue
-in this case but something to keep in mind when using `scope=session`.
-
-#### Running the tests locally
-
-**Note**: you need `docker` and `docker-compose` to be installed on your system
-in order to run the tests locally.
-
-During development, tests can be locally run with tox, same as in the CI. In the case of Redis, there might be no need to test the whole matrix all the times, so for example if you want to run only the unit/mocked tests:
-
-```shell
-tox -e unit
-```
-
-if you want to run integration tests but against one Redis version only:
-
-```shell
-tox -e redis40
-```
-
-tox is great because it creates a virtual Python environment for each tox env but if you don't need this level of isolation you can speed up the development iterations using `pytest` directly (which is what tox does under the hood):
-
-```shell
-REDIS_VERSION=4.0 pytest
-```
-
-or if you don't want to run integration tests:
-
-```shell
-pytest -m"not integration"
-```
-
 ## Further Reading
 
-Read our [series of blog posts][9] about how to monitor your Redis servers with Datadog. We detail the key performance metrics, how to collect them, and how to use Datadog to monitor Redis.
+Additional helpful documentation, links, and articles:
+
+* [How to monitor Redis performance metrics][10]
 
 
-[1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[3]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
-[7]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config
-[8]: https://docs.datadoghq.com/developers/integrations
-[9]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
+[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
+[8]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config
+[9]: https://docs.datadoghq.com/developers/integrations
+[10]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
+[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#setup

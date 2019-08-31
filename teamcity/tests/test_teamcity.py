@@ -1,38 +1,28 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import pytest
-from mock import MagicMock, patch
+from mock import ANY, MagicMock, patch
 
 from datadog_checks.teamcity import TeamCityCheck
 
-CONFIG = {
-    'instances': [
-        {
-            'name': 'One test build',
-            'server': 'localhost:8111',
-            'build_configuration': 'TestProject_TestBuild',
-            'host_affected': 'buildhost42.dtdg.co',
-            'basic_http_authentication': False,
-            'is_deployment': False,
-            'tags': ['one:tag', 'one:test'],
-        }
-    ]
-}
+from .common import CHECK_NAME, CONFIG
 
 
 @pytest.mark.integration
 def test_build_event(aggregator):
-    teamcity = TeamCityCheck('teamcity', {}, {})
+    teamcity = TeamCityCheck(CHECK_NAME, {}, [CONFIG])
 
-    with patch('requests.get', get_mock_first_build):
+    with patch('datadog_checks.base.utils.http.requests.get', get_mock_first_build):
         teamcity.check(CONFIG['instances'][0])
 
     assert len(aggregator.metric_names) == 0
     assert len(aggregator.events) == 0
     aggregator.reset()
 
-    with patch('requests.get', get_mock_one_more_build):
+    with patch('datadog_checks.base.utils.http.requests.get', get_mock_one_more_build):
         teamcity.check(CONFIG['instances'][0])
 
     events = aggregator.events
@@ -48,7 +38,7 @@ def test_build_event(aggregator):
     aggregator.reset()
 
     # One more check should not create any more events
-    with patch('requests.get', get_mock_one_more_build):
+    with patch('datadog_checks.base.utils.http.requests.get', get_mock_one_more_build):
         teamcity.check(CONFIG['instances'][0])
 
     assert len(aggregator.events) == 0
@@ -117,3 +107,25 @@ def get_mock_one_more_build(url, *args, **kwargs):
 
     mock_resp.json.return_value = json
     return mock_resp
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("legacy ssl config True", {'ssl_validation': True}, {'verify': True}),
+        ("legacy ssl config False", {'ssl_validation': False}, {'verify': False}),
+        ("legacy ssl config unset", {}, {'verify': True}),
+    ],
+)
+def test_config(test_case, extra_config, expected_http_kwargs):
+    instance = deepcopy(CONFIG['instances'][0])
+    instance.update(extra_config)
+    check = TeamCityCheck(CHECK_NAME, {}, [instance])
+
+    with patch('datadog_checks.base.utils.http.requests.get') as r:
+        check.check(instance)
+
+        http_wargs = dict(auth=ANY, cert=ANY, headers=ANY, proxies=ANY, timeout=ANY, verify=ANY)
+        http_wargs.update(expected_http_kwargs)
+
+        r.assert_called_with(ANY, **http_wargs)

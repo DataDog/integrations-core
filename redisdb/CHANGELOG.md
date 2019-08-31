@@ -1,5 +1,18 @@
 # CHANGELOG - redisdb
 
+## 1.12.1 / 2019-08-24
+
+* [Fixed] Always publish a value for missing keys. See [#4386](https://github.com/DataDog/integrations-core/pull/4386).
+
+## 1.12.0 / 2019-06-01
+
+* [Added] add redis.mem.overhead and redis.mem.startup. See [#3760](https://github.com/DataDog/integrations-core/pull/3760). Thanks [maximebedard](https://github.com/maximebedard).
+
+## 1.11.0 / 2019-05-14
+
+* [Fixed] Adjust latency tracking in redisdb integration. See [#3689](https://github.com/DataDog/integrations-core/pull/3689). Thanks [Firehed](https://github.com/Firehed).
+* [Added] Adhere to code style. See [#3562](https://github.com/DataDog/integrations-core/pull/3562).
+
 ## 1.10.0 / 2019-02-18
 
 * [Added] adds redis_db tag to redis.key.length. See [#3008](https://github.com/DataDog/integrations-core/pull/3008).

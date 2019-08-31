@@ -35,6 +35,8 @@ STORE_METRICS = [
     'watchers',
 ]
 
+pytestmark = pytest.mark.integration
+
 
 @preview
 def test_check(aggregator, instance):
@@ -44,12 +46,9 @@ def test_check(aggregator, instance):
     tags = ['is_leader:{}'.format('true' if is_leader(URL) else 'false')]
 
     for metric in itervalues(METRIC_MAP):
-        try:
-            aggregator.assert_metric(metric, tags=tags)
-        except AssertionError:
-            pass
+        aggregator.assert_metric('etcd.{}'.format(metric), tags=tags, at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 80
+    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
 
 
 @preview
@@ -61,17 +60,14 @@ def test_check_no_leader_tag(aggregator, instance):
     check.check(instance)
 
     for metric in itervalues(METRIC_MAP):
-        try:
-            aggregator.assert_metric(metric, tags=[])
-        except AssertionError:
-            pass
+        aggregator.assert_metric('etcd.{}'.format(metric), tags=[], at_least=0)
 
-    assert aggregator.metrics_asserted_pct > 80
+    assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
 
 
 @preview
 def test_service_check(aggregator, instance):
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     tags = ['endpoint:{}'.format(instance['prometheus_url'])]
@@ -83,7 +79,7 @@ def test_service_check(aggregator, instance):
 def test_bad_config(aggregator):
     bad_url = '{}/test'.format(URL)
     instance = {'url': bad_url}
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
 
     with pytest.raises(Exception):
         check.check(instance)
@@ -94,7 +90,7 @@ def test_bad_config(aggregator):
 
 @legacy
 def test_metrics(instance, aggregator):
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
@@ -108,7 +104,7 @@ def test_metrics(instance, aggregator):
 
 @legacy
 def test_service_checks(instance, aggregator):
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
@@ -138,7 +134,7 @@ def test_followers(aggregator):
     followers = list(response.json().get('followers', {}).keys())
 
     instance = {'url': url}
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     common_leader_tags = ['url:{}'.format(url), 'etcd_state:leader']

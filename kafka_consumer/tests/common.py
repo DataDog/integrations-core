@@ -11,7 +11,7 @@ HOST = get_docker_hostname()
 HOST_IP = socket.gethostbyname(HOST)
 KAFKA_CONNECT_STR = '{}:9092'.format(HOST_IP)
 ZK_CONNECT_STR = '{}:2181'.format(HOST)
-TOPICS = ['marvel', 'dc', '__consumer_offsets']
+TOPICS = ['marvel', 'dc']
 PARTITIONS = [0, 1]
 
 

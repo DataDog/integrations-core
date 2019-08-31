@@ -20,7 +20,7 @@ instances:
   ## @param services  - list of strings - required
   ## List of services to monitor e.g. Dnscache, wmiApSrv, etc.
   ##
-  ## If any service is set to `ALL`, all services registered with the SCM will be monitored.
+  ## If any service is set to `ALL`, all services registered with the SCM are monitored.
   ##
   ## This matches all services starting with service, as if service.* is configured.
   ## For an exact match, use ^service$
@@ -39,14 +39,16 @@ instances:
   #    - <KEY_2>:<VALUE_2>
 ```
 
-Provide service names as they appear in services.msc's properties field (e.g. `wmiApSrv`), **NOT** the display name (e.g. `WMI Performance Adapter`). For names with spaces: enclose the whole name in double quotation marks (e.g. "Bonjour Service").
-Note: spaces are replaced by underscores in Datadog.
+Provide service names as they appear in the `services.msc` properties field (e.g. `wmiApSrv`), **NOT** the display name (e.g. `WMI Performance Adapter`). For names with spaces: enclose the whole name in double quotation marks (e.g. "Bonjour Service"). **Note**: Spaces are replaced by underscores in Datadog.
 
 [Restart the Agent][4] to start monitoring the services and sending service checks to Datadog.
 
+#### Metrics collection
+The Windows Service check can potentially emit [custom metrics][5], which may impact your [billing][6].
+
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `windows_service` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `windows_service` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -57,8 +59,7 @@ The Windows Service check does not include any metrics.
 The Windows Service check does not include any events.
 
 ### Service Checks
-**windows_service.state**:
-
+**windows_service.state**:  
 The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
 
 | Windows status   | windows_service.state |
@@ -73,21 +74,23 @@ The Agent submits this service check for each Windows service configured in `ser
 | Unknown          | UNKNOWN               |
 
 ## Troubleshooting
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-* [Monitoring Windows Server 2012][7]
-* [How to collect Windows Server 2012 metrics][8]
-* [Monitoring Windows Server 2012 with Datadog][9]
+* [Monitoring Windows Server 2012][9]
+* [How to collect Windows Server 2012 metrics][10]
+* [Monitoring Windows Server 2012 with Datadog][11]
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/windows_service/datadog_checks/windows_service/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[6]: https://docs.datadoghq.com/help
-[7]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
-[8]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
-[9]: https://www.datadoghq.com/blog/windows-server-monitoring
+[5]: https://docs.datadoghq.com/developers/metrics/custom_metrics
+[6]: https://docs.datadoghq.com/account_management/billing/custom_metrics
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[8]: https://docs.datadoghq.com/help
+[9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
+[10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
+[11]: https://www.datadoghq.com/blog/windows-server-monitoring

@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "openstack_controller",
   "metric_prefix": "openstack.",
-  "metric_to_check": "openstack.nova.limits.max_total_cores",
+  "metric_to_check": "openstack.controller",
   "creates_events": false,
   "short_description": "Track hypervisor and VM-level resource usage, plus Neutron metrics.",
   "guid": "49979592-9096-460a-b086-f173f26c6626",
@@ -20,5 +20,10 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "openstack-controller"
+  "integration_id": "openstack-controller",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }
