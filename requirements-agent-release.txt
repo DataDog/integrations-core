@@ -103,7 +103,7 @@ datadog-supervisord==1.2.0
 datadog-system-core==1.5.0
 datadog-system-swap==1.6.0
 datadog-tcp-check==2.3.0
-datadog-teamcity==1.5.0
+datadog-teamcity==1.5.1
 datadog-tls==1.2.0
 datadog-tokumx==2.1.0
 datadog-tomcat==1.2.0
