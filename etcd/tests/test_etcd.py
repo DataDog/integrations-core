@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
+import mock
 import pytest
 import requests
 from six import itervalues
@@ -151,3 +152,62 @@ def test_followers(aggregator):
         aggregator.assert_metric('etcd.leader.latency.max', count=1, tags=fol_tags)
         aggregator.assert_metric('etcd.leader.latency.stddev', count=1, tags=fol_tags)
         aggregator.assert_metric('etcd.leader.latency.current', count=1, tags=fol_tags)
+
+
+@legacy
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'ssl_cert_validation': True}, {'verify': True}),
+        ("legacy ssl config False", {'ssl_cert_validation': False}, {'verify': False}),
+        ("legacy ssl config unset", {}, {'verify': False}),
+    ],
+)
+def test_config_legacy(instance, test_case, extra_config, expected_http_kwargs):
+    instance.update(extra_config)
+    check = Etcd(CHECK_NAME, {}, {}, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_kwargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_kwargs.update(expected_http_kwargs)
+        r.get.assert_called_with(URL + '/v2/stats/store', **http_kwargs)
+
+
+@preview
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'ssl_verify': True}, {'verify': True}),
+        ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
+        ("legacy ssl config unset", {}, {'verify': False}),
+        ("timeout", {'prometheus_timeout': 100}, {'timeout': (100.0, 100.0)}),
+    ],
+)
+def test_config_preview(instance, test_case, extra_config, expected_http_kwargs):
+    instance.update(extra_config)
+    check = Etcd(CHECK_NAME, {}, {}, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_kwargs = dict(
+            auth=mock.ANY,
+            cert=mock.ANY,
+            data=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+        )
+        http_kwargs.update(expected_http_kwargs)
+        r.post.assert_called_with(URL + '/v3alpha/maintenance/status', **http_kwargs)
