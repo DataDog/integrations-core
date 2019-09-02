@@ -11,6 +11,8 @@ CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 
 
 def test_ssl_config_ok():
+    cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
+    private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
     instance = {
         'db': 'abc',
         'server': 'localhost',
@@ -21,16 +23,24 @@ def test_ssl_config_ok():
         'tags': ['foo:bar'],
         'tls_verify': True,
         'validate_hostname': True,
-        'cert': os.path.join(CERTIFICATE_DIR, 'cert.cert'),
-        'private_key': os.path.join(CERTIFICATE_DIR, 'server.pem'),
+        'cert': cert,
+        'private_key': private_key,
         'ca_cert': CERTIFICATE_DIR,
     }
 
     check = VerticaCheck('vertica', {}, [instance])
 
     with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
-        vertica.connect.return_value = mock.MagicMock()
+        with mock.patch('datadog_checks.vertica.vertica.ssl') as ssl:
+            vertica.connect.return_value = mock.MagicMock()
+            tls_context = mock.MagicMock()
+            ssl.SSLContext.return_value = tls_context
 
-        check.check(instance)
+            check.check(instance)
 
-        assert check._connection is not None
+            assert tls_context.verify_mode == ssl.CERT_REQUIRED
+            assert tls_context.check_hostname is True
+            tls_context.load_verify_locations.assert_called_with(None, CERTIFICATE_DIR, None)
+            tls_context.load_cert_chain.assert_called_with(cert, keyfile=private_key)
+
+            assert check._connection is not None
