@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+from copy import deepcopy
 
 import mock
 import pytest
@@ -13,6 +14,8 @@ from datadog_checks.openstack_controller.api import AbstractApi
 from datadog_checks.openstack_controller.exceptions import IncompleteConfig
 
 from . import common
+
+pytestmark = pytest.mark.unit
 
 
 def test_parse_uptime_string(aggregator):
@@ -365,3 +368,21 @@ def test_missing_keystone_server_url():
 
     with pytest.raises(IncompleteConfig):
         check._get_keystone_server_url(instance)
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("new config", {'tls_verify': True, 'timeout': 3}, {'verify': True, 'timeout': (3.0, 3.0)}),
+        ("legacy config", {'ssl_verify': True, 'request_timeout': 5}, {'verify': True, 'timeout': (5.0, 5.0)}),
+    ],
+)
+def test_config(test_case, extra_config, expected_http_kwargs):
+    instance = deepcopy(common.KEYSTONE_INSTANCE)
+    instance.update(extra_config)
+    check = OpenStackControllerCheck('openstack_controller', {}, instances=[instance])
+
+    for key, value in expected_http_kwargs.items():
+        assert check.http.options[key] == value, "Expected '{}' to be {} but was {}".format(
+            key, value, check.http.options[key]
+        )
