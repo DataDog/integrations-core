@@ -112,7 +112,7 @@ instances:
     #
     # tag_replication_role: false
 
-    ## @param table_count_limit - integer - optional
+    ## @param table_count_limit - integer - optional - default: 200
     ## The maximum number of tables to collect metrics from
     #
     # table_count_limit: 200
