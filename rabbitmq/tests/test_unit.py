@@ -7,7 +7,7 @@ import pytest
 import requests
 
 from datadog_checks.rabbitmq import RabbitMQ
-from datadog_checks.rabbitmq.rabbitmq import NODE_TYPE, RabbitMQException
+from datadog_checks.rabbitmq.rabbitmq import RabbitMQException
 
 from . import common
 
@@ -82,15 +82,6 @@ def test__check_aliveness(check, aggregator):
     with pytest.raises(RabbitMQException) as e:
         check._get_vhosts(instance, '')
         assert isinstance(e, RabbitMQException)
-
-
-@pytest.mark.unit
-def test__get_metrics(check, aggregator):
-    data = {'fd_used': 3.14, 'disk_free': 4242, 'mem_used': 9000}
-
-    assert check._get_metrics(data, NODE_TYPE, []) == 3
-    assert check._get_metrics(data, NODE_TYPE, [], 2) == 2
-    assert check._get_metrics(data, NODE_TYPE, [], 5) == 3
 
 
 @pytest.mark.parametrize(
