@@ -30,7 +30,6 @@ def test_check_zk_basic_case_integration(aggregator, zk_instance):
     _assert_check_zk_basic_case(aggregator, zk_instance)
 
 
-@pytest.mark.usefixtures('kafka_producer', 'zk_consumer')
 @pytest.mark.e2e
 def test_check_zk_basic_case_e2e(dd_agent_check, zk_instance):
     aggregator = dd_agent_check(zk_instance)

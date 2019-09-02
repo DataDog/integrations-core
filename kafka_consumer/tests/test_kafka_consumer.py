@@ -28,7 +28,6 @@ def test_check_kafka(aggregator, kafka_instance):
     assert_check_kafka(aggregator, kafka_instance)
 
 
-@pytest.mark.usefixtures('kafka_consumer', 'kafka_producer')
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, kafka_instance):
     aggregator = dd_agent_check(kafka_instance)
