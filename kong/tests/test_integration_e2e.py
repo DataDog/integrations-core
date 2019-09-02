@@ -28,6 +28,20 @@ def check():
 def test_check(aggregator, check):
     for stub in common.CONFIG_STUBS:
         check.check(stub)
+
+    _assert_check(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check):
+    config = {'init_config': {}, 'instances': common.CONFIG_STUBS}
+    aggregator = dd_agent_check(config)
+
+    _assert_check(aggregator)
+
+
+def _assert_check(aggregator):
+    for stub in common.CONFIG_STUBS:
         expected_tags = stub['tags']
 
         for mname in GAUGES:
@@ -43,7 +57,7 @@ def test_check(aggregator, check):
             'kong.can_connect', status=Kong.OK, tags=['kong_host:localhost', 'kong_port:8001'] + expected_tags, count=1
         )
 
-        aggregator.all_metrics_asserted()
+    aggregator.all_metrics_asserted()
 
 
 @pytest.mark.usefixtures('dd_environment')
