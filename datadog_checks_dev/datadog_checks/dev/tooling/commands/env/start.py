@@ -66,7 +66,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
 
     if env not in envs:
         echo_failure('`{}` is not an available environment.'.format(env))
-        echo_info('Available environments for {}:\n\t{}'.format(check, "\n\t".join(envs)))
+        echo_info('Available environments for {}:\n    {}'.format(check, '\n    '.join(envs)))
         echo_info('You can also use `ddev env ls {}` to see available environments.'.format(check))
         abort()
 
