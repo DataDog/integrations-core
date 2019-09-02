@@ -78,7 +78,9 @@ def test_critical_service_check(instance, check, aggregator):
 
 def test_right_server_tag(instance, check, aggregator):
     del instance['custom_queries']
-    with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet.xml')):
+    with mock.patch(
+        'datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet-multiple-nodes.xml')
+    ):
         check = check(instance)
         check.check(instance)
 
@@ -96,7 +98,9 @@ def test_right_values(instance, check, aggregator):
     instance['collect_thread_pool_stats'] = False
     instance['collect_servlet_session_stats'] = False
 
-    with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet.xml')):
+    with mock.patch(
+        'datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet-multiple-nodes.xml')
+    ):
         check = check(instance)
         check.check(instance)
 
