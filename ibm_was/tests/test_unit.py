@@ -74,3 +74,19 @@ def test_critical_service_check(instance, check, aggregator):
         check.check(instance)
 
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+
+
+def test_right_server(instance, check, aggregator):
+    del instance['custom_queries']
+    with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet.xml')):
+        # with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet-8_29.xml')):
+        check = check(instance)
+        check.check(instance)
+
+    node = 'node:cmhqlvij2a04'
+    for metric_name, metrics in aggregator._metrics.items():
+        for metric in metrics:
+            if 'server:IJ2Server02' in metric.tags:
+                assert node in metric.tags, "Expected '{}' tag in '{}' tags, found {}".format(
+                    node, metric_name, metric.tags
+                )

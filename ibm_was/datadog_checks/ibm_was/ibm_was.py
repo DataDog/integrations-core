@@ -76,7 +76,7 @@ class IbmWasCheck(AgentCheck):
             return []
 
     def get_node_from_root(self, xml_data, path):
-        return xml_data.xpath('//{}'.format(path))
+        return xml_data.findall(path)
 
     def process_stats(self, stats, prefix, metric_categories, nested_tags, tags, recursion_level=0):
         """
