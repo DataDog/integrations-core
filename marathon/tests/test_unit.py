@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import mock
 import pytest
-from marathon.datadog_checks.marathon import Marathon
+from datadog_checks.marathon import Marathon
 
 from .common import INSTANCE_INTEGRATION
 
