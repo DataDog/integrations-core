@@ -1,5 +1,9 @@
 # CHANGELOG - IBM WAS
 
+## 1.2.2 / 2019-09-02
+
+* [Fixed] IBM_WAS fix bug, add unit test. See [#4491](https://github.com/DataDog/integrations-core/pull/4491).
+
 ## 1.2.1 / 2019-08-30
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
