@@ -17,7 +17,7 @@ BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
 
-@pytest.mark.usefixtures('dd_environment', 'kafka_consumer', 'kafka_producer')
+@pytest.mark.usefixtures('dd_environment')
 def test_check_kafka(aggregator, kafka_instance):
     """
     Testing Kafka_consumer check.

@@ -5,7 +5,7 @@ from datadog_checks.couchbase import Couchbase
 
 
 def test_camel_case_to_joined_lower():
-    couchbase = Couchbase('couchbase', {}, {})
+    couchbase = Couchbase('couchbase', {}, [{}])
 
     CAMEL_CASE_TEST_PAIRS = {
         'camelCase': 'camel_case',
@@ -28,7 +28,7 @@ def test_camel_case_to_joined_lower():
 
 
 def test_extract_seconds_value():
-    couchbase = Couchbase('couchbase', {}, {})
+    couchbase = Couchbase('couchbase', {}, [{}])
 
     EXTRACT_SECONDS_TEST_PAIRS = {
         '3.45s': 3.45,
@@ -50,5 +50,5 @@ def test__get_query_monitoring_data():
     `query_monitoring_url` can potentially fail, be sure we don't raise when the
     endpoint is not reachable
     """
-    couchbase = Couchbase('couchbase', {}, {})
+    couchbase = Couchbase('couchbase', {}, [{}])
     couchbase._get_query_monitoring_data({'query_monitoring_url': 'http://foo/bar'})

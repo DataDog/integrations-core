@@ -1,12 +1,9 @@
 # (C) Datadog, Inc. 2010-2017
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import warnings
-
 from six.moves.urllib.parse import urlparse
-from urllib3.exceptions import InsecureRequestWarning
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck
 
 
 class Apache(AgentCheck):
@@ -38,8 +35,8 @@ class Apache(AgentCheck):
         'connect_timeout': {'name': 'connect_timeout', 'default': 5},
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(Apache, self).__init__(name, init_config, instances)
         self.assumed_url = {}
 
     def check(self, instance):
@@ -60,11 +57,8 @@ class Apache(AgentCheck):
                 'apache check initiating request, connect timeout %d receive %d'
                 % (self.http.options['timeout'][0], self.http.options['timeout'][1])
             )
-            with warnings.catch_warnings():
-                if is_affirmative(instance.get('tls_ignore_warning', False)):
-                    warnings.simplefilter('ignore', InsecureRequestWarning)
 
-                r = self.http.get(url)
+            r = self.http.get(url)
             r.raise_for_status()
 
         except Exception as e:

@@ -74,3 +74,31 @@ def test_backoff_success(check, instance, aggregator, payload):
         ]
         pool_name = check._process_status(instance['status_url'], [], None, False)
         assert pool_name == 'www'
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("old auth config", {'user': 'old_foo', 'password': 'new_bar'}, {'auth': ('old_foo', 'new_bar')}),
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'disable_ssl_validation': False}, {'verify': True}),
+        ("legacy ssl config False", {'disable_ssl_validation': True}, {'verify': False}),
+        ("legacy ssl config unset", {}, {'verify': True}),
+        ("http_host header", {"http_host": "foo"}, {'headers': {'User-Agent': 'Datadog Agent/0.0.0', 'Host': 'foo'}}),
+    ],
+)
+def test_config(test_case, extra_config, expected_http_kwargs):
+    instance = {'ping_url': 'http://foo:9001/ping'}
+    instance.update(extra_config)
+    check = PHPFPMCheck('php_fpm', {}, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_kwargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_kwargs.update(expected_http_kwargs)
+        r.get.assert_called_with('http://foo:9001/ping', **http_kwargs)

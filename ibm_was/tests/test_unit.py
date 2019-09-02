@@ -22,6 +22,7 @@ def mock_data(file):
 
 def test_metric_collection_per_category(aggregator, instance, check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
+        check = check(instance)
         check.check(instance)
 
     for metric_name in common.METRICS_ALWAYS_PRESENT:
@@ -31,6 +32,7 @@ def test_metric_collection_per_category(aggregator, instance, check):
 
 def test_custom_query(aggregator, instance, check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
+        check = check(instance)
         check.check(instance)
 
     aggregator.assert_metric_has_tag(
@@ -41,6 +43,7 @@ def test_custom_query(aggregator, instance, check):
 
 def test_custom_queries_missing_stat_in_payload(instance, check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
+        check = check(instance)
         check.check(instance)
 
     assert "Error finding JDBC Connection Custom stats in XML output." in check.warnings
@@ -49,6 +52,7 @@ def test_custom_queries_missing_stat_in_payload(instance, check):
 def test_custom_query_validation(check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
         with pytest.raises(ConfigurationError) as e:
+            check = check(None)
             check.check(common.MALFORMED_CUSTOM_QUERY_INSTANCE)
             assert "missing required field" in str(e)
 
@@ -56,6 +60,7 @@ def test_custom_query_validation(check):
 def test_config_validation(check):
     with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
         with pytest.raises(ConfigurationError) as e:
+            check = check(None)
             check.check(common.MISSING_REQ_FIELD_INSTANCE)
             assert "Please specify a servlet_url" in str(e)
 
@@ -65,6 +70,7 @@ def test_critical_service_check(instance, check, aggregator):
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
 
     with pytest.raises(requests.ConnectionError):
+        check = check(instance)
         check.check(instance)
 
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)

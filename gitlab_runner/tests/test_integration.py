@@ -16,7 +16,7 @@ def test_connection_failure(aggregator):
     Make sure we're failing when the URL isn't right
     """
 
-    gitlab_runner = GitlabRunnerCheck('gitlab', BAD_CONFIG['init_config'], {}, instances=BAD_CONFIG['instances'])
+    gitlab_runner = GitlabRunnerCheck('gitlab', BAD_CONFIG['init_config'], instances=BAD_CONFIG['instances'])
 
     with pytest.raises(ConnectionError):
         gitlab_runner.check(BAD_CONFIG['instances'][0])

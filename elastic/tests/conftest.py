@@ -43,7 +43,7 @@ def dd_environment(instance):
 
 @pytest.fixture
 def elastic_check():
-    return ESCheck('elastic', {}, {}, instances=[INSTANCE])
+    return ESCheck('elastic', {}, instances=[INSTANCE])
 
 
 @pytest.fixture(scope='session')

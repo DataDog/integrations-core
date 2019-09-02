@@ -173,7 +173,7 @@ LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   nspname !~ '^pg_toast' AND
   relkind IN ('r') AND
-  relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
+  ( relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[]) )""",
     }
 
     COUNT_METRICS = {

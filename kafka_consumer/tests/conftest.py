@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+import time
 
 import pytest
 from kafka import KafkaConsumer
@@ -20,6 +21,18 @@ def find_topics():
     return len(topics) == 2
 
 
+def initialize_topics():
+    flavor = os.environ.get('KAFKA_OFFSETS_STORAGE')
+    if flavor == 'zookeeper':
+        consumer = ZKConsumer(TOPICS, PARTITIONS)
+    else:
+        consumer = KConsumer(TOPICS)
+
+    with Producer():
+        with consumer:
+            time.sleep(5)
+
+
 @pytest.fixture(scope='session')
 def dd_environment(e2e_instance):
     """
@@ -27,7 +40,7 @@ def dd_environment(e2e_instance):
     """
     with docker_run(
         os.path.join(HERE, 'docker', 'docker-compose.yaml'),
-        conditions=[WaitFor(find_topics, attempts=30, wait=3)],
+        conditions=[WaitFor(find_topics, attempts=30, wait=3), initialize_topics],
         env_vars={
             # Advertising the hostname doesn't work on docker:dind so we manually
             # resolve the IP address. This seems to also work outside docker:dind
@@ -36,27 +49,6 @@ def dd_environment(e2e_instance):
         },
     ):
         yield e2e_instance
-
-
-@pytest.fixture(scope='session')
-@pytest.mark.usefixtures('dd_environment')
-def kafka_producer():
-    with Producer():
-        yield
-
-
-@pytest.fixture(scope='session')
-@pytest.mark.usefixtures('dd_environment')
-def kafka_consumer():
-    with KConsumer(TOPICS):
-        yield
-
-
-@pytest.fixture(scope='session')
-@pytest.mark.usefixtures('dd_environment')
-def zk_consumer():
-    with ZKConsumer(TOPICS, PARTITIONS):
-        yield
 
 
 @pytest.fixture(scope='session')

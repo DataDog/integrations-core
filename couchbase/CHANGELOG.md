@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.9.1 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
 ## 1.9.0 / 2019-08-24
 
 * [Added] Add RequestsWrapper to couchbase. See [#4119](https://github.com/DataDog/integrations-core/pull/4119).

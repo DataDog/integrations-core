@@ -44,7 +44,7 @@ class TeamCityCheck(AgentCheck):
         else:
             build_url = self.LAST_BUILD_URL.format(server=server, build_conf=build_conf)
         try:
-            resp = requests.get(build_url)
+            resp = self.http.get(build_url)
             resp.raise_for_status()
 
             last_build_id = resp.json().get("build")[0].get("id")
