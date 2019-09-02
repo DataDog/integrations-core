@@ -5,12 +5,13 @@ import os
 
 import mock
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.vertica import VerticaCheck
 
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 
 
-def test_ssl_config_ok():
+def test_ssl_config_ok(aggregator):
     cert = os.path.join(CERTIFICATE_DIR, 'cert.cert')
     private_key = os.path.join(CERTIFICATE_DIR, 'server.pem')
     instance = {
@@ -44,3 +45,5 @@ def test_ssl_config_ok():
             tls_context.load_cert_chain.assert_called_with(cert, keyfile=private_key)
 
             assert check._connection is not None
+
+    aggregator.assert_service_check("vertica.can_connect", status=AgentCheck.OK, tags=['db:abc', 'foo:bar'])
