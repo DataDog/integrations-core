@@ -2,7 +2,7 @@
 
 ## 1.2.2 / 2019-09-02
 
-* [Fixed] IBM_WAS fix bug, add unit test. See [#4491](https://github.com/DataDog/integrations-core/pull/4491).
+* [Fixed] IBM_WAS fix bug where multinode clusters would report wrong server/node tag combination and duplicate metric values. See [#4491](https://github.com/DataDog/integrations-core/pull/4491).
 
 ## 1.2.1 / 2019-08-30
 
