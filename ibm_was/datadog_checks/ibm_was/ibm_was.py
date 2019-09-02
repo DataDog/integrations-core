@@ -68,7 +68,7 @@ class IbmWasCheck(AgentCheck):
     def get_node_from_name(self, xml_data, path):
         # XMLPath returns a list, but there should only be one element here since the function starts
         # the search within a given Node/Server
-        data = xml_data.xpath('//Stat[normalize-space(@name)="{}"]'.format(path))
+        data = xml_data.xpath('.//Stat[normalize-space(@name)="{}"]'.format(path))
         if len(data):
             return data[0]
         else:
