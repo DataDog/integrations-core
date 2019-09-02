@@ -44,5 +44,5 @@ def assert_check_kafka(aggregator, kafka_instance):
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
-    aggregator.assert_all_metrics_covered()
 
+    aggregator.assert_all_metrics_covered()
