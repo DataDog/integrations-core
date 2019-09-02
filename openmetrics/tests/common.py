@@ -1,6 +1,5 @@
 from datadog_checks.dev import get_docker_hostname, get_here
 
-
 CHECK_NAME = 'openmetrics'
 
 HERE = get_here()
