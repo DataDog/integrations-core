@@ -74,3 +74,43 @@ def test_critical_service_check(instance, check, aggregator):
         check.check(instance)
 
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+
+
+def test_right_server_tag(instance, check, aggregator):
+    del instance['custom_queries']
+    with mock.patch(
+        'datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet-multiple-nodes.xml')
+    ):
+        check = check(instance)
+        check.check(instance)
+
+    node = 'node:cmhqlvij2a04'
+    for metric_name, metrics in aggregator._metrics.items():
+        for metric in metrics:
+            if 'server:IJ2Server02' in metric.tags:
+                assert node in metric.tags, "Expected '{}' tag in '{}' tags, found {}".format(
+                    node, metric_name, metric.tags
+                )
+
+
+def test_right_values(instance, check, aggregator):
+    del instance['custom_queries']
+    instance['collect_thread_pool_stats'] = False
+    instance['collect_servlet_session_stats'] = False
+
+    with mock.patch(
+        'datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('perfservlet-multiple-nodes.xml')
+    ):
+        check = check(instance)
+        check.check(instance)
+
+    aggregator.assert_metric(
+        'ibm_was.jdbc.pool_size',
+        tags=['server:IJ2Server05', 'key1:value1', 'node:cmhqlvij2a02', 'provider:Oracle JDBC Driver'],
+        value=3,
+    )
+    aggregator.assert_metric(
+        'ibm_was.jdbc.pool_size',
+        tags=['server:IJ2Server02', 'key1:value1', 'node:cmhqlvij2a04', 'provider:Oracle JDBC Driver'],
+        value=4,
+    )
