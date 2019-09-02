@@ -70,7 +70,7 @@ class SnmpCheck(AgentCheck):
             else:
                 data = profile_data['definition']
             self.profiles[profile] = {'definition': data}
-            sys_object_oid = profile_data.get('sysObjectID')
+            sys_object_oid = profile_data.get('sysobjectid')
             if sys_object_oid:
                 self.profiles_by_oid[sys_object_oid] = profile
 
@@ -223,6 +223,7 @@ class SnmpCheck(AgentCheck):
 
     def fetch_sysobject_oid(self, config):
         """Return the sysObjectID of the instance."""
+        # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
         self.log.debug('Running SNMP command on OID %s', oid)
         error_indication, error_status, error_index, var_binds = next(
@@ -245,6 +246,8 @@ class SnmpCheck(AgentCheck):
         try:
             if not (config.table_oids or config.raw_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
+                if sys_object_oid not in self.profiles_by_oid:
+                    raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
                 profile = self.profiles_by_oid[sys_object_oid]
                 config.refresh_with_profile(self.profiles[profile], self.warning)
 

@@ -95,7 +95,7 @@ init_config:
   #   profile1:
   #   	definition_file: <PROFILE_FILE>
   #   	definition: <PROFILE>
-  #   	sysObjectID: <OID>
+  #   	sysobjectid: <OID>
 
 instances:
 

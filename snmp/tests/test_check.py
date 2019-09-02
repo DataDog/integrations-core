@@ -8,6 +8,7 @@ import mock
 import pytest
 import yaml
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 
@@ -493,7 +494,7 @@ def test_profile_sys_object(aggregator):
     instance = common.generate_instance_config([])
     init_config = {
         'profiles': {
-            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysObjectID': '1.3.6.1.4.1.8072.3.2.10'}
+            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
         }
     }
     check = SnmpCheck('snmp', init_config, [instance])
@@ -503,3 +504,22 @@ def test_profile_sys_object(aggregator):
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
     aggregator.assert_all_metrics_covered()
+
+
+def test_profile_sys_object_unknown(aggregator):
+    """If the fetched sysObjectID is not referenced by any profiles, check fails."""
+    instance = common.generate_instance_config([])
+    init_config = {'profiles': {'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.2.3.4.5'}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_profile_sys_object_no_metrics(aggregator):
+    """If an instance is created without metrics and there is no profile defined, an error is raised."""
+    instance = common.generate_instance_config([])
+    with pytest.raises(ConfigurationError):
+        SnmpCheck('snmp', {}, [instance])
