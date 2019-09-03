@@ -63,7 +63,6 @@ def environment_run(up, down, sleep=None, endpoints=None, conditions=None, env_v
                 result = get_env_vars().get(key)
                 if result:
                     yield deserialize_data(result)
-
         finally:
             if tear_down_env():
                 down()

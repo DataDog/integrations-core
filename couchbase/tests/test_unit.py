@@ -35,7 +35,7 @@ def test_camel_case_to_joined_lower():
 
 
 def test_extract_seconds_value():
-    couchbase = Couchbase('couchbase', {}, {})
+    couchbase = Couchbase('couchbase', {}, [{}])
 
     EXTRACT_SECONDS_TEST_PAIRS = {
         '3.45s': 3.45,
@@ -57,7 +57,7 @@ def test__get_query_monitoring_data():
     `query_monitoring_url` can potentially fail, be sure we don't raise when the
     endpoint is not reachable
     """
-    couchbase = Couchbase('couchbase', {}, {})
+    couchbase = Couchbase('couchbase', {}, [{}])
     couchbase._get_query_monitoring_data({'query_monitoring_url': 'http://foo/bar'})
 
 
@@ -75,7 +75,7 @@ def test__get_query_monitoring_data():
 def test_config(test_case, extra_config, expected_http_kwargs):
     instance = deepcopy(DEFAULT_INSTANCE)
     instance.update(extra_config)
-    check = Couchbase('couchbase', {}, {}, instances=[instance])
+    check = Couchbase('couchbase', {}, [instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
