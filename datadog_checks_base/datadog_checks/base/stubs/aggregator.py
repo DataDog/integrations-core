@@ -56,7 +56,10 @@ class AggregatorStub(object):
     def is_aggregate(cls, mtype):
         return mtype in cls.AGGREGATE_TYPES
 
-    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname, device=None):
+    def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
+        self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
+
+    def submit_metric_e2e(self, check, check_id, mtype, name, value, tags, hostname, device=None):
         # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
         self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
