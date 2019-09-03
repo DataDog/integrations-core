@@ -66,10 +66,10 @@ def test__get_query_monitoring_data():
     [
         (
             "new auth config",
-            {'username': 'new_foo', 'tsl_verify': True},
-            {'auth': ('new_foo', 'password'), 'verify': True},
+            {'username': 'new_foo', 'password': 'bar', 'tls_verify': False},
+            {'auth': ('new_foo', 'bar'), 'verify': False},
         ),
-        ("legacy config", {'user': 'new_foo', 'ssl_verify': True}, {'auth': ('new_foo', 'password'), 'verify': True}),
+        ("legacy config", {'user': 'new_foo', 'ssl_verify': False}, {'auth': ('new_foo', 'password'), 'verify': False}),
     ],
 )
 def test_config(test_case, extra_config, expected_http_kwargs):
