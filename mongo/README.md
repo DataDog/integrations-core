@@ -28,7 +28,7 @@ Edit the `mongo.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
 
 In a mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
 
-```
+```shell
 # Authenticate as the admin user.
 use admin
 db.auth("admin", "<YOUR_MONGODB_ADMIN_PASSWORD>")
