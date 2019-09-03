@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 1.10.0 / 2019-08-24
+
+* [Added] Upgrade JPype1 to 0.7.0. See [#4211](https://github.com/DataDog/integrations-core/pull/4211).
+
 ## 1.9.0 / 2019-07-08
 
 * [Added] Upgrade dependencies for Python 3.7 binary wheels. See [#4030](https://github.com/DataDog/integrations-core/pull/4030).

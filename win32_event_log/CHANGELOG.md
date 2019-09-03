@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 2.0.1 / 2019-08-24
+
+* [Fixed] Remove check for user filter. See [#4342](https://github.com/DataDog/integrations-core/pull/4342).
+
 ## 2.0.0 / 2019-05-14
 
 * [Changed] Require the use of filters. See [#3652](https://github.com/DataDog/integrations-core/pull/3652).

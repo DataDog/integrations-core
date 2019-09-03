@@ -1,5 +1,18 @@
 # CHANGELOG - postgres
 
+## 3.1.2 / 2019-08-31
+
+* [Fixed] Document new config option. See [#4480](https://github.com/DataDog/integrations-core/pull/4480).
+
+## 3.1.1 / 2019-08-30
+
+* [Fixed] Fix query condition. See [#4484](https://github.com/DataDog/integrations-core/pull/4484). Thanks [dpierce-aledade](https://github.com/dpierce-aledade).
+
+## 3.1.0 / 2019-08-24
+
+* [Added] Make table_count_limit a parameter. See [#3729](https://github.com/DataDog/integrations-core/pull/3729). Thanks [fischaz](https://github.com/fischaz).
+* [Added] Add postgresql application name to connection. See [#4295](https://github.com/DataDog/integrations-core/pull/4295).
+
 ## 3.0.0 / 2019-07-12
 
 * [Changed] Add SSL support for psycopg2, remove pg8000. See [#4096](https://github.com/DataDog/integrations-core/pull/4096).

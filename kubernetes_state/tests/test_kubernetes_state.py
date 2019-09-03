@@ -16,6 +16,7 @@ CHECK_NAME = 'kubernetes_state'
 
 METRICS = [
     # nodes
+    NAMESPACE + '.node.count',
     NAMESPACE + '.node.cpu_capacity',
     NAMESPACE + '.node.memory_capacity',
     NAMESPACE + '.node.pods_capacity',
@@ -102,9 +103,23 @@ METRICS = [
     # jobs
     NAMESPACE + '.job.failed',
     NAMESPACE + '.job.succeeded',
+    # vpa
+    NAMESPACE + '.vpa.lower_bound',
+    NAMESPACE + '.vpa.target',
+    NAMESPACE + '.vpa.uncapped_target',
+    NAMESPACE + '.vpa.upperbound',
+    NAMESPACE + '.vpa.update_mode',
 ]
 
 TAGS = {
+    NAMESPACE
+    + '.node.count': [
+        'container_runtime_version:docker://1.12.6',
+        'kernel_version:4.9.13',
+        'kubelet_version:v1.8.0',
+        'kubeproxy_version:v1.8.0',
+        'os_image:Buildroot 2017.02',
+    ],
     NAMESPACE + '.pod.ready': ['node:minikube'],
     NAMESPACE + '.pod.scheduled': ['node:minikube'],
     NAMESPACE
@@ -451,15 +466,15 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=87416.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=956.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1270.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90270.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=908.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1282.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=314.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',
         tags=['resource_name:pod', 'resource_namespace:default', 'optional:tag1'],
-        value=600.0,
+        value=540.0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',

@@ -112,8 +112,8 @@ class OpenStackControllerCheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}, 'request_timeout': {'name': 'timeout'}}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        super(OpenStackControllerCheck, self).__init__(name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(OpenStackControllerCheck, self).__init__(name, init_config, instances)
         # We cache all api instances.
         # This allows to cache connection if the underlying implementation support it
         # Ex: _api = <api object>

@@ -91,10 +91,14 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
     config, metadata, error = start_environment(check, env)
 
     if error:
-        echo_failure('failed!')
-        echo_waiting('Stopping the environment...')
-        stop_environment(check, env, metadata=metadata)
-        abort(error)
+        if 'does not support this platform' in error:
+            echo_warning(error)
+            abort(code=0)
+        else:
+            echo_failure('failed!')
+            echo_waiting('Stopping the environment...')
+            stop_environment(check, env, metadata=metadata)
+            abort(error)
     echo_success('success!')
 
     env_type = metadata['env_type']

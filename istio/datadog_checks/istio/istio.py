@@ -299,7 +299,6 @@ class Istio(OpenMetricsBaseCheck):
                     {
                         'endpoint_no_pod': 'endpoint_no_pod',
                         'galley_mcp_source_clients_total': 'mcp_source.clients_total',
-                        'galley_mcp_source_message_sizes_bytes': 'mcp_source.message_size_bytes',
                         'galley_mcp_source_request_acks_total': 'mcp_source.request_acks_total',
                         'galley_runtime_processor_event_span_duration_milliseconds': (
                             'runtime_processor.event_span_duration_milliseconds'
@@ -329,8 +328,10 @@ class Istio(OpenMetricsBaseCheck):
                         'galley_validation_passed': 'validation.passed',
                     }
                 ],
+                'ignore_metrics': ['galley_mcp_source_message_size_bytes'],
             }
         )
+        process_galley_instance['ignore_metrics'].extend(instance.get('ignore_metrics', []))
         process_galley_instance['metrics'][0].update(self._get_generic_metrics())
         return process_galley_instance
 

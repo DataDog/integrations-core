@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
+import mock
 import pytest
 import requests
 from six import itervalues
@@ -67,7 +68,7 @@ def test_check_no_leader_tag(aggregator, instance):
 
 @preview
 def test_service_check(aggregator, instance):
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     tags = ['endpoint:{}'.format(instance['prometheus_url'])]
@@ -79,7 +80,7 @@ def test_service_check(aggregator, instance):
 def test_bad_config(aggregator):
     bad_url = '{}/test'.format(URL)
     instance = {'url': bad_url}
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
 
     with pytest.raises(Exception):
         check.check(instance)
@@ -90,7 +91,7 @@ def test_bad_config(aggregator):
 
 @legacy
 def test_metrics(instance, aggregator):
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
@@ -104,7 +105,7 @@ def test_metrics(instance, aggregator):
 
 @legacy
 def test_service_checks(instance, aggregator):
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
@@ -134,7 +135,7 @@ def test_followers(aggregator):
     followers = list(response.json().get('followers', {}).keys())
 
     instance = {'url': url}
-    check = Etcd(CHECK_NAME, None, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, {}, [instance])
     check.check(instance)
 
     common_leader_tags = ['url:{}'.format(url), 'etcd_state:leader']
@@ -151,3 +152,62 @@ def test_followers(aggregator):
         aggregator.assert_metric('etcd.leader.latency.max', count=1, tags=fol_tags)
         aggregator.assert_metric('etcd.leader.latency.stddev', count=1, tags=fol_tags)
         aggregator.assert_metric('etcd.leader.latency.current', count=1, tags=fol_tags)
+
+
+@legacy
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'ssl_cert_validation': True}, {'verify': True}),
+        ("legacy ssl config False", {'ssl_cert_validation': False}, {'verify': False}),
+        ("legacy ssl config unset", {}, {'verify': False}),
+    ],
+)
+def test_config_legacy(instance, test_case, extra_config, expected_http_kwargs):
+    instance.update(extra_config)
+    check = Etcd(CHECK_NAME, {}, {}, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_kwargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_kwargs.update(expected_http_kwargs)
+        r.get.assert_called_with(URL + '/v2/stats/store', **http_kwargs)
+
+
+@preview
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'ssl_verify': True}, {'verify': True}),
+        ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
+        ("legacy ssl config unset", {}, {'verify': False}),
+        ("timeout", {'prometheus_timeout': 100}, {'timeout': (100.0, 100.0)}),
+    ],
+)
+def test_config_preview(instance, test_case, extra_config, expected_http_kwargs):
+    instance.update(extra_config)
+    check = Etcd(CHECK_NAME, {}, {}, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_kwargs = dict(
+            auth=mock.ANY,
+            cert=mock.ANY,
+            data=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+        )
+        http_kwargs.update(expected_http_kwargs)
+        r.post.assert_called_with(URL + '/v3alpha/maintenance/status', **http_kwargs)

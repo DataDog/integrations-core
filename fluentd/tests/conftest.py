@@ -7,9 +7,8 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.fluentd import Fluentd
 
-from .common import CHECK_NAME, DEFAULT_INSTANCE, HERE, URL
+from .common import DEFAULT_INSTANCE, HERE, URL
 
 
 @pytest.fixture(scope="session")
@@ -36,5 +35,5 @@ def dd_environment():
 
 
 @pytest.fixture
-def check():
-    return Fluentd(CHECK_NAME, {}, [DEFAULT_INSTANCE])
+def instance():
+    return DEFAULT_INSTANCE

@@ -5,7 +5,7 @@ import difflib
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs import similar
-from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
+from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 
 
 class TestSimilarAssertionMessages(object):
@@ -183,3 +183,26 @@ Score   Most similar
 
         # expect similar metrics in a similarity order
         assert similar_service_checks[0][1].name == 'test.similar3'
+
+    def test__build_similar_elements__histogram_buckets(self, aggregator):
+        check = AgentCheck()
+
+        check.submit_histogram_bucket('histogram.bucket3', 1, 0.0, 10.0, True, "hostname", ["tag2"])
+        check.submit_histogram_bucket('histogram.bucket2', 1, 125.0, 312.0, True, "hostname", ["tag1"])
+        check.submit_histogram_bucket('histogram.bucket1', 1, 0.0, 10.0, True, "hostname", ["tag1"])
+        check.submit_histogram_bucket('histogram.bucket4', 1, 125.0, 312.0, True, "hostname2", ["tag1"])
+        check.submit_histogram_bucket('histogram.bucket5', 1, 125.0, 312.0, True, "hostname2", ["tag2"])
+        check.submit_histogram_bucket('histogram.bucket0', 2, 125.0, 312.0, False, "hostname2", ["tag2"])
+
+        expected_histogram_bucket = HistogramBucketStub('histogram.bucket', 1, 0.0, 10.0, True, "hostname", ["tag1"])
+        similar_histogram_bucket = similar._build_similar_elements(
+            expected_histogram_bucket, aggregator._histogram_buckets
+        )
+
+        # expect buckets in closest similarity order
+        assert similar_histogram_bucket[0][1].name == 'histogram.bucket1'  # exact match (except name)
+        assert similar_histogram_bucket[1][1].name == 'histogram.bucket3'  # value/upper/lower/monotonic/host match
+        assert similar_histogram_bucket[2][1].name == 'histogram.bucket2'  # value/monotonic/host/tag match
+        assert similar_histogram_bucket[3][1].name == 'histogram.bucket4'  # value/monotonic/tag match
+        assert similar_histogram_bucket[4][1].name == 'histogram.bucket5'  # value/monotonic match
+        assert similar_histogram_bucket[5][1].name == 'histogram.bucket0'  # no match

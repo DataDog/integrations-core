@@ -502,7 +502,7 @@ class Network(AgentCheck):
             proto = "tcp{0}".format(ip_version)
             if state in tcp_states:
                 metric = self.cx_state_gauge[proto, tcp_states[state]]
-                metrics[metric] = int(value)
+                metrics[metric] += int(value)
 
     def _parse_linux_cx_state(self, lines, tcp_states, state_col, protocol=None, ip_version=None):
         """

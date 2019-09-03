@@ -1,5 +1,14 @@
 # CHANGELOG - gitlab_runner
 
+## 2.4.1 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
+## 2.4.0 / 2019-08-24
+
+* [Fixed] Update RequestsWrapper with read/connect timeout. See [#4241](https://github.com/DataDog/integrations-core/pull/4241).
+* [Added] Add requests wrapper to gitlab_runner. See [#4218](https://github.com/DataDog/integrations-core/pull/4218).
+
 ## 2.3.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3510](https://github.com/DataDog/integrations-core/pull/3510).

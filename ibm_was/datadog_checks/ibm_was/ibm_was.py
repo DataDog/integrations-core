@@ -17,8 +17,8 @@ class IbmWasCheck(AgentCheck):
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
     METRIC_PREFIX = 'ibm_was'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(IbmWasCheck, self).__init__(name, init_config, instances)
         self.metric_type_mapping = {
             'AverageStatistic': self.gauge,
             'BoundedRangeStatistic': self.gauge,
@@ -68,7 +68,7 @@ class IbmWasCheck(AgentCheck):
     def get_node_from_name(self, xml_data, path):
         # XMLPath returns a list, but there should only be one element here since the function starts
         # the search within a given Node/Server
-        data = xml_data.xpath('//Stat[normalize-space(@name)="{}"]'.format(path))
+        data = xml_data.xpath('.//Stat[normalize-space(@name)="{}"]'.format(path))
         if len(data):
             return data[0]
         else:
@@ -76,7 +76,7 @@ class IbmWasCheck(AgentCheck):
             return []
 
     def get_node_from_root(self, xml_data, path):
-        return xml_data.xpath('//{}'.format(path))
+        return xml_data.findall(path)
 
     def process_stats(self, stats, prefix, metric_categories, nested_tags, tags, recursion_level=0):
         """

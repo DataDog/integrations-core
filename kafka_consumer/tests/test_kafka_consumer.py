@@ -17,7 +17,7 @@ BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
 
-@pytest.mark.usefixtures('dd_environment', 'kafka_consumer', 'kafka_producer')
+@pytest.mark.usefixtures('dd_environment')
 def test_check_kafka(aggregator, kafka_instance):
     """
     Testing Kafka_consumer check.
@@ -32,8 +32,6 @@ def test_check_kafka(aggregator, kafka_instance):
                 for mname in BROKER_METRICS:
                     aggregator.assert_metric(mname, tags=tags, at_least=1)
                 for mname in CONSUMER_METRICS:
-                    aggregator.assert_metric(
-                        mname, tags=tags + ["source:kafka", "consumer_group:{}".format(name)], at_least=1
-                    )
+                    aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
 
     aggregator.assert_all_metrics_covered()

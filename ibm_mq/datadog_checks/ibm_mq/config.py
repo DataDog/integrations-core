@@ -7,6 +7,8 @@ import re
 
 from six import iteritems
 
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.config import is_affirmative
 
 # compatibility layer for agents under 6.6.0
@@ -14,6 +16,28 @@ try:
     from datadog_checks.errors import ConfigurationError
 except ImportError:
     ConfigurationError = Exception
+
+try:
+    import pymqi
+except ImportError:
+    pymqi = None
+else:
+    # Since pymqi is not be available/installed on win/macOS when running e2e,
+    # we load the following constants only pymqi import succeed
+
+    DEFAULT_CHANNEL_STATUS_MAPPING = {
+        pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
+        pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
+        pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
+        pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
+        pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
+        pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
+    }
+
 
 log = logging.getLogger(__file__)
 
@@ -58,6 +82,8 @@ class IBMMQConfig:
             )
 
         self.channels = instance.get('channels', [])
+
+        self.channel_status_mapping = self.get_channel_status_mapping(instance.get('channel_status_mapping'))
 
         self.custom_tags = instance.get('tags', [])
 
@@ -110,3 +136,24 @@ class IBMMQConfig:
             "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
             "port:{}".format(self.port),
         ] + self.custom_tags
+
+    @staticmethod
+    def get_channel_status_mapping(channel_status_mapping_raw):
+        if channel_status_mapping_raw:
+            custom_mapping = {}
+            for ibm_mq_status_raw, service_check_status_raw in channel_status_mapping_raw.items():
+                ibm_mq_status_attr = 'MQCHS_{}'.format(ibm_mq_status_raw).upper()
+                service_check_status_attr = service_check_status_raw.upper()
+
+                if service_check_status_attr not in ServiceCheck._fields:
+                    raise ConfigurationError("Invalid service check status: {}".format(service_check_status_raw))
+
+                try:
+                    custom_mapping[getattr(pymqi.CMQCFC, ibm_mq_status_attr)] = getattr(
+                        AgentCheck, service_check_status_attr
+                    )
+                except AttributeError as e:
+                    raise ConfigurationError("Invalid mapping: {}".format(e))
+            return custom_mapping
+        else:
+            return DEFAULT_CHANNEL_STATUS_MAPPING

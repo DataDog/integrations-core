@@ -1,5 +1,13 @@
 # CHANGELOG - IBM WAS
 
+## 1.2.2 / 2019-09-02
+
+* [Fixed] Fix bug where multinode clusters would report wrong server/node tag combination and duplicate metric values. See [#4491](https://github.com/DataDog/integrations-core/pull/4491).
+
+## 1.2.1 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
 ## 1.2.0 / 2019-08-02
 
 * [Added] Update metric type for JVM Metrics. See [#4085](https://github.com/DataDog/integrations-core/pull/4085).

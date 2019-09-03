@@ -11,13 +11,13 @@ DEFAULT_EXPECTED_CODE = r'(1|2|3)\d\d'
 
 Config = namedtuple(
     'Config',
-    'url, ntlm_domain, username, password, client_cert,'
+    'url, client_cert,'
     'client_key, method, data, http_response_status_code,'
-    'timeout, include_content, headers, response_time,'
+    'include_content, headers, response_time,'
     'content_match, reverse_content_match, tags,'
-    'disable_ssl_validation, ssl_expire, instance_ca_certs,'
-    'weakcipher, check_hostname, ignore_ssl_warning,'
-    'skip_proxy, allow_redirects, stream',
+    'ssl_expire, instance_ca_certs,'
+    'weakcipher, check_hostname,'
+    'allow_redirects, stream',
 )
 
 
@@ -28,13 +28,9 @@ def from_instance(instance, default_ca_certs=None):
     method = instance.get('method', 'get')
     data = instance.get('data', {})
     tags = instance.get('tags', [])
-    ntlm_domain = instance.get('ntlm_domain')
-    username = instance.get('username')
-    password = instance.get('password')
     client_cert = instance.get('client_cert')
     client_key = instance.get('client_key')
     http_response_status_code = str(instance.get('http_response_status_code', DEFAULT_EXPECTED_CODE))
-    timeout = int(instance.get('timeout', 10))
     config_headers = instance.get('headers', {})
     default_headers = is_affirmative(instance.get("include_default_headers", True))
     if default_headers:
@@ -55,40 +51,30 @@ def from_instance(instance, default_ca_certs=None):
     if not url.startswith("http"):
         raise ConfigurationError("The url {} must start with the scheme http or https".format(url))
     include_content = is_affirmative(instance.get('include_content', False))
-    disable_ssl_validation = is_affirmative(instance.get('disable_ssl_validation', True))
     ssl_expire = is_affirmative(instance.get('check_certificate_expiration', True))
     instance_ca_certs = instance.get('ca_certs', default_ca_certs)
     weakcipher = is_affirmative(instance.get('weakciphers', False))
-    ignore_ssl_warning = is_affirmative(instance.get('ignore_ssl_warning', False))
     check_hostname = is_affirmative(instance.get('check_hostname', True))
-    skip_proxy = is_affirmative(instance.get('skip_proxy', instance.get('no_proxy', False)))
     allow_redirects = is_affirmative(instance.get('allow_redirects', True))
     stream = is_affirmative(instance.get('stream', False))
 
     return Config(
         url,
-        ntlm_domain,
-        username,
-        password,
         client_cert,
         client_key,
         method,
         data,
         http_response_status_code,
-        timeout,
         include_content,
         headers,
         response_time,
         content_match,
         reverse_content_match,
         tags,
-        disable_ssl_validation,
         ssl_expire,
         instance_ca_certs,
         weakcipher,
         check_hostname,
-        ignore_ssl_warning,
-        skip_proxy,
         allow_redirects,
         stream,
     )

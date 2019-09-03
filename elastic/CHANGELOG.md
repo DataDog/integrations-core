@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 1.13.2 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
 ## 1.13.1 / 2019-07-18
 
 * [Fixed] Add missing HTTP options to example config. See [#4129](https://github.com/DataDog/integrations-core/pull/4129).

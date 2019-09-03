@@ -73,9 +73,6 @@ fingerprints known to correspond to developers who, at the time of writing (May
 * [Nicholas Muesch](https://api.github.com/users/nmuesch/gpg_keys)
   * `6E09 1A53 0468 B148 54BB  6CCE 831C 23C4 9BBE 61F8`
   * `BACE F480 6D0B 4FBE D227  DC3B C0E2 8E5E 241E D25A`
-* [Massimiliano Pippi](https://api.github.com/users/masci/gpg_keys)
-  * `BE9C 5131 8EED C03F E901  F256 C2C8 965F 07D0 A23D`
-  * `69CA DE35 4030 5312 54AF  170C 50A7 66D9 4DFC 27CC`
 * [Julia Simon](https://api.github.com/users/hithwen/gpg_keys)
   * `4A54 09A2 3361 109C 047C  C76A DC8A 42C2 8B95 0123`
   * `129A 26CF A726 3C85 98A6  94B0 8659 1366 CBA1 BF3C`

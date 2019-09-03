@@ -170,6 +170,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_hpa_status_desired_replicas': 'hpa.desired_replicas',
                         'kube_hpa_status_current_replicas': 'hpa.current_replicas',
                         'kube_hpa_status_condition': 'hpa.condition',
+                        'kube_node_info': 'node.count',
                         'kube_node_status_allocatable_cpu_cores': 'node.cpu_allocatable',
                         'kube_node_status_allocatable_memory_bytes': 'node.memory_allocatable',
                         'kube_node_status_allocatable_pods': 'node.pods_allocatable',
@@ -212,6 +213,19 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_statefulset_status_replicas_current': 'statefulset.replicas_current',
                         'kube_statefulset_status_replicas_ready': 'statefulset.replicas_ready',
                         'kube_statefulset_status_replicas_updated': 'statefulset.replicas_updated',
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_lowerbound': (
+                            'vpa.lower_bound'
+                        ),
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_target': (
+                            'vpa.target'
+                        ),
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_uncappedtarget': (
+                            'vpa.uncapped_target'
+                        ),
+                        'kube_verticalpodautoscaler_status_recommendation_containerrecommendations_upperbound': (
+                            'vpa.upperbound'
+                        ),
+                        'kube_verticalpodautoscaler_spec_updatepolicy_updatemode': 'vpa.update_mode',
                     }
                 ],
                 'ignore_metrics': [
@@ -227,9 +241,9 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_namespace_created',
                     'kube_namespace_labels',
                     'kube_node_created',
-                    'kube_node_info',
                     'kube_node_labels',
-                    'kube_pod_created' 'kube_pod_container_info',
+                    'kube_pod_created',
+                    'kube_pod_container_info',
                     'kube_pod_info',
                     'kube_pod_owner',
                     'kube_pod_start_time',
@@ -275,6 +289,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_job_status_active',
                     'kube_job_status_completion_time',  # We could compute the duration=completion-start as a gauge
                     'kube_job_status_start_time',
+                    'kube_verticalpodautoscaler_labels',
                 ],
                 'label_joins': {
                     'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},

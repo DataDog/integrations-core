@@ -9,6 +9,7 @@ from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 
 from .common import CHECK_NAME, EXPECTED_METRICS
+from .utils import not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -16,7 +17,7 @@ except ImportError:
     pyodbc = None
 
 
-@pytest.mark.docker
+@not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_check_invalid_password(aggregator, init_config, instance_docker):
     instance_docker['password'] = 'FOO'
@@ -33,7 +34,7 @@ def test_check_invalid_password(aggregator, init_config, instance_docker):
     )
 
 
-@pytest.mark.docker
+@not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_check_docker(aggregator, init_config, instance_docker):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
@@ -42,7 +43,7 @@ def test_check_docker(aggregator, init_config, instance_docker):
     _assert_metrics(aggregator, expected_tags)
 
 
-@pytest.mark.docker
+@not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_check_stored_procedure(aggregator, init_config, instance_docker):
     proc = 'pyStoredProc'
@@ -109,7 +110,7 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
     aggregator.assert_metric('sql.sp.testb', tags=expected_tags, count=2)
 
 
-@pytest.mark.docker
+@not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_object_name(aggregator, init_config_object_name, instance_docker):
 
@@ -120,7 +121,7 @@ def test_object_name(aggregator, init_config_object_name, instance_docker):
     aggregator.assert_metric('sqlserver.active_requests', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
 
 
-@pytest.mark.local
+@windows_ci
 def test_check_local(aggregator, init_config, instance_sql2017):
     sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_sql2017])
     sqlserver_check.check(instance_sql2017)
@@ -128,7 +129,7 @@ def test_check_local(aggregator, init_config, instance_sql2017):
     _assert_metrics(aggregator, expected_tags)
 
 
-@pytest.mark.local
+@windows_ci
 @pytest.mark.parametrize('adoprovider', ['SQLOLEDB', 'SQLNCLI11'])
 def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovider):
     instance = deepcopy(instance_sql2017)
@@ -138,6 +139,20 @@ def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovide
     sqlserver_check.check(instance)
     expected_tags = instance.get('tags', []) + [r'host:(local)\SQL2017', 'db:master']
     _assert_metrics(aggregator, expected_tags)
+
+
+@pytest.mark.e2e
+def test_check_docker_e2e(dd_agent_check, init_config, instance_docker):
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_docker]}, rate=True)
+
+    aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
+
+    for mname in EXPECTED_METRICS:
+        aggregator.assert_metric(mname)
+
+    aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK)
+
+    aggregator.assert_all_metrics_covered()
 
 
 def _assert_metrics(aggregator, expected_tags):
