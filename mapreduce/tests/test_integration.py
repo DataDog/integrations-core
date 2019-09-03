@@ -12,12 +12,16 @@ pytestmark = pytest.mark.integration
 def test_check(aggregator, check, instance):
     check = check(instance)
     check.check(instance)
+    for metric in common.ELAPSED_TIME_METRICS:
+        aggregator.assert_metric(metric)
     assert_metrics_covered(aggregator)
 
 
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
+    for metric in common.ELAPSED_TIME_BUCKET_METRICS:
+        aggregator.assert_metric(metric)
     assert_metrics_covered(aggregator)
 
 
