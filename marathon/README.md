@@ -106,11 +106,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 Replace `<SERVER>` and `<PORT>` with the parameters of the Marathon instance your want to monitor.
 
- ##### Log collection
+##### Log collection
 
- **Available for Agent v6.5+**
+**Available for Agent v6.5+**
 
- Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][6].
 
 | Parameter      | Value                                               |
 |----------------|------------------------------------------------------|
