@@ -213,7 +213,7 @@ class AggregatorStub(object):
         )
 
     def assert_metric(
-            self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
+        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
     ):
         """
         Assert a metric was processed by this stub
