@@ -714,7 +714,7 @@ GROUP BY datid, datname
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-        except psycopg2.ProgrammingError as e:
+        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
             db.rollback()
             return None
@@ -872,8 +872,11 @@ GROUP BY datid, datname
     def get_connection(self, key, host, port, user, password, dbname, ssl, tags, use_cached=True):
         """Get and memoize connections to instances"""
         if key in self.dbs and use_cached:
-            return self.dbs[key]
-
+            conn = self.dbs[key]
+            if conn.status != psycopg2.extensions.STATUS_READY:
+                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                conn.rollback()
+            return conn
         elif host != "" and user != "":
             try:
                 if host == 'localhost' and password == '':
@@ -941,7 +944,7 @@ GROUP BY datid, datname
                 try:
                     self.log.debug("Running query: {}".format(query))
                     cursor.execute(query)
-                except psycopg2.ProgrammingError as e:
+                except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
                     self.log.error("Error executing query for metric_prefix {}: {}".format(metric_prefix, str(e)))
                     db.rollback()
                     continue
