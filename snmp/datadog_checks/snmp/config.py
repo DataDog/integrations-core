@@ -34,7 +34,7 @@ class InstanceConfig:
         self.ip_address = instance['ip_address']
 
         if not self.metrics and not profiles_by_oid:
-            raise ConfigurationError('Metrics list must contain at least one metric')
+            raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
             self.metrics, self.enforce_constraints, warning
