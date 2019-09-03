@@ -8,8 +8,9 @@ from . import common
 pytestmark = pytest.mark.integration
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
+def test_integration(aggregator, check, instance):
     check = check(instance)
     check.check(instance)
     for metric in common.ELAPSED_TIME_METRICS:
@@ -18,7 +19,7 @@ def test_check(aggregator, check, instance):
 
 
 @pytest.mark.e2e
-def test_check_e2e(dd_agent_check, instance):
+def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     for metric in common.ELAPSED_TIME_BUCKET_METRICS:
         aggregator.assert_metric(metric)
