@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 3.1.3 / 2019-09-04
+
+* [Fixed] Catch statement timeouts correctly. See [#4501](https://github.com/DataDog/integrations-core/pull/4501).
+
 ## 3.1.2 / 2019-08-31
 
 * [Fixed] Document new config option. See [#4480](https://github.com/DataDog/integrations-core/pull/4480).
