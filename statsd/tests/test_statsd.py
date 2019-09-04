@@ -49,14 +49,8 @@ def dd_environment():
 def test_simple_run(aggregator, instance):
     stats_check = StatsCheck(CHECK_NAME, {}, {})
     stats_check.check(instance)
-    expected_tags = ["host:{}".format(HOST), "port:{}".format(PORT)]
 
-    for mname in METRICS:
-        aggregator.assert_metric(mname, count=1, tags=expected_tags)
-
-    aggregator.assert_service_check(SERVICE_CHECK_NAME, status=stats_check.OK, count=1, tags=expected_tags)
-    aggregator.assert_service_check(SERVICE_CHECK_NAME_HEALTH, status=stats_check.OK, count=1, tags=expected_tags)
-    aggregator.assert_all_metrics_covered()
+    assert_metrics_covered(aggregator)
 
 
 @pytest.mark.e2e
