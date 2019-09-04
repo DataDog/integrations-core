@@ -58,6 +58,7 @@ class SnmpCheck(AgentCheck):
         self.mibs_path = init_config.get('mibs_folder')
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
         self.profiles = init_config.get('profiles', {})
+        self.profiles_by_oid = {}
         for profile, profile_data in self.profiles.items():
             filename = profile_data.get('definition_file')
             if filename:
@@ -69,10 +70,18 @@ class SnmpCheck(AgentCheck):
             else:
                 data = profile_data['definition']
             self.profiles[profile] = {'definition': data}
+            sys_object_oid = profile_data.get('sysobjectid')
+            if sys_object_oid:
+                self.profiles_by_oid[sys_object_oid] = profile
 
         self.instance['name'] = self._get_instance_key(self.instance)
         self._config = InstanceConfig(
-            self.instance, self.warning, self.init_config.get('global_metrics', []), self.mibs_path, self.profiles
+            self.instance,
+            self.warning,
+            self.init_config.get('global_metrics', []),
+            self.mibs_path,
+            self.profiles,
+            self.profiles_by_oid,
         )
 
     def _get_instance_key(self, instance):
@@ -212,6 +221,20 @@ class SnmpCheck(AgentCheck):
         self.log.debug('Raw results: %s', results)
         return results
 
+    def fetch_sysobject_oid(self, config):
+        """Return the sysObjectID of the instance."""
+        # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
+        oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
+        self.log.debug('Running SNMP command on OID %s', oid)
+        error_indication, error_status, error_index, var_binds = next(
+            hlapi.nextCmd(
+                config.snmp_engine, config.auth_data, config.transport, config.context_data, oid, lookupMib=False
+            )
+        )
+        self.raise_on_error_indication(error_indication, config.ip_address)
+        self.log.debug('Returned vars: %s', var_binds)
+        return var_binds[0][1].prettyPrint()
+
     def check(self, instance):
         """
         Perform two series of SNMP requests, one for all that have MIB associated
@@ -221,6 +244,13 @@ class SnmpCheck(AgentCheck):
         self._error = self._severity = None
         config = self._config
         try:
+            if not (config.table_oids or config.raw_oids):
+                sys_object_oid = self.fetch_sysobject_oid(config)
+                if sys_object_oid not in self.profiles_by_oid:
+                    raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
+                profile = self.profiles_by_oid[sys_object_oid]
+                config.refresh_with_profile(self.profiles[profile], self.warning)
+
             if config.table_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.table_oids))
                 table_results = self.check_table(

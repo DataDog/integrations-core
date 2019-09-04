@@ -224,6 +224,44 @@ The Agent looks for the converted MIB Python files by specifying the destination
 
 [Restart the Agent][9] to start sending SNMP metrics to Datadog.
 
+#### Profiles
+
+To group configuration, the check allows defining profiles to reusing metric
+definitions on several instances. Profiles defines metrics the same way as
+instances, either inline or in seperate files. Each instance can only match for
+a single profile. For example you can define a profile in the `init_config`
+section:
+
+```
+init_config:
+  profiles:
+    my-profile:
+      definition:
+        - MIB: IP-MIB
+          table: ipSystemStatsTable
+          symbols:
+            - ipSystemStatsInReceives
+          metric_tags:
+            - tag: ipversion
+          index: 1
+      sysobjectid: '1.3.6.1.4.1.8072.3.2.10'
+```
+
+Then either reference it explicitly by name, or use sysObjectID detection:
+
+```
+instances:
+   - ip_address: 192.168.34.10
+     profile: my-profile
+   - ip_address: 192.168.34.11
+     # Don't need anything else here, the check will query the sysObjectID
+     # and use the profile if it matches.
+```
+
+If necessary, additional metrics can also be defined in the instances, and will
+be collected alongside those in the profile.
+
+
 #### Metrics collection
 The SNMP check can potentially emit [custom metrics][10], which may impact your [billing][11].
 

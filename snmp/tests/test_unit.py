@@ -23,11 +23,6 @@ def warning(*args):
 
 @mock.patch("datadog_checks.snmp.config.hlapi")
 def test_parse_metrics(hlapi_mock):
-    # No metrics
-    metrics = []
-    with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
-
     # Unsupported metric
     metrics = [{"foo": "bar"}]
     with pytest.raises(Exception):
