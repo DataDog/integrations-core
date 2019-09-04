@@ -65,6 +65,6 @@ def assert_metrics_covered(aggregator):
     for mname in METRICS:
         aggregator.assert_metric(mname, count=1, tags=expected_tags)
 
-    aggregator.assert_service_check(SERVICE_CHECK_NAME, status=0, count=1, tags=expected_tags)
-    aggregator.assert_service_check(SERVICE_CHECK_NAME_HEALTH, status=0, count=1, tags=expected_tags)
+    aggregator.assert_service_check(SERVICE_CHECK_NAME, status=StatsCheck.OK, count=1, tags=expected_tags)
+    aggregator.assert_service_check(SERVICE_CHECK_NAME_HEALTH, status=StatsCheck.OK, count=1, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
