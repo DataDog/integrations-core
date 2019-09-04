@@ -1,6 +1,6 @@
 [
   {
-      "agent_version": "6.14.0",
+      "agent_version": "6.15.0",
       "integration":"druid",
       "check": "druid.service.can_connect",
       "statuses": ["ok", "critical"],
@@ -9,7 +9,7 @@
       "description": "Returns `CRITICAL` if the check cannot connect to Druid service. Returns `OK` otherwise."
   },
   {
-      "agent_version": "6.14.0",
+      "agent_version": "6.15.0",
       "integration":"druid",
       "check": "druid.service.health",
       "statuses": ["ok", "critical"],
