@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import requests
-from datadog_checks.base.errors import CheckException
 
 from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.errors import CheckException
 
 
 class DruidCheck(AgentCheck):
@@ -30,11 +30,13 @@ class DruidCheck(AgentCheck):
 
         if resp is True:
             status = AgentCheck.OK
+            health_value = 1
         else:
             status = AgentCheck.CRITICAL
+            health_value = 0
 
         self.service_check('druid.service.health', status, tags=tags)
-        self.gauge('druid.service.health', 1 if resp is True else 0, tags=tags)
+        self.gauge('druid.service.health', health_value, tags=tags)
 
     def _get_process_properties(self, base_url, tags):
         url = base_url + "/status/properties"
