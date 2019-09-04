@@ -25,9 +25,9 @@ def test_check(dd_agent_check):
         for metric in metrics.RATE_METRICS:
             aggregator.assert_metric(metrics.METRIC_FORMAT.format(metric), tags=[])
 
-        aggregator.assert_service_check('powerdns.recursor.can_connect',
-                                        status=PowerDNSRecursorCheck.OK,
-                                        tags=service_check_tags)
+        aggregator.assert_service_check(
+            'powerdns.recursor.can_connect', status=PowerDNSRecursorCheck.OK, tags=service_check_tags
+        )
         aggregator.assert_all_metrics_covered()
 
     elif version == 4:
@@ -41,9 +41,9 @@ def test_check(dd_agent_check):
         for metric in metrics.RATE_METRICS + metrics.RATE_METRICS_V4:
             aggregator.assert_metric(metrics.METRIC_FORMAT.format(metric), tags=[])
 
-        aggregator.assert_service_check('powerdns.recursor.can_connect',
-                                        status=PowerDNSRecursorCheck.OK,
-                                        tags=service_check_tags)
+        aggregator.assert_service_check(
+            'powerdns.recursor.can_connect', status=PowerDNSRecursorCheck.OK, tags=service_check_tags
+        )
         aggregator.assert_all_metrics_covered()
     else:
         raise Exception("Version not supported")
