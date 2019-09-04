@@ -10,6 +10,7 @@ from . import common
 pytestmark = pytest.mark.integration
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator, check):
     check.check(deepcopy(common.INSTANCE))
@@ -20,7 +21,7 @@ def test_check(aggregator, check):
 
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check):
-    aggregator = dd_agent_check(deepcopy(common.INSTANCE), rate=True)
+    aggregator = dd_agent_check(deepcopy(common.INSTANCE))
 
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)
