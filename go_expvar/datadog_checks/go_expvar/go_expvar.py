@@ -166,7 +166,7 @@ class GoExpvar(AgentCheck):
 
                 try:
                     float(value)
-                except TypeError:
+                except (TypeError, ValueError):
                     self.log.warning("Unreportable value for path %s: %s" % (path, value))
                     continue
 
