@@ -39,10 +39,10 @@ instances:
     #
     # use_hana_hostnames: false
 
-    ## @param row_limit - integer - optional - default: 1000
+    ## @param batch_size - integer - optional - default: 1000
     ## The number of rows to return with each query result.
     #
-    # row_limit: 1000
+    # batch_size: 1000
 
     ## @param timeout - integer - optional - default: 10
     ## The timeout for connecting to `server`.

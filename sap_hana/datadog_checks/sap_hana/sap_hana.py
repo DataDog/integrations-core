@@ -17,7 +17,7 @@ from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
 from .constants import MICROSECOND
-from .utils import positive, total_time_to_temporal_percent
+from .utils import compute_percent, positive, total_time_to_temporal_percent
 
 
 class SapHanaCheck(AgentCheck):
@@ -33,7 +33,7 @@ class SapHanaCheck(AgentCheck):
         self._username = self.instance.get('username', '')
         self._password = self.instance.get('password', '')
         self._timeout = float(self.instance.get('timeout', 10))
-        self._row_limit = int(self.instance.get('row_limit', 1000))
+        self._batch_size = int(self.instance.get('batch_size', 1000))
         self._tags = self.instance.get('tags', [])
 
         # Add server & port tags
@@ -106,6 +106,8 @@ class SapHanaCheck(AgentCheck):
             if self._use_hana_hostnames:
                 self._master_hostname = master_hostname
 
+            tags.append('hana_host:{}'.format(master_hostname))
+
             self.gauge(
                 'uptime',
                 (master['current_time'] - master['start_time']).total_seconds(),
@@ -135,10 +137,12 @@ class SapHanaCheck(AgentCheck):
             ]
             tags.extend(self._tags)
 
+            hana_host = backup['host']
+            tags.append('hana_host:{}'.format(hana_host))
+            host = self.get_hana_hostname(hana_host)
+
             seconds_since_last_backup = (backup['current_time'] - backup['end_time']).total_seconds()
-            self.gauge(
-                'backup.latest', seconds_since_last_backup, tags=tags, hostname=self.get_hana_hostname(backup['host'])
-            )
+            self.gauge('backup.latest', seconds_since_last_backup, tags=tags, hostname=host)
 
     def query_licenses(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/1d7e7f52f6574a238c137e17b0840673.html
@@ -163,10 +167,7 @@ class SapHanaCheck(AgentCheck):
             usable = total - used
             self.gauge('license.usable', usable, tags=tags, hostname=host)
 
-            if total:
-                utilized = used / total * 100
-            else:
-                utilized = 0
+            utilized = compute_percent(used, total)
             self.gauge('license.utilized', utilized, tags=tags, hostname=host)
 
     def query_connection_overview(self):
@@ -178,6 +179,7 @@ class SapHanaCheck(AgentCheck):
         for (db, host, port), counts in iteritems(db_counts):
             tags = ['db:{}'.format(db), 'hana_port:{}'.format(port)]
             tags.extend(self._tags)
+            tags.append('hana_host:{}'.format(host))
 
             host = self.get_hana_hostname(host)
             running = counts['running']
@@ -193,7 +195,9 @@ class SapHanaCheck(AgentCheck):
             tags = ['db:{}'.format(disk['db_name']), 'resource_type:{}'.format(disk['resource'])]
             tags.extend(self._tags)
 
-            host = self.get_hana_hostname(disk['host'])
+            hana_host = disk['host']
+            tags.append('hana_host:{}'.format(hana_host))
+            host = self.get_hana_hostname(hana_host)
 
             total = disk['total']
             self.gauge('disk.size', total, tags=tags, hostname=host)
@@ -204,10 +208,7 @@ class SapHanaCheck(AgentCheck):
             usable = total - used
             self.gauge('disk.usable', usable, tags=tags, hostname=host)
 
-            if total:
-                utilized = used / total * 100
-            else:
-                utilized = 0
+            utilized = compute_percent(used, total)
             self.gauge('disk.utilized', utilized, tags=tags, hostname=host)
 
     def query_service_memory(self):
@@ -220,7 +221,9 @@ class SapHanaCheck(AgentCheck):
             ]
             tags.extend(self._tags)
 
-            host = self.get_hana_hostname(memory['host'])
+            hana_host = memory['host']
+            tags.append('hana_host:{}'.format(hana_host))
+            host = self.get_hana_hostname(hana_host)
 
             # Overall
             self.gauge('memory.service.overall.physical.total', memory['physical'], tags=tags, hostname=host)
@@ -235,10 +238,7 @@ class SapHanaCheck(AgentCheck):
             usable = total - used
             self.gauge('memory.service.overall.usable', usable, tags=tags, hostname=host)
 
-            if total:
-                utilized = used / total * 100
-            else:
-                utilized = 0
+            utilized = compute_percent(used, total)
             self.gauge('memory.service.overall.utilized', utilized, tags=tags, hostname=host)
 
             # Heap
@@ -251,10 +251,7 @@ class SapHanaCheck(AgentCheck):
             heap_usable = heap_total - heap_used
             self.gauge('memory.service.heap.usable', heap_usable, tags=tags, hostname=host)
 
-            if heap_total:
-                heap_utilized = heap_used / heap_total * 100
-            else:
-                heap_utilized = 0
+            heap_utilized = compute_percent(heap_used, heap_total)
             self.gauge('memory.service.heap.utilized', heap_utilized, tags=tags, hostname=host)
 
             # Shared
@@ -267,10 +264,7 @@ class SapHanaCheck(AgentCheck):
             shared_usable = shared_total - shared_used
             self.gauge('memory.service.shared.usable', shared_usable, tags=tags, hostname=host)
 
-            if shared_total:
-                shared_utilized = shared_used / shared_total * 100
-            else:
-                shared_utilized = 0
+            shared_utilized = compute_percent(shared_used, shared_total)
             self.gauge('memory.service.shared.utilized', shared_utilized, tags=tags, hostname=host)
 
             # Compactors
@@ -283,10 +277,7 @@ class SapHanaCheck(AgentCheck):
             compactors_used = compactors_total - compactors_usable
             self.gauge('memory.service.compactor.used', compactors_used, tags=tags, hostname=host)
 
-            if compactors_total:
-                compactors_utilized = compactors_used / compactors_total * 100
-            else:
-                compactors_utilized = 0
+            compactors_utilized = compute_percent(compactors_used, compactors_total)
             self.gauge('memory.service.compactor.utilized', compactors_utilized, tags=tags, hostname=host)
 
     def query_service_component_memory(self):
@@ -299,12 +290,11 @@ class SapHanaCheck(AgentCheck):
             ]
             tags.extend(self._tags)
 
-            self.gauge(
-                'memory.service.component.used',
-                memory['used'],
-                tags=tags,
-                hostname=self.get_hana_hostname(memory['host']),
-            )
+            hana_host = memory['host']
+            tags.append('hana_host:{}'.format(hana_host))
+            host = self.get_hana_hostname(hana_host)
+
+            self.gauge('memory.service.component.used', memory['used'], tags=tags, hostname=host)
 
     def query_row_store_memory(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20bb47a975191014b1e2f6bd0a685d7b.html
@@ -316,7 +306,9 @@ class SapHanaCheck(AgentCheck):
             ]
             tags.extend(self._tags)
 
-            host = self.get_hana_hostname(memory['host'])
+            hana_host = memory['host']
+            tags.append('hana_host:{}'.format(hana_host))
+            host = self.get_hana_hostname(hana_host)
 
             total = memory['total']
             self.gauge('memory.row_store.total', total, tags=tags, hostname=host)
@@ -327,10 +319,7 @@ class SapHanaCheck(AgentCheck):
             usable = memory['usable']
             self.gauge('memory.row_store.usable', usable, tags=tags, hostname=host)
 
-            if total:
-                utilized = used / total * 100
-            else:
-                utilized = 0
+            utilized = compute_percent(used, total)
             self.gauge('memory.row_store.utilized', utilized, tags=tags, hostname=host)
 
     def query_service_statistics(self):
@@ -343,7 +332,9 @@ class SapHanaCheck(AgentCheck):
             ]
             tags.extend(self._tags)
 
-            host = self.get_hana_hostname(service['host'])
+            hana_host = service['host']
+            tags.append('hana_host:{}'.format(hana_host))
+            host = self.get_hana_hostname(hana_host)
 
             response_time = service['response_time']
             self.gauge('network.service.request.response_time', response_time, tags=tags, hostname=host)
@@ -396,7 +387,9 @@ class SapHanaCheck(AgentCheck):
             ]
             tags.extend(self._tags)
 
-            host = self.get_hana_hostname(volume['host'])
+            hana_host = volume['host']
+            tags.append('hana_host:{}'.format(hana_host))
+            host = self.get_hana_hostname(hana_host)
 
             # Read
             reads = volume['reads']
@@ -513,7 +506,7 @@ class SapHanaCheck(AgentCheck):
             # Re-use column access map for efficiency
             result = {}
 
-            rows = cursor.fetchmany(self._row_limit)
+            rows = cursor.fetchmany(self._batch_size)
             while rows:
                 for row in rows:
                     for column, value in zip(query.fields, row):
@@ -527,19 +520,19 @@ class SapHanaCheck(AgentCheck):
                     yield result
 
                 # Get next result set, if any
-                rows = cursor.fetchmany(self._row_limit)
+                rows = cursor.fetchmany(self._batch_size)
 
     def iter_rows_raw(self, query):
         with closing(self._conn.cursor()) as cursor:
             cursor.execute(query)
 
-            rows = cursor.fetchmany(self._row_limit)
+            rows = cursor.fetchmany(self._batch_size)
             while rows:
                 for row in rows:
                     yield row
 
                 # Get next result set, if any
-                rows = cursor.fetchmany(self._row_limit)
+                rows = cursor.fetchmany(self._batch_size)
 
     def get_connection(self):
         try:
