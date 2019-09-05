@@ -23,17 +23,17 @@ def test_check(aggregator, dd_environment):
     kt.check(deepcopy(DEFAULT_INSTANCE))
     kt.check(deepcopy(DEFAULT_INSTANCE))
 
-    _assert_check(aggregator, 2)
+    _assert_check(aggregator)
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(DEFAULT_INSTANCE, rate=True)
 
-    _assert_check(aggregator, 1)
+    _assert_check(aggregator, rate_metric_count=1)
 
 
-def _assert_check(aggregator, rate_metric_count):
+def _assert_check(aggregator, rate_metric_count=2):
     # prefix every metric with check name (kyototycoon.)
     # no replications, so ignore kyototycoon.replication.delay
     for mname in GAUGES:
