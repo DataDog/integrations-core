@@ -8,7 +8,6 @@ import pytest
 from . import common
 
 
-
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator, check):
