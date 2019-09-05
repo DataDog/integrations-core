@@ -34,7 +34,7 @@ def test_e2e(dd_agent_check):
     _assert_check(aggregator, 1)
 
 
-def _assert_check(aggregator, rate_metric_count=1):
+def _assert_check(aggregator, rate_metric_count):
     # prefix every metric with check name (kyototycoon.)
     # no replications, so ignore kyototycoon.replication.delay
     for mname in GAUGES:
