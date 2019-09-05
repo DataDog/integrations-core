@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import pytest
 
+import pytest
 from mock import mock_open, patch
 
 from . import common
