@@ -25,22 +25,15 @@ The SNMP check doesn't collect anything by default. Specify metrics to collect b
 ```
 init_config:
   ## @param mibs_folder - string - required
-  ## Specify an additional folder for your custom mib files (python format).
-  #
   # mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
   
   ## @param global_metrics - list of elements - (required if none at the instance level)
-  ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
-  ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
-
   # global_metrics:
   ## - MIB: <MIB_NAME>
   ##   symbol: <SYMBOL>
 
 instances:
     ## @param ip_address - string - required
-    ## The IP address of the device to monitor.
-    #
   - ip_address: localhost
 
     ## @param port - integer - required
@@ -49,18 +42,12 @@ instances:
     port: 161
 
     ## @param community_string - string - optional
-    ## Only useful for SNMP v1 & v2.
-    #
     # community_string: public
 
     ## @param snmp_version - integer - optional - default: 2
-    ## If you are using SNMP v1 set snmp_version to 1 (required)
-    #
     # snmp_version: 2
 
     ## @param metrics - list of elements - (required if none at the init_config level)
-    ## Specify metrics you want to monitor by using MIBS for Counter and Gauge.
-    
     metrics:
     - MIB: <MIB_NAME>
       symbol: <SYMBOL>
@@ -77,62 +64,39 @@ instances:
 ```
 init_config:
   ## @param mibs_folder - string - required
-  ## Specify an additional folder for your custom mib files (python format).
-  #
   # mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
   
   ## @param global_metrics - list of elements - (required if none at the instance level)
-  ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
-  ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.
-
   # global_metrics:
   ## - MIB: <MIB_NAME>
   ##   symbol: <SYMBOL>
 
 instances:
     ## @param ip_address - string - required
-    ## The IP address of the device to monitor.
-    #
   - ip_address: localhost
 
     ## @param port - integer - required
-    ## Default SNMP port.
-    #
     port: 161
 
     ## @param snmp_version - integer - optional - default: 2
-    ## If you are using SNMP v1 set snmp_version to 1 (required)
-    #
-    # snmp_version: 3
+    snmp_version: 3
     
     ## @param user - string - required
-    ## USERNAME to connect to your SNMP devices.
-    #
-    # user: <USERNAME>
+    user: <USERNAME>
 
     ## @param authProtocol - string - required
-    ## Authentication type to use when connecting to your SNMP devices.
-    #
-    # authProtocol: <AUTHENTICATION_PROTOCOL>
+    authProtocol: <AUTHENTICATION_PROTOCOL>
 
     ## @param authKey - string - required
-    ## Authentication key to use with your Authentication type.
-    #
-    # authKey: <AUTHENTICATION_TYPE_KEY>
+    authKey: <AUTHENTICATION_TYPE_KEY>
 
     ## @param privProtocol - string - required
-    ## Privacy type to use when connecting to your SNMP devices.
-    #
-    # privProtocol: <PRIVACY_TYPE>
+    privProtocol: <PRIVACY_TYPE>
 
     ## @param privKey - string - required
-    ## Privacy type key to use with your Privacy type.
-    #
-    # privKey: <PRIVACY_TYPE_KEY>
+    privKey: <PRIVACY_TYPE_KEY>
 
     ## @param metrics - list of elements - (required if none at the init_config level)
-    ## Specify metrics you want to monitor by using MIBS for Counter and Gauge.
-    
     metrics:
     - MIB: <MIB_NAME>
       symbol: <SYMBOL>
@@ -273,7 +237,7 @@ instances:
 If necessary, additional metrics can be defined in the instances. These metrics are collected alongside those in the profile.
 
 #### Containerized
-For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][16] for guidance on applying the parameters below.
 
 ##### SNMP v1
 
