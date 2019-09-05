@@ -7,7 +7,6 @@ import pytest
 
 from . import common
 
-pytestmark = pytest.mark.integration
 
 
 @pytest.mark.integration
