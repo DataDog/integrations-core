@@ -16,6 +16,13 @@ def positive(*numbers):
     return max(0, *numbers)
 
 
+def compute_percent(partial, total):
+    if total:
+        return partial / total * 100
+
+    return 0
+
+
 def total_time_to_temporal_percent(total_time, scale=MILLISECOND):
     # This is really confusing, sorry.
     #
