@@ -18,7 +18,7 @@ class DruidCheck(AgentCheck):
         process_properties = self._get_process_properties(base_url, custom_tags)
 
         druid_service = process_properties['druid.service']
-        tags = custom_tags + ['service:{}'.format(druid_service)]
+        tags = custom_tags + ['druid_service:{}'.format(druid_service)]
 
         self._submit_health_status(base_url, tags)
 
