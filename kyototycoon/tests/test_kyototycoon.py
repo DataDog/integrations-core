@@ -9,10 +9,10 @@ from datadog_checks.kyototycoon import KyotoTycoonCheck
 
 from .common import DEFAULT_INSTANCE, TAGS
 
-GAUGES = KyotoTycoonCheck.GAUGES.values()
-DB_GAUGES = KyotoTycoonCheck.DB_GAUGES.values()
-TOTALS = KyotoTycoonCheck.TOTALS.values()
-RATES = KyotoTycoonCheck.RATES.values()
+GAUGES = list(KyotoTycoonCheck.GAUGES.values())
+DB_GAUGES = list(KyotoTycoonCheck.DB_GAUGES.values())
+TOTALS = list(KyotoTycoonCheck.TOTALS.values())
+RATES = list(KyotoTycoonCheck.RATES.values())
 
 # all the RATE type metrics
 ALL_RATES = TOTALS + RATES
