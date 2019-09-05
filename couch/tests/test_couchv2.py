@@ -110,7 +110,7 @@ def _assert_check(aggregator, gauges):
     for node in [common.NODE2, common.NODE3]:
         expected_tags = ["instance:{}".format(node["name"])]
         # One for the server stats, the version is already loaded
-        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
+        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=2)
 
     aggregator.assert_all_metrics_covered()
 
