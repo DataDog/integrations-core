@@ -9,6 +9,8 @@ from datadog_checks.pgbouncer import PgBouncer
 from . import common
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_check(instance, aggregator):
     # add some stats
     connection = psycopg2.connect(
@@ -26,12 +28,12 @@ def test_check(instance, aggregator):
     # run the check
     check = PgBouncer('pgbouncer', {}, {})
     check.check(instance)
+
     assert_metric_coverage(aggregator)
 
 
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check, instance):
-
     # run the check
     aggregator = dd_agent_check(instance, rate=True)
     assert_metric_coverage(aggregator)
