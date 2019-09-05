@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-from six import itervalues
 
 from datadog_checks.kyototycoon import KyotoTycoonCheck
 
