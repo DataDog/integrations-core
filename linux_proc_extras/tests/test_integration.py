@@ -22,7 +22,7 @@ def test_check(aggregator, check):
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check):
     aggregator = dd_agent_check(deepcopy(common.INSTANCE), rate=True)
-    expected_metrics = common.EXPECTED_METRICS.copy()
+    expected_metrics = deepcopy(common.EXPECTED_METRICS)
     expected_metrics.remove('system.processes.priorities')
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
