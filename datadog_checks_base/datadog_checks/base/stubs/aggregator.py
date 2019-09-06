@@ -293,6 +293,10 @@ class AggregatorStub(object):
             missing_metrics = self.not_asserted()
         assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
 
+    def assert_no_duplicate(self):
+        self.assert_no_duplicate_metric()
+        self.assert_no_duplicate_service_check()
+
     def assert_no_duplicate_metric(self):
         all_metrics = [m for metrics in self._metrics.values() for m in metrics]
 
@@ -301,21 +305,32 @@ class AggregatorStub(object):
 
         self._assert_no_duplicate_stub('metric', all_metrics, stub_to_key_fn)
 
+    def assert_no_duplicate_service_check(self):
+        all_metrics = [m for metrics in self._service_checks.values() for m in metrics]
+
+        def stub_to_key_fn(stub):
+            return stub.name, stub.status, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('service_check', all_metrics, stub_to_key_fn)
+
     @staticmethod
     def _assert_no_duplicate_stub(stub_type, all_metrics, stub_to_key_fn):
         all_contexts = defaultdict(list)
         for metric in all_metrics:
             context = stub_to_key_fn(metric)
             all_contexts[context].append(metric)
+
         dup_contexts = defaultdict(list)
         for context, metrics in iteritems(all_contexts):
             if len(metrics) > 1:
                 dup_contexts[context] = metrics
+
         err_msg_lines = ["Duplicate {}s found:".format(stub_type)]
         for metrics in dup_contexts.values():
             err_msg_lines.append('- {}'.format(metrics[0].name))
             for metric in metrics:
                 err_msg_lines.append('    ' + str(metric))
+
         assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
 
     def reset(self):

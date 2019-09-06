@@ -40,42 +40,50 @@ assert 2 == 0
     'case_name, metrics, expect_assertion_error',
     [
         (
-            "no duplicate with different metric",
+            'no duplicate with different metric name',
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.b", value=1, tags=['aa'], hostname='1'),
+                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                dict(type='gauge', name='metric.b', value=1, tags=['aa'], hostname='1'),
             ],
             False,
         ),
         (
-            "no duplicate with different tag",
+            'no duplicate with different metric type',
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.a", value=1, tags=['bb'], hostname='1'),
+                dict(type='rate', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
             ],
             False,
         ),
         (
-            "no duplicate with different hostname",
+            'no duplicate with different tag',
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.a", value=1, tags=['aa'], hostname='2'),
+                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                dict(type='gauge', name='metric.a', value=1, tags=['bb'], hostname='1'),
             ],
             False,
         ),
         (
-            "duplicate metric",
+            'no duplicate with different hostname',
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
+                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='2'),
+            ],
+            False,
+        ),
+        (
+            'duplicate metric',
+            [
+                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
             ],
             True,
         ),
         (
-            "duplicate metric with different values",
+            'duplicate metric with different values',
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.a", value=2, tags=['aa'], hostname='1'),
+                dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
+                dict(type='gauge', name='metric.a', value=2, tags=['aa'], hostname='1'),
             ],
             True,
         ),
@@ -85,78 +93,75 @@ def test_assert_no_duplicate_metrics_cases(aggregator, case_name, metrics, expec
     check = AgentCheck()
 
     for metric_params in metrics:
-        check.gauge(**metric_params)
+        metric_type = metric_params.pop("type")
+        getattr(check, metric_type)(**metric_params)
 
+    msg = ''
     try:
         aggregator.assert_no_duplicate_metric()
         assertion_error_raised = False
-    except AssertionError:
+    except AssertionError as e:
         assertion_error_raised = True
+        msg = str(e)
 
-    assert assertion_error_raised == expect_assertion_error
+    assert assertion_error_raised == expect_assertion_error, msg
 
 
 @pytest.mark.parametrize(
-    'case_name, metric_type, metrics, expect_assertion_error',
+    'case_name, service_checks, expect_assertion_error',
     [
         (
-            "no duplicate with different metric",
-            "gauge",
+            "no duplicate with different name",
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.b", value=1, tags=['aa'], hostname='1'),
+                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
+                dict(name="service.check.b", status=AgentCheck.OK, tags=['aa'], hostname='1'),
             ],
             False,
         ),
         (
             "no duplicate with different tag",
-            "gauge",
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.a", value=1, tags=['bb'], hostname='1'),
+                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
+                dict(name="service.check.a", status=AgentCheck.OK, tags=['bb'], hostname='1'),
             ],
             False,
         ),
         (
             "no duplicate with different hostname",
-            "gauge",
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.a", value=1, tags=['aa'], hostname='2'),
+                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
+                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='2'),
             ],
             False,
         ),
         (
             "duplicate metric",
-            "gauge",
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
+                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
+                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1'),
             ],
             True,
         ),
         (
             "duplicate metric with different values",
-            "gauge",
             [
-                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-                dict(name="metric.a", value=2, tags=['aa'], hostname='1'),
+                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1', message="aaa"),
+                dict(name="service.check.a", status=AgentCheck.OK, tags=['aa'], hostname='1', message="bbb"),
             ],
             True,
         ),
     ],
 )
-def test_assert_no_duplicate_metrics_cases(aggregator, case_name, metric_type, metrics, expect_assertion_error):
+def test_assert_no_duplicate_service_checks_cases(aggregator, case_name, service_checks, expect_assertion_error):
     check = AgentCheck()
 
-    for metric_params in metrics:
-        getattr(check, metric_type)(**metric_params)
+    for metric_params in service_checks:
+        check.service_check(**metric_params)
 
     try:
-        aggregator.assert_no_duplicate_metric()
+        aggregator.assert_no_duplicate_service_check()
         assertion_error_raised = False
     except AssertionError:
         assertion_error_raised = True
 
     assert assertion_error_raised == expect_assertion_error
-
