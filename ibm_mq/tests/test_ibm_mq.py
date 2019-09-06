@@ -41,6 +41,8 @@ def test_service_check_connection_issues(aggregator, instance, seed_data):
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
     aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags)
 
+    aggregator.assert_no_duplicate()
+
 
 def test_channel_status_service_check_default_mapping(aggregator, instance):
     # Late import to not require it for e2e
