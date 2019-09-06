@@ -298,20 +298,20 @@ class AggregatorStub(object):
         self.assert_no_duplicate_service_checks()
 
     def assert_no_duplicate_metrics(self):
-        all_metrics = [m for metrics in self._metrics.values() for m in metrics]
+        metric_stubs = [m for metrics in self._metrics.values() for m in metrics]
 
         def stub_to_key_fn(stub):
             return stub.name, stub.type, str(sorted(stub.tags)), stub.hostname
 
-        self._assert_no_duplicate_stub('metric', all_metrics, stub_to_key_fn)
+        self._assert_no_duplicate_stub('metric', metric_stubs, stub_to_key_fn)
 
     def assert_no_duplicate_service_checks(self):
-        all_metrics = [m for metrics in self._service_checks.values() for m in metrics]
+        service_check_stubs = [m for metrics in self._service_checks.values() for m in metrics]
 
         def stub_to_key_fn(stub):
             return stub.name, stub.status, str(sorted(stub.tags)), stub.hostname
 
-        self._assert_no_duplicate_stub('service_check', all_metrics, stub_to_key_fn)
+        self._assert_no_duplicate_stub('service_check', service_check_stubs, stub_to_key_fn)
 
     @staticmethod
     def _assert_no_duplicate_stub(stub_type, all_metrics, stub_to_key_fn):
