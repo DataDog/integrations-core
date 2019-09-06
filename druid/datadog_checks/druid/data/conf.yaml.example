@@ -33,7 +33,7 @@ instances:
   - url: <DRUID_INSTANCE_URL>
 
     ## @param username - string - optional
-    ## The username to use if services are behind basic auth.
+    ## The username to use if your Druid instance is behind basic auth.
     #
     # username: <USERNAME>
 
