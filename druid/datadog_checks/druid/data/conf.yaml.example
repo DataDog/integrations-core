@@ -38,7 +38,7 @@ instances:
     # username: <USERNAME>
 
     ## @param ntlm_domain - string - optional
-    ## If your services uses NTLM authentication, you can
+    ## If your Druid instance uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM Auth,
     ## append the username to domain, not as the `username` parameter.
     ## Example: <NTLM_DOMAIN>/<USERNAME>
