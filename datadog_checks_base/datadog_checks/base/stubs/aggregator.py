@@ -293,11 +293,11 @@ class AggregatorStub(object):
             missing_metrics = self.not_asserted()
         assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
 
-    def assert_no_duplicate(self):
-        self.assert_no_duplicate_metric()
-        self.assert_no_duplicate_service_check()
+    def assert_no_duplicate_all(self):
+        self.assert_no_duplicate_metrics()
+        self.assert_no_duplicate_service_checks()
 
-    def assert_no_duplicate_metric(self):
+    def assert_no_duplicate_metrics(self):
         all_metrics = [m for metrics in self._metrics.values() for m in metrics]
 
         def stub_to_key_fn(stub):
@@ -305,7 +305,7 @@ class AggregatorStub(object):
 
         self._assert_no_duplicate_stub('metric', all_metrics, stub_to_key_fn)
 
-    def assert_no_duplicate_service_check(self):
+    def assert_no_duplicate_service_checks(self):
         all_metrics = [m for metrics in self._service_checks.values() for m in metrics]
 
         def stub_to_key_fn(stub):

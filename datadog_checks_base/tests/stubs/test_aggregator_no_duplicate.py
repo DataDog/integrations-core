@@ -17,7 +17,7 @@ def test_assert_no_duplicate_message(aggregator):
 
     actual_msg = ""
     try:
-        aggregator.assert_no_duplicate_metric()
+        aggregator.assert_no_duplicate_metrics()
     except AssertionError as e:
         actual_msg = str(e)
 
@@ -97,7 +97,7 @@ def test_assert_no_duplicate_metrics_cases(aggregator, case_name, metrics, expec
 
     msg = ''
     try:
-        aggregator.assert_no_duplicate_metric()
+        aggregator.assert_no_duplicate_metrics()
         assertion_error_raised = False
     except AssertionError as e:
         assertion_error_raised = True
@@ -158,7 +158,7 @@ def test_assert_no_duplicate_service_checks_cases(aggregator, case_name, service
         check.service_check(**metric_params)
 
     try:
-        aggregator.assert_no_duplicate_service_check()
+        aggregator.assert_no_duplicate_service_checks()
         assertion_error_raised = False
     except AssertionError:
         assertion_error_raised = True
