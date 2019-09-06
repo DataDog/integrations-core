@@ -30,7 +30,7 @@ instances:
     ## @param url - string - required
     ## url used to connect to the Druid instance.
     #
-  - url: <DRUID_SERVICE_URL>
+  - url: <DRUID_INSTANCE_URL>
 
     ## @param username - string - optional
     ## The username to use if services are behind basic auth.
