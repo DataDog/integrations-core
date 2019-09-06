@@ -43,7 +43,7 @@ instances:
     ## append the username to domain, not as the `username` parameter.
     ## Example: <NTLM_DOMAIN>/<USERNAME>
     #
-    # ntlm_domain: <DOMAIN>
+    # ntlm_domain: <NTLM_DOMAIN>
 
     ## @param password - string - optional
     ## The password to use if services are behind basic or NTLM auth.
