@@ -12,7 +12,7 @@ The Datadog Agent collects metrics from Druid via [DogStatsD](https://docs.datad
 
 And many more. See details [here][1].
 
-I addition to metrics, the Datadog Agent also sends a service check for Druid health.
+I addition to metrics collected, the Agent also sends a Service Check related to Druid's health.
 
 ## Setup
 
