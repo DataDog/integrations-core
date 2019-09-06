@@ -293,6 +293,26 @@ class AggregatorStub(object):
             missing_metrics = self.not_asserted()
         assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
 
+    def assert_no_duplicate_metric(self):
+        all_contexts = defaultdict(list)
+        for metrics in self._metrics.values():
+            for metric in metrics:
+                context = (metric.name, metric.type, str(sorted(metric.tags)), metric.hostname)
+                all_contexts[context].append(metric)
+
+        dup_contexts = defaultdict(list)
+        for context, metrics in iteritems(all_contexts):
+            if len(metrics) > 1:
+                dup_contexts[context] = metrics
+
+        err_msg_lines = ["Duplicate metrics found:"]
+        for metrics in dup_contexts.values():
+            err_msg_lines.append('- {}'.format(metrics[0].name))
+            for metric in metrics:
+                err_msg_lines.append('    ' + str(metric))
+
+        assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
+
     def reset(self):
         """
         Set the stub to its initial state
