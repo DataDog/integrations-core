@@ -229,7 +229,7 @@ def test_successful_check(check, instance, aggregator):
     'test_case, extra_config, expected_http_kwargs',
     [("explicit timeout", {'timeout': 30}, {'timeout': (30, 30)}), ("default timeout", {}, {'timeout': (5, 5)})],
 )
-def test_config(instance, test_case, extra_config, expected_http_kwargs):
+def test_config(test_case, extra_config, expected_http_kwargs):
     instance = extra_config
     check = FargateCheck('ecs_fargate', {}, instances=[instance])
 
