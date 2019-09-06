@@ -93,7 +93,6 @@ Returns `CRITICAL` if the check cannot connect to Druid process. Returns `OK` ot
 
 Returns `CRITICAL` if Druid process is not healthy. Returns `OK` otherwise.
 
-
 ### Events
 
 The Druid check does not include any events.
