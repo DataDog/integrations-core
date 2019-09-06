@@ -66,7 +66,7 @@ class AggregatorStub(object):
         self._events.append(event)
 
     def submit_histogram_bucket(
-            self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
     ):
         self._histogram_buckets[name].append(
             HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
@@ -180,7 +180,7 @@ class AggregatorStub(object):
             assert len(candidates) >= at_least, msg
 
     def assert_histogram_bucket(
-            self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
+        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
     ):
         candidates = []
         for bucket in self.histogram_bucket(name):
