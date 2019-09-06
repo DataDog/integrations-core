@@ -531,6 +531,7 @@ def test_profile_sys_object_no_metrics(aggregator):
 def test_discovery(aggregator):
     host = socket.gethostbyname(common.HOST)
     network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    check_tags = ['snmp_device:{}'.format(host)]
     instance = {'name': 'snmp_conf', 'network_address': network, 'port': common.PORT, 'community_string': 'public'}
     init_config = {
         'profiles': {
@@ -549,5 +550,5 @@ def test_discovery(aggregator):
 
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
-        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+        aggregator.assert_metric(metric_name, tags=check_tags, count=1)
     aggregator.assert_all_metrics_covered()

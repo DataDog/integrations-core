@@ -88,7 +88,7 @@ class SnmpCheck(AgentCheck):
             self.profiles_by_oid,
         )
         if self._config.network_address:
-            self._thread = threading.Thread(target=self.discover_instances)
+            self._thread = threading.Thread(target=self.discover_instances, name=self.name)
             self._thread.daemon = True
             self._thread.start()
 
@@ -130,7 +130,8 @@ class SnmpCheck(AgentCheck):
                 )
                 try:
                     sys_object_oid = self.fetch_sysobject_oid(config)
-                except Exception:
+                except Exception as e:
+                    self.log.debug("Error scanning host %s: %s", host, e)
                     continue
                 if sys_object_oid not in self.profiles_by_oid:
                     self.log.warn("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)

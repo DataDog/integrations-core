@@ -34,17 +34,23 @@ class InstanceConfig:
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
 
-        if 'ip_address' not in instance and 'network_address' not in instance:
+        ip_address = instance.get('ip_address')
+        network_address = instance.get('network_address')
+
+        if not ip_address and not network_address:
             raise ConfigurationError('An IP address or a network address needs to be specified')
 
-        if 'ip_address' in instance:
+        if ip_address and network_address:
+            raise ConfigurationError('Only one of IP address and network address must be specified')
+
+        if ip_address:
             self.transport = self.get_transport_target(instance, timeout, retries)
 
-            self.ip_address = instance['ip_address']
+            self.ip_address = ip_address
             self.tags.append('snmp_device:{}'.format(self.ip_address))
 
-        if 'network_address' in instance:
-            self.network_address = instance['network_address']
+        if network_address:
+            self.network_address = network_address
 
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
