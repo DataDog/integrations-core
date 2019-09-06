@@ -4,7 +4,8 @@
   ],
   "categories": [
     "data store",
-    "log collection"
+    "log collection",
+    "Autodiscovery"
   ],
   "creates_events": true,
   "display_name": "MongoDB",
