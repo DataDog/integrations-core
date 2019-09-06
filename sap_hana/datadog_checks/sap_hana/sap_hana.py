@@ -549,7 +549,7 @@ class SapHanaCheck(AgentCheck):
             )
             connection.connect()
         except Exception as e:
-            error = str(e).replace(self._password, '*' * len(self._password))
+            error = str(e).replace(self._password, '**********')
             self.log.error('Unable to connect to SAP HANA: {}'.format(error))
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
         else:
