@@ -180,7 +180,7 @@ instances:
     #   X-Auth-Token: <AUTH_TOKEN>
 
     ## @param timeout - integer - optional - default: 10
-    ## The timeout for connecting to services.
+    ## The timeout for connecting to your Druid instance.
     #
     # timeout: 10
 
