@@ -28,22 +28,22 @@ init_config:
 
 instances:
     ## @param url - string - required
-    ## url used to connect to the Druid service.
+    ## url used to connect to the Druid instance.
     #
-  - url: <DRUID_SERVICE_URL>
+  - url: <DRUID_INSTANCE_URL>
 
     ## @param username - string - optional
-    ## The username to use if services are behind basic auth.
+    ## The username to use if your Druid instance is behind basic auth.
     #
     # username: <USERNAME>
 
     ## @param ntlm_domain - string - optional
-    ## If your services uses NTLM authentication, you can
+    ## If your Druid instance uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM Auth,
     ## append the username to domain, not as the `username` parameter.
     ## Example: <NTLM_DOMAIN>/<USERNAME>
     #
-    # ntlm_domain: <DOMAIN>
+    # ntlm_domain: <NTLM_DOMAIN>
 
     ## @param password - string - optional
     ## The password to use if services are behind basic or NTLM auth.
@@ -180,7 +180,7 @@ instances:
     #   X-Auth-Token: <AUTH_TOKEN>
 
     ## @param timeout - integer - optional - default: 10
-    ## The timeout for connecting to services.
+    ## The timeout for connecting to your Druid instance.
     #
     # timeout: 10
 

@@ -65,9 +65,9 @@ druid.emitter.statsd.dogstatsd=true
 druid.emitter.statsd.dogstatsdServiceAsTag=true
 ```
 
-Important: `druid.emitter.statsd.dogstatsd` and `druid.emitter.statsd.dogstatsdServiceAsTag` must be set to `true`, otherwise tags might not be reported correctly to Datadog.
+**Note**: `druid.emitter.statsd.dogstatsd` and `druid.emitter.statsd.dogstatsdServiceAsTag` must be set to `true`, otherwise tags are not reported correctly to Datadog.
 
-Restart Druid to start sending more Druid metrics to DogStatsD (included in the Datadog Agent).
+Restart Druid to start sending your Druid metrics to the Agent through DogStatsD.
 
 #### Integration Service Checks
 
