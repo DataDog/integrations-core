@@ -66,7 +66,7 @@ class AggregatorStub(object):
         self._events.append(event)
 
     def submit_histogram_bucket(
-        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+            self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
     ):
         self._histogram_buckets[name].append(
             HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
@@ -180,7 +180,7 @@ class AggregatorStub(object):
             assert len(candidates) >= at_least, msg
 
     def assert_histogram_bucket(
-        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
+            self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
     ):
         candidates = []
         for bucket in self.histogram_bucket(name):
@@ -294,23 +294,28 @@ class AggregatorStub(object):
         assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
 
     def assert_no_duplicate_metric(self):
-        all_contexts = defaultdict(list)
-        for metrics in self._metrics.values():
-            for metric in metrics:
-                context = (metric.name, metric.type, str(sorted(metric.tags)), metric.hostname)
-                all_contexts[context].append(metric)
+        all_metrics = [m for metrics in self._metrics.values() for m in metrics]
 
+        def stub_to_key_fn(stub):
+            return stub.name, stub.type, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('metric', all_metrics, stub_to_key_fn)
+
+    @staticmethod
+    def _assert_no_duplicate_stub(stub_type, all_metrics, stub_to_key_fn):
+        all_contexts = defaultdict(list)
+        for metric in all_metrics:
+            context = stub_to_key_fn(metric)
+            all_contexts[context].append(metric)
         dup_contexts = defaultdict(list)
         for context, metrics in iteritems(all_contexts):
             if len(metrics) > 1:
                 dup_contexts[context] = metrics
-
-        err_msg_lines = ["Duplicate metrics found:"]
+        err_msg_lines = ["Duplicate {}s found:".format(stub_type)]
         for metrics in dup_contexts.values():
             err_msg_lines.append('- {}'.format(metrics[0].name))
             for metric in metrics:
                 err_msg_lines.append('    ' + str(metric))
-
         assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
 
     def reset(self):
