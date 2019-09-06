@@ -45,23 +45,28 @@ instances:
     #
     # ntlm_domain: <NTLM_DOMAIN>
 
+    ## @param timeout - integer - optional - default: 10
+    ## The timeout for connecting to your Druid instance.
+    #
+    # timeout: 10
+
     ## @param password - string - optional
     ## The password to use if services are behind basic or NTLM auth.
     #
     # password: <PASSWORD>
 
-    ## @param connect_timeout - integer - optional
+    ## @param connect_timeout - integer - optional - default: 10
     ## Overrides the default connection timeout value,
     ## and fails the check if the time to establish the (TCP) connection
     ## exceeds the connect_timeout value (in seconds)
     #
-    # connect_timeout: <VALUE_IN_SECOND>
+    # connect_timeout: 10
 
-    ## @param read_timeout - integer - optional
+    ## @param read_timeout - integer - optional - default: 10
     ## Overrides the default received timeout value, and fails the check if the time to receive
     ## the server status from the server exceeds the read_timeout value (in seconds)
     #
-    # read_timeout: <VALUE_IN_SECOND>
+    # read_timeout: 10
 
     ## @param proxy - object - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -178,11 +183,6 @@ instances:
     # headers:
     #   Host: <ALTERNATIVE_HOSTNAME>
     #   X-Auth-Token: <AUTH_TOKEN>
-
-    ## @param timeout - integer - optional - default: 10
-    ## The timeout for connecting to your Druid instance.
-    #
-    # timeout: 10
 
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
