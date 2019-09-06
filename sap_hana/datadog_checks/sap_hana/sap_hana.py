@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-import sys
 from collections import defaultdict
 from contextlib import closing
 from itertools import chain
@@ -17,6 +16,7 @@ from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
 from .constants import MICROSECOND
+from .exceptions import QueryExecutionError
 from .utils import compute_percent, positive, total_time_to_temporal_percent
 
 
@@ -85,14 +85,12 @@ class SapHanaCheck(AgentCheck):
         ):
             try:
                 query_method()
+            except QueryExecutionError as e:
+                views = queries.VIEWS_USED[e.query_class.__name__]
+                self.log.error('Error querying %s: %s', ', '.join(views), str(e))
+                continue
             except Exception as e:
-                error = str(e)
-                if 'insufficient privilege' in error:
-                    error += ' ---> Access to the following view(s) is required: {}'.format(
-                        ', '.join(self.detect_used_views())
-                    )
-
-                self.log.error('Error running `%s`: %s', query_method.__name__, error)
+                self.log.error('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                 continue
 
     def query_master_database(self):
@@ -501,12 +499,19 @@ class SapHanaCheck(AgentCheck):
     def iter_rows(self, query, implicit_values=True):
         # https://github.com/SAP/PyHDB
         with closing(self._conn.cursor()) as cursor:
-            cursor.execute(query.query)
+            try:
+                cursor.execute(query.query)
+            except Exception as e:
+                raise QueryExecutionError(str(e), query)
 
             # Re-use column access map for efficiency
             result = {}
 
-            rows = cursor.fetchmany(self._batch_size)
+            try:
+                rows = cursor.fetchmany(self._batch_size)
+            except Exception as e:
+                raise QueryExecutionError(str(e), query)
+
             while rows:
                 for row in rows:
                     for column, value in zip(query.fields, row):
@@ -520,7 +525,10 @@ class SapHanaCheck(AgentCheck):
                     yield result
 
                 # Get next result set, if any
-                rows = cursor.fetchmany(self._batch_size)
+                try:
+                    rows = cursor.fetchmany(self._batch_size)
+                except Exception as e:
+                    raise QueryExecutionError(str(e), query)
 
     def iter_rows_raw(self, query):
         with closing(self._conn.cursor()) as cursor:
@@ -551,12 +559,3 @@ class SapHanaCheck(AgentCheck):
     def get_hana_hostname(self, hostname=None):
         if self._use_hana_hostnames:
             return hostname or self._master_hostname
-
-    @classmethod
-    def detect_used_views(cls):
-        try:
-            _, _, traceback = sys.exc_info()
-            query_class = traceback.tb_next.tb_next.tb_frame.f_locals['query'].__name__
-            return queries.VIEWS_USED[query_class]
-        except Exception:
-            return queries.ALL_VIEWS_USED
