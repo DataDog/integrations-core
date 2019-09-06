@@ -22,11 +22,11 @@ The SNMP check doesn't collect anything by default. Specify metrics to collect b
 
 ##### SNMP v1-v2 configuration
 
-```
+```yaml
 init_config:
   ## @param mibs_folder - string - required
   # mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
-  
+
   ## @param global_metrics - list of elements - (required if none at the instance level)
   # global_metrics:
   ## - MIB: <MIB_NAME>
@@ -61,11 +61,11 @@ instances:
 
 **Note**: See the [SNMP Library reference][4] for all configuration options.
 
-```
+```yaml
 init_config:
   ## @param mibs_folder - string - required
   # mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
-  
+
   ## @param global_metrics - list of elements - (required if none at the instance level)
   # global_metrics:
   ## - MIB: <MIB_NAME>
@@ -80,7 +80,7 @@ instances:
 
     ## @param snmp_version - integer - optional - default: 2
     snmp_version: 3
-    
+
     ## @param user - string - required
     user: <USERNAME>
 
@@ -123,22 +123,22 @@ Since Datadog Agent v5.14, the Agent's PySNMP dependency has been upgraded from 
 
 In Linux, find the location of `mibdump.py`, run:
 
-```
+```shell
 $ find /opt/datadog-agent/ -type f -name build-pysnmp-mib.py -o -name mibdump.py
 /opt/datadog-agent/embedded/bin/mibdump.py
 ```
 
 Windows example:
 
-```
+```powershell
 C:\>dir mibdump.py /s
 
- Directory of C:\Program Files\Datadog\Datadog Agent\embedded\Scripts
+Directory of C:\Program Files\Datadog\Datadog Agent\embedded\Scripts
 ```
 
 In Linux, use this format for the script:
 
-```
+```shell
 <PATH_TO_FILE>/mibdump.py \
   --mib-source <PATH_TO_MIB_FILES> \
   --mib-source http://mibs.snmplabs.com/asn1/@mib@ \
@@ -149,7 +149,8 @@ In Linux, use this format for the script:
 Windows Powershell example:
 
 Agent versions <=6.11:
-```
+
+```powershell
 PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FILE>\mibdump.py' `
   --mib-source <PATH_TO_MIB_SOURCE> `
   --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
@@ -158,7 +159,8 @@ PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FIL
 ```
 
 Agent versions >=6.12:
-```
+
+```powershell
 PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded2\python.exe' '<PATH_TO_FILE>\mibdump.py' `
   --mib-source <PATH_TO_MIB_SOURCE> `
   --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
@@ -208,7 +210,7 @@ The Agent looks for the converted MIB Python files by specifying the destination
 
 To group configuration, the check allows defining profiles to reuse metric definitions on several instances. Profiles define metrics the same way as instances, either inline or in separate files. Each instance can only match a single profile. For example you can define a profile in the `init_config` section:
 
-```
+```yaml
 init_config:
   profiles:
     my-profile:
@@ -225,7 +227,7 @@ init_config:
 
 Then either reference it explicitly by name, or use sysObjectID detection:
 
-```
+```yaml
 instances:
    - ip_address: 192.168.34.10
      profile: my-profile
@@ -241,29 +243,30 @@ For containerized environments, see the [Autodiscovery Integration Templates][16
 
 ##### SNMP v1
 
-| Parameter            | Value                                                                                                                                                                                                                          |
-|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `snmp`                                                                                                                                                                                                                         |
-| `<INIT_CONFIG>`      | `{"mibs_folder":"<PATH_TO_ADDITIONAL_MIBS>"}`                                                                                                                                                                                  |
-| `<INSTANCE_CONFIG>`  | <pre>{"ip_address":"%%host%%",<br>"port":"161",<br>"community_string":"<COMMUNITY_NAME>",<br>"snmp_version:"1",<br>"metrics":[{"MIB":"<MIB_NAME>","symbol":"&lt;SYMBOL&gt;"},{"OID":"&lt;OID&gt;","name":"<OID_NAME>"}]}</pre> |
+| Parameter              | Value                                                                                                                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------                                                        |
+| `<INTEGRATION_NAME>`   | `snmp`                                                                                                                                                                                             |
+| `<INIT_CONFIG>`        | `{"mibs_folder":"<PATH_TO_ADDITIONAL_MIBS>"}`                                                                                                                                                      |
+| `<INSTANCE_CONFIG>`    | ```{"ip_address":"%%host%%", "port":"161", "community_string":"<COMMUNITY_NAME>", "snmp_version":"1", "metrics":[{"MIB":"<MIB_NAME>","symbol":"<SYMBOL>"},{"OID":"<OID>","name":"<OID_NAME>"}]}``` |
 
 ##### SNMP v2
 
-| Parameter            | Value                                                                                                                                                                                                    |
-|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `snmp`                                                                                                                                                                                                   |
-| `<INIT_CONFIG>`      | `{"mibs_folder":"<PATH_TO_ADDITIONAL_MIBS>"}`                                                                                                                                                            |
-| `<INSTANCE_CONFIG>`  | <pre>{"ip_address":"%%host%%",<br>"port":"161",<br>"community_string":"<COMMUNITY_NAME>",<br>"metrics":[{"MIB":"<MIB_NAME>","symbol":"&lt;SYMBOL&gt;"},{"OID":"&lt;OID&gt;","name":"<OID_NAME>"}]}</pre> |
+| Parameter              | Value                                                                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------                                                                               |
+| `<INTEGRATION_NAME>`   | `snmp`                                                                                                                                                                         |
+| `<INIT_CONFIG>`        | `{"mibs_folder":"<PATH_TO_ADDITIONAL_MIBS>"}`                                                                                                                                  |
+| `<INSTANCE_CONFIG>`    | ```{"ip_address":"%%host%%", "port":"161", "community_string":"<COMMUNITY_NAME>", "metrics":[{"MIB":"<MIB_NAME>","symbol":"<SYMBOL>"},{"OID":"<OID>","name":"<OID_NAME>"}]}``` |
 
 ##### SNMP v3
 
 **Note**: See the [SNMP Library reference][4] for all configuration options.
 
-| Parameter            | Value                                                                                                                                                                                                                                                                                                                                                                |
-|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `snmp`                                                                                                                                                                                                                                                                                                                                                               |
-| `<INIT_CONFIG>`      | `{"mibs_folder":"<PATH_TO_ADDITIONAL_MIBS>"}`                                                                                                                                                                                                                                                                                                                        |
-| `<INSTANCE_CONFIG>`  | <pre>{"ip_address":"%%host%%",<br>"port":"161",<br>"snmp_version:"3",<br>"user":"<USER_NAME>",<br>"authKey":"&lt;PASSWORD&gt;",<br>"privKey":"<PRIVACY_TYPE_KEY>",<br>"authProtocol":"<AUTHENTICATION_PROTOCOL>",<br>"privProtocol":"<PRIVACY_TYPE>",<br>"metrics":[{"MIB":"<MIB_NAME>","symbol":"&lt;SYMBOL&gt;"},{"OID":"&lt;OID&gt;","name":"<OID_NAME>"}]}</pre> |
+| Parameter              | Value                                                                                                                                                                                                                                                                                                                  |
+| ---------------------- | -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------      |
+| `<INTEGRATION_NAME>`   | `snmp`                                                                                                                                                                                                                                                                                                                 |
+| `<INIT_CONFIG>`        | `{"mibs_folder":"<PATH_TO_ADDITIONAL_MIBS>"}`                                                                                                                                                                                                                                                                          |
+| `<INSTANCE_CONFIG>`    | ```{"ip_address":"%%host%%", "port":"161", "snmp_version":"3", "user":"<USER_NAME>", "authKey":"<PASSWORD>", "privKey":"<PRIVACY_TYPE_KEY>", "authProtocol":"<AUTHENTICATION_PROTOCOL>", "privProtocol":"<PRIVACY_TYPE>", "metrics":[{"MIB":"<MIB_NAME>","symbol":"<SYMBOL>"},{"OID":"<OID>","name":"<OID_NAME>"}]}``` |
+
 
 ### Custom metrics
 The SNMP check can potentially emit [custom metrics][10], which may impact your [billing][11].
