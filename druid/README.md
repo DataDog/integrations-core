@@ -1,4 +1,4 @@
-# Agent Check: druid
+# Agent Check: Druid
 
 ## Overview
 
@@ -44,7 +44,7 @@ More info about this step can be found on the [official guide for loading Druid 
 
 2) Update Druid java properties
 
-Update/Add following configs to your druid properties.
+Update/Add following configs to your Druid properties.
 ```
 # Add `statsd-emitter` to the extensions list to be loaded 
 druid.extensions.loadList=[..., "statsd-emitter"]
