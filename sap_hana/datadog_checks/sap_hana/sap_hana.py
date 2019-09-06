@@ -454,7 +454,7 @@ class SapHanaCheck(AgentCheck):
                     continue
 
                 if len(columns) != len(row):  # no cov
-                    self.log.error('Custom query result expected {} columns, got {}'.format(len(columns), len(row)))
+                    self.log.error('Custom query result expected {} column(s), got {}'.format(len(columns), len(row)))
                     continue
 
                 metric_info = []

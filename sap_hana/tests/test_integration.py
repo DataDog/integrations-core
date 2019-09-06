@@ -7,6 +7,8 @@ from datadog_checks.sap_hana import SapHanaCheck
 
 from . import metrics
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.mark.usefixtures('dd_environment')
 def test_check(aggregator, instance):
@@ -44,14 +46,3 @@ def test_custom_queries(aggregator, instance):
                 'test:sap_hana',
             ],
         )
-
-
-@pytest.mark.e2e
-def test_check_e2e(dd_agent_check, instance):
-    aggregator = dd_agent_check(instance, rate=True)
-
-    for metric in metrics.STANDARD:
-        aggregator.assert_metric_has_tag(metric, 'server:{}'.format(instance['server']))
-        aggregator.assert_metric_has_tag(metric, 'port:{}'.format(instance['port']))
-
-    aggregator.assert_all_metrics_covered()
