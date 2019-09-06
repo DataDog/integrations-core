@@ -1,7 +1,14 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
+import mock
+import pytest
+
 from datadog_checks.couchbase import Couchbase
+
+from .common import DEFAULT_INSTANCE
 
 
 def test_camel_case_to_joined_lower():
@@ -52,3 +59,31 @@ def test__get_query_monitoring_data():
     """
     couchbase = Couchbase('couchbase', {}, [{}])
     couchbase._get_query_monitoring_data({'query_monitoring_url': 'http://foo/bar'})
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        (
+            "new auth config",
+            {'username': 'new_foo', 'password': 'bar', 'tls_verify': False},
+            {'auth': ('new_foo', 'bar'), 'verify': False},
+        ),
+        ("legacy config", {'user': 'new_foo', 'ssl_verify': False}, {'auth': ('new_foo', 'password'), 'verify': False}),
+    ],
+)
+def test_config(test_case, extra_config, expected_http_kwargs):
+    instance = deepcopy(DEFAULT_INSTANCE)
+    instance.update(extra_config)
+    check = Couchbase('couchbase', {}, [instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_wargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_wargs.update(expected_http_kwargs)
+        r.get.assert_called_with('http://localhost:8091/pools/default/tasks', **http_wargs)
