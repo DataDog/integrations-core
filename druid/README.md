@@ -4,15 +4,7 @@
 
 The Datadog Agent collects metrics from Druid via [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/). Metrics collected are related to Druid queries, ingestion, and coordination data, see the [Druid metrics documentation][1] to learn more.
 
-* Query Metrics
-* SQL Metrics
-* Coordination
-* General Health
-* Sys
-
-And many more. See details [here][1].
-
-I addition to metrics collected, the Agent also sends a Service Check related to Druid's health.
+In addition to metrics collected, the Agent also sends a Service Check related to Druid's health.
 
 ## Setup
 
