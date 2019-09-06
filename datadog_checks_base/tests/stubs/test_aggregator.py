@@ -6,28 +6,51 @@ import pytest
 from datadog_checks.base import AgentCheck
 
 
-@pytest.mark.parametrize('case_name, metrics, expect_assertion_error', [
-    ("no duplicate with different metric", [
-        dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-        dict(name="metric.b", value=1, tags=['aa'], hostname='1'),
-    ], False),
-    ("no duplicate with different tag", [
-        dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-        dict(name="metric.a", value=1, tags=['bb'], hostname='1'),
-    ], False),
-    ("no duplicate with different hostname", [
-        dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-        dict(name="metric.a", value=1, tags=['aa'], hostname='2'),
-    ], False),
-    ("duplicate metric", [
-        dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-        dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-    ], True),
-    ("duplicate metric with different values", [
-        dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
-        dict(name="metric.a", value=2, tags=['aa'], hostname='1'),
-    ], True),
-])
+@pytest.mark.parametrize(
+    'case_name, metrics, expect_assertion_error',
+    [
+        (
+            "no duplicate with different metric",
+            [
+                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
+                dict(name="metric.b", value=1, tags=['aa'], hostname='1'),
+            ],
+            False,
+        ),
+        (
+            "no duplicate with different tag",
+            [
+                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
+                dict(name="metric.a", value=1, tags=['bb'], hostname='1'),
+            ],
+            False,
+        ),
+        (
+            "no duplicate with different hostname",
+            [
+                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
+                dict(name="metric.a", value=1, tags=['aa'], hostname='2'),
+            ],
+            False,
+        ),
+        (
+            "duplicate metric",
+            [
+                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
+                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
+            ],
+            True,
+        ),
+        (
+            "duplicate metric with different values",
+            [
+                dict(name="metric.a", value=1, tags=['aa'], hostname='1'),
+                dict(name="metric.a", value=2, tags=['aa'], hostname='1'),
+            ],
+            True,
+        ),
+    ],
+)
 def test_assert_no_duplicate_cases(aggregator, case_name, metrics, expect_assertion_error):
     check = AgentCheck()
 
