@@ -22,18 +22,19 @@ Druid 0.16 or above is required for this integration to work properly.
 
 ### Installation
 
-The druid check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+Both steps below are needed for Druid integration to work properly.
 
-### Configuration
+#### Step 1: Configure Druid to collect health metrics and service checks
 
-#### Step 1: Configure Druid to collect service checks
+Step to configure the Druid check included in the [Datadog Agent][2] package to collect health metrics and service checks.
 
 1. Edit the `druid.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your druid service checks. See the [sample druid.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
 
 #### Step 2: Connect Druid to DogStatsD (included in the Datadog Agent) by using the extension `statsd-emitter` to collect metrics
+
+Step to configure `statsd-emitter` extension to collect the majority of [Druid metrics][1].
 
 1) Install Druid extension [`statsd-emitter`][5] 
 
