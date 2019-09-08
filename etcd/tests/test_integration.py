@@ -6,61 +6,40 @@ from copy import deepcopy
 import mock
 import pytest
 import requests
-from six import itervalues
 
 from datadog_checks.dev import run_command
 from datadog_checks.etcd import Etcd
-from datadog_checks.etcd.metrics import METRIC_MAP
 
-from .common import COMPOSE_FILE, HOST, URL
+from .common import COMPOSE_FILE, HOST, STORE_METRICS, URL
 from .utils import is_leader, legacy, preview
 
 CHECK_NAME = 'etcd'
 
-STORE_METRICS = [
-    'compareanddelete.fail',
-    'compareanddelete.success',
-    'compareandswap.fail',
-    'compareandswap.success',
-    'create.fail',
-    'create.success',
-    'delete.fail',
-    'delete.success',
-    'expire.count',
-    'gets.fail',
-    'gets.success',
-    'sets.fail',
-    'sets.success',
-    'update.fail',
-    'update.success',
-    'watchers',
-]
-
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 @preview
-def test_check(aggregator, instance):
-    check = Etcd('etcd', {}, {}, [instance])
+def test_check(aggregator, instance, openmetrics_metrics):
+    check = Etcd('etcd', {}, [instance])
     check.check(instance)
 
     tags = ['is_leader:{}'.format('true' if is_leader(URL) else 'false')]
 
-    for metric in itervalues(METRIC_MAP):
+    for metric in openmetrics_metrics:
         aggregator.assert_metric('etcd.{}'.format(metric), tags=tags, at_least=0)
 
     assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
 
 
 @preview
-def test_check_no_leader_tag(aggregator, instance):
+def test_check_no_leader_tag(aggregator, instance, openmetrics_metrics):
     instance = deepcopy(instance)
     instance['leader_tag'] = False
 
-    check = Etcd('etcd', {}, {}, [instance])
+    check = Etcd('etcd', {}, [instance])
     check.check(instance)
 
-    for metric in itervalues(METRIC_MAP):
+    for metric in openmetrics_metrics:
         aggregator.assert_metric('etcd.{}'.format(metric), tags=[], at_least=0)
 
     assert aggregator.metrics_asserted_pct > 79, 'Missing metrics {}'.format(aggregator.not_asserted())
@@ -68,7 +47,7 @@ def test_check_no_leader_tag(aggregator, instance):
 
 @preview
 def test_service_check(aggregator, instance):
-    check = Etcd(CHECK_NAME, {}, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, [instance])
     check.check(instance)
 
     tags = ['endpoint:{}'.format(instance['prometheus_url'])]
@@ -80,7 +59,7 @@ def test_service_check(aggregator, instance):
 def test_bad_config(aggregator):
     bad_url = '{}/test'.format(URL)
     instance = {'url': bad_url}
-    check = Etcd(CHECK_NAME, {}, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, [instance])
 
     with pytest.raises(Exception):
         check.check(instance)
@@ -91,7 +70,7 @@ def test_bad_config(aggregator):
 
 @legacy
 def test_metrics(instance, aggregator):
-    check = Etcd(CHECK_NAME, {}, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, [instance])
     check.check(instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
@@ -105,7 +84,7 @@ def test_metrics(instance, aggregator):
 
 @legacy
 def test_service_checks(instance, aggregator):
-    check = Etcd(CHECK_NAME, {}, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, [instance])
     check.check(instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
@@ -135,7 +114,7 @@ def test_followers(aggregator):
     followers = list(response.json().get('followers', {}).keys())
 
     instance = {'url': url}
-    check = Etcd(CHECK_NAME, {}, {}, [instance])
+    check = Etcd(CHECK_NAME, {}, [instance])
     check.check(instance)
 
     common_leader_tags = ['url:{}'.format(url), 'etcd_state:leader']
@@ -166,7 +145,7 @@ def test_followers(aggregator):
 )
 def test_config_legacy(instance, test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
-    check = Etcd(CHECK_NAME, {}, {}, instances=[instance])
+    check = Etcd(CHECK_NAME, {}, [instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
@@ -193,7 +172,7 @@ def test_config_legacy(instance, test_case, extra_config, expected_http_kwargs):
 )
 def test_config_preview(instance, test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
-    check = Etcd(CHECK_NAME, {}, {}, instances=[instance])
+    check = Etcd(CHECK_NAME, {}, [instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
