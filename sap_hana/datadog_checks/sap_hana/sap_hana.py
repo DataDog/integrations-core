@@ -55,6 +55,9 @@ class SapHanaCheck(AgentCheck):
         # We'll connect on the first check run
         self._conn = None
 
+        # Whether or not the connection was lost
+        self._need_reconnect = False
+
         # Whether or not to use the hostnames contained in the queried views
         self._use_hana_hostnames = is_affirmative(self.instance.get('use_hana_hostnames', False))
 
@@ -69,29 +72,38 @@ class SapHanaCheck(AgentCheck):
 
             self._conn = connection
 
-        for query_method in (
-            self.query_master_database,
-            self.query_database_status,
-            self.query_backup_status,
-            self.query_licenses,
-            self.query_connection_overview,
-            self.query_disk_usage,
-            self.query_service_memory,
-            self.query_service_component_memory,
-            self.query_row_store_memory,
-            self.query_service_statistics,
-            self.query_volume_io,
-            self.query_custom,
-        ):
-            try:
-                query_method()
-            except QueryExecutionError as e:
-                views = queries.VIEWS_USED[e.query_class.__name__]
-                self.log.error('Error querying %s: %s', ', '.join(views), str(e))
-                continue
-            except Exception as e:
-                self.log.error('Unexpected error running `%s`: %s', query_method.__name__, str(e))
-                continue
+        try:
+            for query_method in (
+                self.query_master_database,
+                self.query_database_status,
+                self.query_backup_status,
+                self.query_licenses,
+                self.query_connection_overview,
+                self.query_disk_usage,
+                self.query_service_memory,
+                self.query_service_component_memory,
+                self.query_row_store_memory,
+                self.query_service_statistics,
+                self.query_volume_io,
+                self.query_custom,
+            ):
+                try:
+                    query_method()
+                except QueryExecutionError as e:
+                    if e.source in queries.VIEWS_USED:
+                        views = ', '.join(queries.VIEWS_USED[e.source])
+                        self.log.error('Error querying %s: %s', views, e)
+                    else:
+                        self.log.error('Error executing custom query: %s', e)
+                    continue
+                except Exception as e:
+                    self.log.error('Unexpected error running `%s`: %s', query_method.__name__, e)
+                    continue
+        finally:
+            if self._need_reconnect:
+                self._conn.close()
+                self._conn = None
+                self._need_reconnect = False
 
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html
@@ -499,19 +511,12 @@ class SapHanaCheck(AgentCheck):
     def iter_rows(self, query, implicit_values=True):
         # https://github.com/SAP/PyHDB
         with closing(self._conn.cursor()) as cursor:
-            try:
-                cursor.execute(query.query)
-            except Exception as e:
-                raise QueryExecutionError(str(e), query)
+            self.execute_query(cursor, query.query, source=query.__name__)
 
             # Re-use column access map for efficiency
             result = {}
 
-            try:
-                rows = cursor.fetchmany(self._batch_size)
-            except Exception as e:
-                raise QueryExecutionError(str(e), query)
-
+            rows = cursor.fetchmany(self._batch_size)
             while rows:
                 for row in rows:
                     for column, value in zip(query.fields, row):
@@ -525,14 +530,11 @@ class SapHanaCheck(AgentCheck):
                     yield result
 
                 # Get next result set, if any
-                try:
-                    rows = cursor.fetchmany(self._batch_size)
-                except Exception as e:
-                    raise QueryExecutionError(str(e), query)
+                rows = cursor.fetchmany(self._batch_size)
 
     def iter_rows_raw(self, query):
         with closing(self._conn.cursor()) as cursor:
-            cursor.execute(query)
+            self.execute_query(cursor, query)
 
             rows = cursor.fetchmany(self._batch_size)
             while rows:
@@ -555,6 +557,16 @@ class SapHanaCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return connection
+
+    def execute_query(self, cursor, query, source=None):
+        try:
+            cursor.execute(query)
+        except Exception as e:
+            error = str(e)
+            if 'Lost connection to HANA server' in error:
+                self._need_reconnect = True
+
+            raise QueryExecutionError(error, source)
 
     def get_hana_hostname(self, hostname=None):
         if self._use_hana_hostnames:

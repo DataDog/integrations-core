@@ -4,6 +4,6 @@
 
 
 class QueryExecutionError(Exception):
-    def __init__(self, message, query_class):
+    def __init__(self, message, source):
         super(QueryExecutionError, self).__init__(message)
-        self.query_class = query_class
+        self.source = source
