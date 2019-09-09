@@ -90,10 +90,10 @@ class SapHanaCheck(AgentCheck):
                 try:
                     query_method()
                 except QueryExecutionError as e:
-                    self.log.error('Error querying %s: %s', e.source(), e)
+                    self.log.error('Error querying %s: %s', e.source(), str(e))
                     continue
                 except Exception as e:
-                    self.log.error('Unexpected error running `%s`: %s', query_method.__name__, e)
+                    self.log.error('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                     continue
         finally:
             if self._need_reconnect:
