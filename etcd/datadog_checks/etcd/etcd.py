@@ -61,7 +61,7 @@ class Etcd(OpenMetricsBaseCheck):
         'standardDeviation': 'etcd.leader.latency.stddev',
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
 
         if instances is not None:
             for instance in instances:
@@ -87,7 +87,6 @@ class Etcd(OpenMetricsBaseCheck):
         super(Etcd, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 'etcd': {
