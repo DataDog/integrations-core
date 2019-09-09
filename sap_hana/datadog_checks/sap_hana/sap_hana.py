@@ -90,11 +90,7 @@ class SapHanaCheck(AgentCheck):
                 try:
                     query_method()
                 except QueryExecutionError as e:
-                    if e.source in queries.VIEWS_USED:
-                        views = ', '.join(queries.VIEWS_USED[e.source])
-                        self.log.error('Error querying %s: %s', views, e)
-                    else:
-                        self.log.error('Error executing custom query: %s', e)
+                    self.log.error('Error querying %s: %s', e.source(), e)
                     continue
                 except Exception as e:
                     self.log.error('Unexpected error running `%s`: %s', query_method.__name__, e)
@@ -511,7 +507,7 @@ class SapHanaCheck(AgentCheck):
     def iter_rows(self, query, implicit_values=True):
         # https://github.com/SAP/PyHDB
         with closing(self._conn.cursor()) as cursor:
-            self.execute_query(cursor, query.query, source=query.__name__)
+            self.execute_query(cursor, query.query, lambda: ', '.join(sorted(query.views)))
 
             # Re-use column access map for efficiency
             result = {}
@@ -534,7 +530,7 @@ class SapHanaCheck(AgentCheck):
 
     def iter_rows_raw(self, query):
         with closing(self._conn.cursor()) as cursor:
-            self.execute_query(cursor, query)
+            self.execute_query(cursor, query, lambda: 'custom query')
 
             rows = cursor.fetchmany(self._batch_size)
             while rows:
@@ -558,7 +554,7 @@ class SapHanaCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             return connection
 
-    def execute_query(self, cursor, query, source=None):
+    def execute_query(self, cursor, query, source):
         try:
             cursor.execute(query)
         except Exception as e:

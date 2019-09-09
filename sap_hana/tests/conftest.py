@@ -9,7 +9,7 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.sap_hana.queries import ALL_VIEWS_USED
+from datadog_checks.sap_hana.queries import Query
 
 from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA
 
@@ -34,8 +34,9 @@ class DbManager(object):
                 # Create a role with the necessary monitoring privileges
                 cursor.execute('CREATE ROLE DD_MONITOR')
                 cursor.execute('GRANT CATALOG READ TO DD_MONITOR')
-                for view in ALL_VIEWS_USED:
-                    cursor.execute('GRANT SELECT ON {} TO DD_MONITOR'.format(view))
+                for cls in Query.__subclasses__():
+                    for view in cls.views:
+                        cursor.execute('GRANT SELECT ON {} TO DD_MONITOR'.format(view))
 
                 # For custom query test
                 cursor.execute('GRANT SELECT ON SYS_DATABASES.M_DATA_VOLUMES TO DD_MONITOR')
