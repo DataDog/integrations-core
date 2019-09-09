@@ -140,8 +140,8 @@ class SnmpCheck(AgentCheck):
                 self._config.discovered_instances[host] = config
                 time.sleep(discovery_pause)
             time_elapsed = time.time() - start_time
-            if time_elapsed - discovery_interval > 0:
-                time.sleep(time_elapsed - discovery_interval)
+            if discovery_interval - time_elapsed > 0:
+                time.sleep(discovery_interval - time_elapsed)
 
     def raise_on_error_indication(self, error_indication, ip_address):
         if error_indication:
