@@ -21,25 +21,20 @@ for view in views:
     for row in cur.fetchall():
         print(f'    {row[0]}')
 """
-import inspect
-from collections import defaultdict
-
 from .utils import compact_query
 
-VIEWS_USED = defaultdict(set)
+
+class Query(object):
+    pass
 
 
-def view(v, user=None):
-    VIEWS_USED[user or inspect.getframeinfo(inspect.currentframe().f_back).function].add(v)
-    return v
-
-
-class MasterDatabase:
+class MasterDatabase(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html
     """
 
     fields = ('db_name', 'host', 'start_time', 'usage', 'version', 'current_time')
+    views = ('SYS.M_DATABASE',)
     query = compact_query(
         """
         SELECT
@@ -51,17 +46,18 @@ class MasterDatabase:
           CURRENT_UTCTIMESTAMP
         FROM {}
         """.format(
-            view('SYS.M_DATABASE')
+            *views
         )
     )
 
 
-class SystemDatabases:
+class SystemDatabases(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/dbbdc0d96675470e80801c5ddfb8d348.html
     """
 
     fields = ('db_name', 'status', 'details')
+    views = ('SYS.M_DATABASES',)
     query = compact_query(
         """
         SELECT
@@ -70,17 +66,18 @@ class SystemDatabases:
           ACTIVE_STATUS_DETAILS
         FROM {}
         """.format(
-            view('SYS.M_DATABASES')
+            *views
         )
     )
 
 
-class GlobalSystemBackupProgress:
+class GlobalSystemBackupProgress(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/783108ba8b8b4c709959220b4535a010.html
     """
 
     fields = ('db_name', 'host', 'service', 'status', 'end_time', 'current_time')
+    views = ('SYS_DATABASES.M_BACKUP_PROGRESS',)
     query = compact_query(
         """
         SELECT
@@ -92,17 +89,18 @@ class GlobalSystemBackupProgress:
           CURRENT_UTCTIMESTAMP
         FROM {}
         """.format(
-            view('SYS_DATABASES.M_BACKUP_PROGRESS')
+            *views
         )
     )
 
 
-class GlobalSystemLicenses:
+class GlobalSystemLicenses(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/1d7e7f52f6574a238c137e17b0840673.html
     """
 
     fields = ('sid', 'product_name', 'limit', 'usage', 'start_date', 'expiration_date')
+    views = ('SYS_DATABASES.M_LICENSES',)
     query = compact_query(
         """
         SELECT
@@ -114,17 +112,18 @@ class GlobalSystemLicenses:
           EXPIRATION_DATE
         FROM {}
         """.format(
-            view('SYS_DATABASES.M_LICENSES')
+            *views
         )
     )
 
 
-class GlobalSystemConnectionsStatus:
+class GlobalSystemConnectionsStatus(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20abcf1f75191014a254a82b3d0f66bf.html
     """
 
     fields = ('db_name', 'host', 'port', 'status', 'total')
+    views = ('SYS_DATABASES.M_CONNECTIONS',)
     query = compact_query(
         """
         SELECT
@@ -137,17 +136,18 @@ class GlobalSystemConnectionsStatus:
         WHERE CONNECTION_STATUS != ''
         GROUP BY DATABASE_NAME, HOST, PORT, CONNECTION_STATUS
         """.format(
-            view('SYS_DATABASES.M_CONNECTIONS')
+            *views
         )
     )
 
 
-class GlobalSystemDiskUsage:
+class GlobalSystemDiskUsage(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/a2aac2ee72b341699fa8eb3988d8cecb.html
     """
 
     fields = ('db_name', 'host', 'resource', 'used', 'total')
+    views = ('SYS_DATABASES.M_DISK_USAGE',)
     query = compact_query(
         """
         SELECT
@@ -158,12 +158,12 @@ class GlobalSystemDiskUsage:
           TOTAL_SIZE
         FROM {}
         """.format(
-            view('SYS_DATABASES.M_DISK_USAGE')
+            *views
         )
     )
 
 
-class GlobalSystemServiceMemory:
+class GlobalSystemServiceMemory(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20bf33c975191014bc16d7ffb7717db2.html
     """
@@ -184,6 +184,7 @@ class GlobalSystemServiceMemory:
         'compactors_total',
         'compactors_usable',
     )
+    views = ('SYS_DATABASES.M_SERVICE_MEMORY',)
     query = compact_query(
         """
         SELECT
@@ -203,17 +204,18 @@ class GlobalSystemServiceMemory:
           COMPACTORS_FREEABLE_SIZE
         FROM {}
         """.format(
-            view('SYS_DATABASES.M_SERVICE_MEMORY')
+            *views
         )
     )
 
 
-class GlobalSystemServiceComponentMemory:
+class GlobalSystemServiceComponentMemory(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20bed4f675191014a4cf8e62c28d16ae.html
     """
 
     fields = ('db_name', 'host', 'port', 'component', 'used')
+    views = ('SYS_DATABASES.M_SERVICE_COMPONENT_MEMORY',)
     query = compact_query(
         """
         SELECT
@@ -224,17 +226,18 @@ class GlobalSystemServiceComponentMemory:
           USED_MEMORY_SIZE
         FROM {}
         """.format(
-            view('SYS_DATABASES.M_SERVICE_COMPONENT_MEMORY')
+            *views
         )
     )
 
 
-class GlobalSystemRowStoreMemory:
+class GlobalSystemRowStoreMemory(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20bb47a975191014b1e2f6bd0a685d7b.html
     """
 
     fields = ('db_name', 'host', 'port', 'category', 'total', 'used', 'usable')
+    views = ('SYS_DATABASES.M_RS_MEMORY',)
     query = compact_query(
         """
         SELECT
@@ -247,12 +250,12 @@ class GlobalSystemRowStoreMemory:
           FREE_SIZE
         FROM {}
         """.format(
-            view('SYS_DATABASES.M_RS_MEMORY')
+            *views
         )
     )
 
 
-class GlobalSystemServiceStatistics:
+class GlobalSystemServiceStatistics(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20c460be751910149173ac5c08d42be5.html
     """
@@ -273,6 +276,7 @@ class GlobalSystemServiceStatistics:
         'files_open',
         'cpu_time',
     )
+    views = ('SYS_DATABASES.M_SERVICE_STATISTICS',)
     query = compact_query(
         """
         SELECT
@@ -292,12 +296,12 @@ class GlobalSystemServiceStatistics:
           PROCESS_CPU_TIME
         FROM {}
         """.format(
-            view('SYS_DATABASES.M_SERVICE_STATISTICS')
+            *views
         )
     )
 
 
-class GlobalSystemVolumeIO:
+class GlobalSystemVolumeIO(Query):
     """
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20cadec8751910148bab98528e3634a9.html
     """
@@ -316,6 +320,7 @@ class GlobalSystemVolumeIO:
         'write_time',
         'io_time',
     )
+    views = ('SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS',)
     query = compact_query(
         """
         SELECT
@@ -333,10 +338,6 @@ class GlobalSystemVolumeIO:
           TOTAL_IO_TIME
         FROM {}
         """.format(
-            view('SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS')
+            *views
         )
     )
-
-
-ALL_VIEWS_USED = tuple(sorted(set(v for vu in VIEWS_USED.values() for v in vu)))
-VIEWS_USED = {k: tuple(sorted(v)) for k, v in sorted(VIEWS_USED.items())}
