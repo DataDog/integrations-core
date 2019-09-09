@@ -234,6 +234,7 @@ class IbmMqCheck(AgentCheck):
         """Submit channel status
         :param search_channel_name might contain wildcard characters
         """
+        channels_to_skip = channels_to_skip or []
         search_channel_tags = tags + ["channel:{}".format(search_channel_name)]
         try:
             args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(search_channel_name)}
@@ -246,7 +247,7 @@ class IbmMqCheck(AgentCheck):
         else:
             for channel_info in response:
                 channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
-                if channels_to_skip and channel_name in channels_to_skip:
+                if channel_name in channels_to_skip:
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
 
