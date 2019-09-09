@@ -142,6 +142,7 @@ def test_locks_metrics(aggregator, check, pg_instance):
         'db:datadog_test',
         'lock_mode:AccessExclusiveLock',
         'table:persons',
+        'schema:public',
     ]
     aggregator.assert_metric('postgresql.locks', count=1, tags=expected_tags)
 
