@@ -98,16 +98,22 @@ init_config:
   #   	sysobjectid: <OID>
 
 instances:
-
-    ## @param ip_address - string - required
+  -
+    ## @param ip_address - string - optional
     ## The IP address of the device to monitor.
+    ## One of ip_address and network_address must be provided.
     #
-  - ip_address: localhost
+    # ip_address: <IP_ADDRESS>
 
-    ## @param port - integer - required
+    ## @param network_address - string - optional
+    ## The network address of the devices to scan for monitor.
+    #
+    # network_address: <NETWORK_ADRESS>
+
+    ## @param port - integer - optional - default: 161
     ## Default SNMP port.
     #
-    port: 161
+    # port: 161
 
     ## @param community_string - string - optional
     ## Only useful for SNMP v1 & v2.
@@ -129,6 +135,11 @@ instances:
     ## Amount of retries before failure.
     #
     # retries: 5
+
+    ## @param discovery_interval - integer - optional - default: 3600
+    ## Interval between 2 discovery starts, in seconds.
+    #
+    # discovery_interval: 3600
 
     ## @param enforce_mib_constraints - boolean - optional - default: true
     ## If set to false we will not check the values returned meet the MIB constraints.
