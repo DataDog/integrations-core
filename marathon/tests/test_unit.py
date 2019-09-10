@@ -91,6 +91,8 @@ def test_get_instance_config(check):
             {'timeout': 5, 'username': 'foo', 'password': 'bar', 'tls_verify': False},
             {'timeout': 5, 'auth': ('foo', 'bar'), 'verify': False},
         ),
+        ("connect_timeout", {'default_timeout': 5}, {'connect_timeout': 2}, {'timeout': (5.0, 2.0)}),
+        ("read_timeout", {}, {'timeout': 7, 'read_timeout': 3}, {'timeout': (3.0, 7.0)}),
         (
             "legacy config",
             {'default_timeout': 3},
