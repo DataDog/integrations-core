@@ -23,6 +23,7 @@ def test_check(aggregator, check):
 def test_check_e2e(dd_agent_check):
     aggregator = dd_agent_check(deepcopy(common.INSTANCE), rate=True)
     expected_metrics = deepcopy(common.EXPECTED_METRICS)
+    # metric removed from list because env does not emit
     expected_metrics.remove('system.processes.priorities')
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
