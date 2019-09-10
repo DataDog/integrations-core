@@ -281,16 +281,24 @@ class SnmpCheck(AgentCheck):
         Perform two series of SNMP requests, one for all that have MIB associated
         and should be looked up and one for those specified by oids.
         """
-        # Reset errors
-        self._error = self._severity = None
         if instance.get('network_address'):
-            for discovered in list(self._config.discovered_instances.values()):
-                # TODO: cleanup failing hosts
-                self._check_with_config(discovered)
+            for host, discovered in list(self._config.discovered_instances.items()):
+                if self._check_with_config(discovered):
+                    self._config.failing_instances[host] += 1
+                    if self._config.failing_instances[host] > self._config.allowed_failures:
+                        # Remove it from discovered instances, we'll re-discover it later if it reappears
+                        self._config.discovered_instances.pop(host)
+                        # Reset the failure counter as well
+                        self._config.failing_instances.pop(host)
+                else:
+                    # Reset the counter if not's failing
+                    self._config.failing_instances.pop(host, None)
         else:
             self._check_with_config(self._config)
 
     def _check_with_config(self, config):
+        # Reset errors
+        self._error = self._severity = None
         instance = config.instance
         try:
             if not (config.table_oids or config.raw_oids):
@@ -325,6 +333,7 @@ class SnmpCheck(AgentCheck):
                 if self._severity:
                     status = self._severity
             self.service_check(self.SC_STATUS, status, tags=sc_tags, message=self._error)
+        return self._error
 
     def report_raw_metrics(self, metrics, results, tags):
         """
