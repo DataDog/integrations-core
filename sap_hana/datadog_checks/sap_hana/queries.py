@@ -182,7 +182,7 @@ class GlobalSystemServiceMemory(Query):
         'shared_total',
         'shared_used',
         'compactors_total',
-        'compactors_usable',
+        'compactors_free',
     )
     views = ('SYS_DATABASES.M_SERVICE_MEMORY',)
     query = compact_query(
@@ -236,7 +236,7 @@ class GlobalSystemRowStoreMemory(Query):
     https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20bb47a975191014b1e2f6bd0a685d7b.html
     """
 
-    fields = ('db_name', 'host', 'port', 'category', 'total', 'used', 'usable')
+    fields = ('db_name', 'host', 'port', 'category', 'total', 'used', 'free')
     views = ('SYS_DATABASES.M_RS_MEMORY',)
     query = compact_query(
         """

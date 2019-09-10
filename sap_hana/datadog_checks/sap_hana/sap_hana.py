@@ -211,8 +211,8 @@ class SapHanaCheck(AgentCheck):
             used = disk['used']
             self.gauge('disk.used', used, tags=tags, hostname=host)
 
-            usable = total - used
-            self.gauge('disk.usable', usable, tags=tags, hostname=host)
+            free = total - used
+            self.gauge('disk.free', free, tags=tags, hostname=host)
 
             utilized = compute_percent(used, total)
             self.gauge('disk.utilized', utilized, tags=tags, hostname=host)
@@ -241,8 +241,8 @@ class SapHanaCheck(AgentCheck):
             used = memory['used']
             self.gauge('memory.service.overall.used', used, tags=tags, hostname=host)
 
-            usable = total - used
-            self.gauge('memory.service.overall.usable', usable, tags=tags, hostname=host)
+            free = total - used
+            self.gauge('memory.service.overall.free', free, tags=tags, hostname=host)
 
             utilized = compute_percent(used, total)
             self.gauge('memory.service.overall.utilized', utilized, tags=tags, hostname=host)
@@ -254,8 +254,8 @@ class SapHanaCheck(AgentCheck):
             heap_used = memory['heap_used']
             self.gauge('memory.service.heap.used', heap_used, tags=tags, hostname=host)
 
-            heap_usable = heap_total - heap_used
-            self.gauge('memory.service.heap.usable', heap_usable, tags=tags, hostname=host)
+            heap_free = heap_total - heap_used
+            self.gauge('memory.service.heap.free', heap_free, tags=tags, hostname=host)
 
             heap_utilized = compute_percent(heap_used, heap_total)
             self.gauge('memory.service.heap.utilized', heap_utilized, tags=tags, hostname=host)
@@ -267,8 +267,8 @@ class SapHanaCheck(AgentCheck):
             shared_used = memory['shared_used']
             self.gauge('memory.service.shared.used', shared_used, tags=tags, hostname=host)
 
-            shared_usable = shared_total - shared_used
-            self.gauge('memory.service.shared.usable', shared_usable, tags=tags, hostname=host)
+            shared_free = shared_total - shared_used
+            self.gauge('memory.service.shared.free', shared_free, tags=tags, hostname=host)
 
             shared_utilized = compute_percent(shared_used, shared_total)
             self.gauge('memory.service.shared.utilized', shared_utilized, tags=tags, hostname=host)
@@ -277,10 +277,10 @@ class SapHanaCheck(AgentCheck):
             compactors_total = memory['compactors_total']
             self.gauge('memory.service.compactor.total', compactors_total, tags=tags, hostname=host)
 
-            compactors_usable = memory['compactors_usable']
-            self.gauge('memory.service.compactor.usable', compactors_usable, tags=tags, hostname=host)
+            compactors_free = memory['compactors_free']
+            self.gauge('memory.service.compactor.free', compactors_free, tags=tags, hostname=host)
 
-            compactors_used = compactors_total - compactors_usable
+            compactors_used = compactors_total - compactors_free
             self.gauge('memory.service.compactor.used', compactors_used, tags=tags, hostname=host)
 
             compactors_utilized = compute_percent(compactors_used, compactors_total)
@@ -322,8 +322,8 @@ class SapHanaCheck(AgentCheck):
             used = memory['used']
             self.gauge('memory.row_store.used', used, tags=tags, hostname=host)
 
-            usable = memory['usable']
-            self.gauge('memory.row_store.usable', usable, tags=tags, hostname=host)
+            free = memory['free']
+            self.gauge('memory.row_store.free', free, tags=tags, hostname=host)
 
             utilized = compute_percent(used, total)
             self.gauge('memory.row_store.utilized', utilized, tags=tags, hostname=host)
