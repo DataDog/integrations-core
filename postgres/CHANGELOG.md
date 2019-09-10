@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 3.2.0 / 2019-09-10
+
+* [Added] Add schema tag to Lock and Size metrics. See [#3721](https://github.com/DataDog/integrations-core/pull/3721). Thanks [fischaz](https://github.com/fischaz).
+
 ## 3.1.3 / 2019-09-04
 
 * [Fixed] Catch statement timeouts correctly. See [#4501](https://github.com/DataDog/integrations-core/pull/4501).
