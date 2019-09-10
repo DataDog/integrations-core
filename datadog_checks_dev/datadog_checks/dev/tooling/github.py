@@ -91,9 +91,9 @@ def from_contributor(pr_payload):
 
 def parse_pr_number(log_line):
     """If there are multiple matches, the PR id is always the latest one"""
-    match = re.findall(PR_PATTERN, log_line)
-    if match:
-        return match[-1]
+    matches = re.findall(PR_PATTERN, log_line)
+    if matches:
+        return matches[-1]
 
 
 def parse_pr_numbers(git_log_lines):
