@@ -1,22 +1,22 @@
 {
-  "display_name": "mapr",
+  "display_name": "MapR",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "mapr",
   "metric_prefix": "mapr.",
-  "metric_to_check": "",
+  "metric_to_check": "mapr.metrics.submitted",
   "creates_events": false,
-  "short_description": "MapR metrics",
+  "short_description": "Collect the monitoring metrics made available by MapR.",
   "guid": "7d1de422-85a6-47cc-9962-427a9499d109",
   "support": "core",
   "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
+    "linux"
   ],
   "public_title": "Datadog-MapR Integration",
   "categories": [
-    "data-store"
+    "data-store",
+    "os & system",
+    "processing"
   ],
   "type": "check",
   "is_public": false,
