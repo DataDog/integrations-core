@@ -15,6 +15,8 @@ class InstanceConfig:
 
     DEFAULT_RETRIES = 5
     DEFAULT_TIMEOUT = 1
+    DEFAULT_ALLOWED_FAILURES = 3
+    DEFAULT_BULK_THRESHOLD = 5
 
     def __init__(self, instance, warning, global_metrics, mibs_path, profiles, profiles_by_oid):
         self.instance = instance
@@ -33,7 +35,8 @@ class InstanceConfig:
         self.network_address = None
         self.discovered_instances = {}
         self.failing_instances = defaultdict(int)
-        self.allowed_failures = int(instance.get('discovery_allowed_failures', 3))
+        self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
+        self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
@@ -156,7 +159,7 @@ class InstanceConfig:
     @staticmethod
     def parse_metrics(metrics, enforce_constraints, warning):
         raw_oids = []
-        table_oids = []
+        table_oids = {}
         mibs_to_load = set()
         # Check the metrics completely defined
         for metric in metrics:
@@ -169,15 +172,17 @@ class InstanceConfig:
                 if 'symbol' in metric:
                     to_query = metric['symbol']
                     try:
-                        table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], to_query)))
+                        table_oids[hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], to_query))] = []
                     except Exception as e:
                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                 elif 'symbols' not in metric:
                     raise ConfigurationError('When specifying a table, you must specify a list of symbols')
                 else:
+                    symbols = []
+                    table_oids[hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], metric['table']))] = symbols
                     for symbol in metric['symbols']:
                         try:
-                            table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], symbol)))
+                            symbols.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], symbol)))
                         except Exception as e:
                             warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                     if 'metric_tags' in metric:
@@ -189,7 +194,7 @@ class InstanceConfig:
                             if 'column' in metric_tag:
                                 # In case it's a column, we need to query it as well
                                 try:
-                                    table_oids.append(
+                                    symbols.append(
                                         hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], metric_tag.get('column')))
                                     )
                                 except Exception as e:

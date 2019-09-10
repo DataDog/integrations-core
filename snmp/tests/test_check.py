@@ -103,6 +103,7 @@ def test_snmpget(aggregator):
 
 def test_snmp_getnext_call():
     instance = common.generate_instance_config(common.PLAY_WITH_GET_NEXT_METRICS)
+    instance['snmp_version'] = 1
     check = common.create_check(instance)
 
     # Test that we invoke next with the correct keyword arguments that are hard to test otherwise
@@ -358,6 +359,33 @@ def test_table_v3_SHA_AES(aggregator):
         for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
             tag = mtag['tag']
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+
+    # Test service check
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_bulk_table(aggregator):
+    instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    # Test metrics
+    for symbol in common.BULK_TABULAR_OBJECTS[0]['symbols']:
+        metric_name = "snmp." + symbol
+        aggregator.assert_metric(metric_name, at_least=1)
+        aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
+
+        for mtag in common.BULK_TABULAR_OBJECTS[0]['metric_tags']:
+            tag = mtag['tag']
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+
+    for symbol in common.BULK_TABULAR_OBJECTS[1]['symbols']:
+        metric_name = "snmp." + symbol
+        aggregator.assert_metric(metric_name, at_least=1)
+        aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)

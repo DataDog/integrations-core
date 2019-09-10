@@ -51,6 +51,8 @@ class SnmpCheck(AgentCheck):
     _error = None
     _severity = None
     _running = True
+    _NON_REPEATERS = 0
+    _MAX_REPETITIONS = 25
 
     def __init__(self, name, init_config, instances):
         super(SnmpCheck, self).__init__(name, init_config, instances)
@@ -147,12 +149,10 @@ class SnmpCheck(AgentCheck):
             self._error = message
             raise CheckException(message)
 
-    def check_table(self, config, oids, lookup_names, enforce_constraints):
+    def check_table(self, config, table_oids):
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
-        lookup_names is a boolean to specify whether or not to use the mibs to
-        resolve the name and values.
 
         Returns a dictionary:
         dict[oid/metric_name][row index] = value
@@ -161,14 +161,25 @@ class SnmpCheck(AgentCheck):
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passeed is referring to a specific leaf.
         # For example:
-        # snmpgetnext -v2c -c public localhost:11111 1.3.6.1.2.1.25.4.2.1.7.222
-        # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
+        # snmpgetnext -v2c -c public localhost:11111 1.3.6.1.2.1.25.5.1.1.1.1
+        # 1.3.6.1.2.1.25.5.1.1.1.6 = INTEGER: 3
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
-
-        # Set aliases for snmpget and snmpgetnext with logging
         first_oid = 0
         all_binds = []
         results = defaultdict(dict)
+        enforce_constraints = config.enforce_constraints
+        oids = []
+        bulk_oids = []
+        # Use bulk for SNMP > 1 and there are enough symbols
+        bulk_limit = config.bulk_threshold if config.auth_data.mpModel else 0
+        for table, symbols in table_oids.items():
+            if not symbols:
+                # No table to browse, just one symbol
+                oids.append(table)
+            elif len(symbols) < bulk_limit:
+                oids.extend(symbols)
+            else:
+                bulk_oids.append(table)
 
         while first_oid < len(oids):
             try:
@@ -202,8 +213,9 @@ class SnmpCheck(AgentCheck):
 
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
+                    # Don't walk through the entire MIB, stop at end of table
                     self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
-                    for error_indication, error_status, _, var_binds_table in hlapi.nextCmd(
+                    iterator = hlapi.nextCmd(
                         config.snmp_engine,
                         config.auth_data,
                         config.transport,
@@ -211,10 +223,11 @@ class SnmpCheck(AgentCheck):
                         *missing_results,
                         lookupMib=enforce_constraints,
                         ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
-                        lexicographicMode=False  # Don't walk through the entire MIB, stop at end of table
-                    ):
-
+                        lexicographicMode=False
+                    )
+                    for error_indication, error_status, _, var_binds_table in iterator:
                         self.log.debug('Returned vars: %s', var_binds_table)
+
                         # Raise on error_indication
                         self.raise_on_error_indication(error_indication, config.ip_address)
 
@@ -239,26 +252,163 @@ class SnmpCheck(AgentCheck):
                 self.warning('Fail to collect some metrics: {}'.format(e))
 
             # if we fail move onto next batch
-            first_oid = first_oid + self.oid_batch_size
+            first_oid += self.oid_batch_size
+
+        for oid in bulk_oids:
+            try:
+                self.log.debug('Running SNMP command getBulk on OID %s', oid)
+                iterator = hlapi.bulkCmd(
+                    config.snmp_engine,
+                    config.auth_data,
+                    config.transport,
+                    config.context_data,
+                    self._NON_REPEATERS,
+                    self._MAX_REPETITIONS,
+                    oid,
+                    lookupMib=enforce_constraints,
+                    ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
+                    lexicographicMode=False,
+                )
+                for error_indication, error_status, _, var_binds_table in iterator:
+                    self.log.debug('Returned vars: %s', var_binds_table)
+
+                    # Raise on error_indication
+                    self.raise_on_error_indication(error_indication, config.ip_address)
+
+                    if error_status:
+                        message = '{} for instance {}'.format(error_status.prettyPrint(), config.ip_address)
+                        self._error = message
+
+                        # submit CRITICAL service check if we can't connect to device
+                        if 'unknownUserName' in message:
+                            self.log.error(message)
+                        else:
+                            self.warning(message)
+
+                    for table_row in var_binds_table:
+                        all_binds.append(table_row)
+
+            except PySnmpError as e:
+                if not self._error:
+                    self._error = 'Fail to collect some metrics: {}'.format(e)
+                self.warning('Fail to collect some metrics: {}'.format(e))
 
         # if we've collected some variables, it's not that bad.
         if self._error and all_binds:
             self._severity = self.WARNING
 
         for result_oid, value in all_binds:
-            if lookup_names:
-                if not enforce_constraints:
-                    # if enforce_constraints is false, then MIB resolution has not been done yet
-                    # so we need to do it manually. We have to specify the mibs that we will need
-                    # to resolve the name.
-                    oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple()).loadMibs(*config.mibs_to_load)
-                    result_oid = oid_to_resolve.resolveWithMib(config.mib_view_controller)
-                _, metric, indexes = result_oid.getMibSymbol()
-                results[metric][indexes] = value
-            else:
-                oid = result_oid.asTuple()
-                matching = '.'.join([str(i) for i in oid])
-                results[matching] = value
+            if not enforce_constraints:
+                # if enforce_constraints is false, then MIB resolution has not been done yet
+                # so we need to do it manually. We have to specify the mibs that we will need
+                # to resolve the name.
+                oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple()).loadMibs(*config.mibs_to_load)
+                result_oid = oid_to_resolve.resolveWithMib(config.mib_view_controller)
+            _, metric, indexes = result_oid.getMibSymbol()
+            results[metric][indexes] = value
+        self.log.debug('Raw results: %s', results)
+        return results
+
+    def check_raw(self, config, oids):
+        """
+        Perform a snmpwalk on the domain specified by the oids, on the device
+        configured in instance.
+
+        Returns a dictionary:
+        dict[oid/metric_name][row index] = value
+        In case of scalar objects, the row index is just 0
+        """
+        # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
+        # It returns the wrong value when the OID passeed is referring to a specific leaf.
+        # For example:
+        # snmpgetnext -v2c -c public localhost:11111 1.3.6.1.2.1.25.4.2.1.7.222
+        # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
+        # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
+        first_oid = 0
+        all_binds = []
+        results = defaultdict(dict)
+
+        while first_oid < len(oids):
+            try:
+                oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
+                self.log.debug('Running SNMP command get on OIDS %s', oids_batch)
+                error_indication, error_status, error_index, var_binds = next(
+                    hlapi.getCmd(
+                        config.snmp_engine,
+                        config.auth_data,
+                        config.transport,
+                        config.context_data,
+                        *oids_batch,
+                        lookupMib=False
+                    )
+                )
+                self.log.debug('Returned vars: %s', var_binds)
+
+                # Raise on error_indication
+                self.raise_on_error_indication(error_indication, config.ip_address)
+
+                missing_results = []
+                complete_results = []
+
+                for var in var_binds:
+                    result_oid, value = var
+                    if reply_invalid(value):
+                        oid_tuple = result_oid.asTuple()
+                        missing_results.append(hlapi.ObjectType(hlapi.ObjectIdentity(oid_tuple)))
+                    else:
+                        complete_results.append(var)
+
+                if missing_results:
+                    # If we didn't catch the metric using snmpget, try snmpnext
+                    # Don't walk through the entire MIB, stop at end of table
+                    self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
+                    iterator = hlapi.nextCmd(
+                        config.snmp_engine,
+                        config.auth_data,
+                        config.transport,
+                        config.context_data,
+                        *missing_results,
+                        lookupMib=False,
+                        ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
+                        lexicographicMode=False
+                    )
+                    for error_indication, error_status, _, var_binds_table in iterator:
+                        self.log.debug('Returned vars: %s', var_binds_table)
+
+                        # Raise on error_indication
+                        self.raise_on_error_indication(error_indication, config.ip_address)
+
+                        if error_status:
+                            message = '{} for instance {}'.format(error_status.prettyPrint(), config.ip_address)
+                            self._error = message
+
+                            # submit CRITICAL service check if we can't connect to device
+                            if 'unknownUserName' in message:
+                                self.log.error(message)
+                            else:
+                                self.warning(message)
+
+                        for table_row in var_binds_table:
+                            complete_results.append(table_row)
+
+                all_binds.extend(complete_results)
+
+            except PySnmpError as e:
+                if not self._error:
+                    self._error = 'Fail to collect some metrics: {}'.format(e)
+                self.warning('Fail to collect some metrics: {}'.format(e))
+
+            # if we fail move onto next batch
+            first_oid += self.oid_batch_size
+
+        # if we've collected some variables, it's not that bad.
+        if self._error and all_binds:
+            self._severity = self.WARNING
+
+        for result_oid, value in all_binds:
+            oid = result_oid.asTuple()
+            matching = '.'.join([str(i) for i in oid])
+            results[matching] = value
         self.log.debug('Raw results: %s', results)
         return results
 
@@ -310,14 +460,12 @@ class SnmpCheck(AgentCheck):
 
             if config.table_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.table_oids))
-                table_results = self.check_table(
-                    config, config.table_oids, lookup_names=True, enforce_constraints=config.enforce_constraints
-                )
+                table_results = self.check_table(config, config.table_oids)
                 self.report_table_metrics(config.metrics, table_results, config.tags)
 
             if config.raw_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.raw_oids))
-                raw_results = self.check_table(config, config.raw_oids, lookup_names=False, enforce_constraints=False)
+                raw_results = self.check_raw(config, config.raw_oids)
                 self.report_raw_metrics(config.metrics, raw_results, config.tags)
         except Exception as e:
             if not self._error:

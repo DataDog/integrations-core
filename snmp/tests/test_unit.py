@@ -31,7 +31,7 @@ def test_parse_metrics(hlapi_mock):
     # Simple OID
     metrics = [{"OID": "1.2.3"}]
     table, raw, mibs = InstanceConfig.parse_metrics(metrics, False, warning)
-    assert table == []
+    assert table == {}
     assert mibs == set()
     assert len(raw) == 1
     hlapi_mock.ObjectIdentity.assert_called_once_with("1.2.3")
@@ -61,7 +61,8 @@ def test_parse_metrics(hlapi_mock):
     table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
     assert raw == []
     assert mibs == set()
-    assert len(table) == 2
+    assert len(table) == 1
+    assert len(list(table.values())[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.reset_mock()
@@ -83,7 +84,8 @@ def test_parse_metrics(hlapi_mock):
     table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
     assert raw == []
     assert mibs == set()
-    assert len(table) == 2
+    assert len(table) == 1
+    assert len(list(table.values())[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.reset_mock()
@@ -95,7 +97,8 @@ def test_parse_metrics(hlapi_mock):
     table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
     assert raw == []
     assert mibs == set()
-    assert len(table) == 3
+    assert len(table) == 1
+    assert len(list(table.values())[0]) == 3
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "baz")

@@ -90,6 +90,62 @@ TABULAR_OBJECTS = [
     }
 ]
 
+BULK_TABULAR_OBJECTS = [
+    {
+        'MIB': "IF-MIB",
+        'table': "ifTable",
+        'symbols': [
+            "ifInOctets",
+            "ifOutOctets",
+            "ifInUcastPkts",
+            "ifInUcastPkts",
+            "ifInNUcastPkts",
+            "ifInDiscards",
+            "ifInErrors",
+            "ifInUnknownProtos",
+        ],
+        'metric_tags': [{'tag': "interface", 'column': "ifDescr"}, {'tag': "dumbindex", 'index': 1}],
+    },
+    {
+        'MIB': "IP-MIB",
+        'table': "ipSystemStatsTable",
+        'symbols': [
+            "ipSystemStatsInReceives",
+            "ipSystemStatsHCInReceives",
+            "ipSystemStatsInOctets",
+            "ipSystemStatsHCInOctets",
+            "ipSystemStatsInHdrErrors",
+            "ipSystemStatsInNoRoutes",
+            "ipSystemStatsInAddrErrors",
+            "ipSystemStatsInUnknownProtos",
+            "ipSystemStatsInTruncatedPkts",
+            "ipSystemStatsInForwDatagrams",
+            "ipSystemStatsHCInForwDatagrams",
+            "ipSystemStatsReasmReqds",
+            "ipSystemStatsReasmOKs",
+            "ipSystemStatsReasmFails",
+            "ipSystemStatsInDiscards",
+            "ipSystemStatsInDelivers",
+            "ipSystemStatsHCInDelivers",
+            "ipSystemStatsOutRequests",
+            "ipSystemStatsHCOutRequests",
+            "ipSystemStatsOutNoRoutes",
+            "ipSystemStatsOutForwDatagrams",
+            "ipSystemStatsHCOutForwDatagrams",
+            "ipSystemStatsOutDiscards",
+            "ipSystemStatsOutFragReqds",
+            "ipSystemStatsOutFragOKs",
+            "ipSystemStatsOutFragFails",
+            "ipSystemStatsOutFragCreates",
+            "ipSystemStatsOutTransmits",
+            "ipSystemStatsHCOutTransmits",
+            "ipSystemStatsOutOctets",
+            "ipSystemStatsHCOutOctets",
+            "ipSystemStatsInMcastPkts",
+        ],
+    },
+]
+
 INVALID_METRICS = [{'MIB': "IF-MIB", 'table': "noIdeaWhatIAmDoingHere", 'symbols': ["ImWrong", "MeToo"]}]
 
 PLAY_WITH_GET_NEXT_METRICS = [
