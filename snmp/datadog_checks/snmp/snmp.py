@@ -285,7 +285,7 @@ class SnmpCheck(AgentCheck):
         self._error = self._severity = None
         if instance.get('network_address'):
             for discovered in list(self._config.discovered_instances.values()):
-                # XXX cleanup failing hosts
+                # TODO: cleanup failing hosts
                 self._check_with_config(discovered)
         else:
             self._check_with_config(self._config)
