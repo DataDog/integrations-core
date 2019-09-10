@@ -73,6 +73,34 @@ Restart Druid to start sending your Druid metrics to the Agent through DogStatsD
 
 Use the default configuration of your `druid.d/conf.yaml` file to activate the collection of your Druid service checks. See the sample [druid.d/conf.yaml][3] for all available configuration options.
 
+#### Log collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
+
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Add this configuration block to your `druid.d/conf.yaml` file to start collecting your Druid logs:
+
+    ```yaml
+      logs:
+        - type: file
+          path: <PATH_TO_DRUID_DIR>/var/sv/*.log
+          source: druid
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \d{4}\-\d{2}\-\d{2}
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment.
+
+3. [Restart the Agent][6].
+
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `druid` under the Checks section.
