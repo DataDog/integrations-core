@@ -9,10 +9,11 @@ from datadog_checks.sap_hana import SapHanaCheck
 pytestmark = pytest.mark.unit
 
 
-def test_error_query(instance):
-    def error(_query):
-        raise Exception('test')
+def error(*args, **kwargs):
+    raise Exception('test')
 
+
+def test_error_query(instance):
     check = SapHanaCheck('sap_hana', {}, [instance])
     check.log = mock.MagicMock()
 
@@ -28,10 +29,17 @@ def test_error_query(instance):
 
 def test_error_unknown(instance):
     def query_master_database():
-        raise Exception('test')
+        error()
 
     check = SapHanaCheck('sap_hana', {}, [instance])
     check.log = mock.MagicMock()
+
+    conn = mock.MagicMock()
+    cursor = mock.MagicMock()
+    cursor.execute = error
+    conn.cursor = lambda: cursor
+    check._conn = conn
+
     check.query_master_database = query_master_database
 
     check.check(None)

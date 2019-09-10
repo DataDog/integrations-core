@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 STANDARD = [
     'sap_hana.backup.latest',
-    'sap_hana.connection.active',
     'sap_hana.connection.idle',
+    'sap_hana.connection.open',
     'sap_hana.connection.running',
     'sap_hana.cpu.service.utilized',
     'sap_hana.disk.size',
