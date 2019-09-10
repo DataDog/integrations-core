@@ -78,7 +78,7 @@ def test_transient_error(aggregator):
 
 def test_snmpget(aggregator):
     """
-    When failing with 'snmpget' command, SNMP check falls back to 'snpgetnext'
+    When failing with 'snmpget' command, SNMP check falls back to 'snmpgetnext'
 
         > snmpget -v2c -c public localhost:11111 1.3.6.1.2.1.25.6.3.1.4
         iso.3.6.1.2.1.25.6.3.1.4 = No Such Instance currently exists at this OID

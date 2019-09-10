@@ -141,6 +141,11 @@ instances:
     #
     # discovery_interval: 3600
 
+    ## @param discovery_allowed_failures - integer - optional - default: 3
+    ## Number of times a discovered host can fail before we remove it from the discovered list.
+    #
+    # discovery_allowed_failures: 3
+
     ## @param enforce_mib_constraints - boolean - optional - default: true
     ## If set to false we will not check the values returned meet the MIB constraints.
     #

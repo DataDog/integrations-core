@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from collections import defaultdict
+
 from pyasn1.type.univ import OctetString
 from pysnmp import hlapi
 from pysnmp.smi import builder, view
@@ -30,6 +32,8 @@ class InstanceConfig:
         self.ip_address = None
         self.network_address = None
         self.discovered_instances = {}
+        self.failing_instances = defaultdict(int)
+        self.allowed_failures = int(instance.get('discovery_allowed_failures', 3))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
