@@ -25,7 +25,7 @@ instances:
     ## @param filetagname - string - optional - default: <FILE_NAME>
     ## The name of the key for the tag used for each file, the value is the filename.
     ## The resulting tag is "<filetagname>:<filename>". Only used if filegauges is set to true and if the directory
-    ## contains 20 files or less.
+    ## contains 20 files or less (including sub-directories).
     #
     # filetagname: <TAG_KEY_FILENAME>
 
