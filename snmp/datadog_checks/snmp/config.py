@@ -33,7 +33,7 @@ class InstanceConfig:
         self.network_address = None
         self.discovered_instances = {}
         self.failing_instances = defaultdict(int)
-        self.allowed_failures = int(instance.get('allowed_failures', 3))
+        self.allowed_failures = int(instance.get('discovery_allowed_failures', 3))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))

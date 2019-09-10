@@ -150,15 +150,21 @@ def test_removing_host():
     check.warning = warnings.append
     check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, [], '', {}, {})
     msg = 'No SNMP response received before timeout for instance 1.1.1.1'
+
     check.check(instance)
     assert warnings == [msg]
+
     check.check(instance)
     assert warnings == [msg, msg]
+
     check.check(instance)
     assert warnings == [msg, msg, msg]
+
     check.check(instance)
     assert warnings == [msg, msg, msg, msg]
+    # Instance has been removed
     assert check._config.discovered_instances == {}
+
     check.check(instance)
     # No new warnings produced
     assert warnings == [msg, msg, msg, msg]
