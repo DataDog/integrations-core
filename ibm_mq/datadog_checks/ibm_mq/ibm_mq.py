@@ -220,19 +220,21 @@ class IbmMqCheck(AgentCheck):
             mname = '{}.channel.channels'.format(self.METRIC_PREFIX)
             self.gauge(mname, channels, tags=tags)
 
-        # grab all the discoverable channels
-        self._submit_channel_status(queue_manager, '*', tags, config)
-
-        # check specific channels as well
-        # if a channel is not listed in the above one, a user may want to check it specifically,
-        # in this case it'll fail
+        # Check specific channels
+        # If a channel is not discoverable, a user may want to check it specifically.
+        # Specific channels are checked first to send channel metrics and `ibm_mq.channel` service checks
+        # at the same time, but the end result is the same in any order.
         for channel in config.channels:
             self._submit_channel_status(queue_manager, channel, tags, config)
 
-    def _submit_channel_status(self, queue_manager, search_channel_name, tags, config):
+        # Grab all the discoverable channels
+        self._submit_channel_status(queue_manager, '*', tags, config, config.channels)
+
+    def _submit_channel_status(self, queue_manager, search_channel_name, tags, config, channels_to_skip=None):
         """Submit channel status
         :param search_channel_name might contain wildcard characters
         """
+        channels_to_skip = channels_to_skip or []
         search_channel_tags = tags + ["channel:{}".format(search_channel_name)]
         try:
             args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(search_channel_name)}
@@ -245,6 +247,8 @@ class IbmMqCheck(AgentCheck):
         else:
             for channel_info in response:
                 channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                if channel_name in channels_to_skip:
+                    continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
 
                 channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]

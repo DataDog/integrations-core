@@ -18,7 +18,7 @@ log = logging.getLogger(__file__)
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_service_check_connection_issues(aggregator, instance, seed_data):
+def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance)
 
@@ -37,9 +37,13 @@ def test_service_check_connection_issues(aggregator, instance, seed_data):
     ]
 
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags)
+    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags, count=1)
+
     bad_channel_tags = tags + ['channel:{}'.format(common.BAD_CHANNEL)]
-    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags)
+    aggregator.assert_service_check('ibm_mq.channel', check.CRITICAL, tags=bad_channel_tags, count=1)
+
+    discoverable_tags = tags + ['channel:*']
+    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1)
 
 
 def test_channel_status_service_check_default_mapping(aggregator, instance):
