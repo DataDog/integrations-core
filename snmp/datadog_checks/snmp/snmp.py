@@ -109,7 +109,6 @@ class SnmpCheck(AgentCheck):
     def discover_instances(self):
         network = ipaddress.ip_network(self._config.network_address)
         discovery_interval = self._config.instance.get('discovery_interval', 3600)
-        discovery_pause = self._config.instance.get('discovery_pause', 1)
         while self._running:
             start_time = time.time()
             for host in network.hosts():
@@ -138,7 +137,6 @@ class SnmpCheck(AgentCheck):
                 profile = self.profiles_by_oid[sys_object_oid]
                 config.refresh_with_profile(self.profiles[profile], self.warning)
                 self._config.discovered_instances[host] = config
-                time.sleep(discovery_pause)
             time_elapsed = time.time() - start_time
             if discovery_interval - time_elapsed > 0:
                 time.sleep(discovery_interval - time_elapsed)
@@ -287,6 +285,7 @@ class SnmpCheck(AgentCheck):
         self._error = self._severity = None
         if instance.get('network_address'):
             for discovered in list(self._config.discovered_instances.values()):
+                # XXX cleanup failing hosts
                 self._check_with_config(discovered)
         else:
             self._check_with_config(self._config)

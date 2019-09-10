@@ -141,11 +141,6 @@ instances:
     #
     # discovery_interval: 3600
 
-    ## @param discovery_pause - integer - optional - default: 1
-    ## Pause between the discovery of each network host, in seconds.
-    #
-    # discovery_pause: 1
-
     ## @param enforce_mib_constraints - boolean - optional - default: true
     ## If set to false we will not check the values returned meet the MIB constraints.
     #
