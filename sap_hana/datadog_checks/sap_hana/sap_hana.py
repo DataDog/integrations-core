@@ -355,16 +355,18 @@ class SapHanaCheck(AgentCheck):
             self.gauge('network.service.request.pending', requests_pending, tags=tags, hostname=host)
 
             requests_finished_total = service['requests_finished_total']
-            self.monotonic_count('network.service.request.total', requests_finished_total, tags=tags, hostname=host)
+            self.monotonic_count(
+                'network.service.request.total_finished', requests_finished_total, tags=tags, hostname=host
+            )
 
             requests_finished_external = service['requests_finished_external']
             self.monotonic_count(
-                'network.service.request.external.total', requests_finished_external, tags=tags, hostname=host
+                'network.service.request.external.total_finished', requests_finished_external, tags=tags, hostname=host
             )
 
             requests_finished_internal = requests_finished_total - requests_finished_external
             self.monotonic_count(
-                'network.service.request.internal.total', requests_finished_internal, tags=tags, hostname=host
+                'network.service.request.internal.total_finished', requests_finished_internal, tags=tags, hostname=host
             )
 
             threads_total = service['threads_total']
