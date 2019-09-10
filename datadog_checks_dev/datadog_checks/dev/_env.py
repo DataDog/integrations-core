@@ -7,6 +7,8 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 from six import iteritems
 
+from datadog_checks.base import to_string
+
 E2E_PREFIX = 'DDEV_E2E'
 E2E_ENV_VAR_PREFIX = '{}_ENV_'.format(E2E_PREFIX)
 E2E_SET_UP = '{}_UP'.format(E2E_PREFIX)
@@ -101,8 +103,7 @@ def serialize_data(data):
     # 1. Printing to stdout won't fail
     # 2. Easy parsing since there are no spaces
     #
-    # TODO: Remove str() when we drop Python 2
-    return str(urlsafe_b64encode(data.encode('utf-8')).decode('utf-8'))
+    return to_string(urlsafe_b64encode(data.encode('utf-8')).decode('utf-8'))
 
 
 def deserialize_data(data):
