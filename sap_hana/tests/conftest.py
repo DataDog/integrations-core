@@ -28,8 +28,8 @@ class DbManager(object):
         with closing(self.conn) as conn:
             with closing(conn.cursor()) as cursor:
                 cursor.execute('CREATE RESTRICTED USER datadog PASSWORD "{}"'.format(CONFIG['password']))
-                cursor.execute('ALTER USER datadog DISABLE PASSWORD LIFETIME')
                 cursor.execute('ALTER USER datadog ENABLE CLIENT CONNECT')
+                cursor.execute('ALTER USER datadog DISABLE PASSWORD LIFETIME')
 
                 # Create a role with the necessary monitoring privileges
                 cursor.execute('CREATE ROLE DD_MONITOR')
