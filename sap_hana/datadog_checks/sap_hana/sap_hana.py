@@ -193,7 +193,7 @@ class SapHanaCheck(AgentCheck):
 
             self.gauge('connection.running', running, tags=tags, hostname=host)
             self.gauge('connection.idle', idle, tags=tags, hostname=host)
-            self.gauge('connection.active', running + idle, tags=tags, hostname=host)
+            self.gauge('connection.open', running + idle, tags=tags, hostname=host)
 
     def query_disk_usage(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/a2aac2ee72b341699fa8eb3988d8cecb.html
