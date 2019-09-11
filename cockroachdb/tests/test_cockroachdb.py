@@ -11,7 +11,7 @@ from datadog_checks.cockroachdb.metrics import METRIC_MAP
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_integration(aggregator, instance):
-    check = CockroachdbCheck('cockroachdb', {}, {}, [instance])
+    check = CockroachdbCheck('cockroachdb', {}, [instance])
     check.check(instance)
 
     _test_check(aggregator)
