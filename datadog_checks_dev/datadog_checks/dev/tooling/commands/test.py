@@ -182,7 +182,21 @@ def test(
                         abort('\nFailed!', code=result.code)
 
                     fix_coverage_report(check, 'coverage.xml')
-                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
+                    run_command(
+                        [
+                            'bash',
+                            '<(curl https://codecov.io/bash)',
+                            '-X',
+                            'gcov',
+                            '--root',
+                            root,
+                            '-F',
+                            check,
+                            '-f',
+                            'coverage.xml',
+                        ],
+                        shell=True
+                    )
                 else:
                     if not cov_keep:
                         remove_path('.coverage')
