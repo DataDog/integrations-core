@@ -6,25 +6,17 @@ services:
     image: zookeeper:3.4.11
 
   druid-broker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: ["bin/run-druid", "broker", "/opt/druid_conf"]
+    image: datadog/docker-library:druid_1_5
+    command: "broker"
     depends_on:
       - zookeeper
-    volumes:
-      - ./conf:/opt/druid_conf
     ports:
       - 8082:8082
 
   druid-coordinator:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: ["bin/run-druid", "coordinator-overlord", "/opt/druid_conf"]
+    image: datadog/docker-library:druid_1_5
+    command: "coordinator-overlord"
     depends_on:
       - zookeeper
-    volumes:
-      - ./conf:/opt/druid_conf
     ports:
       - 8081:8081
