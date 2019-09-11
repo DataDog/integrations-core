@@ -18,8 +18,8 @@ def dd_environment(instance):
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         conditions=[
-            CheckEndpoints(COORDINATOR_URL + '/status', attempts=200),
-            CheckEndpoints(BROKER_URL + '/status', attempts=200),
+            CheckEndpoints(COORDINATOR_URL + '/status', attempts=100),
+            CheckEndpoints(BROKER_URL + '/status', attempts=100),
         ],
     ):
         yield instance
