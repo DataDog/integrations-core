@@ -40,10 +40,12 @@ class Apache(AgentCheck):
         self.assumed_url = {}
 
     def check(self, instance):
-        if 'apache_status_url' not in instance:
+        try:
+            apache_status_url = instance['apache_status_url']
+        except KeyError:
             raise Exception("Missing 'apache_status_url' in Apache config")
 
-        url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
+        url = self.assumed_url.get(apache_status_url, apache_status_url)
         tags = instance.get('tags', [])
 
         # Submit a service check for status page availability.
@@ -68,40 +70,37 @@ class Apache(AgentCheck):
         else:
             self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
         self.log.debug("apache check succeeded")
-        metric_count = 0
+        metric_found = False
         # Loop through and extract the numerical values
         for line in r.iter_lines(decode_unicode=True):
-            values = line.split(': ')
-            if len(values) == 2:  # match
-                metric, value = values
-                try:
-                    value = float(value)
-                except ValueError:
-                    continue
+            try:
+                metric, value = line.split(': ')
+                value = float(value)
+            except ValueError:
+                continue
+            # Special case: kBytes => bytes
+            if metric == 'Total kBytes':
+                value = value * 1024
+            # Send metric as a gauge, if applicable
+            try:
+                self.gauge(self.GAUGES[metric], value, tags=tags)
+                metric_found = True
+            except KeyError:
+                pass
+            # Send metric as a rate, if applicable
+            try:
+                self.rate(self.RATES[metric], value, tags=tags)
+                metric_found = True
+            except KeyError:
+                pass
 
-                # Special case: kBytes => bytes
-                if metric == 'Total kBytes':
-                    value = value * 1024
-
-                # Send metric as a gauge, if applicable
-                if metric in self.GAUGES:
-                    metric_count += 1
-                    metric_name = self.GAUGES[metric]
-                    self.gauge(metric_name, value, tags=tags)
-
-                # Send metric as a rate, if applicable
-                if metric in self.RATES:
-                    metric_count += 1
-                    metric_name = self.RATES[metric]
-                    self.rate(metric_name, value, tags=tags)
-
-        if metric_count == 0:
-            if self.assumed_url.get(instance['apache_status_url'], None) is None and url[-5:] != '?auto':
-                self.assumed_url[instance['apache_status_url']] = '%s?auto' % url
+        if not metric_found:
+            if self.assumed_url.get(apache_status_url, None) is None and url[-5:] != '?auto':
+                self.assumed_url[apache_status_url] = '%s?auto' % url
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
                 self.check(instance)
             else:
                 raise Exception(
-                    ("No metrics were fetched for this instance. Make sure that %s is the proper url.")
-                    % instance['apache_status_url']
+                    "No metrics were fetched for this instance. Make sure that %s is the proper url."
+                    % apache_status_url
                 )
