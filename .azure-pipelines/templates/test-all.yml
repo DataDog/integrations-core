@@ -1,0 +1,572 @@
+jobs:
+- template: './test-single-linux.yml'
+  parameters:
+    check: datadog_checks_base
+    display: Datadog Checks Base
+    validate: true
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: datadog_checks_dev
+    display: Datadog Checks Dev
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: datadog_checks_downloader
+    display: Datadog Checks Downloader
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: active_directory
+    display: Active Directory
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: activemq_xml
+    display: ActiveMQ XML
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: aerospike
+    display: Aerospike
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: ambari
+    display: Ambari
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: apache
+    display: Apache
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: aspdotnet
+    display: ASP.NET
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: btrfs
+    display: Btrfs
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: cacti
+    display: Cacti
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: cassandra_nodetool
+    display: Cassandra Nodetool
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: ceph
+    display: Ceph
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: cisco_aci
+    display: Cisco ACI
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: cockroachdb
+    display: CockroachDB
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: consul
+    display: Consul
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: coredns
+    display: CoreDNS
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: couch
+    display: CouchDB
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: couchbase
+    display: Couchbase
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: crio
+    display: CRI-O
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: directory
+    display: Directory
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: disk
+    display: Disk (Linux)
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: disk
+    display: Disk (Windows)
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: dns_check
+    display: DNS
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: dotnetclr
+    display: .NET CLR
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: ecs_fargate
+    display: Amazon ECS Fargate
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: elastic
+    display: Elasticsearch
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: envoy
+    display: Envoy
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: etcd
+    display: etcd
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: exchange_server
+    display: Exchange Server
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: fluentd
+    display: fluentd
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: gearmand
+    display: Gearman
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: gitlab
+    display: Gitlab
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: gitlab_runner
+    display: Gitlab Runner
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: go_expvar
+    display: Go-Expvar
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: gunicorn
+    display: Gunicorn
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: haproxy
+    display: HAProxy
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: harbor
+    display: Harbor
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: hdfs_datanode
+    display: HDFS Datanode
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: hdfs_namenode
+    display: HDFS Namenode
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: http_check
+    display: HTTP
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: ibm_db2
+    display: IBM Db2
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: ibm_mq
+    display: IBM MQ
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: ibm_was
+    display: IBM WAS
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: iis
+    display: IIS
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: istio
+    display: Istio
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kafka_consumer
+    display: Kafka Consumer
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kong
+    display: Kong
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kube_apiserver_metrics
+    display: Kubernetes API server metrics
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kube_controller_manager
+    display: Kubernetes Controller Manager
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kube_dns
+    display: Kube DNS
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kube_metrics_server
+    display: Kube metrics server
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kube_proxy
+    display: Kube Proxy
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kube_scheduler
+    display: Kubernetes Scheduler
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kubelet
+    display: Kubelet
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kubernetes_state
+    display: Kubernetes State
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: kyototycoon
+    display: Kyoto Tycoon
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: lighttpd
+    display: Lighttpd
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: linkerd
+    display: Linkerd
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: linux_proc_extras
+    display: Linux proc extras
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: mapreduce
+    display: MapReduce
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: marathon
+    display: Marathon
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: mcache
+    display: Memcached
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: mesos_master
+    display: Mesos Master
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: mesos_slave
+    display: Mesos Slave
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: mongo
+    display: MongoDB
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: mysql
+    display: MySQL
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: nagios
+    display: Nagios
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: network
+    display: Network
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: nfsstat
+    display: NFSstat
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: nginx
+    display: NGINX
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: nginx_ingress_controller
+    display: NGINX Ingress Controller
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: openldap
+    display: OpenLDAP
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: openmetrics
+    display: OpenMetrics
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: openstack
+    display: OpenStack
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: openstack_controller
+    display: OpenStack Controller
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: oracle
+    display: Oracle Database
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: pdh_check
+    display: PDH
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: pgbouncer
+    display: PGBouncer
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: php_fpm
+    display: PHP-FPM
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: postfix
+    display: Postfix
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: postgres
+    display: Postgres
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: powerdns_recursor
+    display: PowerDNS Recursor
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: process
+    display: Process
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: prometheus
+    display: Prometheus
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: rabbitmq
+    display: RabbitMQ
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: redisdb
+    display: Redis
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: riak
+    display: Riak
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: riakcs
+    display: Riak CS
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: snmp
+    display: SNMP
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: spark
+    display: Spark
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: sqlserver
+    display: SQL Server (Linux)
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: sqlserver
+    display: SQL Server (Windows)
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: squid
+    display: Squid
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: ssh_check
+    display: SSH
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: statsd
+    display: StatsD
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: supervisord
+    display: Supervisord
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: system_core
+    display: System Core
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: system_swap
+    display: System Swap
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: tcp_check
+    display: TCP
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: teamcity
+    display: TeamCity
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: tls
+    display: TLS
+
+# TODO: Python 2-only, remove soon
+- template: './test-single-linux.yml'
+  parameters:
+    check: tokumx
+    display: TokuMX
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: twemproxy
+    display: Twemproxy
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: twistlock
+    display: Twistlock
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: varnish
+    display: Varnish
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: vault
+    display: Vault
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: vertica
+    display: Vertica
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: vsphere
+    display: vSphere
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: win32_event_log
+    display: Win32 Event Log
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: windows_service
+    display: Windows Service
+
+- template: './test-single-windows.yml'
+  parameters:
+    check: wmi_check
+    display: WMI
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: yarn
+    display: Yarn
+
+- template: './test-single-linux.yml'
+  parameters:
+    check: zk
+    display: ZooKeeper

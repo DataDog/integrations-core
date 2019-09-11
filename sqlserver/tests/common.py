@@ -26,6 +26,8 @@ def get_local_driver():
 
 HOST = get_docker_hostname()
 PORT = 1433
+DOCKER_SERVER = '{},{}'.format(HOST, PORT)
+LOCAL_SERVER = 'localhost,{}'.format(PORT)
 HERE = get_here()
 CHECK_NAME = "sqlserver"
 
@@ -41,7 +43,13 @@ INSTANCE_DOCKER = {
     'tags': ['optional:tag1'],
 }
 
-INSTANCE_SQL2017 = {'host': r'(local)\SQL2017', 'username': 'sa', 'password': 'Password12!'}
+INSTANCE_SQL2017 = {
+    'host': LOCAL_SERVER,
+    'username': 'sa',
+    'password': 'Password12!',
+    'connector': 'odbc',
+    'driver': '{ODBC Driver 17 for SQL Server}',
+}
 
 INIT_CONFIG = {
     'custom_metrics': [
