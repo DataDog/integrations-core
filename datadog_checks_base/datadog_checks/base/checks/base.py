@@ -75,7 +75,7 @@ class __AgentCheck(object):
     HTTP_CONFIG_REMAPPER = None  # Used by `self.http` RequestsWrapper
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
-    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
+    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9.]+)|(^[^a-zA-Z]+)')
     DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
     DEFAULT_METRIC_LIMIT = 0
 
@@ -101,16 +101,12 @@ class __AgentCheck(object):
         self.metrics = defaultdict(list)
         self.check_id = ''
         self.instances = kwargs.get('instances', [])
-        self.name = kwargs.get('name', '')
-        self.init_config = kwargs.get('init_config', {})
+        self.name = args[0] if len(args) > 0 else kwargs.get('name', '')
+        self.init_config = args[1] if len(args) > 1 else kwargs.get('init_config', {})
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
         self.metric_limiter = None
 
-        if len(args) > 0:
-            self.name = args[0]
-        if len(args) > 1:
-            self.init_config = args[1]
         if len(args) > 2:
             if len(args) > 3 or 'instances' in kwargs:
                 # old-style init: the 3rd argument is `agentConfig`
@@ -177,16 +173,16 @@ class __AgentCheck(object):
         }
 
         # Setup metric limits
-        try:
-            metric_limit = self.instances[0].get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
+        if self.instance is not None:
+            metric_limit = self.instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
             # Do not allow to disable limiting if the class has set a non-zero default value
-            if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
+            if metric_limit <= 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
                 self.warning(
-                    'Setting max_returned_metrics to zero is not allowed, reverting '
+                    'Setting max_returned_metrics to zero or less is not allowed, reverting '
                     'to the default of {} metrics'.format(self.DEFAULT_METRIC_LIMIT)
                 )
-        except Exception:
+        else:
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
             self.metric_limiter = Limiter(self.name, 'metrics', metric_limit, self.warning)
@@ -446,16 +442,6 @@ class __AgentCheck(object):
             self.log.exception('Unexpected external tags format: {}'.format(external_tags))
             raise
 
-    def convert_to_underscore_separated(self, name):
-        """
-        Convert from CamelCase to camel_case
-        And substitute illegal metric characters
-        """
-        metric_name = self.FIRST_CAP_RE.sub(br'\1_\2', ensure_bytes(name))
-        metric_name = self.ALL_CAP_RE.sub(br'\1_\2', metric_name).lower()
-        metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
-        return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
-
     def warning(self, warning_message):
         """Log a warning message and display it in the Agent's status page.
 
@@ -512,19 +498,8 @@ class __AgentCheck(object):
             metric = unicodedata.normalize('NFKD', metric).encode('ascii', 'ignore')
 
         if fix_case:
-            name = self.convert_to_underscore_separated(metric)
-            if prefix is not None:
-                prefix = self.convert_to_underscore_separated(prefix)
-        else:
-            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric)
-        # Eliminate multiple _
-        name = re.sub(br"__+", b"_", name)
-        # Don't start/end with _
-        name = re.sub(br"^_", b"", name)
-        name = re.sub(br"_$", b"", name)
-        # Drop ._ and _.
-        name = re.sub(br"\._", b".", name)
-        name = re.sub(br"_\.", b".", name)
+            metric = self.ALL_CAP_RE.sub(br'\1_\2', self.FIRST_CAP_RE.sub(br'\1_\2', ensure_bytes(metric))).lower()
+        name = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', self.METRIC_REPLACEMENT.sub(br'_', metric)).strip(b'_')
 
         if prefix is not None:
             name = ensure_bytes(prefix) + b"." + name
