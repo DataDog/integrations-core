@@ -12,7 +12,7 @@ The SAP HANA check is included in the [Datadog Agent][2] package.
 
 #### Prepare HANA
 
-To query certain views, specific privileges must be granted to the chosen HANA monitoring user.
+To query certain views, specific privileges must be granted to the chosen HANA monitoring user. For more information, see [Granting privileges](#granting-privileges).
 
 ##### User creation
 
