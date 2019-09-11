@@ -14,6 +14,7 @@ from .common import INSTANCES, response
 CHECK_NAME = 'envoy'
 
 
+@pytest.mark.usefixtures('dd_environment')
 def test_success(aggregator):
     instance = INSTANCES['main']
     c = Envoy(CHECK_NAME, {}, [instance])

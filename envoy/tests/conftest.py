@@ -10,7 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def dd_environment():
     flavor = os.getenv('FLAVOR', 'default')
     instance = INSTANCES['main']
