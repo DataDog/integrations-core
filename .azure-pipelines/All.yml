@@ -6,6 +6,7 @@ schedules:
     include:
     - master
 
+trigger: none
 # Re-enable when we have enough runners
 # trigger:
 #   branches:
