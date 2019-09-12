@@ -46,9 +46,9 @@ More info about this step can be found on the [official guide for loading Druid 
 
     ```
     # Add `statsd-emitter` to the extensions list to be loaded 
-     druid.extensions.loadList=[..., "statsd-emitter"]
+    druid.extensions.loadList=[..., "statsd-emitter"]
 
-     # By default druid emission period is 1 minute (PT1M).
+    # By default druid emission period is 1 minute (PT1M).
     # We recommend using 15 seconds instead:
     druid.monitoring.emissionPeriod=PT15S
 
@@ -60,10 +60,9 @@ More info about this step can be found on the [official guide for loading Druid 
     druid.emitter.statsd.port:8125
 
     # Configure `statsd-emitter` to use dogstatsd format. Must be set to true, otherwise tags are not reported correctly to Datadog.
-     druid.emitter.statsd.dogstatsd=true
+    druid.emitter.statsd.dogstatsd=true
     druid.emitter.statsd.dogstatsdServiceAsTag=true
     ```
-
 
 3. Restart Druid to start sending your Druid metrics to the Agent through DogStatsD.
 
