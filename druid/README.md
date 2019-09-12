@@ -44,7 +44,7 @@ More info about this step can be found on the [official guide for loading Druid 
 
 2. Update Druid java properties by adding the following configs:
 
-```
+    ```
 # Add `statsd-emitter` to the extensions list to be loaded 
 druid.extensions.loadList=[..., "statsd-emitter"]
 
