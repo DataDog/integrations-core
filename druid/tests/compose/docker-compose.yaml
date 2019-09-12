@@ -6,7 +6,7 @@ services:
     image: zookeeper:3.4.11
 
   druid-broker:
-    image: datadog/docker-library:druid_1_5
+    image: datadog/docker-library:druid_0_15
     command: "broker"
     depends_on:
       - zookeeper
@@ -14,7 +14,7 @@ services:
       - 8082:8082
 
   druid-coordinator:
-    image: datadog/docker-library:druid_1_5
+    image: datadog/docker-library:druid_0_15
     command: "coordinator-overlord"
     depends_on:
       - zookeeper
