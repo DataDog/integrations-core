@@ -165,9 +165,9 @@ def test_enforce_constraint(aggregator):
 
     check.check(instance)
 
-    assert "failed at: ValueConstraintError" in check._error
-
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
+
+    assert "failed at: ValueConstraintError" in aggregator.service_checks("snmp.can_check")[0].message
 
 
 def test_unenforce_constraint(aggregator):
@@ -438,7 +438,7 @@ def test_invalid_forcedtype_metric(aggregator):
     check.check(instance)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, tags=common.CHECK_TAGS, at_least=1)
 
 
 def test_scalar_with_tags(aggregator):
