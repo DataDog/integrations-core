@@ -53,7 +53,7 @@ More info about this step can be found on the [official guide for loading Druid 
     druid.monitoring.emissionPeriod=PT15S
 
     # Use `statsd-emitter` extension as metric emitter
-druid.emitter=statsd
+    druid.emitter=statsd
 
 # Configure `statsd-emitter` endpoint
 druid.emitter.statsd.hostname=127.0.0.1
