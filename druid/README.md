@@ -18,7 +18,7 @@ Both steps below are needed for Druid integration to work properly.
 
 #### Step 1: Configure Druid to collect health metrics and service checks
 
-Step to configure the Druid check included in the [Datadog Agent][2] package to collect health metrics and service checks.
+Configure the Druid check included in the [Datadog Agent][2] package to collect health metrics and service checks.
 
 1. Edit the `druid.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your druid service checks. See the [sample druid.d/conf.yaml][3] for all available configuration options.
 
