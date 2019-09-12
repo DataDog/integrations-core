@@ -66,7 +66,7 @@ druid.emitter.statsd.port:8125
 
 **Note**: `druid.emitter.statsd.dogstatsd` and `druid.emitter.statsd.dogstatsdServiceAsTag` must be set to `true`, otherwise tags are not reported correctly to Datadog.
 
-Restart Druid to start sending your Druid metrics to the Agent through DogStatsD.
+3. Restart Druid to start sending your Druid metrics to the Agent through DogStatsD.
 
 #### Integration Service Checks
 
