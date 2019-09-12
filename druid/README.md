@@ -60,7 +60,7 @@ druid.emitter.statsd.hostname=127.0.0.1
 druid.emitter.statsd.port:8125
 
 # Configure `statsd-emitter` to use dogstatsd format 
-druid.emitter.statsd.dogstatsd=true
+     druid.emitter.statsd.dogstatsd=true
     druid.emitter.statsd.dogstatsdServiceAsTag=true
     ```
 
