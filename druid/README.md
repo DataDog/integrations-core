@@ -52,7 +52,7 @@ More info about this step can be found on the [official guide for loading Druid 
     # We recommend using 15 seconds instead:
     druid.monitoring.emissionPeriod=PT15S
 
-# Use `statsd-emitter` extension as metric emitter
+    # Use `statsd-emitter` extension as metric emitter
 druid.emitter=statsd
 
 # Configure `statsd-emitter` endpoint
