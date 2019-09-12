@@ -42,7 +42,7 @@ $ java \
 
 More info about this step can be found on the [official guide for loading Druid extensions][6]
 
-2) Update Druid java properties
+2. Update Druid java properties by adding the following configs:
 
 Update/Add following configs to your Druid properties.
 ```
