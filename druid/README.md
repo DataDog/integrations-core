@@ -59,7 +59,7 @@ More info about this step can be found on the [official guide for loading Druid 
     druid.emitter.statsd.hostname=127.0.0.1
     druid.emitter.statsd.port:8125
 
-# Configure `statsd-emitter` to use dogstatsd format 
+    # Configure `statsd-emitter` to use dogstatsd format. Must be set to true, otherwise tags are not reported correctly to Datadog.
      druid.emitter.statsd.dogstatsd=true
     druid.emitter.statsd.dogstatsdServiceAsTag=true
     ```
