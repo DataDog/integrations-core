@@ -27,6 +27,8 @@ jobs:
   - ${{ if eq(parameters.test, 'true') }}:
     - script: ddev test --cov ${{ parameters.check }}
       displayName: 'Run tests'
+      env:
+        CODECOV_TOKEN: $(CODECOV_TOKEN)
 
   - ${{ if eq(parameters.test_e2e, 'true') }}:
     - script: ddev env test --new-env ${{ parameters.check }}
