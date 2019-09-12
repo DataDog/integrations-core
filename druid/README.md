@@ -28,7 +28,7 @@ Configure the Druid check included in the [Datadog Agent][2] package to collect 
 
 Step to configure `statsd-emitter` extension to collect the majority of [Druid metrics][1].
 
-1) Install Druid extension [`statsd-emitter`][5] 
+1. Install the Druid extension [`statsd-emitter`][5].
 
 ```
 $ java \
