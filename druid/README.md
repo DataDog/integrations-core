@@ -110,3 +110,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/druid/metadata.csv
 [9]: https://docs.datadoghq.com/help
+[10]: https://docs.datadoghq.com/developers/dogstatsd/
+[11]: https://docs.datadoghq.com/agent/
