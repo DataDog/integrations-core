@@ -14,7 +14,7 @@ Druid 0.16 or above is required for this integration to work properly.
 
 ### Installation
 
-Both steps below are needed for Druid integration to work properly.
+Both steps below are needed for Druid integration to work properly. Before you begin, you should [install the Datadog Agent][11].
 
 #### Step 1: Configure Druid to collect health metrics and service checks
 
