@@ -195,7 +195,7 @@ def test(
                             '-f',
                             'coverage.xml',
                         ],
-                        shell=True
+                        shell=True,
                     )
                 else:
                     if not cov_keep:
