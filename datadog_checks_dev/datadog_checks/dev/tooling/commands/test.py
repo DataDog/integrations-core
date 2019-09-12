@@ -8,7 +8,7 @@ import click
 
 from ..._env import E2E_PARENT_PYTHON
 from ...subprocess import run_command
-from ...utils import chdir, file_exists, remove_path, running_on_ci
+from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
@@ -111,6 +111,8 @@ def test(
         'PYTEST_ADDOPTS': pytest_options,
     }
 
+    test_env_vars['TOX_TESTENV_PASSENV'] += ' {}'.format(' '.join(get_ci_env_vars()))
+
     if color is not None:
         test_env_vars['PY_COLORS'] = '1' if color else '0'
 
@@ -182,21 +184,7 @@ def test(
                         abort('\nFailed!', code=result.code)
 
                     fix_coverage_report(check, 'coverage.xml')
-                    run_command(
-                        [
-                            'bash',
-                            '<(curl https://codecov.io/bash)',
-                            '-X',
-                            'gcov',
-                            '--root',
-                            root,
-                            '-F',
-                            check,
-                            '-f',
-                            'coverage.xml',
-                        ],
-                        shell=True,
-                    )
+                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
                 else:
                     if not cov_keep:
                         remove_path('.coverage')

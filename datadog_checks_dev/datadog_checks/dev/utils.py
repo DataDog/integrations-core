@@ -26,6 +26,10 @@ ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
 
+def get_ci_env_vars():
+    return ('AGENT_OS', 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI')
+
+
 def running_on_ci():
     return 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI' in os.environ
 
