@@ -175,11 +175,8 @@ class SnmpCheck(AgentCheck):
         for oid in bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %s', oid)
-                iterator = hlapi.bulkCmd(
-                    config.snmp_engine,
-                    config.auth_data,
-                    config.transport,
-                    config.context_data,
+                iterator = config.call_cmd(
+                    hlapi.bulkCmd,
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
                     oid,
@@ -187,24 +184,8 @@ class SnmpCheck(AgentCheck):
                     ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                     lexicographicMode=False,
                 )
-                for error_indication, error_status, _, var_binds_table in iterator:
-                    self.log.debug('Returned vars: %s', var_binds_table)
-
-                    # Raise on error_indication
-                    self.raise_on_error_indication(error_indication, config.ip_address)
-
-                    if error_status:
-                        message = '{} for instance {}'.format(error_status.prettyPrint(), config.ip_address)
-                        error = message
-
-                        # submit CRITICAL service check if we can't connect to device
-                        if 'unknownUserName' in message:
-                            self.log.error(message)
-                        else:
-                            self.warning(message)
-
-                    for table_row in var_binds_table:
-                        all_binds.append(table_row)
+                binds, error = self._consume_iterator(iterator, config)
+                all_binds.extend(binds)
 
             except PySnmpError as e:
                 if not error:
@@ -258,23 +239,14 @@ class SnmpCheck(AgentCheck):
             try:
                 oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
                 self.log.debug('Running SNMP command get on OIDS %s', oids_batch)
-                error_indication, error_status, error_index, var_binds = next(
-                    hlapi.getCmd(
-                        config.snmp_engine,
-                        config.auth_data,
-                        config.transport,
-                        config.context_data,
-                        *oids_batch,
-                        lookupMib=enforce_constraints
-                    )
+                error_indication, error_status, _, var_binds = next(
+                    config.call_cmd(hlapi.getCmd, *oids_batch, lookupMib=enforce_constraints)
                 )
                 self.log.debug('Returned vars: %s', var_binds)
 
-                # Raise on error_indication
                 self.raise_on_error_indication(error_indication, config.ip_address)
 
                 missing_results = []
-                complete_results = []
 
                 for var in var_binds:
                     result_oid, value = var
@@ -282,42 +254,21 @@ class SnmpCheck(AgentCheck):
                         oid_tuple = result_oid.asTuple()
                         missing_results.append(hlapi.ObjectType(hlapi.ObjectIdentity(oid_tuple)))
                     else:
-                        complete_results.append(var)
+                        all_binds.append(var)
 
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
                     # Don't walk through the entire MIB, stop at end of table
                     self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
-                    iterator = hlapi.nextCmd(
-                        config.snmp_engine,
-                        config.auth_data,
-                        config.transport,
-                        config.context_data,
+                    iterator = config.call_cmd(
+                        hlapi.nextCmd,
                         *missing_results,
                         lookupMib=enforce_constraints,
                         ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                         lexicographicMode=False
                     )
-                    for error_indication, error_status, _, var_binds_table in iterator:
-                        self.log.debug('Returned vars: %s', var_binds_table)
-
-                        # Raise on error_indication
-                        self.raise_on_error_indication(error_indication, config.ip_address)
-
-                        if error_status:
-                            message = '{} for instance {}'.format(error_status.prettyPrint(), config.ip_address)
-                            error = message
-
-                            # submit CRITICAL service check if we can't connect to device
-                            if 'unknownUserName' in message:
-                                self.log.error(message)
-                            else:
-                                self.warning(message)
-
-                        for table_row in var_binds_table:
-                            complete_results.append(table_row)
-
-                all_binds.extend(complete_results)
+                    binds, error = self._consume_iterator(iterator, config)
+                    all_binds.extend(binds)
 
             except PySnmpError as e:
                 if not error:
@@ -334,14 +285,31 @@ class SnmpCheck(AgentCheck):
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
         self.log.debug('Running SNMP command on OID %s', oid)
-        error_indication, error_status, error_index, var_binds = next(
-            hlapi.nextCmd(
-                config.snmp_engine, config.auth_data, config.transport, config.context_data, oid, lookupMib=False
-            )
-        )
+        error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
         self.raise_on_error_indication(error_indication, config.ip_address)
         self.log.debug('Returned vars: %s', var_binds)
         return var_binds[0][1].prettyPrint()
+
+    def _consume_iterator(self, iterator, config):
+        all_binds = []
+        error = None
+        for error_indication, error_status, _, var_binds_table in iterator:
+            self.log.debug('Returned vars: %s', var_binds_table)
+
+            self.raise_on_error_indication(error_indication, config.ip_address)
+
+            if error_status:
+                message = '{} for instance {}'.format(error_status.prettyPrint(), config.ip_address)
+                error = message
+
+                # submit CRITICAL service check if we can't connect to device
+                if 'unknownUserName' in message:
+                    self.log.error(message)
+                else:
+                    self.warning(message)
+
+            all_binds.extend(var_binds_table)
+        return all_binds, error
 
     def check(self, instance):
         """

@@ -75,6 +75,9 @@ class InstanceConfig:
             self.metrics, self.enforce_constraints, warning
         )
 
+    def call_cmd(self, cmd, *args, **kwargs):
+        return cmd(self.snmp_engine, self.auth_data, self.transport, self.context_data, *args, **kwargs)
+
     @staticmethod
     def create_snmp_engine(mibs_path):
         """
