@@ -57,7 +57,7 @@ More info about this step can be found on the [official guide for loading Druid 
 
     # Configure `statsd-emitter` endpoint
     druid.emitter.statsd.hostname=127.0.0.1
-druid.emitter.statsd.port:8125
+    druid.emitter.statsd.port:8125
 
 # Configure `statsd-emitter` to use dogstatsd format 
      druid.emitter.statsd.dogstatsd=true
