@@ -5,6 +5,7 @@ import os
 
 import mock
 
+from datadog_checks.dev import EnvVars
 from datadog_checks.dev.utils import running_on_ci, running_on_linux_ci, running_on_macos_ci, running_on_windows_ci
 
 
@@ -27,6 +28,7 @@ def test_running_on_macos_ci():
 
 
 def test_not_running_ci():
-    with mock.patch.dict(os.environ, {'AGENT_OS': 'Linux'}):
-        assert running_on_ci() is False
-        assert running_on_linux_ci() is False
+    with EnvVars(ignore=['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']):
+        with mock.patch.dict(os.environ, {'AGENT_OS': 'Linux'}):
+            assert running_on_ci() is False
+            assert running_on_linux_ci() is False
