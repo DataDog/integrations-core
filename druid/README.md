@@ -49,7 +49,7 @@ More info about this step can be found on the [official guide for loading Druid 
      druid.extensions.loadList=[..., "statsd-emitter"]
 
      # By default druid emission period is 1 minute (PT1M).
-# We recommmend using 15 seconds instead as follow:
+    # We recommend using 15 seconds instead:
 druid.monitoring.emissionPeriod=PT15S
 
 # Use `statsd-emitter` extension as metric emitter
