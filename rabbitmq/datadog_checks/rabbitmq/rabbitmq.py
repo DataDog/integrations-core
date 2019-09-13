@@ -361,6 +361,8 @@ class RabbitMQ(AgentCheck):
         object_type: either QUEUE_TYPE or NODE_TYPE or EXCHANGE_TYPE
         max_detailed: the limit of objects to collect for this type
         filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
+        limit_vhosts: collection of vhosts to limit to
+        custom_tags: Custom tags to get applied to all metrics
         """
         # Make a copy of this list as we will remove items from it at each
         # iteration
@@ -494,18 +496,23 @@ class RabbitMQ(AgentCheck):
             # Post a message on the dogweb stream to warn
             self.alert(base_url, max_detailed, len(data), object_type, custom_tags)
 
-        if len(data) > max_detailed:
-            # Display a warning in the info page
-            msg = (
-                "Too many items to fetch. "
-                "You must choose the {} you are interested in by editing the rabbitmq.yaml configuration file"
-                "or get in touch with Datadog support"
-            ).format(object_type)
-            self.warning(msg)
+        data_lines_sent = 0
+        for idx, data_line in enumerate(data):
+            if data_lines_sent >= max_detailed:
+                if idx < (len(data) - 1):
+                    # Display a warning in the info page
+                    msg = (
+                        "Too many items to fetch. "
+                        "You must choose the {} you are interested in by editing the rabbitmq.yaml configuration file"
+                        "or get in touch with Datadog support"
+                    ).format(object_type)
+                    self.warning(msg)
 
-        for data_line in data[:max_detailed]:
+                break
             # We truncate the list if it's above the limit
-            self._get_metrics(data_line, object_type, custom_tags)
+            metrics_sent = self._get_metrics(data_line, object_type, custom_tags)
+            if metrics_sent >= 1:
+                data_lines_sent += 1
 
         # get a list of the number of bindings on a given queue
         # /api/queues/vhost/name/bindings
@@ -518,6 +525,7 @@ class RabbitMQ(AgentCheck):
 
     def _get_metrics(self, data, object_type, custom_tags):
         tags = self._get_tags(data, object_type, custom_tags)
+        metrics_sent = 0
         for attribute, metric_name, operation in ATTRIBUTES[object_type]:
             # Walk down through the data path, e.g. foo/bar => d['foo']['bar']
             root = data
@@ -531,12 +539,14 @@ class RabbitMQ(AgentCheck):
                     self.gauge(
                         'rabbitmq.{}.{}'.format(METRIC_SUFFIX[object_type], metric_name), operation(value), tags=tags
                     )
+                    metrics_sent += 1
                 except ValueError:
                     self.log.debug(
                         "Caught ValueError for {} {} = {}  with tags: {}".format(
                             METRIC_SUFFIX[object_type], attribute, value, tags
                         )
                     )
+        return metrics_sent
 
     def _get_queue_bindings_metrics(self, base_url, custom_tags, data, object_type):
         for item in data:
