@@ -35,6 +35,7 @@ def display_envs(check_envs):
 @click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')
 @click.option('--verbose', '-v', count=True, help='Increase verbosity (can be used additively)')
 @click.option('--list', '-l', 'list_envs', is_flag=True, help='List available test environments')
+@click.option('--passenv', help='Additional environment variables to pass down')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
@@ -54,6 +55,7 @@ def test(
     debug,
     verbose,
     list_envs,
+    passenv,
     changed,
     cov_keep,
     pytest_args,
@@ -110,6 +112,9 @@ def test(
         'DDEV_COV_MISSING': coverage_show_missing_lines,
         'PYTEST_ADDOPTS': pytest_options,
     }
+
+    if passenv:
+        test_env_vars['TOX_TESTENV_PASSENV'] += ' {}'.format(passenv)
 
     test_env_vars['TOX_TESTENV_PASSENV'] += ' {}'.format(' '.join(get_ci_env_vars()))
 
