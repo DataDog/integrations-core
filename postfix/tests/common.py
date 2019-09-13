@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import getpass
 
-from datadog_checks.dev._env import deserialize_data, get_env_vars
+from datadog_checks.dev.env import deserialize_data, get_env_vars
 
 
 def get_data_dir():
