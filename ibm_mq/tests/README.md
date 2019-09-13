@@ -26,3 +26,26 @@ Set up the following env vars in your test run configuration:
 
 [1]: https://developer.ibm.com/messaging/2019/02/05/ibm-mq-macos-toolkit-for-developers
 [2]: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit
+
+Development Tips
+================
+
+### How to connect to IBM MQ console
+
+```
+$ ddev env start ibm_mq py27-8
+$ docker exec -it ibm_mq bash
+
+# Inside the container
+$ runmqsc
+```
+
+# IBM MQ Console example commands
+
+```
+# Display all channels
+$ DIS CHANNEL(*)
+
+# Display one channels properties
+DIS CHANNEL(DEV.APP.SVRCONN)
+``` 
