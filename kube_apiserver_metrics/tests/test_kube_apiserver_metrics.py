@@ -92,30 +92,3 @@ class TestKubeAPIServerMetrics:
             aggregator.assert_metric_has_tag(metric, customtag)
         aggregator.assert_all_metrics_covered()
 
-    def test_bearer(self):
-        """
-        Testing the bearer token configuration.
-        """
-        temp_dir = tempfile.mkdtemp()
-        temp_bearer_file = os.path.join(temp_dir, "foo")
-        with open(temp_bearer_file, "w+") as f:
-            f.write("XXX")
-        instanceSecure["bearer_token_path"] = temp_bearer_file
-
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instanceSecure])
-        apiserver_instance = check._create_kube_apiserver_metrics_instance(instanceSecure)
-        configured_instance = check.get_scraper_config(apiserver_instance)
-
-        os.remove(temp_bearer_file)
-        assert configured_instance["_bearer_token"] == APISERVER_INSTANCE_BEARER_TOKEN
-
-    def test_default_config(self, aggregator):
-        """
-        Testing the default configuration.
-        """
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance])
-        apiserver_instance = check._create_kube_apiserver_metrics_instance(minimal_instance)
-
-        assert not apiserver_instance["ssl_verify"]
-        assert apiserver_instance["bearer_token_auth"]
-        assert apiserver_instance["prometheus_url"] == "https://localhost:443/metrics"
