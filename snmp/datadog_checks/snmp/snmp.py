@@ -188,9 +188,10 @@ class SnmpCheck(AgentCheck):
                 all_binds.extend(binds)
 
             except PySnmpError as e:
+                message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
-                    error = 'Failed to collect some metrics: {}'.format(e)
-                self.warning('Failed to collect some metrics: {}'.format(e))
+                    error = message
+                self.warning(message)
 
         for result_oid, value in all_binds:
             if not enforce_constraints:
@@ -212,7 +213,7 @@ class SnmpCheck(AgentCheck):
         configured in instance.
 
         Returns a dictionary:
-        dict[oid/metric_name][row index] = value
+        dict[oid/metric_name] = value
         In case of scalar objects, the row index is just 0
         """
         all_binds, error = self.fetch_oids(config, oids, enforce_constraints=False)
@@ -220,7 +221,7 @@ class SnmpCheck(AgentCheck):
 
         for result_oid, value in all_binds:
             oid = result_oid.asTuple()
-            matching = '.'.join([str(i) for i in oid])
+            matching = '.'.join(str(i) for i in oid)
             results[matching] = value
         self.log.debug('Raw results: %s', results)
         return results, error
@@ -271,9 +272,10 @@ class SnmpCheck(AgentCheck):
                     all_binds.extend(binds)
 
             except PySnmpError as e:
+                message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
-                    error = 'Failed to collect some metrics: {}'.format(e)
-                self.warning('Failed to collect some metrics: {}'.format(e))
+                    error = message
+                self.warning(message)
 
             # if we fail move onto next batch
             first_oid += self.oid_batch_size
@@ -380,8 +382,8 @@ class SnmpCheck(AgentCheck):
         Submit the results to the aggregator.
         """
         for metric in metrics:
-            forced_type = metric.get('forced_type')
             if 'OID' in metric:
+                forced_type = metric.get('forced_type')
                 queried_oid = metric['OID'].lstrip('.')
                 if queried_oid in results:
                     value = results[queried_oid]
@@ -407,8 +409,8 @@ class SnmpCheck(AgentCheck):
         Submit the results to the aggregator.
         """
         for metric in metrics:
-            forced_type = metric.get('forced_type')
             if 'table' in metric:
+                forced_type = metric.get('forced_type')
                 index_based_tags = []
                 column_based_tags = []
                 for metric_tag in metric.get('metric_tags', []):
@@ -426,6 +428,7 @@ class SnmpCheck(AgentCheck):
                         self.submit_metric(value_to_collect, val, forced_type, metric_tags)
 
             elif 'symbol' in metric:
+                forced_type = metric.get('forced_type')
                 name = metric['symbol']
                 result = list(results[name].items())
                 if len(result) > 1:
