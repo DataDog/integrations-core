@@ -23,10 +23,6 @@ Set up the following env vars in your test run configuration:
 * DYLD_LIBRARY_PATH=~/IBM-MQ-Toolkit-Mac-x64-9.1.2.0/lib64
 * IBM_MQ_VERSION= 8 or 9
 
-
-[1]: https://developer.ibm.com/messaging/2019/02/05/ibm-mq-macos-toolkit-for-developers
-[2]: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit
-
 Development Tips
 ================
 
@@ -49,3 +45,19 @@ $ DIS CHANNEL(*)
 # Display one channels properties
 DIS CHANNEL(DEV.APP.SVRCONN)
 ``` 
+
+
+### How to create a channel with permissions
+
+```
+DEFINE CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) MCAUSER('app') REPLACE
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(BLOCKUSER) USERLIST('nobody') DESCR('Allows admins on ADMIN channel') ACTION(REPLACE)
+SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(CHANNEL) DESCR('Allows admin user to connect via ADMIN channel') ACTION(REPLACE)
+```
+[source][3]
+
+[3(https://github.com/ibm-messaging/mq-docker/blob/a1df5ac6c5f39c375bdbdc0ec812c00aa54accc3/mq-dev-config#L35-L43)
+
+
+[1]: https://developer.ibm.com/messaging/2019/02/05/ibm-mq-macos-toolkit-for-developers
+[2]: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/messaging/mqdev/mactoolkit
