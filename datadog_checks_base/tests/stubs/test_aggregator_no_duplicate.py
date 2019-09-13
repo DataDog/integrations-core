@@ -71,7 +71,7 @@ Duplicate metrics found:
             False,
         ),
         (
-            'no duplicate for count types',
+            'duplicate allowed for types intended to be submitted multiple times',
             [
                 dict(type='count', name='metric.count', value=1, tags=['aa'], hostname='1'),
                 dict(type='count', name='metric.count', value=1, tags=['aa'], hostname='1'),
