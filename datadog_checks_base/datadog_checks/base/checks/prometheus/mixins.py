@@ -9,7 +9,9 @@ from math import isinf, isnan
 
 import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
-from prometheus_client.parser import text_fd_to_metric_families
+# from patch_prometheus_client import text_fd_to_metric_families
+# using the patched version to improve perf
+from ..patch_prometheus_client import text_fd_to_metric_families
 from six import PY3, iteritems, itervalues, string_types
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
