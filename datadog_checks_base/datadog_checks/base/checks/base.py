@@ -177,16 +177,16 @@ class __AgentCheck(object):
         }
 
         # Setup metric limits
-        try:
-            metric_limit = self.instances[0].get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
+        if self.instance is not None:
+            metric_limit = self.instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
             # Do not allow to disable limiting if the class has set a non-zero default value
-            if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
+            if metric_limit <= 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
                 self.warning(
-                    'Setting max_returned_metrics to zero is not allowed, reverting '
+                    'Setting max_returned_metrics to zero or less is not allowed, reverting '
                     'to the default of {} metrics'.format(self.DEFAULT_METRIC_LIMIT)
                 )
-        except Exception:
+        else:
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
             self.metric_limiter = Limiter(self.name, 'metrics', metric_limit, self.warning)

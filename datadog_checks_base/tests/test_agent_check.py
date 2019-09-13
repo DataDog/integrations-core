@@ -359,3 +359,13 @@ class TestLimits:
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
         assert len(aggregator.metrics("metric")) == 10
+
+    def test_metric_limit_instance_config_neg(self, aggregator):
+        instances = [{"max_returned_metrics": -1}]
+        check = LimitedCheck("test", {}, instances)
+        assert len(check.get_warnings()) == 1
+
+        for _ in range(0, 42):
+            check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 1  # get_warnings resets the array
+        assert len(aggregator.metrics("metric")) == 10
