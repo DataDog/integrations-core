@@ -54,9 +54,7 @@ DEFINE CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) MCAUSER('app') REPLACE
 SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(BLOCKUSER) USERLIST('nobody') DESCR('Allows admins on ADMIN channel') ACTION(REPLACE)
 SET CHLAUTH('DEV.ADMIN.SVRCONN') TYPE(USERMAP) CLNTUSER('admin') USERSRC(CHANNEL) DESCR('Allows admin user to connect via ADMIN channel') ACTION(REPLACE)
 ```
-[source][3]
-
-[3(https://github.com/ibm-messaging/mq-docker/blob/a1df5ac6c5f39c375bdbdc0ec812c00aa54accc3/mq-dev-config#L35-L43)
+[source](https://github.com/ibm-messaging/mq-docker/blob/a1df5ac6c5f39c375bdbdc0ec812c00aa54accc3/mq-dev-config#L35-L43)
 
 
 [1]: https://developer.ibm.com/messaging/2019/02/05/ibm-mq-macos-toolkit-for-developers
