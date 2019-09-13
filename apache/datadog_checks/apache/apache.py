@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from six.moves.urllib.parse import urlparse
 
+from datadog_checks.apache.consumer_builder import build_metric_consumer_fct_map
 from datadog_checks.base import AgentCheck
 
 
@@ -12,20 +13,21 @@ class Apache(AgentCheck):
     See http://httpd.apache.org/docs/2.2/mod/mod_status.html for more details
     """
 
-    GAUGES = {
-        'IdleWorkers': 'apache.performance.idle_workers',
-        'BusyWorkers': 'apache.performance.busy_workers',
-        'CPULoad': 'apache.performance.cpu_load',
-        'Uptime': 'apache.performance.uptime',
-        'Total kBytes': 'apache.net.bytes',
-        'Total Accesses': 'apache.net.hits',
-        'ConnsTotal': 'apache.conns_total',
-        'ConnsAsyncWriting': 'apache.conns_async_writing',
-        'ConnsAsyncKeepAlive': 'apache.conns_async_keep_alive',
-        'ConnsAsyncClosing': 'apache.conns_async_closing',
-    }
-
-    RATES = {'Total kBytes': 'apache.net.bytes_per_s', 'Total Accesses': 'apache.net.request_per_s'}
+    METRIC_CONSUMER_MAP = build_metric_consumer_fct_map({
+        'IdleWorkers': {'gauge': 'apache.performance.idle_workers'},
+        'BusyWorkers': {'gauge': 'apache.performance.busy_workers'},
+        'CPULoad': {'gauge': 'apache.performance.cpu_load'},
+        'Uptime': {'gauge': 'apache.performance.uptime'},
+        'Total kBytes': {'gauge': 'apache.net.bytes',
+                         'rate': 'apache.net.bytes_per_s',
+                         'transform_value': lambda value: float(value) * 1024},
+        'Total Accesses': {'gauge': 'apache.net.hits',
+                           'rate': 'apache.net.request_per_s'},
+        'ConnsTotal': {'gauge': 'apache.conns_total'},
+        'ConnsAsyncWriting': {'gauge': 'apache.conns_async_writing'},
+        'ConnsAsyncKeepAlive': {'gauge': 'apache.conns_async_keep_alive'},
+        'ConnsAsyncClosing': {'gauge': 'apache.conns_async_closing'},
+    }, default_transform_value=float)
 
     HTTP_CONFIG_REMAPPER = {
         'apache_user': {'name': 'username'},
@@ -40,10 +42,12 @@ class Apache(AgentCheck):
         self.assumed_url = {}
 
     def check(self, instance):
-        if 'apache_status_url' not in instance:
+        try:
+            apache_status_url = instance['apache_status_url']
+        except KeyError:
             raise Exception("Missing 'apache_status_url' in Apache config")
 
-        url = self.assumed_url.get(instance['apache_status_url'], instance['apache_status_url'])
+        url = self.assumed_url.get(apache_status_url, apache_status_url)
         tags = instance.get('tags', [])
 
         # Submit a service check for status page availability.
@@ -68,40 +72,24 @@ class Apache(AgentCheck):
         else:
             self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
         self.log.debug("apache check succeeded")
-        metric_count = 0
+        metric_found = False
         # Loop through and extract the numerical values
         for line in r.iter_lines(decode_unicode=True):
-            values = line.split(': ')
-            if len(values) == 2:  # match
-                metric, value = values
-                try:
-                    value = float(value)
-                except ValueError:
-                    continue
-
-                # Special case: kBytes => bytes
-                if metric == 'Total kBytes':
-                    value = value * 1024
-
-                # Send metric as a gauge, if applicable
-                if metric in self.GAUGES:
-                    metric_count += 1
-                    metric_name = self.GAUGES[metric]
-                    self.gauge(metric_name, value, tags=tags)
-
-                # Send metric as a rate, if applicable
-                if metric in self.RATES:
-                    metric_count += 1
-                    metric_name = self.RATES[metric]
-                    self.rate(metric_name, value, tags=tags)
-
-        if metric_count == 0:
-            if self.assumed_url.get(instance['apache_status_url'], None) is None and url[-5:] != '?auto':
-                self.assumed_url[instance['apache_status_url']] = '%s?auto' % url
+            try:
+                metric, value = line.split(': ')
+                fct = self.METRIC_CONSUMER_MAP.get(metric, None)
+                if fct is not None:
+                    fct(self, value, tags)
+                    metric_found = True
+            except ValueError:
+                continue
+        if not metric_found:
+            if self.assumed_url.get(apache_status_url, None) is None and url[-5:] != '?auto':
+                self.assumed_url[apache_status_url] = '%s?auto' % url
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
                 self.check(instance)
             else:
                 raise Exception(
-                    ("No metrics were fetched for this instance. Make sure that %s is the proper url.")
-                    % instance['apache_status_url']
+                    "No metrics were fetched for this instance. Make sure that %s is the proper url."
+                    % apache_status_url
                 )
