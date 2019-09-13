@@ -4,7 +4,6 @@
 
 # stdlib
 import os
-import tempfile
 
 import mock
 import pytest
