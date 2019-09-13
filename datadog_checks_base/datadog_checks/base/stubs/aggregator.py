@@ -304,7 +304,9 @@ class AggregatorStub(object):
         """
         Assert no duplicate metrics have been submitted.
         """
-        metric_stubs = [m for metrics in self._metrics.values() for m in metrics]
+        # metric types that intended to be called multiple times are ignored
+        ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]
+        metric_stubs = [m for metrics in self._metrics.values() for m in metrics if m.type not in ignored_types]
 
         def stub_to_key_fn(stub):
             return stub.name, stub.type, str(sorted(stub.tags)), stub.hostname

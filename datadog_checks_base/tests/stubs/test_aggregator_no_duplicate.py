@@ -71,6 +71,20 @@ Duplicate metrics found:
             False,
         ),
         (
+            'no duplicate for count types',
+            [
+                dict(type='count', name='metric.count', value=1, tags=['aa'], hostname='1'),
+                dict(type='count', name='metric.count', value=1, tags=['aa'], hostname='1'),
+                dict(type='monotonic_count', name='metric.monotonic_count', value=1, tags=['aa'], hostname='1'),
+                dict(type='monotonic_count', name='metric.monotonic_count', value=1, tags=['aa'], hostname='1'),
+                dict(type='increment', name='metric.increment', value=1, tags=['aa'], hostname='1'),
+                dict(type='increment', name='metric.increment', value=1, tags=['aa'], hostname='1'),
+                dict(type='decrement', name='metric.decrement', value=1, tags=['aa'], hostname='1'),
+                dict(type='decrement', name='metric.decrement', value=1, tags=['aa'], hostname='1'),
+            ],
+            False,
+        ),
+        (
             'duplicate metric',
             [
                 dict(type='gauge', name='metric.a', value=1, tags=['aa'], hostname='1'),
