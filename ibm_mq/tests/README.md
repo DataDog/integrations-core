@@ -30,10 +30,7 @@ Development Tips
 
 ```
 $ ddev env start ibm_mq py27-8
-$ docker exec -it ibm_mq bash
-
-# Inside the container
-$ runmqsc
+$ docker exec -it ibm_mq runmqsc datadog
 ```
 
 # IBM MQ Console example commands
