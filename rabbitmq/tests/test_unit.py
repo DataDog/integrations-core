@@ -5,11 +5,11 @@
 import mock
 import pytest
 import requests
+from tests.common import EXCHANGE_MESSAGE_STATS
 
 import datadog_checks
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, RabbitMQException
-from tests.common import EXCHANGE_MESSAGE_STATS
 
 from . import common
 
