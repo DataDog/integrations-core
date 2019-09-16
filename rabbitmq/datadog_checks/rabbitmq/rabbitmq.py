@@ -354,6 +354,122 @@ class RabbitMQ(AgentCheck):
                 tags.append('{}_{}:{}'.format(TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
+    def _get_object_data(self, instance, base_url, object_type, limit_vhosts):
+        """ data is a list of nodes or queues:
+                data = [
+                    {
+                        'status': 'running',
+                        'node': 'rabbit@host',
+                        'name': 'queue1',
+                        'consumers': 0,
+                        'vhost': '/',
+                        'backing_queue_status': {
+                            'q1': 0,
+                            'q3': 0,
+                            'q2': 0,
+                            'q4': 0,
+                            'avg_ack_egress_rate': 0.0,
+                            'ram_msg_count': 0,
+                            'ram_ack_count': 0,
+                            'len': 0,
+                            'persistent_count': 0,
+                            'target_ram_count': 'infinity',
+                            'next_seq_id': 0,
+                            'delta': ['delta', 'undefined', 0, 'undefined'],
+                            'pending_acks': 0,
+                            'avg_ack_ingress_rate': 0.0,
+                            'avg_egress_rate': 0.0,
+                            'avg_ingress_rate': 0.0
+                        },
+                        'durable': True,
+                        'idle_since': '2013-10-03 13:38:18',
+                        'exclusive_consumer_tag': '',
+                        'arguments': {},
+                        'memory': 10956,
+                        'policy': '',
+                        'auto_delete': False
+                    },
+                    {
+                        'status': 'running',
+                        'node': 'rabbit@host,
+                        'name': 'queue10',
+                        'consumers': 0,
+                        'vhost': '/',
+                        'backing_queue_status': {
+                            'q1': 0,
+                            'q3': 0,
+                            'q2': 0,
+                            'q4': 0,
+                            'avg_ack_egress_rate': 0.0,
+                            'ram_msg_count': 0,
+                            'ram_ack_count': 0,
+                            'len': 0,
+                            'persistent_count': 0,
+                            'target_ram_count': 'infinity',
+                            'next_seq_id': 0,
+                            'delta': ['delta', 'undefined', 0, 'undefined'],
+                            'pending_acks': 0,
+                            'avg_ack_ingress_rate': 0.0,
+                            'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0
+                        },
+                        'durable': True,
+                        'idle_since': '2013-10-03 13:38:18',
+                        'exclusive_consumer_tag': '',
+                        'arguments': {},
+                        'memory': 10956,
+                        'policy': '',
+                        'auto_delete': False
+                    },
+                    {
+                        'status': 'running',
+                        'node': 'rabbit@host',
+                        'name': 'queue11',
+                        'consumers': 0,
+                        'vhost': '/',
+                        'backing_queue_status': {
+                            'q1': 0,
+                            'q3': 0,
+                            'q2': 0,
+                            'q4': 0,
+                            'avg_ack_egress_rate': 0.0,
+                            'ram_msg_count': 0,
+                            'ram_ack_count': 0,
+                            'len': 0,
+                            'persistent_count': 0,
+                            'target_ram_count': 'infinity',
+                            'next_seq_id': 0,
+                            'delta': ['delta', 'undefined', 0, 'undefined'],
+                            'pending_acks': 0,
+                            'avg_ack_ingress_rate': 0.0,
+                            'avg_egress_rate': 0.0,
+                            'avg_ingress_rate': 0.0
+                        },
+                        'durable': True,
+                        'idle_since': '2013-10-03 13:38:18',
+                        'exclusive_consumer_tag': '',
+                        'arguments': {},
+                        'memory': 10956,
+                        'policy': '',
+                        'auto_delete': False
+                    },
+                    ...
+                ]
+        """
+        data = []
+
+        # only do this if vhosts were specified,
+        # otherwise it'll just be making more queries for the same data
+        if self._limit_vhosts(instance) and object_type == QUEUE_TYPE:
+            for vhost in limit_vhosts:
+                url = '{}/{}'.format(object_type, quote_plus(vhost))
+                try:
+                    data += self._get_data(urljoin(base_url, url))
+                except Exception as e:
+                    self.log.debug("Couldn't grab queue data from vhost, {}: {}".format(vhost, e))
+        else:
+            data = self._get_data(urljoin(base_url, object_type))
+        return data
+
     def get_stats(self, instance, base_url, object_type, max_detailed, filters, limit_vhosts, custom_tags):
         """
         instance: the check instance
@@ -368,121 +484,8 @@ class RabbitMQ(AgentCheck):
         # iteration
         explicit_filters = list(filters['explicit'])
         regex_filters = filters['regexes']
+        data = self._get_object_data(instance, base_url, object_type, limit_vhosts)
 
-        data = []
-
-        # only do this if vhosts were specified,
-        # otherwise it'll just be making more queries for the same data
-        if self._limit_vhosts(instance) and object_type == QUEUE_TYPE:
-            for vhost in limit_vhosts:
-                url = '{}/{}'.format(object_type, quote_plus(vhost))
-                try:
-                    data += self._get_data(urljoin(base_url, url))
-                except Exception as e:
-                    self.log.debug("Couldn't grab queue data from vhost, {}: {}".format(vhost, e))
-        else:
-            data = self._get_data(urljoin(base_url, object_type))
-
-        """ data is a list of nodes or queues:
-        data = [
-            {
-                'status': 'running',
-                'node': 'rabbit@host',
-                'name': 'queue1',
-                'consumers': 0,
-                'vhost': '/',
-                'backing_queue_status': {
-                    'q1': 0,
-                    'q3': 0,
-                    'q2': 0,
-                    'q4': 0,
-                    'avg_ack_egress_rate': 0.0,
-                    'ram_msg_count': 0,
-                    'ram_ack_count': 0,
-                    'len': 0,
-                    'persistent_count': 0,
-                    'target_ram_count': 'infinity',
-                    'next_seq_id': 0,
-                    'delta': ['delta', 'undefined', 0, 'undefined'],
-                    'pending_acks': 0,
-                    'avg_ack_ingress_rate': 0.0,
-                    'avg_egress_rate': 0.0,
-                    'avg_ingress_rate': 0.0
-                },
-                'durable': True,
-                'idle_since': '2013-10-03 13:38:18',
-                'exclusive_consumer_tag': '',
-                'arguments': {},
-                'memory': 10956,
-                'policy': '',
-                'auto_delete': False
-            },
-            {
-                'status': 'running',
-                'node': 'rabbit@host,
-                'name': 'queue10',
-                'consumers': 0,
-                'vhost': '/',
-                'backing_queue_status': {
-                    'q1': 0,
-                    'q3': 0,
-                    'q2': 0,
-                    'q4': 0,
-                    'avg_ack_egress_rate': 0.0,
-                    'ram_msg_count': 0,
-                    'ram_ack_count': 0,
-                    'len': 0,
-                    'persistent_count': 0,
-                    'target_ram_count': 'infinity',
-                    'next_seq_id': 0,
-                    'delta': ['delta', 'undefined', 0, 'undefined'],
-                    'pending_acks': 0,
-                    'avg_ack_ingress_rate': 0.0,
-                    'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0
-                },
-                'durable': True,
-                'idle_since': '2013-10-03 13:38:18',
-                'exclusive_consumer_tag': '',
-                'arguments': {},
-                'memory': 10956,
-                'policy': '',
-                'auto_delete': False
-            },
-            {
-                'status': 'running',
-                'node': 'rabbit@host',
-                'name': 'queue11',
-                'consumers': 0,
-                'vhost': '/',
-                'backing_queue_status': {
-                    'q1': 0,
-                    'q3': 0,
-                    'q2': 0,
-                    'q4': 0,
-                    'avg_ack_egress_rate': 0.0,
-                    'ram_msg_count': 0,
-                    'ram_ack_count': 0,
-                    'len': 0,
-                    'persistent_count': 0,
-                    'target_ram_count': 'infinity',
-                    'next_seq_id': 0,
-                    'delta': ['delta', 'undefined', 0, 'undefined'],
-                    'pending_acks': 0,
-                    'avg_ack_ingress_rate': 0.0,
-                    'avg_egress_rate': 0.0,
-                    'avg_ingress_rate': 0.0
-                },
-                'durable': True,
-                'idle_since': '2013-10-03 13:38:18',
-                'exclusive_consumer_tag': '',
-                'arguments': {},
-                'memory': 10956,
-                'policy': '',
-                'auto_delete': False
-            },
-            ...
-        ]
-        """
         if len(explicit_filters) > max_detailed:
             raise Exception("The maximum number of {} you can specify is {}.".format(object_type, max_detailed))
 

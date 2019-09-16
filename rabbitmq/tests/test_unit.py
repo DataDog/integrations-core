@@ -6,8 +6,10 @@ import mock
 import pytest
 import requests
 
+import datadog_checks
 from datadog_checks.rabbitmq import RabbitMQ
-from datadog_checks.rabbitmq.rabbitmq import NODE_TYPE, RabbitMQException
+from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, RabbitMQException
+from tests.common import EXCHANGE_MESSAGE_STATS
 
 from . import common
 
@@ -90,6 +92,22 @@ def test__get_metrics(check, aggregator):
 
     assert check._get_metrics(data, NODE_TYPE, []) == 3
     assert check._get_metrics({}, NODE_TYPE, []) == 0
+
+
+@pytest.mark.unit
+@mock.patch.object(datadog_checks.rabbitmq.RabbitMQ, '_get_object_data')
+def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggregator):
+    data = [
+        {'name': 'ex1', 'message_stats': EXCHANGE_MESSAGE_STATS},
+        {'name': 'ex2', 'message_stats': EXCHANGE_MESSAGE_STATS},
+        {'name': 'ex3', 'message_stats': {}},
+        {'name': 'ex4', 'message_stats': EXCHANGE_MESSAGE_STATS},
+    ]
+    mock__get_object_data.return_value = data
+    check.get_stats(instance, 'base_url', EXCHANGE_TYPE, 3, {'explicit': [], 'regexes': ['ex.*']}, [], [])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex1'])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex2'])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex4'])
 
 
 @pytest.mark.parametrize(
