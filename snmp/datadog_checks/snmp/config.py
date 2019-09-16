@@ -161,6 +161,12 @@ class InstanceConfig:
 
     @staticmethod
     def parse_metrics(metrics, enforce_constraints, warning):
+        """Parse configuration and returns data to be used for SNMP queries.
+
+        `raw_oids` is a list of SNMP numerical OIDs to query.
+        `table_oids` is a dictionnary of SNMP tables to symbols to query.
+        `mibs_to_load` contains the relevant MIBs used for querying.
+        """
         raw_oids = []
         table_oids = {}
         mibs_to_load = set()

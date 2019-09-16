@@ -175,7 +175,7 @@ class SnmpCheck(AgentCheck):
         for oid in bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %s', oid)
-                iterator = config.call_cmd(
+                binds_iterator = config.call_cmd(
                     hlapi.bulkCmd,
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
@@ -184,7 +184,7 @@ class SnmpCheck(AgentCheck):
                     ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                     lexicographicMode=False,
                 )
-                binds, error = self._consume_iterator(iterator, config)
+                binds, error = self._consume_binds_iterator(binds_iterator, config)
                 all_binds.extend(binds)
 
             except PySnmpError as e:
@@ -261,14 +261,14 @@ class SnmpCheck(AgentCheck):
                     # If we didn't catch the metric using snmpget, try snmpnext
                     # Don't walk through the entire MIB, stop at end of table
                     self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
-                    iterator = config.call_cmd(
+                    binds_iterator = config.call_cmd(
                         hlapi.nextCmd,
                         *missing_results,
                         lookupMib=enforce_constraints,
                         ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                         lexicographicMode=False
                     )
-                    binds, error = self._consume_iterator(iterator, config)
+                    binds, error = self._consume_binds_iterator(binds_iterator, config)
                     all_binds.extend(binds)
 
             except PySnmpError as e:
@@ -292,10 +292,10 @@ class SnmpCheck(AgentCheck):
         self.log.debug('Returned vars: %s', var_binds)
         return var_binds[0][1].prettyPrint()
 
-    def _consume_iterator(self, iterator, config):
+    def _consume_binds_iterator(self, binds_iterator, config):
         all_binds = []
         error = None
-        for error_indication, error_status, _, var_binds_table in iterator:
+        for error_indication, error_status, _, var_binds_table in binds_iterator:
             self.log.debug('Returned vars: %s', var_binds_table)
 
             self.raise_on_error_indication(error_indication, config.ip_address)
@@ -409,8 +409,8 @@ class SnmpCheck(AgentCheck):
         Submit the results to the aggregator.
         """
         for metric in metrics:
+            forced_type = metric.get('forced_type')
             if 'table' in metric:
-                forced_type = metric.get('forced_type')
                 index_based_tags = []
                 column_based_tags = []
                 for metric_tag in metric.get('metric_tags', []):
@@ -428,7 +428,6 @@ class SnmpCheck(AgentCheck):
                         self.submit_metric(value_to_collect, val, forced_type, metric_tags)
 
             elif 'symbol' in metric:
-                forced_type = metric.get('forced_type')
                 name = metric['symbol']
                 result = list(results[name].items())
                 if len(result) > 1:
