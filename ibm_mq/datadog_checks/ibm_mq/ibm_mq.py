@@ -232,6 +232,10 @@ class IbmMqCheck(AgentCheck):
 
     def _submit_channel_status(self, queue_manager, search_channel_name, tags, config, channels_to_skip=None):
         """Submit channel status
+
+        Note: Error 3065 (MQRCCF_CHL_STATUS_NOT_FOUND) might indicate that the channel has not been used.
+        More info: https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.1.0/com.ibm.mq.doc/fm16690_.htm
+
         :param search_channel_name might contain wildcard characters
         """
         channels_to_skip = channels_to_skip or []
@@ -242,8 +246,11 @@ class IbmMqCheck(AgentCheck):
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.OK, search_channel_tags)
         except pymqi.MQMIError as e:
-            self.log.warning("Error getting CHANNEL stats {}".format(e))
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, search_channel_tags)
+            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND:
+                self.log.debug("Channel status not found for channel {}: {}".format(search_channel_name, e))
+            else:
+                self.log.warning("Error getting CHANNEL status for channel {}: {}".format(search_channel_name, e))
         else:
             for channel_info in response:
                 channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()

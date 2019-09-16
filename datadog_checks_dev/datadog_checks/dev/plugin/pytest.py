@@ -156,7 +156,8 @@ def dd_agent_check(request, aggregator):
 
         return aggregator
 
-    with TempDir() as temp_dir:
+    # Give an explicit name so we don't shadow other uses
+    with TempDir('dd_agent_check') as temp_dir:
         yield run_check
 
 
