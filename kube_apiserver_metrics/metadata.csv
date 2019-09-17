@@ -17,3 +17,5 @@ kube_apiserver.apiserver_request_count.count,count,,request,,Monotonic count of 
 kube_apiserver.apiserver_dropped_requests_total.count,count,,request,,Monotonic count of requests dropped with 'Try again later' response,0, kube_apiserver, count of dropped requests
 kube_apiserver.http_requests_total.count,count,,request,,Monotonic count of the number of HTTP requests made,0,kube_apiserver, total count of requests
 kube_apiserver.authenticated_user_requests.count,count,,request,,Monotonic count of authenticated requests broken out by username,0, kube_apiserver, count of authenticated requests
+kube_apiserver.apiserver_request_total,gauge,,request,,Accumulated number of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (To replace apiserver_request_count),1, kube_apiserver, accumulated number of requests
+kube_apiserver.apiserver_request_total.count,count,,request,,Monotonic count of apiserver requests broken out for each verb API resource client and HTTP response contentType and code (To replace apiserver_request_count.count),0, kube_apiserver, count of requests
