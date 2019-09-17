@@ -500,7 +500,7 @@ class RabbitMQ(AgentCheck):
             self.alert(base_url, max_detailed, len(data), object_type, custom_tags)
 
         data_lines_sent = 0
-        for idx, data_line in enumerate(data):
+        for data_line in data:
             if data_lines_sent >= max_detailed:
                 # Display a warning in the info page
                 msg = (
