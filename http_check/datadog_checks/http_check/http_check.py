@@ -11,12 +11,12 @@ from datetime import datetime
 
 import _strptime  # noqa
 import requests
-from datadog_checks.base.checks.network import STATUS_TO_SERVICE_CHECK
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import ensure_unicode, is_affirmative, AgentCheck
+from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.checks import Status
+from datadog_checks.base.checks.network import STATUS_TO_SERVICE_CHECK
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
@@ -57,7 +57,7 @@ class HTTPCheck(AgentCheck):
             # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
             self.http.options['verify'] = False
 
-    def _check(self, instance):
+    def check(self, instance):
         (
             addr,
             client_cert,
@@ -236,7 +236,9 @@ class HTTPCheck(AgentCheck):
 
             service_checks.append((self.SC_SSL_CERT, status, msg))
 
-        return service_checks
+        for status in service_checks:
+            sc_name, status, msg = status
+            self.report_as_service_check(sc_name, status, instance, msg)
 
     def report_as_service_check(self, sc_name, status, instance, msg=None):
         instance_name = self.normalize(instance['name'])
