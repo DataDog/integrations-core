@@ -502,15 +502,13 @@ class RabbitMQ(AgentCheck):
         data_lines_sent = 0
         for idx, data_line in enumerate(data):
             if data_lines_sent >= max_detailed:
-                if idx < (len(data) - 1):
-                    # Display a warning in the info page
-                    msg = (
-                        "Too many items to fetch. "
-                        "You must choose the {} you are interested in by editing the rabbitmq.yaml configuration file"
-                        "or get in touch with Datadog support"
-                    ).format(object_type)
-                    self.warning(msg)
-
+                # Display a warning in the info page
+                msg = (
+                    "Too many items to fetch. "
+                    "You must choose the {} you are interested in by editing the rabbitmq.yaml configuration file"
+                    "or get in touch with Datadog support"
+                ).format(object_type)
+                self.warning(msg)
                 break
             # We truncate the list if it's above the limit
             metrics_sent = self._get_metrics(data_line, object_type, custom_tags)
