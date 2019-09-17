@@ -152,7 +152,7 @@ instances:
     # enforce_mib_constraints: true
 
     ## @param bulk_threshold - integer - optional - default: 5
-    ## The number of symbols in each tables that triggers a BULK request.
+    ## The number of symbols in each table that triggers a BULK request.
     ## Only relevant for SNMP > 1.
     #
     # bulk_threshold: 5
