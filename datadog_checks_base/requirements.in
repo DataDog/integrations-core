@@ -5,7 +5,7 @@ kubernetes==8.0.1
 prometheus-client==0.3.0
 protobuf==3.7.0
 pysocks==1.7.0
-pywin32==224; sys_platform == 'win32'
+pywin32==225; sys_platform == 'win32'
 pyyaml==5.1
 requests==2.22.0
 requests-kerberos==0.12.0
