@@ -73,7 +73,6 @@ class DNSCheck(AgentCheck):
         hostname, timeout, nameserver, record_type, resolver, resolves_as = self._load_conf(instance)
 
         # Perform the DNS query, and report its duration as a gauge
-        response_time = 0
         t0 = time_func()
 
         try:

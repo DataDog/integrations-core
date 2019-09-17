@@ -4,14 +4,16 @@
 import socket
 import time
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks import Status
+from datadog_checks.base.checks.network import STATUS_TO_SERVICE_CHECK
 
 
 class BadConfException(Exception):
     pass
 
 
-class TCPCheck(NetworkCheck):
+class TCPCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'
     SERVICE_CHECK_NAME = 'tcp.can_connect'
@@ -55,7 +57,7 @@ class TCPCheck(NetworkCheck):
 
         return addr, port, custom_tags, socket_type, timeout, response_time
 
-    def _check(self, instance):
+    def check(self, instance):
         addr, port, custom_tags, socket_type, timeout, response_time = self._load_conf(instance)
         start = time.time()
         try:
@@ -71,7 +73,9 @@ class TCPCheck(NetworkCheck):
             # The connection timed out because it took more time than the specified value in the yaml config file
             length = int((time.time() - start) * 1000)
             self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(addr, port, str(e), length))
-            return Status.DOWN, "{}. Connection failed after {} ms".format(str(e), length)
+            self.report_as_service_check(
+                Status.DOWN, instance, "{}. Connection failed after {} ms".format(str(e), length)
+            )
 
         except socket.error as e:
             length = int((time.time() - start) * 1000)
@@ -84,22 +88,28 @@ class TCPCheck(NetworkCheck):
                     'change this setting to allow longer timeouts'
                 )
                 self.log.info("System tcp timeout. Assuming that the checked system is down")
-                return (
+                self.report_as_service_check(
                     Status.DOWN,
+                    instance,
                     """Socket error: {}.
                  The connection timed out after {} ms because it took more time than the system tcp stack allows.
                  You might want to change this setting to allow longer timeouts""".format(
                         str(e), length
                     ),
                 )
+
             else:
                 self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(addr, port, str(e), length))
-                return Status.DOWN, "{}. Connection failed after {} ms".format(str(e), length)
+                self.report_as_service_check(
+                    Status.DOWN, instance, "{}. Connection failed after {} ms".format(str(e), length)
+                )
 
         except Exception as e:
             length = int((time.time() - start) * 1000)
             self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(addr, port, str(e), length))
-            return Status.DOWN, "{}. Connection failed after {} ms".format(str(e), length)
+            self.report_as_service_check(
+                Status.DOWN, instance, "{}. Connection failed after {} ms".format(str(e), length)
+            )
 
         if response_time:
             self.gauge(
@@ -110,9 +120,9 @@ class TCPCheck(NetworkCheck):
             )
 
         self.log.debug("{}:{} is UP".format(addr, port))
-        return Status.UP, "UP"
+        self.report_as_service_check(Status.UP, instance, 'UP')
 
-    def report_as_service_check(self, sc_name, status, instance, msg=None):
+    def report_as_service_check(self, status, instance, msg=None):
         instance_name = self.normalize(instance['name'])
         host = instance.get('host', None)
         port = instance.get('port', None)
@@ -127,8 +137,6 @@ class TCPCheck(NetworkCheck):
             'instance:{}'.format(instance_name),
         ]
 
-        self.service_check(
-            self.SERVICE_CHECK_NAME, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg
-        )
+        self.service_check(self.SERVICE_CHECK_NAME, STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
         # Report as a metric as well
         self.gauge("network.tcp.can_connect", 1 if status == Status.UP else 0, tags=tags)
