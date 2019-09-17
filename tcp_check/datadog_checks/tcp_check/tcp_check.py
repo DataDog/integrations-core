@@ -4,7 +4,7 @@
 import socket
 import time
 
-from datadog_checks.base.checks import NetworkCheck, Status
+from datadog_checks.base.checks import Status
 
 
 class BadConfException(Exception):
