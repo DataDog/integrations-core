@@ -1,5 +1,9 @@
 # CHANGELOG - rabbitmq
 
+## 2.0.0 / 2019-09-18
+
+* [Changed] [RabbitMQ] Ignore empty data for metrics limit. See [#4544](https://github.com/DataDog/integrations-core/pull/4544).
+
 ## 1.9.1 / 2019-08-29
 
 * [Fixed] Revert "Fix queue, node and echange limit". See [#4467](https://github.com/DataDog/integrations-core/pull/4467).
