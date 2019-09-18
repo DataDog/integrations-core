@@ -2,7 +2,7 @@
 
 ## 2.0.0 / 2019-09-18
 
-* [Changed] [RabbitMQ] Ignore empty data for metrics limit. See [#4544](https://github.com/DataDog/integrations-core/pull/4544).
+* [Changed] Ignore empty data for metrics limit. See [#4544](https://github.com/DataDog/integrations-core/pull/4544).
 
 ## 1.9.1 / 2019-08-29
 
