@@ -32,7 +32,6 @@ def dd_environment(instance_basic):
             CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
             populate_database,
         ],
-        sleep=1
     ):
         yield instance_basic
 
