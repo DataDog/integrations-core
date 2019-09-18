@@ -26,6 +26,9 @@
     "dashboards": {
       "Ambari base dashboard": "assets/dashboards/base_dashboard.json"
     },
+    "saved_views": {
+      "Ambari base saved view": "assets/saved_views/base_saved_view.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
