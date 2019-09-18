@@ -104,8 +104,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | `<INIT_CONFIG>`      | blank or `{}`                          |
 | `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%:%%port%%"}` |
 
-Replace `<SERVER>` and `<PORT>` with the parameters of the Marathon instance your want to monitor.
-
 ##### Log collection
 
 **Available for Agent v6.5+**
