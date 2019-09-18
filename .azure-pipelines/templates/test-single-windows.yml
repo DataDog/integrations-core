@@ -1,0 +1,40 @@
+parameters:
+  job_name: ''
+  check: ''
+  display: ''
+  test: true
+  test_e2e: false
+  benchmark: false
+  validate: false
+
+jobs:
+- job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
+  displayName: '${{ parameters.display }}'
+
+  pool:
+    vmImage: 'windows-2019'
+
+  steps:
+  - template: './checkout-code.yml'
+  - template: './set-up-windows.yml'
+  - template: './install-deps.yml'
+  - template: './set-up-integrations.yml'
+    parameters:
+      check: ${{ parameters.check }}
+
+  - ${{ if eq(parameters.validate, 'true') }}:
+    - template: './run-validations.yml'
+
+  - ${{ if eq(parameters.test, 'true') }}:
+    - script: ddev test --cov ${{ parameters.check }}
+      displayName: 'Run tests'
+      env:
+        CODECOV_TOKEN: $(CODECOV_TOKEN)
+
+  - ${{ if eq(parameters.test_e2e, 'true') }}:
+    - script: ddev env test --new-env ${{ parameters.check }}
+      displayName: 'Run E2E tests'
+
+  - ${{ if eq(parameters.benchmark, 'true') }}:
+    - script: ddev test --bench ${{ parameters.check }}
+      displayName: 'Run benchmarks'

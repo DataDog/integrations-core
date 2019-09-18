@@ -56,6 +56,7 @@ def test_relations_metrics(aggregator, pg_instance):
         'port:{}'.format(pg_instance['port']),
         'db:%s' % pg_instance['dbname'],
         'table:persons',
+        'schema:public',
     ]
 
     for name in RELATION_METRICS:
@@ -96,6 +97,7 @@ def test_relations_metrics2(aggregator, pg_instance):
             'port:{}'.format(pg_instance['port']),
             'db:%s' % pg_instance['dbname'],
             'table:{}'.format(relation.lower()),
+            'schema:public',
         ]
 
     for relation in relations:

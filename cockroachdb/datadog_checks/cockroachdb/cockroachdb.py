@@ -7,11 +7,10 @@ from .metrics import METRIC_MAP
 
 
 class CockroachdbCheck(OpenMetricsBaseCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         super(CockroachdbCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 'cockroachdb': {

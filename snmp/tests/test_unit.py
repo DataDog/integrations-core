@@ -119,3 +119,52 @@ def test_profile_error():
         init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         with pytest.raises(ConfigurationError):
             SnmpCheck('snmp', init_config, [instance])
+
+
+def test_no_address():
+    instance = common.generate_instance_config([])
+    instance.pop('ip_address')
+    with pytest.raises(ConfigurationError) as e:
+        SnmpCheck('snmp', {}, [instance])
+    assert str(e.value) == 'An IP address or a network address needs to be specified'
+
+
+def test_both_addresses():
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance['network_address'] = '192.168.0.0/24'
+    with pytest.raises(ConfigurationError) as e:
+        SnmpCheck('snmp', {}, [instance])
+    assert str(e.value) == 'Only one of IP address and network address must be specified'
+
+
+def test_removing_host():
+    """If a discovered host is failing 3 times in a row, we stop querying it."""
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    discovered_instance = instance.copy()
+    discovered_instance['ip_address'] = '1.1.1.1'
+    discovered_instance['retries'] = 0
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.0.0/24'
+    check = SnmpCheck('snmp', {}, [instance])
+    warnings = []
+    check.warning = warnings.append
+    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, [], '', {}, {})
+    msg = 'No SNMP response received before timeout for instance 1.1.1.1'
+
+    check.check(instance)
+    assert warnings == [msg]
+
+    check.check(instance)
+    assert warnings == [msg, msg]
+
+    check.check(instance)
+    assert warnings == [msg, msg, msg]
+
+    check.check(instance)
+    assert warnings == [msg, msg, msg, msg]
+    # Instance has been removed
+    assert check._config.discovered_instances == {}
+
+    check.check(instance)
+    # No new warnings produced
+    assert warnings == [msg, msg, msg, msg]

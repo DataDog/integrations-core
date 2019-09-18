@@ -26,7 +26,7 @@ from . import common
 def test_config(test_case, extra_config, expected_http_kwargs):
     instance = deepcopy(common.BASIC_CONFIG)
     instance.update(extra_config)
-    check = CouchDb(common.CHECK_NAME, {}, {}, instances=[instance])
+    check = CouchDb(common.CHECK_NAME, {}, instances=[instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200, content='{}')

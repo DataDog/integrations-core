@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.10.0 / 2019-09-16
+
+* [Added] Add log documentation in the example configuration file. See [#4537](https://github.com/DataDog/integrations-core/pull/4537).
+
 ## 1.9.1 / 2019-08-30
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).

@@ -6,17 +6,6 @@ TMP_DIR=/tmp/mq
 MQ_URL=https://s3.amazonaws.com/dd-agent-tarball-mirror/mqadv_dev90_linux_x86-64.tar.gz
 MQ_PACKAGES="MQSeriesRuntime-*.rpm MQSeriesServer-*.rpm MQSeriesMsg*.rpm MQSeriesJava*.rpm MQSeriesJRE*.rpm MQSeriesGSKit*.rpm"
 
-if [ -z "$CHECK" ]; then
-    OUT=$(ddev test --list)
-    if [[ "$OUT" != *"ibm_mq"* ]]; then
-        exit 0
-    fi
-else
-    if [ $CHECK != "ibm_mq" ]; then
-        exit 0
-    fi
-fi
-
 if [ -e /opt/mqm/inc/cmqc.h ]; then
   echo "cmqc.h already exists, exiting"
   set +ex

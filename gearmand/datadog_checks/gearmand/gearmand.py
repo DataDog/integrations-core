@@ -32,15 +32,13 @@ class Gearman(AgentCheck):
 
         return self.gearman_clients[(host, port)]
 
-    def _get_aggregate_metrics(self, tasks, tags):
+    def _get_aggregate_metrics(self, tasks, workers, tags):
         running = 0
         queued = 0
-        workers = 0
 
         for stat in tasks:
             running += stat['running']
             queued += stat['queued']
-            workers += stat['workers']
 
         unique_tasks = len(tasks)
 
@@ -108,7 +106,8 @@ class Gearman(AgentCheck):
 
         try:
             tasks = client.get_status()
-            self._get_aggregate_metrics(tasks, tags)
+            workers = len([w for w in client.get_workers() if w['tasks']])
+            self._get_aggregate_metrics(tasks, workers, tags)
             self._get_per_task_metrics(tasks, task_filter, tags)
             self.service_check(
                 self.SERVICE_CHECK_NAME,

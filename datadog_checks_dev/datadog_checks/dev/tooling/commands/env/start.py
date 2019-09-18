@@ -66,7 +66,8 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
 
     if env not in envs:
         echo_failure('`{}` is not an available environment.'.format(env))
-        echo_info('See what is available via `ddev env ls {}`.'.format(check))
+        echo_info('Available environments for {}:\n    {}'.format(check, '\n    '.join(envs)))
+        echo_info('You can also use `ddev env ls {}` to see available environments.'.format(check))
         abort()
 
     env_python_version = get_tox_env_python_version(env)

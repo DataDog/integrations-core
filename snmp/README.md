@@ -161,7 +161,7 @@ PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FIL
 Agent versions >=6.12:
 
 ```powershell
-PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded2\python.exe' '<PATH_TO_FILE>\mibdump.py' `
+PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe' '<PATH_TO_FILE>\mibdump.py' `
   --mib-source <PATH_TO_MIB_SOURCE> `
   --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
   --destination-directory=<PATH_TO_MIB_DESTINATION> `
