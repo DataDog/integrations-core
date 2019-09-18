@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-druid Integration",
+  "public_title": "Datadog-Druid Integration",
   "categories": [
     "processing",
     "data store"
