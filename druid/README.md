@@ -1,5 +1,7 @@
 # Agent Check: Druid
 
+![Druid Dashbaord][1]
+
 ## Overview
 
 The Datadog Agent collects metrics from Druid using [DogStatsD][10]. DogStatsD collects metrics on Druid queries, ingestion, and coordination data. For more information, see the [Druid metrics documentation][1].
@@ -109,3 +111,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help
 [10]: https://docs.datadoghq.com/developers/dogstatsd/
 [11]: https://docs.datadoghq.com/agent/
+[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/druid/images/druid_dashboard_overview.png
