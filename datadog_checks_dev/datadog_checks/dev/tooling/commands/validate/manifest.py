@@ -11,7 +11,7 @@ import click
 from six import string_types
 
 from ....compat import JSONDecodeError
-from ....utils import basepath, file_exists, read_file, write_file
+from ....utils import file_exists, read_file, write_file
 from ...constants import get_root
 from ...utils import parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
@@ -61,7 +61,6 @@ def manifest(ctx, fix, include_extras):
     all_guids = {}
 
     root = get_root()
-    root_name = basepath(get_root())
     is_extras = ctx.obj['repo_choice'] == 'extras'
 
     ok_checks = 0
