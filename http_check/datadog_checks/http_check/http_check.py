@@ -57,6 +57,19 @@ class HTTPCheck(AgentCheck):
             # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
             self.http.options['verify'] = False
 
+    def _get_service_checks_tags(self, instance):
+        instance_name = self.normalize(instance['name'])
+        url = instance.get('url', None)
+        if url is not None:
+            url = ensure_unicode(url)
+        tags = instance.get('tags', [])
+        tags.append("instance:{}".format(instance_name))
+
+        # Only add the URL tag if it's not already present
+        if not any(filter(re.compile('^url:').match, tags)):
+            tags.append('url:{}'.format(url))
+        return tags
+
     def check(self, instance):
         (
             addr,
@@ -101,6 +114,7 @@ class HTTPCheck(AgentCheck):
         instance_name = self.normalize(instance['name'])
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
+        service_checks_tags = self._get_service_check_tags(instance)
         r = None
         try:
             parsed_uri = urlparse(addr)
@@ -238,20 +252,9 @@ class HTTPCheck(AgentCheck):
 
         for status in service_checks:
             sc_name, status, msg = status
-            self.report_as_service_check(sc_name, status, instance, msg)
+            self.report_as_service_check(sc_name, status, service_checks_tags, msg)
 
-    def report_as_service_check(self, sc_name, status, instance, msg=None):
-        instance_name = self.normalize(instance['name'])
-        url = instance.get('url', None)
-        if url is not None:
-            url = ensure_unicode(url)
-        tags = instance.get('tags', [])
-        tags.append("instance:{}".format(instance_name))
-
-        # Only add the URL tag if it's not already present
-        if not any(filter(re.compile('^url:').match, tags)):
-            tags.append('url:{}'.format(url))
-
+    def report_as_service_check(self, sc_name, status, tags, msg=None):
         if sc_name == self.SC_STATUS:
             # format the HTTP response body into the event
             if isinstance(msg, tuple):
