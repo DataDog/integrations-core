@@ -11,11 +11,12 @@ from datetime import datetime
 
 import _strptime  # noqa
 import requests
+from datadog_checks.base.checks.network import STATUS_TO_SERVICE_CHECK
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import ensure_unicode, is_affirmative
-from datadog_checks.base.checks import NetworkCheck, Status
+from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+from datadog_checks.checks import Status
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
@@ -30,7 +31,7 @@ CONTENT_LENGTH = 200
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
 
 
-class HTTPCheck(NetworkCheck):
+class HTTPCheck(AgentCheck):
     SOURCE_TYPE_NAME = 'system'
     SC_STATUS = 'http.can_connect'
     SC_SSL_CERT = 'http.ssl_cert'
@@ -56,7 +57,7 @@ class HTTPCheck(NetworkCheck):
             # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
             self.http.options['verify'] = False
 
-    def _check(self, instance):
+    def check(self, instance):
         (
             addr,
             client_cert,
@@ -235,7 +236,9 @@ class HTTPCheck(NetworkCheck):
 
             service_checks.append((self.SC_SSL_CERT, status, msg))
 
-        return service_checks
+        for status in service_checks:
+            sc_name, status, msg = status
+            self.report_as_service_check(sc_name, status, instance, msg)
 
     def report_as_service_check(self, sc_name, status, instance, msg=None):
         instance_name = self.normalize(instance['name'])
@@ -261,7 +264,7 @@ class HTTPCheck(NetworkCheck):
                 msg = '{} {}\n\n{}'.format(code, reason, content)
                 msg = msg.rstrip()
 
-        self.service_check(sc_name, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
+        self.service_check(sc_name, STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
 
     def check_cert_expiration(
         self, instance, timeout, instance_ca_certs, check_hostname, client_cert=None, client_key=None
