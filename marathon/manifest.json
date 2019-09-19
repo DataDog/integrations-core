@@ -3,7 +3,7 @@
     "configuration & deployment",
     "containers",
     "log collection",
-    "Autodiscovery"
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Marathon",

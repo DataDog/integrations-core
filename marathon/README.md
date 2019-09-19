@@ -15,9 +15,9 @@ The Marathon check is included in the [Datadog Agent][1] package, so you don't n
 ### Configuration
 #### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-##### Metrics
+##### Metrics collection
 
 1. Edit the `marathon.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2].
     See the [sample marathon.d/conf.yaml][3] for all available configuration options:
@@ -34,7 +34,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
     Replace `<SERVER>` and `<PORT>` with the parameters of the Marathon instance your want to monitor.
 
-2. [Restart the Agent][4] to begin sending Marathon metrics to Datadog.
+2. [Restart the Agent][4].
 
 ##### Log collection
 
