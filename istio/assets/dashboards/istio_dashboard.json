@@ -9,7 +9,7 @@
 	"created": "2019-06-14T14:42:13.236275+00:00",
 	"created_by": {
 		"disabled": false,
-		"handle": "support@datadoghq.com",
+		"handle": "support@datadoghq.com"
         "name": "Datadog",
 		"is_admin": false,
 		"role": null,
