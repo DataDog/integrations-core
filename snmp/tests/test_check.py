@@ -559,6 +559,8 @@ def test_profile_sys_object_no_metrics(aggregator):
 def test_discovery(aggregator):
     host = socket.gethostbyname(common.HOST)
     network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    # Make sure the check handles bytes
+    network = network.encode("utf-8")
     check_tags = ['snmp_device:{}'.format(host)]
     instance = {'name': 'snmp_conf', 'network_address': network, 'port': common.PORT, 'community_string': 'public'}
     init_config = {
