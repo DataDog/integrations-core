@@ -9,8 +9,7 @@ import time
 import dns.resolver
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.checks.network import STATUS_TO_SERVICE_CHECK
-from datadog_checks.checks import Status
+from datadog_checks.checks import NetworkCheck, Status
 from datadog_checks.utils.platform import Platform
 
 # These imports are necessary because otherwise dynamic type
@@ -152,4 +151,6 @@ class DNSCheck(AgentCheck):
         if status == Status.UP:
             msg = None
 
-        self.service_check(self.SERVICE_CHECK_NAME, STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
+        self.service_check(
+            self.SERVICE_CHECK_NAME, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg
+        )

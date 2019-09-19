@@ -15,8 +15,7 @@ from six import string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
-from datadog_checks.base.checks import Status
-from datadog_checks.base.checks.network import STATUS_TO_SERVICE_CHECK
+from datadog_checks.checks import NetworkCheck, Status
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
@@ -264,7 +263,7 @@ class HTTPCheck(AgentCheck):
                 msg = '{} {}\n\n{}'.format(code, reason, content)
                 msg = msg.rstrip()
 
-        self.service_check(sc_name, STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
+        self.service_check(sc_name, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
 
     def check_cert_expiration(
         self, instance, timeout, instance_ca_certs, check_hostname, client_cert=None, client_key=None

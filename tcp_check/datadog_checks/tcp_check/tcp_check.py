@@ -5,8 +5,7 @@ import socket
 import time
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.checks import Status
-from datadog_checks.base.checks.network import STATUS_TO_SERVICE_CHECK
+from datadog_checks.base.checks import NetworkCheck, Status
 
 
 class BadConfException(Exception):
@@ -137,6 +136,8 @@ class TCPCheck(AgentCheck):
             'instance:{}'.format(instance_name),
         ]
 
-        self.service_check(self.SERVICE_CHECK_NAME, STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
+        self.service_check(
+            self.SERVICE_CHECK_NAME, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg
+        )
         # Report as a metric as well
         self.gauge("network.tcp.can_connect", 1 if status == Status.UP else 0, tags=tags)
