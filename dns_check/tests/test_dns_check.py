@@ -16,7 +16,7 @@ RESULTS_TIMEOUT = 10
 @mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=success_query_mock)
 def test_success(mocked_query, mocked_time, aggregator):
-    integration = DNSCheck('dns_check', {}, common.CONFIG_SUCCESS['instances'])
+    integration = DNSCheck('dns_check', {}, {})
 
     integration.check(common.CONFIG_SUCCESS['instances'][0])
     tags = ['instance:success', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:A']
@@ -68,7 +68,7 @@ def test_success(mocked_query, mocked_time, aggregator):
 @mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=nxdomain_query_mock)
 def test_success_nxdomain(mocked_query, mocked_time, aggregator):
-    integration = DNSCheck('dns_check', {}, [common.CONFIG_SUCCESS_NXDOMAIN])
+    integration = DNSCheck('dns_check', {}, {})
     integration.check(common.CONFIG_SUCCESS_NXDOMAIN)
 
     tags = ['instance:nxdomain', 'nameserver:127.0.0.1', 'resolved_hostname:www.example.org', 'record_type:NXDOMAIN']
@@ -82,9 +82,7 @@ def test_success_nxdomain(mocked_query, mocked_time, aggregator):
 @mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=Timeout())
 def test_default_timeout(mocked_query, mocked_time, aggregator):
-    integration = DNSCheck(
-        'dns_check', common.CONFIG_DEFAULT_TIMEOUT['init_config'], common.CONFIG_DEFAULT_TIMEOUT['instances']
-    )
+    integration = DNSCheck('dns_check', common.CONFIG_DEFAULT_TIMEOUT['init_config'], {})
     integration.check(common.CONFIG_DEFAULT_TIMEOUT['instances'][0])
 
     tags = ['instance:default_timeout', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:A']
@@ -103,7 +101,7 @@ def test_default_timeout(mocked_query, mocked_time, aggregator):
 @mock.patch('datadog_checks.dns_check.dns_check.time_func', side_effect=MockTime.time)
 @mock.patch.object(Resolver, 'query', side_effect=Timeout())
 def test_instance_timeout(mocked_query, mocked_time, aggregator):
-    integration = DNSCheck('dns_check', {}, [common.CONFIG_INSTANCE_TIMEOUT])
+    integration = DNSCheck('dns_check', {}, {})
     integration.check(common.CONFIG_INSTANCE_TIMEOUT)
 
     tags = ['instance:instance_timeout', 'resolved_hostname:www.example.org', 'nameserver:127.0.0.1', 'record_type:A']
@@ -120,8 +118,8 @@ def test_instance_timeout(mocked_query, mocked_time, aggregator):
 
 
 def test_invalid_config(aggregator):
+    integration = DNSCheck('dns_check', {}, {})
     for instance, message in common.CONFIG_INVALID:
-        integration = DNSCheck('dns_check', {}, [instance])
         integration.check(instance)
         aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.CRITICAL, count=1, message=message)
 
