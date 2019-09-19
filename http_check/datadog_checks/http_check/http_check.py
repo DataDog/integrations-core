@@ -14,8 +14,8 @@ import requests
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
-from datadog_checks.checks import NetworkCheck, Status
+from datadog_checks.base import ensure_unicode, is_affirmative
+from datadog_checks.base.checks import NetworkCheck, Status
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
@@ -30,7 +30,7 @@ CONTENT_LENGTH = 200
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
 
 
-class HTTPCheck(AgentCheck):
+class HTTPCheck(NetworkCheck):
     SOURCE_TYPE_NAME = 'system'
     SC_STATUS = 'http.can_connect'
     SC_SSL_CERT = 'http.ssl_cert'
@@ -56,7 +56,7 @@ class HTTPCheck(AgentCheck):
             # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
             self.http.options['verify'] = False
 
-    def check(self, instance):
+    def _check(self, instance):
         (
             addr,
             client_cert,
@@ -235,9 +235,7 @@ class HTTPCheck(AgentCheck):
 
             service_checks.append((self.SC_SSL_CERT, status, msg))
 
-        for status in service_checks:
-            sc_name, status, msg = status
-            self.report_as_service_check(sc_name, status, instance, msg)
+        return service_checks
 
     def report_as_service_check(self, sc_name, status, instance, msg=None):
         instance_name = self.normalize(instance['name'])
