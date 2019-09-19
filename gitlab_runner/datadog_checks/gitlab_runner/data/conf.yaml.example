@@ -204,6 +204,11 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
+    ## @param kerberos_cache - string - optional
+    ## Sets KRB5CCNAME environment variable. It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KRB5CCNAME>
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate of services.
     #
