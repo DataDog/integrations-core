@@ -11,7 +11,6 @@ from datetime import datetime
 
 import _strptime  # noqa
 import requests
-from datadog_checks.base.checks.network import STATUS_TO_SERVICE_CHECK
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
@@ -86,14 +85,14 @@ class HTTPCheck(AgentCheck):
         def send_status_up(logMsg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.debug(logMsg)
-            service_checks.append((self.SC_STATUS, Status.UP, "UP"))
+            service_checks.append((self.SC_STATUS, AgentCheck.UP, "UP"))
 
         def send_status_down(loginfo, down_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.info(loginfo)
             if include_content:
                 down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
-            service_checks.append((self.SC_STATUS, Status.DOWN, down_msg))
+            service_checks.append((self.SC_STATUS, AgentCheck.DOWN, down_msg))
 
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
@@ -132,14 +131,14 @@ class HTTPCheck(AgentCheck):
             length = int((time.time() - start) * 1000)
             self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
             service_checks.append(
-                (self.SC_STATUS, Status.DOWN, "{}. Connection failed after {} ms".format(str(e), length))
+                (self.SC_STATUS, AgentCheck.DOWN, "{}. Connection failed after {} ms".format(str(e), length))
             )
 
         except socket.error as e:
             length = int((time.time() - start) * 1000)
             self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
             service_checks.append(
-                (self.SC_STATUS, Status.DOWN, "Socket error: {}. Connection failed after {} ms".format(repr(e), length))
+                (self.SC_STATUS, AgentCheck.DOWN, "Socket error: {}. Connection failed after {} ms".format(repr(e), length))
             )
 
         except Exception as e:
@@ -176,7 +175,7 @@ class HTTPCheck(AgentCheck):
 
                 self.log.info(message)
 
-                service_checks.append((self.SC_STATUS, Status.DOWN, message))
+                service_checks.append((self.SC_STATUS, AgentCheck.DOWN, message))
 
             if not service_checks:
                 # Host is UP
@@ -267,7 +266,7 @@ class HTTPCheck(AgentCheck):
                 msg = '{} {}\n\n{}'.format(code, reason, content)
                 msg = msg.rstrip()
 
-        self.service_check(sc_name, STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
+        self.service_check(sc_name, status, tags=tags, message=msg)
 
     def check_cert_expiration(
         self, instance, timeout, instance_ca_certs, check_hostname, client_cert=None, client_key=None
@@ -309,13 +308,13 @@ class HTTPCheck(AgentCheck):
             msg = str(e)
             if 'expiration' in msg:
                 self.log.debug("error: {}. Cert might be expired.".format(e))
-                return Status.DOWN, 0, 0, msg
+                return AgentCheck.DOWN, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
                 self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
-                return Status.CRITICAL, 0, 0, msg
+                return AgentCheck.CRITICAL, 0, 0, msg
             else:
                 self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
-                return Status.DOWN, 0, 0, msg
+                return AgentCheck.DOWN, 0, 0, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         time_left = exp_date - datetime.utcnow()
@@ -327,7 +326,7 @@ class HTTPCheck(AgentCheck):
 
         if seconds_left < seconds_critical:
             return (
-                Status.CRITICAL,
+                AgentCheck.CRITICAL,
                 days_left,
                 seconds_left,
                 "This cert TTL is critical: only {} days before it expires".format(days_left),
@@ -335,11 +334,11 @@ class HTTPCheck(AgentCheck):
 
         elif seconds_left < seconds_warning:
             return (
-                Status.WARNING,
+                AgentCheck.WARNING,
                 days_left,
                 seconds_left,
                 "This cert is almost expired, only {} days left".format(days_left),
             )
 
         else:
-            return Status.UP, days_left, seconds_left, "Days left: {}".format(days_left)
+            return AgentCheck.UP, days_left, seconds_left, "Days left: {}".format(days_left)
