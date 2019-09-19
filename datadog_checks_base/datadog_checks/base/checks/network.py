@@ -11,14 +11,6 @@ class Status:
     UP = "UP"
 
 
-STATUS_TO_SERVICE_CHECK = {
-        Status.UP: AgentCheck.OK,
-        Status.WARNING: AgentCheck.WARNING,
-        Status.CRITICAL: AgentCheck.CRITICAL,
-        Status.DOWN: AgentCheck.CRITICAL,
-    }
-
-
 class NetworkCheck(AgentCheck):
     """
     This class should never be directly instantiated.
@@ -26,7 +18,12 @@ class NetworkCheck(AgentCheck):
     `AgentCheck` class directly.
     """
 
-    STATUS_TO_SERVICE_CHECK = STATUS_TO_SERVICE_CHECK
+    STATUS_TO_SERVICE_CHECK = {
+        Status.UP: AgentCheck.OK,
+        Status.WARNING: AgentCheck.WARNING,
+        Status.CRITICAL: AgentCheck.CRITICAL,
+        Status.DOWN: AgentCheck.CRITICAL,
+    }
 
     def __init__(self, *args, **kwargs):
         super(NetworkCheck, self).__init__(*args, **kwargs)
