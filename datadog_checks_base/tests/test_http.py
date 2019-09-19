@@ -271,6 +271,19 @@ class TestAuth:
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
+    def test_config_kerberos_cache(self):
+        instance = {'kerberos_cache': '/test/file'}
+        init_config = {}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert os.environ.get('KRB5CCNAME') is None
+
+        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+            assert http.get('https://www.google.com') == '/test/file'
+
+        assert os.environ.get('KRB5CCNAME') is None
+
     def test_config_kerberos_keytab_file_rollback(self):
         instance = {'kerberos_keytab': '/test/file'}
         init_config = {}
