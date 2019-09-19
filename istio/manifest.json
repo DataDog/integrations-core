@@ -24,7 +24,9 @@
   "integration_id": "istio",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Istio base dashboard": "assets/dashboards/istio_dashboard.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
