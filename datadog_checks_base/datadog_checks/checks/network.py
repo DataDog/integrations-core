@@ -2,4 +2,5 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # flake8: noqa
-from ..base.checks.network import Status
+from ..base.checks.network import *
+from . import AgentCheck
