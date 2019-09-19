@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import ipaddress
 from collections import defaultdict
 
 from pyasn1.type.univ import OctetString
@@ -32,7 +33,7 @@ class InstanceConfig:
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self.snmp_engine, self.mib_view_controller = self.create_snmp_engine(mibs_path)
         self.ip_address = None
-        self.network_address = None
+        self.ip_network = None
         self.discovered_instances = {}
         self.failing_instances = defaultdict(int)
         self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
@@ -57,7 +58,9 @@ class InstanceConfig:
             self.tags.append('snmp_device:{}'.format(self.ip_address))
 
         if network_address:
-            self.network_address = network_address
+            if isinstance(network_address, bytes):
+                network_address = network_address.decode('utf-8')
+            self.ip_network = ipaddress.ip_network(network_address)
 
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
