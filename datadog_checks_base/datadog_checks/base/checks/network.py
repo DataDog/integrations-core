@@ -25,10 +25,6 @@ class NetworkCheck(AgentCheck):
         Status.DOWN: AgentCheck.CRITICAL,
     }
 
-    def __init__(self, *args, **kwargs):
-        super(NetworkCheck, self).__init__(*args, **kwargs)
-        self.log.warning("NetworkCheck is deprecated. Please inherit from AgentCheck instead")
-
     def check(self, instance):
         try:
             statuses = self._check(instance)
