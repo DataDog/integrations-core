@@ -15,7 +15,6 @@ from six import string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
-from datadog_checks.checks import Status
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
@@ -138,7 +137,11 @@ class HTTPCheck(AgentCheck):
             length = int((time.time() - start) * 1000)
             self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
             service_checks.append(
-                (self.SC_STATUS, AgentCheck.DOWN, "Socket error: {}. Connection failed after {} ms".format(repr(e), length))
+                (
+                    self.SC_STATUS,
+                    AgentCheck.DOWN,
+                    "Socket error: {}. Connection failed after {} ms".format(repr(e), length),
+                )
             )
 
         except Exception as e:
