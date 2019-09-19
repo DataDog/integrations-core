@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.33.0 / 2019-09-19
+
+* [Fixed] Stop identifying core vs extras from the working directory name. See [#4583](https://github.com/DataDog/integrations-core/pull/4583).
+* [Added] Update tooling for Azure Pipelines. See [#4536](https://github.com/DataDog/integrations-core/pull/4536).
+
 ## 0.32.0 / 2019-08-24
 
 * [Added] Don't fail e2e on unsupported platforms. See [#4398](https://github.com/DataDog/integrations-core/pull/4398).
