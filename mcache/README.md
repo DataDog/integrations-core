@@ -36,7 +36,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 | Parameter            | Value                                 |
 |----------------------|---------------------------------------|
-| `<INTEGRATION_NAME>` | `memcached`                           |
+| `<INTEGRATION_NAME>` | `mcache`                              |
 | `<INIT_CONFIG>`      | blank or `{}`                         |
 | `<INSTANCE_CONFIG>`  | `{"url": "%%host%%","port": "11211"}` |
 
