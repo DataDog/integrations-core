@@ -64,15 +64,11 @@ def download():
         wheel_distribution_name = __get_wheel_distribution_name(standard_distribution_name)
         tuf_downloader = TUFDownloader(repository_url_prefix=repository_url_prefix, verbose=verbose)
 
-        if not version:
-            version = tuf_downloader.get_latest_version(standard_distribution_name, wheel_distribution_name)
-        else:
-            if not __is_canonical(version):
-                raise NonCanonicalVersion(version)
+        if version and not __is_canonical(version):
+            raise NonCanonicalVersion(version)
 
-        target_relpath = 'simple/{}/{}-{}-py2.py3-none-any.whl'.format(
-            standard_distribution_name, wheel_distribution_name, version
-        )
+        wheel = tuf_downloader.get_wheel(standard_distribution_name, wheel_distribution_name, version)
+        target_relpath = 'simple/{}/{}'.format(standard_distribution_name, wheel)
 
         try:
             target_abspath = tuf_downloader.download(target_relpath)

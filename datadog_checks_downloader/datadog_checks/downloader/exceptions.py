@@ -55,6 +55,10 @@ class NoSuchDatadogPackageOrVersion(CLIError):
         return 'Either no {} package, or {} version!'.format(self.standard_distribution_name, self.version)
 
 
+class PythonVersionMismatch(Exception):
+    pass
+
+
 # Exceptions for the download module.
 
 

@@ -7,7 +7,9 @@ import logging.config
 import os
 import re
 import shutil
+import sys
 import tempfile
+from collections import defaultdict
 
 from in_toto import verifylib
 from in_toto.models.metadata import Metablock
@@ -23,6 +25,7 @@ from .exceptions import (
     NoInTotoLinkMetadataFound,
     NoInTotoRootLayoutPublicKeysFound,
     NoSuchDatadogPackage,
+    PythonVersionMismatch,
 )
 from .parameters import substitute
 
@@ -239,12 +242,12 @@ class TUFDownloader:
         '''
         return self.__get_target(target_relpath, download_in_toto_metadata=download_in_toto_metadata)
 
-    def get_latest_version(self, standard_distribution_name, wheel_distribution_name):
-        '''
+    def get_wheel(self, standard_distribution_name, wheel_distribution_name, desired_package_version=None):
+        """
         Returns:
-            If download over TUF is successful, this function will return the
-            latest known version of the Datadog integration.
-        '''
+            If download over TUF is successful, this function will return the wheel corresponding to
+            the desired version (latest if omitted) of the Datadog integration.
+        """
         target_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
 
         try:
@@ -253,23 +256,32 @@ class TUFDownloader:
         except UnknownTargetError:
             raise NoSuchDatadogPackage(standard_distribution_name)
 
-        pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-py2\\.py3-none-any\\.whl)'>(.*?)</a><br />"
-        versions = []
+        pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-(.*?)-none-any\\.whl)'>(.*?)</a><br />"
+        packages = defaultdict(list)
 
         with open(target_abspath) as simple_index:
             for line in simple_index:
                 match = re.match(pattern, line)
                 if match:
-                    href = match.group(1)
-                    version = match.group(2)
-                    text = match.group(3)
+                    href, package_version, python_versions, text = match.groups()
+
                     if href != text:
                         raise InconsistentSimpleIndex(href, text)
                     else:
-                        # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
-                        versions.append(parse_version(version))
+                        packages[package_version].append((href, python_versions.split('.')))
 
-        if not len(versions):
+        if not packages:
             raise MissingVersions(standard_distribution_name)
+
+        if not desired_package_version:
+            # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
+            desired_package_version = str(max(parse_version(p) for p in packages))
+        elif desired_package_version not in packages:
+            raise MissingVersions(standard_distribution_name)
+
+        desired_python_version = 'py{}'.format(sys.version_info[0])
+        for wheel, supported_python_versions in packages[desired_package_version]:
+            if desired_python_version in supported_python_versions:
+                return wheel
         else:
-            return max(versions)
+            raise PythonVersionMismatch('No packages available for target: {}'.format(desired_python_version))
