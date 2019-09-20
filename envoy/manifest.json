@@ -11,7 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "envoy.",
-  "metric_to_check": "envoy.stats.overflow",
+  "metric_to_check": "envoy.server.uptime",
   "name": "envoy",
   "public_title": "Datadog-Envoy Integration",
   "short_description": "Envoy is an open source edge and service proxy",
