@@ -49,6 +49,10 @@ def download():
     parser.add_argument('--version', type=str, default=None, help='The version number of the desired Datadog check.')
 
     parser.add_argument(
+        '--python-tag', type=str, default='py2.py3', help='The Python tag for the wheel of the desired Datadog check.'
+    )
+
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
     )
 
@@ -56,6 +60,7 @@ def download():
     repository_url_prefix = args.repository
     standard_distribution_name = args.standard_distribution_name
     version = args.version
+    python_tag = args.python_tag
     verbose = args.verbose
 
     if not standard_distribution_name.startswith('datadog-'):
@@ -70,8 +75,8 @@ def download():
             if not __is_canonical(version):
                 raise NonCanonicalVersion(version)
 
-        target_relpath = 'simple/{}/{}-{}-py2.py3-none-any.whl'.format(
-            standard_distribution_name, wheel_distribution_name, version
+        target_relpath = 'simple/{}/{}-{}-{}-none-any.whl'.format(
+            standard_distribution_name, wheel_distribution_name, version, python_tag
         )
 
         try:
