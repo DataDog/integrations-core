@@ -5,7 +5,7 @@
   "categories": [
     "web",
     "caching",
-    "Autodiscovery"
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Memcached",
