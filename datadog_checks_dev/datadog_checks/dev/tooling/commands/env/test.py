@@ -89,7 +89,7 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, pytest_args):
                         checks=['{}:{}'.format(check, env)],
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
-                        pytest_args=pytest_args
+                        pytest_args=pytest_args,
                     )
             finally:
                 if new_env:
