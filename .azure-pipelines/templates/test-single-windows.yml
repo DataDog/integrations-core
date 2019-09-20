@@ -27,13 +27,13 @@ jobs:
     - template: './run-validations.yml'
 
   - ${{ if eq(parameters.test, 'true') }}:
-    - script: ddev test --cov --pytest-args='${{ parameters.pytest_flaky_opts }}' ${{ parameters.check }}
+    - script: ddev test --cov --pytest-args="${{ parameters.pytest_flaky_opts }}" ${{ parameters.check }}
       displayName: 'Run tests'
       env:
         CODECOV_TOKEN: $(CODECOV_TOKEN)
 
   - ${{ if eq(parameters.test_e2e, 'true') }}:
-    - script: ddev env test --new-env --pytest-args='${{ parameters.pytest_flaky_opts }}' ${{ parameters.check }}
+    - script: ddev env test --new-env --pytest-args="${{ parameters.pytest_flaky_opts }}" ${{ parameters.check }}
       displayName: 'Run E2E tests'
 
   - ${{ if eq(parameters.benchmark, 'true') }}:
