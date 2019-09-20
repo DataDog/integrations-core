@@ -50,13 +50,19 @@ class Marathon(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(Marathon, self).__init__(name, init_config, instances)
+        timeout = (
+            self.instance.get('timeout')
+            or self.init_config.get('timeout')
+            or self.init_config.get('default_timeout')
+            or self.DEFAULT_TIMEOUT
+        )
         if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
             # `default_timeout` config option will be removed with Agent 5
+            self.http.options['timeout'] = timeout
+        else:
             self.http.options['timeout'] = (
-                self.instance.get('timeout')
-                or self.init_config.get('timeout')
-                or self.init_config.get('default_timeout')
-                or self.DEFAULT_TIMEOUT
+                float(self.instance.get('read_timeout', timeout)),
+                float(self.instance.get('connect_timeout', timeout)),
             )
         self._auth_body = None
         if self.http.options['auth'] is not None:
