@@ -1,3 +1,6 @@
+parameters:
+  repo: 'core'
+
 steps:
 # Install the Python version with which to use globally last as
 # these tasks prepend to PATH instead of appending to it. See:
@@ -18,8 +21,13 @@ steps:
 - script: pip install --disable-pip-version-check git+git://github.com/ofek/codecov-python.git@73271695d5e8ab2d6538a06e63b400f163f26487
   displayName: 'Install Codecov'
 
-- script: pip install ./datadog_checks_dev[cli]
-  displayName: 'Install ddev'
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: pip install ./datadog_checks_dev[cli]
+    displayName: 'Install ddev from local folder'
 
-- script: ddev config set core .
+- ${{ if not(eq(parameters.repo, 'core')) }}:
+  - script: pip install datadog-checks-dev[cli]
+    displayName: 'Install ddev from PyPI'
+
+- script: ddev config set ${{ parameters.repo }} . && ddev config set repo ${{ parameters.repo }}
   displayName: 'Configure ddev'
