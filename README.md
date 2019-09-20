@@ -1,7 +1,6 @@
 # Datadog Agent Integrations - Core
 
 [![Build status][1]][2]
-[![Build status][3]][4]
 [![Coverage status][17]][18]
 [![Documentation Status][19]][20]
 [![Code style - black][21]][22]
@@ -86,10 +85,8 @@ fingerprints known to correspond to developers who, at the time of writing (May
   * `D24D 57CE 96BD F8C2 9BB0  BEAB C783 0ECB 08F8 8C74`
   * `3936 7937 7466 5878 C67A  50E9 3C67 09D5 583F B57C`
 
-[1]: https://api.travis-ci.com/DataDog/integrations-core.svg?branch=master
-[2]: https://travis-ci.com/DataDog/integrations-core
-[3]: https://ci.appveyor.com/api/projects/status/8w4s2bilp48n43gw?svg=true
-[4]: https://ci.appveyor.com/project/Datadog/integrations-core
+[1]: https://dev.azure.com/datadoghq/integrations-core/_apis/build/status/All?branchName=master
+[2]: https://dev.azure.com/datadoghq/integrations-core/_build/latest?definitionId=4&branchName=master
 [5]: https://github.com/DataDog/integrations-extras
 [6]: https://docs.datadoghq.com/developers/integrations
 [7]: https://github.com/DataDog/datadog-agent
