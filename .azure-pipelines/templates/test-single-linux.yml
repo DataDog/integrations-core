@@ -16,9 +16,6 @@ jobs:
 
   steps:
   - template: './checkout-code.yml'
-  - script: ls .azure-pipelines
-  - script: ls .azure-pipelines/scripts
-  - script: .azure-pipelines/scripts/retry.sh false
   - template: './install-deps.yml'
   - template: './set-up-integrations.yml'
     parameters:
@@ -28,13 +25,13 @@ jobs:
     - template: './run-validations.yml'
 
   - ${{ if eq(parameters.test, 'true') }}:
-    - script: ddev test --cov ${{ parameters.check }}
+    - script: .azure-pipelines/scripts/retry.sh ddev test --cov ${{ parameters.check }}
       displayName: 'Run tests'
       env:
         CODECOV_TOKEN: $(CODECOV_TOKEN)
 
   - ${{ if eq(parameters.test_e2e, 'true') }}:
-    - script: ddev env test --new-env ${{ parameters.check }}
+    - script: .azure-pipelines/scripts/retry.sh ddev env test --new-env ${{ parameters.check }}
       displayName: 'Run E2E tests'
 
   - ${{ if eq(parameters.benchmark, 'true') }}:

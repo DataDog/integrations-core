@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 n=1
 max=3
 delay=1
