@@ -26,7 +26,7 @@ jobs:
     - template: './run-validations.yml'
 
   - ${{ if eq(parameters.test, 'true') }}:
-    - script: ddev test --cov ${{ parameters.check }}
+    - script: .azure-pipelines/scripts/retry.sh ddev test --cov ${{ parameters.check }}
       displayName: 'Run tests'
       env:
         CODECOV_TOKEN: $(CODECOV_TOKEN)
