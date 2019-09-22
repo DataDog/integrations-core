@@ -30,6 +30,7 @@ REQUIRES = [
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
     'pytest-mock',
+    'flaky',
     'requests>=2.22.0',
     'six',
     "shutilwhich==1.1.0; python_version < '3.0'",
