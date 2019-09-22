@@ -6,6 +6,8 @@ from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 HOST = get_docker_hostname()
+MYSQL_USERNAME = 'cactiuser'
+MYSQL_PASSWORD = 'cactipass'
 
 # ID
 CONTAINER_NAME = "dd-test-cacti"
@@ -14,8 +16,8 @@ RRD_PATH = '/var/www/html/cacti/rra'
 
 INSTANCE_INTEGRATION = {
     'mysql_host': HOST,
-    'mysql_user': 'cactiuser',
-    'mysql_password': 'cactipass',
+    'mysql_user': MYSQL_USERNAME,
+    'mysql_password': MYSQL_PASSWORD,
     'rrd_path': RRD_PATH,
     'collect_task_metrics': True,
 }
