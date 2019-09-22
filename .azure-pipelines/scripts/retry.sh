@@ -9,12 +9,12 @@ while true; do
     if [[ $n -lt $max ]]; then
       ((n++))
       echo ""
-      echo "${COLOR_RED}The command \"${*}\" failed. Attempt $n/$max:${COLOR_RESET}"
+      echo "${COLOR_RED}[RETRY] The command \"${*}\" failed. Attempt $n/$max:${COLOR_RESET}"
       echo ""
       sleep $delay;
     else
       echo ""
-      echo "${COLOR_RED}The command \"${*}\" failed after $n attempts.${COLOR_RESET}"
+      echo "${COLOR_RED}[RETRY] The command \"${*}\" failed after $n attempts.${COLOR_RESET}"
       echo ""
       exit 1
     fi
