@@ -13,10 +13,6 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 from .common import CONTAINER_NAME, E2E_METADATA, HERE, INSTANCE_INTEGRATION, MYSQL_PASSWORD, MYSQL_USERNAME, RRD_PATH
 
 SQL_SETUP = '''
-CREATE USER '{user}'@'localhost' IDENTIFIED BY '{password}';
-GRANT ALL PRIVILEGES ON *.* TO '{user}'@'localhost' WITH GRANT OPTION;
-CREATE USER '{user}'@'%' IDENTIFIED BY '{password}';
-GRANT ALL PRIVILEGES ON *.* TO '{user}'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 '''.format(
     user=MYSQL_USERNAME, password=MYSQL_PASSWORD
