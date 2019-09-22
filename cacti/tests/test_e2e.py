@@ -15,4 +15,3 @@ def test_e2e(dd_agent_check, instance):
     aggregator.assert_metric('cacti.hosts.count', value=1)
     aggregator.assert_metric('cacti.metrics.count')
     aggregator.assert_all_metrics_covered()
-
