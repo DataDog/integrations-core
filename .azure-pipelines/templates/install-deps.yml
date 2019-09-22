@@ -12,9 +12,6 @@ steps:
     versionSpec: '3.7'
   displayName: 'Use Python 3.7'
 
-- script: env | grep DOCKER_HOST
-  displayName: 'Print DOCKER_HOST'
-
 - script: python -m pip install --disable-pip-version-check --upgrade pip setuptools
   displayName: 'Upgrade Python packaging tools'
 
