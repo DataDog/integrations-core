@@ -32,6 +32,8 @@ def test_lighttpd(aggregator, check, instance):
         aggregator.assert_metric(gauge, tags=['instance:first'], count=1)
     aggregator.assert_all_metrics_covered()
 
+    assert False
+
 
 def test_service_check_ko(aggregator, check, instance):
     instance['lighttpd_status_url'] = 'http://localhost:1337'
