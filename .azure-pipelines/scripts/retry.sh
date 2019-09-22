@@ -7,14 +7,14 @@ while true; do
   "$@" && break || {
     if [[ $n -lt $max ]]; then
       ((n++))
-      echo ""
+      echo "******************************************************"
       echo "[RETRY] The command \"${*}\" failed. Attempt $n/$max:"
-      echo ""
+      echo "******************************************************"
       sleep $delay;
     else
-      echo ""
+      echo "******************************************************"
       echo "[RETRY] The command \"${*}\" failed after $n attempts."
-      echo ""
+      echo "******************************************************"
       exit 1
     fi
   }
