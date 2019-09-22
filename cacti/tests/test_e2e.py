@@ -5,7 +5,6 @@ import pytest
 
 #
 # You can access cacti in localhost:8080/cacti and log in with admin/Admin23@
-# .
 #
 
 
