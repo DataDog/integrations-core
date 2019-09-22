@@ -15,9 +15,6 @@ steps:
 - script: python -m pip install --disable-pip-version-check --upgrade pip setuptools
   displayName: 'Upgrade Python packaging tools'
 
-- script: sudo systemctl stop mysql
-  displayName: 'Mysql stop'
-
 - script: pip install --disable-pip-version-check git+git://github.com/ofek/codecov-python.git@73271695d5e8ab2d6538a06e63b400f163f26487
   displayName: 'Install Codecov'
 
