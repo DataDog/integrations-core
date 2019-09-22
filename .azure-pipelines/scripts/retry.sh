@@ -8,10 +8,14 @@ while true; do
   "$@" && break || {
     if [[ $n -lt $max ]]; then
       ((n++))
-      echo "\\n${COLOR_RED}The command \"${*}\" failed. Attempt $n/$max:${COLOR_RESET}\\n"
+      echo ""
+      echo "${COLOR_RED}The command \"${*}\" failed. Attempt $n/$max:${COLOR_RESET}"
+      echo ""
       sleep $delay;
     else
-      echo "\\n${COLOR_RED}The command \"${*}\" failed after $n attempts.${COLOR_RESET}\\n"
+      echo ""
+      echo "${COLOR_RED}The command \"${*}\" failed after $n attempts.${COLOR_RESET}"
+      echo ""
       exit 1
     fi
   }
