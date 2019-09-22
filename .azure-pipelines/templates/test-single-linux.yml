@@ -26,6 +26,7 @@ jobs:
   dependsOn: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_Setup'
   pool:
     vmImage: 'ubuntu-16.04'
+  steps:
   - ${{ if eq(parameters.validate, 'true') }}:
     - template: './run-validations.yml'
 
@@ -35,6 +36,7 @@ jobs:
   dependsOn: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_Setup'
   pool:
     vmImage: 'ubuntu-16.04'
+  steps:
   - ${{ if eq(parameters.test, 'true') }}:
     - script: ddev test --cov ${{ parameters.check }}
       displayName: 'Run tests'
@@ -46,6 +48,7 @@ jobs:
   dependsOn: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_Setup'
   pool:
     vmImage: 'ubuntu-16.04'
+  steps:
   - ${{ if eq(parameters.test_e2e, 'true') }}:
     - script: ddev env test --new-env ${{ parameters.check }}
       displayName: 'Run E2E tests'
@@ -55,6 +58,7 @@ jobs:
   dependsOn: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_Setup'
   pool:
     vmImage: 'ubuntu-16.04'
+  steps:
   - ${{ if eq(parameters.benchmark, 'true') }}:
     - script: ddev test --bench ${{ parameters.check }}
       displayName: 'Run benchmarks'
