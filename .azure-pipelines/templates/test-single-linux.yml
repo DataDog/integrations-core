@@ -8,7 +8,7 @@ parameters:
   validate: false
 
 jobs:
-- job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
+- job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_Setup'
   displayName: '${{ parameters.display }}'
 
   pool:
@@ -21,19 +21,40 @@ jobs:
     parameters:
       check: ${{ parameters.check }}
 
+- job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_validation'
+  displayName: '${{ parameters.display }} Validation'
+  dependsOn: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_Setup'
+  pool:
+    vmImage: 'ubuntu-16.04'
   - ${{ if eq(parameters.validate, 'true') }}:
     - template: './run-validations.yml'
 
+
+- job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_unit_tests'
+  displayName: '${{ parameters.display }} Unit Tests'
+  dependsOn: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_Setup'
+  pool:
+    vmImage: 'ubuntu-16.04'
   - ${{ if eq(parameters.test, 'true') }}:
     - script: ddev test --cov ${{ parameters.check }}
       displayName: 'Run tests'
       env:
         CODECOV_TOKEN: $(CODECOV_TOKEN)
 
+- job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_e2e_tests'
+  displayName: '${{ parameters.display }} E2E Tests'
+  dependsOn: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_Setup'
+  pool:
+    vmImage: 'ubuntu-16.04'
   - ${{ if eq(parameters.test_e2e, 'true') }}:
     - script: ddev env test --new-env ${{ parameters.check }}
       displayName: 'Run E2E tests'
 
+- job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_benchmark'
+  displayName: '${{ parameters.display }} Benchmark'
+  dependsOn: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux_Setup'
+  pool:
+    vmImage: 'ubuntu-16.04'
   - ${{ if eq(parameters.benchmark, 'true') }}:
     - script: ddev test --bench ${{ parameters.check }}
       displayName: 'Run benchmarks'
