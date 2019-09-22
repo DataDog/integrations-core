@@ -15,6 +15,8 @@ jobs:
     vmImage: 'ubuntu-16.04'
 
   steps:
+  - script: source ./.azure-pipelines/scripts/functions.sh
+  - script: retry false
   - template: './checkout-code.yml'
   - template: './install-deps.yml'
   - template: './set-up-integrations.yml'
