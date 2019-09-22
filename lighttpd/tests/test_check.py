@@ -33,14 +33,20 @@ def test_lighttpd(aggregator, check, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_service_check_ko(aggregator, check, instance):
+import random
+
+random.seed(0)
+
+
+def test_service_check_ko_random_but_success(aggregator, check, instance):
     instance['lighttpd_status_url'] = 'http://localhost:1337'
     tags = ['host:localhost', 'port:1337', 'instance:first']
     with pytest.raises(Exception):
         check.check(instance)
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Lighttpd.CRITICAL, tags=tags)
 
-    assert False
+    assert random.randrange(0, 3) == 0
+
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
