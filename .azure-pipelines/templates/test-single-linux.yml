@@ -18,8 +18,7 @@ jobs:
   - template: './checkout-code.yml'
   - script: ls .azure-pipelines
   - script: ls .azure-pipelines/scripts
-  - script: source .azure-pipelines/scripts/functions.sh
-  - script: retry false
+  - script: .azure-pipelines/scripts/retry.sh false
   - template: './install-deps.yml'
   - template: './set-up-integrations.yml'
     parameters:
