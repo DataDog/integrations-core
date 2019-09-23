@@ -171,6 +171,21 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
 
         echo_success('success!')
 
+        echo_waiting('Reloading the environment to reflect changes... ', nl=False)
+        result = environment.restart_agent()
+
+        if result.code:
+            click.echo()
+            echo_info(result.stdout + result.stderr)
+            echo_failure('An error occurred.')
+            echo_waiting('Stopping the environment...')
+            stop_environment(check, env, metadata=metadata)
+            echo_waiting('Stopping the Agent...')
+            environment.stop_agent()
+            environment.remove_config()
+        else:
+            echo_success('success!')
+
     if base and not dev:
         dev = True
         echo_info(
