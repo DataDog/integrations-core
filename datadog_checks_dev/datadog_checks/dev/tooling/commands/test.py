@@ -40,7 +40,7 @@ def display_envs(check_envs):
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
-@click.option('--retry', '-r', help='Number of retries on tox env test failure', type=int)
+@click.option('--retry', '-r', help='Number of retries if tests fail (per tox env)', type=int)
 @click.pass_context
 def test(
     ctx,
@@ -174,7 +174,7 @@ def test(
                 # so coverage tracks the real locations instead of .tox virtual envs
                 '--develop '
                 # comma-separated list of environments
-                '-e {}'.format(','.join(envs)),
+                '-e {}'.format(','.join(envs))
             )
             if result.code:
                 abort('\nFailed!', code=result.code)

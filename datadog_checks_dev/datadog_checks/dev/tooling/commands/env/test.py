@@ -43,7 +43,7 @@ from .stop import stop
     ),
 )
 @click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
-@click.option('--retry', '-r', help='Number of retries on failure')
+@click.option('--retry', '-r', help='Number of retries if tests fail (per tox env)', type=int)
 @click.pass_context
 def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
     """Test an environment."""
@@ -89,6 +89,7 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
                         checks=['{}:{}'.format(check, env)],
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
+                        retry=retry,
                     )
             finally:
                 if new_env:
