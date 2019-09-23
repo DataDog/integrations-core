@@ -11,7 +11,7 @@ import click
 from six import string_types
 
 from ....compat import JSONDecodeError
-from ....utils import basepath, file_exists, read_file, write_file
+from ....utils import file_exists, read_file, write_file
 from ...constants import get_root
 from ...utils import parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
@@ -55,12 +55,13 @@ INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.option('--include-extras', '-i', is_flag=True, help='Include optional fields')
-def manifest(fix, include_extras):
+@click.pass_context
+def manifest(ctx, fix, include_extras):
     """Validate `manifest.json` files."""
     all_guids = {}
 
     root = get_root()
-    root_name = basepath(get_root())
+    is_extras = ctx.obj['repo_choice'] == 'extras'
 
     ok_checks = 0
     failed_checks = 0
@@ -215,7 +216,7 @@ def manifest(fix, include_extras):
                 display_queue.append((echo_failure, output))
 
             # maintainer
-            if root_name == 'integrations-core':
+            if not is_extras:
                 correct_maintainer = 'help@datadoghq.com'
                 maintainer = decoded.get('maintainer')
                 if maintainer != correct_maintainer:
@@ -261,7 +262,7 @@ def manifest(fix, include_extras):
                 display_queue.append((echo_failure, '  should contain 80 characters maximum: short_description'))
 
             # support
-            correct_support = 'contrib' if root_name == 'integrations-extras' else 'core'
+            correct_support = 'contrib' if is_extras else 'core'
             support = decoded.get('support')
             if support != correct_support:
                 file_failures += 1

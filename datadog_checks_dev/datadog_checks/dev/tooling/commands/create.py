@@ -10,7 +10,7 @@ from ...utils import resolve_path
 from ..constants import get_root
 from ..create import construct_template_fields, create_template_files, get_valid_templates
 from ..utils import normalize_package_name
-from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success
+from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_warning
 
 HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
 PIPE = b'\xe2\x94\x82'.decode('utf-8')
@@ -94,6 +94,10 @@ def display_path_tree(path_tree):
 @click.pass_context
 def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run):
     """Create scaffolding for a new integration."""
+
+    if name.islower():
+        echo_warning('Make sure to use use display name. e.g. MapR, Ambari, IBM MQ, vSphere, ...')
+
     repo_choice = ctx.obj['repo_choice']
     root = resolve_path(location) if location else get_root()
     path_sep = os.path.sep

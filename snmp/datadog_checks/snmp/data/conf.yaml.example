@@ -151,6 +151,12 @@ instances:
     #
     # enforce_mib_constraints: true
 
+    ## @param bulk_threshold - integer - optional - default: 5
+    ## The number of symbols in each table that triggers a BULK request.
+    ## Only relevant for SNMP > 1.
+    #
+    # bulk_threshold: 5
+
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
