@@ -252,11 +252,13 @@
 					<BoundedRangeStatistic ID="7" highWaterMark="28" integral="5.04836463E9" lastSampleTime="1541641692656" lowWaterMark="0" lowerBound="0" mean="26.105691009151297" name="LocalBulletinBoardSubcriptionCount" startTime="1541448310890" unit="None" upperBound="0" value="28"/>
 				</Stat>
 				<Stat name="JVM Runtime">
+					<Stat name="Garbage collection">
 					<BoundedRangeStatistic ID="1" highWaterMark="242240" integral="2.05717966272E11" lastSampleTime="1541641692656" lowWaterMark="51200" lowerBound="51200" mean="1063.7910055074533" name="HeapSize" startTime="1541448310718" unit="KILOBYTE" upperBound="262144" value="242240"/>
 					<CountStatistic ID="2" count="55449" lastSampleTime="1541641692656" name="FreeMemory" startTime="1541448310718" unit="KILOBYTE"/>
 					<CountStatistic ID="3" count="186790" lastSampleTime="1541641692656" name="UsedMemory" startTime="1541448310718" unit="KILOBYTE"/>
 					<CountStatistic ID="4" count="193381" lastSampleTime="1541641692656" name="UpTime" startTime="1541448310718" unit="SECOND"/>
 					<CountStatistic ID="5" count="0" lastSampleTime="1541641692656" name="ProcessCpuUsage" startTime="1541448310718" unit="N/A"/>
+				        </Stat>
 				</Stat>
 				<Stat name="Object Pool">
 					<Stat name="ObjectPool_ibm.system.objectpool_com.ibm.ws.webcontainer.srt.SRTConnectionContextImpl">
@@ -4693,10 +4695,12 @@
 				</Stat>
 				<Stat name="Object Pool">
 					<Stat name="ObjectPool_ibm.system.objectpool_com.ibm.ws.webcontainer.srt.SRTConnectionContextImpl">
+						<Stat name="Pool info">
 						<CountStatistic ID="1" count="5" lastSampleTime="1541456203578" name="ObjectsCreatedCount" startTime="1541448312578" unit="unit.none"/>
 						<BoundedRangeStatistic ID="2" highWaterMark="0" integral="0.0" lastSampleTime="1541641692656" lowWaterMark="0" lowerBound="0" mean="0.0" name="ObjectsAllocatedCount" startTime="1541448312578" unit="unit.none" upperBound="0" value="0"/>
 						<BoundedRangeStatistic ID="3" highWaterMark="0" integral="0.0" lastSampleTime="1541641692656" lowWaterMark="0" lowerBound="0" mean="0.0" name="ObjectsReturnedCount" startTime="1541448312578" unit="unit.none" upperBound="0" value="0"/>
 						<BoundedRangeStatistic ID="4" highWaterMark="6" integral="1.136019628E9" lastSampleTime="1541641692656" lowWaterMark="0" lowerBound="0" mean="5.8745432298357025" name="IdleObjectsSize" startTime="1541448312578" unit="unit.none" upperBound="0" value="5"/>
+						</Stat>
 					</Stat>
 					<Stat name="ObjectPool_ibm.system.objectpool_com.ibm.ws.webcontainer.srt.SRTConnectionContextImpl.class@6a181eb6">
 						<CountStatistic ID="1" count="5" lastSampleTime="1541456203578" name="ObjectsCreatedCount" startTime="1541448312578" unit="unit.none"/>
