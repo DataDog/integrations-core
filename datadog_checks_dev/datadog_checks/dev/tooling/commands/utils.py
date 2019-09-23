@@ -26,7 +26,7 @@ def run_command_with_retry(retry, command, *args, **kwargs):
             echo_success("[RETRY] Command \"{}\" succeeded.".format(command))
             break
 
-        echo_warning("[RETRY] Command \"{}\" failed attempt {}/{}).".format(command, attempt, retry))
+        echo_warning("[RETRY] Command \"{}\" failed attempt {}/{}.".format(command, attempt, retry))
         attempt += 1
 
     return result
