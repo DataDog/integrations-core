@@ -25,7 +25,7 @@ jobs:
     - template: './run-validations.yml'
 
   - ${{ if eq(parameters.test, 'true') }}:
-    - script: ddev test --cov ${{ parameters.check }}
+    - script: ddev test --cov --pytest-args="--junitxml=junit/test-results.xml" ${{ parameters.check }}
       displayName: 'Run tests'
       env:
         CODECOV_TOKEN: $(CODECOV_TOKEN)
@@ -35,5 +35,11 @@ jobs:
       displayName: 'Run E2E tests'
 
   - ${{ if eq(parameters.benchmark, 'true') }}:
-    - script: ddev test --bench ${{ parameters.check }}
+    - script: ddev test --bench --pytest-args="--junitxml=junit/test-bench-results.xml" ${{ parameters.check }}
       displayName: 'Run benchmarks'
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: '**/test-*.xml'
+      testRunTitle: 'Publish test results'
