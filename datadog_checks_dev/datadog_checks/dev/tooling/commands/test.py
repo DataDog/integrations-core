@@ -174,7 +174,7 @@ def test(
                 # so coverage tracks the real locations instead of .tox virtual envs
                 '--develop '
                 # comma-separated list of environments
-                '-e {}'.format(','.join(envs))
+                '-e {}'.format(','.join(envs)),
             )
             if result.code:
                 abort('\nFailed!', code=result.code)
