@@ -9,6 +9,7 @@ from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import get_tox_envs
 from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
 from ..test import test as test_command
+from ..utils import retryable
 from .start import start
 from .stop import stop
 
@@ -43,7 +44,9 @@ from .stop import stop
     ),
 )
 @click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
+@click.option('--retry', '-r', help='Number of retries on failure')
 @click.pass_context
+@retryable
 def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True)

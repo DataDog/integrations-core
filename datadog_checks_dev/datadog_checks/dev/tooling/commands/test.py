@@ -12,6 +12,7 @@ from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_o
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from .utils import retryable
 
 
 def display_envs(check_envs):
@@ -39,7 +40,9 @@ def display_envs(check_envs):
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
+@click.option('--retry', '-r', help='Number of retries on failure')
 @click.pass_context
+@retryable
 def test(
     ctx,
     checks,
