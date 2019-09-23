@@ -6,8 +6,8 @@
 import os
 
 import mock
-from datadog_checks.base import AgentCheck
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.http_check import HTTPCheck
 
 from .common import (
