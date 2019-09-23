@@ -9,7 +9,6 @@ import time
 import dns.resolver
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.checks import NetworkCheck, Status
 from datadog_checks.utils.platform import Platform
 
 # These imports are necessary because otherwise dynamic type
@@ -93,18 +92,22 @@ class DNSCheck(AgentCheck):
 
         except dns.exception.Timeout:
             self.log.error('DNS resolution of {} timed out'.format(hostname))
-            self.report_as_service_check(Status.CRITICAL, instance, 'DNS resolution of {} timed out'.format(hostname))
+            self.report_as_service_check(
+                AgentCheck.CRITICAL, instance, 'DNS resolution of {} timed out'.format(hostname)
+            )
 
         except Exception:
             self.log.exception('DNS resolution of {} has failed.'.format(hostname))
-            self.report_as_service_check(Status.CRITICAL, instance, 'DNS resolution of {} has failed'.format(hostname))
+            self.report_as_service_check(
+                AgentCheck.CRITICAL, instance, 'DNS resolution of {} has failed'.format(hostname)
+            )
 
         else:
             tags = self._get_tags(instance)
             if response_time > 0:
                 self.gauge('dns.response_time', response_time, tags=tags)
             self.log.debug('Resolved hostname: {}'.format(hostname))
-            self.report_as_service_check(Status.UP, instance, 'UP')
+            self.report_as_service_check(AgentCheck.OK, instance, 'UP')
 
     def _check_answer(self, answer, resolves_as):
         ips = [x.strip().lower() for x in resolves_as.split(',')]
@@ -148,9 +151,7 @@ class DNSCheck(AgentCheck):
     def report_as_service_check(self, status, instance, msg=None):
         tags = self._get_tags(instance)
 
-        if status == Status.UP:
+        if status == AgentCheck.OK:
             msg = None
 
-        self.service_check(
-            self.SERVICE_CHECK_NAME, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg
-        )
+        self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
