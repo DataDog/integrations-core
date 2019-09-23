@@ -40,7 +40,7 @@ def display_envs(check_envs):
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
-@click.option('--retry', '-r', help='Number of retries if tests fail (per tox env)', type=int)
+@click.option('--retry', '-r', help='Number of retries for each tox env', type=int)
 @click.pass_context
 def test(
     ctx,
