@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.dev import run_command
-from datadog_checks.dev.tooling.commands.console import abort, echo_success, echo_warning
+from ...subprocess import run_command
+from .console import abort, echo_success, echo_warning
 
 
 def run_command_with_retry(retry, command, *args, **kwargs):
