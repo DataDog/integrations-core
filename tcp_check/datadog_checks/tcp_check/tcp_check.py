@@ -18,29 +18,23 @@ class TCPCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(TCPCheck, self).__init__(name, init_config, instances)
-
         instance = self.instances[0]
-        instance_name = self.normalize(instance['name'])
-        url = instance.get('host', None)
 
-        try:
-            self.port = int(instance.get('port', None))
-        except Exception:
-            raise BadConfException("{} is not a correct port.".format(str(instance.get('port', None))))
-
+        self.instance_name = self.normalize(instance['name'])
+        port = instance.get('port', None)
         self.timeout = float(instance.get('timeout', 10))
         self.response_time = instance.get('collect_response_time', False)
-
-        custom_tags = instance.get('tags', [])
-        self.tags = custom_tags + [
-            'target_host:{}'.format(url),
-            'port:{}'.format(self.port),
-            'instance:{}'.format(instance_name),
-        ]
-
+        self.custom_tags = instance.get('tags', [])
         self.socket_type = None
+
         try:
-            split = url.split(":")
+            self.port = int(port)
+        except Exception:
+            raise BadConfException("{} is not a correct port.".format(str(port)))
+
+        try:
+            self.url = instance.get('host', None)
+            split = self.url.split(":")
         except Exception:  # Would be raised if url is not a string
             raise BadConfException("A valid url must be specified")
 
@@ -50,13 +44,13 @@ class TCPCheck(AgentCheck):
                 if len(block) != 4:
                     raise BadConfException("{} is not a correct IPv6 address.".format(url))
 
-            self.addr = url
+            self.addr = self.url
             # It's a correct IP V6 address
             self.socket_type = socket.AF_INET6
 
         if self.socket_type is None:
             try:
-                self.addr = socket.gethostbyname(url)
+                self.addr = socket.gethostbyname(self.url)
                 self.socket_type = socket.AF_INET
             except Exception:
                 msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(url)
@@ -118,7 +112,8 @@ class TCPCheck(AgentCheck):
             self.gauge(
                 'network.tcp.response_time',
                 time.time() - start,
-                tags=['url:{}:{}'.format(instance.get('host', None), self.port)] + self.tags,
+                tags=['url:{}:{}'.format(instance.get('host', None), self.port), 'instance:{}'.format(instance.get('name'))]
+                     + self.custom_tags,
             )
 
         self.log.debug("{}:{} is UP".format(self.addr, self.port))
@@ -128,6 +123,12 @@ class TCPCheck(AgentCheck):
         if status == AgentCheck.OK:
             msg = None
 
-        self.service_check(self.SERVICE_CHECK_NAME, status, tags=self.tags, message=msg)
+        tags = self.custom_tags + [
+            'target_host:{}'.format(self.url),
+            'port:{}'.format(self.port),
+            'instance:{}'.format(self.instance_name),
+        ]
+
+        self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
         # Report as a metric as well
-        self.gauge("network.tcp.can_connect", 1 if status == AgentCheck.OK else 0, tags=self.tags)
+        self.gauge("network.tcp.can_connect", 1 if status == AgentCheck.OK else 0, tags=tags)

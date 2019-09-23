@@ -3,14 +3,17 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from copy import deepcopy
 
+from tcp_check.datadog_checks.tcp_check import TCPCheck
 from . import common
 
 
-def test_down(aggregator, check):
+def test_down(aggregator):
     """
     Service expected to be down
     """
-    check.check(deepcopy(common.INSTANCE_KO))
+    instance = deepcopy(common.INSTANCE_KO)
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
+    check.check(instance)
     expected_tags = ["instance:DownService", "target_host:127.0.0.1", "port:65530", "foo:bar"]
     aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
@@ -26,13 +29,14 @@ def test_up(aggregator, check):
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
 
 
-def test_response_time(aggregator, check):
+def test_response_time(aggregator):
     """
     Test the response time from a server expected to be up
     """
     instance = deepcopy(common.INSTANCE)
     instance['collect_response_time'] = True
     instance['name'] = 'instance:response_time'
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
     check.check(instance)
 
     # service check
