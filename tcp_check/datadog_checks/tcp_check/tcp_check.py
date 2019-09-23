@@ -70,7 +70,9 @@ class TCPCheck(AgentCheck):
         except socket.timeout as e:
             # The connection timed out because it took more time than the specified value in the yaml config file
             length = int((time.time() - start) * 1000)
-            self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(self.addr, self.port, str(e), length))
+            self.log.info(
+                "{}:{} is DOWN ({}). Connection failed after {} ms".format(self.addr, self.port, str(e), length)
+            )
             self.report_as_service_check(
                 AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
             )
@@ -96,14 +98,18 @@ class TCPCheck(AgentCheck):
                 )
 
             else:
-                self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(self.addr, self.port, str(e), length))
+                self.log.info(
+                    "{}:{} is DOWN ({}). Connection failed after {} ms".format(self.addr, self.port, str(e), length)
+                )
                 self.report_as_service_check(
                     AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
                 )
 
         except Exception as e:
             length = int((time.time() - start) * 1000)
-            self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(self.addr, self.port, str(e), length))
+            self.log.info(
+                "{}:{} is DOWN ({}). Connection failed after {} ms".format(self.addr, self.port, str(e), length)
+            )
             self.report_as_service_check(
                 AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
             )
@@ -112,8 +118,11 @@ class TCPCheck(AgentCheck):
             self.gauge(
                 'network.tcp.response_time',
                 time.time() - start,
-                tags=['url:{}:{}'.format(instance.get('host', None), self.port), 'instance:{}'.format(instance.get('name'))]
-                     + self.custom_tags,
+                tags=[
+                    'url:{}:{}'.format(instance.get('host', None), self.port),
+                    'instance:{}'.format(instance.get('name')),
+                ]
+                + self.custom_tags,
             )
 
         self.log.debug("{}:{} is UP".format(self.addr, self.port))

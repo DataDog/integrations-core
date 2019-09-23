@@ -3,7 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from copy import deepcopy
 
-from tcp_check.datadog_checks.tcp_check import TCPCheck
+from datadog_checks.tcp_check import TCPCheck
+
 from . import common
 
 
