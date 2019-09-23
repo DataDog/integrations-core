@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
@@ -15,6 +15,21 @@ class TCPCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'
     SERVICE_CHECK_NAME = 'tcp.can_connect'
+
+    def __init__(self, name, init_config, instances):
+        super(TCPCheck, self).__init__(name, init_config, instances=instances)
+
+        instance = self.instances[0]
+        instance_name = self.normalize(instance['name'])
+        host = instance.get('host', None)
+        port = instance.get('port', None)
+        custom_tags = instance.get('tags', [])
+
+        self.tags = custom_tags + [
+            'target_host:{}'.format(host),
+            'port:{}'.format(port),
+            'instance:{}'.format(instance_name),
+        ]
 
     def _load_conf(self, instance):
         # Fetches the conf
@@ -72,7 +87,7 @@ class TCPCheck(AgentCheck):
             length = int((time.time() - start) * 1000)
             self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(addr, port, str(e), length))
             self.report_as_service_check(
-                AgentCheck.CRITICAL, instance, "{}. Connection failed after {} ms".format(str(e), length)
+                AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
             )
 
         except socket.error as e:
@@ -88,7 +103,6 @@ class TCPCheck(AgentCheck):
                 self.log.info("System tcp timeout. Assuming that the checked system is down")
                 self.report_as_service_check(
                     AgentCheck.CRITICAL,
-                    instance,
                     """Socket error: {}.
                  The connection timed out after {} ms because it took more time than the system tcp stack allows.
                  You might want to change this setting to allow longer timeouts""".format(
@@ -99,14 +113,14 @@ class TCPCheck(AgentCheck):
             else:
                 self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(addr, port, str(e), length))
                 self.report_as_service_check(
-                    AgentCheck.CRITICAL, instance, "{}. Connection failed after {} ms".format(str(e), length)
+                    AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
                 )
 
         except Exception as e:
             length = int((time.time() - start) * 1000)
             self.log.info("{}:{} is DOWN ({}). Connection failed after {} ms".format(addr, port, str(e), length))
             self.report_as_service_check(
-                AgentCheck.CRITICAL, instance, "{}. Connection failed after {} ms".format(str(e), length)
+                AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
             )
 
         if response_time:
@@ -118,25 +132,12 @@ class TCPCheck(AgentCheck):
             )
 
         self.log.debug("{}:{} is UP".format(addr, port))
-        self.report_as_service_check(AgentCheck.OK, instance, 'UP')
+        self.report_as_service_check(AgentCheck.OK, 'UP')
 
-    def report_as_service_check(self, status, instance, msg=None):
-        instance_name = self.normalize(instance['name'])
-        host = instance.get('host', None)
-        port = instance.get('port', None)
-        custom_tags = instance.get('tags', [])
-
+    def report_as_service_check(self, status, msg=None):
         if status == AgentCheck.OK:
             msg = None
 
-        tags = custom_tags + [
-            'target_host:{}'.format(host),
-            'port:{}'.format(port),
-            'instance:{}'.format(instance_name),
-        ]
-
-        self.service_check(
-            self.SERVICE_CHECK_NAME, status, tags=tags, message=msg
-        )
+        self.service_check(self.SERVICE_CHECK_NAME, status, tags=self.tags, message=msg)
         # Report as a metric as well
         self.gauge("network.tcp.can_connect", 1 if status == AgentCheck.OK else 0, tags=tags)
