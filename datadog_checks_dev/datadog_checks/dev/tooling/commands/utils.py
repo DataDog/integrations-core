@@ -7,7 +7,7 @@ import functools
 from datadog_checks.dev.tooling.commands.console import abort, echo_failure, echo_warning
 
 
-def retryable(func):
+def retry_command(func):
     """ Make command retryable
 
     Usage with click:
