@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import ipaddress
 import threading
 import time
 from collections import defaultdict
@@ -87,7 +86,7 @@ class SnmpCheck(AgentCheck):
             self.profiles,
             self.profiles_by_oid,
         )
-        if self._config.network_address:
+        if self._config.ip_network:
             self._thread = threading.Thread(target=self.discover_instances, name=self.name)
             self._thread.daemon = True
             self._thread.start()
@@ -107,19 +106,19 @@ class SnmpCheck(AgentCheck):
         return key
 
     def discover_instances(self):
-        network = ipaddress.ip_network(self._config.network_address)
-        discovery_interval = self._config.instance.get('discovery_interval', 3600)
+        config = self._config
+        discovery_interval = config.instance.get('discovery_interval', 3600)
         while self._running:
             start_time = time.time()
-            for host in network.hosts():
+            for host in config.ip_network.hosts():
                 host = str(host)
-                if host in self._config.discovered_instances:
+                if host in config.discovered_instances:
                     continue
-                instance = self._config.instance.copy()
+                instance = config.instance.copy()
                 instance.pop('network_address')
                 instance['ip_address'] = host
 
-                config = InstanceConfig(
+                host_config = InstanceConfig(
                     instance,
                     self.warning,
                     self.init_config.get('global_metrics', []),
@@ -128,15 +127,18 @@ class SnmpCheck(AgentCheck):
                     self.profiles_by_oid,
                 )
                 try:
-                    sys_object_oid = self.fetch_sysobject_oid(config)
+                    sys_object_oid = self.fetch_sysobject_oid(host_config)
                 except Exception as e:
                     self.log.debug("Error scanning host %s: %s", host, e)
                     continue
                 if sys_object_oid not in self.profiles_by_oid:
-                    self.log.warn("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
-                profile = self.profiles_by_oid[sys_object_oid]
-                config.refresh_with_profile(self.profiles[profile], self.warning)
-                self._config.discovered_instances[host] = config
+                    if not (host_config.table_oids or host_config.raw_oids):
+                        self.log.warn("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
+                        continue
+                else:
+                    profile = self.profiles_by_oid[sys_object_oid]
+                    host_config.refresh_with_profile(self.profiles[profile], self.warning)
+                config.discovered_instances[host] = host_config
             time_elapsed = time.time() - start_time
             if discovery_interval - time_elapsed > 0:
                 time.sleep(discovery_interval - time_elapsed)
@@ -318,20 +320,21 @@ class SnmpCheck(AgentCheck):
         Perform two series of SNMP requests, one for all that have MIB associated
         and should be looked up and one for those specified by oids.
         """
+        config = self._config
         if instance.get('network_address'):
-            for host, discovered in list(self._config.discovered_instances.items()):
+            for host, discovered in list(config.discovered_instances.items()):
                 if self._check_with_config(discovered):
-                    self._config.failing_instances[host] += 1
-                    if self._config.failing_instances[host] > self._config.allowed_failures:
+                    config.failing_instances[host] += 1
+                    if config.failing_instances[host] > config.allowed_failures:
                         # Remove it from discovered instances, we'll re-discover it later if it reappears
-                        self._config.discovered_instances.pop(host)
+                        config.discovered_instances.pop(host)
                         # Reset the failure counter as well
-                        self._config.failing_instances.pop(host)
+                        config.failing_instances.pop(host)
                 else:
                     # Reset the counter if not's failing
-                    self._config.failing_instances.pop(host, None)
+                    config.failing_instances.pop(host, None)
         else:
-            self._check_with_config(self._config)
+            self._check_with_config(config)
 
     def _check_with_config(self, config):
         # Reset errors
