@@ -40,6 +40,12 @@ def test_service_check_ko(aggregator, check, instance):
         check.check(instance)
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Lighttpd.CRITICAL, tags=tags)
 
+    import time
+
+    r = int(time.time() * 10)
+    print('r', r)
+    assert r % 2 == 0
+
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):

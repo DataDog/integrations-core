@@ -2,41 +2,31 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import functools
+from datadog_checks.dev import run_command
+from datadog_checks.dev.tooling.commands.console import abort, echo_success, echo_warning
 
-from datadog_checks.dev.tooling.commands.console import abort, echo_failure, echo_warning
 
-
-def retry_command(func):
-    """ Make command retryable
-
-    Usage with click:
-
-        @click.option('--retry', '-r', help='Number of retries on failure')
-        @retryable
-        def command():
-            ...
-
+def run_command_with_retry(retry, command, *args, **kwargs):
+    """ Wrap run_command with retry.
+        If retry is None. Will call transparently run_command.
     """
+    if retry is None:
+        return run_command(command, *args, **kwargs)
 
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        retry = kwargs.get('retry')
-        retry = 1 if retry is None else int(retry)
-        if retry < 1:
-            abort('\nRetry must be >= 1.', code=2)
-        n = 1
-        while True:
-            try:
-                return func(*args, **kwargs)
-            except SystemExit as e:
-                if n < retry:
-                    echo_warning(
-                        "\n[RETRY] Command \"{}\" failed. Start attempt {}/{} ...\n".format(func.__name__, n + 1, retry)
-                    )
-                else:
-                    echo_failure("\n[RETRY] Command \"{}\" failed after {} attempts.\n".format(func.__name__, retry))
-                    raise e
-            n += 1
+    if retry < 1:
+        abort('\nRetry must be >= 1.', code=2)
 
-    return wrapper
+    attempt = 1
+    result = None
+    while attempt <= retry:
+        echo_warning("[RETRY] Start attempt {}/{} ...".format(attempt, retry))
+
+        result = run_command(command, *args, **kwargs)
+        if result.code == 0:
+            echo_success("[RETRY] Command \"{}\" succeeded.".format(command))
+            break
+
+        echo_warning("[RETRY] Command \"{}\" failed attempt {}/{}).".format(command, attempt, retry))
+        attempt += 1
+
+    return result

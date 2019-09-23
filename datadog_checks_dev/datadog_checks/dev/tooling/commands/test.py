@@ -12,7 +12,7 @@ from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_o
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
-from .utils import retry_command
+from .utils import run_command_with_retry
 
 
 def display_envs(check_envs):
@@ -40,9 +40,8 @@ def display_envs(check_envs):
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
-@click.option('--retry', '-r', help='Number of retries on failure')
+@click.option('--retry', '-r', help='Number of retries on tox env test failure', type=int)
 @click.pass_context
-@retry_command
 def test(
     ctx,
     checks,
@@ -167,14 +166,15 @@ def test(
             echo_waiting(wait_text)
             echo_waiting('-' * len(wait_text))
 
-            result = run_command(
-                'tox '
+            result = run_command_with_retry(
+                retry=retry,
+                command='tox '
                 # so users won't get failures for our possibly strict CI requirements
                 '--skip-missing-interpreters '
                 # so coverage tracks the real locations instead of .tox virtual envs
                 '--develop '
                 # comma-separated list of environments
-                '-e {}'.format(','.join(envs))
+                '-e {}'.format(','.join(envs)),
             )
             if result.code:
                 abort('\nFailed!', code=result.code)
