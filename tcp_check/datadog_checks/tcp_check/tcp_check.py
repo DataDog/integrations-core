@@ -42,7 +42,7 @@ class TCPCheck(AgentCheck):
         if len(split) == 8:  # It may then be a IP V6 address, we check that
             for block in split:
                 if len(block) != 4:
-                    raise BadConfException("{} is not a correct IPv6 address.".format(url))
+                    raise BadConfException("{} is not a correct IPv6 address.".format(self.url))
 
             self.addr = self.url
             # It's a correct IP V6 address
@@ -53,7 +53,7 @@ class TCPCheck(AgentCheck):
                 self.addr = socket.gethostbyname(self.url)
                 self.socket_type = socket.AF_INET
             except Exception:
-                msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(url)
+                msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(self.url)
                 raise BadConfException(msg)
 
     def check(self, instance):
