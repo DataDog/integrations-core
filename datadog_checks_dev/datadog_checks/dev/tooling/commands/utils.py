@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
 
 from ...subprocess import run_command
 from .console import abort, echo_failure, echo_success, echo_waiting
@@ -19,14 +20,16 @@ def run_command_with_retry(retry, command, *args, **kwargs):
     attempt = 1
     result = None
     while attempt <= retry:
-        echo_waiting("[RETRY] Start attempt {}/{} ...".format(attempt, retry))
+        echo_prefix = "[RETRY] {}/{} - Command \"{}\": ".format(attempt, retry, command)
+        echo_waiting(echo_prefix + "Start...")
 
         result = run_command(command, *args, **kwargs)
         if result.code == 0:
-            echo_success("[RETRY] Command \"{}\" succeeded.".format(command))
+            echo_success(echo_prefix + "Passed.")
             break
 
-        echo_failure("[RETRY] Command \"{}\" failed attempt {}/{}.".format(command, attempt, retry))
+        echo_failure(echo_prefix + "Failed.")
+        time.sleep(1)
         attempt += 1
 
     return result
