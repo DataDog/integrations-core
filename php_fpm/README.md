@@ -38,8 +38,8 @@ Configuration Options:
 * `ping_url` (Required) - URL for the PHP FPM ping page defined in the fpm pool config file (ping.path)
 * `use_fastcgi` (Optional) - Communicate directly with PHP-FPM using FastCGI
 * `ping_reply` (Required) - Reply from the ping_url. Unless you define a reply, it is `pong`
-* `username` (Optional) - Used if you have set basic authentication on the status and ping pages
-* `password` (Optional) - Used if you have set basic authentication on the status and ping pages
+* `username` (Optional) - Used if basic authentication is set on the status and ping pages
+* `password` (Optional) - Used if basic authentication is set on the status and ping pages
 * `http_host` (Optional) - If your FPM pool is only accessible via a specific HTTP vhost, specify it here
 
 [Restart the Agent][6] to start sending PHP-FPM metrics to Datadog.

@@ -35,7 +35,7 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
           - apache_status_url: http://example.com/server-status?auto
           #  username: example_user # if apache_status_url needs HTTP basic auth
           #  password: example_password
-          #  tls_verify: false # if you need to disable TLS cert validation, i.e. for self-signed certs
+          #  tls_verify: false # if you need to enable TLS cert validation, i.e. for self-signed certs
 
     Change the `apache_status_url` parameter value and configure it for your environment.
     See the [sample apache.d/conf.yaml][5] for all available configuration options.

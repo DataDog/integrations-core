@@ -28,8 +28,8 @@ Follow the instructions below to configure this check for an Agent running on a 
         instances:
           - url: https://<server>:<port> # the API endpoint of your Marathon master; required
         #   acs_url: https://<server>:<port> # if your Marathon master requires ACS auth
-            username: <username> # the username for marathon API or ACS token authentication
-            password: <password> # the password for marathon API or ACS token authentication
+            username: <username> # the username for Marathon API or ACS token authentication
+            password: <password> # the password for Marathon API or ACS token authentication
     ```
 
     The function of `username` and `password` depends on whether or not you configure `acs_url`; If you do, the Agent uses them to request an authentication token from ACS, which it then uses to authenticate to the Marathon API. Otherwise, the Agent uses `username` and `password` to directly authenticate to the Marathon API.
