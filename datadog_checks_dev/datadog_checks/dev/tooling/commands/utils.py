@@ -21,7 +21,7 @@ def retry_command(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        retry = kwargs.pop('retry')
+        retry = kwargs.get('retry')
         retry = 1 if retry is None else int(retry)
         if retry < 1:
             abort('\nRetry must be >= 1.', code=2)

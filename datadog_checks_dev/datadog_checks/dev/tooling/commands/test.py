@@ -62,6 +62,7 @@ def test(
     changed,
     cov_keep,
     pytest_args,
+    retry,
 ):
     """Run tests for Agent-based checks.
 

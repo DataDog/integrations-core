@@ -47,7 +47,7 @@ from .stop import stop
 @click.option('--retry', '-r', help='Number of retries on failure')
 @click.pass_context
 @retry_command
-def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
+def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True)
     tests_ran = False
@@ -95,6 +95,5 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
             finally:
                 if new_env:
                     ctx.invoke(stop, check=check, env=env)
-
     if not tests_ran:
         echo_info('Nothing to test!')
