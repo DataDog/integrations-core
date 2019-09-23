@@ -349,9 +349,9 @@ class AggregatorStub(object):
                 dup_contexts[context] = metrics
 
         err_msg_lines = ["Duplicate {}s found:".format(stub_type)]
-        for metrics in dup_contexts.values():
-            err_msg_lines.append('- {}'.format(metrics[0].name))
-            for metric in metrics:
+        for key in sorted(dup_contexts.keys()):
+            err_msg_lines.append('- {}'.format(dup_contexts[key][0].name))
+            for metric in dup_contexts[key]:
                 err_msg_lines.append('    ' + str(metric))
 
         assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
