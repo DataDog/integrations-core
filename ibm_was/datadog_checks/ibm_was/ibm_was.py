@@ -88,7 +88,11 @@ class IbmWasCheck(AgentCheck):
             if child.tag in metrics.METRIC_VALUE_FIELDS:
                 self.submit_metrics(child, prefix, tags)
             elif child.tag in metrics.CATEGORY_FIELDS:
-                recursion_tags = tags + ["{}:{}".format(nested_tags.get(prefix)[recursion_level], child.get('name'))]
+                tag_list = nested_tags.get(prefix)
+                if tag_list and len(tag_list) > recursion_level:
+                    recursion_tags = tags + ['{}:{}'.format(tag_list[recursion_level], child.get('name'))]
+                else:
+                    recursion_tags = tags
                 self.process_stats(child, prefix, metric_categories, nested_tags, recursion_tags, recursion_level + 1)
 
     def submit_metrics(self, child, prefix, tags):
