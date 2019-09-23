@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from ...subprocess import run_command
-from .console import abort, echo_failure, echo_info, echo_success
+from .console import abort, echo_failure, echo_success, echo_waiting
 
 
 def run_command_with_retry(retry, command, *args, **kwargs):
@@ -19,7 +19,7 @@ def run_command_with_retry(retry, command, *args, **kwargs):
     attempt = 1
     result = None
     while attempt <= retry:
-        echo_info("[RETRY] Start attempt {}/{} ...".format(attempt, retry))
+        echo_waiting("[RETRY] Start attempt {}/{} ...".format(attempt, retry))
 
         result = run_command(command, *args, **kwargs)
         if result.code == 0:
