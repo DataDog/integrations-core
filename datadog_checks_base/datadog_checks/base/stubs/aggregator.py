@@ -303,6 +303,12 @@ class AggregatorStub(object):
     def assert_no_duplicate_metrics(self):
         """
         Assert no duplicate metrics have been submitted.
+
+        Metrics are considered duplicate when all following fields match:
+            - metric name
+            - type (gauge, rate, etc)
+            - tags
+            - hostname
         """
         # metric types that intended to be called multiple times are ignored
         ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]
@@ -316,6 +322,12 @@ class AggregatorStub(object):
     def assert_no_duplicate_service_checks(self):
         """
         Assert no duplicate service checks have been submitted.
+
+        Service checks are considered duplicate when all following fields match:
+            - metric name
+            - status
+            - tags
+            - hostname
         """
         service_check_stubs = [m for metrics in self._service_checks.values() for m in metrics]
 
