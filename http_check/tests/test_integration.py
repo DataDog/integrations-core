@@ -6,6 +6,7 @@
 import os
 
 import mock
+from datadog_checks.base import AgentCheck
 
 from datadog_checks.http_check import HTTPCheck
 
@@ -29,14 +30,14 @@ def test_check_cert_expiration(http_check):
     # up
     instance = {'url': 'https://sha256.badssl.com/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
-    assert status == 'UP'
+    assert status == AgentCheck.OK
     assert days_left > 0
     assert seconds_left > 0
 
     # bad hostname
     instance = {'url': 'https://wrong.host.badssl.com/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
-    assert status == 'CRITICAL'
+    assert status == AgentCheck.CRITICAL
     assert days_left == 0
     assert seconds_left == 0
     assert 'Hostname mismatch' in msg or "doesn't match" in msg
@@ -44,14 +45,14 @@ def test_check_cert_expiration(http_check):
     # site is down
     instance = {'url': 'https://this.does.not.exist.foo'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
-    assert status == 'DOWN'
+    assert status == AgentCheck.CRITICAL
     assert days_left == 0
     assert seconds_left == 0
 
     # cert expired
     instance = {'url': 'https://expired.badssl.com/'}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
-    assert status == 'DOWN'
+    assert status == AgentCheck.CRITICAL
     assert days_left == 0
     assert seconds_left == 0
 
@@ -59,28 +60,28 @@ def test_check_cert_expiration(http_check):
     days_critical = 1000
     instance = {'url': 'https://sha256.badssl.com/', 'days_critical': days_critical}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
-    assert status == 'CRITICAL'
+    assert status == AgentCheck.CRITICAL
     assert 0 < days_left < days_critical
 
     # critical in seconds (ensure seconds take precedence over days config)
     seconds_critical = days_critical * 24 * 3600
     instance = {'url': 'https://sha256.badssl.com/', 'days_critical': 0, 'seconds_critical': seconds_critical}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
-    assert status == 'CRITICAL'
+    assert status == AgentCheck.CRITICAL
     assert 0 < seconds_left < seconds_critical
 
     # warning in days
     days_warning = 1000
     instance = {'url': 'https://sha256.badssl.com/', 'days_warning': days_warning}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
-    assert status == 'WARNING'
+    assert status == AgentCheck.WARNING
     assert 0 < days_left < days_warning
 
     # warning in seconds (ensure seconds take precedence over days config)
     seconds_warning = days_warning * 24 * 3600
     instance = {'url': 'https://sha256.badssl.com/', 'days_warning': 0, 'seconds_warning': seconds_warning}
     status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path, check_hostname)
-    assert status == 'WARNING'
+    assert status == AgentCheck.WARNING
     assert 0 < seconds_left < seconds_warning
 
 
@@ -204,9 +205,9 @@ def test_data_methods(aggregator, http_check):
         url_tag = ['url:{}'.format(instance.get('url'))]
         instance_tag = ['instance:{}'.format(instance.get('name'))]
 
-        aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=url_tag + instance_tag, count=1)
-        aggregator.assert_metric('network.http.can_connect', tags=url_tag + instance_tag, value=1, count=1)
-        aggregator.assert_metric('network.http.cant_connect', tags=url_tag + instance_tag, value=0, count=1)
+        aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=AgentCheck.OK, tags=url_tag + instance_tag, count=1)
+        aggregator.assert_metric('network.http.can_connect', tags=url_tag + instance_tag, value=1.0, count=1)
+        aggregator.assert_metric('network.http.cant_connect', tags=url_tag + instance_tag, value=0.0, count=1)
         aggregator.assert_metric('network.http.response_time', tags=url_tag + instance_tag, count=1)
 
         # Assert coverage for this check on this instance

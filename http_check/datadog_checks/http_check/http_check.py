@@ -84,14 +84,14 @@ class HTTPCheck(AgentCheck):
         def send_status_up(logMsg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.debug(logMsg)
-            service_checks.append((self.SC_STATUS, AgentCheck.UP, "UP"))
+            service_checks.append((self.SC_STATUS, AgentCheck.OK, "UP"))
 
         def send_status_down(loginfo, down_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.info(loginfo)
             if include_content:
                 down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
-            service_checks.append((self.SC_STATUS, AgentCheck.DOWN, down_msg))
+            service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
 
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
@@ -99,7 +99,7 @@ class HTTPCheck(AgentCheck):
         instance_name = self.normalize(instance['name'])
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
-        service_checks_tags = self._get_service_check_tags(instance)
+        service_checks_tags = self._get_service_checks_tags(instance)
         r = None
         try:
             parsed_uri = urlparse(addr)
@@ -130,7 +130,7 @@ class HTTPCheck(AgentCheck):
             length = int((time.time() - start) * 1000)
             self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
             service_checks.append(
-                (self.SC_STATUS, AgentCheck.DOWN, "{}. Connection failed after {} ms".format(str(e), length))
+                (self.SC_STATUS, AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length))
             )
 
         except socket.error as e:
@@ -139,7 +139,7 @@ class HTTPCheck(AgentCheck):
             service_checks.append(
                 (
                     self.SC_STATUS,
-                    AgentCheck.DOWN,
+                    AgentCheck.CRITICAL,
                     "Socket error: {}. Connection failed after {} ms".format(repr(e), length),
                 )
             )
@@ -178,7 +178,7 @@ class HTTPCheck(AgentCheck):
 
                 self.log.info(message)
 
-                service_checks.append((self.SC_STATUS, AgentCheck.DOWN, message))
+                service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, message))
 
             if not service_checks:
                 # Host is UP
@@ -220,11 +220,11 @@ class HTTPCheck(AgentCheck):
 
         # Report status metrics as well
         if service_checks:
-            can_status = 1 if service_checks[0][1] == "UP" else 0
+            can_status = 1 if service_checks[0][1] == AgentCheck.OK else 0
             self.gauge('network.http.can_connect', can_status, tags=tags_list)
 
             # cant_connect is useful for top lists
-            cant_status = 0 if service_checks[0][1] == "UP" else 1
+            cant_status = 0 if service_checks[0][1] == AgentCheck.OK else 1
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
@@ -311,13 +311,13 @@ class HTTPCheck(AgentCheck):
             msg = str(e)
             if 'expiration' in msg:
                 self.log.debug("error: {}. Cert might be expired.".format(e))
-                return AgentCheck.DOWN, 0, 0, msg
+                return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
                 self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
                 return AgentCheck.CRITICAL, 0, 0, msg
             else:
                 self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
-                return AgentCheck.DOWN, 0, 0, msg
+                return AgentCheck.CRITICAL, 0, 0, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         time_left = exp_date - datetime.utcnow()
@@ -344,4 +344,4 @@ class HTTPCheck(AgentCheck):
             )
 
         else:
-            return AgentCheck.UP, days_left, seconds_left, "Days left: {}".format(days_left)
+            return AgentCheck.OK, days_left, seconds_left, "Days left: {}".format(days_left)
