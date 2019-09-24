@@ -8,6 +8,7 @@ HERE = get_here()
 HOST = get_docker_hostname()
 MYSQL_USERNAME = 'cactiuser'
 MYSQL_PASSWORD = 'cactipass'
+DATABASE = 'cacti'
 
 # ID
 CONTAINER_NAME = "dd-test-cacti"
