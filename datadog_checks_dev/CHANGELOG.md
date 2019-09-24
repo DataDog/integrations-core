@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.34.0 / 2019-09-24
+
+* [Added] Improve RetryError message. See [#4619](https://github.com/DataDog/integrations-core/pull/4619).
+* [Added] Reload environments if there are extra startup commands. See [#4614](https://github.com/DataDog/integrations-core/pull/4614).
+* [Added] Add warning to create command if name is lowercase. See [#4564](https://github.com/DataDog/integrations-core/pull/4564).
+
 ## 0.33.0 / 2019-09-19
 
 * [Fixed] Stop identifying core vs extras from the working directory name. See [#4583](https://github.com/DataDog/integrations-core/pull/4583).
