@@ -132,72 +132,69 @@ def test(
     tests_ran = False
 
     for check, envs in check_envs:
-        # Many checks don't have benchmark envs, etc.
-        if not envs:
-            continue
+        for env in envs:
+            # This is for ensuring proper spacing between output of multiple checks' tests.
+            # Basically this avoids printing a new line before the first check's tests.
+            output_separator = '\n' if tests_ran else ''
 
-        # This is for ensuring proper spacing between output of multiple checks' tests.
-        # Basically this avoids printing a new line before the first check's tests.
-        output_separator = '\n' if tests_ran else ''
+            # For performance reasons we're generating what to test on the fly and therefore
+            # need a way to tell if anything ran since we don't know anything upfront.
+            tests_ran = True
 
-        # For performance reasons we're generating what to test on the fly and therefore
-        # need a way to tell if anything ran since we don't know anything upfront.
-        tests_ran = True
+            if coverage:
+                test_env_vars['PYTEST_ADDOPTS'] = pytest_options.format(pytest_coverage_sources(check))
 
-        if coverage:
-            test_env_vars['PYTEST_ADDOPTS'] = pytest_options.format(pytest_coverage_sources(check))
+            if verbose:
+                echo_info('pytest options: `{}`'.format(test_env_vars['PYTEST_ADDOPTS']))
 
-        if verbose:
-            echo_info('pytest options: `{}`'.format(test_env_vars['PYTEST_ADDOPTS']))
-
-        with chdir(os.path.join(root, check), env_vars=test_env_vars):
-            if format_style:
-                test_type_display = 'the code formatter'
-            elif style:
-                test_type_display = 'only style checks'
-            elif bench:
-                test_type_display = 'only benchmarks'
-            elif e2e:
-                test_type_display = 'only end-to-end tests'
-            else:
-                test_type_display = 'tests'
-
-            wait_text = '{}Running {} for `{}`'.format(output_separator, test_type_display, check)
-            echo_waiting(wait_text)
-            echo_waiting('-' * len(wait_text))
-
-            result = run_command_with_retry(
-                retry=retry,
-                command='tox '
-                # so users won't get failures for our possibly strict CI requirements
-                '--skip-missing-interpreters '
-                # so coverage tracks the real locations instead of .tox virtual envs
-                '--develop '
-                # comma-separated list of environments
-                '-e {}'.format(','.join(envs)),
-            )
-            if result.code:
-                abort('\nFailed!', code=result.code)
-
-            if coverage and file_exists('.coverage'):
-                if not cov_keep:
-                    echo_info('\n---------- Coverage report ----------\n')
-
-                    result = run_command('coverage report --rcfile=../.coveragerc')
-                    if result.code:
-                        abort('\nFailed!', code=result.code)
-
-                if testing_on_ci:
-                    result = run_command('coverage xml -i --rcfile=../.coveragerc')
-                    if result.code:
-                        abort('\nFailed!', code=result.code)
-
-                    fix_coverage_report(check, 'coverage.xml')
-                    run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
+            with chdir(os.path.join(root, check), env_vars=test_env_vars):
+                if format_style:
+                    test_type_display = 'the code formatter'
+                elif style:
+                    test_type_display = 'only style checks'
+                elif bench:
+                    test_type_display = 'only benchmarks'
+                elif e2e:
+                    test_type_display = 'only end-to-end tests'
                 else:
+                    test_type_display = 'tests'
+
+                wait_text = '\n{}Running {} for {} : {}'.format(output_separator, test_type_display, check, env)
+                echo_waiting(wait_text)
+                echo_waiting('-' * len(wait_text) + '\n')
+
+                result = run_command_with_retry(
+                    retry=retry,
+                    command='tox '
+                    # so users won't get failures for our possibly strict CI requirements
+                    '--skip-missing-interpreters '
+                    # so coverage tracks the real locations instead of .tox virtual envs
+                    '--develop '
+                    # comma-separated list of environments
+                    '-e {}'.format(env),
+                )
+                if result.code:
+                    abort('\nFailed!', code=result.code)
+
+                if coverage and file_exists('.coverage'):
                     if not cov_keep:
-                        remove_path('.coverage')
-                        remove_path('coverage.xml')
+                        echo_info('\n---------- Coverage report ----------\n')
+
+                        result = run_command('coverage report --rcfile=../.coveragerc')
+                        if result.code:
+                            abort('\nFailed!', code=result.code)
+
+                    if testing_on_ci:
+                        result = run_command('coverage xml -i --rcfile=../.coveragerc')
+                        if result.code:
+                            abort('\nFailed!', code=result.code)
+
+                        fix_coverage_report(check, 'coverage.xml')
+                        run_command(['codecov', '-X', 'gcov', '--root', root, '-F', check, '-f', 'coverage.xml'])
+                    else:
+                        if not cov_keep:
+                            remove_path('.coverage')
+                            remove_path('coverage.xml')
 
         echo_success('\nPassed!')
 
