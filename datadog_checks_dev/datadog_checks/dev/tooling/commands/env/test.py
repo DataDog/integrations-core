@@ -43,7 +43,7 @@ from .stop import stop
     ),
 )
 @click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
-@click.option('--retry', '-r', help='Number of retries for each tox env', type=int)
+@click.option('--retry', '-r', help='Number of retries for each tox env', type=click.INT)
 @click.pass_context
 def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
     """Test an environment."""
