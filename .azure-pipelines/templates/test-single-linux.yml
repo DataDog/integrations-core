@@ -17,9 +17,11 @@ jobs:
 
   steps:
   - template: './checkout-code.yml'
+
   - template: './install-deps.yml'
     parameters:
       repo: ${{ parameters.repo }}
+
   - template: './set-up-integrations.yml'
     parameters:
       check: ${{ parameters.check }}
@@ -29,22 +31,8 @@ jobs:
       parameters:
         repo: ${{ parameters.repo }}
 
-  - ${{ if eq(parameters.test, 'true') }}:
-    - script: ddev test --cov --retry 3 --pytest-args="--junitxml=junit/test-results.xml" ${{ parameters.check }}
-      displayName: 'Run tests'
-      env:
-        CODECOV_TOKEN: $(CODECOV_TOKEN)
-
-  - ${{ if eq(parameters.test_e2e, 'true') }}:
-    - script: ddev env test --new-env --retry 3 ${{ parameters.check }}
-      displayName: 'Run E2E tests'
-
-  - ${{ if eq(parameters.benchmark, 'true') }}:
-    - script: ddev test --bench --pytest-args="--junitxml=junit/test-bench-results.xml" ${{ parameters.check }}
-      displayName: 'Run benchmarks'
-
-  - task: PublishTestResults@2
-    condition: succeededOrFailed()
-    inputs:
-      testResultsFiles: '**/test-*.xml'
-      testRunTitle: 'Publish test results'
+  - template: './run-tests.yml'
+    parameters:
+      test: ${{ parameters.test }}
+      test_e2e: ${{ parameters.test_e2e }}
+      benchmark: ${{ parameters.benchmark }}

@@ -1,0 +1,26 @@
+parameters:
+  check: ''
+  test: false
+  test_e2e: false
+  benchmark: false
+
+steps:
+- ${{ if eq(parameters.test, 'true') }}:
+  - script: ddev test --cov --retry 3 --pytest-args="--junitxml=junit/test-results.xml" ${{ parameters.check }}
+    displayName: 'Run tests'
+    env:
+      CODECOV_TOKEN: $(CODECOV_TOKEN)
+
+- ${{ if eq(parameters.test_e2e, 'true') }}:
+  - script: ddev env test --new-env --retry 3 ${{ parameters.check }}
+    displayName: 'Run E2E tests'
+
+- ${{ if eq(parameters.benchmark, 'true') }}:
+  - script: ddev test --bench --pytest-args="--junitxml=junit/test-bench-results.xml" ${{ parameters.check }}
+    displayName: 'Run benchmarks'
+
+- task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: '${{ parameters.check }}'
