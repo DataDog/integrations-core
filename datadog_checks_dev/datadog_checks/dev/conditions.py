@@ -45,11 +45,7 @@ class WaitFor(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            raise RetryError(
-                'Result: {}\nError: {}\nFunction: {}, Args: {}, Kwargs: {}\n'.format(
-                    repr(last_result), last_error, self.func.__name__, self.args, self.kwargs
-                )
-            )
+            raise RetryError('Result: {}\n' 'Error: {}'.format(repr(last_result), last_error))
 
 
 class CheckEndpoints(LazyFunction):
