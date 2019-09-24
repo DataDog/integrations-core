@@ -13,6 +13,7 @@ x-common-params: &common-params
     KRB5_REALM: EXAMPLE.COM
     KRB5_KDC: &kdc kdc
     KRB5_KEYTAB: /tmp/shared/http.keytab
+    KRB5_CCNAME: /tmp/shared/krbc5ccname
     DOMAIN: *domain
     WEBHOST: &webhost web.example.com
 

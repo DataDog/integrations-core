@@ -21,5 +21,10 @@ echo "Principals in cache..."
 echo "----------------------"
 klist
 echo "======================"
+echo "Copying Kerberos cache file..."
+echo "----------------------"
+cp /tmp/krb5cc_* /tmp/shared/krbc5ccname
+echo "======================"
+
 echo "ReadyToConnect"
 set +x
