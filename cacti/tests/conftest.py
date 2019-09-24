@@ -31,11 +31,10 @@ FLUSH PRIVILEGES;
 
 def setup_db():
     run_docker_command(['mysql', '-u', 'root', '-e', SQL_SETUP])
-
-
-def setup_data():
     run_docker_command(['/sbin/restore'])
 
+
+def check_data_available():
     conn = pymysql.connect(
         host=common.HOST, user=common.MYSQL_USERNAME, passwd=common.MYSQL_PASSWORD, db=common.DATABASE
     )
@@ -63,7 +62,7 @@ def dd_environment():
         e2e_metadata['docker_volumes'] = ['{}:{}'.format(rrd_path, RRD_PATH)]
 
         with docker_run(
-            conditions=[WaitFor(setup_db), WaitFor(setup_data), WaitFor(poll_cacti)],
+            conditions=[WaitFor(setup_db), WaitFor(check_data_available), WaitFor(poll_cacti)],
             compose_file=os.path.join(HERE, "compose", "docker-compose.yaml"),
             env_vars={'RRD_PATH': rrd_path},
             build=True,
