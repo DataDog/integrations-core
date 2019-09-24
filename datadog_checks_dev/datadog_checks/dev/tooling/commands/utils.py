@@ -19,10 +19,9 @@ def run_command_with_retry(retry, command, *args, **kwargs):
     if retry < 1:
         abort('\nRetry must be >= 1.', code=2)
 
-    attempt = 1
     result = None
-    while attempt <= retry:
-        echo_prefix = "[RETRY] {}/{} - Command \"{}\": ".format(attempt, retry, command)
+    for i in range(retry):
+        echo_prefix = "[RETRY] {}/{} - Command \"{}\": ".format(i, retry, command)
         echo_waiting(echo_prefix + "Start...")
 
         result = run_command(command, *args, **kwargs)
@@ -32,6 +31,5 @@ def run_command_with_retry(retry, command, *args, **kwargs):
 
         echo_failure(echo_prefix + "Failed.")
         time.sleep(1)
-        attempt += 1
 
     return result
