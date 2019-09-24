@@ -21,7 +21,7 @@ def run_command_with_retry(retry, command, *args, **kwargs):
 
     result = None
     for i in range(retry):
-        echo_prefix = "[RETRY] {}/{} - Command \"{}\": ".format(i+1, retry, command)
+        echo_prefix = "[RETRY] {}/{} - Command \"{}\": ".format(i + 1, retry, command)
         if i > 0:  # do not print on first attempt
             echo_waiting(echo_prefix + "Start...")
 
