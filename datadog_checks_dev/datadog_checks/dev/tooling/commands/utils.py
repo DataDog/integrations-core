@@ -9,7 +9,9 @@ from .console import abort, echo_failure, echo_success, echo_waiting
 
 def run_command_with_retry(retry, command, *args, **kwargs):
     """ Wrap run_command with retry.
-        If retry is None. Will call transparently run_command.
+
+        If retry is None, we just forward the call to run_command.
+        Otherwise, retry run_command until success or retry limit.
     """
     if retry is None:
         return run_command(command, *args, **kwargs)
