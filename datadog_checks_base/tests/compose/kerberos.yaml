@@ -2,9 +2,11 @@ version: '3.7'
 
 x-common-params: &common-params
   domainname: &domain example.com
-  volumes:
-    - shared-volume:/tmp/shared/
-  environment:
+  volumes: 
+    - &sharedvol /tmp/shared-volume:/tmp/shared/
+  networks:
+    - kdc-net
+  environment: &environment
     KRB5_USER: datadog/admin
     KRB5_SVC: HTTP
     KRB5_PASS: 123pass
@@ -12,8 +14,10 @@ x-common-params: &common-params
     KRB5_KDC: &kdc kdc
     KRB5_KEYTAB: /tmp/shared/http.keytab
     DOMAIN: *domain
+    WEBHOST: &webhost web.example.com
 
 services:
+
   kdc:
     <<: *common-params
     build: ./kerberos-kdc
@@ -33,22 +37,17 @@ services:
     image: kerberos-nginx
     build: ./kerberos-nginx
     expose:
-      - "8080"
-      - "443"
+      - "80"
     ports:
-      - "8080:8080"
-      - "8081:443"
+      - "80:80"
     hostname: web
     networks:
       kdc-net:
         aliases:
-          - web.example.com
+          - *webhost
     depends_on:
       - "kdc"
 
-
-volumes:
-  shared-volume: 
 networks:
   kdc-net: {}
   

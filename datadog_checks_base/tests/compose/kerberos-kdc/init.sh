@@ -30,12 +30,44 @@ function generate_config()
 
 [realms]
 ${KRB5_REALM} = {
-   kdc = ${KRB5_KDC}
-   admin_server = ${KRB5_KDC}
-   kpasswd_server = ${KRB5_KDC}
+  kdc = ${KRB5_KDC}.${DOMAIN}:8888
+  admin_server = ${KRB5_KDC}.${DOMAIN}:8749
+  kpasswd_server = ${KRB5_KDC}
+  default_domain = $DOMAIN 
+  kpasswd_port = 8464
 }
 EOF
 
+echo "configuring kerberos..."
+
+cat > /etc/krb5.conf << EOF
+[libdefaults]
+    default_tkt_enctypes = aes256-cts arcfour-hmac-md5 des-cbc-crc des-cbc-md5
+    default_tgs_enctypes = aes256-cts arcfour-hmac-md5 des-cbc-crc des-cbc-md5
+    default_keytab_name  = FILE:$KRB5_KEYTAB
+    default_realm        = $KRB5_REALM 
+    ticket_lifetime      = 24h
+    kdc_timesync         = 1
+    ccache_type          = 4
+    forwardable          = false
+    proxiable            = false
+
+[realms]
+    $KRB5_REALM = {
+        kdc            = $HOSTNAME.$DOMAIN:8888
+        admin_server   = $HOSTNAME.$DOMAIN:8749
+        kpasswd_server = $HOSTNAME.$DOMAIN
+        default_domain = $DOMAIN 
+        kpasswd_port = 8464
+    }
+
+[domain_realm]
+    .kerberos.server = $KRB5_REALM 
+    .fabric.local    = $KRB5_REALM 
+    .$DOMAIN = $KRB5_REALM 
+EOF
+echo "kerberos configured as: "
+cat /etc/krb5.conf
     # Create a realm configuration
     cat <<EOF > ${KDC_CONFIG_DIR}.d/$KRB5_REALM.conf
 
@@ -69,20 +101,24 @@ EOF
     # Create a KDC database for the realm 
     kdb5_util create -r ${KRB5_REALM} < /tmp/krb5_pass
     rm /tmp/krb5_pass
+    rm ${KRB5_KEYTAB}
 
     ## Creates a <user>/<instance>@<realm>
     ## admin/admin for remote kadmin
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -pw ${KRB5_PASS} admin/admin@${KRB5_REALM}"
     ## HTTP/hostname.fqdn@realm
-    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_SVC}/web.example.com@${KRB5_REALM}"
-    ## Additional users
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_SVC}/localhost@${KRB5_REALM}"
+    ## Additional principals
     # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_USER}@${KRB5_REALM}"
 
     ## Creates and adds principals to a keytab file
     ## HTTP/hostname.fqdn@realm
-    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k /tmp/shared/http.keytab ${KRB5_SVC}/web.example.com@${KRB5_REALM}"
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_SVC}/localhost@${KRB5_REALM}"
     ## Additional users
-    # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k /tmp/shared/http.keytab ${KRB5_USER}@${KRB5_REALM}"
+    # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_USER}@${KRB5_REALM}"
+    # chmod 744 ${KRB5_KEYTAB}
 
     ## Lists all principals in realm
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "listprincs"
@@ -126,7 +162,8 @@ function run_kdc()
 
   share_config
 
-  /usr/sbin/krb5kdc -n -r ${KRB5_REALM}
+  /usr/sbin/krb5kdc -n -r ${KRB5_REALM} &
+  /usr/sbin/kadmind -nofork -r ${KRB5_REALM} 
 
 }
 

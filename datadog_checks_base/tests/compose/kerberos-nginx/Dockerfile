@@ -34,7 +34,6 @@ COPY configurekerberos.sh /opt/install/configurekerberos.sh
 COPY entrypoint.sh /opt/install/entrypoint.sh
 
 RUN chmod +x /opt/install/setupkeytab.sh \
-    #&& chmod +x /opt/install/signintoactivedirectory.sh \
     && chmod +x /opt/install/configurenginx.sh \
     && chmod +x /opt/install/configurekerberos.sh \
     && chmod +x /opt/install/entrypoint.sh

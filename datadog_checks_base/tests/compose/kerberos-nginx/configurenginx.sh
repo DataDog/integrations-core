@@ -3,9 +3,15 @@ echo " --- configuring nginx..."
 
 cat > /etc/nginx/conf.d/default.conf << EOF
 server {
-        server_name $HOSTNAME.$DOMAIN;
+  server_name $HOSTNAME.$DOMAIN;
+  #server_name localhost;
 
-  listen 8080;
+  listen 80 default_server;
+
+  # location / {
+  #     root   /usr/share/nginx/html;
+  #     index  index.html index.htm;
+  # }
   location / {
     stub_status on;
     allow all;
