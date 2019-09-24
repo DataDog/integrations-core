@@ -33,6 +33,7 @@ jobs:
 
   - template: './run-tests.yml'
     parameters:
+      check: ${{ parameters.check }}
       test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
       benchmark: ${{ parameters.benchmark }}
