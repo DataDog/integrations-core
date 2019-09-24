@@ -31,13 +31,13 @@ jobs:
         repo: ${{ parameters.repo }}
 
   - ${{ if eq(parameters.test, 'true') }}:
-    - script: ddev test --cov --pytest-args="--junitxml=junit/test-results.xml" ${{ parameters.check }}
+    - script: ddev test --cov --retry 3 --pytest-args="--junitxml=junit/test-results.xml" ${{ parameters.check }}
       displayName: 'Run tests'
       env:
         CODECOV_TOKEN: $(CODECOV_TOKEN)
 
   - ${{ if eq(parameters.test_e2e, 'true') }}:
-    - script: ddev env test --new-env ${{ parameters.check }}
+    - script: ddev env test --new-env --retry 3 ${{ parameters.check }}
       displayName: 'Run E2E tests'
 
   - ${{ if eq(parameters.benchmark, 'true') }}:
