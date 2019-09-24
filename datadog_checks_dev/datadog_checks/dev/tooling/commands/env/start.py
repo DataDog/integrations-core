@@ -2,13 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import time
 
 import click
 import pyperclip
 
-from ....utils import dir_exists, file_exists, path_join
+from ....utils import dir_exists, file_exists, path_join, running_on_ci
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
-from ...e2e.agent import DEFAULT_PYTHON_VERSION
+from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
+from ...git import get_current_branch
 from ...testing import get_available_tox_envs, get_tox_env_python_version
 from ...utils import get_tox_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
@@ -43,11 +45,14 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
         'Ex: -e DD_URL=app.datadoghq.com -e DD_API_KEY=123456'
     ),
 )
+@click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
 @click.pass_context
-def start(ctx, check, env, agent, python, dev, base, env_vars):
+def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
+
+    on_ci = running_on_ci()
 
     base_package = None
     if base:
@@ -80,6 +85,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
             'To influence the Agent Python version, use the `-py/--python` option.'.format(env, python)
         )
 
+    if profile_memory and python < 3:
+        profile_memory = False
+        echo_warning('Collecting metrics about memory usage is only supported on Python 3+.')
+
     api_key = ctx.obj['dd_api_key']
     if api_key is None:
         echo_warning(
@@ -87,6 +96,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
             'fake API key will be used instead. You can also set the API key '
             'by doing `ddev config set dd_api_key`.'
         )
+
+    if profile_memory and not api_key:
+        profile_memory = False
 
     echo_waiting('Setting up environment `{}`... '.format(env), nl=False)
     config, metadata, error = start_environment(check, env)
@@ -125,6 +137,23 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
     env_vars = dict(ev.split('=', 1) for ev in env_vars)
     for key, value in metadata.get('env_vars', {}).items():
         env_vars.setdefault(key, value)
+
+    if profile_memory:
+        env_vars['DD_TRACEMALLOC_DEBUG'] = '1'
+        env_vars['DD_TRACEMALLOC_WHITELIST'] = check
+
+        instances = config
+        if isinstance(config, dict):
+            instances = config.get('instances', [config])
+
+        for instance in instances:
+            instance['__memory_profiling_tags'] = ['env:{}'.format(env)]
+
+            if on_ci:
+                instance['__memory_profiling_tags'].append('branch:{}'.format(get_current_branch()))
+                instance['min_collection_interval'] = metadata.get(
+                    'sampling_collection_interval', DEFAULT_SAMPLING_COLLECTION_INTERVAL
+                )
 
     environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key, python)
 
@@ -213,6 +242,13 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
         else:
             environment.update_check()
             echo_success('success!')
+
+    if profile_memory and on_ci:
+        environment.metadata['sampling_start_time'] = time.time()
+
+        echo_waiting('Updating metadata... '.format(env), nl=False)
+        environment.write_config()
+        echo_success('success!')
 
     click.echo()
 
