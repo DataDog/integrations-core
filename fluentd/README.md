@@ -55,7 +55,7 @@ In your fluentd configuration file, add a `monitor_agent` source:
 
 #### Log Collection
 
-As long as you can forward your FluentD logs over tcp/udp to a specific port, you can use that approach to forward your FluentD logs to your Datadog agent. But another option is to use the [Datadog FluentD plugin][7] to forward the logs directly from FluentD to your Datadog account.
+You can use the [Datadog FluentD plugin][7] to forward the logs directly from FluentD to your Datadog account.
 
 ##### Add metadata to your logs
 
