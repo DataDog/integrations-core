@@ -105,20 +105,18 @@ EOF
 
     ## Creates a <user>/<instance>@<realm>
     ## admin/admin for remote kadmin
-    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -pw ${KRB5_PASS} admin/admin@${KRB5_REALM}"
-    ## HTTP/hostname.fqdn@realm
-    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
-    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_SVC}/localhost@${KRB5_REALM}"
-    ## Additional principals
-    # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_USER}@${KRB5_REALM}"
+    # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -pw ${KRB5_PASS} ${KRB5_USER}@${KRB5_REALM}"
+
+    # ## HTTP/hostname.fqdn@realm
+    # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
+    # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_SVC}/localhost@${KRB5_REALM}"
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -randkey ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -randkey ${KRB5_SVC}/localhost@${KRB5_REALM}"
 
     ## Creates and adds principals to a keytab file
     ## HTTP/hostname.fqdn@realm
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_SVC}/localhost@${KRB5_REALM}"
-    ## Additional users
-    # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_USER}@${KRB5_REALM}"
-    # chmod 744 ${KRB5_KEYTAB}
 
     ## Lists all principals in realm
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "listprincs"

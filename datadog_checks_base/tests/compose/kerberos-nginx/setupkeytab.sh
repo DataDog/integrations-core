@@ -23,7 +23,8 @@ klist
 echo "======================"
 echo "Copying Kerberos cache file..."
 echo "----------------------"
-cp /tmp/krb5cc_* /tmp/shared/krbc5ccname
+cp /tmp/krb5cc_* ${KRB5_CCNAME}
+chmod a+r ${KRB5_CCNAME}
 echo "======================"
 
 echo "ReadyToConnect"
