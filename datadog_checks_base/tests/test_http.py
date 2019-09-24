@@ -191,6 +191,31 @@ class TestAuth:
 
         assert http.options['auth'] is None
 
+    def test_kerberos_auth_noconf(self, kerberos):
+        instance = {}
+        init_config = {}
+        # breakpoint()
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(kerberos["url"])
+
+        assert response.status_code == 401
+
+    def test_kerberos_auth_required_keytab(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'kerberos_auth': 'required',
+            'kerberos_keytab': kerberos["keytab"],
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_principal': kerberos["principal"],
+            'kerberos_force_initiate': 'true'
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+
+        # breakpoint()
+        assert response.status_code != 401
+
     def test_config_kerberos(self):
         instance = {'kerberos_auth': 'required'}
         init_config = {}
