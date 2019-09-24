@@ -31,7 +31,7 @@ jobs:
         repo: ${{ parameters.repo }}
 
   - ${{ if eq(parameters.test, 'true') }}:
-    - script: ddev test --cov --retry 3 ${{ parameters.check }}
+    - script: ddev test --cov --retry 3 --pytest-args="--junitxml=junit/test-results.xml" ${{ parameters.check }}
       displayName: 'Run tests'
       env:
         CODECOV_TOKEN: $(CODECOV_TOKEN)
@@ -41,5 +41,12 @@ jobs:
       displayName: 'Run E2E tests'
 
   - ${{ if eq(parameters.benchmark, 'true') }}:
-    - script: ddev test --bench ${{ parameters.check }}
+    - script: ddev test --bench --pytest-args --junitxml=junit/test-bench-results.xml ${{ parameters.check }}
+    - script: ddev test --bench --pytest-args="--junitxml=junit/test-bench-results.xml" ${{ parameters.check }}
       displayName: 'Run benchmarks'
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: 'junit/test-*.xml'
+      testRunTitle: 'Publish test results'
