@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_here, TempDir
+from datadog_checks.dev import TempDir, docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 HERE = get_here()
@@ -44,7 +44,8 @@ def kerberos():
                 'KRB5_CCNAME': common_config['cache'],
                 'KRB5_REALM': common_config['realm'],
                 'KRB5_SVC': common_config['svc'],
-                'WEBHOST': common_config['hostname']},
-            conditions=[CheckDockerLogs(compose_file, "ReadyToConnect")]
+                'WEBHOST': common_config['hostname'],
+            },
+            conditions=[CheckDockerLogs(compose_file, "ReadyToConnect")],
         ):
-                yield common_config
+            yield common_config

@@ -23,7 +23,8 @@ klist
 echo "======================"
 echo "Copying Kerberos cache file..."
 echo "----------------------"
-cp /tmp/krb5cc_* ${KRB5_CCNAME}
+cp /tmp/krb5cc_* ${KRB5_CCNAME}/tkt_web
+echo "tkt" > ${KRB5_CCNAME}/primary
 chmod a+r ${KRB5_CCNAME}
 echo "======================"
 
