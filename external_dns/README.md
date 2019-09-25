@@ -30,7 +30,6 @@ metadata:
     service-discovery.datadoghq.com/external_dns.instances: '[[{"prometheus_url":"http://%%host%%:7979/metrics", "tags":["dns-pod:%%host%%"]}]]'
 ```
 
-**Remarks:**
 
  - The "dns-pod" tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
    pod IP. The other tags will be related to the dd-agent that is polling the
