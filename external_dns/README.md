@@ -6,7 +6,6 @@ Get metrics from the external DNS service in real time to visualize and monitor 
 
 
 For more information about external DNS, see the [Github repo][7].
-more informations about external-dns
 
 ## Setup
 ### Installation
