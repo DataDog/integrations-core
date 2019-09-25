@@ -107,7 +107,7 @@ class DNSCheck(AgentCheck):
             if response_time > 0:
                 self.gauge('dns.response_time', response_time, tags=tags)
             self.log.debug('Resolved hostname: {}'.format(hostname))
-            self.report_as_service_check(AgentCheck.OK, instance, 'UP')
+            self.report_as_service_check(AgentCheck.OK, instance)
 
     def _check_answer(self, answer, resolves_as):
         ips = [x.strip().lower() for x in resolves_as.split(',')]
@@ -150,8 +150,4 @@ class DNSCheck(AgentCheck):
 
     def report_as_service_check(self, status, instance, msg=None):
         tags = self._get_tags(instance)
-
-        if status == AgentCheck.OK:
-            msg = None
-
         self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags, message=msg)
