@@ -45,6 +45,7 @@ STANDALONE_APP_PATH_HTML = 'app/'
 SPARK_SERVICE_CHECK = 'spark.application_master.can_connect'
 YARN_SERVICE_CHECK = 'spark.resource_manager.can_connect'
 MESOS_SERVICE_CHECK = 'spark.mesos_master.can_connect'
+SPARK_DRIVER_SERVICE_CHECK = 'spark.driver.can_connect'
 STANDALONE_SERVICE_CHECK = 'spark.standalone_master.can_connect'
 
 TEST_USERNAME = 'admin'
@@ -106,6 +107,17 @@ MESOS_SPARK_STAGE_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_A
 MESOS_SPARK_EXECUTOR_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'executors'))
 MESOS_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd'))
 MESOS_SPARK_STREAMING_STATISTICS_URL = Url(
+    join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
+)
+
+# Driver Service URLs
+DRIVER_APP_URL = Url(urljoin(SPARK_APP_URL, SPARK_REST_PATH))
+DRIVER_SPARK_APP_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH))
+DRIVER_SPARK_JOB_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'jobs'))
+DRIVER_SPARK_STAGE_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'stages'))
+DRIVER_SPARK_EXECUTOR_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'executors'))
+DRIVER_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd'))
+DRIVER_SPARK_STREAMING_STATISTICS_URL = Url(
     join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
 )
 
@@ -242,6 +254,56 @@ def mesos_requests_get_mock(*args, **kwargs):
         with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
             body = f.read()
             return MockMesosResponse(body, 200)
+
+
+def driver_requests_get_mock(*args, **kwargs):
+    class MockDriverResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+
+        def json(self):
+            return json.loads(self.json_data)
+
+        def raise_for_status(self):
+            return True
+
+    arg_url = Url(args[0])
+
+    if arg_url == DRIVER_APP_URL:
+        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
+            body = f.read()
+            return MockDriverResponse(body, 200)
+
+    elif arg_url == DRIVER_SPARK_APP_URL:
+        with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
+            body = f.read()
+            return MockDriverResponse(body, 200)
+
+    elif arg_url == DRIVER_SPARK_JOB_URL:
+        with open(os.path.join(FIXTURE_DIR, 'job_metrics'), 'rb') as f:
+            body = f.read()
+            return MockDriverResponse(body, 200)
+
+    elif arg_url == DRIVER_SPARK_STAGE_URL:
+        with open(os.path.join(FIXTURE_DIR, 'stage_metrics'), 'rb') as f:
+            body = f.read()
+            return MockDriverResponse(body, 200)
+
+    elif arg_url == DRIVER_SPARK_EXECUTOR_URL:
+        with open(os.path.join(FIXTURE_DIR, 'executor_metrics'), 'rb') as f:
+            body = f.read()
+            return MockDriverResponse(body, 200)
+
+    elif arg_url == DRIVER_SPARK_RDD_URL:
+        with open(os.path.join(FIXTURE_DIR, 'rdd_metrics'), 'rb') as f:
+            body = f.read()
+            return MockDriverResponse(body, 200)
+
+    elif arg_url == DRIVER_SPARK_STREAMING_STATISTICS_URL:
+        with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
+            body = f.read()
+            return MockDriverResponse(body, 200)
 
 
 def standalone_requests_get_mock(*args, **kwargs):
@@ -405,6 +467,13 @@ MESOS_FILTERED_CONFIG = {
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_mesos_mode',
     'spark_ui_ports': [1234],
+}
+
+DRIVER_CONFIG = {
+    'spark_url': 'http://localhost:4040',
+    'cluster_name': CLUSTER_NAME,
+    'spark_cluster_mode': 'spark_driver_mode',
+    'tags': list(CUSTOM_TAGS),
 }
 
 STANDALONE_CONFIG = {
@@ -701,6 +770,63 @@ def test_mesos_filter(aggregator):
             assert sc.tags == ['url:http://localhost:5050', 'cluster_name:SparkCluster']
 
         assert aggregator.metrics_asserted_pct == 100.0
+
+
+@pytest.mark.unit
+def test_driver(aggregator):
+    with mock.patch('requests.get', driver_requests_get_mock):
+        c = SparkCheck('spark', {}, [DRIVER_CONFIG])
+        c.check(DRIVER_CONFIG)
+
+        # Check the running job metrics
+        for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the succeeded job metrics
+        for metric, value in iteritems(SPARK_JOB_SUCCEEDED_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_JOB_SUCCEEDED_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the running stage metrics
+        for metric, value in iteritems(SPARK_STAGE_RUNNING_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_RUNNING_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the complete stage metrics
+        for metric, value in iteritems(SPARK_STAGE_COMPLETE_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_STAGE_COMPLETE_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the driver metrics
+        for metric, value in iteritems(SPARK_DRIVER_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the executor metrics
+        for metric, value in iteritems(SPARK_EXECUTOR_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the RDD metrics
+        for metric, value in iteritems(SPARK_RDD_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the streaming statistics metrics
+        for metric, value in iteritems(SPARK_STREAMING_STATISTICS_METRIC_VALUES):
+            aggregator.assert_metric(metric, value=value, tags=SPARK_METRIC_TAGS + CUSTOM_TAGS)
+
+        # Check the service tests
+
+        for sc in aggregator.service_checks(SPARK_DRIVER_SERVICE_CHECK):
+            assert sc.status == SparkCheck.OK
+            tags = ['url:http://localhost:4040', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
+        for sc in aggregator.service_checks(SPARK_SERVICE_CHECK):
+            assert sc.status == SparkCheck.OK
+            tags = ['url:http://localhost:4040', 'cluster_name:SparkCluster'] + CUSTOM_TAGS
+            tags.sort()
+            sc.tags.sort()
+            assert sc.tags == tags
+
+        # Assert coverage for this check on this instance
+        aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.unit
