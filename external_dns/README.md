@@ -19,7 +19,6 @@ Edit the `external_dns.d/conf.yaml` file, in the `conf.d/` folder at the root of
 #### Using with service discovery
 
 If you are using one Datadog Agent pod per Kubernetes worker node, use these example annotations on your external-dns pod to retrieve the data automatically:
-following annotations on your external-dns pod to get the data retrieve
 automatically.
 
 ```yaml
