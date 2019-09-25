@@ -18,10 +18,9 @@ The MongoDB check is included in the [Datadog Agent][2] package. No additional i
 
 ### Configuration
 
-#### Host
-
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+#### Host
 ##### Prepare MongoDB
 
 In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
@@ -143,22 +142,23 @@ See the [MongoDB 3.0 Manual][9] for more detailed descriptions of some of these 
 
 **NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
-|                          |                                                   |
-|--------------------------|---------------------------------------------------|
-| metric prefix            | what to add to `additional_metrics` to collect it |
-| mongodb.collection       | collection                                        |
-| mongodb.commands         | top                                               |
-| mongodb.getmore          | top                                               |
-| mongodb.insert           | top                                               |
-| mongodb.queries          | top                                               |
-| mongodb.readLock         | top                                               |
-| mongodb.writeLock        | top                                               |
-| mongodb.remove           | top                                               |
-| mongodb.total            | top                                               |
-| mongodb.update           | top                                               |
-| mongodb.writeLock        | top                                               |
-| mongodb.tcmalloc         | tcmalloc                                          |
-| mongodb.metrics.commands | metrics.commands                                  |
+|----------------------------|-----------------------------------------------------|
+| -------------------------- | --------------------------------------------------- |
+| metric prefix              | what to add to `additional_metrics` to collect it   |
+| mongodb.collection         | collection                                          |
+| mongodb.commands           | top                                                 |
+| mongodb.getmore            | top                                                 |
+| mongodb.insert             | top                                                 |
+| mongodb.queries            | top                                                 |
+| mongodb.readLock           | top                                                 |
+| mongodb.writeLock          | top                                                 |
+| mongodb.remove             | top                                                 |
+| mongodb.total              | top                                                 |
+| mongodb.update             | top                                                 |
+| mongodb.writeLock          | top                                                 |
+| mongodb.tcmalloc           | tcmalloc                                            |
+| mongodb.metrics.commands   | metrics.commands                                    |
+|                            |                                                     ||
 
 ### Events
 
