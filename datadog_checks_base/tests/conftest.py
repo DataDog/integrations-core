@@ -28,11 +28,12 @@ def kerberos():
         common_config = {
             "url": "http://localhost:80",
             "keytab": os.path.join(shared_volume, "http.keytab"),
-            "cache": os.path.join(shared_volume, "krb5cc_web"),
+            "cache": os.path.join(shared_volume),
             "realm": realm,
             "svc": svc,
             "hostname": webserver_hostname,
-            "principal": "{}/{}@{}".format(svc, webserver_hostname, realm)
+            "principal": "user/inkeytab@{}".format(realm),
+            # "principal": "{}/{}@{}".format(svc, webserver_hostname, realm)
         }
 
         with docker_run(

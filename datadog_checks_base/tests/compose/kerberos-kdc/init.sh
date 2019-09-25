@@ -6,7 +6,7 @@ KDC_DATABASE=/dev/shm/kerberos/db
 
 [ -z ${KRB5_KDC} ] && echo "*** KRB5_KDC variable not set, KDC host missing, using 'localhost' as default." && KRB5_KDC=localhost
 
-[ -z ${RUN_MODE} ] && echo "*** RUN_MODE not specified, options are 'kdc', and 'kadmin'. Default is 'kdc'" && RUN_MODE=kdc
+[ -z ${RUN_MODE} ] && echo "*** RUN_MODE not specified, options are 'kdc', 'kadmin', or 'kdckadmin'. Default is 'kdc'" && RUN_MODE=kdc
 
 [ -z ${KRB5_REALM} ] && echo "*** Default realm not set (KRB5_REALM), using EXAMPLE.COM as default" && KRB5_REALM="EXAMPLE.COM"
 
@@ -106,10 +106,11 @@ EOF
     ## Creates a <user>/<instance>@<realm>
     ## admin/admin for remote kadmin
     # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -pw ${KRB5_PASS} ${KRB5_USER}@${KRB5_REALM}"
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -pw ${KRB5_PASS} ${KRB5_USER}@${KRB5_REALM}"
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -pw ${KRB5_PASS} user/inkeytab@${KRB5_REALM}"
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -pw ${KRB5_PASS} user/nokeytab@${KRB5_REALM}"
 
     # ## HTTP/hostname.fqdn@realm
-    # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
-    # kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -pw ${KRB5_PASS} ${KRB5_SVC}/localhost@${KRB5_REALM}"
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -randkey ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "addprinc -requires_preauth -randkey ${KRB5_SVC}/localhost@${KRB5_REALM}"
 
@@ -117,6 +118,8 @@ EOF
     ## HTTP/hostname.fqdn@realm
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_SVC}/${WEBHOST}@${KRB5_REALM}"
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} ${KRB5_SVC}/localhost@${KRB5_REALM}"
+
+    kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "ktadd -k ${KRB5_KEYTAB} user/inkeytab@${KRB5_REALM}"
 
     ## Lists all principals in realm
     kadmin.local -r ${KRB5_REALM} -p "K/M@KRV.SVC" -q "listprincs"

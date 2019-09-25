@@ -11,6 +11,7 @@ set -x
 
 ## Load principals into cache
 kinit -kt ${KRB5_KEYTAB} ${KRB5_SVC}/${HOSTNAME}.${DOMAIN}@${KRB5_REALM} -V
+echo ${KRB5_PASS} | kinit user/nokeytab@${KRB5_REALM} -c ${KRB5_CCNAME}/tkt_nokeytab -V
 
 ## List principals in cache
 echo "Principals in keytab..."
@@ -25,7 +26,7 @@ echo "Copying Kerberos cache file..."
 echo "----------------------"
 cp /tmp/krb5cc_* ${KRB5_CCNAME}/tkt_web
 echo "tkt" > ${KRB5_CCNAME}/primary
-chmod a+r ${KRB5_CCNAME}
+chmod a+r ${KRB5_CCNAME}/*
 echo "======================"
 
 echo "ReadyToConnect"
