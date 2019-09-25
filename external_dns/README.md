@@ -14,7 +14,7 @@ The external DNS check is included in the [Datadog Agent][1] package, so you don
 
 ### Configuration
 
-Edit the `external_dns.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2], to point to your server and port, set the masters to monitor. See the [sample external_dns.d/conf.yaml][3] for all available configuration options.
+Edit the `external_dns.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2], to point to your server and port, and to set the masters to monitor. See the [sample external_dns.d/conf.yaml][3] for all available configuration options.
 
 #### Using with service discovery
 
