@@ -203,11 +203,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                    |
-|----------------------|------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `mysql`                                                                                  |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                            |
-| `<INSTANCE_CONFIG>`  | <pre>{"server": "%%host%%", <br>"user": "datadog", <br>"pass": "<UNIQUEPASSWORD>"}</pre> |
+| Parameter            | Value                                                                  |
+|----------------------|------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `mysql`                                                                |
+| `<INIT_CONFIG>`      | blank or `{}`                                                          |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}` |
 
 
 See the [Autodiscovery template variables documentation][25] to learn how to pass `<UNIQUEPASSWORD>` as an Environment variable instead of a label.
