@@ -142,23 +142,22 @@ See the [MongoDB 3.0 Manual][9] for more detailed descriptions of some of these 
 
 **NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
-|----------------------------|-----------------------------------------------------|
-| -------------------------- | --------------------------------------------------- |
-| metric prefix              | what to add to `additional_metrics` to collect it   |
-| mongodb.collection         | collection                                          |
-| mongodb.commands           | top                                                 |
-| mongodb.getmore            | top                                                 |
-| mongodb.insert             | top                                                 |
-| mongodb.queries            | top                                                 |
-| mongodb.readLock           | top                                                 |
-| mongodb.writeLock          | top                                                 |
-| mongodb.remove             | top                                                 |
-| mongodb.total              | top                                                 |
-| mongodb.update             | top                                                 |
-| mongodb.writeLock          | top                                                 |
-| mongodb.tcmalloc           | tcmalloc                                            |
-| mongodb.metrics.commands   | metrics.commands                                    |
-|                            |                                                     ||
+| metric prefix            | what to add to `additional_metrics` to collect it |
+|--------------------------|---------------------------------------------------|
+| mongodb.collection       | collection                                        |
+| mongodb.commands         | top                                               |
+| mongodb.getmore          | top                                               |
+| mongodb.insert           | top                                               |
+| mongodb.queries          | top                                               |
+| mongodb.readLock         | top                                               |
+| mongodb.writeLock        | top                                               |
+| mongodb.remove           | top                                               |
+| mongodb.total            | top                                               |
+| mongodb.update           | top                                               |
+| mongodb.writeLock        | top                                               |
+| mongodb.tcmalloc         | tcmalloc                                          |
+| mongodb.metrics.commands | metrics.commands                                  |
+
 
 ### Events
 
