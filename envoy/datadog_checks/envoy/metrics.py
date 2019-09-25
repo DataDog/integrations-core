@@ -140,6 +140,27 @@ METRICS = {
         ),
         'method': 'gauge',
     },
+    'control_plane.connected_state': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'control_plane.pending_requests': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'control_plane.rate_limit_enforced': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster_manager.cds.config_reload': {
         'tags': (
             (),
@@ -172,6 +193,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster_manager.cds.update_rejected': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster_manager.cds.version': {
         'tags': (
             (),
@@ -179,6 +208,33 @@ METRICS = {
             (),
         ),
         'method': 'gauge',
+    },
+    'cluster_manager.cds.control_plane.connected_state': {
+        'tags': (
+            (),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster_manager.cds.control_plane.pending_requests': {
+        'tags': (
+            (),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster_manager.cds.control_plane.rate_limit_enforced': {
+        'tags': (
+            (),
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
     },
     'http.no_route': {
         'tags': (
@@ -428,6 +484,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'http.rds.update_rejected': {
+        'tags': (
+            ('stat_prefix', ),
+            ('route_config_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'http.rds.version': {
         'tags': (
             ('stat_prefix', ),
@@ -435,6 +499,33 @@ METRICS = {
             (),
         ),
         'method': 'gauge',
+    },
+    'http.rds.control_plane.connected_state': {
+        'tags': (
+            ('stat_prefix', ),
+            ('route_config_name', ),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.rds.control_plane.pending_requests': {
+        'tags': (
+            ('stat_prefix', ),
+            ('route_config_name', ),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.rds.control_plane.rate_limit_enforced': {
+        'tags': (
+            ('stat_prefix', ),
+            ('route_config_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
     },
     'tcp.downstream_cx_total': {
         'tags': (
@@ -1150,6 +1241,81 @@ METRICS = {
             (),
         ),
         'method': 'gauge',
+    },
+    'listener_manager.lds.config_reload': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener_manager.lds.update_attempt': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener_manager.lds.update_success': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener_manager.lds.update_failure': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener_manager.lds.update_rejected': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener_manager.lds.version': {
+        'tags': (
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'listener_manager.lds.control_plane.connected_state': {
+        'tags': (
+            (),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'listener_manager.lds.control_plane.pending_requests': {
+        'tags': (
+            (),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'listener_manager.lds.control_plane.rate_limit_enforced': {
+        'tags': (
+            (),
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
     },
     'http.downstream_cx_total': {
         'tags': (
