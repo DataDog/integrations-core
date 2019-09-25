@@ -32,7 +32,7 @@ The CouchDB check is included in the [Datadog Agent][3] package, so you don't ne
 
       instances:
         - server: http://localhost:5984 # or wherever your CouchDB is listening
-        #user: <your_username>
+        #username: <your_username>
         #password: <your_password>
         #name: <A node's Erlang name> # Only for CouchDB 2.x
         #max_nodes_per_check: If no name is specified, the agent will scan all nodes up. As that may be very long, you can limit how many to collect per check. Default: 20

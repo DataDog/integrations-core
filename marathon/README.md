@@ -26,13 +26,13 @@ Follow the instructions below to configure this check for an Agent running on a 
         init_config:
 
         instances:
-          ## @param url - string - required
-          ## The API endpoint of your Marathon master.
-          #
-          - url: "https://<SERVER>:<PORT>"
+          - url: https://<server>:<port> # the API endpoint of your Marathon master; required
+        #   acs_url: https://<server>:<port> # if your Marathon master requires ACS auth
+            username: <username> # the username for Marathon API or ACS token authentication
+            password: <password> # the password for Marathon API or ACS token authentication
     ```
 
-    Replace `<SERVER>` and `<PORT>` with the parameters of the Marathon instance your want to monitor.
+    The function of `username` and `password` depends on whether or not you configure `acs_url`; If you do, the Agent uses them to request an authentication token from ACS, which it then uses to authenticate to the Marathon API. Otherwise, the Agent uses `username` and `password` to directly authenticate to the Marathon API.
 
 2. [Restart the Agent][4].
 
