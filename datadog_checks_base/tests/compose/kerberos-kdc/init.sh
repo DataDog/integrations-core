@@ -153,7 +153,7 @@ function copy_shared_config()
 }
 
 
-function run_kdc()
+function run_kdc_kadmin()
 {
 
   generate_config
@@ -162,6 +162,17 @@ function run_kdc()
 
   /usr/sbin/krb5kdc -n -r ${KRB5_REALM} &
   /usr/sbin/kadmind -nofork -r ${KRB5_REALM} 
+
+}
+
+function run_kdc()
+{
+
+  generate_config
+
+  share_config
+
+  /usr/sbin/krb5kdc -n -r ${KRB5_REALM} 
 
 }
 
@@ -180,6 +191,10 @@ case $RUN_MODE in
 
   kadmin)
     run_kadmin
+    ;;
+
+  kdckadmin)
+    run_kdc_kadmin
     ;;
 
   *)
