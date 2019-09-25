@@ -43,6 +43,30 @@ instances:
 
 [Restart the Agent][6] to begin sending DataNode metrics to Datadog.
 
+#### Log collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
+
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Add this configuration block to your `hdfs_datanode.d/conf.yaml` file to start collecting your Druid logs:
+
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/hadoop-hdfs/*.log
+          source: hdfs_datanode
+          service: <SERVICE_NAME>
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment.
+
+3. [Restart the Agent][6].
+
 ### Validation
 
 [Run the Agent's `status` subcommand][7] and look for `hdfs_datanode` under the Checks section.
