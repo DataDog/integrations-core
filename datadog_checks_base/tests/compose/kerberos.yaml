@@ -3,7 +3,7 @@ version: '3.7'
 x-common-params: &common-params
   domainname: &domain example.com
   volumes: 
-    - /tmp/shared-volume:/tmp/shared-volume/
+    - ${SHARED_VOLUME}:${SHARED_VOLUME}
   networks:
     - kdc-net
   environment: &environment

@@ -1,6 +1,6 @@
 FROM centos:centos7
 
-# MAINTAINER eseymour@redhat.com
+# https://github.com/edseymour/kinit-sidecar/blob/master/example-server/Dockerfile
 
 # install kdc and kadmin
 RUN yum install -y krb5-server krb5-workstation && yum clean all
