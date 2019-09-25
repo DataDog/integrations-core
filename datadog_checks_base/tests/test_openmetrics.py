@@ -361,7 +361,26 @@ def test_submit_summary(aggregator, mocked_prometheus_check, mocked_prometheus_s
     _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
     check = mocked_prometheus_check
     check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_submit_summary_with_monotonic_count(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+    _sum = SummaryMetricFamily('my_summary', 'Random summary')
+    _sum.add_metric([], 5.0, 120512.0)
+    _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
+    _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
+    _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['send_counts_as_monotonic'] = True
+    check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
+    aggregator.assert_metric(
+        'prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
+    )
     aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
@@ -377,10 +396,58 @@ def test_submit_histogram(aggregator, mocked_prometheus_check, mocked_prometheus
     check = mocked_prometheus_check
     check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
     aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 1, tags=['upper_bound:1.0'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 2, tags=['upper_bound:31104000.0'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 3, tags=['upper_bound:432400000.0'], count=1)
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count', 1, tags=['upper_bound:1.0'], count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count', 2, tags=['upper_bound:31104000.0'], count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count', 3, tags=['upper_bound:432400000.0'], count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_all_metrics_covered()
+
+
+def test_submit_histogram_with_monotonic_count(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+    _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
+    _histo.add_metric(
+        [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
+    )
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['send_counts_as_monotonic'] = True
+    check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
+    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        4,
+        tags=['upper_bound:none'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        1,
+        tags=['upper_bound:1.0'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        2,
+        tags=['upper_bound:31104000.0'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        3,
+        tags=['upper_bound:432400000.0'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
     aggregator.assert_all_metrics_covered()
 
 
