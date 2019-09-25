@@ -16,16 +16,9 @@ You can also create your own metrics using custom SQL queries.
 **Note:** This integration is also compatible with [MariaDB](https://mariadb.org/), as it serves as a ["drop-in replacement"][24] for MySQL.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The MySQL check is included in the [Datadog Agent][3] package. No additional installation is needed on your MySQL server.
-
-### Configuration
-
-Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample mysql.d/conf.yaml][5] for all available configuration options.
 
 #### Prepare MySQL
 
@@ -91,7 +84,15 @@ mysql> GRANT SELECT ON performance_schema.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-#### Metric collection
+### Configuration
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+#### Host
+
+Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample mysql.d/conf.yaml][5] for all available configuration options.
+
+##### Metric collection
 
 * Add this configuration block to your `mysql.d/conf.yaml` to collect your [MySQL metrics](#metrics):
 
@@ -123,7 +124,7 @@ See our [sample mysql.yaml][8] for all available configuration options, includin
 
 [Restart the Agent][9] to start sending MySQL metrics to Datadog.
 
-#### Log collection
+##### Log collection
 
 **Available for Agent >6.0**
 
@@ -196,12 +197,40 @@ See our [sample mysql.yaml][8] for all available configuration options, includin
 
 4. [Restart the Agent][9].
 
+##### Validation
+
+[Run the Agent's status subcommand][11] and look for `mysql` under the Checks section.
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                                                                    |
+|----------------------|------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `mysql`                                                                                  |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                            |
+| `<INSTANCE_CONFIG>`  | <pre>{"server": "%%host%%", <br>"user": "datadog", <br>"pass": "<UNIQUEPASSWORD>"}</pre> |
+
+
+See the [Autodiscovery template variables documentation][25] to learn how to pass `<UNIQUEPASSWORD>` as an Environment variable instead of a label.
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][5].
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "mysql", "service": "mysql"}` |
+
 ### Validation
 
 [Run the Agent's status subcommand][11] and look for `mysql` under the Checks section.
 
 ## Data Collected
-
 ### Metrics
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
@@ -399,3 +428,4 @@ Read our [series of blog posts][23] about monitoring MySQL with Datadog.
 [22]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-with-sql-stored-procedure
 [23]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
 [24]: https://mariadb.com/kb/en/library/mariadb-vs-mysql-compatibility
+[25]: https://docs.datadoghq.com/agent/autodiscovery/template_variables/
