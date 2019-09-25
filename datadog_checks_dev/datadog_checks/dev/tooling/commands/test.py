@@ -10,7 +10,7 @@ from ..._env import E2E_PARENT_PYTHON
 from ...subprocess import run_command
 from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci
 from ..constants import get_root
-from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
+from ..testing import STYLE_ENVS, construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 from .utils import run_command_with_retry
 
@@ -163,16 +163,20 @@ def test(
                 echo_waiting(wait_text)
                 echo_waiting('-' * len(wait_text) + '\n')
 
-                result = run_command_with_retry(
-                    retry=retry,
-                    command='tox '
+                command = (
+                    'tox '
                     # so users won't get failures for our possibly strict CI requirements
                     '--skip-missing-interpreters '
                     # so coverage tracks the real locations instead of .tox virtual envs
                     '--develop '
                     # comma-separated list of environments
-                    '-e {}'.format(env),
+                    '-e {}'.format(env)
                 )
+                if env in STYLE_ENVS:
+                    result = run_command(command=command)
+                else:
+                    result = run_command_with_retry(retry=retry, command=command)
+
                 if result.code:
                     abort('\nFailed!', code=result.code)
 
