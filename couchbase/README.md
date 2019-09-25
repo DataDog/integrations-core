@@ -32,12 +32,12 @@ The Couchbase check is included in the [Datadog Agent][3] package, so you don't 
 1.  Add this configuration block to your `couchbase.d/conf.yaml` file to start gathering your [Couchbase Metrics](#metrics):
 
     ```
-    init_config:
+      init_config:
 
-    instances:
-      - server: http://localhost:8091 # or wherever your Couchbase is listening
-        #user: <your_username>
-        #password: <your_password>
+      instances:
+        - server: http://localhost:8091 # or wherever your Couchbase is listening
+          user: <your_username>
+          password: <your_password>
     ```
 
 2. [Restart the Agent][6] to begin sending Couchbase metrics to Datadog.
