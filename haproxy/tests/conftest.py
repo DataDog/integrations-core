@@ -82,7 +82,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return HAProxy('haproxy', {}, {})
+    return lambda instance: HAProxy('haproxy', {}, [instance])
 
 
 @pytest.fixture

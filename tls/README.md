@@ -31,6 +31,10 @@ No additional installation is needed on your server.
 
 See [metadata.csv][6] for a list of metrics provided by this integration.
 
+### Events
+
+TLS does not include any events.
+
 ### Service Checks
 
 See [service_checks.json][7] for a list of service checks provided by this integration.
@@ -39,10 +43,6 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 - `tls.version` - Returns `CRITICAL` if a connection is made with a protocol version that is not allowed, otherwise returns `OK`.
 - `tls.cert_validation` - Returns `CRITICAL` if the certificate is malformed or does not match the server hostname, otherwise returns `OK`.
 - `tls.cert_expiration` - Returns `CRITICAL` if the certificate has expired or expires in less than `days_critical`/`seconds_critical`, returns `WARNING` if the certificate expires in less than `days_warning`/`seconds_warning`, otherwise returns `OK`.
-
-### Events
-
-TLS does not include any events.
 
 ## Troubleshooting
 

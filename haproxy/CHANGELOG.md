@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 2.3.0 / 2019-08-24
+
+* [Added] Add requests wrapper to haproxy. See [#4219](https://github.com/DataDog/integrations-core/pull/4219).
+
 ## 2.2.0 / 2019-06-01
 
 * [Added] Add `requests.tot_rate`, `connections.rate`, `connections.tot_rate`, and `requests.intercepted`. See [#3797](https://github.com/DataDog/integrations-core/pull/3797).

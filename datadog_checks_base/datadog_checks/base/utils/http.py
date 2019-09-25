@@ -42,6 +42,7 @@ STANDARD_FIELDS = {
     'extra_headers': None,
     'headers': None,
     'kerberos_auth': None,
+    'kerberos_cache': None,
     'kerberos_delegate': False,
     'kerberos_force_initiate': False,
     'kerberos_hostname': None,
@@ -133,8 +134,13 @@ class RequestsWrapper(object):
             if field in instance:
                 continue
 
+            # Invert default booleans if need be
+            default = default_fields[field]
+            if data.get('invert'):
+                default = not default
+
             # Get value, with a possible default
-            value = instance.get(remapped_field, data.get('default', default_fields[field]))
+            value = instance.get(remapped_field, data.get('default', default))
 
             # Invert booleans if need be
             if data.get('invert'):
@@ -266,6 +272,8 @@ class RequestsWrapper(object):
 
         if config['kerberos_keytab']:
             self.request_hooks.append(lambda: handle_kerberos_keytab(config['kerberos_keytab']))
+        if config['kerberos_cache']:
+            self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -368,6 +376,22 @@ def handle_kerberos_keytab(keytab_file):
         del os.environ['KRB5_CLIENT_KTNAME']
     else:
         os.environ['KRB5_CLIENT_KTNAME'] = old_keytab_path
+
+
+@contextmanager
+def handle_kerberos_cache(cache_file_path):
+    """
+    :param cache_file_path: Location of the Kerberos credentials (ticket) cache. It defaults to /tmp/krb5cc_[uid]
+    """
+    old_cache_path = os.environ.get('KRB5CCNAME')
+    os.environ['KRB5CCNAME'] = cache_file_path
+
+    yield
+
+    if old_cache_path is None:
+        del os.environ['KRB5CCNAME']
+    else:
+        os.environ['KRB5CCNAME'] = old_cache_path
 
 
 def ensure_kerberos():

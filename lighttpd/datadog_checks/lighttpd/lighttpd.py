@@ -61,12 +61,12 @@ class Lighttpd(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}}
 
-    def __init__(self, name, init_config, instances=None):
-        AgentCheck.__init__(self, name, init_config, instances)
+    def __init__(self, name, init_config, instances):
+        super(Lighttpd, self).__init__(name, init_config, instances)
         self.assumed_url = {}
 
-        if instances is not None and 'auth_type' in instances[0]:
-            if instances[0]['auth_type'] == 'digest':
+        if 'auth_type' in self.instance:
+            if self.instance['auth_type'] == 'digest':
                 auth = self.http.options['auth']
                 self.http.options['auth'] = requests.auth.HTTPDigestAuth(auth[0], auth[1])
 

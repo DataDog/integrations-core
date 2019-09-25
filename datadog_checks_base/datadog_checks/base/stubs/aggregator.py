@@ -7,7 +7,7 @@ from collections import OrderedDict, defaultdict
 
 from six import binary_type, iteritems
 
-from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
+from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from datadog_checks.base.stubs.similar import build_similar_elements_msg
 
 from ..utils.common import ensure_unicode, to_string
@@ -50,6 +50,7 @@ class AggregatorStub(object):
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        self._histogram_buckets = defaultdict(list)
 
     @classmethod
     def is_aggregate(cls, mtype):
@@ -63,6 +64,13 @@ class AggregatorStub(object):
 
     def submit_event(self, check, check_id, event):
         self._events.append(event)
+
+    def submit_histogram_bucket(
+        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+    ):
+        self._histogram_buckets[name].append(
+            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+        )
 
     def metrics(self, name):
         """
@@ -115,6 +123,23 @@ class AggregatorStub(object):
 
         return all_events
 
+    def histogram_bucket(self, name):
+        """
+        Return the histogram buckets received under the given name
+        """
+        return [
+            HistogramBucketStub(
+                ensure_unicode(stub.name),
+                stub.value,
+                stub.lower_bound,
+                stub.upper_bound,
+                stub.monotonic,
+                ensure_unicode(stub.hostname),
+                normalize_tags(stub.tags),
+            )
+            for stub in self._histogram_buckets.get(to_string(name), [])
+        ]
+
     def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
         """
         Assert a metric is tagged with tag
@@ -153,6 +178,34 @@ class AggregatorStub(object):
             assert len(candidates) == count, msg
         else:
             assert len(candidates) >= at_least, msg
+
+    def assert_histogram_bucket(
+        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
+    ):
+        candidates = []
+        for bucket in self.histogram_bucket(name):
+            if value is not None and value != bucket.value:
+                continue
+
+            if tags and tags != sorted(bucket.tags):
+                continue
+
+            if hostname and hostname != bucket.hostname:
+                continue
+
+            candidates.append(bucket)
+
+        expected_bucket = HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+
+        if count is not None:
+            msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
+            condition = len(candidates) == count
+        else:
+            msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
+            condition = len(candidates) >= at_least
+        self._assert(
+            condition=condition, msg=msg, expected_stub=expected_bucket, submitted_elements=self._histogram_buckets
+        )
 
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None):
         """
@@ -235,7 +288,10 @@ class AggregatorStub(object):
         assert condition, new_msg
 
     def assert_all_metrics_covered(self):
-        assert self.metrics_asserted_pct >= 100.0
+        missing_metrics = ''
+        if self.metrics_asserted_pct < 100.0:
+            missing_metrics = self.not_asserted()
+        assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
 
     def reset(self):
         """
@@ -250,12 +306,8 @@ class AggregatorStub(object):
         assert self.metrics_asserted_pct >= 100.0
 
     def not_asserted(self):
-        metrics_not_asserted = []
-        for metric in self._metrics:
-            metric = ensure_unicode(metric)
-            if metric not in self._asserted:
-                metrics_not_asserted.append(metric)
-        return metrics_not_asserted
+        present_metrics = {ensure_unicode(m) for m in self._metrics}
+        return present_metrics - set(self._asserted)
 
     def assert_metric_has_tag_prefix(self, metric_name, tag_prefix, count=None, at_least=1):
         candidates = []
@@ -286,7 +338,10 @@ class AggregatorStub(object):
             else:
                 return 0
 
-        return num_asserted / num_metrics * 100
+        # If it there have been assertions with at_least=0 the length of the num_metrics and num_asserted can match
+        # even if there are different metrics in each set
+        not_asserted = self.not_asserted()
+        return (num_metrics - len(not_asserted)) / num_metrics * 100
 
     @property
     def metric_names(self):

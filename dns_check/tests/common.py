@@ -69,3 +69,8 @@ CONFIG_INVALID = [
         "DNS resolution of example.com has failed",
     ),
 ]
+
+
+def _test_check(aggregator):
+    aggregator.assert_metric('dns.response_time')
+    aggregator.assert_all_metrics_covered()

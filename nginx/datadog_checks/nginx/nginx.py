@@ -5,13 +5,11 @@ import re
 from datetime import datetime
 from itertools import chain
 
-import requests
 import simplejson as json
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.headers import headers
 
 from .metrics import METRICS_SEND_AS_COUNT, VTS_METRIC_MAP
 
@@ -72,16 +70,18 @@ class Nginx(AgentCheck):
 
     """
 
+    HTTP_CONFIG_REMAPPER = {'ssl_validation': {'name': 'tls_verify'}, 'user': {'name': 'username'}}
+
     def check(self, instance):
         if 'nginx_status_url' not in instance:
             raise ConfigurationError('NginX instance missing "nginx_status_url" value.')
 
         tags = instance.get('tags', [])
 
-        url, ssl_validation, auth, use_plus_api, plus_api_version = self._get_instance_params(instance)
+        url, use_plus_api, plus_api_version = self._get_instance_params(instance)
 
         if not use_plus_api:
-            response, content_type = self._get_data(instance, url, ssl_validation, auth)
+            response, content_type = self._get_data(instance, url)
             self.log.debug(u"Nginx status `response`: {}".format(response))
             self.log.debug(u"Nginx status `content_type`: {}".format(content_type))
 
@@ -91,14 +91,12 @@ class Nginx(AgentCheck):
                 metrics = self.parse_text(response, tags)
         else:
             metrics = []
-            self._perform_service_check(instance, '{}/{}'.format(url, plus_api_version), ssl_validation, auth)
+            self._perform_service_check(instance, '{}/{}'.format(url, plus_api_version))
 
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
             for endpoint, nest in chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS)):
-                response = self._get_plus_api_data(
-                    instance, url, ssl_validation, auth, plus_api_version, endpoint, nest
-                )
+                response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
                 self.log.debug(u"Nginx Plus API version {} `response`: {}".format(plus_api_version, response))
                 metrics.extend(self.parse_json(response, tags))
 
@@ -139,38 +137,25 @@ class Nginx(AgentCheck):
     @classmethod
     def _get_instance_params(cls, instance):
         url = instance.get('nginx_status_url')
-        ssl_validation = instance.get('ssl_validation', True)
-
-        auth = None
-        if 'user' in instance and 'password' in instance:
-            auth = (instance['user'], instance['password'])
 
         use_plus_api = instance.get("use_plus_api", False)
         plus_api_version = str(instance.get("plus_api_version", 2))
 
-        return url, ssl_validation, auth, use_plus_api, plus_api_version
+        return url, use_plus_api, plus_api_version
 
-    def _get_data(self, instance, url, ssl_validation, auth):
-
-        r = self._perform_service_check(instance, url, ssl_validation, auth)
+    def _get_data(self, instance, url):
+        r = self._perform_service_check(instance, url)
 
         body = r.content
         resp_headers = r.headers
         return body, resp_headers.get('content-type', 'text/plain')
 
-    def _perform_request(self, instance, url, ssl_validation, auth):
-        r = requests.get(
-            url,
-            auth=auth,
-            headers=headers(self.agentConfig),
-            verify=ssl_validation,
-            timeout=self.default_integration_http_timeout,
-            proxies=self.get_instance_proxy(instance, url),
-        )
+    def _perform_request(self, url):
+        r = self.http.get(url)
         r.raise_for_status()
         return r
 
-    def _perform_service_check(self, instance, url, ssl_validation, auth):
+    def _perform_service_check(self, instance, url):
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
         nginx_host = parsed_url.hostname
@@ -183,7 +168,7 @@ class Nginx(AgentCheck):
         service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + custom_tags
         try:
             self.log.debug(u"Querying URL: {}".format(url))
-            r = self._perform_request(instance, url, ssl_validation, auth)
+            r = self._perform_request(url)
         except Exception:
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
@@ -200,7 +185,7 @@ class Nginx(AgentCheck):
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
 
-    def _get_plus_api_data(self, instance, api_url, ssl_validation, auth, plus_api_version, endpoint, nest):
+    def _get_plus_api_data(self, api_url, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
         # so we can treat it the same way
 
@@ -208,7 +193,7 @@ class Nginx(AgentCheck):
         payload = {}
         try:
             self.log.debug(u"Querying URL: {}".format(url))
-            r = self._perform_request(instance, url, ssl_validation, auth)
+            r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
             if endpoint in PLUS_API_STREAM_ENDPOINTS:

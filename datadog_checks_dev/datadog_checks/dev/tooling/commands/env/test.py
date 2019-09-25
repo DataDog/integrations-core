@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
-from ...e2e import get_configured_envs
+from .... import EnvVars
+from ...e2e import create_interface, get_configured_envs
 from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import get_tox_envs
 from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
@@ -42,8 +43,9 @@ from .stop import stop
     ),
 )
 @click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
+@click.option('--retry', '-r', help='Number of retries for each tox env', type=click.INT)
 @click.pass_context
-def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
+def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True)
     tests_ran = False
@@ -77,11 +79,20 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env):
             elif env not in config_envs:
                 continue
 
+            environment = create_interface(check, env)
+            persisted_env_vars = environment.metadata.get('env_vars', {})
+
             try:
-                ctx.invoke(test_command, checks=['{}:{}'.format(check, env)], e2e=True)
+                with EnvVars(persisted_env_vars):
+                    ctx.invoke(
+                        test_command,
+                        checks=['{}:{}'.format(check, env)],
+                        e2e=True,
+                        passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
+                        retry=retry,
+                    )
             finally:
                 if new_env:
                     ctx.invoke(stop, check=check, env=env)
-
     if not tests_ran:
         echo_info('Nothing to test!')

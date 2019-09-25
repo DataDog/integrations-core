@@ -17,8 +17,8 @@ class IbmWasCheck(AgentCheck):
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
     METRIC_PREFIX = 'ibm_was'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(IbmWasCheck, self).__init__(name, init_config, instances)
         self.metric_type_mapping = {
             'AverageStatistic': self.gauge,
             'BoundedRangeStatistic': self.gauge,
@@ -68,7 +68,7 @@ class IbmWasCheck(AgentCheck):
     def get_node_from_name(self, xml_data, path):
         # XMLPath returns a list, but there should only be one element here since the function starts
         # the search within a given Node/Server
-        data = xml_data.xpath('//Stat[normalize-space(@name)="{}"]'.format(path))
+        data = xml_data.xpath('.//Stat[normalize-space(@name)="{}"]'.format(path))
         if len(data):
             return data[0]
         else:
@@ -76,7 +76,7 @@ class IbmWasCheck(AgentCheck):
             return []
 
     def get_node_from_root(self, xml_data, path):
-        return xml_data.xpath('//{}'.format(path))
+        return xml_data.findall(path)
 
     def process_stats(self, stats, prefix, metric_categories, nested_tags, tags, recursion_level=0):
         """
@@ -88,7 +88,11 @@ class IbmWasCheck(AgentCheck):
             if child.tag in metrics.METRIC_VALUE_FIELDS:
                 self.submit_metrics(child, prefix, tags)
             elif child.tag in metrics.CATEGORY_FIELDS:
-                recursion_tags = tags + ["{}:{}".format(nested_tags.get(prefix)[recursion_level], child.get('name'))]
+                tag_list = nested_tags.get(prefix)
+                if tag_list and len(tag_list) > recursion_level:
+                    recursion_tags = tags + ['{}:{}'.format(tag_list[recursion_level], child.get('name'))]
+                else:
+                    recursion_tags = tags
                 self.process_stats(child, prefix, metric_categories, nested_tags, recursion_tags, recursion_level + 1)
 
     def submit_metrics(self, child, prefix, tags):

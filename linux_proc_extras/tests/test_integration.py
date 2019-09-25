@@ -7,12 +7,21 @@ import pytest
 
 from . import common
 
-pytestmark = pytest.mark.integration
 
-
+@pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator, check):
     check.check(deepcopy(common.INSTANCE))
 
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric_has_tag(metric, common.EXPECTED_TAG)
+
+
+@pytest.mark.e2e
+def test_check_e2e(dd_agent_check):
+    aggregator = dd_agent_check(deepcopy(common.INSTANCE), rate=True)
+    expected_metrics = deepcopy(common.EXPECTED_METRICS)
+    # metric removed from list because env does not emit
+    expected_metrics.remove('system.processes.priorities')
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)

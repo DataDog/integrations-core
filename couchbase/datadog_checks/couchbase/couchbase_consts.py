@@ -14,7 +14,7 @@ NODE_HEALTH_SERVICE_CHECK_NAME = 'couchbase.by_node.health'
 NODE_MEMBERSHIP_TRANSLATION = {
     'active': AgentCheck.OK,
     'inactiveAdded': AgentCheck.WARNING,
-    'activeFailed': AgentCheck.CRITICAL,
+    'inactiveFailed': AgentCheck.CRITICAL,
     None: AgentCheck.UNKNOWN,
 }
 

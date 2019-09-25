@@ -1,6 +1,7 @@
-pysnmp-mibs==0.1.6
-pyasn1==0.4.2
-pysnmp==4.4.3
+ipaddress==1.0.22; python_version < '3.0'
+ply==3.10
+pyasn1==0.4.6
 pycryptodomex==3.8.2
 pysmi==0.2.2
-ply==3.10
+pysnmp==4.4.3
+pysnmp-mibs==0.1.6

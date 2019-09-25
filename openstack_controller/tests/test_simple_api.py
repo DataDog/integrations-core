@@ -163,7 +163,7 @@ PROJECTS_RESPONSE = [
 PROJECT_RESPONSE = [{"domain_id": "1111", "id": "3333", "name": "name 1"}]
 
 
-def test_from_config():
+def test_from_config(requests_wrapper):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -173,7 +173,7 @@ def test_from_config():
         with mock.patch(
             'datadog_checks.openstack_controller.api.Authenticator._get_auth_projects', return_value=PROJECTS_RESPONSE
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
             assert isinstance(cred, Credential)
             assert cred.auth_token == "fake_token"
             assert cred.name == "name 2"
@@ -183,7 +183,7 @@ def test_from_config():
             assert cred.neutron_endpoint == "http://10.0.2.15:9292"
 
 
-def test_from_config_with_missing_name():
+def test_from_config_with_missing_name(requests_wrapper):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -197,11 +197,11 @@ def test_from_config_with_missing_name():
             'datadog_checks.openstack_controller.api.Authenticator._get_auth_projects',
             return_value=project_response_without_name,
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
             assert cred is None
 
 
-def test_from_config_with_missing_id():
+def test_from_config_with_missing_id(requests_wrapper):
     mock_http_response = copy.deepcopy(common.EXAMPLE_AUTH_RESPONSE)
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
 
@@ -215,11 +215,11 @@ def test_from_config_with_missing_id():
             'datadog_checks.openstack_controller.api.Authenticator._get_auth_projects',
             return_value=project_response_without_name,
         ):
-            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'])
+            cred = Authenticator.from_config(log, 'http://10.0.2.15:5000', GOOD_USERS[0]['user'], requests_wrapper)
             assert cred is None
 
 
-def get_os_hypervisor_uptime_pre_v2_52_response(url, header, params=None, timeout=None):
+def get_os_hypervisor_uptime_pre_v2_52_response(url, params=None, timeout=None):
     return json.loads(
         """{
         "hypervisor": {
@@ -233,7 +233,7 @@ def get_os_hypervisor_uptime_pre_v2_52_response(url, header, params=None, timeou
     )
 
 
-def get_os_hypervisor_uptime_post_v2_53_response(url, header, params=None, timeout=None):
+def get_os_hypervisor_uptime_post_v2_53_response(url, params=None, timeout=None):
     return json.loads(
         """{
         "hypervisor": {
@@ -247,12 +247,12 @@ def get_os_hypervisor_uptime_post_v2_53_response(url, header, params=None, timeo
     )
 
 
-def test_get_os_hypervisor_uptime(aggregator):
+def test_get_os_hypervisor_uptime(aggregator, requests_wrapper):
     with mock.patch(
         'datadog_checks.openstack_controller.api.SimpleApi._make_request',
         side_effect=get_os_hypervisor_uptime_pre_v2_52_response,
     ):
-        api = SimpleApi(None, None)
+        api = SimpleApi(None, None, requests_wrapper)
         assert (
             api.get_os_hypervisor_uptime(1) == " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
         )
@@ -261,13 +261,13 @@ def test_get_os_hypervisor_uptime(aggregator):
         'datadog_checks.openstack_controller.api.SimpleApi._make_request',
         side_effect=get_os_hypervisor_uptime_post_v2_53_response,
     ):
-        api = SimpleApi(None, None)
+        api = SimpleApi(None, None, requests_wrapper)
         assert (
             api.get_os_hypervisor_uptime(1) == " 08:32:11 up 93 days, 18:25, 12 users,  load average: 0.20, 0.12, 0.14"
         )
 
 
-def get_os_aggregates_response(url, headers, params=None, timeout=None):
+def get_os_aggregates_response(url, params=None, timeout=None):
     return json.loads(
         """{
         "aggregates": [
@@ -292,11 +292,11 @@ def get_os_aggregates_response(url, headers, params=None, timeout=None):
     )
 
 
-def test_get_os_aggregates(aggregator):
+def test_get_os_aggregates(aggregator, requests_wrapper):
     with mock.patch(
         'datadog_checks.openstack_controller.api.SimpleApi._make_request', side_effect=get_os_aggregates_response
     ):
-        api = SimpleApi(None, None)
+        api = SimpleApi(None, None, requests_wrapper)
 
         aggregates = api.get_os_aggregates()
 
@@ -305,7 +305,7 @@ def test_get_os_aggregates(aggregator):
                 assert value == aggregates[i][key]
 
 
-def get_os_hypervisors_detail_post_v2_33_response(url, headers, params=None, timeout=None):
+def get_os_hypervisors_detail_post_v2_33_response(url, params=None, timeout=None):
     return json.loads(
         """{
         "hypervisors": [
@@ -359,7 +359,7 @@ def get_os_hypervisors_detail_post_v2_33_response(url, headers, params=None, tim
     )
 
 
-def get_os_hypervisors_detail_post_v2_53_response(url, headers, params=None, timeout=None):
+def get_os_hypervisors_detail_post_v2_53_response(url, params=None, timeout=None):
     return json.loads(
         """{
         "hypervisors": [
@@ -413,19 +413,19 @@ def get_os_hypervisors_detail_post_v2_53_response(url, headers, params=None, tim
     )
 
 
-def test_get_os_hypervisors_detail(aggregator):
+def test_get_os_hypervisors_detail(aggregator, requests_wrapper):
     with mock.patch(
         'datadog_checks.openstack_controller.api.SimpleApi._make_request',
         side_effect=get_os_hypervisors_detail_post_v2_33_response,
     ):
-        api = SimpleApi(None, None)
+        api = SimpleApi(None, None, requests_wrapper)
         assert api.get_os_hypervisors_detail() == common.EXAMPLE_GET_OS_HYPERVISORS_RETURN_VALUE
 
     with mock.patch(
         'datadog_checks.openstack_controller.api.SimpleApi._make_request',
         side_effect=get_os_hypervisors_detail_post_v2_53_response,
     ):
-        api = SimpleApi(None, None)
+        api = SimpleApi(None, None, requests_wrapper)
         assert api.get_os_hypervisors_detail() == [
             {
                 "cpu_info": {
@@ -458,7 +458,7 @@ def test_get_os_hypervisors_detail(aggregator):
         ]
 
 
-def get_servers_detail_post_v2_63_response(url, headers, params=None, timeout=None):
+def get_servers_detail_post_v2_63_response(url, params=None, timeout=None):
     return json.loads(
         """{
         "servers": [
@@ -557,12 +557,12 @@ def get_servers_detail_post_v2_63_response(url, headers, params=None, timeout=No
     )
 
 
-def test_get_servers_detail(aggregator):
+def test_get_servers_detail(aggregator, requests_wrapper):
     with mock.patch(
         'datadog_checks.openstack_controller.api.SimpleApi._make_request',
         side_effect=get_servers_detail_post_v2_63_response,
     ):
-        api = SimpleApi(None, None)
+        api = SimpleApi(None, None, requests_wrapper)
         assert api.get_servers_detail(None) == [
             {
                 "OS-DCF:diskConfig": "AUTO",
@@ -648,7 +648,7 @@ def test_get_servers_detail(aggregator):
         ]
 
 
-def test__get_paginated_list():
+def test__get_paginated_list(requests_wrapper):
 
     log = mock.MagicMock()
 
@@ -656,7 +656,7 @@ def test__get_paginated_list():
     instance["paginated_limit"] = 4
 
     with mock.patch("datadog_checks.openstack_controller.api.SimpleApi.connect"):
-        api = ApiFactory.create(log, None, instance)
+        api = ApiFactory.create(log, instance, requests_wrapper)
     with mock.patch(
         "datadog_checks.openstack_controller.api.SimpleApi._make_request",
         side_effect=[
@@ -717,14 +717,14 @@ def test__get_paginated_list():
             api._get_paginated_list("url", "obj", {})
 
 
-def test__make_request_failure():
+def test__make_request_failure(requests_wrapper):
     log = mock.MagicMock()
 
     instance = copy.deepcopy(common.MOCK_CONFIG["instances"][0])
     instance["paginated_limit"] = 4
 
     with mock.patch("datadog_checks.openstack_controller.api.SimpleApi.connect"):
-        api = ApiFactory.create(log, None, instance)
+        api = ApiFactory.create(log, instance, requests_wrapper)
 
     response_mock = mock.MagicMock()
     with mock.patch("datadog_checks.openstack_controller.api.requests.get", return_value=response_mock):
@@ -746,7 +746,7 @@ def test__make_request_failure():
             api._make_request("", {})
 
 
-def get_server_diagnostics_post_v2_48_response(url, headers, params=None, timeout=None):
+def get_server_diagnostics_post_v2_48_response(url, params=None, timeout=None):
     return json.loads(
         """{
         "config_drive": true,
@@ -797,7 +797,7 @@ def get_server_diagnostics_post_v2_48_response(url, headers, params=None, timeou
     )
 
 
-def get_server_diagnostics_post_v2_1_response(url, headers, params=None, timeout=None):
+def get_server_diagnostics_post_v2_1_response(url, params=None, timeout=None):
     return json.loads(
         """{
         "cpu0_time": 17300000000,
@@ -819,12 +819,12 @@ def get_server_diagnostics_post_v2_1_response(url, headers, params=None, timeout
     )
 
 
-def test_get_server_diagnostics(aggregator):
+def test_get_server_diagnostics(aggregator, requests_wrapper):
     with mock.patch(
         'datadog_checks.openstack_controller.api.SimpleApi._make_request',
         side_effect=get_server_diagnostics_post_v2_48_response,
     ):
-        api = SimpleApi(None, None)
+        api = SimpleApi(None, None, requests_wrapper)
         assert api.get_server_diagnostics(None) == {
             "config_drive": True,
             "cpu_details": [{"id": 0, "time": 17300000000, "utilisation": 15}],
@@ -867,7 +867,7 @@ def test_get_server_diagnostics(aggregator):
         'datadog_checks.openstack_controller.api.SimpleApi._make_request',
         side_effect=get_server_diagnostics_post_v2_1_response,
     ):
-        api = SimpleApi(None, None)
+        api = SimpleApi(None, None, requests_wrapper)
         assert api.get_server_diagnostics(None) == {
             "cpu0_time": 17300000000,
             "memory": 524288,
@@ -972,10 +972,10 @@ def get_network_quotas_response():
     )
 
 
-def test_get_project_limits(aggregator):
+def test_get_project_limits(aggregator, requests_wrapper):
     with mock.patch(
         'datadog_checks.openstack_controller.api.SimpleApi._make_request',
         side_effect=[get_project_limits_response(), get_network_quotas_response()],
     ):
-        api = SimpleApi(None, None)
+        api = SimpleApi(None, None, requests_wrapper)
         assert api.get_project_limits(None) == common.EXAMPLE_GET_PROJECT_LIMITS_RETURN_VALUE

@@ -61,7 +61,7 @@ def mock_get(url, *args, **kwargs):
 
 def test_check(aggregator):
 
-    check = TwistlockCheck('twistlock', {}, {})
+    check = TwistlockCheck('twistlock', {}, [instance])
 
     with mock.patch('requests.get', side_effect=mock_get, autospec=True):
         check.check(instance)

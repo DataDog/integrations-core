@@ -4,7 +4,7 @@
     "log collection"
   ],
   "creates_events": true,
-  "description": "The MySQL integration helps to collect performance and avaialbility metrics from MySQL server instances.",
+  "description": "The MySQL integration helps to collect performance and availability metrics from MySQL server instances.",
   "display_name": "MySQL",
   "guid": "056bfc7f-4775-4581-9442-502078593d10",
   "is_public": true,

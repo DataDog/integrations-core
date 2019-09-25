@@ -4,7 +4,7 @@
 
 from mock import patch
 
-from datadog_checks.nagios import Nagios
+from datadog_checks.nagios import NagiosCheck
 
 from .common import CHECK_NAME, CUSTOM_TAGS
 
@@ -34,7 +34,7 @@ class TestGaugeWrapper:
 
         # This should call 'gauge_v6' with all the same arguments that we passed in, except for the 'timestamp' argument
         with patch('datadog_checks.checks.AgentCheck.gauge', new=gauge_v6):
-            nagios = Nagios(CHECK_NAME, {}, {})
+            nagios = NagiosCheck(CHECK_NAME, {}, {})
             nagios.gauge(METRIC_NAME, METRIC_VALUE, tags=METRIC_TAGS, timestamp=METRIC_TIMESTAMP)
 
     def test_gauge_with_timestamp(self):
@@ -56,5 +56,5 @@ class TestGaugeWrapper:
 
         # This should call 'gauge_v5' with all the same arguments that we passed in
         with patch('datadog_checks.checks.AgentCheck.gauge', new=gauge_v5):
-            nagios = Nagios(CHECK_NAME, {}, {})
+            nagios = NagiosCheck(CHECK_NAME, {}, {})
             nagios.gauge(METRIC_NAME, METRIC_VALUE, tags=METRIC_TAGS, timestamp=METRIC_TIMESTAMP)

@@ -24,7 +24,7 @@ CONFIG_FILE_INSTANCE = {
     'openstack_cloud_name': 'test_cloud',
 }
 
-KEYSTONE_INSTACE = {
+KEYSTONE_INSTANCE = {
     'name': 'test_name',
     'keystone_server_url': 'http://10.0.2.15:5000',
     'user': {'name': 'test_name', 'password': 'test_pass', 'domain': {'id': 'test_id'}},
@@ -32,7 +32,7 @@ KEYSTONE_INSTACE = {
     'exclude_network_ids': EXCLUDED_NETWORK_IDS,
 }
 
-MOCK_CONFIG = {'init_config': {}, 'instances': [KEYSTONE_INSTACE]}
+MOCK_CONFIG = {'init_config': {}, 'instances': [KEYSTONE_INSTANCE]}
 
 EXAMPLE_AUTH_RESPONSE = {
     u'token': {
@@ -346,4 +346,38 @@ EXAMPLE_GET_NETWORKS_RETURN_VALUE = [
         'tenant_id': u'680031a39ce040e1b81289ea8c73fb11',
         'admin_state_up': True,
     }
+]
+
+DEFAULT_METRICS = [
+    'openstack.controller',
+    'openstack.nova.current_workload',
+    'openstack.nova.disk_available_least',
+    'openstack.nova.free_disk_gb',
+    'openstack.nova.free_ram_mb',
+    'openstack.nova.hypervisor_load.1',
+    'openstack.nova.hypervisor_load.15',
+    'openstack.nova.hypervisor_load.5',
+    'openstack.nova.limits.max_image_meta',
+    'openstack.nova.limits.max_personality',
+    'openstack.nova.limits.max_personality_size',
+    'openstack.nova.limits.max_security_group_rules',
+    'openstack.nova.limits.max_security_groups',
+    'openstack.nova.limits.max_server_meta',
+    'openstack.nova.limits.max_total_cores',
+    'openstack.nova.limits.max_total_floating_ips',
+    'openstack.nova.limits.max_total_instances',
+    'openstack.nova.limits.max_total_keypairs',
+    'openstack.nova.limits.max_total_ram_size',
+    'openstack.nova.limits.total_cores_used',
+    'openstack.nova.limits.total_floating_ips_used',
+    'openstack.nova.limits.total_instances_used',
+    'openstack.nova.limits.total_ram_used',
+    'openstack.nova.limits.total_security_groups_used',
+    'openstack.nova.local_gb',
+    'openstack.nova.local_gb_used',
+    'openstack.nova.memory_mb',
+    'openstack.nova.memory_mb_used',
+    'openstack.nova.running_vms',
+    'openstack.nova.vcpus',
+    'openstack.nova.vcpus_used',
 ]

@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 
 from six import iteritems
 
@@ -70,24 +72,41 @@ def format_config(config):
 
 
 def replay_check_run(agent_collector, stub_aggregator):
-    # We assume a test only uses one instance
-    agent_collector = agent_collector[0]
-    aggregator = agent_collector['aggregator']
-    runner = agent_collector['runner']
-    check_id = runner['CheckID']
-    check_name = runner['CheckName']
+    errors = []
+    for collector in agent_collector:
+        aggregator = collector['aggregator']
+        runner = collector['runner']
+        check_id = runner['CheckID']
+        check_name = runner['CheckName']
 
-    for data in aggregator.get('metrics', []):
-        for _, value in data['points']:
-            metric_type = stub_aggregator.METRIC_ENUM_MAP[data['type']]
-            stub_aggregator.submit_metric(
-                check_name, check_id, metric_type, data['metric'], value, data['tags'], data['host']
+        for data in aggregator.get('metrics', []):
+            for _, value in data['points']:
+                metric_type = stub_aggregator.METRIC_ENUM_MAP[data['type']]
+                stub_aggregator.submit_metric(
+                    check_name, check_id, metric_type, data['metric'], value, data['tags'], data['host']
+                )
+
+        for data in aggregator.get('service_checks', []):
+            stub_aggregator.submit_service_check(
+                check_name, check_id, data['check'], data['status'], data['tags'], data['host_name'], data['message']
             )
 
-    for data in aggregator.get('service_checks', []):
-        stub_aggregator.submit_service_check(
-            check_name, check_id, data['check'], data['status'], data['tags'], data['host_name'], data['message']
-        )
+        if runner['LastError']:
+            errors.extend(json.loads(runner['LastError']))
+    if errors:
+        raise Exception("\n".join("Message: {}\n{}".format(err['message'], err['traceback']) for err in errors))
 
-    if runner['LastError']:
-        raise Exception(runner['LastError'])
+
+def serialize_data(data):
+    data = json.dumps(data, separators=(',', ':'))
+    # Using base64 ensures:
+    # 1. Printing to stdout won't fail
+    # 2. Easy parsing since there are no spaces
+    #
+    # TODO: Remove str() when we drop Python 2
+    return str(urlsafe_b64encode(data.encode('utf-8')).decode('utf-8'))
+
+
+def deserialize_data(data):
+    decoded = urlsafe_b64decode(data.encode('utf-8'))
+    return json.loads(decoded.decode('utf-8'))

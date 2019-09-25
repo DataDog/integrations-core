@@ -2,8 +2,6 @@ import copy
 import os
 from collections import defaultdict
 
-from datadog_checks.haproxy import HAProxy
-
 from . import common
 
 BASE_CONFIG = {'url': 'http://localhost/admin?stats', 'collect_status_metrics': True, 'enable_service_check': True}
@@ -19,12 +17,12 @@ def _assert_agg_statuses(aggregator, count_status_by_service=True, collate_statu
             aggregator.assert_metric('haproxy.count_per_status', value=value, tags=tags)
 
 
-def test_count_per_status_agg_only(aggregator, haproxy_mock):
+def test_count_per_status_agg_only(aggregator, check, haproxy_mock):
     config = copy.deepcopy(BASE_CONFIG)
     # with count_status_by_service set to False
     config['count_status_by_service'] = False
 
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     aggregator.assert_metric('haproxy.count_per_status', value=2, tags=['status:open'])
@@ -37,9 +35,9 @@ def test_count_per_status_agg_only(aggregator, haproxy_mock):
     _assert_agg_statuses(aggregator, count_status_by_service=False)
 
 
-def test_count_per_status_by_service(aggregator, haproxy_mock):
+def test_count_per_status_by_service(aggregator, check, haproxy_mock):
     config = copy.deepcopy(BASE_CONFIG)
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:open', 'service:a'])
@@ -56,10 +54,10 @@ def test_count_per_status_by_service(aggregator, haproxy_mock):
     _assert_agg_statuses(aggregator)
 
 
-def test_count_per_status_by_service_and_host(aggregator, haproxy_mock):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+def test_count_per_status_by_service_and_host(aggregator, check, haproxy_mock):
     config = copy.deepcopy(BASE_CONFIG)
     config['collect_status_metrics_by_host'] = True
+    haproxy_check = check(config)
     haproxy_check.check(config)
 
     tags = ['backend:FRONTEND', 'status:open', 'service:a']
@@ -83,8 +81,8 @@ def test_count_per_status_by_service_and_host(aggregator, haproxy_mock):
     _assert_agg_statuses(aggregator)
 
 
-def test_count_per_status_by_service_and_collate_per_host(aggregator, haproxy_mock):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+def test_count_per_status_by_service_and_collate_per_host(aggregator, check, haproxy_mock):
+    haproxy_check = check(BASE_CONFIG)
     config = copy.deepcopy(BASE_CONFIG)
     config['collect_status_metrics_by_host'] = True
     config['collate_status_tags_per_host'] = True
@@ -111,8 +109,8 @@ def test_count_per_status_by_service_and_collate_per_host(aggregator, haproxy_mo
     _assert_agg_statuses(aggregator, collate_status_tags_per_host=True)
 
 
-def test_count_per_status_by_service_and_collate_per_host_evil(aggregator, haproxy_mock_evil):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+def test_count_per_status_by_service_and_collate_per_host_evil(aggregator, check, haproxy_mock_evil):
+    haproxy_check = check(BASE_CONFIG)
     config = copy.deepcopy(BASE_CONFIG)
     config['collect_status_metrics_by_host'] = True
     config['collate_status_tags_per_host'] = True
@@ -139,8 +137,8 @@ def test_count_per_status_by_service_and_collate_per_host_evil(aggregator, hapro
     _assert_agg_statuses(aggregator, collate_status_tags_per_host=True)
 
 
-def test_count_per_status_collate_per_host(aggregator, haproxy_mock):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+def test_count_per_status_collate_per_host(aggregator, check, haproxy_mock):
+    haproxy_check = check(BASE_CONFIG)
     config = copy.deepcopy(BASE_CONFIG)
     config['collect_status_metrics_by_host'] = True
     config['collate_status_tags_per_host'] = True
@@ -161,8 +159,8 @@ def test_count_per_status_collate_per_host(aggregator, haproxy_mock):
 
 # This mock is only useful to make the first `run_check` run w/o errors
 # (which in turn is useful only to initialize the check)
-def test_count_hosts_statuses(aggregator, haproxy_mock):
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+def test_count_hosts_statuses(aggregator, check, haproxy_mock):
+    haproxy_check = check(BASE_CONFIG)
     haproxy_check.check(BASE_CONFIG)
 
     filepath = os.path.join(common.HERE, 'fixtures', 'statuses_mock')
@@ -207,10 +205,10 @@ def test_count_hosts_statuses(aggregator, haproxy_mock):
     assert haproxy_check.hosts_statuses, expected_hosts_statuses
 
 
-def test_optional_tags(aggregator, haproxy_mock):
+def test_optional_tags(aggregator, check, haproxy_mock):
     config = copy.deepcopy(BASE_CONFIG)
     config['tags'] = ['new-tag', 'my:new:tag']
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+    haproxy_check = check(BASE_CONFIG)
     haproxy_check.check(config)
 
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'new-tag')
@@ -220,12 +218,12 @@ def test_optional_tags(aggregator, haproxy_mock):
     aggregator.assert_service_check('haproxy.backend_up', tags=tags)
 
 
-def test_regex_tags(aggregator, haproxy_mock):
+def test_regex_tags(aggregator, check, haproxy_mock):
     config = copy.deepcopy(BASE_CONFIG)
     config['tags'] = ['region:infra']
     # OS3 service: be_edge_http_sre-production_elk-kibana
     config['tags_regex'] = r'be_(?P<security>edge_http|http)?_(?P<team>[a-z]+)\-(?P<env>[a-z]+)_(?P<app>.*)'
-    haproxy_check = HAProxy(common.CHECK_NAME, {}, {})
+    haproxy_check = check(BASE_CONFIG)
     haproxy_check.check(config)
 
     expected_tags = [

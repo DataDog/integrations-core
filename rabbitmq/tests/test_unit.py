@@ -5,14 +5,20 @@
 import mock
 import pytest
 import requests
+from tests.common import EXCHANGE_MESSAGE_STATS
 
+import datadog_checks
 from datadog_checks.rabbitmq import RabbitMQ
-from datadog_checks.rabbitmq.rabbitmq import NODE_TYPE, RabbitMQException
+from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, RabbitMQException
+
+from . import common
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.unit
 def test__get_data(check):
-    with mock.patch('datadog_checks.rabbitmq.rabbitmq.requests') as r:
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.side_effect = [requests.exceptions.HTTPError, ValueError]
         with pytest.raises(RabbitMQException) as e:
             check._get_data('')
@@ -67,7 +73,7 @@ def test__check_aliveness(check, aggregator):
 
     # only one vhost should be OK
     check._get_data.side_effect = [{"status": "ok"}, {}]
-    check._check_aliveness(instance, '', vhosts=['foo', 'bar'], custom_tags=[])
+    check._check_aliveness('', vhosts=['foo', 'bar'], custom_tags=[])
     sc = aggregator.service_checks('rabbitmq.aliveness')
     assert len(sc) == 2
     aggregator.assert_service_check('rabbitmq.aliveness', status=RabbitMQ.OK)
@@ -85,5 +91,51 @@ def test__get_metrics(check, aggregator):
     data = {'fd_used': 3.14, 'disk_free': 4242, 'mem_used': 9000}
 
     assert check._get_metrics(data, NODE_TYPE, []) == 3
-    assert check._get_metrics(data, NODE_TYPE, [], 2) == 2
-    assert check._get_metrics(data, NODE_TYPE, [], 5) == 3
+    assert check._get_metrics({}, NODE_TYPE, []) == 0
+
+
+@pytest.mark.unit
+@mock.patch.object(datadog_checks.rabbitmq.RabbitMQ, '_get_object_data')
+def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggregator):
+    data = [
+        {'name': 'ex1', 'message_stats': EXCHANGE_MESSAGE_STATS},
+        {'name': 'ex2', 'message_stats': EXCHANGE_MESSAGE_STATS},
+        {'name': 'ex3', 'message_stats': {}},
+        {'name': 'ex4', 'message_stats': EXCHANGE_MESSAGE_STATS},
+    ]
+    mock__get_object_data.return_value = data
+    check.get_stats(instance, 'base_url', EXCHANGE_TYPE, 3, {'explicit': [], 'regexes': ['ex.*']}, [], [])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex1'])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex2'])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex4'])
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        (
+            "legacy auth config",
+            {'rabbitmq_user': 'legacy_foo', 'rabbitmq_pass': 'legacy_bar'},
+            {'auth': ('legacy_foo', 'legacy_bar')},
+        ),
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'ssl_verify': True}, {'verify': True}),
+        ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
+    ],
+)
+def test_config(check, test_case, extra_config, expected_http_kwargs):
+    config = {'rabbitmq_api_url': common.URL, 'queues': ['test1'], 'tags': ["tag1:1", "tag2"], 'exchanges': ['test1']}
+    config.update(extra_config)
+    check = RabbitMQ('rabbitmq', {}, instances=[config])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(config)
+
+        http_wargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_wargs.update(expected_http_kwargs)
+
+        r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)

@@ -157,4 +157,9 @@ def setup_more_with_vhosts(rabbitmq_admin_script):
 
 @pytest.fixture
 def check():
-    return RabbitMQ(CHECK_NAME, {}, {})
+    return RabbitMQ(CHECK_NAME, {}, [CONFIG])
+
+
+@pytest.fixture
+def instance():
+    return CONFIG

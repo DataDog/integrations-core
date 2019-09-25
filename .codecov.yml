@@ -1,5 +1,5 @@
 comment:
-  layout: "reach,files"
+  layout: "files"
   behavior: default
   branches: null
 

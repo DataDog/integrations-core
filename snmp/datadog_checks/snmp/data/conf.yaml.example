@@ -83,17 +83,37 @@ init_config:
   #     metric_tags:
   #       - TCP
 
+  ## @param profiles - dictionary - optional
+  ## Specify profiles to be able to reference a set of metrics by name.
+  ## One of definition_file or definition needs to be defined.
+  ## definition_file points to a file with the same structure as
+  ## global_metrics, whereas definition inlines it directly here.
+  ## sysObjectID can be set to match the devices that are going to
+  ## automatically use this profile.
+  #
+  # profiles:
+  #   profile1:
+  #   	definition_file: <PROFILE_FILE>
+  #   	definition: <PROFILE>
+  #   	sysobjectid: <OID>
+
 instances:
-
-    ## @param ip_address - string - required
+  -
+    ## @param ip_address - string - optional
     ## The IP address of the device to monitor.
+    ## One of ip_address and network_address must be provided.
     #
-  - ip_address: localhost
+    # ip_address: <IP_ADDRESS>
 
-    ## @param port - integer - required
+    ## @param network_address - string - optional
+    ## The network address of the devices to scan for monitor.
+    #
+    # network_address: <NETWORK_ADRESS>
+
+    ## @param port - integer - optional - default: 161
     ## Default SNMP port.
     #
-    port: 161
+    # port: 161
 
     ## @param community_string - string - optional
     ## Only useful for SNMP v1 & v2.
@@ -116,10 +136,26 @@ instances:
     #
     # retries: 5
 
+    ## @param discovery_interval - integer - optional - default: 3600
+    ## Interval between 2 discovery starts, in seconds.
+    #
+    # discovery_interval: 3600
+
+    ## @param discovery_allowed_failures - integer - optional - default: 3
+    ## Number of times a discovered host can fail before we remove it from the discovered list.
+    #
+    # discovery_allowed_failures: 3
+
     ## @param enforce_mib_constraints - boolean - optional - default: true
     ## If set to false we will not check the values returned meet the MIB constraints.
     #
     # enforce_mib_constraints: true
+
+    ## @param bulk_threshold - integer - optional - default: 5
+    ## The number of symbols in each table that triggers a BULK request.
+    ## Only relevant for SNMP > 1.
+    #
+    # bulk_threshold: 5
 
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
@@ -175,6 +211,11 @@ instances:
     ## Whether or not global_metrics should be included for this instance.
     #
     # use_global_metrics: true
+
+    ## @param profile - string - optional
+    ## Name of the profile to use, if any.
+    #
+    # profile: <PROFILE_NAME>
 
     ## @param metrics - list of elements - optional
     ## Specify metrics you want to monitor by using MIBS for Counter and Gauge.

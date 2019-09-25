@@ -16,6 +16,7 @@ CHECK_NAME = 'kubernetes_state'
 
 METRICS = [
     # nodes
+    NAMESPACE + '.node.count',
     NAMESPACE + '.node.cpu_capacity',
     NAMESPACE + '.node.memory_capacity',
     NAMESPACE + '.node.pods_capacity',
@@ -102,9 +103,23 @@ METRICS = [
     # jobs
     NAMESPACE + '.job.failed',
     NAMESPACE + '.job.succeeded',
+    # vpa
+    NAMESPACE + '.vpa.lower_bound',
+    NAMESPACE + '.vpa.target',
+    NAMESPACE + '.vpa.uncapped_target',
+    NAMESPACE + '.vpa.upperbound',
+    NAMESPACE + '.vpa.update_mode',
 ]
 
 TAGS = {
+    NAMESPACE
+    + '.node.count': [
+        'container_runtime_version:docker://1.12.6',
+        'kernel_version:4.9.13',
+        'kubelet_version:v1.8.0',
+        'kubeproxy_version:v1.8.0',
+        'os_image:Buildroot 2017.02',
+    ],
     NAMESPACE + '.pod.ready': ['node:minikube'],
     NAMESPACE + '.pod.scheduled': ['node:minikube'],
     NAMESPACE
@@ -208,6 +223,11 @@ class MockResponse:
         pass
 
 
+def mock_from_file(fname):
+    with open(os.path.join(HERE, 'fixtures', fname), 'rb') as f:
+        return f.read()
+
+
 @pytest.fixture
 def instance():
     return {'host': 'foo', 'kube_state_url': 'http://foo', 'tags': ['optional:tag1'], 'telemetry': False}
@@ -216,9 +236,7 @@ def instance():
 @pytest.fixture
 def check(instance):
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    with open(os.path.join(HERE, 'fixtures', 'prometheus.txt'), 'rb') as f:
-        check.poll = mock.MagicMock(return_value=MockResponse(f.read(), 'text/plain'))
-
+    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     return check
 
 
@@ -381,12 +399,66 @@ def test_pod_phase_gauges(aggregator, instance, check):
     )
 
 
+def test_extract_timestamp(check):
+    job_name = "hello2-1509998340"
+    job_name2 = "hello-2-1509998340"
+    job_name3 = "hello2"
+    result = check._extract_job_timestamp(job_name)
+    assert result == 1509998340
+    result = check._extract_job_timestamp(job_name2)
+    assert result == 1509998340
+    result = check._extract_job_timestamp(job_name3)
+    assert result == 0
+
+
+def test_job_counts(aggregator, instance):
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    payload = mock_from_file("prometheus.txt")
+    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+
+    for _ in range(2):
+        check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=0
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=3
+    )
+
+    # Re-run check to make sure we don't count the same jobs
+    check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=0
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=3
+    )
+
+    # Edit the payload and rerun the check
+    payload = payload.replace(
+        b'kube_job_status_succeeded{job="hello-1509998340",namespace="default"} 1',
+        b'kube_job_status_succeeded{job="hello-1509998500",namespace="default"} 1',
+    )
+    payload = payload.replace(
+        b'kube_job_status_failed{job="hello-1509998340",namespace="default"} 0',
+        b'kube_job_status_failed{job="hello-1509998510",namespace="default"} 1',
+    )
+
+    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=1
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=4
+    )
+
+
 def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
 
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    with open(os.path.join(HERE, 'fixtures', 'prometheus.txt'), 'rb') as f:
-        check.poll = mock.MagicMock(return_value=MockResponse(f.read(), 'text/plain'))
+    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
 
     endpoint = instance['kube_state_url']
     scraper_config = check.config_map[endpoint]
@@ -394,15 +466,15 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=87416.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=956.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1270.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90270.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=908.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1282.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=314.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',
         tags=['resource_name:pod', 'resource_namespace:default', 'optional:tag1'],
-        value=600.0,
+        value=540.0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',

@@ -1,5 +1,14 @@
 # CHANGELOG - IBM MQ
 
+## 3.2.1 / 2019-09-18
+
+* [Fixed] Improve IBM MQ docs and logging. See [#4540](https://github.com/DataDog/integrations-core/pull/4540).
+* [Fixed] Fix duplicate service checks. See [#4525](https://github.com/DataDog/integrations-core/pull/4525).
+
+## 3.2.0 / 2019-08-21
+
+* [Added] Add channel_status_mapping config. See [#4395](https://github.com/DataDog/integrations-core/pull/4395).
+
 ## 3.1.1 / 2019-07-29
 
 * [Fixed] Fix ibm_mq e2e import issue. See [#4140](https://github.com/DataDog/integrations-core/pull/4140).

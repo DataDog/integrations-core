@@ -10,7 +10,7 @@ from datadog_checks.dev.conditions import CheckCommandOutput, CheckDockerLogs, C
 from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command
 
-from .common import not_appveyor
+from .common import not_windows_ci
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
@@ -70,7 +70,7 @@ class TestCheckCommandOutput:
 
 
 class TestCheckDockerLogs:
-    pytestmark = [pytest.mark.docker, not_appveyor]
+    pytestmark = [pytest.mark.docker, not_windows_ci]
 
     def test_no_matches(self):
         compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')

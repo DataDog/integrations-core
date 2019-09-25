@@ -1,5 +1,9 @@
 # CHANGELOG - kafka
 
+## 2.0.1 / 2019-08-24
+
+* [Fixed] Treat `kafka.producer.compression_rate` as a ratio. See [#4293](https://github.com/DataDog/integrations-core/pull/4293).
+
 ## 2.0.0 / 2019-06-01
 
 * [Changed] Fix unit type of `kafka.request.produce.time.avg` & `kafka.request.produce.time.99percentile`. See [#3834](https://github.com/DataDog/integrations-core/pull/3834).

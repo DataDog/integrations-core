@@ -3,26 +3,32 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import sys
 
-from datadog_checks.dev import get_docker_hostname
+from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.dev._env import e2e_testing
+from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
 from datadog_checks.sqlserver import SQLServer
 
 
-def lib_tds_path():
+def get_local_driver():
     """
     This is definitely ugly but should do the trick most of the times. On OSX
     we can point unixODBC directly to the FreeTDS client library. On linux instead
     we need to define the 'FreeTDS' driver in odbcinst.ini
     """
-    if sys.platform == 'darwin':
+    if ON_MACOS:
         return '/usr/local/lib/libtdsodbc.so'
-    return 'FreeTDS'
+    elif ON_WINDOWS:
+        return '{ODBC Driver 17 for SQL Server}'
+    else:
+        return 'FreeTDS'
 
 
 HOST = get_docker_hostname()
 PORT = 1433
-HERE = os.path.dirname(os.path.abspath(__file__))
+DOCKER_SERVER = '{},{}'.format(HOST, PORT)
+LOCAL_SERVER = 'localhost,{}'.format(PORT)
+HERE = get_here()
 CHECK_NAME = "sqlserver"
 
 CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.exec.in_progress']
@@ -31,13 +37,19 @@ EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS] + CUSTOM_METRICS
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
     'connector': 'odbc',
-    'driver': lib_tds_path(),
+    'driver': 'FreeTDS' if e2e_testing() else get_local_driver(),
     'username': 'sa',
     'password': 'Password123',
     'tags': ['optional:tag1'],
 }
 
-INSTANCE_SQL2017 = {'host': r'(local)\SQL2017', 'username': 'sa', 'password': 'Password12!'}
+INSTANCE_SQL2017 = {
+    'host': LOCAL_SERVER,
+    'username': 'sa',
+    'password': 'Password12!',
+    'connector': 'odbc',
+    'driver': '{ODBC Driver 17 for SQL Server}',
+}
 
 INIT_CONFIG = {
     'custom_metrics': [
@@ -78,3 +90,10 @@ INIT_CONFIG_OBJECT_NAME = {
 }
 
 FULL_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_DOCKER]}
+
+E2E_METADATA = {
+    'start_commands': ['apt-get update', 'apt-get install -y tdsodbc unixodbc-dev'],
+    'docker_volumes': [
+        '{}:/opt/datadog-agent/embedded/etc/odbcinst.ini'.format(os.path.join(HERE, 'odbc', 'odbcinst.ini'))
+    ],
+}

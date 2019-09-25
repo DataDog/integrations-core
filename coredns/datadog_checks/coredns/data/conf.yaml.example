@@ -17,7 +17,7 @@ instances:
     tags:
       - "dns-pod:%%host%%"
 
-    ## @param send_histogram_buckets - boolean - optional - default: true
+    ## @param send_histograms_buckets - boolean - optional - default: true
     ## Set send_histograms_buckets to `true` to send the histograms buckets.
     #
     # send_histograms_buckets: true

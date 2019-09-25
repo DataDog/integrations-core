@@ -80,3 +80,9 @@ instances:
     ## making the request to the Harbor API
     #
     # skip_proxy: false
+
+# logs:
+#   - type: file
+#     path: /var/log/harbor/*.log
+#     source: harbor
+#     service: <SERVICE_NAME>

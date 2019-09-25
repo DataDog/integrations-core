@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 3.3.2 / 2019-08-14
+
+* [Fixed] Enforce unicode output in requests.iter_lines call. See [#4360](https://github.com/DataDog/integrations-core/pull/4360).
+
 ## 3.3.1 / 2019-07-16
 
 * [Fixed] Update tagger usage to match prefix update. See [#4109](https://github.com/DataDog/integrations-core/pull/4109).

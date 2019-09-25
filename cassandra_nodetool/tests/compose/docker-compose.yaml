@@ -12,6 +12,7 @@ services:
     environment:
       JMX_PORT: ${CONTAINER_PORT}
       LOCAL_JMX: "no"
+      CASSANDRA_START_RPC: "true"
       JVM_EXTRA_OPTS: >
         -Dcom.sun.management.jmxremote.port=${CONTAINER_PORT}
         -Dcom.sun.management.jmxremote.rmi.port=${CONTAINER_PORT}

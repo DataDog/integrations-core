@@ -7,17 +7,13 @@ import os
 import platform
 import re
 
+import psutil
 from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
-
-try:
-    import psutil
-except ImportError:
-    psutil = None
 
 # See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
 IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
@@ -26,8 +22,6 @@ IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
 class Disk(AgentCheck):
     """ Collects metrics about the machine's disks. """
 
-    # -T for filesystem info
-    DF_COMMAND = ['df', '-T']
     METRIC_DISK = 'system.disk.{}'
     METRIC_INODE = 'system.fs.inodes.{}'
 
@@ -50,6 +44,7 @@ class Disk(AgentCheck):
         self._device_tag_re = instance.get('device_tag_re', {})
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
+        self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
 
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
@@ -61,19 +56,7 @@ class Disk(AgentCheck):
         """Get disk space/inode stats"""
         if self._tag_by_label and Platform.is_linux():
             self.devices_label = self._get_devices_label()
-        # Windows and Mac will always have psutil
-        # (we have packaged for both of them)
-        if self._psutil():
-            self.collect_metrics_psutil()
-        else:
-            # FIXME: implement all_partitions (df -a)
-            self.collect_metrics_manually()
 
-    @classmethod
-    def _psutil(cls):
-        return psutil is not None
-
-    def collect_metrics_psutil(self):
         self._valid_disks = {}
         for part in psutil.disk_partitions(all=True):
             # we check all exclude conditions
@@ -92,8 +75,10 @@ class Disk(AgentCheck):
                 self.log.warning('Unable to get disk metrics for %s: %s', part.mountpoint, e)
                 continue
 
-            # Exclude disks with total disk size 0
-            if disk_usage.total == 0:
+            # Exclude disks with size less than min_disk_size
+            if disk_usage.total <= self._min_disk_size:
+                if disk_usage.total > 0:
+                    self.log.info('Excluding device {} with total disk size {}'.format(part.device, disk_usage.total))
                 continue
 
             # For later, latency metrics
@@ -271,95 +256,6 @@ class Disk(AgentCheck):
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
                 self.log.debug('Latency metrics not collected for {}: {}'.format(disk_name, e))
-
-    # no psutil, let's use df
-    def collect_metrics_manually(self):
-        df_out, _, _ = get_subprocess_output(self.DF_COMMAND + ['-k'], self.log)
-        self.log.debug(df_out)
-
-        for device in self._list_devices(df_out):
-            self.log.debug("Passed: {}".format(device))
-            device_name = device[-1] if self._use_mount else device[0]
-
-            tags = [device[1], 'filesystem:{}'.format(device[1])] if self._tag_by_filesystem else []
-            tags.extend(self._custom_tags)
-
-            # apply device/mountpoint specific tags
-            for regex, device_tags in self._device_tag_re:
-                if regex.match(device_name):
-                    tags += device_tags
-            tags.append('device:{}'.format(device_name))
-
-            if self.devices_label.get(device_name):
-                tags.append(self.devices_label.get(device_name))
-
-            for metric_name, value in iteritems(self._collect_metrics_manually(device)):
-                self.gauge(metric_name, value, tags=tags)
-
-    def _collect_metrics_manually(self, device):
-        result = {}
-
-        used = float(device[3])
-        free = float(device[4])
-
-        # device is
-        # ["/dev/sda1", "ext4", 524288,  171642,  352646, "33%", "/"]
-        result[self.METRIC_DISK.format('total')] = float(device[2])
-        result[self.METRIC_DISK.format('used')] = used
-        result[self.METRIC_DISK.format('free')] = free
-
-        # Rather than grabbing in_use, let's calculate it to be more precise
-        result[self.METRIC_DISK.format('in_use')] = used / (used + free)
-
-        result.update(self._collect_inodes_metrics(device[-1]))
-        return result
-
-    def _keep_device(self, device):
-        # device is for Unix
-        # [/dev/disk0s2, ext4, 244277768, 88767396, 155254372, 37%, /]
-        # First, skip empty lines.
-        # then filter our fake hosts like 'map -hosts'.
-        #    Filesystem    Type   1024-blocks     Used Available Capacity  Mounted on
-        #    /dev/disk0s2  ext4     244277768 88767396 155254372    37%    /
-        #    map -hosts    tmpfs            0        0         0   100%    /net
-        # and finally filter out fake devices
-        return (
-            device
-            and len(device) > 1
-            and device[2].isdigit()
-            and not self._exclude_disk(device[0], device[1], device[6])
-        )
-
-    def _flatten_devices(self, devices):
-        # Some volumes are stored on their own line. Rejoin them here.
-        previous = None
-        for parts in devices:
-            if len(parts) == 1:
-                previous = parts[0]
-            elif previous is not None:
-                # collate with previous line
-                parts.insert(0, previous)
-                previous = None
-            else:
-                previous = None
-        return devices
-
-    def _list_devices(self, df_output):
-        """
-        Given raw output for the df command, transform it into a normalized
-        list devices. A 'device' is a list with fields corresponding to the
-        output of df output on each platform.
-        """
-        all_devices = [l.strip().split() for l in df_output.splitlines()]
-
-        # Skip the header row and empty lines.
-        raw_devices = [l for l in all_devices[1:] if l]
-
-        # Flatten the disks that appear in the mulitple lines.
-        flattened_devices = self._flatten_devices(raw_devices)
-
-        # Filter fake or unwanteddisks.
-        return [d for d in flattened_devices if self._keep_device(d)]
 
     def _compile_pattern_filters(self, instance):
         # Force exclusion of CDROM (iso9660)

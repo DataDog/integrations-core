@@ -36,6 +36,7 @@ instances:
 #   port: 1234         # set along with host
 #   version: 3         # to use a specific NTP version
 #   timeout: 5         # seconds to wait for a response from the NTP server; default is 1
+#   use_local_defined_servers: false # Use the NTP servers defined in the localhost; default is false
 ```
 
 Configuration Options:
@@ -44,6 +45,7 @@ Configuration Options:
 * `port` (Optional) - What port to use
 * `version` (Optional) - ntp version
 * `timeout` (Optional) - Response timeout
+* `use_local_defined_servers` (Optional) - True to use NTP servers defined in the localhost. For Unix system, the servers defined in /etc/ntp.conf and etc/xntp.conf are used. For Windows system, the servers defined in registry key HKLM\SYSTEM\CurrentControlSet\Services\W32Time\Parameters\NtpServer are used. **Caveat**: Enabling this option will make the NTP check unable to detect issues if the clock of the target NTP server of the system is skewed
 
 [Restart the Agent][4] to effect any configuration changes.
 
@@ -69,7 +71,7 @@ Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[3]: https://github.com/DataDog/integrations-core/blob/master/ntp/datadog_checks/ntp/data/conf.yaml.default
+[3]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/ntp.d/conf.yaml.default
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/ntp/metadata.csv

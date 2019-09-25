@@ -5,7 +5,7 @@ import os
 import sys
 
 from datadog_checks.dev import EnvVars, run_command
-from datadog_checks.dev._env import TESTING_PLUGIN
+from datadog_checks.dev._env import E2E_PREFIX, TESTING_PLUGIN
 from datadog_checks.dev.utils import chdir, remove_path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +24,10 @@ def test_new_check_test():
         run_command([sys.executable, '-m', 'pip', 'install', check_path], capture=True, check=True)
 
         with chdir(check_path):
-            with EnvVars(ignore=[TESTING_PLUGIN]):
+            ignored_env_vars = [TESTING_PLUGIN]
+            ignored_env_vars.extend(ev for ev in os.environ if ev.startswith(E2E_PREFIX))
+
+            with EnvVars(ignore=ignored_env_vars):
                 run_command([sys.executable, '-m', 'pytest'], capture=True, check=True)
 
         run_command([sys.executable, '-m', 'pip', 'uninstall', '-y', 'my-check'], capture=True, check=True)

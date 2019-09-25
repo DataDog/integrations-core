@@ -1,5 +1,9 @@
 # CHANGELOG - Ambari
 
+## 1.1.2 / 2019-08-24
+
+* [Fixed] Add custom tags to service checks. See [#4320](https://github.com/DataDog/integrations-core/pull/4320).
+
 ## 1.1.1 / 2019-07-09
 
 * [Fixed] Fix typo TSL => TLS. See [#4072](https://github.com/DataDog/integrations-core/pull/4072).

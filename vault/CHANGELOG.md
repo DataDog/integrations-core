@@ -1,5 +1,13 @@
 # CHANGELOG - Vault
 
+## 1.5.0 / 2019-08-24
+
+* [Added] Add requests wrapper to vault. See [#4259](https://github.com/DataDog/integrations-core/pull/4259).
+
+## 1.4.1 / 2019-07-31
+
+* [Fixed] Submit critical service check with 500 server errors. See [#4242](https://github.com/DataDog/integrations-core/pull/4242).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3580](https://github.com/DataDog/integrations-core/pull/3580).

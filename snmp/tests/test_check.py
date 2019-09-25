@@ -2,9 +2,17 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import ipaddress
+import os
+import socket
+import time
+
 import mock
 import pytest
+import yaml
 
+from datadog_checks.base import ConfigurationError
+from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
@@ -70,7 +78,7 @@ def test_transient_error(aggregator):
 
 def test_snmpget(aggregator):
     """
-    When failing with 'snmpget' command, SNMP check falls back to 'snpgetnext'
+    When failing with 'snmpget' command, SNMP check falls back to 'snmpgetnext'
 
         > snmpget -v2c -c public localhost:11111 1.3.6.1.2.1.25.6.3.1.4
         iso.3.6.1.2.1.25.6.3.1.4 = No Such Instance currently exists at this OID
@@ -95,6 +103,7 @@ def test_snmpget(aggregator):
 
 def test_snmp_getnext_call():
     instance = common.generate_instance_config(common.PLAY_WITH_GET_NEXT_METRICS)
+    instance['snmp_version'] = 1
     check = common.create_check(instance)
 
     # Test that we invoke next with the correct keyword arguments that are hard to test otherwise
@@ -156,9 +165,9 @@ def test_enforce_constraint(aggregator):
 
     check.check(instance)
 
-    assert "failed at: ValueConstraintError" in check._error
-
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
+
+    assert "failed at: ValueConstraintError" in aggregator.service_checks("snmp.can_check")[0].message
 
 
 def test_unenforce_constraint(aggregator):
@@ -357,6 +366,33 @@ def test_table_v3_SHA_AES(aggregator):
     aggregator.all_metrics_asserted()
 
 
+def test_bulk_table(aggregator):
+    instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    # Test metrics
+    for symbol in common.BULK_TABULAR_OBJECTS[0]['symbols']:
+        metric_name = "snmp." + symbol
+        aggregator.assert_metric(metric_name, at_least=1)
+        aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
+
+        for mtag in common.BULK_TABULAR_OBJECTS[0]['metric_tags']:
+            tag = mtag['tag']
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+
+    for symbol in common.BULK_TABULAR_OBJECTS[1]['symbols']:
+        metric_name = "snmp." + symbol
+        aggregator.assert_metric(metric_name, at_least=1)
+        aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
+
+    # Test service check
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
 def test_invalid_metric(aggregator):
     """
     Invalid metrics raise a Warning and a critical service check
@@ -402,7 +438,7 @@ def test_invalid_forcedtype_metric(aggregator):
     check.check(instance)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, tags=common.CHECK_TAGS, at_least=1)
 
 
 def test_scalar_with_tags(aggregator):
@@ -453,3 +489,96 @@ def test_cast_metrics(aggregator):
     aggregator.assert_metric('snmp.cpuload2', value=0.06)
 
     aggregator.all_metrics_asserted()
+
+
+def test_profile(aggregator):
+    instance = common.generate_instance_config([])
+    instance['profile'] = 'profile1'
+    init_config = {'profiles': {'profile1': {'definition': common.SUPPORTED_METRIC_TYPES}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_profile_by_file(aggregator):
+    instance = common.generate_instance_config([])
+    instance['profile'] = 'profile1'
+    with temp_dir() as tmp:
+        profile_file = os.path.join(tmp, 'profile1.yaml')
+        with open(profile_file, 'w') as f:
+            f.write(yaml.safe_dump(common.SUPPORTED_METRIC_TYPES))
+        init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
+        check = SnmpCheck('snmp', init_config, [instance])
+        check.check(instance)
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_profile_sys_object(aggregator):
+    instance = common.generate_instance_config([])
+    init_config = {
+        'profiles': {
+            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
+        }
+    }
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_profile_sys_object_unknown(aggregator):
+    """If the fetched sysObjectID is not referenced by any profiles, check fails."""
+    instance = common.generate_instance_config([])
+    init_config = {'profiles': {'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.2.3.4.5'}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_profile_sys_object_no_metrics(aggregator):
+    """If an instance is created without metrics and there is no profile defined, an error is raised."""
+    instance = common.generate_instance_config([])
+    with pytest.raises(ConfigurationError):
+        SnmpCheck('snmp', {}, [instance])
+
+
+def test_discovery(aggregator):
+    host = socket.gethostbyname(common.HOST)
+    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    # Make sure the check handles bytes
+    network = network.encode("utf-8")
+    check_tags = ['snmp_device:{}'.format(host)]
+    instance = {'name': 'snmp_conf', 'network_address': network, 'port': common.PORT, 'community_string': 'public'}
+    init_config = {
+        'profiles': {
+            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
+        }
+    }
+    check = SnmpCheck('snmp', init_config, [instance])
+    try:
+        for _ in range(30):
+            check.check(instance)
+            if aggregator.metric_names:
+                break
+            time.sleep(1)
+    finally:
+        check._running = False
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=check_tags, count=1)
+    aggregator.assert_all_metrics_covered()

@@ -27,9 +27,8 @@ class TeamCityCheck(AgentCheck):
         'headers': {'name': 'headers', 'default': {"Accept": "application/json"}},
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-
+    def __init__(self, name, init_config, instances):
+        super(TeamCityCheck, self).__init__(name, init_config, instances)
         # Keep track of last build IDs per instance
         self.last_build_ids = {}
 
@@ -45,7 +44,7 @@ class TeamCityCheck(AgentCheck):
         else:
             build_url = self.LAST_BUILD_URL.format(server=server, build_conf=build_conf)
         try:
-            resp = requests.get(build_url)
+            resp = self.http.get(build_url)
             resp.raise_for_status()
 
             last_build_id = resp.json().get("build")[0].get("id")

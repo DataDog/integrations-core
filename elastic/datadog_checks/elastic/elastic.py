@@ -35,8 +35,8 @@ class ESCheck(AgentCheck):
     SERVICE_CHECK_CLUSTER_STATUS = 'elasticsearch.cluster_health'
     SOURCE_TYPE_NAME = 'elasticsearch'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(ESCheck, self).__init__(name, init_config, instances)
         # Host status needs to persist across all checks
         self.cluster_status = {}
 

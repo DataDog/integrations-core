@@ -437,7 +437,7 @@
         "legend_size": "0",
         "isShared": false,
         "scaleFactor": 1,
-        "legend": false,
+        "legend": true,
         "add_timeframe": true
       },
       {

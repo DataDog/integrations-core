@@ -7,17 +7,7 @@ from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixt
 
 from datadog_checks.pdh_check import PDHCheck
 
-CHECK_NAME = 'pdh_check'
-
-INSTANCE = {
-    'countersetname': 'System',
-    'metrics': [
-        ['File Read Operations/sec', 'pdh.system.file_read_per_sec', 'gauge'],
-        ['File Write Bytes/sec', 'pdh.system.file_write_bytes_sec', 'gauge'],
-    ],
-}
-
-INSTANCE_METRICS = ['pdh.system.file_read_per_sec', 'pdh.system.file_write_bytes_sec']
+from .common import CHECK_NAME, INSTANCE, INSTANCE_METRICS
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')

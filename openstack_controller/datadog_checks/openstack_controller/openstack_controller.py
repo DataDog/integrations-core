@@ -110,8 +110,10 @@ class OpenStackControllerCheck(AgentCheck):
 
     HYPERVISOR_CACHE_EXPIRY = 120  # seconds
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        super(OpenStackControllerCheck, self).__init__(name, init_config, agentConfig, instances)
+    HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}, 'request_timeout': {'name': 'timeout'}}
+
+    def __init__(self, name, init_config, instances):
+        super(OpenStackControllerCheck, self).__init__(name, init_config, instances)
         # We cache all api instances.
         # This allows to cache connection if the underlying implementation support it
         # Ex: _api = <api object>
@@ -598,7 +600,6 @@ class OpenStackControllerCheck(AgentCheck):
         removed due to token expiry
         """
         custom_tags = custom_tags or []
-        proxy_config = self.get_instance_proxy(instance_config, keystone_server_url)
 
         if self._api is None:
             # We are missing the entire instance scope either because it is the first time we initialize it or because
@@ -607,7 +608,7 @@ class OpenStackControllerCheck(AgentCheck):
             try:
                 self.log.debug("Fetch scope for instance {}".format(self.instance_name))
                 # Set keystone api with proper token
-                self._api = ApiFactory.create(self.log, proxy_config, instance_config)
+                self._api = ApiFactory.create(self.log, instance_config, self.http)
                 self.service_check(
                     self.IDENTITY_API_SC,
                     AgentCheck.OK,
