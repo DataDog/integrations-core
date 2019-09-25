@@ -22,7 +22,7 @@ init_config:
 instances:
   - name: Example website
     url: https://example.com/
-    # tls_verify: false                  # default is true, so set to true to enable TLS validation
+    # tls_verify: false                  # default is false, so set to true to enable TLS validation
     # tls_ca_cert: /path/to/ca/file      # e.g. /etc/ssl/certs/ca-certificates.crt
     # check_certificate_expiration: true # default is true
     # days_warning: 28                   # default 14
