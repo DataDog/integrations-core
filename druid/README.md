@@ -111,4 +111,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help
 [10]: https://docs.datadoghq.com/developers/dogstatsd/
 [11]: https://docs.datadoghq.com/agent/
-[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/druid/images/druid_dashboard_overview.png
+[12]: https://raw.githubusercontent.com/DataDog/integrations-core/master/druid/assets/images/druid_dashboard_overview.png
