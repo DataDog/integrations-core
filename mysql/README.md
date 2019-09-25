@@ -197,10 +197,6 @@ See our [sample mysql.yaml][8] for all available configuration options, includin
 
 4. [Restart the Agent][9].
 
-##### Validation
-
-[Run the Agent's status subcommand][11] and look for `mysql` under the Checks section.
-
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
