@@ -5,7 +5,7 @@ cat > /etc/nginx/conf.d/default.conf << EOF
 server {
   server_name ${HOSTNAME}.${DOMAIN};
 
-  listen 8080 default_server;
+  listen 80 default_server;
 
   # location / {
   #     root   /usr/share/nginx/html;

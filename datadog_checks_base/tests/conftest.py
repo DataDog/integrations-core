@@ -26,7 +26,7 @@ def kerberos():
         krb5_conf = os.path.join(HERE, "fixtures", "kerberos", "krb5.conf")
 
         common_config = {
-            "url": "http://localhost:8080",
+            "url": "http://localhost:80",
             "keytab": os.path.join(shared_volume, "http.keytab"),
             "cache": os.path.join(shared_volume),
             "realm": realm,
@@ -39,7 +39,7 @@ def kerberos():
         with docker_run(
             compose_file=compose_file,
             env_vars={
-                'TMP_VOLUME': shared_volume,
+                'SHARED_VOLUME': shared_volume,
                 'KRB5_CONFIG': krb5_conf,
                 'KRB5_KEYTAB': common_config['keytab'],
                 'KRB5_CCNAME': common_config['cache'],
