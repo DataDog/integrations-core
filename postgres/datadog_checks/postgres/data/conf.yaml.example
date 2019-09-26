@@ -63,7 +63,7 @@ instances:
     ## @param relations - list of objects (or strings) - optional
     ## The list of relations/tables must be specified here to track per-relation (table) metrics.
     ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
-    ## from all matching relations.
+    ## from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
     ## Each relation generates many metrics (10 + 10 per index)
     ## By default all schemas are included. To track relations from specific schemas only,
     ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
