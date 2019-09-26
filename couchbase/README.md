@@ -36,7 +36,7 @@ The Couchbase check is included in the [Datadog Agent][3] package, so you don't 
 
     instances:
       - server: http://localhost:8091 # or wherever your Couchbase is listening
-        #user: <your_username>
+        #username: <your_username>
         #password: <your_password>
     ```
 

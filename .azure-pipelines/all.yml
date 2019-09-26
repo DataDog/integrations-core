@@ -1,17 +1,7 @@
-schedules:
-- cron: "0 5 * * *"
-  displayName: Nightly (EDT/EST)
-  always: true
+trigger:
   branches:
     include:
     - master
-
-trigger: none
-# Re-enable when we have enough runners
-# trigger:
-#   branches:
-#     include:
-#     - master
 
 pr: none
 #   branches:
