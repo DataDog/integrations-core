@@ -329,6 +329,7 @@ class TestAuth:
                 principal=None,
             )
 
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
     def test_kerberos_auth_noconf(self, kerberos):
         instance = {}
         init_config = {}
@@ -337,6 +338,7 @@ class TestAuth:
 
         assert response.status_code == 401
 
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
     def test_kerberos_auth_principal_inexistent(self, kerberos):
         instance = {
             'url': kerberos["url"],
@@ -352,6 +354,7 @@ class TestAuth:
         response = http.get(instance["url"])
         assert response.status_code == 401
 
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
     def test_kerberos_auth_principal_incache_nokeytab(self, kerberos):
         instance = {
             'url': kerberos["url"],
@@ -366,6 +369,7 @@ class TestAuth:
         response = http.get(instance["url"])
         assert response.status_code == 200
 
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
     def test_kerberos_auth_principal_inkeytab_nocache(self, kerberos):
         instance = {
             'url': kerberos["url"],
