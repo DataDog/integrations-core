@@ -13,10 +13,10 @@ The Agent's Marathon check lets you:
 The Marathon check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Marathon master.
 
 ### Configuration
-#### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+#### Host
 ##### Metrics collection
 
 1. Edit the `marathon.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2].
@@ -110,9 +110,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][6].
 
-| Parameter      | Value                                               |
-|----------------|------------------------------------------------------|
-| `<LOG_CONFIG>` | `{"source": "marathon", "service": "<SERVICE_NAME>"}`|
+| Parameter      | Value                                                 |
+|----------------|-------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "marathon", "service": "<SERVICE_NAME>"}` |
 
 
 ### Validation

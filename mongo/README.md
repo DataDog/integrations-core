@@ -18,10 +18,9 @@ The MongoDB check is included in the [Datadog Agent][2] package. No additional i
 
 ### Configuration
 
-#### Host
-
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+#### Host
 ##### Prepare MongoDB
 
 In a Mongo shell, create a read-only user for the Datadog Agent in the `admin` database:
@@ -114,11 +113,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                                                                                                                            |
-|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `mongodb`                                                                                                                                                                                        |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                                    |
-| `<INSTANCE_CONFIG>`  | <pre>{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", <br>"replica_check": true, <br>"additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}</pre> |
+| Parameter            | Value                                                                                                                                                                           |
+|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `mongodb`                                                                                                                                                                       |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                   |
+| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}` |
 
 ##### Log collection
 
@@ -143,9 +142,8 @@ See the [MongoDB 3.0 Manual][9] for more detailed descriptions of some of these 
 
 **NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
-|                          |                                                   |
-|--------------------------|---------------------------------------------------|
 | metric prefix            | what to add to `additional_metrics` to collect it |
+|--------------------------|---------------------------------------------------|
 | mongodb.collection       | collection                                        |
 | mongodb.commands         | top                                               |
 | mongodb.getmore          | top                                               |
@@ -159,6 +157,7 @@ See the [MongoDB 3.0 Manual][9] for more detailed descriptions of some of these 
 | mongodb.writeLock        | top                                               |
 | mongodb.tcmalloc         | tcmalloc                                          |
 | mongodb.metrics.commands | metrics.commands                                  |
+
 
 ### Events
 
