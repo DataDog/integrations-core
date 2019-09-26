@@ -38,6 +38,7 @@ services:
       KRB5_SVC: ${KRB5_SVC}
       KRB5_KDC: kerberos-kdc
       WEBHOST: ${WEBHOST}
+      WEBPORT: ${WEBPORT}
       DOMAIN: example.com
       KRB5_USER: datadog/admin
       KRB5_PASS: 123pass
@@ -50,9 +51,9 @@ services:
         aliases:
           - ${WEBHOST}
     expose:
-      - "80"
+      - "${WEBPORT}"
     ports:
-      - "80:80"
+      - "${WEBPORT}:${WEBPORT}"
     depends_on:
       - kerberos-kdc
 

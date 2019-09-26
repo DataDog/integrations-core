@@ -23,10 +23,11 @@ def kerberos():
         realm = "EXAMPLE.COM"
         svc = "HTTP"
         webserver_hostname = "web.example.com"
+        webserver_port = "8080"
         krb5_conf = os.path.join(HERE, "fixtures", "kerberos", "krb5.conf")
 
         common_config = {
-            "url": "http://localhost:80",
+            "url": "http://localhost:{}".format(webserver_port),
             "keytab": os.path.join(shared_volume, "http.keytab"),
             "cache": os.path.join(shared_volume),
             "realm": realm,
@@ -46,6 +47,7 @@ def kerberos():
                 'KRB5_REALM': common_config['realm'],
                 'KRB5_SVC': common_config['svc'],
                 'WEBHOST': common_config['hostname'],
+                'WEBPORT': webserver_port,
             },
             conditions=[CheckDockerLogs(compose_file, "ReadyToConnect")],
         ):
