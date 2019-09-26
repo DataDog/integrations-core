@@ -27,12 +27,12 @@ instances:
     #     labels_to_get:
     #       - label_addonmanager_kubernetes_io_mode
 
-    ## @param hostname_override - boolean - optional - default: false
+    ## @param hostname_override - boolean - optional - default: true
     ## By default the hostname for metrics containing the node label is
     ## overriden by the value of the label, this can be deactivated (all metrics
     ## will be attached to the host running KSM)
     #
-    # hostname_override: false
+    # hostname_override: true
 
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
