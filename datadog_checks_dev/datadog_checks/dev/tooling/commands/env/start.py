@@ -99,6 +99,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
 
     if profile_memory and not api_key:
         profile_memory = False
+        echo_warning('No API key is set; collecting metrics about memory usage will be disabled.')
 
     echo_waiting('Setting up environment `{}`... '.format(env), nl=False)
     config, metadata, error = start_environment(check, env)
@@ -243,6 +244,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
             environment.update_check()
             echo_success('success!')
 
+    # Ensure this happens after all time-consuming steps
     if profile_memory and on_ci:
         environment.metadata['sampling_start_time'] = time.time()
 
