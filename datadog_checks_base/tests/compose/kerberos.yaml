@@ -18,7 +18,7 @@ services:
     hostname: kerberos-kdc
     domainname: example.com
     volumes: 
-      - ${SHARED_VOLUME}:${SHARED_VOLUME}
+      - ${TMP_VOLUME}:${TMP_VOLUME}
     networks:
       kdc-net:
         aliases:
@@ -44,15 +44,15 @@ services:
     hostname: web
     domainname: example.com
     volumes: 
-      - ${SHARED_VOLUME}:${SHARED_VOLUME}
+      - ${TMP_VOLUME}:${TMP_VOLUME}
     networks:
       kdc-net:
         aliases:
           - ${WEBHOST}
     expose:
-      - "80"
+      - "8080"
     ports:
-      - "80:80"
+      - "8080:8080"
     depends_on:
       - kerberos-kdc
 
