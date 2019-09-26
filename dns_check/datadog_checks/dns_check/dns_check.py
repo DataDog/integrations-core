@@ -38,7 +38,7 @@ class DNSCheck(AgentCheck):
         inst = instances[0]
         inst['name'] = inst.get('name', "dns-check-0")
 
-        AgentCheck.__init__(self, name, init_config, instances)
+        super(DNSCheck, self).__init__(name, init_config, instances)
 
         self.default_timeout = init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
 
