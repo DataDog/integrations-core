@@ -578,7 +578,7 @@ class __AgentCheck(object):
                 tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
                 tags.extend(instance.get('__memory_profiling_tags', []))
                 for m in metrics:
-                    self.gauge(m.name, m.value, tags=tags)
+                    self.gauge(m.name, m.value, tags=tags, raw=True)
             else:
                 self.check(instance)
 
