@@ -191,58 +191,6 @@ class TestAuth:
 
         assert http.options['auth'] is None
 
-    def test_kerberos_auth_noconf(self, kerberos):
-        instance = {}
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-        response = http.get(kerberos["url"])
-
-        assert response.status_code == 401
-
-    def test_kerberos_auth_principal_inexistent(self, kerberos):
-        instance = {
-            'url': kerberos["url"],
-            'kerberos_auth': 'required',
-            'kerberos_hostname': kerberos["hostname"],
-            'kerberos_cache': "DIR:{}/".format(kerberos["cache"]),
-            'kerberos_keytab': kerberos["keytab"],
-            'kerberos_principal': "user/doesnotexist@{}".format(kerberos["realm"]),
-            'kerberos_force_initiate': 'false',
-        }
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-        response = http.get(instance["url"])
-        assert response.status_code == 401
-
-    def test_kerberos_auth_principal_inkeytab_nocache(self, kerberos):
-        instance = {
-            'url': kerberos["url"],
-            'kerberos_auth': 'required',
-            'kerberos_hostname': kerberos["hostname"],
-            'kerberos_cache': "DIR:{}/".format(kerberos["cache"]),
-            'kerberos_keytab': kerberos["keytab"],
-            'kerberos_principal': "user/inkeytab@{}".format(kerberos["realm"]),
-            'kerberos_force_initiate': 'true',
-        }
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-        response = http.get(instance["url"])
-        assert response.status_code == 200
-
-    def test_kerberos_auth_principal_incache_nokeytab(self, kerberos):
-        instance = {
-            'url': kerberos["url"],
-            'kerberos_auth': 'required',
-            'kerberos_cache': "DIR:{}/".format(kerberos["cache"]),
-            'kerberos_hostname': kerberos["hostname"],
-            'kerberos_principal': "user/nokeytab@{}".format(kerberos["realm"]),
-            'kerberos_force_initiate': 'true',
-        }
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-        response = http.get(instance["url"])
-        assert response.status_code == 200
-
     def test_config_kerberos(self):
         instance = {'kerberos_auth': 'required'}
         init_config = {}
@@ -380,6 +328,58 @@ class TestAuth:
                 hostname_override=None,
                 principal=None,
             )
+
+    def test_kerberos_auth_noconf(self, kerberos):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(kerberos["url"])
+
+        assert response.status_code == 401
+
+    def test_kerberos_auth_principal_inexistent(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'kerberos_auth': 'required',
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+            'kerberos_keytab': kerberos["keytab"],
+            'kerberos_principal': "user/doesnotexist@{}".format(kerberos["realm"]),
+            'kerberos_force_initiate': 'false',
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+        assert response.status_code == 401
+
+    def test_kerberos_auth_principal_incache_nokeytab(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'kerberos_auth': 'required',
+            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_principal': "user/nokeytab@{}".format(kerberos["realm"]),
+            'kerberos_force_initiate': 'true',
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+        assert response.status_code == 200
+
+    def test_kerberos_auth_principal_inkeytab_nocache(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'kerberos_auth': 'required',
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+            'kerberos_keytab': kerberos["keytab"],
+            'kerberos_principal': "user/inkeytab@{}".format(kerberos["realm"]),
+            'kerberos_force_initiate': 'true',
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+        assert response.status_code == 200
 
     def test_config_ntlm(self):
         instance = {'ntlm_domain': 'domain\\user', 'password': 'pass'}
