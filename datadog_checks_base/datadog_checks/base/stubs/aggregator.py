@@ -293,6 +293,70 @@ class AggregatorStub(object):
             missing_metrics = self.not_asserted()
         assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
 
+    def assert_no_duplicate_all(self):
+        """
+        Assert no duplicate metrics and service checks have been submitted.
+        """
+        self.assert_no_duplicate_metrics()
+        self.assert_no_duplicate_service_checks()
+
+    def assert_no_duplicate_metrics(self):
+        """
+        Assert no duplicate metrics have been submitted.
+
+        Metrics are considered duplicate when all following fields match:
+            - metric name
+            - type (gauge, rate, etc)
+            - tags
+            - hostname
+        """
+        # metric types that intended to be called multiple times are ignored
+        ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]
+        metric_stubs = [m for metrics in self._metrics.values() for m in metrics if m.type not in ignored_types]
+
+        def stub_to_key_fn(stub):
+            return stub.name, stub.type, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('metric', metric_stubs, stub_to_key_fn)
+
+    def assert_no_duplicate_service_checks(self):
+        """
+        Assert no duplicate service checks have been submitted.
+
+        Service checks are considered duplicate when all following fields match:
+            - metric name
+            - status
+            - tags
+            - hostname
+        """
+        service_check_stubs = [m for metrics in self._service_checks.values() for m in metrics]
+
+        def stub_to_key_fn(stub):
+            return stub.name, stub.status, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('service_check', service_check_stubs, stub_to_key_fn)
+
+    @staticmethod
+    def _assert_no_duplicate_stub(stub_type, all_metrics, stub_to_key_fn):
+        all_contexts = defaultdict(list)
+        for metric in all_metrics:
+            context = stub_to_key_fn(metric)
+            all_contexts[context].append(metric)
+
+        dup_contexts = defaultdict(list)
+        for context, metrics in iteritems(all_contexts):
+            if len(metrics) > 1:
+                dup_contexts[context] = metrics
+
+        err_msg_lines = ["Duplicate {}s found:".format(stub_type)]
+        for key in sorted(dup_contexts):
+            contexts = dup_contexts[key]
+            err_msg_lines.append('- {}'.format(contexts[0].name))
+            for metric in contexts:
+                err_msg_lines.append('    ' + str(metric))
+
+        assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
+
     def reset(self):
         """
         Set the stub to its initial state
