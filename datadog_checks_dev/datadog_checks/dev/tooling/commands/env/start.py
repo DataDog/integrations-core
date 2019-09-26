@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import platform
 import time
 
 import click
@@ -148,7 +149,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
             instances = config.get('instances', [config])
 
         for instance in instances:
-            instance['__memory_profiling_tags'] = ['env:{}'.format(env)]
+            instance['__memory_profiling_tags'] = ['platform:{}'.format(platform.system()), 'env:{}'.format(env)]
 
             if on_ci:
                 instance['__memory_profiling_tags'].append('branch:{}'.format(get_current_branch()))
