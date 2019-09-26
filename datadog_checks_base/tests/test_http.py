@@ -371,7 +371,7 @@ class TestAuth:
             'url': kerberos["url"],
             'kerberos_auth': 'required',
             'kerberos_hostname': kerberos["hostname"],
-            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+            'kerberos_cache': "DIR:{}".format(kerberos["tmp_dir"]),
             'kerberos_keytab': kerberos["keytab"],
             'kerberos_principal': "user/inkeytab@{}".format(kerberos["realm"]),
             'kerberos_force_initiate': 'true',

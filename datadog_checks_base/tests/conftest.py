@@ -33,7 +33,7 @@ def kerberos():
             "svc": svc,
             "hostname": webserver_hostname,
             "principal": "user/inkeytab@{}".format(realm),
-            # "principal": "{}/{}@{}".format(svc, webserver_hostname, realm)
+            "tmp_dir": tmp_dir,
         }
 
         with docker_run(
