@@ -12,7 +12,7 @@ steps:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
-  - script: ddev env test --new-env --retry 3 --debug --verbose ${{ parameters.check }}
+  - script: ddev env test --new-env --retry 3 ${{ parameters.check }}
     displayName: 'Run E2E tests'
 
 - ${{ if eq(parameters.benchmark, 'true') }}:
