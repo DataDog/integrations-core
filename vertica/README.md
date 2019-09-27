@@ -16,7 +16,17 @@ Edit the `vertica.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 #### Prepare Vertica
 
+Create a database user for the Datadog Agent. From [vsql][vsql], connect to the database as a superuser. Then run the `CREATE USER` statement.
+
+```
+CREATE USER datadog IDENTIFIED BY '<PASSWORD>';
+```
+
 The user used to connect to the database must be granted the [SYSMONITOR][monitor role] role in order to access the monitoring system tables.
+
+```
+GRANT SYSMONITOR TO datadog WITH ADMIN OPTION;
+```
 
 Additionally, as the metrics for current license usage use the values from the most recent [audit][audit command], it is recommended to schedule it to occur as often as possible. For more information, see [this][license guide].
 
@@ -77,3 +87,4 @@ Need help? Contact [Datadog support][].
 [agent status]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [metrics csv]: https://github.com/DataDog/integrations-core/blob/master/vertica/metadata.csv
 [Datadog support]: https://docs.datadoghq.com/help
+[vsql]: https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/Glossary/vsql.htm
