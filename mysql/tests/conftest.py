@@ -6,7 +6,7 @@ import os
 import pymysql
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev import WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
@@ -24,7 +24,7 @@ def dd_environment(instance_basic):
             'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
             'MYSQL_PORT': str(common.PORT),
             'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
-            'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
+            # 'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
         },
         conditions=[
             WaitFor(init_master, wait=2),
@@ -84,7 +84,12 @@ def init_master():
 
 
 def init_slave():
+    run_docker_command(['mysqladmin', 'ping', '--silent'])
     pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
+
+
+def run_docker_command(command):
+    run_command(['docker', 'exec', 'mysql-slave'] + command, capture=True, check=True)
 
 
 def _add_dog_user(conn):
