@@ -1,0 +1,12 @@
+parameters:
+  checks: []
+  repo: 'core'
+
+jobs:
+- ${{ each check in parameters.checks }}:
+  - template: './test-single-${{ check.os }}.yml'
+    parameters:
+      check: ${{ check.checkName }}
+      display: ${{ check.displayName }}
+      validate: true
+      repo: ${{ parameters.repo }}

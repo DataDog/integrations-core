@@ -1,5 +1,13 @@
 # CHANGELOG - snmp
 
+## 1.11.0 / 2019-09-19
+
+* [Fixed] Handle bytes in network_address. See [#4577](https://github.com/DataDog/integrations-core/pull/4577).
+* [Added] Use bulk call when possible. See [#4530](https://github.com/DataDog/integrations-core/pull/4530).
+* [Added] Remove failing discovered hosts. See [#4526](https://github.com/DataDog/integrations-core/pull/4526).
+* [Added] Basic discovery mechanism and test. See [#4511](https://github.com/DataDog/integrations-core/pull/4511).
+* [Added] Allow autoconfiguration of instances by sysObjectId. See [#4391](https://github.com/DataDog/integrations-core/pull/4391).
+
 ## 1.10.0 / 2019-08-24
 
 * [Added] Support referencing metrics by profile. See [#4329](https://github.com/DataDog/integrations-core/pull/4329).

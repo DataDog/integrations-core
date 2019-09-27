@@ -18,7 +18,9 @@ from datadog_checks.couch import CouchDb
 
 from . import common
 
-pytestmark = pytest.mark.v2
+pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 2, reason='Test for version Couch v2')
+
+INSTANCES = [common.NODE1, common.NODE2, common.NODE3]
 
 
 @pytest.fixture(scope="module")
@@ -67,16 +69,23 @@ def gauges():
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check(aggregator, gauges):
+    for config in deepcopy(INSTANCES):
+        check = CouchDb(common.CHECK_NAME, {}, [config])
+        check.check(config)
+    _assert_check(aggregator, gauges)
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, gauges):
+    aggregator = dd_agent_check({'init_config': {}, 'instances': deepcopy(INSTANCES)})
+    _assert_check(aggregator, gauges)
+
+
+def _assert_check(aggregator, gauges):
     """
     Testing Couchdb2 check.
     """
-    configs = [deepcopy(common.NODE1), deepcopy(common.NODE2), deepcopy(common.NODE3)]
-
-    for config in configs:
-        check = CouchDb(common.CHECK_NAME, {}, [config])
-        check.check(config)
-
-    for config in configs:
+    for config in INSTANCES:
         expected_tags = ["instance:{}".format(config["name"])]
         for gauge in gauges["cluster_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)

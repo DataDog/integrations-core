@@ -1,9 +1,14 @@
 # (C) Datadog, Inc. 2010-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from copy import deepcopy
 
 import mock
 import pytest
+
+from datadog_checks.squid import SquidCheck
+
+from . import common
 
 
 def test_parse_counter(aggregator, check):
@@ -64,3 +69,29 @@ def test_get_counters(check):
         # we assert `parse_counter` was called only once despite the raw text
         # containing multiple `\n` chars
         check.parse_counter.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    'auth_config',
+    [
+        {"cachemgr_username": "datadog_user", "cachemgr_password": "datadog_pass"},
+        {"username": "datadog_user", "password": "datadog_pass"},
+    ],
+)
+def test_legacy_username_password(instance, auth_config):
+    instance = deepcopy(instance)
+    instance.update(auth_config)
+    check = SquidCheck(common.CHECK_NAME, {}, {}, [instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests.get') as g:
+        check.get_counters('host', 'port', [])
+
+        g.assert_called_with(
+            'http://host:port/squid-internal-mgr/counters',
+            auth=('datadog_user', 'datadog_pass'),
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+        )

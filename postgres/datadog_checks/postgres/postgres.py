@@ -100,19 +100,21 @@ class PostgreSql(AgentCheck):
     }
 
     LOCK_METRICS = {
-        'descriptors': [('mode', 'lock_mode'), ('datname', 'db'), ('relname', 'table')],
+        'descriptors': [('mode', 'lock_mode'), ('nspname', 'schema'), ('datname', 'db'), ('relname', 'table')],
         'metrics': {'lock_count': ('postgresql.locks', GAUGE)},
         'query': """
 SELECT mode,
+       pn.nspname,
        pd.datname,
        pc.relname,
        count(*) AS {metrics_columns}
   FROM pg_locks l
   JOIN pg_database pd ON (l.database = pd.oid)
   JOIN pg_class pc ON (l.relation = pc.oid)
+  LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
  WHERE l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg_%%'
- GROUP BY pd.datname, pc.relname, mode""",
+ GROUP BY pd.datname, pc.relname, pn.nspname, mode""",
         'relation': False,
     }
 
@@ -157,7 +159,7 @@ SELECT relname,
     }
 
     SIZE_METRICS = {
-        'descriptors': [('relname', 'table')],
+        'descriptors': [('nspname', 'schema'), ('relname', 'table')],
         'metrics': {
             'pg_table_size(C.oid) as table_size': ('postgresql.table_size', GAUGE),
             'pg_indexes_size(C.oid) as index_size': ('postgresql.index_size', GAUGE),
@@ -166,6 +168,7 @@ SELECT relname,
         'relation': True,
         'query': """
 SELECT
+  N.nspname,
   relname,
   {metrics_columns}
 FROM pg_class C
@@ -714,7 +717,7 @@ GROUP BY datid, datname
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-        except psycopg2.ProgrammingError as e:
+        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
             db.rollback()
             return None
@@ -872,8 +875,11 @@ GROUP BY datid, datname
     def get_connection(self, key, host, port, user, password, dbname, ssl, tags, use_cached=True):
         """Get and memoize connections to instances"""
         if key in self.dbs and use_cached:
-            return self.dbs[key]
-
+            conn = self.dbs[key]
+            if conn.status != psycopg2.extensions.STATUS_READY:
+                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                conn.rollback()
+            return conn
         elif host != "" and user != "":
             try:
                 if host == 'localhost' and password == '':
@@ -941,7 +947,7 @@ GROUP BY datid, datname
                 try:
                     self.log.debug("Running query: {}".format(query))
                     cursor.execute(query)
-                except psycopg2.ProgrammingError as e:
+                except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
                     self.log.error("Error executing query for metric_prefix {}: {}".format(metric_prefix, str(e)))
                     db.rollback()
                     continue

@@ -20,23 +20,17 @@ from . import common
 
 @pytest.fixture
 def check():
-    env = os.environ
-    couch_version = env["COUCH_VERSION"][0]
-
-    if couch_version == '1':
+    if common.COUCH_MAJOR_VERSION == 1:
         return CouchDb(common.CHECK_NAME, {}, instances=[common.BASIC_CONFIG])
-    elif couch_version == '2':
+    elif common.COUCH_MAJOR_VERSION == 2:
         return CouchDb(common.CHECK_NAME, {}, instances=[common.BASIC_CONFIG_V2])
 
 
 @pytest.fixture
 def instance():
-    env = os.environ
-    couch_version = env["COUCH_VERSION"][0]
-
-    if couch_version == '1':
+    if common.COUCH_MAJOR_VERSION == 1:
         return deepcopy(common.BASIC_CONFIG)
-    elif couch_version == '2':
+    elif common.COUCH_MAJOR_VERSION == 2:
         return deepcopy(common.BASIC_CONFIG_V2)
 
 

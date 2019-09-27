@@ -62,3 +62,22 @@ CONFIG_TEST_VHOSTS = {
     'rabbitmq_pass': 'guest',
     'vhosts': ['test', 'test2'],
 }
+
+EXCHANGE_MESSAGE_STATS = {
+    'ack': 1.0,
+    'ack_details': {'rate': 1.0},
+    'confirm': 1.0,
+    'confirm_details': {'rate': 1.0},
+    'deliver_get': 1.0,
+    'deliver_get_details': {'rate': 1.0},
+    'publish': 1.0,
+    'publish_details': {'rate': 1.0},
+    'publish_in': 1.0,
+    'publish_in_details': {'rate': 1.0},
+    'publish_out': 1.0,
+    'publish_out_details': {'rate': 1.0},
+    'return_unroutable': 1.0,
+    'return_unroutable_details': {'rate': 1.0},
+    'redeliver': 1.0,
+    'redeliver_details': {'rate': 1.0},
+}

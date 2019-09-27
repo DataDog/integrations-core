@@ -66,7 +66,8 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
 
     if env not in envs:
         echo_failure('`{}` is not an available environment.'.format(env))
-        echo_info('See what is available via `ddev env ls {}`.'.format(check))
+        echo_info('Available environments for {}:\n    {}'.format(check, '\n    '.join(envs)))
+        echo_info('You can also use `ddev env ls {}` to see available environments.'.format(check))
         abort()
 
     env_python_version = get_tox_env_python_version(env)
@@ -169,6 +170,21 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
                 abort()
 
         echo_success('success!')
+
+        echo_waiting('Reloading the environment to reflect changes... ', nl=False)
+        result = environment.restart_agent()
+
+        if result.code:
+            click.echo()
+            echo_info(result.stdout + result.stderr)
+            echo_failure('An error occurred.')
+            echo_waiting('Stopping the environment...')
+            stop_environment(check, env, metadata=metadata)
+            echo_waiting('Stopping the Agent...')
+            environment.stop_agent()
+            environment.remove_config()
+        else:
+            echo_success('success!')
 
     if base and not dev:
         dev = True

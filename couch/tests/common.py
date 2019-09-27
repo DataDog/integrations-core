@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+import re
 
 from datadog_checks.utils.common import get_docker_hostname
 
@@ -15,6 +16,8 @@ USER = "dduser"
 PASSWORD = "pawprint"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+COUCH_MAJOR_VERSION = int(re.split(r'\D+', os.getenv('COUCH_VERSION'))[0])
 
 # Publicly readable databases
 DB_NAMES = ["_replicator", "_users", "kennel"]

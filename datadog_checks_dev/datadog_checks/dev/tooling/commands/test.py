@@ -8,10 +8,11 @@ import click
 
 from ..._env import E2E_PARENT_PYTHON
 from ...subprocess import run_command
-from ...utils import chdir, file_exists, remove_path, running_on_ci
+from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from .utils import run_command_with_retry
 
 
 def display_envs(check_envs):
@@ -35,9 +36,11 @@ def display_envs(check_envs):
 @click.option('--debug', '-d', is_flag=True, help='Set the log level to debug')
 @click.option('--verbose', '-v', count=True, help='Increase verbosity (can be used additively)')
 @click.option('--list', '-l', 'list_envs', is_flag=True, help='List available test environments')
+@click.option('--passenv', help='Additional environment variables to pass down')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
+@click.option('--retry', '-r', help='Number of retries for each tox env', type=click.INT)
 @click.pass_context
 def test(
     ctx,
@@ -54,9 +57,11 @@ def test(
     debug,
     verbose,
     list_envs,
+    passenv,
     changed,
     cov_keep,
     pytest_args,
+    retry,
 ):
     """Run tests for Agent-based checks.
 
@@ -69,7 +74,7 @@ def test(
     $ ddev test mysql:mysql57,maria10130
     """
     if list_envs:
-        check_envs = get_tox_envs(checks, every=True, sort=True)
+        check_envs = get_tox_envs(checks, every=True, sort=True, changed_only=changed)
         display_envs(check_envs)
         return
 
@@ -110,6 +115,11 @@ def test(
         'DDEV_COV_MISSING': coverage_show_missing_lines,
         'PYTEST_ADDOPTS': pytest_options,
     }
+
+    if passenv:
+        test_env_vars['TOX_TESTENV_PASSENV'] += ' {}'.format(passenv)
+
+    test_env_vars['TOX_TESTENV_PASSENV'] += ' {}'.format(' '.join(get_ci_env_vars()))
 
     if color is not None:
         test_env_vars['PY_COLORS'] = '1' if color else '0'
@@ -156,14 +166,15 @@ def test(
             echo_waiting(wait_text)
             echo_waiting('-' * len(wait_text))
 
-            result = run_command(
-                'tox '
+            result = run_command_with_retry(
+                retry=retry,
+                command='tox '
                 # so users won't get failures for our possibly strict CI requirements
                 '--skip-missing-interpreters '
                 # so coverage tracks the real locations instead of .tox virtual envs
                 '--develop '
                 # comma-separated list of environments
-                '-e {}'.format(','.join(envs))
+                '-e {}'.format(','.join(envs)),
             )
             if result.code:
                 abort('\nFailed!', code=result.code)
