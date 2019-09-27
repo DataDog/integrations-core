@@ -166,6 +166,7 @@ def test(
             echo_waiting(wait_text)
             echo_waiting('-' * len(wait_text))
 
+            print(">>> retry: {}".format(retry))
             result = run_command_with_retry(
                 retry=retry,
                 command='tox '
