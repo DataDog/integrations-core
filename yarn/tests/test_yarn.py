@@ -5,7 +5,12 @@ from requests.exceptions import SSLError
 from six import iteritems
 
 from datadog_checks.yarn import YarnCheck
-from datadog_checks.yarn.yarn import SERVICE_CHECK_NAME, YARN_APP_METRICS, YARN_QUEUE_METRICS
+from datadog_checks.yarn.yarn import (
+    APPLICATION_STATUS_SERVICE_CHECK,
+    SERVICE_CHECK_NAME,
+    YARN_APP_METRICS,
+    YARN_QUEUE_METRICS,
+)
 
 from .common import (
     CUSTOM_TAGS,
@@ -43,6 +48,12 @@ def test_check(aggregator, mocked_request):
         SERVICE_CHECK_NAME,
         status=YarnCheck.OK,
         tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+    )
+
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.OK,
+        tags=['app_queue:default', 'app_name:word count', 'optional:tag1', 'cluster_name:SparkCluster'],
     )
 
     # Check the YARN Cluster Metrics
