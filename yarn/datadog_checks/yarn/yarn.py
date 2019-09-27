@@ -34,10 +34,16 @@ INCREMENT = 'increment'
 # Name of the service check
 SERVICE_CHECK_NAME = 'yarn.can_connect'
 
+# Application states
+YARN_APPLICATION_RUNNING = 'RUNNING'
+
 APPLICATION_STATUS_SERVICE_CHECK = 'yarn.application.status'
 
-# Application states to collect
-YARN_APPLICATION_RUNNING = 'RUNNING'
+DEFAULT_APPLICATION_STATUS_MAPPING = {
+    YARN_APPLICATION_RUNNING: AgentCheck.OK,
+    'FAILED': AgentCheck.CRITICAL,
+    'KILLED': AgentCheck.CRITICAL
+}
 
 # Cluster metrics identifier
 YARN_CLUSTER_METRICS_ELEMENT = 'clusterMetrics'
@@ -153,7 +159,7 @@ class YarnCheck(AgentCheck):
         try:
             self.application_status_mapping = {
                 k.upper(): getattr(AgentCheck, v.upper()) for k, v in application_status_mapping.items()
-            }
+            } or DEFAULT_APPLICATION_STATUS_MAPPING
         except AttributeError as e:
             raise ConfigurationError("Invalid mapping: {}".format(e))
 
@@ -220,7 +226,7 @@ class YarnCheck(AgentCheck):
 
         if metrics_json and metrics_json['apps'] is not None and metrics_json['apps']['app'] is not None:
             for app_json in metrics_json['apps']['app']:
-                tags = self._get_app_tags(app_json, app_tags, addl_tags)
+                tags = self._get_app_tags(app_json, app_tags) + addl_tags
 
                 if app_json['state'] == YARN_APPLICATION_RUNNING:
                     self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
@@ -232,7 +238,7 @@ class YarnCheck(AgentCheck):
                     tags=tags,
                 )
 
-    def _get_app_tags(self, app_json, app_tags, addl_tags):
+    def _get_app_tags(self, app_json, app_tags):
         tags = []
         for dd_tag, yarn_key in iteritems(app_tags):
             try:
@@ -241,8 +247,6 @@ class YarnCheck(AgentCheck):
                     tags.append('{tag}:{value}'.format(tag=dd_tag, value=val))
             except KeyError:
                 self.log.error("Invalid value {} for application_tag".format(yarn_key))
-
-        tags.extend(addl_tags)
         return tags
 
     def _yarn_node_metrics(self, rm_address, addl_tags):

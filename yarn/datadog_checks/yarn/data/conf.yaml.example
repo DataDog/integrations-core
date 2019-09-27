@@ -59,7 +59,8 @@ instances:
     #   <TAG_KEY1>: <YARN_KEY>
     #   <TAG_KEY2>: <YARN_KEY>
 
-    ## @param application_status_mapping - list of key:value elements - optional
+    ## @param application_status_mapping - list of key:value elements - optional - default: {RUNNING: ok, FAILED: critical, KILLED: critical}
+    ##
     ## Custom application status mapping for service check `yarn.application.status`.
     ##
     ## The key is the Yarn application channel status. Valid keys are: `ALL`, `NEW`,
