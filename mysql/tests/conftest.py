@@ -27,7 +27,7 @@ def dd_environment(instance_basic):
         },
         conditions=[
             WaitFor(init_master, wait=2),
-            WaitFor(init_slave, wait=2),
+            WaitFor(init_slave, attempts=120, wait=2),
             CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
             populate_database,
         ],
@@ -83,8 +83,6 @@ def init_master():
 
 
 def init_slave():
-    wait_command = ['mysqladmin', 'ping', '--silent']
-    run_command(['docker', 'exec', common.MYSQL_SLAVE_CONTAINER_NAME] + wait_command, capture=True, check=True)
     pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
 
 
