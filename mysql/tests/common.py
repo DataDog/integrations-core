@@ -21,5 +21,3 @@ SLAVE_PORT = 13307
 
 USER = 'dog'
 PASS = 'dog'
-
-MYSQL_SLAVE_CONTAINER_NAME = 'mysql-slave'
