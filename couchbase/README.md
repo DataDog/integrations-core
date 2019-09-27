@@ -26,19 +26,19 @@ The Couchbase check is included in the [Datadog Agent][3] package, so you don't 
 
 1. Edit the `couchbase.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Couchbase performance [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample couchbase.d/conf.yaml][5] for all available configuration options.
-  
+
 #### Metric Collection
 
 1.  Add this configuration block to your `couchbase.d/conf.yaml` file to start gathering your [Couchbase Metrics](#metrics):
 
-    ```
-    init_config:
+      ```
+      init_config:
 
-    instances:
-      - server: http://localhost:8091 # or wherever your Couchbase is listening
-        #username: <your_username>
-        #password: <your_password>
-    ```
+      instances:
+        - server: http://localhost:8091 # or wherever your Couchbase is listening
+          #username: <your_username>
+          #password: <your_password>
+      ```
 
 2. [Restart the Agent][6] to begin sending Couchbase metrics to Datadog.
 
