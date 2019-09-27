@@ -6,7 +6,7 @@ import os
 import pymysql
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run, run_command
+from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
@@ -28,7 +28,7 @@ def dd_environment(instance_basic):
         },
         conditions=[
             WaitFor(init_master, wait=2),
-            WaitFor(init_slave, wait=2),
+            WaitFor(init_slave, attempts=300, wait=2),
             CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
             populate_database,
         ],
@@ -84,14 +84,7 @@ def init_master():
 
 
 def init_slave():
-    print("=" * 80)
-    run_command('docker logs mysql-slave', check=True)
-    print("=" * 80)
-    try:
-        pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
-    except Exception as e:
-        print(e)
-        raise e
+    pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
 
 
 def _add_dog_user(conn):
@@ -131,7 +124,7 @@ def _wait_for_it_script():
 
 def _mysql_docker_repo():
     if MYSQL_FLAVOR == 'mysql':
-        if MYSQL_VERSION == '5.5-2':
+        if MYSQL_VERSION == '5.5':
             return 'jfullaondo/mysql-replication'
         elif MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'

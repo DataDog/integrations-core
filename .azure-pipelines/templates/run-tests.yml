@@ -6,7 +6,7 @@ parameters:
 
 steps:
 - ${{ if eq(parameters.test, 'true') }}:
-  - script: ddev test --cov --retry 3 --debug --verbose --pytest-args="--junitxml=junit/test-results.xml" ${{ parameters.check }}
+  - script: ddev test --cov --retry 3 --pytest-args="--junitxml=junit/test-results.xml" ${{ parameters.check }}
     displayName: 'Run tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
