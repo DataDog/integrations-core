@@ -1,0 +1,29 @@
+{
+  "display_name": "cilium",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "cilium",
+  "metric_prefix": "cilium.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "976d82f8-cea9-47c0-914a-a1e812d817b1",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-cilium Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "cilium",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
