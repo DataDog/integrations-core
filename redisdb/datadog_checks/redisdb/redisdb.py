@@ -238,6 +238,10 @@ class Redis(AgentCheck):
         Compute the length of the configured keys across all the databases
         """
         key_list = instance.get('keys')
+
+        if key_list is None:
+            return
+
         instance_db = instance.get('db')
 
         if not isinstance(key_list, list) or not key_list:
