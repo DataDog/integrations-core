@@ -59,3 +59,15 @@ jobs:
     job_name: Changed_8
     display: Linux_8
     validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_9
+    display: Linux_9
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_10
+    display: Linux_10
+    validate: true
