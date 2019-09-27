@@ -36,7 +36,7 @@ class DNSCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         inst = instances[0]
-        inst['name'] = inst.get('name', "dns-check-0")
+        inst.setdefault("name", "dns-check-0")
 
         super(DNSCheck, self).__init__(name, init_config, instances)
 
