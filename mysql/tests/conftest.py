@@ -6,7 +6,7 @@ import os
 import pymysql
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev import WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
@@ -84,6 +84,7 @@ def init_master():
 
 
 def init_slave():
+    run_command('docker logs mysql-slave', check=True)
     pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
 
 
