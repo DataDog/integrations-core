@@ -84,15 +84,14 @@ def init_master():
 
 
 def init_slave():
-    print("="*80)
+    print("=" * 80)
     run_command('docker logs mysql-slave', check=True)
-    print("="*80)
+    print("=" * 80)
     try:
         pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
     except Exception as e:
         print(e)
         raise e
-
 
 
 def _add_dog_user(conn):
