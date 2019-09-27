@@ -141,6 +141,12 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
         env_vars.setdefault(key, value)
 
     if profile_memory:
+        plat = platform.system()
+        try:
+            branch = get_current_branch()
+        except Exception:
+            branch = 'unknown'
+
         env_vars['DD_TRACEMALLOC_DEBUG'] = '1'
         env_vars['DD_TRACEMALLOC_WHITELIST'] = check
 
@@ -149,10 +155,13 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
             instances = config.get('instances', [config])
 
         for instance in instances:
-            instance['__memory_profiling_tags'] = ['platform:{}'.format(platform.system()), 'env:{}'.format(env)]
+            instance['__memory_profiling_tags'] = [
+                'platform:{}'.format(plat),
+                'env:{}'.format(env),
+                'branch:{}'.format(branch),
+            ]
 
             if on_ci:
-                instance['__memory_profiling_tags'].append('branch:{}'.format(get_current_branch()))
                 instance['min_collection_interval'] = metadata.get(
                     'sampling_collection_interval', DEFAULT_SAMPLING_COLLECTION_INTERVAL
                 )
