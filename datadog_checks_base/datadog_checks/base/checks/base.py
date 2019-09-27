@@ -17,6 +17,7 @@ from six import PY3, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
+from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
@@ -565,7 +566,9 @@ class __AgentCheck(object):
                 from ..utils.agent.debug import enter_pdb
 
                 enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
-            elif 'profile_memory' in self.init_config or datadog_agent.tracemalloc_enabled():
+            elif 'profile_memory' in self.init_config or (
+                datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
+            ):
                 from ..utils.agent.memory import profile_memory
 
                 metrics = profile_memory(
@@ -573,8 +576,9 @@ class __AgentCheck(object):
                 )
 
                 tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
+                tags.extend(instance.get('__memory_profiling_tags', []))
                 for m in metrics:
-                    self.gauge(m.name, m.value, tags=tags)
+                    self.gauge(m.name, m.value, tags=tags, raw=True)
             else:
                 self.check(instance)
 

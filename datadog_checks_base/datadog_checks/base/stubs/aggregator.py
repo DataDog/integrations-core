@@ -44,6 +44,7 @@ class AggregatorStub(object):
     )
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
+    IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
 
     def __init__(self):
         self._metrics = defaultdict(list)
@@ -56,8 +57,13 @@ class AggregatorStub(object):
     def is_aggregate(cls, mtype):
         return mtype in cls.AGGREGATE_TYPES
 
+    @classmethod
+    def ignore_metric(cls, name):
+        return name in cls.IGNORED_METRICS
+
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
-        self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
+        if not self.ignore_metric(name):
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
