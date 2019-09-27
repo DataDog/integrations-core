@@ -124,7 +124,7 @@ def _wait_for_it_script():
 
 def _mysql_docker_repo():
     if MYSQL_FLAVOR == 'mysql':
-        if MYSQL_VERSION == '5.5':
+        if MYSQL_VERSION == '5.5-2':
             return 'alexandreyangdatadog/mysql-replication'
         elif MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
