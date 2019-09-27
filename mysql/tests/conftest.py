@@ -24,7 +24,6 @@ def dd_environment(instance_basic):
             'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
             'MYSQL_PORT': str(common.PORT),
             'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
-            # 'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
         },
         conditions=[
             WaitFor(init_master, wait=2),
@@ -84,12 +83,13 @@ def init_master():
 
 
 def init_slave():
-    run_docker_command(['mysqladmin', 'ping', '--silent'])
+    wait_command = ['mysqladmin', 'ping', '--silent']
+    run_command(['docker', 'exec', common.MYSQL_SLAVE_CONTAINER_NAME] + wait_command, capture=True, check=True)
     pymysql.connect(host=common.HOST, port=common.SLAVE_PORT, user=common.USER, passwd=common.PASS)
 
 
-def run_docker_command(command):
-    run_command(['docker', 'exec', 'mysql-slave'] + command, capture=True, check=True)
+def run_docker_command(container_name, command):
+    run_command(['docker', 'exec', container_name] + command, capture=True, check=True)
 
 
 def _add_dog_user(conn):
@@ -116,15 +116,6 @@ def populate_database():
     cur.execute("INSERT INTO testdb.users (name,age) VALUES('Bob',20);")
     cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%';")
     cur.close()
-
-
-def _wait_for_it_script():
-    """
-    FIXME: relying on the filesystem layout is a bad idea, the testing helper
-    should expose its path through the api instead
-    """
-    script = os.path.join(common.TESTS_HELPER_DIR, 'scripts', 'wait-for-it.sh')
-    return os.path.abspath(script)
 
 
 def _mysql_docker_repo():
