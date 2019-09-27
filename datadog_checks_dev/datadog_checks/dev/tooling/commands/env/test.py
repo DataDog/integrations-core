@@ -90,6 +90,8 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
                         retry=retry,
+                        debug=True,
+                        verbose=True,
                     )
             finally:
                 if new_env:
