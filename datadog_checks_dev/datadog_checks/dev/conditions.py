@@ -46,8 +46,8 @@ class WaitFor(LazyFunction):
             time.sleep(self.wait)
         else:
             raise RetryError(
-                'Result: {}\nError: {}\nFunction: {}, Args: {}, Kwargs: {}\n'.format(
-                    repr(last_result), last_error, self.func.__name__, self.args, self.kwargs
+                'Failure after {} attempts\nResult: {}\nError: {}\nFunction: {}, Args: {}, Kwargs: {}\n'.format(
+                    self.attempts, repr(last_result), last_error, self.func.__name__, self.args, self.kwargs
                 )
             )
 
