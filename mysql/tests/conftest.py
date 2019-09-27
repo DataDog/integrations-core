@@ -28,7 +28,7 @@ def dd_environment(instance_basic):
         },
         conditions=[
             WaitFor(init_master, wait=2),
-            WaitFor(init_slave, attempts=300, wait=2),
+            WaitFor(init_slave, wait=2),
             CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
             populate_database,
         ],
@@ -132,7 +132,7 @@ def _wait_for_it_script():
 def _mysql_docker_repo():
     if MYSQL_FLAVOR == 'mysql':
         if MYSQL_VERSION == '5.5-2':
-            return 'alexandreyangdatadog/mysql-replication'
+            return 'jfullaondo/mysql-replication'
         elif MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
         elif MYSQL_VERSION == '8.0':
