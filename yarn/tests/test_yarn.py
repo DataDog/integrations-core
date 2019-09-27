@@ -56,6 +56,18 @@ def test_check(aggregator, mocked_request):
         tags=['app_queue:default', 'app_name:word count', 'optional:tag1', 'cluster_name:SparkCluster'],
     )
 
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.CRITICAL,
+        tags=['app_queue:default', 'app_name:dead app', 'optional:tag1', 'cluster_name:SparkCluster'],
+    )
+
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.UNKNOWN,
+        tags=['app_queue:default', 'app_name:new app', 'optional:tag1', 'cluster_name:SparkCluster'],
+    )
+
     # Check the YARN Cluster Metrics
     for metric, value in iteritems(YARN_CLUSTER_METRICS_VALUES):
         aggregator.assert_metric(metric, value=value, tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS, count=1)
