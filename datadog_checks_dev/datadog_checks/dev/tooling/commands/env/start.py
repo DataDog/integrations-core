@@ -146,6 +146,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
             branch = get_current_branch()
         except Exception:
             branch = 'unknown'
+            echo_warning('Unable to detect the current Git branch, defaulting to `{}`.'.format(branch))
 
         env_vars['DD_TRACEMALLOC_DEBUG'] = '1'
         env_vars['DD_TRACEMALLOC_WHITELIST'] = check
