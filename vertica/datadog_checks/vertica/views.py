@@ -66,7 +66,15 @@ class ProjectionStorage:
     """
 
     name = 'projection_storage'
-    fields = ('anchor_table_name', 'node_name', 'projection_name', 'ros_row_count', 'used_bytes', 'wos_row_count')
+    fields = (
+        'anchor_table_name',
+        'node_name',
+        'projection_name',
+        'ros_row_count',
+        'ros_used_bytes',
+        'wos_row_count',
+        'wos_used_bytes',
+    )
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 

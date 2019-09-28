@@ -209,59 +209,95 @@ class VerticaCheck(AgentCheck):
 
     def query_projection_storage(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
-        projection_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {'rows': 0, 'used': 0})))
+        projection_data = defaultdict(
+            lambda: defaultdict(
+                lambda: defaultdict(lambda: {'rows_ros': 0, 'rows_wos': 0, 'used_ros': 0, 'used_wos': 0})
+            )
+        )
 
         for ps in self.iter_rows(views.ProjectionStorage):
             projection = projection_data[ps['node_name']][ps['anchor_table_name']][ps['projection_name']]
 
-            projection['rows'] += ps['ros_row_count'] + ps['wos_row_count']
-            projection['used'] += ps['used_bytes']
+            projection['rows_ros'] += ps['ros_row_count']
+            projection['rows_wos'] += ps['wos_row_count']
+            projection['used_ros'] += ps['ros_used_bytes']
+            projection['used_wos'] += ps['wos_used_bytes']
 
-        total_rows = 0
-        total_used = 0
+        total_rows_ros = 0
+        total_rows_wos = 0
+        total_used_ros = 0
+        total_used_wos = 0
 
         # My understanding is that nodes have multiple tables, which in turn can have multiple projections
         for node, tables in iteritems(projection_data):
             node_tags = ['node_name:{}'.format(node)]
             node_tags.extend(self._tags)
 
-            node_rows = 0
-            node_used = 0
+            node_rows_ros = 0
+            node_rows_wos = 0
+            node_used_ros = 0
+            node_used_wos = 0
 
             for table, projections in iteritems(tables):
                 table_tags = ['table_name:{}'.format(table)]
                 table_tags.extend(node_tags)
 
-                table_rows = 0
-                table_used = 0
+                table_rows_ros = 0
+                table_rows_wos = 0
+                table_used_ros = 0
+                table_used_wos = 0
 
                 for projection, data in iteritems(projections):
                     projection_tags = ['projection_name:{}'.format(projection)]
                     projection_tags.extend(table_tags)
 
-                    projection_rows = data['rows']
-                    projection_used = data['used']
+                    projection_rows_ros = data['rows_ros']
+                    projection_rows_wos = data['rows_wos']
+                    projection_used_ros = data['used_ros']
+                    projection_used_wos = data['used_wos']
 
-                    self.gauge('projection.row.total', projection_rows, tags=projection_tags)
-                    self.gauge('projection.disk.used', projection_used, tags=projection_tags)
+                    self.gauge('projection.row.ros', projection_rows_ros, tags=projection_tags)
+                    self.gauge('projection.row.wos', projection_rows_wos, tags=projection_tags)
+                    self.gauge('projection.row.total', projection_rows_ros + projection_rows_wos, tags=projection_tags)
+                    self.gauge('projection.disk.used.ros', projection_used_ros, tags=projection_tags)
+                    self.gauge('projection.disk.used.wos', projection_used_wos, tags=projection_tags)
+                    self.gauge('projection.disk.used', projection_used_ros + projection_used_wos, tags=projection_tags)
 
-                    table_rows += projection_rows
-                    table_used += projection_used
+                    table_rows_ros += projection_rows_ros
+                    table_rows_wos += projection_rows_wos
+                    table_used_ros += projection_used_ros
+                    table_used_wos += projection_used_wos
 
-                self.gauge('table.row.total', table_rows, tags=table_tags)
-                self.gauge('table.disk.used', table_used, tags=table_tags)
+                self.gauge('table.row.ros', table_rows_ros, tags=table_tags)
+                self.gauge('table.row.wos', table_rows_wos, tags=table_tags)
+                self.gauge('table.row.total', table_rows_ros + table_rows_wos, tags=table_tags)
+                self.gauge('table.disk.used.ros', table_used_ros, tags=table_tags)
+                self.gauge('table.disk.used.wos', table_used_wos, tags=table_tags)
+                self.gauge('table.disk.used', table_used_ros + table_used_wos, tags=table_tags)
 
-                node_rows += table_rows
-                node_used += table_used
+                node_rows_ros += table_rows_ros
+                node_rows_wos += table_rows_wos
+                node_used_ros += table_used_ros
+                node_used_wos += table_used_wos
 
-            self.gauge('node.row.total', node_rows, tags=node_tags)
-            self.gauge('node.disk.used', node_used, tags=node_tags)
+            self.gauge('node.row.ros', node_rows_ros, tags=node_tags)
+            self.gauge('node.row.wos', node_rows_wos, tags=node_tags)
+            self.gauge('node.row.total', node_rows_ros + node_rows_wos, tags=node_tags)
+            self.gauge('node.disk.used.ros', node_used_ros, tags=node_tags)
+            self.gauge('node.disk.used.wos', node_used_wos, tags=node_tags)
+            self.gauge('node.disk.used', node_used_ros + node_used_wos, tags=node_tags)
 
-            total_rows += node_rows
-            total_used += node_used
+            total_rows_ros += node_rows_ros
+            total_rows_wos += node_rows_wos
+            total_used_ros += node_used_ros
+            total_used_wos += node_used_wos
 
-        self.gauge('row.total', total_rows, tags=self._tags)
-        self.gauge('disk.used', total_used, tags=self._tags)
+        self.gauge('row.ros', total_rows_ros, tags=self._tags)
+        self.gauge('row.wos', total_rows_wos, tags=self._tags)
+        self.gauge('row.total', total_rows_ros + total_rows_wos, tags=self._tags)
+        self.gauge('disk.used.ros', total_used_ros, tags=self._tags)
+        self.gauge('disk.used.wos', total_used_wos, tags=self._tags)
+        self.gauge('disk.used', total_used_ros + total_used_wos, tags=self._tags)
 
     def query_host_resources(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/HOST_RESOURCES.htm
