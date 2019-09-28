@@ -78,6 +78,7 @@ class ProjectionStorage:
         'anchor_table_name',
         'node_name',
         'projection_name',
+        'ros_count',
         'ros_row_count',
         'ros_used_bytes',
         'wos_row_count',

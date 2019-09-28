@@ -215,13 +215,16 @@ class VerticaCheck(AgentCheck):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/PROJECTION_STORAGE.htm
         projection_data = defaultdict(
             lambda: defaultdict(
-                lambda: defaultdict(lambda: {'rows_ros': 0, 'rows_wos': 0, 'used_ros': 0, 'used_wos': 0})
+                lambda: defaultdict(
+                    lambda: {'ros_count': 0, 'rows_ros': 0, 'rows_wos': 0, 'used_ros': 0, 'used_wos': 0}
+                )
             )
         )
 
         for ps in self.iter_rows(views.ProjectionStorage):
             projection = projection_data[ps['node_name']][ps['anchor_table_name']][ps['projection_name']]
 
+            projection['ros_count'] += ps['ros_count']
             projection['rows_ros'] += ps['ros_row_count']
             projection['rows_wos'] += ps['wos_row_count']
             projection['used_ros'] += ps['ros_used_bytes']
@@ -260,6 +263,7 @@ class VerticaCheck(AgentCheck):
                     projection_used_ros = data['used_ros']
                     projection_used_wos = data['used_wos']
 
+                    self.gauge('projection.ros.containers', data['ros_count'], tags=projection_tags)
                     self.gauge('projection.row.ros', projection_rows_ros, tags=projection_tags)
                     self.gauge('projection.row.wos', projection_rows_wos, tags=projection_tags)
                     self.gauge('projection.row.total', projection_rows_ros + projection_rows_wos, tags=projection_tags)

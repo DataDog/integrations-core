@@ -42,6 +42,7 @@ ALL_METRICS = [
     'vertica.projection.disk.used',
     'vertica.projection.disk.used.ros',
     'vertica.projection.disk.used.wos',
+    'vertica.projection.ros.containers',
     'vertica.projection.row.ros',
     'vertica.projection.row.total',
     'vertica.projection.row.wos',
