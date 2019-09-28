@@ -36,7 +36,15 @@ class System:
     """
 
     name = 'system'
-    fields = ('current_fault_tolerance', 'designed_fault_tolerance', 'node_count', 'node_down_count')
+    fields = (
+        'ahm_epoch',
+        'current_epoch',
+        'current_fault_tolerance',
+        'designed_fault_tolerance',
+        'last_good_epoch',
+        'node_count',
+        'node_down_count',
+    )
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 
