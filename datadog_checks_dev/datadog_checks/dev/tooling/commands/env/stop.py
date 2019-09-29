@@ -51,8 +51,6 @@ def stop(check, env):
 
                     time.sleep(1)
 
-                time.sleep(30)
-
                 if notice_displayed:
                     echo_success('success!')
 
