@@ -105,6 +105,7 @@ class VerticaCheck(AgentCheck):
             self.query_nodes()
             self.query_projections()
             self.query_projection_storage()
+            self.query_storage_containers()
             self.query_host_resources()
             self.query_query_metrics()
             self.query_disk_storage()
@@ -306,6 +307,47 @@ class VerticaCheck(AgentCheck):
         self.gauge('disk.used.ros', total_used_ros, tags=self._tags)
         self.gauge('disk.used.wos', total_used_wos, tags=self._tags)
         self.gauge('disk.used', total_used_ros + total_used_wos, tags=self._tags)
+
+    def query_storage_containers(self):
+        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
+        container_data = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {'delete_vectors': 0})))
+
+        for sc in self.iter_rows(views.StorageContainers):
+            container = container_data[sc['node_name']][sc['projection_name']][sc['storage_type'].lower()]
+
+            container['delete_vectors'] += sc['delete_vector_count']
+
+        total_delete_vectors = 0
+
+        for node, projections in iteritems(container_data):
+            node_tags = ['node_name:{}'.format(node)]
+            node_tags.extend(self._tags)
+
+            node_delete_vectors = 0
+
+            for projection, containers in iteritems(projections):
+                projection_tags = ['projection_name:{}'.format(projection)]
+                projection_tags.extend(node_tags)
+
+                projection_delete_vectors = 0
+
+                for container_type, data in iteritems(containers):
+                    container_tags = ['container_type:{}'.format(container_type)]
+                    container_tags.extend(projection_tags)
+
+                    container_type_delete_vectors = data['delete_vectors']
+
+                    self.gauge('projection.delete_vectors', container_type_delete_vectors, tags=container_tags)
+
+                    projection_delete_vectors += container_type_delete_vectors
+
+                node_delete_vectors += projection_delete_vectors
+
+            self.gauge('node.delete_vectors', node_delete_vectors, tags=node_tags)
+
+            total_delete_vectors += node_delete_vectors
+
+        self.gauge('delete_vectors', total_delete_vectors, tags=self._tags)
 
     def query_host_resources(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/HOST_RESOURCES.htm

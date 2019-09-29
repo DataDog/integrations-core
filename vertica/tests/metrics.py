@@ -4,6 +4,7 @@
 ALL_METRICS = [
     'vertica.connection.active',
     'vertica.connection.total',
+    'vertica.delete_vectors',
     'vertica.disk.used',
     'vertica.disk.used.ros',
     'vertica.disk.used.wos',
@@ -30,6 +31,7 @@ ALL_METRICS = [
     'vertica.memory.utilized',
     'vertica.node.allowed',
     'vertica.node.available',
+    'vertica.node.delete_vectors',
     'vertica.node.disk.used',
     'vertica.node.disk.used.ros',
     'vertica.node.disk.used.wos',
@@ -39,6 +41,7 @@ ALL_METRICS = [
     'vertica.node.row.total',
     'vertica.node.row.wos',
     'vertica.node.total',
+    'vertica.projection.delete_vectors',
     'vertica.projection.disk.used',
     'vertica.projection.disk.used.ros',
     'vertica.projection.disk.used.wos',

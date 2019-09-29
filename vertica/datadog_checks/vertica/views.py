@@ -87,6 +87,16 @@ class ProjectionStorage:
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 
+class StorageContainers:
+    """
+    https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
+    """
+
+    name = 'storage_containers'
+    fields = ('delete_vector_count', 'node_name', 'projection_name', 'storage_type')
+    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
+
+
 class QueryMetrics:
     """
     https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/QUERY_METRICS.htm
