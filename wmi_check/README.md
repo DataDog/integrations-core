@@ -9,6 +9,9 @@ Get metrics from your Windows applications/servers with Windows Management Instr
 * Visualize their performance.
 * Correlate their activity with the rest of your applications.
 
+**Note:** It is recommended that the [PDH check][14] be used instead in all cases due to its significantly less overhead
+and thus better scalability.
+
 ## Setup
 ### Installation
 
@@ -71,7 +74,7 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
 * `class` is the name of the WMI class, for example `Win32_OperatingSystem` or `Win32_PerfFormattedData_PerfProc_Process`. You can find many of the standard class names on the [MSDN docs][6]. The `Win32_FormattedData_*` classes provide many useful performance counters by default.
 
 * `metrics` is a list of metrics you want to capture, with each item in the
-list being a set of `[<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]`: 
+list being a set of `[<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]`:
   *  `<WMI_PROPERTY_NAME>` is something like `NumberOfUsers` or `ThreadCount`. The standard properties are also available on the MSDN docs for each class.
   *  `<METRIC_NAME>` is the name you want to show up in Datadog.
   * `<METRIC_TYPE>` is from the standard choices for all agent checks, such as gauge, rate, histogram or counter.
@@ -135,3 +138,4 @@ Need help? Contact [Datadog support][13].
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
 [13]: https://docs.datadoghq.com/help
+[14]: https://docs.datadoghq.com/integrations/pdh_check/
