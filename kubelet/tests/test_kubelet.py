@@ -660,3 +660,25 @@ def test_add_labels_to_tags(monkeypatch, aggregator):
     for metric in METRICS_WITH_INTERFACE_TAG:
         tag = 'interface:%s' % METRICS_WITH_INTERFACE_TAG[metric]
         aggregator.assert_metric_has_tag(metric, tag)
+
+def test_report_container_requests_limits(monkeypatch, tagger):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_requests_limits.json'))))
+    monkeypatch.setattr(check, 'gauge', mock.Mock())
+
+    attrs = {'is_excluded.return_value': False}
+    check.pod_list_utils = mock.Mock(**attrs)
+
+    pod_list = check.retrieve_pod_list()
+    tags = ['kube_container_name:cassandra']
+    check._report_container_spec_metrics(pod_list, tags)
+
+    calls = [
+        mock.call('kubernetes.cpu.requests', 0.5, tags),
+        mock.call('kubernetes.memory.requests', 1073741824.0, tags),
+        mock.call('kubernetes.ephemeral-storage.requests', 0.5, tags),
+        mock.call('kubernetes.cpu.limits', 0.5, tags),
+        mock.call('kubernetes.memory.limits', 1073741824.0, tags),
+        mock.call('kubernetes.ephemeral-storage.limits', 2147483648.0, tags),
+    ]
+    check.gauge.assert_has_calls(calls, any_order=True)
