@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
+
 from requests.exceptions import SSLError
 from six import iteritems
 
@@ -64,7 +66,7 @@ def test_check(aggregator, mocked_request):
 
     aggregator.assert_service_check(
         APPLICATION_STATUS_SERVICE_CHECK,
-        status=YarnCheck.UNKNOWN,
+        status=YarnCheck.OK,
         tags=['app_queue:default', 'app_name:new app', 'optional:tag1', 'cluster_name:SparkCluster'],
     )
 
@@ -116,6 +118,34 @@ def test_check_excludes_app_metrics(aggregator, mocked_request):
         status=YarnCheck.OK,
         tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
         count=3,
+    )
+
+
+def test_custom_mapping(aggregator, mocked_request):
+    instance = copy.deepcopy(YARN_CONFIG['instances'][0])
+    instance['application_status_mapping'] = {'KILLED': 'WARNING', 'RUNNING': 'OK'}
+
+    yarn = YarnCheck('yarn', {}, [instance])
+
+    # Run the check once
+    yarn.check(instance)
+
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.OK,
+        tags=['app_queue:default', 'app_name:word count', 'optional:tag1', 'cluster_name:SparkCluster'],
+    )
+
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.WARNING,
+        tags=['app_queue:default', 'app_name:dead app', 'optional:tag1', 'cluster_name:SparkCluster'],
+    )
+
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.UNKNOWN,
+        tags=['app_queue:default', 'app_name:new app', 'optional:tag1', 'cluster_name:SparkCluster'],
     )
 
 

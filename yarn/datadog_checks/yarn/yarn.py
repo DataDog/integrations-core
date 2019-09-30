@@ -40,9 +40,15 @@ YARN_APPLICATION_RUNNING = 'RUNNING'
 APPLICATION_STATUS_SERVICE_CHECK = 'yarn.application.status'
 
 DEFAULT_APPLICATION_STATUS_MAPPING = {
-    YARN_APPLICATION_RUNNING: AgentCheck.OK,
-    'FAILED': AgentCheck.CRITICAL,
-    'KILLED': AgentCheck.CRITICAL
+    'ALL': 'unknown',
+    'NEW': 'ok',
+    'NEW_SAVING': 'ok',
+    'SUBMITTED': 'ok',
+    'ACCEPTED': 'ok',
+    YARN_APPLICATION_RUNNING: 'ok',
+    'FINISHED': 'ok',
+    'FAILED': 'critical',
+    'KILLED': 'critical',
 }
 
 # Cluster metrics identifier
@@ -155,11 +161,13 @@ class YarnCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):
         super(YarnCheck, self).__init__(*args, **kwargs)
-        application_status_mapping = self.instances[0].get('application_status_mapping', {})
+        application_status_mapping = self.instances[0].get(
+            'application_status_mapping', DEFAULT_APPLICATION_STATUS_MAPPING
+        )
         try:
             self.application_status_mapping = {
                 k.upper(): getattr(AgentCheck, v.upper()) for k, v in application_status_mapping.items()
-            } or DEFAULT_APPLICATION_STATUS_MAPPING
+            }
         except AttributeError as e:
             raise ConfigurationError("Invalid mapping: {}".format(e))
 

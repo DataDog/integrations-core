@@ -97,7 +97,6 @@ YARN_CONFIG = {
             'tags': list(CUSTOM_TAGS),
             'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
             'queue_blacklist': ['nofollowqueue'],
-            'application_status_mapping': {'running': 'ok', 'killed': 'critical'},
         }
     ]
 }
