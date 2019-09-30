@@ -427,7 +427,7 @@ class ProcessCheck(AgentCheck):
                 else:
                     self.gauge('system.processes.{}'.format(mname), sum_vals, tags=tags)
                     if mname in ['ioread_bytes', 'iowrite_bytes']:
-                        self.count('system.processes.{}_count'.format(mname), sum_vals, tags=tags)
+                        self.monotonic_count('system.processes.{}_count'.format(mname), sum_vals, tags=tags)
 
         for attr, mname in iteritems(ATTR_TO_METRIC_RATE):
             vals = [x for x in proc_state[attr] if x is not None]
