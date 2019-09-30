@@ -118,8 +118,12 @@ COMMON_TAGS = {
     "container_id://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": ['pod_name:pi-kff76'],
     "kubernetes_pod_uid://12ceeaa9-33ca-11e6-ac8f-42010af00003": ['pod_name:dd-agent-ntepl'],
     "container_id://32fc50ecfe24df055f6d56037acb966337eef7282ad5c203a1be58f2dd2fe743": ['pod_name:dd-agent-ntepl'],
-    "container_id://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479": ['kube_container_name:datadog-agent'],
-    "container_id://326b384481ca95204018e3e837c61e522b64a3b86c3804142a22b2d1db9dbd7b": ['kube_container_name:datadog-agent'],
+    "container_id://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479": [
+        'kube_container_name:datadog-agent'
+    ],
+    "container_id://326b384481ca95204018e3e837c61e522b64a3b86c3804142a22b2d1db9dbd7b": [
+        'kube_container_name:datadog-agent'
+    ],
 }
 
 METRICS_WITH_DEVICE_TAG = {
@@ -463,12 +467,12 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
             314572800.0,
             ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
-        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent']  + instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent']  + instance_tags),
-        mock.call('kubernetes.memory.requests', 134217728.0, ['kube_container_name:datadog-agent']  + instance_tags),
-        mock.call('kubernetes.cpu.limits', 0.25, ['kube_container_name:datadog-agent']  + instance_tags),
-        mock.call('kubernetes.memory.limits', 536870912.0, ['kube_container_name:datadog-agent']  + instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"]  + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.memory.requests', 134217728.0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.limits', 0.25, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.memory.limits', 536870912.0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
     if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
@@ -496,35 +500,27 @@ def test_report_container_state_metrics(monkeypatch, tagger):
             1,
             ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
             + instance_tags
-            + ['reason:OOMKilled']
+            + ['reason:OOMKilled'],
         ),
         mock.call(
             'kubernetes.containers.state.waiting',
             1,
             ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
             + instance_tags
-            + ['reason:CrashLoopBackOff']
+            + ['reason:CrashLoopBackOff'],
         ),
         mock.call(
             'kubernetes.containers.restarts',
             1,
-            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.containers.restarts',
             0,
-            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags
+            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
-        mock.call(
-            'kubernetes.containers.restarts',
-            0,
-            ['kube_container_name:datadog-agent'] + instance_tags
-        ),
-        mock.call(
-            'kubernetes.containers.restarts',
-            0,
-            ['kube_container_name:datadog-agent'] + instance_tags
-        ),
+        mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
