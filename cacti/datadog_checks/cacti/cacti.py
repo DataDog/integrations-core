@@ -37,7 +37,7 @@ CACTI_TO_DD = {
 
 class CactiCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
-        AgentCheck.__init__(self, name, init_config, instances)
+        super(CactiCheck, self).__init__(name, init_config, instances)
         self.last_ts = {}
         # Load the instance config
         self.config = self._get_config(instances[0])
