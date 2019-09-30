@@ -47,7 +47,7 @@ db.createUser({
 
 ##### Metric collection
 
-1. Edit the `mongo.d/conf.yaml` file in the `conf.d` folder at the root of your [Agent’s configuration directory][3]. See the [sample mongo.d/conf.yaml][4] for all available configuration options.
+1. Edit the `mongo.d/conf.yaml` file in the `conf.d` folder at the root of your [Agent's configuration directory][3]. See the [sample mongo.d/conf.yaml][4] for all available configuration options.
 
     ```yaml
       init_config:
