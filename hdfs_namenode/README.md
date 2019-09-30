@@ -47,7 +47,7 @@ instances:
 
 **Available for Agent >6.0**
 
-1. Collecting logs is disabled by default in the Datadog Agent, enable it in the `datadog.yaml` file with:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
 
     ```yaml
       logs_enabled: true
