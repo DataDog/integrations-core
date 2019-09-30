@@ -117,7 +117,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 |----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `mongodb`                                                                                                                                                                       |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                   |
-| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}` |
+| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}` |
 
 ##### Log collection
 
