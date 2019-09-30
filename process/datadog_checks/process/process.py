@@ -417,14 +417,17 @@ class ProcessCheck(AgentCheck):
             vals = [x for x in proc_state[attr] if x is not None]
             # skip []
             if vals:
+                sum_vals = sum(vals)
                 if attr == 'run_time':
-                    self.gauge('system.processes.{}.avg'.format(mname), sum(vals) / len(vals), tags=tags)
+                    self.gauge('system.processes.{}.avg'.format(mname), sum_vals / len(vals), tags=tags)
                     self.gauge('system.processes.{}.max'.format(mname), max(vals), tags=tags)
                     self.gauge('system.processes.{}.min'.format(mname), min(vals), tags=tags)
 
                 # FIXME 8.x: change this prefix?
                 else:
-                    self.gauge('system.processes.{}'.format(mname), sum(vals), tags=tags)
+                    self.gauge('system.processes.{}'.format(mname), sum_vals, tags=tags)
+                    if mname in ['ioread_bytes', 'iowrite_bytes']:
+                        self.count('system.processes.{}_count'.format(mname), sum_vals, tags=tags)
 
         for attr, mname in iteritems(ATTR_TO_METRIC_RATE):
             vals = [x for x in proc_state[attr] if x is not None]
