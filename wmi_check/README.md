@@ -9,8 +9,7 @@ Get metrics from your Windows applications/servers with Windows Management Instr
 * Visualize their performance.
 * Correlate their activity with the rest of your applications.
 
-**Note:** It is recommended that the [PDH check][14] be used instead in all cases due to its significantly less overhead
-and thus better scalability.
+**Note:** It is recommended that the [PDH check][14] be used instead in all cases due to its significantly less overhead and thus better scalability.
 
 ## Setup
 ### Installation
