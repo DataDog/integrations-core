@@ -495,15 +495,15 @@ def test_report_container_state_metrics(monkeypatch, tagger):
             'kubernetes.containers.last_state.terminated',
             1,
             ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
-            + ['reason:OOMKilled']
             + instance_tags
+            + ['reason:OOMKilled']
         ),
         mock.call(
             'kubernetes.containers.state.waiting',
             1,
             ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
-            + ['reason:CrashLoopBackOff']
             + instance_tags
+            + ['reason:CrashLoopBackOff']
         ),
         mock.call(
             'kubernetes.containers.restarts',
