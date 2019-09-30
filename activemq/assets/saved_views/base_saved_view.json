@@ -1,0 +1,21 @@
+{
+  "name": "chicken analytics",
+  "query": "poulet",
+  "type": "logs",
+  "timerange": {
+    "interval": 12345
+  },
+  "page": "analytics",
+  "facets": ["dinde"],
+  "options": {
+    "analytics": {
+      "aggregationQueries": ["pavo"],
+      "aggregationMetrics": ["foo"],
+      "aggregationTypes": ["bar"],
+      "step": "60",
+      "top": "10",
+      "topOrder": "top",
+      "viz": "query_table"
+    }
+  }
+}

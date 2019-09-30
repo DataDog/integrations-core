@@ -1,0 +1,21 @@
+{
+  "name": "chicken trace stream",
+  "query": "pollo",
+  "type": "traces",
+  "timerange": {
+    "interval": 654321
+  },
+  "page": "stream",
+  "facets": ["paon"],
+  "options": {
+    "analytics": {
+      "aggregationQueries": ["pavo"],
+      "aggregationMetrics": ["foo"],
+      "aggregationTypes": ["bar"],
+      "step": "60",
+      "top": "10",
+      "topOrder": "top",
+      "viz": "query_table"
+    }
+  }
+}

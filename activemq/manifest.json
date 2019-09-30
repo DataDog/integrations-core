@@ -30,6 +30,10 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
+    "saved_views": {
+      "ActiveMQ base saved view": "assets/saved_views/base_saved_view.json",
+      "ActiveMQ overview saved view": "assets/saved_views/overview_saved_view.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
