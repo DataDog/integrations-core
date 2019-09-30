@@ -7,7 +7,7 @@ instances:
     #
   - mysql_host: localhost
 
-    ## @param mysql_port - int - optional - default: 3306
+    ## @param mysql_port - integer - optional - default: 3306
     ## port of your MySQL database
     #
     # mysql_port: 3306
