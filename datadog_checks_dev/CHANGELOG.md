@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.35.1 / 2019-09-30
+
+* [Fixed] Auto detect changes and run tests when yaml files change. See [#4657](https://github.com/DataDog/integrations-core/pull/4657).
+
 ## 0.35.0 / 2019-09-30
 
 * [Added] Support submitting memory profiling metrics during E2E. See [#4635](https://github.com/DataDog/integrations-core/pull/4635).
