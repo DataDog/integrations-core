@@ -59,7 +59,7 @@ instances:
     #   <TAG_KEY1>: <YARN_KEY>
     #   <TAG_KEY2>: <YARN_KEY>
 
-    ## @param application_status_mapping - list of key:value elements - optional - default: as example below.
+    ## @param application_status_mapping - list of key:value elements - optional
     ##
     ## Custom application status mapping for service check `yarn.application.status`.
     ##
@@ -68,7 +68,7 @@ instances:
     ## The value is the Datadog service check level. Valid values are: `ok`, `warning`, `critical`, and `unknown`.
     ## If a channel status is not mapped, it is mapped to `unknown`.
     ##
-    ## Example of mapping:
+    ## Find below the default mapping configuration.
     #
     # application_status_mapping:
     #     ALL: unknown
