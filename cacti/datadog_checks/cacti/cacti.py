@@ -53,7 +53,7 @@ class CactiCheck(AgentCheck):
         # Load the instance config
         config = self._get_config(instance)
 
-        connection = pymysql.connect(config.host, config.user, config.password, config.db)
+        connection = pymysql.connect(config.host, config.user, config.password, config.db, config.port)
 
         self.log.debug("Connected to MySQL to fetch Cacti metadata")
 
@@ -96,16 +96,17 @@ class CactiCheck(AgentCheck):
         user = instance.get('mysql_user')
         password = instance.get('mysql_password', '') or ''
         db = instance.get('mysql_db', 'cacti')
+        port = instance.get('mysql_port')
         rrd_path = instance.get('rrd_path')
         whitelist = instance.get('rrd_whitelist')
         field_names = instance.get('field_names', ['ifName', 'dskDevice'])
         tags = instance.get('tags', [])
 
         Config = namedtuple(
-            'Config', ['host', 'user', 'password', 'db', 'rrd_path', 'whitelist', 'field_names', 'tags']
+            'Config', ['host', 'user', 'password', 'db', 'port', 'rrd_path', 'whitelist', 'field_names', 'tags']
         )
 
-        return Config(host, user, password, db, rrd_path, whitelist, field_names, tags)
+        return Config(host, user, password, db, port, rrd_path, whitelist, field_names, tags)
 
     @staticmethod
     def _get_rrd_info(rrd_path):
