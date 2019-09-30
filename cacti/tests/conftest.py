@@ -72,7 +72,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return CactiCheck('cacti', {}, {})
+    return CactiCheck('cacti', {}, [{}])
 
 
 @pytest.fixture

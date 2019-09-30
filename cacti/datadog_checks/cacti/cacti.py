@@ -60,7 +60,9 @@ class CactiCheck(AgentCheck):
         patterns = self._get_whitelist_patterns(self.config.whitelist)
 
         # Fetch the RRD metadata from MySQL
-        rrd_meta = self._fetch_rrd_meta(connection, self.config.rrd_path, patterns, self.config.field_names, self.config.tags)
+        rrd_meta = self._fetch_rrd_meta(
+            connection, self.config.rrd_path, patterns, self.config.field_names, self.config.tags
+        )
 
         # Load the metrics from each RRD, tracking the count as we go
         metric_count = 0
@@ -71,7 +73,9 @@ class CactiCheck(AgentCheck):
         self.gauge('cacti.metrics.count', metric_count, tags=self.config.tags)
 
     def _get_connection(self):
-        return pymysql.connect(self.config.host, self.config.user, self.config.password, self.config.db, self.config.port)
+        return pymysql.connect(
+            self.config.host, self.config.user, self.config.password, self.config.db, self.config.port
+        )
 
     def _get_whitelist_patterns(self, whitelist=None):
         patterns = []
