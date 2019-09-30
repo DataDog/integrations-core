@@ -663,7 +663,10 @@ def test_add_labels_to_tags(monkeypatch, aggregator):
 
 def test_report_container_requests_limits(monkeypatch, tagger):
     check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_requests_limits.json'))))
+    monkeypatch.setattr(check,
+        'retrieve_pod_list',
+        mock.Mock(return_value=json.loads(mock_from_file('pods_requests_limits.json'))),
+        )
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
     attrs = {'is_excluded.return_value': False}
