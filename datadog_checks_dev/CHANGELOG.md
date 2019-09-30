@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.35.0 / 2019-09-30
+
+* [Added] Support submitting memory profiling metrics during E2E. See [#4635](https://github.com/DataDog/integrations-core/pull/4635).
+
 ## 0.34.0 / 2019-09-24
 
 * [Added] Improve RetryError message. See [#4619](https://github.com/DataDog/integrations-core/pull/4619).
