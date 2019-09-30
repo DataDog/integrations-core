@@ -162,3 +162,20 @@ class ResourceUsage:
     name = 'resource_usage'
     fields = ('active_thread_count', 'node_name', 'request_count')
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
+
+
+class ResourcePoolStatus:
+    """
+    https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/RESOURCE_POOL_STATUS.htm
+    """
+
+    name = 'resource_pool_status'
+    fields = (
+        'general_memory_borrowed_kb',
+        'max_memory_size_kb',
+        'memory_inuse_kb',
+        'node_name',
+        'pool_name',
+        'running_query_count',
+    )
+    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)

@@ -17,7 +17,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import views
-from .utils import node_state_to_service_check
+from .utils import kilobytes_to_bytes, node_state_to_service_check
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
@@ -108,6 +108,7 @@ class VerticaCheck(AgentCheck):
             self.query_storage_containers()
             self.query_host_resources()
             self.query_query_metrics()
+            self.query_resource_pool_status()
             self.query_disk_storage()
             self.query_resource_usage()
             self.query_custom()
@@ -402,6 +403,19 @@ class VerticaCheck(AgentCheck):
             self.monotonic_count('connection.total', node['total_user_session_count'], tags=tags)
             self.gauge('query.active', node['running_query_count'], tags=tags)
             self.monotonic_count('query.total', node['executed_query_count'], tags=tags)
+
+    def query_resource_pool_status(self):
+        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/RESOURCE_POOL_STATUS.htm
+        for pool in self.iter_rows(views.ResourcePoolStatus):
+            tags = ['node_name:{}'.format(pool['node_name']), 'pool_name:{}'.format(pool['pool_name'])]
+            tags.extend(self._tags)
+
+            self.gauge(
+                'resource_pool.memory.borrowed', kilobytes_to_bytes(pool['general_memory_borrowed_kb']), tags=tags
+            )
+            self.gauge('resource_pool.memory.max', kilobytes_to_bytes(pool['max_memory_size_kb']), tags=tags)
+            self.gauge('resource_pool.memory.used', kilobytes_to_bytes(pool['memory_inuse_kb']), tags=tags)
+            self.gauge('resource_pool.query.running', pool['running_query_count'], tags=tags)
 
     def query_disk_storage(self):
         # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/DISK_STORAGE.htm

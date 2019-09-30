@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from binary import BYTE, KILOBYTE, convert_units
+
 from datadog_checks.base.constants import ServiceCheck
 
 # https://www.vertica.com/docs/9.2.x/HTML/Content/Resources/Images/Node_States_531x851.png
@@ -24,3 +26,7 @@ NODE_STATES = {
 
 def node_state_to_service_check(node_state):
     return NODE_STATES.get(node_state, ServiceCheck.UNKNOWN)
+
+
+def kilobytes_to_bytes(kb):
+    return convert_units(kb, unit=KILOBYTE, to=BYTE)[0]
