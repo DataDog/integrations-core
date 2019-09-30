@@ -100,13 +100,10 @@ class Etcd(OpenMetricsBaseCheck):
         )
 
     def check(self, instance):
-        if is_affirmative(instance.get('use_preview', False)):
+        if is_affirmative(instance.get('use_preview', True)):
             self.check_post_v3(instance)
         else:
-            self.warning(
-                'In Agent 6.11 this check will only support ETCD v3+. If you '
-                'wish to preview the new version, set `use_preview` to `true`.'
-            )
+            self.warning('In the future etcd check will only support ETCD v3+.')
             self.check_pre_v3(instance)
 
     def access_api(self, scraper_config, path, data='{}'):
