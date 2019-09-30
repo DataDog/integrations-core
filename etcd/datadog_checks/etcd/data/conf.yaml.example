@@ -26,7 +26,7 @@ instances:
     ## @param use_preview - boolean - optional - default: true
     ## Whether or not to preview the new version of the check supporting only ETCD 3+
     #
-  - use_preview: true
+    # use_preview: true
 
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
