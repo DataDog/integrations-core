@@ -29,11 +29,16 @@ def dd_environment(instance):
 
 
 @pytest.fixture(scope='session')
+def legacy_instance():
+    return {'url': URL, 'use_preview': False}
+
+
+@pytest.fixture(scope='session')
 def instance():
     if V3_PREVIEW:
         return {'use_preview': True, 'prometheus_url': '{}/metrics'.format(URL)}
     else:
-        return {'url': URL}
+        return legacy_instance
 
 
 @pytest.fixture(scope='session')
