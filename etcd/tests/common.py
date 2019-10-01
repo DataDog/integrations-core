@@ -12,6 +12,8 @@ PORT = '23790'
 V3_PREVIEW = os.getenv('V3_PREVIEW') == 'true'
 URL = 'http://{}:{}'.format(HOST, PORT)
 
+LEGACY_INSTANCE = {'url': URL, 'use_preview': False}
+
 STORE_METRICS = [
     'compareanddelete.fail',
     'compareanddelete.success',
