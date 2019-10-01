@@ -1,7 +1,7 @@
 {
   "notify_list": null,
   "description": "",
-  "author_name": "Julia Simon",
+  "author_name": "Datadog",
   "template_variable_presets": [],
   "template_variables": [
     {
@@ -12,11 +12,10 @@
   ],
   "is_read_only": false,
   "id": "ur6-853-452",
-  "title": "Julia's Screenboard 30 Sep 2019 14:31",
-  "url": "/dashboard/ur6-853-452/julias-screenboard-30-sep-2019-1431",
+  "title": "Etcd Overview",
   "created_at": "2019-09-30T12:31:31.471879+00:00",
   "modified_at": "2019-09-30T13:25:21.920780+00:00",
-  "author_handle": "julia.simon@datadoghq.com",
+  "author_handle": "support@datadoghq.com",
   "widgets": [
     {
       "definition": {
