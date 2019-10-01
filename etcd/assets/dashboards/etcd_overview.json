@@ -1,7 +1,25 @@
 {
-  "notify_list": null,
+  "board_title": "Etcd Overview",
+  "read_only": false,
+  "author_info": {
+    "author_name": "Julia Simon"
+  },
   "description": "",
-  "author_name": "Datadog",
+  "board_bgtype": "board_graph",
+  "created": "2019-09-30T12:31:31.471879+00:00",
+  "created_by": {
+    "disabled": false,
+    "handle": "support@datadoghq.com",
+    "name": "Datadog",
+    "is_admin": false,
+    "role": null,
+    "access_role": "st",
+    "verified": true,
+    "email": "julia.simon@datadoghq.com",
+  },
+  "new_id": "ur6-853-452",
+  "modified": "2019-09-30T13:25:21.920780+00:00",
+  "originalHeight": 80,
   "template_variable_presets": [],
   "template_variables": [
     {
@@ -10,262 +28,324 @@
       "name": "scope"
     }
   ],
-  "is_read_only": false,
-  "id": "ur6-853-452",
-  "title": "Etcd Overview",
-  "created_at": "2019-09-30T12:31:31.471879+00:00",
-  "modified_at": "2019-09-30T13:25:21.920780+00:00",
-  "author_handle": "support@datadoghq.com",
+  "isIntegration": false,
+  "disableEditing": false,
+  "originalWidth": "calc(100% - 32px)",
   "widgets": [
     {
-      "definition": {
-        "url": "/static/images/screenboard/integrations/etcd.png",
-        "sizing": "zoom",
-        "type": "image"
-      },
-      "layout": {
-        "y": 0,
-        "x": 0,
-        "width": 47,
-        "height": 15
-      }
+      "board_id": "ur6-853-452",
+      "sizing": "zoom",
+      "title": false,
+      "url": "/static/images/screenboard/integrations/etcd.png",
+      "margin": "",
+      "height": 15,
+      "width": 47,
+      "scaleFactor": 1,
+      "y": 0,
+      "x": 0,
+      "add_timeframe": true,
+      "type": "image",
+      "isShared": false
     },
     {
-      "definition": {
+      "board_id": "ur6-853-452",
+      "title_align": "left",
+      "title_size": 16,
+      "title": true,
+      "type": "hostmap",
+      "generated_title": "Host Map",
+      "title_text": "Leader board",
+      "height": 27,
+      "tile_def": {
         "style": {
+          "fillMax": null,
           "palette": "green_to_orange",
-          "palette_flip": false
+          "fillMin": null,
+          "paletteFlip": false
         },
-        "title_size": "16",
-        "title": "Leader board",
-        "title_align": "left",
-        "no_metric_hosts": false,
+        "group": null,
+        "notes": null,
+        "noMetricHosts": false,
+        "viz": "hostmap",
         "scope": [
           "$scope"
         ],
-        "requests": {
-          "fill": {
-            "q": "max:etcd.server.is_leader{$scope} by {host}"
+        "requests": [
+          {
+            "q": "max:etcd.server.is_leader{$scope} by {host}",
+            "type": "fill"
           }
-        },
-        "no_group_hosts": true,
-        "type": "hostmap"
+        ],
+        "groupby": null,
+        "noGroupHosts": true
       },
-      "layout": {
-        "y": 17,
-        "x": 0,
-        "width": 47,
-        "height": 29
-      }
+      "width": 47,
+      "query": "avg:system.load.1{*} by {host}",
+      "y": 17,
+      "x": 0,
+      "legend_size": null,
+      "add_timeframe": true,
+      "scaleFactor": 1,
+      "legend": null,
+      "isShared": false
     },
     {
-      "definition": {
-        "tick_pos": "50%",
-        "show_tick": true,
-        "type": "note",
-        "tick_edge": "bottom",
-        "text_align": "left",
-        "content": "Network",
-        "font_size": "14",
-        "background_color": "blue"
-      },
-      "layout": {
-        "y": 0,
-        "x": 49,
-        "width": 96,
-        "height": 5
-      }
+      "board_id": "ur6-853-452",
+      "tick": true,
+      "font_size": "14",
+      "title": false,
+      "refresh_every": 30000,
+      "scaleFactor": 1,
+      "tick_edge": "bottom",
+      "text_align": "left",
+      "auto_refresh": false,
+      "bgcolor": "blue",
+      "add_timeframe": true,
+      "html": "Network",
+      "type": "note",
+      "y": 0,
+      "x": 49,
+      "height": 5,
+      "tick_pos": "50%",
+      "width": 96,
+      "isShared": false
     },
     {
-      "definition": {
-        "tick_pos": "50%",
-        "show_tick": true,
-        "type": "note",
-        "tick_edge": "bottom",
-        "text_align": "left",
-        "content": "GRPC cache",
-        "font_size": "14",
-        "background_color": "blue"
-      },
-      "layout": {
-        "y": 24,
-        "x": 49,
-        "width": 47,
-        "height": 5
-      }
+      "board_id": "ur6-853-452",
+      "tick": true,
+      "font_size": "14",
+      "title": false,
+      "refresh_every": 30000,
+      "scaleFactor": 1,
+      "tick_edge": "bottom",
+      "text_align": "left",
+      "auto_refresh": false,
+      "bgcolor": "blue",
+      "add_timeframe": true,
+      "html": "GRPC cache",
+      "type": "note",
+      "y": 24,
+      "x": 49,
+      "height": 5,
+      "tick_pos": "50%",
+      "width": 47,
+      "isShared": false
     },
     {
-      "definition": {
-        "tick_pos": "50%",
-        "show_tick": true,
-        "type": "note",
-        "tick_edge": "bottom",
-        "text_align": "left",
-        "content": "Disk",
-        "font_size": "14",
-        "background_color": "blue"
-      },
-      "layout": {
-        "y": 24,
-        "x": 98,
-        "width": 47,
-        "height": 5
-      }
+      "board_id": "ur6-853-452",
+      "tick": true,
+      "font_size": "14",
+      "title": false,
+      "refresh_every": 30000,
+      "scaleFactor": 1,
+      "tick_edge": "bottom",
+      "text_align": "left",
+      "auto_refresh": false,
+      "bgcolor": "blue",
+      "add_timeframe": true,
+      "html": "Disk",
+      "type": "note",
+      "y": 24,
+      "x": 98,
+      "height": 5,
+      "tick_pos": "50%",
+      "width": 47,
+      "isShared": false
     },
     {
-      "definition": {
-        "title_size": "16",
-        "title": "Commit / Fsync duration",
-        "title_align": "left",
-        "show_legend": false,
-        "time": {
-          "live_span": "1h"
-        },
+      "board_id": "ur6-853-452",
+      "title_align": "left",
+      "title_size": 16,
+      "title": true,
+      "type": "timeseries",
+      "generated_title": "system.cpu.user",
+      "title_text": "Commit / Fsync duration",
+      "height": 13,
+      "tile_def": {
+        "viz": "timeseries",
         "requests": [
           {
             "q": "avg:etcd.disk.backend.commit.duration.seconds{$scope}",
+            "aggregator": "avg",
             "style": {
-              "line_width": "normal",
+              "width": "normal",
               "palette": "dog_classic",
-              "line_type": "solid"
+              "type": "solid"
             },
-            "display_type": "line"
+            "type": "line",
+            "conditional_formats": []
           },
           {
             "q": "avg:etcd.disk.wal.fsync.duration.seconds{$scope}",
+            "aggregator": "avg",
             "style": {
-              "line_width": "normal",
+              "width": "normal",
               "palette": "dog_classic",
-              "line_type": "solid"
+              "type": "solid"
             },
-            "display_type": "line"
+            "type": "line"
           }
         ],
-        "type": "timeseries",
-        "legend_size": "0"
+        "autoscale": true
       },
-      "layout": {
-        "y": 31,
-        "x": 98,
-        "width": 47,
-        "height": 15
-      }
+      "width": 47,
+      "time": {
+        "live_span": "1h"
+      },
+      "error": null,
+      "y": 31,
+      "x": 98,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "scaleFactor": 1,
+      "legend": false,
+      "isShared": false
     },
     {
-      "definition": {
-        "title_size": "16",
-        "title": "GRPC cache hits / misses",
-        "title_align": "left",
-        "show_legend": false,
-        "time": {
-          "live_span": "1h"
-        },
+      "board_id": "ur6-853-452",
+      "title_align": "left",
+      "title_size": 16,
+      "title": true,
+      "type": "timeseries",
+      "generated_title": "system.cpu.user",
+      "title_text": "GRPC cache hits / misses",
+      "height": 13,
+      "tile_def": {
+        "viz": "timeseries",
         "requests": [
           {
             "q": "avg:etcd.grpc.proxy.cache.hits.total{$scope}",
+            "aggregator": "avg",
             "style": {
-              "line_width": "normal",
+              "width": "normal",
               "palette": "dog_classic",
-              "line_type": "solid"
+              "type": "solid"
             },
-            "display_type": "line"
+            "type": "line",
+            "conditional_formats": []
           },
           {
             "q": "avg:etcd.grpc.proxy.cache.misses.total{$scope}",
+            "aggregator": "avg",
             "style": {
-              "line_width": "normal",
+              "width": "normal",
               "palette": "dog_classic",
-              "line_type": "solid"
+              "type": "solid"
             },
-            "display_type": "line"
+            "type": "line"
           }
         ],
-        "type": "timeseries",
-        "legend_size": "0"
+        "autoscale": true
       },
-      "layout": {
-        "y": 31,
-        "x": 49,
-        "width": 47,
-        "height": 15
-      }
+      "width": 47,
+      "time": {
+        "live_span": "1h"
+      },
+      "error": null,
+      "y": 31,
+      "x": 49,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "scaleFactor": 1,
+      "legend": false,
+      "isShared": false
     },
     {
-      "definition": {
-        "title_size": "16",
-        "title": "Client received and sent bytes",
-        "title_align": "left",
-        "show_legend": false,
-        "time": {},
+      "board_id": "ur6-853-452",
+      "title_align": "left",
+      "title_size": 16,
+      "title": true,
+      "type": "timeseries",
+      "generated_title": "Timeseries",
+      "title_text": "Client received and sent bytes",
+      "height": 13,
+      "tile_def": {
+        "viz": "timeseries",
         "requests": [
           {
             "q": "avg:etcd.network.client.grpc.received.bytes.total{*}.as_count()",
+            "aggregator": "avg",
             "style": {
-              "line_width": "normal",
+              "width": "normal",
               "palette": "dog_classic",
-              "line_type": "solid"
+              "type": "solid"
             },
-            "display_type": "line"
+            "type": "line",
+            "conditional_formats": []
           },
           {
             "q": "avg:etcd.network.client.grpc.sent.bytes.total{*}.as_count()",
             "style": {
-              "line_width": "normal",
+              "width": "normal",
               "palette": "dog_classic",
-              "line_type": "solid"
+              "type": "solid"
             },
-            "display_type": "line"
+            "type": "line"
           }
         ],
-        "type": "timeseries",
-        "legend_size": "0"
+        "autoscale": true
       },
-      "layout": {
-        "y": 7,
-        "x": 49,
-        "width": 47,
-        "height": 15
-      }
+      "width": 47,
+      "time": {},
+      "error": null,
+      "y": 7,
+      "x": 49,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "scaleFactor": 1,
+      "legend": false,
+      "isShared": false
     },
     {
-      "definition": {
-        "title_size": "16",
-        "title": "Peer received and sent bytes",
-        "title_align": "left",
-        "show_legend": false,
-        "time": {
-          "live_span": "1h"
-        },
+      "board_id": "ur6-853-452",
+      "title_align": "left",
+      "title_size": 16,
+      "title": true,
+      "type": "timeseries",
+      "generated_title": "Timeseries",
+      "title_text": "Peer received and sent bytes",
+      "height": 13,
+      "tile_def": {
+        "viz": "timeseries",
         "requests": [
           {
             "q": "avg:etcd.network.peer.received.bytes.total{$scope}.as_count()",
+            "aggregator": "avg",
             "style": {
-              "line_width": "normal",
+              "width": "normal",
               "palette": "dog_classic",
-              "line_type": "solid"
+              "type": "solid"
             },
-            "display_type": "line"
+            "type": "line",
+            "conditional_formats": []
           },
           {
             "q": "avg:etcd.network.peer.sent.bytes.total{$scope}.as_count()",
             "style": {
-              "line_width": "normal",
+              "width": "normal",
               "palette": "dog_classic",
-              "line_type": "solid"
+              "type": "solid"
             },
-            "display_type": "line"
+            "type": "line"
           }
         ],
-        "type": "timeseries",
-        "legend_size": "0"
+        "autoscale": true
       },
-      "layout": {
-        "y": 7,
-        "x": 98,
-        "width": 47,
-        "height": 15
-      }
+      "width": 47,
+      "time": {
+        "live_span": "1h"
+      },
+      "error": null,
+      "y": 7,
+      "x": 98,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "scaleFactor": 1,
+      "legend": false,
+      "isShared": false
     }
   ],
-  "layout_type": "free"
+  "disableCog": false,
+  "id": 64746,
+  "isShared": false
 }
