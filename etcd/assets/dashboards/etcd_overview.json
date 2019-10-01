@@ -1,0 +1,272 @@
+{
+  "notify_list": null,
+  "description": "",
+  "author_name": "Julia Simon",
+  "template_variable_presets": [],
+  "template_variables": [
+    {
+      "default": "*",
+      "prefix": null,
+      "name": "scope"
+    }
+  ],
+  "is_read_only": false,
+  "id": "ur6-853-452",
+  "title": "Julia's Screenboard 30 Sep 2019 14:31",
+  "url": "/dashboard/ur6-853-452/julias-screenboard-30-sep-2019-1431",
+  "created_at": "2019-09-30T12:31:31.471879+00:00",
+  "modified_at": "2019-09-30T13:25:21.920780+00:00",
+  "author_handle": "julia.simon@datadoghq.com",
+  "widgets": [
+    {
+      "definition": {
+        "url": "/static/images/screenboard/integrations/etcd.png",
+        "sizing": "zoom",
+        "type": "image"
+      },
+      "layout": {
+        "y": 0,
+        "x": 0,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "definition": {
+        "style": {
+          "palette": "green_to_orange",
+          "palette_flip": false
+        },
+        "title_size": "16",
+        "title": "Leader board",
+        "title_align": "left",
+        "no_metric_hosts": false,
+        "scope": [
+          "$scope"
+        ],
+        "requests": {
+          "fill": {
+            "q": "max:etcd.server.is_leader{$scope} by {host}"
+          }
+        },
+        "no_group_hosts": true,
+        "type": "hostmap"
+      },
+      "layout": {
+        "y": 17,
+        "x": 0,
+        "width": 47,
+        "height": 29
+      }
+    },
+    {
+      "definition": {
+        "tick_pos": "50%",
+        "show_tick": true,
+        "type": "note",
+        "tick_edge": "bottom",
+        "text_align": "left",
+        "content": "Network",
+        "font_size": "14",
+        "background_color": "blue"
+      },
+      "layout": {
+        "y": 0,
+        "x": 49,
+        "width": 96,
+        "height": 5
+      }
+    },
+    {
+      "definition": {
+        "tick_pos": "50%",
+        "show_tick": true,
+        "type": "note",
+        "tick_edge": "bottom",
+        "text_align": "left",
+        "content": "GRPC cache",
+        "font_size": "14",
+        "background_color": "blue"
+      },
+      "layout": {
+        "y": 24,
+        "x": 49,
+        "width": 47,
+        "height": 5
+      }
+    },
+    {
+      "definition": {
+        "tick_pos": "50%",
+        "show_tick": true,
+        "type": "note",
+        "tick_edge": "bottom",
+        "text_align": "left",
+        "content": "Disk",
+        "font_size": "14",
+        "background_color": "blue"
+      },
+      "layout": {
+        "y": 24,
+        "x": 98,
+        "width": 47,
+        "height": 5
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "Commit / Fsync duration",
+        "title_align": "left",
+        "show_legend": false,
+        "time": {
+          "live_span": "1h"
+        },
+        "requests": [
+          {
+            "q": "avg:etcd.disk.backend.commit.duration.seconds{$scope}",
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "line"
+          },
+          {
+            "q": "avg:etcd.disk.wal.fsync.duration.seconds{$scope}",
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "line"
+          }
+        ],
+        "type": "timeseries",
+        "legend_size": "0"
+      },
+      "layout": {
+        "y": 31,
+        "x": 98,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "GRPC cache hits / misses",
+        "title_align": "left",
+        "show_legend": false,
+        "time": {
+          "live_span": "1h"
+        },
+        "requests": [
+          {
+            "q": "avg:etcd.grpc.proxy.cache.hits.total{$scope}",
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "line"
+          },
+          {
+            "q": "avg:etcd.grpc.proxy.cache.misses.total{$scope}",
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "line"
+          }
+        ],
+        "type": "timeseries",
+        "legend_size": "0"
+      },
+      "layout": {
+        "y": 31,
+        "x": 49,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "Client received and sent bytes",
+        "title_align": "left",
+        "show_legend": false,
+        "time": {},
+        "requests": [
+          {
+            "q": "avg:etcd.network.client.grpc.received.bytes.total{*}.as_count()",
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "line"
+          },
+          {
+            "q": "avg:etcd.network.client.grpc.sent.bytes.total{*}.as_count()",
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "line"
+          }
+        ],
+        "type": "timeseries",
+        "legend_size": "0"
+      },
+      "layout": {
+        "y": 7,
+        "x": 49,
+        "width": 47,
+        "height": 15
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "Peer received and sent bytes",
+        "title_align": "left",
+        "show_legend": false,
+        "time": {
+          "live_span": "1h"
+        },
+        "requests": [
+          {
+            "q": "avg:etcd.network.peer.received.bytes.total{$scope}.as_count()",
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "line"
+          },
+          {
+            "q": "avg:etcd.network.peer.sent.bytes.total{$scope}.as_count()",
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "line"
+          }
+        ],
+        "type": "timeseries",
+        "legend_size": "0"
+      },
+      "layout": {
+        "y": 7,
+        "x": 98,
+        "width": 47,
+        "height": 15
+      }
+    }
+  ],
+  "layout_type": "free"
+}
