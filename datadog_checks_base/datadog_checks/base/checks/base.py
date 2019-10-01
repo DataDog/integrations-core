@@ -21,6 +21,7 @@ from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
+from ..utils.metadata import MetadataManager
 from ..utils.proxy import config_proxy_skip
 
 try:
@@ -73,7 +74,23 @@ class __AgentCheck(object):
 
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
-    HTTP_CONFIG_REMAPPER = None  # Used by `self.http` RequestsWrapper
+    # Used by `self.http` for an instance of RequestsWrapper
+    HTTP_CONFIG_REMAPPER = None
+
+    # Used by `self.set_metadata` for an instance of MetadataManager
+    #
+    # This is a mapping of metadata names to functions. When you call `self.set_metadata(name, value, **options)`,
+    # if `name` is in this mapping then the corresponding function will be called with the `value`, and the
+    # return value(s) will be sent instead.
+    #
+    # Transformer functions must satisfy the following signature:
+    #
+    #    def transform_<NAME>(value: Any, options: dict) -> Union[str, Dict[str, str]]:
+    #
+    # If the return type is a string, then it will be sent as the value for `name`. If the return type is
+    # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
+    METADATA_TRANSFORMERS = None
+
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
     METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
@@ -134,6 +151,9 @@ class __AgentCheck(object):
         # Provides logic to yield consistent network behavior based on user configuration.
         # Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         self._http = None
+
+        # Used for sending metadata via Go bindings
+        self._metadata_manager = None
 
         # Save the dynamically detected integration version
         self._check_version = None
@@ -205,6 +225,16 @@ class __AgentCheck(object):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
+
+    @property
+    def metadata_manager(self):
+        if self._metadata_manager is None:
+            if not self.check_id:
+                raise RuntimeError('Attribute `check_id` must be set')
+
+            self._metadata_manager = MetadataManager(self.name, self.check_id, self.log, self.METADATA_TRANSFORMERS)
+
+        return self._metadata_manager
 
     @property
     def check_version(self):
@@ -449,9 +479,19 @@ class __AgentCheck(object):
             self.log.warning(self._deprecations[deprecation_key][1])
             self._deprecations[deprecation_key][0] = True
 
-    # TODO(olivier): implement service_metadata if it's worth it
+    # TODO: Remove once our checks stop calling it
     def service_metadata(self, meta_name, value):
         pass
+
+    def set_metadata(self, name, value, **options):
+        """Updates the cached metadata ``name`` with ``value``, which is then sent by the Agent at regular intervals.
+
+        :param str name: the name of the metadata
+        :param object value: the value for the metadata. if ``name`` has no transformer defined then the
+                             raw ``value`` will be submitted and therefore it must be a ``str``
+        :param options: keyword arguments to pass to any defined transformer
+        """
+        self.metadata_manager.submit(name, value, options)
 
     def set_external_tags(self, external_tags):
         # Example of external_tags format

@@ -31,6 +31,10 @@ def debug(msg, *args, **kwargs):
     pass
 
 
+def set_check_metadata(*args, **kwargs):
+    pass
+
+
 def set_external_tags(*args, **kwargs):
     pass
 
