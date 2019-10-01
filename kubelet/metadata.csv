@@ -53,3 +53,5 @@ kubernetes.kubelet.volume.stats.used_bytes,gauge,,byte,,The number of used bytes
 kubernetes.kubelet.volume.stats.inodes,gauge,,inode,,The maximum number of inodes in the volume,0,kubelet,k8s.vol.inodes_max
 kubernetes.kubelet.volume.stats.inodes_free,gauge,,inode,,The number of free inodes in the volume,1,kubelet,k8s.vol.inodes_free
 kubernetes.kubelet.volume.stats.inodes_used,gauge,,inode,,The number of used inodes in the volume,-1,kubelet,k8s.vol.inodes_used
+kubernetes.ephemeral_storage.limits,gauge,,byte,,Ephemeral storage limit of the container (requires kubernetes v1.8+),0,kubelet,k8s.eph_storage.limits
+kubernetes.ephemeral_storage.requests,gauge,,byte,,Ephemeral storage request of the container (requires kubernetes v1.8+),0,kubelet,k8s.eph_storage.requests

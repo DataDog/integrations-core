@@ -47,7 +47,7 @@ db.createUser({
 
 ##### Metric collection
 
-1. Edit the `mongo.d/conf.yaml` file in the `conf.d` folder at the root of your [Agent’s configuration directory][3]. See the [sample mongo.d/conf.yaml][4] for all available configuration options.
+1. Edit the `mongo.d/conf.yaml` file in the `conf.d` folder at the root of your [Agent's configuration directory][3]. See the [sample mongo.d/conf.yaml][4] for all available configuration options.
 
     ```yaml
       init_config:
@@ -117,7 +117,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 |----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `mongodb`                                                                                                                                                                       |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                   |
-| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}` |
+| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}` |
 
 ##### Log collection
 

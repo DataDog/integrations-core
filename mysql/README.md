@@ -207,7 +207,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 |----------------------|------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `mysql`                                                                |
 | `<INIT_CONFIG>`      | blank or `{}`                                                          |
-| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}` |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}` |
 
 
 See the [Autodiscovery template variables documentation][25] to learn how to pass `<UNIQUEPASSWORD>` as an Environment variable instead of a label.
