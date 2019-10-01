@@ -10,7 +10,7 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.etcd.metrics import METRIC_MAP
 
-from .common import COMPOSE_FILE, URL, V3_PREVIEW, LEGACY_INSTANCE
+from .common import COMPOSE_FILE, LEGACY_INSTANCE, URL, V3_PREVIEW
 
 
 def add_key():
