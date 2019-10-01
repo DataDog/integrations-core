@@ -2,7 +2,7 @@
   "board_title": "Etcd Overview",
   "read_only": false,
   "author_info": {
-    "author_name": "Julia Simon"
+    "author_name": "Datadog"
   },
   "description": "",
   "board_bgtype": "board_graph",
@@ -15,7 +15,7 @@
     "role": null,
     "access_role": "st",
     "verified": true,
-    "email": "julia.simon@datadoghq.com",
+    "email": "support@datadoghq.com"
   },
   "new_id": "ur6-853-452",
   "modified": "2019-09-30T13:25:21.920780+00:00",
