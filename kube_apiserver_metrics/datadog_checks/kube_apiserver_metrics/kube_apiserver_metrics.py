@@ -31,6 +31,8 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
             'apiserver_dropped_requests_total': self.apiserver_dropped_requests_total,
             'http_requests_total': self.http_requests_total,
             'authenticated_user_requests': self.authenticated_user_requests,
+            # metric added in kubernetes 1.15
+            'apiserver_request_total': self.apiserver_request_total,
         }
         self.kube_apiserver_config = None
 
@@ -119,3 +121,6 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
     def authenticated_user_requests(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.authenticated_user_requests', metric, scraper_config)
+
+    def apiserver_request_total(self, metric, scraper_config):
+        self.submit_as_gauge_and_monotonic_count('.apiserver_request_total', metric, scraper_config)

@@ -17,6 +17,7 @@ from six import PY3, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
+from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
@@ -24,12 +25,12 @@ from ..utils.proxy import config_proxy_skip
 
 try:
     import datadog_agent
-    from ..log import init_logging
+    from ..log import CheckLoggingAdapter, init_logging
 
     init_logging()
 except ImportError:
     from ..stubs import datadog_agent
-    from ..stubs.log import init_logging
+    from ..stubs.log import CheckLoggingAdapter, init_logging
 
     init_logging()
 
@@ -127,8 +128,8 @@ class __AgentCheck(object):
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()
 
-        # the agent5 'AgentCheck' setup a log attribute.
-        self.log = logging.getLogger('{}.{}'.format(__name__, self.name))
+        logger = logging.getLogger('{}.{}'.format(__name__, self.name))
+        self.log = CheckLoggingAdapter(logger, self)
 
         # Provides logic to yield consistent network behavior based on user configuration.
         # Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
@@ -238,7 +239,32 @@ class __AgentCheck(object):
     def _context_uid(self, mtype, name, tags=None, hostname=None):
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
-    def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None):
+    def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags):
+        if value is None:
+            # ignore metric sample
+            return
+
+        # make sure the value (bucket count) is an integer
+        try:
+            value = int(value)
+        except ValueError:
+            err_msg = 'Histogram: {} has non integer value: {}. Only integer are valid bucket values (count).'.format(
+                repr(name), repr(value)
+            )
+            if using_stub_aggregator:
+                raise ValueError(err_msg)
+            self.warning(err_msg)
+            return
+
+        tags = self._normalize_tags_type(tags, metric_name=name)
+        if hostname is None:
+            hostname = ''
+
+        aggregator.submit_histogram_bucket(
+            self, self.check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+        )
+
+    def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False):
         if value is None:
             # ignore metric sample
             return
@@ -269,9 +295,9 @@ class __AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name), value, tags, hostname)
+        aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname)
 
-    def gauge(self, name, value, tags=None, hostname=None, device_name=None):
+    def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         """Sample a gauge metric.
 
         :param str name: the name of the metric.
@@ -280,10 +306,13 @@ class __AgentCheck(object):
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
         :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
             list instead.
+        :param bool raw: (optional) whether to ignore any defined namespace prefix
         """
-        self._submit_metric(aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name)
+        self._submit_metric(
+            aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
+        )
 
-    def count(self, name, value, tags=None, hostname=None, device_name=None):
+    def count(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         """Sample a raw count metric.
 
         :param str name: the name of the metric.
@@ -292,10 +321,13 @@ class __AgentCheck(object):
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
         :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
             list instead.
+        :param bool raw: (optional) whether to ignore any defined namespace prefix
         """
-        self._submit_metric(aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name)
+        self._submit_metric(
+            aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
+        )
 
-    def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None):
+    def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         """Sample an increasing counter metric.
 
         :param str name: the name of the metric.
@@ -304,12 +336,13 @@ class __AgentCheck(object):
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
         :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
             list instead.
+        :param bool raw: (optional) whether to ignore any defined namespace prefix
         """
         self._submit_metric(
-            aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name
+            aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def rate(self, name, value, tags=None, hostname=None, device_name=None):
+    def rate(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         """Sample a point, with the rate calculated at the end of the check.
 
         :param str name: the name of the metric.
@@ -318,10 +351,13 @@ class __AgentCheck(object):
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
         :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
             list instead.
+        :param bool raw: (optional) whether to ignore any defined namespace prefix
         """
-        self._submit_metric(aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name)
+        self._submit_metric(
+            aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
+        )
 
-    def histogram(self, name, value, tags=None, hostname=None, device_name=None):
+    def histogram(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         """Sample a histogram metric.
 
         :param str name: the name of the metric.
@@ -330,10 +366,13 @@ class __AgentCheck(object):
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
         :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
             list instead.
+        :param bool raw: (optional) whether to ignore any defined namespace prefix
         """
-        self._submit_metric(aggregator.HISTOGRAM, name, value, tags=tags, hostname=hostname, device_name=device_name)
+        self._submit_metric(
+            aggregator.HISTOGRAM, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
+        )
 
-    def historate(self, name, value, tags=None, hostname=None, device_name=None):
+    def historate(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         """Sample a histogram based on rate metrics.
 
         :param str name: the name of the metric.
@@ -342,10 +381,13 @@ class __AgentCheck(object):
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
         :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
             list instead.
+        :param bool raw: (optional) whether to ignore any defined namespace prefix
         """
-        self._submit_metric(aggregator.HISTORATE, name, value, tags=tags, hostname=hostname, device_name=device_name)
+        self._submit_metric(
+            aggregator.HISTORATE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
+        )
 
-    def increment(self, name, value=1, tags=None, hostname=None, device_name=None):
+    def increment(self, name, value=1, tags=None, hostname=None, device_name=None, raw=False):
         """Increment a counter metric.
 
         :param str name: the name of the metric.
@@ -354,11 +396,14 @@ class __AgentCheck(object):
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
         :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
             list instead.
+        :param bool raw: (optional) whether to ignore any defined namespace prefix
         """
         self._log_deprecation('increment')
-        self._submit_metric(aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name)
+        self._submit_metric(
+            aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
+        )
 
-    def decrement(self, name, value=-1, tags=None, hostname=None, device_name=None):
+    def decrement(self, name, value=-1, tags=None, hostname=None, device_name=None, raw=False):
         """Decrement a counter metric.
 
         :param str name: the name of the metric.
@@ -367,11 +412,14 @@ class __AgentCheck(object):
         :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
         :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
             list instead.
+        :param bool raw: (optional) whether to ignore any defined namespace prefix
         """
         self._log_deprecation('increment')
-        self._submit_metric(aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name)
+        self._submit_metric(
+            aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
+        )
 
-    def service_check(self, name, status, tags=None, hostname=None, message=None):
+    def service_check(self, name, status, tags=None, hostname=None, message=None, raw=False):
         """Send the status of a service.
 
         :param str name: the name of the service check.
@@ -379,6 +427,7 @@ class __AgentCheck(object):
         :type status: :py:class:`datadog_checks.base.constants.ServiceCheck`
         :param list tags: (optional) a list of tags to associate with this check.
         :param str message: (optional) additional information or a description of why this status occurred.
+        :param bool raw: (optional) whether to ignore any defined namespace prefix
         """
         tags = self._normalize_tags_type(tags)
         if hostname is None:
@@ -389,7 +438,7 @@ class __AgentCheck(object):
             message = to_string(message)
 
         aggregator.submit_service_check(
-            self, self.check_id, self._format_namespace(name), status, tags, hostname, message
+            self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
     def _log_deprecation(self, deprecation_key):
@@ -443,7 +492,7 @@ class __AgentCheck(object):
         # only log the last part of the filename, not the full path
         filename = basename(frame.f_code.co_filename)
 
-        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename})
+        self.log.warning(warning_message, extra={'_lineno': lineno, '_filename': filename, '_check_id': self.check_id})
         self.warnings.append(warning_message)
 
     def get_warnings(self):
@@ -469,8 +518,8 @@ class __AgentCheck(object):
 
         return proxies if proxies else no_proxy_settings
 
-    def _format_namespace(self, s):
-        if self.__NAMESPACE__:
+    def _format_namespace(self, s, raw=False):
+        if not raw and self.__NAMESPACE__:
             return '{}.{}'.format(self.__NAMESPACE__, to_string(s))
 
         return to_string(s)
@@ -517,17 +566,19 @@ class __AgentCheck(object):
                 from ..utils.agent.debug import enter_pdb
 
                 enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
-            elif 'profile_memory' in self.init_config:
-                from ..utils.agent.memory import TRACE_LOCK, profile_memory
+            elif 'profile_memory' in self.init_config or (
+                datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
+            ):
+                from ..utils.agent.memory import profile_memory
 
-                with TRACE_LOCK:
-                    metrics = profile_memory(
-                        self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
-                    )
+                metrics = profile_memory(
+                    self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
+                )
 
                 tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
+                tags.extend(instance.get('__memory_profiling_tags', []))
                 for m in metrics:
-                    self.gauge(m.name, m.value, tags=tags)
+                    self.gauge(m.name, m.value, tags=tags, raw=True)
             else:
                 self.check(instance)
 

@@ -3,9 +3,9 @@
         "agent_version": "5.2.0",
         "integration":"snmp",
         "check": "snmp.can_check",
-        "statuses": ["ok", "critical"],
+        "statuses": ["ok", "critical", "warning"],
         "groups": ["host", "snmp_device"],
         "name": "Can check",
-        "description": "Returns `CRITICAL` if the Agent check is unable to collect metrics from SNMP. Returns `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent check is unable to collect metrics from SNMP, and `WARNING` if it partially works but metrics configuration is incorrect. Returns `OK` otherwise."
     }
 ]

@@ -1,5 +1,9 @@
 # CHANGELOG - openstack
 
+## 1.8.2 / 2019-08-24
+
+* [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).
+
 ## 1.8.1 / 2019-06-01
 
 * [Fixed] Fix code style. See [#3838](https://github.com/DataDog/integrations-core/pull/3838).

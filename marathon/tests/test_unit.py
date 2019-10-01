@@ -1,8 +1,14 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import mock
 import pytest
+
+from datadog_checks.marathon import Marathon
+
+from .common import INSTANCE_INTEGRATION
 
 
 def test_get_app_tags(check):
@@ -33,7 +39,7 @@ def test_process_apps_ko(check, aggregator):
     collected
     """
     check.get_apps_json = mock.MagicMock(return_value=None)
-    check.process_apps('url', 10, 'auth', 'acs_url', False, [], [], None)
+    check.process_apps('url', 'acs_url', [], [], None)
     assert len(aggregator.metric_names) == 0
 
 
@@ -47,7 +53,7 @@ def test_process_apps(check, aggregator):
         }
     )
 
-    check.process_apps('url', 10, 'auth', 'acs_url', False, [], [], None)
+    check.process_apps('url', 'acs_url', [], [], None)
     aggregator.assert_metric('marathon.apps', value=2, count=1)
     aggregator.assert_metric('marathon.backoffSeconds', value=99, count=1, tags=['app_id:/', 'version:'])
     aggregator.assert_metric('marathon.backoffSeconds', value=101, count=1, tags=['app_id:/', 'version:'])
@@ -62,28 +68,52 @@ def test_get_instance_config(check):
 
     # test defaults
     instance = {'url': 'http://foo'}
-    url, auth, acs_url, ssl_verify, group, tags, label_tags, timeout = check.get_instance_config(instance)
+    url, acs_url, group, tags, label_tags = check.get_instance_config(instance)
     assert url == 'http://foo'
-    assert auth is None
     assert acs_url is None
-    assert ssl_verify is True
     assert group is None
     assert tags == []
     assert label_tags == []
-    assert timeout == 5
-
-    # test auth
-    instance = {'url': 'http://foo', 'user': 'user'}
-    _, auth, _, _, _, _, _, _ = check.get_instance_config(instance)
-    assert auth is None
-
-    instance['password'] = 'mypass'
-    _, auth, _, _, _, _, _, _ = check.get_instance_config(instance)
-    assert auth == ('user', 'mypass')
 
     # test misc
     instance = {'url': 'http://foo', 'disable_ssl_validation': True, 'tags': ['foo:bar'], 'label_tags': ['label_foo']}
-    _, _, acs_url, ssl_verify, _, tags, label_tags, _ = check.get_instance_config(instance)
-    assert ssl_verify is False
+    _, acs_url, _, tags, label_tags = check.get_instance_config(instance)
     assert tags == ['foo:bar']
     assert label_tags == ['label_foo']
+
+
+@pytest.mark.parametrize(
+    'test_case, init_config, extra_config, expected_http_kwargs',
+    [
+        (
+            "new config",
+            {},
+            {'timeout': 5, 'username': 'foo', 'password': 'bar', 'tls_verify': False},
+            {'timeout': 5, 'auth': ('foo', 'bar'), 'verify': False},
+        ),
+        ("connect_timeout", {'default_timeout': 5}, {'connect_timeout': 2}, {'timeout': (5.0, 2.0)}),
+        ("read_timeout", {}, {'timeout': 7, 'read_timeout': 3}, {'timeout': (3.0, 7.0)}),
+        (
+            "legacy config",
+            {'default_timeout': 3},
+            {'user': 'foo', 'password': 'bar', 'disable_ssl_validation': True},
+            {'timeout': 3, 'auth': ('foo', 'bar'), 'verify': False},
+        ),
+        ("default config", {}, {}, {'verify': True}),
+    ],
+)
+def test_config(test_case, init_config, extra_config, expected_http_kwargs):
+    instance = deepcopy(INSTANCE_INTEGRATION)
+    instance.update(extra_config)
+    check = Marathon('marathon', init_config, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_wargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_wargs.update(expected_http_kwargs)
+        r.get.assert_called_with('http://localhost:8080/v2/queue', **http_wargs)

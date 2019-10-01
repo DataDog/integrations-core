@@ -57,7 +57,7 @@ class WindowsService(AgentCheck):
 
         for short_name, _, service_status in service_statuses:
             if 'ALL' not in services:
-                for service, service_pattern in iteritems(service_patterns):
+                for service, service_pattern in sorted(iteritems(service_patterns), reverse=True):
                     self.log.debug(
                         'Service: {} with Short Name: {} and Pattern: {}'.format(
                             service, short_name, service_pattern.pattern

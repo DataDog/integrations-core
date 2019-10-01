@@ -77,18 +77,9 @@ class ConsulCheck(AgentCheck):
         self._instance_states = defaultdict(lambda: ConsulCheckInstanceState())
 
         self.HTTP_CONFIG_REMAPPER = {
-            'client_cert_file': {
-                'name': 'tls_cert',
-                'default': self.init_config.get('tls_cert') or self.init_config.get('client_cert_file') or False,
-            },
-            'private_key_file': {
-                'name': 'tls_private_key',
-                'default': self.init_config.get('tls_private_key') or self.init_config.get('private_key_file') or False,
-            },
-            'ca_bundle_file': {
-                'name': 'tls_ca_cert',
-                'default': self.init_config.get('tls_ca_cert') or self.init_config.get('ca_bundle_file') or False,
-            },
+            'client_cert_file': {'name': 'tls_cert'},
+            'private_key_file': {'name': 'tls_private_key'},
+            'ca_bundle_file': {'name': 'tls_ca_cert'},
         }
 
         if 'acl_token' in self.instance:

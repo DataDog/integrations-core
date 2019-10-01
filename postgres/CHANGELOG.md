@@ -1,5 +1,26 @@
 # CHANGELOG - postgres
 
+## 3.2.0 / 2019-09-10
+
+* [Added] Add schema tag to Lock and Size metrics. See [#3721](https://github.com/DataDog/integrations-core/pull/3721). Thanks [fischaz](https://github.com/fischaz).
+
+## 3.1.3 / 2019-09-04
+
+* [Fixed] Catch statement timeouts correctly. See [#4501](https://github.com/DataDog/integrations-core/pull/4501).
+
+## 3.1.2 / 2019-08-31
+
+* [Fixed] Document new config option. See [#4480](https://github.com/DataDog/integrations-core/pull/4480).
+
+## 3.1.1 / 2019-08-30
+
+* [Fixed] Fix query condition. See [#4484](https://github.com/DataDog/integrations-core/pull/4484). Thanks [dpierce-aledade](https://github.com/dpierce-aledade).
+
+## 3.1.0 / 2019-08-24
+
+* [Added] Make table_count_limit a parameter. See [#3729](https://github.com/DataDog/integrations-core/pull/3729). Thanks [fischaz](https://github.com/fischaz).
+* [Added] Add postgresql application name to connection. See [#4295](https://github.com/DataDog/integrations-core/pull/4295).
+
 ## 3.0.0 / 2019-07-12
 
 * [Changed] Add SSL support for psycopg2, remove pg8000. See [#4096](https://github.com/DataDog/integrations-core/pull/4096).

@@ -84,7 +84,7 @@ INIT_CONFIG = {
     ],
 }
 
-EXPECTED_METRICS = {
+EXPECTED_METRICS = [
     "mapreduce.job.maps_running",
     "mapreduce.job.reduces_running",
     "mapreduce.job.failed_reduce_attempts",
@@ -100,13 +100,34 @@ EXPECTED_METRICS = {
     "mapreduce.job.running_reduce_attempts",
     "mapreduce.job.running_map_attempts",
     "mapreduce.job.successful_map_attempts",
-    "mapreduce.job.elapsed_time",
     "mapreduce.job.maps_completed",
     "mapreduce.job.maps_pending",
     "mapreduce.job.maps_total",
+]
+
+ELAPSED_TIME_BUCKET_METRICS = [
+    "mapreduce.job.elapsed_time.max",
+    "mapreduce.job.elapsed_time.avg",
+    "mapreduce.job.elapsed_time.median",
+    "mapreduce.job.elapsed_time.95percentile",
+    "mapreduce.job.elapsed_time.count",
+    "mapreduce.job.map.task.elapsed_time.max",
+    "mapreduce.job.map.task.elapsed_time.avg",
+    "mapreduce.job.map.task.elapsed_time.median",
+    "mapreduce.job.map.task.elapsed_time.95percentile",
+    "mapreduce.job.map.task.elapsed_time.count",
+    "mapreduce.job.reduce.task.elapsed_time.max",
+    "mapreduce.job.reduce.task.elapsed_time.avg",
+    "mapreduce.job.reduce.task.elapsed_time.median",
+    "mapreduce.job.reduce.task.elapsed_time.95percentile",
+    "mapreduce.job.reduce.task.elapsed_time.count",
+]
+
+ELAPSED_TIME_METRICS = [
+    "mapreduce.job.elapsed_time",
     "mapreduce.job.map.task.elapsed_time",
     "mapreduce.job.reduce.task.elapsed_time",
-}
+]
 
 MAPREDUCE_JOB_METRIC_VALUES = {
     'mapreduce.job.elapsed_time': 99221829,

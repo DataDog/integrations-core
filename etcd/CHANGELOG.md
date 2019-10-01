@@ -1,5 +1,9 @@
 # CHANGELOG - etcd
 
+## 1.9.0 / 2019-08-24
+
+* [Added] Add requests wrapper to etcd. See [#4323](https://github.com/DataDog/integrations-core/pull/4323).
+
 ## 1.8.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3505](https://github.com/DataDog/integrations-core/pull/3505).

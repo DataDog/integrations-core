@@ -17,7 +17,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
 from datadog_checks.dev import EnvVars
-from datadog_checks.dev.utils import running_on_appveyor
+from datadog_checks.dev.utils import running_on_windows_ci
 
 pytestmark = pytest.mark.http
 
@@ -271,6 +271,31 @@ class TestAuth:
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
+    def test_config_kerberos_cache(self):
+        instance = {'kerberos_cache': '/test/file'}
+        init_config = {}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert os.environ.get('KRB5CCNAME') is None
+
+        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+            assert http.get('https://www.google.com') == '/test/file'
+
+        assert os.environ.get('KRB5CCNAME') is None
+
+    def test_config_kerberos_cache_restores_rollback(self):
+        instance = {'kerberos_cache': '/test/file'}
+        init_config = {}
+
+        http = RequestsWrapper(instance, init_config)
+
+        with EnvVars({'KRB5CCNAME': 'old'}):
+            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+                assert http.get('https://www.google.com') == '/test/file'
+
+            assert os.environ.get('KRB5CCNAME') == 'old'
+
     def test_config_kerberos_keytab_file_rollback(self):
         instance = {'kerberos_keytab': '/test/file'}
         init_config = {}
@@ -455,7 +480,7 @@ class TestProxies:
 
         http.get('https://www.google.com')
 
-    @pytest.mark.skipif(running_on_appveyor(), reason="Cannot run on appveyor")
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
     def test_socks5_proxy(self, socks5_proxy):
         instance = {'proxy': {'http': 'socks5h://{}'.format(socks5_proxy)}}
         init_config = {}

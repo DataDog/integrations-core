@@ -7,7 +7,7 @@ from collections import OrderedDict, defaultdict
 
 from six import binary_type, iteritems
 
-from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
+from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from datadog_checks.base.stubs.similar import build_similar_elements_msg
 
 from ..utils.common import ensure_unicode, to_string
@@ -44,25 +44,39 @@ class AggregatorStub(object):
     )
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
+    IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
 
     def __init__(self):
         self._metrics = defaultdict(list)
         self._asserted = set()
         self._service_checks = defaultdict(list)
         self._events = []
+        self._histogram_buckets = defaultdict(list)
 
     @classmethod
     def is_aggregate(cls, mtype):
         return mtype in cls.AGGREGATE_TYPES
 
+    @classmethod
+    def ignore_metric(cls, name):
+        return name in cls.IGNORED_METRICS
+
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
-        self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
+        if not self.ignore_metric(name):
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
 
     def submit_event(self, check, check_id, event):
         self._events.append(event)
+
+    def submit_histogram_bucket(
+        self, check, check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
+    ):
+        self._histogram_buckets[name].append(
+            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+        )
 
     def metrics(self, name):
         """
@@ -115,6 +129,23 @@ class AggregatorStub(object):
 
         return all_events
 
+    def histogram_bucket(self, name):
+        """
+        Return the histogram buckets received under the given name
+        """
+        return [
+            HistogramBucketStub(
+                ensure_unicode(stub.name),
+                stub.value,
+                stub.lower_bound,
+                stub.upper_bound,
+                stub.monotonic,
+                ensure_unicode(stub.hostname),
+                normalize_tags(stub.tags),
+            )
+            for stub in self._histogram_buckets.get(to_string(name), [])
+        ]
+
     def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
         """
         Assert a metric is tagged with tag
@@ -153,6 +184,34 @@ class AggregatorStub(object):
             assert len(candidates) == count, msg
         else:
             assert len(candidates) >= at_least, msg
+
+    def assert_histogram_bucket(
+        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
+    ):
+        candidates = []
+        for bucket in self.histogram_bucket(name):
+            if value is not None and value != bucket.value:
+                continue
+
+            if tags and tags != sorted(bucket.tags):
+                continue
+
+            if hostname and hostname != bucket.hostname:
+                continue
+
+            candidates.append(bucket)
+
+        expected_bucket = HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags)
+
+        if count is not None:
+            msg = "Needed exactly {} candidates for '{}', got {}".format(count, name, len(candidates))
+            condition = len(candidates) == count
+        else:
+            msg = "Needed at least {} candidates for '{}', got {}".format(at_least, name, len(candidates))
+            condition = len(candidates) >= at_least
+        self._assert(
+            condition=condition, msg=msg, expected_stub=expected_bucket, submitted_elements=self._histogram_buckets
+        )
 
     def assert_metric(self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None):
         """
@@ -239,6 +298,70 @@ class AggregatorStub(object):
         if self.metrics_asserted_pct < 100.0:
             missing_metrics = self.not_asserted()
         assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
+
+    def assert_no_duplicate_all(self):
+        """
+        Assert no duplicate metrics and service checks have been submitted.
+        """
+        self.assert_no_duplicate_metrics()
+        self.assert_no_duplicate_service_checks()
+
+    def assert_no_duplicate_metrics(self):
+        """
+        Assert no duplicate metrics have been submitted.
+
+        Metrics are considered duplicate when all following fields match:
+            - metric name
+            - type (gauge, rate, etc)
+            - tags
+            - hostname
+        """
+        # metric types that intended to be called multiple times are ignored
+        ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]
+        metric_stubs = [m for metrics in self._metrics.values() for m in metrics if m.type not in ignored_types]
+
+        def stub_to_key_fn(stub):
+            return stub.name, stub.type, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('metric', metric_stubs, stub_to_key_fn)
+
+    def assert_no_duplicate_service_checks(self):
+        """
+        Assert no duplicate service checks have been submitted.
+
+        Service checks are considered duplicate when all following fields match:
+            - metric name
+            - status
+            - tags
+            - hostname
+        """
+        service_check_stubs = [m for metrics in self._service_checks.values() for m in metrics]
+
+        def stub_to_key_fn(stub):
+            return stub.name, stub.status, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('service_check', service_check_stubs, stub_to_key_fn)
+
+    @staticmethod
+    def _assert_no_duplicate_stub(stub_type, all_metrics, stub_to_key_fn):
+        all_contexts = defaultdict(list)
+        for metric in all_metrics:
+            context = stub_to_key_fn(metric)
+            all_contexts[context].append(metric)
+
+        dup_contexts = defaultdict(list)
+        for context, metrics in iteritems(all_contexts):
+            if len(metrics) > 1:
+                dup_contexts[context] = metrics
+
+        err_msg_lines = ["Duplicate {}s found:".format(stub_type)]
+        for key in sorted(dup_contexts):
+            contexts = dup_contexts[key]
+            err_msg_lines.append('- {}'.format(contexts[0].name))
+            for metric in contexts:
+                err_msg_lines.append('    ' + str(metric))
+
+        assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
 
     def reset(self):
         """

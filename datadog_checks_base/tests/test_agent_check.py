@@ -116,6 +116,16 @@ class TestMetrics:
 
         aggregator.assert_metric('test.metric')
 
+    def test_namespace_override(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        methods = ('gauge', 'count', 'monotonic_count', 'rate', 'histogram', 'historate', 'increment', 'decrement')
+        for method in methods:
+            getattr(check, method)('metric', 0, raw=True)
+
+        aggregator.assert_metric('metric', count=len(methods))
+
     def test_non_float_metric(self, aggregator):
         check = AgentCheck()
         metric_name = 'test_metric'
@@ -182,6 +192,13 @@ class TestServiceChecks:
 
         check.service_check('service_check', AgentCheck.OK)
         aggregator.assert_service_check('test.service_check', status=AgentCheck.OK)
+
+    def test_namespace_override(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        check.service_check('service_check', AgentCheck.OK, raw=True)
+        aggregator.assert_service_check('service_check', status=AgentCheck.OK)
 
 
 class TestTags:

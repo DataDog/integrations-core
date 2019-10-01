@@ -1,0 +1,27 @@
+parameters:
+  repo: 'core'
+
+steps:
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: ddev validate agent-reqs
+    displayName: 'Validate Agent requirements'
+
+- script: ddev validate config
+  displayName: 'Validate default configuration files'
+
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: ddev validate dep
+    displayName: 'Validate dependencies'
+
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: ddev validate logos
+    displayName: 'Validate logos'
+
+- script: ddev validate manifest -i
+  displayName: 'Validate manifest files'
+
+- script: ddev validate metadata
+  displayName: 'Validate metric data'
+
+- script: ddev validate service-checks
+  displayName: 'Validate service check data'

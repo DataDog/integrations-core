@@ -12,6 +12,8 @@ PORT = '5050'
 
 INSTANCE = {'url': 'http://{}:{}'.format(HOST, PORT), 'tags': ['instance:mytag1']}
 
+BAD_INSTANCE = {'url': 'http://localhost:9999', 'tasks': ['hello']}
+
 CHECK_NAME = "mesos_master"
 
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')

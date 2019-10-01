@@ -1,5 +1,9 @@
 # CHANGELOG - ceph
 
+## 1.7.0 / 2019-08-24
+
+* [Added] Remove unused version command. See [#4249](https://github.com/DataDog/integrations-core/pull/4249).
+
 ## 1.6.0 / 2019-07-09
 
 * [Added] Add log setup and configuration. See [#3960](https://github.com/DataDog/integrations-core/pull/3960).

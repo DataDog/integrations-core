@@ -36,4 +36,4 @@ def generate_metrics():
 
 @pytest.fixture
 def check():
-    return Apache(CHECK_NAME, {}, {})
+    return lambda instance: Apache(CHECK_NAME, {}, [instance])

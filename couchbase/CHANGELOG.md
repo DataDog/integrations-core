@@ -1,5 +1,22 @@
 # CHANGELOG - couchbase
 
+## 1.11.0 / 2019-09-23
+
+* [Fixed] Fix typo for couchbase.by_node.cluster_membership service check. See [#4565](https://github.com/DataDog/integrations-core/pull/4565).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
+## 1.10.0 / 2019-09-16
+
+* [Added] Add log documentation in the example configuration file. See [#4537](https://github.com/DataDog/integrations-core/pull/4537).
+
+## 1.9.1 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
+## 1.9.0 / 2019-08-24
+
+* [Added] Add RequestsWrapper to couchbase. See [#4119](https://github.com/DataDog/integrations-core/pull/4119).
+
 ## 1.8.1 / 2019-07-12
 
 * [Fixed] Change `couchbase.by_bucket.avg_bg_wait_time` metric unit from second to microsecond. See [#4078](https://github.com/DataDog/integrations-core/pull/4078).

@@ -23,11 +23,6 @@ def warning(*args):
 
 @mock.patch("datadog_checks.snmp.config.hlapi")
 def test_parse_metrics(hlapi_mock):
-    # No metrics
-    metrics = []
-    with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
-
     # Unsupported metric
     metrics = [{"foo": "bar"}]
     with pytest.raises(Exception):
@@ -36,7 +31,7 @@ def test_parse_metrics(hlapi_mock):
     # Simple OID
     metrics = [{"OID": "1.2.3"}]
     table, raw, mibs = InstanceConfig.parse_metrics(metrics, False, warning)
-    assert table == []
+    assert table == {}
     assert mibs == set()
     assert len(raw) == 1
     hlapi_mock.ObjectIdentity.assert_called_once_with("1.2.3")
@@ -66,7 +61,8 @@ def test_parse_metrics(hlapi_mock):
     table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
     assert raw == []
     assert mibs == set()
-    assert len(table) == 2
+    assert len(table) == 1
+    assert len(list(table.values())[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.reset_mock()
@@ -88,7 +84,8 @@ def test_parse_metrics(hlapi_mock):
     table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
     assert raw == []
     assert mibs == set()
-    assert len(table) == 2
+    assert len(table) == 1
+    assert len(list(table.values())[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.reset_mock()
@@ -100,7 +97,8 @@ def test_parse_metrics(hlapi_mock):
     table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
     assert raw == []
     assert mibs == set()
-    assert len(table) == 3
+    assert len(table) == 1
+    assert len(list(table.values())[0]) == 3
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "baz")
@@ -124,3 +122,52 @@ def test_profile_error():
         init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         with pytest.raises(ConfigurationError):
             SnmpCheck('snmp', init_config, [instance])
+
+
+def test_no_address():
+    instance = common.generate_instance_config([])
+    instance.pop('ip_address')
+    with pytest.raises(ConfigurationError) as e:
+        SnmpCheck('snmp', {}, [instance])
+    assert str(e.value) == 'An IP address or a network address needs to be specified'
+
+
+def test_both_addresses():
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance['network_address'] = '192.168.0.0/24'
+    with pytest.raises(ConfigurationError) as e:
+        SnmpCheck('snmp', {}, [instance])
+    assert str(e.value) == 'Only one of IP address and network address must be specified'
+
+
+def test_removing_host():
+    """If a discovered host is failing 3 times in a row, we stop querying it."""
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    discovered_instance = instance.copy()
+    discovered_instance['ip_address'] = '1.1.1.1'
+    discovered_instance['retries'] = 0
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.0.0/24'
+    check = SnmpCheck('snmp', {}, [instance])
+    warnings = []
+    check.warning = warnings.append
+    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, [], '', {}, {})
+    msg = 'No SNMP response received before timeout for instance 1.1.1.1'
+
+    check.check(instance)
+    assert warnings == [msg]
+
+    check.check(instance)
+    assert warnings == [msg, msg]
+
+    check.check(instance)
+    assert warnings == [msg, msg, msg]
+
+    check.check(instance)
+    assert warnings == [msg, msg, msg, msg]
+    # Instance has been removed
+    assert check._config.discovered_instances == {}
+
+    check.check(instance)
+    # No new warnings produced
+    assert warnings == [msg, msg, msg, msg]

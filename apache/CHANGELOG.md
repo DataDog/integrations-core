@@ -1,5 +1,13 @@
 # CHANGELOG - apache
 
+## 1.7.1 / 2019-08-30
+
+* [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
+
+## 1.7.0 / 2019-08-24
+
+* [Added] Add support for proxy options. See [#3362](https://github.com/DataDog/integrations-core/pull/3362).
+
 ## 1.6.0 / 2019-05-02
 
 * [Added] Add option to Suppress `InsecureRequestWarning` when disable_ssl_validation is set. See [#2475](https://github.com/DataDog/integrations-core/pull/2475).

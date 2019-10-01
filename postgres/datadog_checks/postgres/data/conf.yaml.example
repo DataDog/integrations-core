@@ -63,7 +63,7 @@ instances:
     ## @param relations - list of objects (or strings) - optional
     ## The list of relations/tables must be specified here to track per-relation (table) metrics.
     ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
-    ## from all matching relations.
+    ## from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
     ## Each relation generates many metrics (10 + 10 per index)
     ## By default all schemas are included. To track relations from specific schemas only,
     ## you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
@@ -111,6 +111,11 @@ instances:
     ## Tag metrics and checks with `replication_role:<master|standby>`.
     #
     # tag_replication_role: false
+
+    ## @param table_count_limit - integer - optional - default: 200
+    ## The maximum number of tables to collect metrics from
+    #
+    # table_count_limit: 200
 
     ## @param custom_queries - object - optional
     ## Define custom queries to collect custom metrics from your PostgreSQL

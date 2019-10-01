@@ -8,6 +8,50 @@ from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'bearer_tokens')
 
 
+class TestSignature:
+    def test_default_legacy_basic(self):
+        check = OpenMetricsBaseCheck('openmetrics_check', {}, {})
+
+        assert check.default_instances == {}
+        assert check.default_namespace is None
+
+    def test_default_instances(self):
+        instance = {'prometheus_url': 'endpoint'}
+        check = OpenMetricsBaseCheck('openmetrics_check', {}, [instance], default_namespace='openmetrics')
+
+        assert check.default_instances == {}
+        assert check.default_namespace == 'openmetrics'
+        assert 'endpoint' in check.config_map
+
+    def test_default_instances_legacy(self):
+        instance = {'prometheus_url': 'endpoint'}
+        check = OpenMetricsBaseCheck('openmetrics_check', {}, {}, [instance], default_namespace='openmetrics')
+
+        assert check.default_instances == {}
+        assert check.default_namespace == 'openmetrics'
+        assert 'endpoint' in check.config_map
+
+    def test_default_instances_legacy_kwarg(self):
+        instance1 = {'prometheus_url': 'endpoint1'}
+        instance2 = {'prometheus_url': 'endpoint2'}
+        check = OpenMetricsBaseCheck(
+            'openmetrics_check', {}, {}, instances=[instance1, instance2], default_namespace='openmetrics'
+        )
+
+        assert check.default_instances == {}
+        assert check.default_namespace == 'openmetrics'
+        assert 'endpoint1' in check.config_map
+        assert 'endpoint2' in check.config_map
+
+    def test_args_legacy(self):
+        instance = {'prometheus_url': 'endpoint'}
+        check = OpenMetricsBaseCheck('openmetrics_check', {}, {}, [instance], None, 'openmetrics')
+
+        assert check.default_instances == {}
+        assert check.default_namespace == 'openmetrics'
+        assert 'endpoint' in check.config_map
+
+
 def test_rate_override():
     endpoint = "none"
     instance = {

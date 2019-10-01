@@ -32,7 +32,7 @@ instances:
     build_configuration: MyWebsite_Deploy # the internal build ID of the build configuration you wish to track
  #  host_affected: msicalweb6 # defaults to hostname of the Agent's host
  #  is_deployment: true       # causes events to use the word 'deployment' in their messaging
- #  ssl_validation: false     # default is true
+ #  tls_verify: false     # default is true
  #  tags:                     # add custom tags to events
  #    - test
 ```

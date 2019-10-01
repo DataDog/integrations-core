@@ -100,19 +100,21 @@ class PostgreSql(AgentCheck):
     }
 
     LOCK_METRICS = {
-        'descriptors': [('mode', 'lock_mode'), ('datname', 'db'), ('relname', 'table')],
+        'descriptors': [('mode', 'lock_mode'), ('nspname', 'schema'), ('datname', 'db'), ('relname', 'table')],
         'metrics': {'lock_count': ('postgresql.locks', GAUGE)},
         'query': """
 SELECT mode,
+       pn.nspname,
        pd.datname,
        pc.relname,
        count(*) AS {metrics_columns}
   FROM pg_locks l
   JOIN pg_database pd ON (l.database = pd.oid)
   JOIN pg_class pc ON (l.relation = pc.oid)
+  LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
  WHERE l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg_%%'
- GROUP BY pd.datname, pc.relname, mode""",
+ GROUP BY pd.datname, pc.relname, pn.nspname, mode""",
         'relation': False,
     }
 
@@ -157,7 +159,7 @@ SELECT relname,
     }
 
     SIZE_METRICS = {
-        'descriptors': [('relname', 'table')],
+        'descriptors': [('nspname', 'schema'), ('relname', 'table')],
         'metrics': {
             'pg_table_size(C.oid) as table_size': ('postgresql.table_size', GAUGE),
             'pg_indexes_size(C.oid) as index_size': ('postgresql.index_size', GAUGE),
@@ -166,6 +168,7 @@ SELECT relname,
         'relation': True,
         'query': """
 SELECT
+  N.nspname,
   relname,
   {metrics_columns}
 FROM pg_class C
@@ -173,13 +176,14 @@ LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   nspname !~ '^pg_toast' AND
   relkind IN ('r') AND
-  relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
+  ( relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[]) )""",
     }
 
     COUNT_METRICS = {
         'descriptors': [('schemaname', 'schema')],
         'metrics': {'pg_stat_user_tables': ('postgresql.table.count', GAUGE)},
         'relation': False,
+        'use_global_db_tag': True,
         'query': fmt.format(
             """
 SELECT schemaname, count(*) FROM
@@ -189,8 +193,7 @@ SELECT schemaname, count(*) FROM
   ORDER BY schemaname, relname
   LIMIT {table_count_limit}
 ) AS subquery GROUP BY schemaname
-        """,
-            table_count_limit=TABLE_COUNT_LIMIT,
+        """
         ),
     }
 
@@ -567,6 +570,13 @@ GROUP BY datid, datname
             'relation': False,
         }
 
+    def _get_count_metrics(self, table_count_limit):
+        metrics = dict(self.COUNT_METRICS)
+        metrics['query'] = self.COUNT_METRICS['query'].format(
+            metrics_columns="{metrics_columns}", table_count_limit=table_count_limit
+        )
+        return metrics
+
     def _get_archiver_metrics(self, key, db):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
         defined in 9.4 (first version to have this table).
@@ -707,7 +717,7 @@ GROUP BY datid, datname
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-        except psycopg2.ProgrammingError as e:
+        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
             db.rollback()
             return None
@@ -766,7 +776,7 @@ GROUP BY datid, datname
             # Special-case the "db" tag, which overrides the one that is passed as instance_tag
             # The reason is that pg_stat_database returns all databases regardless of the
             # connection.
-            if not scope['relation']:
+            if not scope['relation'] and not scope.get('use_global_db_tag', False):
                 tags = [t for t in instance_tags if not t.startswith("db:")]
             else:
                 tags = [t for t in instance_tags]
@@ -794,6 +804,7 @@ GROUP BY datid, datname
         instance_tags,
         relations,
         custom_metrics,
+        table_count_limit,
         collect_function_metrics,
         collect_count_metrics,
         collect_activity_metrics,
@@ -815,7 +826,7 @@ GROUP BY datid, datname
         if collect_function_metrics:
             metric_scope.append(self.FUNCTION_METRICS)
         if collect_count_metrics:
-            metric_scope.append(self.COUNT_METRICS)
+            metric_scope.append(self._get_count_metrics(table_count_limit))
 
         # Do we need relation-specific metrics?
         relations_config = {}
@@ -864,8 +875,11 @@ GROUP BY datid, datname
     def get_connection(self, key, host, port, user, password, dbname, ssl, tags, use_cached=True):
         """Get and memoize connections to instances"""
         if key in self.dbs and use_cached:
-            return self.dbs[key]
-
+            conn = self.dbs[key]
+            if conn.status != psycopg2.extensions.STATUS_READY:
+                # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
+                conn.rollback()
+            return conn
         elif host != "" and user != "":
             try:
                 if host == 'localhost' and password == '':
@@ -933,7 +947,7 @@ GROUP BY datid, datname
                 try:
                     self.log.debug("Running query: {}".format(query))
                     cursor.execute(query)
-                except psycopg2.ProgrammingError as e:
+                except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
                     self.log.error("Error executing query for metric_prefix {}: {}".format(metric_prefix, str(e)))
                     db.rollback()
                     continue
@@ -1054,6 +1068,7 @@ GROUP BY datid, datname
         ssl = instance.get('ssl', False)
         if ssl not in SSL_MODES:
             ssl = 'require' if is_affirmative(ssl) else 'disable'
+        table_count_limit = instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         collect_function_metrics = is_affirmative(instance.get('collect_function_metrics', False))
         # Default value for `count_metrics` is True for backward compatibility
         collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
@@ -1107,6 +1122,7 @@ GROUP BY datid, datname
                 tags,
                 relations,
                 custom_metrics,
+                table_count_limit,
                 collect_function_metrics,
                 collect_count_metrics,
                 collect_activity_metrics,
@@ -1124,6 +1140,7 @@ GROUP BY datid, datname
                 tags,
                 relations,
                 custom_metrics,
+                table_count_limit,
                 collect_function_metrics,
                 collect_count_metrics,
                 collect_activity_metrics,
