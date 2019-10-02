@@ -11,6 +11,7 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
+from datadog_checks.base.utils.common import ensure_unicode
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
 
 # Skip the whole tests module on Windows
@@ -541,8 +542,8 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     check = mock_kubelet_check(monkeypatch, [{}])
     check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
-    # Test that we get no metrics
-    assert aggregator.metric_names == []
+    # Test that we get only the node related metrics (no calls to the tagger for these ones)
+    assert aggregator.metric_names == [ensure_unicode('kubernetes.cpu.capacity'), ensure_unicode('kubernetes.memory.capacity')]
 
 
 def test_pod_expiration(monkeypatch, aggregator, tagger):
