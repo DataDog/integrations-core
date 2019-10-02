@@ -308,7 +308,9 @@ class TwistlockCheck(AgentCheck):
 
     def _retrieve_json(self, path):
         url = self.config.url + path
-        response = self.http.get(url)
+        project = self.config.project
+        qparams = {'project': project} if project else None
+        response = self.http.get(url, params=qparams)
         try:
             j = response.json()
             # it's possible to get a null response from the server
