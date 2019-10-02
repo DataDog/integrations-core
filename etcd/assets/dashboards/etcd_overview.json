@@ -49,48 +49,6 @@
     },
     {
       "board_id": "ur6-853-452",
-      "title_align": "left",
-      "title_size": 16,
-      "title": true,
-      "type": "hostmap",
-      "generated_title": "Host Map",
-      "title_text": "Leader board",
-      "height": 27,
-      "tile_def": {
-        "style": {
-          "fillMax": null,
-          "palette": "green_to_orange",
-          "fillMin": null,
-          "paletteFlip": false
-        },
-        "group": null,
-        "notes": null,
-        "noMetricHosts": false,
-        "viz": "hostmap",
-        "scope": [
-          "$scope"
-        ],
-        "requests": [
-          {
-            "q": "max:etcd.server.is_leader{$scope} by {host}",
-            "type": "fill"
-          }
-        ],
-        "groupby": null,
-        "noGroupHosts": true
-      },
-      "width": 47,
-      "query": "avg:system.load.1{*} by {host}",
-      "y": 17,
-      "x": 0,
-      "legend_size": null,
-      "add_timeframe": true,
-      "scaleFactor": 1,
-      "legend": null,
-      "isShared": false
-    },
-    {
-      "board_id": "ur6-853-452",
       "tick": true,
       "font_size": "14",
       "title": false,
@@ -124,8 +82,8 @@
       "add_timeframe": true,
       "html": "GRPC cache",
       "type": "note",
-      "y": 24,
-      "x": 49,
+      "y": 17,
+      "x": 0,
       "height": 5,
       "tick_pos": "50%",
       "width": 47,
@@ -145,8 +103,8 @@
       "add_timeframe": true,
       "html": "Disk",
       "type": "note",
-      "y": 24,
-      "x": 98,
+      "y": 42,
+      "x": 0,
       "height": 5,
       "tick_pos": "50%",
       "width": 47,
@@ -193,8 +151,8 @@
         "live_span": "1h"
       },
       "error": null,
-      "y": 31,
-      "x": 98,
+      "y": 49,
+      "x": 0,
       "legend_size": "0",
       "add_timeframe": true,
       "scaleFactor": 1,
@@ -242,8 +200,8 @@
         "live_span": "1h"
       },
       "error": null,
-      "y": 31,
-      "x": 49,
+      "y": 25,
+      "x": 0,
       "legend_size": "0",
       "add_timeframe": true,
       "scaleFactor": 1,
@@ -337,6 +295,183 @@
       },
       "error": null,
       "y": 7,
+      "x": 98,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "scaleFactor": 1,
+      "legend": false,
+      "isShared": false
+    },
+    {
+      "board_id": "ur6-853-452",
+      "font_size": "14",
+      "title": false,
+      "refresh_every": 30000,
+      "scaleFactor": 1,
+      "tick_edge": "bottom",
+      "text_align": "left",
+      "auto_refresh": false,
+      "height": 6,
+      "bgcolor": "blue",
+      "add_timeframe": true,
+      "html": "Memstats",
+      "type": "note",
+      "y": 25,
+      "x": 49,
+      "tick": true,
+      "tick_pos": "50%",
+      "width": 96,
+      "isShared": false
+    },
+    {
+      "board_id": "ur6-853-452",
+      "title_align": "left",
+      "title_size": 16,
+      "title": true,
+      "type": "timeseries",
+      "generated_title": "Timeseries",
+      "title_text": "GC time",
+      "height": 13,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:etcd.go.memstats.last.gc.time.seconds{$scope}",
+            "aggregator": "avg",
+            "style": {
+              "width": "normal",
+              "palette": "dog_classic",
+              "type": "solid"
+            },
+            "type": "bars",
+            "conditional_formats": []
+          }
+        ],
+        "autoscale": true
+      },
+      "width": 47,
+      "time": {
+        "live_span": "1h"
+      },
+      "error": null,
+      "y": 49,
+      "x": 49,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "scaleFactor": 1,
+      "legend": false,
+      "isShared": false
+    },
+    {
+      "board_id": "ur6-853-452",
+      "title_align": "left",
+      "title_size": 16,
+      "title": true,
+      "type": "timeseries",
+      "generated_title": "Timeseries",
+      "title_text": "Allocated heap",
+      "height": 13,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:etcd.go.memstats.heap.alloc.bytes{$scope}",
+            "aggregator": "avg",
+            "style": {
+              "width": "normal",
+              "palette": "dog_classic",
+              "type": "solid"
+            },
+            "type": "line",
+            "conditional_formats": []
+          }
+        ],
+        "autoscale": true
+      },
+      "width": 47,
+      "time": {
+        "live_span": "1h"
+      },
+      "error": null,
+      "y": 33,
+      "x": 98,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "scaleFactor": 1,
+      "legend": false,
+      "isShared": false
+    },
+    {
+      "board_id": "ur6-853-452",
+      "title_align": "left",
+      "title_size": 16,
+      "title": true,
+      "type": "timeseries",
+      "generated_title": "Timeseries",
+      "title_text": "Allocated bytes",
+      "height": 13,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:etcd.go.memstats.alloc.bytes{$scope}",
+            "aggregator": "avg",
+            "style": {
+              "width": "normal",
+              "palette": "dog_classic",
+              "type": "solid"
+            },
+            "type": "line",
+            "conditional_formats": []
+          }
+        ],
+        "autoscale": true
+      },
+      "width": 47,
+      "time": {
+        "live_span": "1h"
+      },
+      "error": null,
+      "y": 33,
+      "x": 49,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "scaleFactor": 1,
+      "legend": false,
+      "isShared": false
+    },
+    {
+      "board_id": "ur6-853-452",
+      "title_align": "left",
+      "title_size": 16,
+      "title": true,
+      "type": "timeseries",
+      "generated_title": "Timeseries",
+      "title_text": "Profiling bucket hash table size",
+      "height": 13,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:etcd.go.memstats.buck.hash.sys.bytes{$scope}",
+            "aggregator": "avg",
+            "style": {
+              "width": "normal",
+              "palette": "dog_classic",
+              "type": "solid"
+            },
+            "type": "line",
+            "conditional_formats": []
+          }
+        ],
+        "autoscale": true
+      },
+      "width": 47,
+      "time": {
+        "live_span": "1h"
+      },
+      "error": null,
+      "y": 50,
       "x": 98,
       "legend_size": "0",
       "add_timeframe": true,
