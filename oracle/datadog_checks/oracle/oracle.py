@@ -160,7 +160,7 @@ class Oracle(AgentCheck):
 
             with closing(con.cursor()) as cursor:
                 cursor.execute(query)
-                for row in cursor.fetchall():
+                for row in cursor:
                     if len(columns) != len(row):
                         self.log.error(
                             'query result for metric_prefix {}: expected {} columns, got {}'.format(
