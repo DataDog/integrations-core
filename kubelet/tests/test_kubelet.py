@@ -10,8 +10,8 @@ import mock
 import pytest
 from six import iteritems
 
-from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.base.utils.common import ensure_unicode
+from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
 
 # Skip the whole tests module on Windows
@@ -125,6 +125,7 @@ COMMON_TAGS = {
     "container_id://326b384481ca95204018e3e837c61e522b64a3b86c3804142a22b2d1db9dbd7b": [
         'kube_container_name:datadog-agent'
     ],
+    "container_id://6d8c6a05731b52195998c438fdca271b967b171f6c894f11ba59aa2f4deff10c": ['pod_name:cassandra-0'],
 }
 
 METRICS_WITH_DEVICE_TAG = {
@@ -543,7 +544,11 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
     # Test that we get only the node related metrics (no calls to the tagger for these ones)
-    assert aggregator.metric_names == [ensure_unicode('kubernetes.cpu.capacity'), ensure_unicode('kubernetes.memory.capacity')]
+    metric1 = ensure_unicode('kubernetes.memory.capacity')
+    metric2 = ensure_unicode('kubernetes.cpu.capacity')
+    assert (
+        metric1 in aggregator.metric_names and metric2 in aggregator.metric_names and len(aggregator.metric_names) == 2
+    )
 
 
 def test_pod_expiration(monkeypatch, aggregator, tagger):
@@ -698,11 +703,11 @@ def test_report_container_requests_limits(monkeypatch, tagger):
     check._report_container_spec_metrics(pod_list, tags)
 
     calls = [
-        mock.call('kubernetes.cpu.requests', 0.5, tags),
-        mock.call('kubernetes.memory.requests', 1073741824.0, tags),
-        mock.call('kubernetes.ephemeral-storage.requests', 0.5, tags),
-        mock.call('kubernetes.cpu.limits', 0.5, tags),
-        mock.call('kubernetes.memory.limits', 1073741824.0, tags),
-        mock.call('kubernetes.ephemeral-storage.limits', 2147483648.0, tags),
+        mock.call('kubernetes.cpu.requests', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.memory.requests', 1073741824.0, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.ephemeral-storage.requests', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.cpu.limits', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.memory.limits', 1073741824.0, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.ephemeral-storage.limits', 2147483648.0, ['pod_name:cassandra-0'] + tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
