@@ -32,7 +32,7 @@ class IbmWasCheck(AgentCheck):
         validation.validate_config(instance)
         collect_stats = self.setup_configured_stats(instance)
         url = instance.get('servlet_url')
-        self.custom_queries_units_gauge = instance.get('custom_queries_units_gauge', [])
+        self.custom_queries_units_gauge = set(instance.get('custom_queries_units_gauge', []))
 
         nested_tags, metric_categories = self.append_custom_queries(instance, collect_stats)
         self.custom_stats = list(nested_tags)
