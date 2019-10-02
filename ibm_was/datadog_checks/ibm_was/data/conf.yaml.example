@@ -124,7 +124,7 @@ instances:
     #       - "threadKey"
 
     ## @param custom_queries_units_gauge - list - optional - default: []
-    ## List to unit names used to map CountStatistic to gauge in custom queries.
+    ## List of unit names used to map CountStatistic to gauge in custom queries.
     ## By default CountStatistic stats are submitted as monotonic count, but some of them actually contain
     ## data which are gauge, as they have data with a unit. To get that behavior, the unit can be added here
     ## and the check will translate the metric type.
