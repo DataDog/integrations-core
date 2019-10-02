@@ -416,7 +416,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = tagger.tag('%s' % replace_container_rt_prefix(cid), tagger.HIGH) or []
+                tags = tagger.tag('%s' % replace_container_rt_prefix(cid), tagger.HIGH) or None
                 if not tags:
                     continue
                 tags += instance_tags
@@ -457,7 +457,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = tagger.tag('%s' % replace_container_rt_prefix(cid), tagger.ORCHESTRATOR) or []
+                tags = tagger.tag('%s' % replace_container_rt_prefix(cid), tagger.ORCHESTRATOR) or None
                 if not tags:
                     continue
                 tags += instance_tags

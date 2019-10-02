@@ -532,6 +532,23 @@ def test_report_container_state_metrics(monkeypatch, tagger):
     if any(map(lambda e: not any(x for x in e if x.startswith('reason:')), container_state_gauges)):
         raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
 
+def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
+    # Reset tagger with not tags
+    tagger.reset()
+    tagger.set_tags({})
+
+    check = mock_kubelet_check(monkeypatch, [{}])
+    monkeypatch.setattr(check, 'gauge', mock.Mock())
+    check.check({})
+
+    # Test that we get no metrics
+    for metric in EXPECTED_METRICS_COMMON:
+        aggregator.assert_metric(metric, value=None, count=0)
+    for metric in EXPECTED_METRICS_PROMETHEUS:
+        aggregator.assert_metric(metric, value=None, count=0)
+
+    assert aggregator.metrics_asserted_pct == 0.0
+
 
 def test_pod_expiration(monkeypatch, aggregator, tagger):
     check = KubeletCheck('kubelet', None, {}, [{}])
