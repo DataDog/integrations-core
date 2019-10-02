@@ -147,9 +147,7 @@
         "autoscale": true
       },
       "width": 47,
-      "time": {
-        "live_span": "1h"
-      },
+      "time": {},
       "error": null,
       "y": 49,
       "x": 0,
@@ -196,9 +194,7 @@
         "autoscale": true
       },
       "width": 47,
-      "time": {
-        "live_span": "1h"
-      },
+      "time": {},
       "error": null,
       "y": 25,
       "x": 0,
@@ -290,9 +286,7 @@
         "autoscale": true
       },
       "width": 47,
-      "time": {
-        "live_span": "1h"
-      },
+      "time": {},
       "error": null,
       "y": 7,
       "x": 98,
@@ -350,9 +344,7 @@
         "autoscale": true
       },
       "width": 47,
-      "time": {
-        "live_span": "1h"
-      },
+      "time": {},
       "error": null,
       "y": 49,
       "x": 49,
@@ -389,9 +381,7 @@
         "autoscale": true
       },
       "width": 47,
-      "time": {
-        "live_span": "1h"
-      },
+      "time": {},
       "error": null,
       "y": 33,
       "x": 98,
@@ -428,9 +418,7 @@
         "autoscale": true
       },
       "width": 47,
-      "time": {
-        "live_span": "1h"
-      },
+      "time": {},
       "error": null,
       "y": 33,
       "x": 49,
@@ -467,9 +455,7 @@
         "autoscale": true
       },
       "width": 47,
-      "time": {
-        "live_span": "1h"
-      },
+      "time": {},
       "error": null,
       "y": 50,
       "x": 98,
