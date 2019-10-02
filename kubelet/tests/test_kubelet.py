@@ -539,7 +539,6 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     tagger.set_tags({})
 
     check = mock_kubelet_check(monkeypatch, [{}])
-    monkeypatch.setattr(check, 'gauge', mock.Mock())
     check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
     # Test that we get no metrics
