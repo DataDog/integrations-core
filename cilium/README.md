@@ -1,8 +1,8 @@
-# Agent Check: cilium
+# Agent Check: Cilium
 
 ## Overview
 
-This check monitors [cilium][1] through the Datadog Agent.
+This check monitors [Cilium][1] through the Datadog Agent.
 
 ## Setup
 
@@ -10,7 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The cilium check is included in the [Datadog Agent][2] package.
+The Cilium check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -27,15 +27,15 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-cilium does not include any metrics.
+Cilium does not include any metrics.
 
 ### Service Checks
 
-cilium does not include any service checks.
+Cilium does not include any service checks.
 
 ### Events
 
-cilium does not include any events.
+Cilium does not include any events.
 
 ## Troubleshooting
 

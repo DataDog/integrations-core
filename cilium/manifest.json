@@ -1,5 +1,5 @@
 {
-  "display_name": "cilium",
+  "display_name": "Cilium",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "cilium",
@@ -7,14 +7,14 @@
   "metric_to_check": "",
   "creates_events": false,
   "short_description": "",
-  "guid": "976d82f8-cea9-47c0-914a-a1e812d817b1",
+  "guid": "1d9db288-4678-4ede-9ba0-8b04a8ae31c2",
   "support": "core",
   "supported_os": [
     "linux",
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-cilium Integration",
+  "public_title": "Datadog-Cilium Integration",
   "categories": [
     ""
   ],

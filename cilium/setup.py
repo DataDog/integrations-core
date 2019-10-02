@@ -24,7 +24,7 @@ CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 setup(
     name='datadog-cilium',
     version=ABOUT['__version__'],
-    description='The cilium check',
+    description='The Cilium check',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent cilium check',
