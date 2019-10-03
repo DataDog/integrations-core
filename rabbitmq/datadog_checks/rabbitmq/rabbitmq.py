@@ -534,7 +534,7 @@ class RabbitMQ(AgentCheck):
             for path in keys[:-1]:
                 root = root.get(path, {})
 
-            value = root.get(keys[-1], None)
+            value = root.get(keys[-1], None) if isinstance(root, dict) else None
             if value is not None:
                 try:
                     self.gauge(
