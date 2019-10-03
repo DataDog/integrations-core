@@ -51,10 +51,10 @@ init_config:
   #
   # ssl_verify: true
 
-  ## @param use_agent_proxy - boolean - optional - default: false
+  ## @param use_agent_proxy - boolean - optional - default: true
   ## Whether the dd-agent proxy should also be used for Openstack API requests (if set).
   #
-  # use_agent_proxy: false
+  # use_agent_proxy: true
 
 instances:
 
