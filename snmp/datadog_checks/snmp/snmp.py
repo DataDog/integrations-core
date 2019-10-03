@@ -6,7 +6,6 @@ import threading
 import time
 from collections import defaultdict
 
-import datadog_agent
 import pysnmp.proto.rfc1902 as snmp_type
 import yaml
 from pyasn1.codec.ber import decoder
@@ -20,6 +19,14 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
 from .config import InstanceConfig
+
+try:
+    from datadog_agent import get_config
+except ImportError:
+
+    def get_config(value):
+        return '/tmp'
+
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -64,7 +71,7 @@ class SnmpCheck(AgentCheck):
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
         self.profiles = init_config.get('profiles', {})
         self.profiles_by_oid = {}
-        confd = datadog_agent.get_config('confd_path')
+        confd = get_config('confd_path')
         for profile, profile_data in self.profiles.items():
             filename = profile_data.get('definition_file')
             if filename:
