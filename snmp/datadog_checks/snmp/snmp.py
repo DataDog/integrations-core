@@ -176,7 +176,7 @@ class SnmpCheck(AgentCheck):
 
         for oid in bulk_oids:
             try:
-                self.log.debug('Running SNMP command getBulk on OID %s', oid)
+                self.log.debug('Running SNMP command getBulk on OID %r', oid)
                 binds_iterator = config.call_cmd(
                     hlapi.bulkCmd,
                     self._NON_REPEATERS,
@@ -288,7 +288,7 @@ class SnmpCheck(AgentCheck):
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
-        self.log.debug('Running SNMP command on OID %s', oid)
+        self.log.debug('Running SNMP command on OID %r', oid)
         error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
         self.raise_on_error_indication(error_indication, config.ip_address)
         self.log.debug('Returned vars: %s', var_binds)
