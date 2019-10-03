@@ -1,3 +1,15 @@
+# Profile for F5 BIG-IP devices
+#
+# You need the MIB compiled to get the data. For example, run:
+# $ /opt/datadog-agent/embedded/bin/python /opt/datadog-agent/embedded/bin/mibdump.py  --destination-directory=/opt/datadog-agent/embedded/lib/python2.7/site-packages/pysnmp_mibs F5-BIGIP-SYSTEM-MIB
+#
+# Then you can use it this way in your SNMP configuration:
+# init_config:
+#   profiles:
+#     f5-big-ip:
+#       definition_file: f5-big-ip.profile
+#       sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.43
+#
 # Memory stats
 - MIB: F5-BIGIP-SYSTEM-MIB
   symbol: sysStatMemoryTotal
