@@ -6,6 +6,7 @@ import threading
 import time
 from collections import defaultdict
 
+import datadog_agent
 import pysnmp.proto.rfc1902 as snmp_type
 import yaml
 from pyasn1.codec.ber import decoder
@@ -14,8 +15,6 @@ from pysnmp.error import PySnmpError
 from pysnmp.smi import builder
 from pysnmp.smi.exval import noSuchInstance, noSuchObject
 from six import iteritems
-
-import datadog_agent
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
