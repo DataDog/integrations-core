@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
 import threading
 import time
 from collections import defaultdict
@@ -13,6 +14,8 @@ from pysnmp.error import PySnmpError
 from pysnmp.smi import builder
 from pysnmp.smi.exval import noSuchInstance, noSuchObject
 from six import iteritems
+
+import datadog_agent
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
@@ -62,9 +65,12 @@ class SnmpCheck(AgentCheck):
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
         self.profiles = init_config.get('profiles', {})
         self.profiles_by_oid = {}
+        confd = datadog_agent.get_config('confd_path')
         for profile, profile_data in self.profiles.items():
             filename = profile_data.get('definition_file')
             if filename:
+                if not os.path.isabs(filename):
+                    filename = os.path.join(confd, 'snmp.d', filename)
                 try:
                     with open(filename) as f:
                         data = yaml.safe_load(f)
