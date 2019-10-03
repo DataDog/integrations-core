@@ -97,13 +97,14 @@ instances:
 
     ## @param security_protocol - string - optional
     ## Protocol used to communicate with brokers.
-    ## Valid values are: PLAINTEXT, SSL. Default: PLAINTEXT.
+    ## Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
+    ## Default: PLAINTEXT.
     #
     # security_protocol: PLAINTEXT
 
     ## @param sasl_mechanism - string - optional
     ## String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
-    ## Currently only PLAIN is supported.
+    ## Valid values are: PLAIN, GSSAPI, OAUTHBEARER.
     #
     # sasl_mechanism: PLAIN
 
