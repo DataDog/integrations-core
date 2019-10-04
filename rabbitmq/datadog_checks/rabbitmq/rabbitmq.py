@@ -534,7 +534,9 @@ class RabbitMQ(AgentCheck):
             for path in keys[:-1]:
                 root = root.get(path, {})
 
-            value = root.get(keys[-1], None) if isinstance(root, dict) else None  # In RabbitMQ 3.1.x queue_totals is a list instead of a dict
+            value = (
+                root.get(keys[-1], None) if isinstance(root, dict) else None
+            )  # In RabbitMQ 3.1.x queue_totals is a list instead of a dict
             if value is not None:
                 try:
                     self.gauge(
