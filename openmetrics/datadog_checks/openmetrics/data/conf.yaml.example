@@ -79,7 +79,7 @@ instances:
     ## @param send_distribution_buckets - boolean - optional - default: false
     ## Send histograms as datadog distribution metrics.
     ## This requires send_histograms_buckets to be true.
-    ##
+    ## Set `send_histograms_buckets` to `true` to send histograms as Datadog distribution metrics.
     ## Learn more about distribution metrics: https://docs.datadoghq.com/developers/metrics/distributions/
     #
     # send_distribution_buckets: false
