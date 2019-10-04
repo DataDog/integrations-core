@@ -1,1 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+system.inodes.total,gauge,,,,number of inodes the system has allocated,0,linux_prox_extras,nr_inodes
+system.inodes.used,gauge,,,,number of used inodes,0,linux_prox_extras,used_inodes
+system.linux.context_switches,monotonic count,,,count of the number of context switches,1,context_switches
+system.linux.processes_created,monotonic count,,,count of the number of created processes,1,created_processes
+system.linux.interrupts,monotonic count,,,count of the number of interrupts,1,interrupts
+system.entropy.available,gauge,,,system entropy,0,entropy
+system.processes.states,gauge
+system.processes.priorities,gauge
