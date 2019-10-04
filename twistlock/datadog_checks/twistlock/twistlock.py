@@ -76,7 +76,7 @@ class TwistlockCheck(AgentCheck):
         self.last_run = datetime.utcnow()
 
     def report_license_expiration(self):
-        service_check_name = self.NAMESPACE + ".license_ok"
+        service_check_name = "{}.license_ok".format(self.NAMESPACE)
         try:
             license = self._retrieve_json("/api/v1/settings/license")
         except Exception as e:
@@ -100,8 +100,8 @@ class TwistlockCheck(AgentCheck):
         )
 
     def report_registry_scan(self):
-        namespace = self.NAMESPACE + ".registry"
-        service_check_name = self.NAMESPACE + ".can_connect"
+        namespace = "{}.registry".format(self.NAMESPACE)
+        service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
             scan_result = self._retrieve_json("/api/v1/registry")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.instance_tags)
@@ -120,13 +120,15 @@ class TwistlockCheck(AgentCheck):
             image_tags = ["scanned_image:{}".format(image_name)] + self.instance_tags
 
             self._report_layer_count(image, namespace, image_tags)
-            self._report_service_check(image, namespace, tags=image_tags, message="Last scan: " + image.get("scanTime"))
+            self._report_service_check(
+                image, namespace, tags=image_tags, message="Last scan: {}".format(image.get("scanTime"))
+            )
             self._report_vuln_info(namespace, image, image_tags)
             self._report_compliance_information(namespace, image, image_tags)
 
     def report_images_scan(self):
-        namespace = self.NAMESPACE + ".images"
-        service_check_name = self.NAMESPACE + ".can_connect"
+        namespace = "{}.images".format(self.NAMESPACE)
+        service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
             scan_result = self._retrieve_json("/api/v1/images")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.instance_tags)
@@ -150,13 +152,15 @@ class TwistlockCheck(AgentCheck):
             image_tags = ["scanned_image:{}".format(image_name)] + self.instance_tags
 
             self._report_layer_count(image, namespace, image_tags)
-            self._report_service_check(image, namespace, tags=image_tags, message="Last scan: " + image.get("scanTime"))
+            self._report_service_check(
+                image, namespace, tags=image_tags, message="Last scan: {}".format(image.get("scanTime"))
+            )
             self._report_vuln_info(namespace, image, image_tags)
             self._report_compliance_information(namespace, image, image_tags)
 
     def report_hosts_scan(self):
-        namespace = self.NAMESPACE + ".hosts"
-        service_check_name = self.NAMESPACE + ".can_connect"
+        namespace = "{}.hosts".format(self.NAMESPACE)
+        service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
             scan_result = self._retrieve_json("/api/v1/hosts")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.instance_tags)
@@ -173,13 +177,15 @@ class TwistlockCheck(AgentCheck):
             hostname = host['hostname']
             host_tags = ["scanned_host:{}".format(hostname)] + self.instance_tags
 
-            self._report_service_check(host, namespace, tags=host_tags, message="Last scan: " + host.get("scanTime"))
+            self._report_service_check(
+                host, namespace, tags=host_tags, message="Last scan: {}".format(host.get("scanTime"))
+            )
             self._report_vuln_info(namespace, host, host_tags)
             self._report_compliance_information(namespace, host, host_tags)
 
     def report_container_compliance(self):
-        namespace = self.NAMESPACE + ".containers"
-        service_check_name = self.NAMESPACE + ".can_connect"
+        namespace = "{}.containers".format(self.NAMESPACE)
+        service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
             scan_result = self._retrieve_json("/api/v1/containers")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.instance_tags)
@@ -197,14 +203,14 @@ class TwistlockCheck(AgentCheck):
             container_info = container.get('info', {})
             name = container_info.get('name')
             if name:
-                container_tags += ["container_name:" + name]
+                container_tags += ["container_name:{}".format(name)]
             image_name = container_info.get('imageName')
             if image_name:
-                container_tags += ["image_name:" + image_name]
+                container_tags += ["image_name:{}".format(image_name)]
             container_tags += self.instance_tags
 
             self._report_service_check(
-                container, namespace, tags=container_tags, message="Last scan: " + container.get("scanTime")
+                container, namespace, tags=container_tags, message="Last scan: {}".format(container.get("scanTime"))
             )
             self._report_compliance_information(namespace, container, container_tags)
 
@@ -273,14 +279,14 @@ class TwistlockCheck(AgentCheck):
         cves = data.get('info', {}).get('cveVulnerabilities', []) or []
         for cve in cves:
             summary[cve['severity']] += 1
-            cve_tags = ['cve:' + cve['cve']] + SEVERITY_TAGS.get(cve['severity'], []) + tags
+            cve_tags = ['cve:{}'.format(cve['cve'])] + SEVERITY_TAGS.get(cve['severity'], []) + tags
             if 'packageName' in cve:
-                cve_tags += ["package:" + cve['packageName']]
-            self.gauge(namespace + '.cve.details', float(1), cve_tags)
+                cve_tags += ["package:{}".format(cve['packageName'])]
+            self.gauge('{}.cve.details'.format(namespace), float(1), cve_tags)
         # Send counts to avoid no-data on zeroes
         for severity, count in iteritems(summary):
             cve_tags = SEVERITY_TAGS.get(severity, []) + tags
-            self.gauge(namespace + '.cve.count', float(count), cve_tags)
+            self.gauge('{}.cve.count'.format(namespace), float(count), cve_tags)
 
     def _report_compliance_information(self, namespace, data, tags):
         compliance = defaultdict(int)
@@ -289,7 +295,7 @@ class TwistlockCheck(AgentCheck):
         for type in types:
             compliance[type] += vulns[type]
             compliance_tags = SEVERITY_TAGS.get(type, []) + tags
-            self.gauge(namespace + '.compliance.count', compliance[type], compliance_tags)
+            self.gauge('{}.compliance.count'.format(namespace), compliance[type], compliance_tags)
 
     def _report_layer_count(self, data, namespace, tags):
         # Layer count and size
@@ -298,8 +304,8 @@ class TwistlockCheck(AgentCheck):
         for layer in data.get('info', {}).get('history', []):
             layer_count += 1
             layer_sizes += layer.get('sizeBytes', 0)
-        self.gauge(namespace + '.size', float(layer_sizes), tags)
-        self.gauge(namespace + '.layer_count', float(layer_count), tags)
+        self.gauge('{}.size'.format(namespace), float(layer_sizes), tags)
+        self.gauge('{}.layer_count'.format(namespace), float(layer_count), tags)
 
     def _report_service_check(self, data, prefix, tags=None, message=""):
         # Last scan service check
@@ -309,7 +315,7 @@ class TwistlockCheck(AgentCheck):
             scan_status = AgentCheck.WARNING
         if scan_date < self.critical_date:
             scan_status = AgentCheck.CRITICAL
-        self.service_check(prefix + '.is_scanned', scan_status, tags=tags, message=message)
+        self.service_check('{}.is_scanned'.format(prefix), scan_status, tags=tags, message=message)
 
     def _retrieve_json(self, path):
         url = self.config.url + path
