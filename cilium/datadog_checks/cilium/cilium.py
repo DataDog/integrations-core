@@ -80,5 +80,9 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
     Collect Cilium metrics from Prometheus endpoint
     """
+
+    def __init__(self, name, init_config, agentConfig, instances=None):
+
+
     def check(self, instance):
         pass
