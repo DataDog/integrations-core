@@ -41,10 +41,11 @@ HERE = get_here()
 
 
 class MockResponse:
-    def __init__(self, j):
+    def __init__(self, j, **kwargs):
         self.text = j
         self._json = j
         self.status_code = 200
+        self.params = kwargs['params'] if 'params' in kwargs else None
 
     def json(self):
         return json.loads(self._json)
@@ -56,7 +57,7 @@ def mock_get(url, *args, **kwargs):
     f_name = os.path.join(HERE, 'fixtures', path)
     with open(f_name, 'r') as f:
         text_data = f.read()
-        return MockResponse(text_data)
+        return MockResponse(text_data, **kwargs)
 
 
 def test_check(aggregator):
@@ -72,3 +73,16 @@ def test_check(aggregator):
         aggregator.assert_metric_has_tag(metric, customtag)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_config_project():
+
+    project = 'foo'
+    qparams = {'project': project} if project else None
+
+    instance['project'] = project
+    check = TwistlockCheck('twistlock', {}, [instance])
+
+    with mock.patch('requests.get', side_effect=mock_get, autospec=True):
+        response = check.http.get('/containers', params=qparams)
+    assert "project" in response.params
