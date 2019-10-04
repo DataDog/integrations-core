@@ -15,4 +15,4 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return MoreUnixCheck(common.CHECK_NAME, {}, {})
+    return MoreUnixCheck(common.CHECK_NAME, {}, {}, [common.INSTANCE])
