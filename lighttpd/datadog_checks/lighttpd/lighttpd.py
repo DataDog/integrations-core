@@ -103,6 +103,8 @@ class Lighttpd(AgentCheck):
         server_version = self._get_server_version(headers_resp)
         response = r.content
 
+
+
         metric_count = 0
         # Loop through and extract the numerical values
         for line in response.split(b'\n'):
