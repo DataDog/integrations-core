@@ -61,19 +61,7 @@ DEFAULT_METRICS = {
 
     # Metrics unsure if needed
     'cilium_event_ts': 'event_timestamp',
-}
-
-OPERATOR_METRICS = {
-    'cilium_operator_process_cpu_seconds_total': 'operator.process.cpu.seconds',
-    'cilium_operator_process_max_fds': 'operator.process.max_fds',
-    'cilium_operator_process_open_fds': 'operator.process.open_fds',
-    'cilium_operator_process_resident_memory_bytes': 'operator.process.resident_memory.bytes',
-    'cilium_operator_process_start_time_seconds': 'operator.process.start_time.seconds',
-    'cilium_operator_process_virtual_memory_bytes': 'operator.process.virtual_memory.bytes',
-    'cilium_operator_process_virtual_memory_max_bytes': 'operator.process.virtual_memory_max.bytes',
-    # TODO: ENI metrics are not listed
-
-}
+}g
 
 
 class CiliumCheck(OpenMetricsBaseCheck):
@@ -82,6 +70,7 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
 
     def __init__(self, name, init_config, agentConfig, instances=None):
+        pass
 
 
     def check(self, instance):
