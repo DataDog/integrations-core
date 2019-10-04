@@ -25,7 +25,7 @@ try:
 except ImportError:
 
     def get_config(value):
-        return '/tmp'
+        return ''
 
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
