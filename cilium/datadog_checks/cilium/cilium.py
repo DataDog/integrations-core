@@ -71,6 +71,7 @@ OPERATOR_METRICS = {
     'cilium_operator_process_start_time_seconds': 'operator.process.start_time.seconds',
     'cilium_operator_process_virtual_memory_bytes': 'operator.process.virtual_memory.bytes',
     'cilium_operator_process_virtual_memory_max_bytes': 'operator.process.virtual_memory_max.bytes',
+    # TODO: ENI metrics are not listed
 
 }
 
