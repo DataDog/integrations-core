@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 1.12.2 / 2019-10-04
+
+* [Fixed] Don't display warning for default keys value. See [#4641](https://github.com/DataDog/integrations-core/pull/4641).
+
 ## 1.12.1 / 2019-08-24
 
 * [Fixed] Always publish a value for missing keys. See [#4386](https://github.com/DataDog/integrations-core/pull/4386).
