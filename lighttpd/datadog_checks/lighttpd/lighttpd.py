@@ -66,9 +66,10 @@ class Lighttpd(AgentCheck):
         self.assumed_url = {}
 
         if 'auth_type' in self.instance:
-            if self.instance['auth_type'] == 'digest':
+            if self.instance.get('auth_type', 'basic').lower() == 'digest':
                 auth = self.http.options['auth']
-                self.http.options['auth'] = requests.auth.HTTPDigestAuth(auth[0], auth[1])
+                if auth is not None:
+                    self.http.options['auth'] = requests.auth.HTTPDigestAuth(auth[0], auth[1])
 
     def check(self, instance):
         if 'lighttpd_status_url' not in instance:
@@ -79,7 +80,7 @@ class Lighttpd(AgentCheck):
         tags = instance.get('tags', [])
         auth_type = instance.get('auth_type', 'basic').lower()
 
-        if self.http.options['auth'] is None:
+        if auth_type not in ('basic', 'digest'):
             msg = "Unsupported value of 'auth_type' variable in Lighttpd config: {}".format(auth_type)
             raise Exception(msg)
 
