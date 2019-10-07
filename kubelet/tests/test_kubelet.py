@@ -10,7 +10,6 @@ import mock
 import pytest
 from six import iteritems
 
-from datadog_checks.base.utils.common import ensure_unicode
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
 
@@ -544,11 +543,6 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
     # Test that we get only the node related metrics (no calls to the tagger for these ones)
-    #metric1 = ensure_unicode('kubernetes.memory.capacity')
-    #metric2 = ensure_unicode('kubernetes.cpu.capacity')
-    #assert (
-    #    metric1 in aggregator.metric_names and metric2 in aggregator.metric_names and len(aggregator.metric_names) == 2
-    #)
     aggregator.assert_metric('kubernetes.memory.capacity')
     aggregator.assert_metric('kubernetes.cpu.capacity')
     aggregator.assert_all_metrics_covered()

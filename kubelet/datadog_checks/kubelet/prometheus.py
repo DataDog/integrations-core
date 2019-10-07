@@ -329,7 +329,7 @@ class CadvisorPrometheusScraperMixin(object):
         for pod_uid, sample in iteritems(samples):
             if '.network.' in metric_name and self._is_pod_host_networked(pod_uid):
                 continue
-            tags = tagger.tag('kubernetes_pod_uid://%s' % pod_uid, tagger.HIGH) 
+            tags = tagger.tag('kubernetes_pod_uid://%s' % pod_uid, tagger.HIGH)
             if not tags:
                 continue
             tags += scraper_config['custom_tags']
