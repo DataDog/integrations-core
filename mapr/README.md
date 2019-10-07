@@ -12,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The MapR check is included in the [Datadog Agent][2] package but requires additional setup operations.
 
-1. Add `/opt/mapr/lib/` to your `ld.so.conf` file. The agent uses the mapr-streams-python library which requires access to some shared libraries.
+1. Add `/opt/mapr/lib/` to your `ld.so.conf` file. The Agent uses the *mapr-streams-python* library which requires access to some shared libraries.
 2. Create a password for the `dd-agent` user, then add this user to every node of the cluster with the same `UID`/`GID` so it is recognized by MapR. See [Managing users and groups][10] for additional details.
 3. Install the agent on every host you want to monitor.
 4. Generate a [long-lived ticket][8] for the `dd-agent` user.
