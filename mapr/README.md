@@ -29,7 +29,7 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 #### Log collection
 
 MapR uses fluentD for logs. Use the [fluent datadog plugin][11] to collect MapR logs.
-The following command will download and install the plugin into the right directory.
+The following command downloads and installs the plugin into the right directory.
 
 `curl https://raw.githubusercontent.com/DataDog/fluent-plugin-datadog/master/lib/fluent/plugin/out_datadog.rb -o /opt/mapr/fluentd/fluentd-<VERSION>/lib/fluentd-<VERSION>-linux-x86_64/lib/app/lib/fluent/plugin/out_datadog.rb`
 
