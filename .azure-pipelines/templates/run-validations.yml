@@ -10,7 +10,7 @@ steps:
   displayName: 'Validate default configuration files'
 
 - script: ddev validate dashboards
-  displayName: "Validate dashboard definition files"
+  displayName: 'Validate dashboard definition files'
 
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate dep
