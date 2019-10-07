@@ -9,5 +9,6 @@ HERE = get_here()
 
 @pytest.fixture(scope="session")
 def socks5_proxy():
-    with docker_run(compose_file=os.path.join(HERE, "compose", "socks5-proxy.yaml")):
+    compose_file = os.path.join(HERE, "compose", "socks5-proxy.yaml")
+    with docker_run(compose_file=compose_file, log_patterns=['Start listening proxy service on port']):
         yield "proxy_user:proxy_password@localhost:1080"
