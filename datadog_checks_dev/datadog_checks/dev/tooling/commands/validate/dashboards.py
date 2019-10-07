@@ -55,7 +55,8 @@ def dashboards():
                 display_queue.append(
                     (
                         echo_failure,
-                        '    {} is using the new /dash payload format which isn\'t currently supported. Please use the format from the /screen or /time API endpoints instead.'.format(
+                        '    {} is using the new /dash payload format which isn\'t currently supported.'
+                        ' Please use the format from the /screen or /time API endpoints instead.'.format(
                             dashboard_file
                         ),
                     )
