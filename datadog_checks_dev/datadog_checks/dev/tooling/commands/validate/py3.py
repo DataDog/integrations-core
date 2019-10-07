@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 from operator import itemgetter
 
 import click
-from a7 import validate_py3
 
+from ....subprocess import run_command
 from ...utils import get_valid_checks, get_version_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
@@ -29,21 +30,24 @@ def py3(check):
         abort(u"{} does not exist.".format(path_to_module))
 
     echo_info(u"Validating python3 compatibility of {}...".format(check))
-    results = validate_py3(path_to_module)
+    cmd = ["pylint", "-f", "json", "--py3k", "-d", "W1618", "--persistent", "no", "--exit-zero", path_to_module]
+    results = json.loads(run_command(cmd, capture='stdout').stdout)
 
     if results:
         echo_failure(u"Incompatibilities were found for {}:".format(check))
         current_path = None
         for problem in sorted(results, key=itemgetter("path")):
-            # validate_py3 returns an array a dicts like
+            # pylint returns an array a dicts like
             # {
-            #     "message": "Line 23, Column 8: Calling a dict.iter*() method",
+            #     "line": 23,
+            #     "column": 8,
+            #     "message": "Calling a dict.iter*() method",
             #     "file": "/path/to/file.py",
             # }
             path = problem["path"]
             if current_path is None or path != current_path:
                 echo_info(u"File {}:".format(path))
-            echo_failure("  {}".format(problem["message"]))
+            echo_failure("  Line {}, column {}: {}".format(problem['line'], problem['column'], problem["message"]))
             current_path = path
         abort()
     else:
