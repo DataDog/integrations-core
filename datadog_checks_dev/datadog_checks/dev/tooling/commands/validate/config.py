@@ -1,14 +1,18 @@
 # (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+import os
+
 import click
 import yaml
 
+from datadog_checks.dev.tooling.config_validator.schema import generate_schema
 from datadog_checks.dev.tooling.config_validator.validator import validate_config
 from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
 
 from ....utils import basepath, read_file
-from ...utils import get_config_files, get_valid_checks
+from ...utils import get_config_files, get_root, get_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 FILE_INDENT = ' ' * 8
@@ -17,8 +21,9 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
+@click.option('--schema', is_flag=True, help='Generate schema file')
 @click.argument('check', required=False)
-def config(check):
+def config(check, schema):
     """Validate default configuration files."""
     if check:
         checks = [check]
@@ -79,6 +84,12 @@ def config(check):
             if file_display_queue:
                 check_display_queue.append(lambda x=file_name: echo_info('{}:'.format(x), indent=True))
                 check_display_queue.extend(file_display_queue)
+
+            if schema and os.path.basename(config_file) == 'conf.yaml.example':
+                config_schema = generate_schema(file_data)
+                schema_path = os.path.join(get_root(), check, 'datadog_checks', check, 'data', 'conf.schema')
+                with open(schema_path, 'w') as f:
+                    f.write(json.dumps(config_schema, indent=2))
 
         if check_display_queue:
             echo_success('{}:'.format(check))
