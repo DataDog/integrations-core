@@ -70,7 +70,7 @@ See [metadata.csv][13] for a list of default metrics provided by this integratio
 ### Service Checks
 
 - `mapr.can_connect`:
-Returns CRITICAL if the Agent fails to connect to the MapR monitoring streams, otherwise returns UP.
+Returns `CRITICAL` if the Agent fails to connect and subscribe to the stream topic, `OK` otherwise.
 
 ### Events
 
