@@ -74,6 +74,11 @@ def _get_similarity_score_for_metric(expected_metric, candidate_metric):
         score = _is_similar_text_score(expected_metric.hostname, candidate_metric.hostname)
         scores.append((score, 1))
 
+    if expected_metric.device:
+        # device is only present in metrics coming from the real agent in e2e tests
+        score = _is_similar_text_score(expected_metric.device, candidate_metric.device)
+        scores.append((score, 1))
+
     return _compute_score(scores)
 
 
