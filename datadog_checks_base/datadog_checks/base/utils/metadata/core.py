@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
+import re
 
 from six import iteritems
 
+from .constants import DEFAULT_BLACKLIST
 from .utils import is_primitive
 from .version import parse_version
 
@@ -93,6 +95,8 @@ class MetadataManager(object):
         User configuration can override defaults allowing complete, granular control of metadata submissions. In
         any section, one may set ``metadata_whitelist`` and/or ``metadata_blacklist`` which will override their
         keyword argument counterparts. In following our standard, blacklists take precedence over whitelists.
+
+        Blacklists are special in that each item is considered a regular expression.
         """
         section = options.get('section')
         if section is None:
@@ -102,13 +106,19 @@ class MetadataManager(object):
         # may be cases where a subclass (for example of OpenMetricsBaseCheck) would want to ignore
         # just a few fields, hence for convenience we have the ability to also pass a blacklist.
         whitelist = config.get('metadata_whitelist', options.get('whitelist', []))
-        blacklist = config.get('metadata_blacklist', options.get('blacklist', []))
-        allowed_fields = set(whitelist).difference(blacklist)
+        blacklist = config.get('metadata_blacklist', options.get('blacklist', DEFAULT_BLACKLIST))
+        blacklist = re.compile('|'.join(blacklist), re.IGNORECASE)
 
         transformed_data = {}
 
         data = []
-        for field in allowed_fields:
+        for field in whitelist:
+            if blacklist.search(field):
+                self.logger.debug(
+                    'Skipping metadata submission of blacklisted field `%s` in section `%s`', field, section
+                )
+                continue
+
             field_data = {}
 
             if field in config:

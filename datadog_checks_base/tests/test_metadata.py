@@ -355,11 +355,20 @@ class TestConfig:
             assert not data
 
     def test_blacklist(self):
-        check = AgentCheck('test', {}, [{'foo': 'bar'}])
+        check = AgentCheck('test', {}, [{'product_pw': 'foo'}])
         check.check_id = 'test:123'
 
         with mock.patch(SET_CHECK_METADATA_METHOD) as m:
-            check.set_metadata('config', check.instance, section='instance', whitelist=['foo'], blacklist=['foo'])
+            check.set_metadata('config', check.instance, section='instance', whitelist=['product_pw'], blacklist=['pw'])
+
+            assert m.call_count == 0
+
+    def test_blacklist_default(self):
+        check = AgentCheck('test', {}, [{'product_password': 'foo'}])
+        check.check_id = 'test:123'
+
+        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.set_metadata('config', check.instance, section='instance', whitelist=['product_password'])
 
             assert m.call_count == 0
 
