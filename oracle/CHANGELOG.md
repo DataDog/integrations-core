@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 1.10.1 / 2019-10-07
+
+* [Fixed] Use fetchall instead of iterating cursor. See [#4664](https://github.com/DataDog/integrations-core/pull/4664).
+
 ## 1.10.0 / 2019-08-24
 
 * [Added] Upgrade JPype1 to 0.7.0. See [#4211](https://github.com/DataDog/integrations-core/pull/4211).
