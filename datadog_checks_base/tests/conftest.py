@@ -12,6 +12,6 @@ HERE = get_here()
 def socks5_proxy():
     compose_file = os.path.join(HERE, "compose", "socks5-proxy.yaml")
     with docker_run(
-        compose_file=compose_file, conditions=[CheckDockerLogs(compose_file, 'Start listening proxy service on port')]
+        compose_file=compose_file, log_patterns=['Start listening proxy service on port']
     ):
         yield "proxy_user:proxy_password@localhost:1080"
