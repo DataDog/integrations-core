@@ -362,7 +362,7 @@ class TestVault:
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
             c.check(instance)
-        aggregator.assert_metric('vault.is_leader', 0)
+        aggregator.assert_metric('vault.is_leader', 1)
         aggregator.assert_all_metrics_covered()
 
     def test_ha_is_perf_standby(self, aggregator):
@@ -396,5 +396,5 @@ class TestVault:
 
         with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
             c.check(instance)
-        aggregator.assert_metric('vault.is_leader', 0)
+        aggregator.assert_metric('vault.is_leader', 1)
         aggregator.assert_all_metrics_covered()
