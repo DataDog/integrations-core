@@ -93,7 +93,7 @@ def test__get_custom_metrics_misconfigured(check):
     gauge = mock.MagicMock()
     con = mock.MagicMock()
     cursor = mock.MagicMock()
-    cursor.__iter__.side_effect = lambda: iter([["foo", "bar"], ["foo", "bar"]])
+    cursor.fetchall.side_effect = lambda: iter([["foo", "bar"], ["foo", "bar"]])
     con.cursor.return_value = cursor
     check.log = log
     check.gauge = gauge
@@ -166,7 +166,7 @@ def test__get_custom_metrics(aggregator, check):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
     data = [[["tag_value1", "1"]], [[1, 2, "tag_value2"]]]
-    cursor.__iter__.side_effect = lambda: iter(data.pop(0))
+    cursor.fetchall.side_effect = lambda: iter(data.pop(0))
     con.cursor.return_value = cursor
 
     custom_queries = [
@@ -212,7 +212,7 @@ def test__get_custom_metrics_multiple_results(aggregator, check):
     con = mock.MagicMock()
     cursor = mock.MagicMock()
     data = [["tag_value1", "1"], ["tag_value2", "2"]]
-    cursor.__iter__.side_effect = lambda: iter(data)
+    cursor.fetchall.side_effect = lambda: iter(data)
     con.cursor.return_value = cursor
 
     custom_queries = [
