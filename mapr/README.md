@@ -39,7 +39,7 @@ Then update the `/opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/fluentd.conf` w
 <match *>
   @type copy
   <store> # This section is here by default and sends the logs to ElasticCache for Kibana.
-    @include /opt/mapr/fluentd/fluentd-1.4.0/etc/fluentd/es_config.conf
+    @include /opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/es_config.conf
     include_tag_key true
     tag_key service_name
   </store>
