@@ -330,3 +330,71 @@ class TestVault:
             c.check(instance)
 
         aggregator.assert_metric('vault.is_leader', 0)
+
+    def test_ha_is_standby(self, aggregator):
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+
+        config = c.get_config(instance)
+
+        # Keep a reference for use during mock
+        requests_get = requests.get
+
+        def mock_requests_get(url, *args, **kwargs):
+            if url == config['api_url'] + '/sys/health':
+                status_code = 200 if kwargs.get('params', {}).get('standbyok') else 429
+                return MockResponse(
+                    {
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': False,
+                        'replication_dr_mode': 'disabled',
+                        'replication_performance_mode': 'disabled',
+                        'sealed': False,
+                        'server_time_utc': 1529357080,
+                        'standby': True,
+                        'performance_standby': False,
+                        'version': '0.10.2',
+                    },
+                    status_code,
+                )
+            return requests_get(url, *args, **kwargs)
+
+        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+            c.check(instance)
+        aggregator.assert_metric('vault.is_leader', 0)
+        aggregator.assert_all_metrics_covered()
+
+    def test_ha_is_perf_standby(self, aggregator):
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+
+        config = c.get_config(instance)
+
+        # Keep a reference for use during mock
+        requests_get = requests.get
+
+        def mock_requests_get(url, *args, **kwargs):
+            if url == config['api_url'] + '/sys/health':
+                status_code = 200 if kwargs.get('params', {}).get('perfstandbyok') else 473
+                return MockResponse(
+                    {
+                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                        'cluster_name': 'vault-cluster-f5f44063',
+                        'initialized': False,
+                        'replication_dr_mode': 'disabled',
+                        'replication_performance_mode': 'disabled',
+                        'sealed': False,
+                        'server_time_utc': 1529357080,
+                        'standby': False,
+                        'performance_standby': True,
+                        'version': '0.10.2',
+                    },
+                    status_code,
+                )
+            return requests_get(url, *args, **kwargs)
+
+        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+            c.check(instance)
+        aggregator.assert_metric('vault.is_leader', 0)
+        aggregator.assert_all_metrics_covered()
