@@ -65,11 +65,10 @@ class Lighttpd(AgentCheck):
         super(Lighttpd, self).__init__(name, init_config, instances)
         self.assumed_url = {}
 
-        if 'auth_type' in self.instance:
-            if self.instance.get('auth_type', 'basic').lower() == 'digest':
-                auth = self.http.options['auth']
-                if auth is not None:
-                    self.http.options['auth'] = requests.auth.HTTPDigestAuth(auth[0], auth[1])
+        if self.instance.get('auth_type', 'basic').lower() == 'digest':
+            auth = self.http.options['auth']
+            if auth is not None:
+                self.http.options['auth'] = requests.auth.HTTPDigestAuth(auth[0], auth[1])
 
     def check(self, instance):
         if 'lighttpd_status_url' not in instance:
