@@ -2,7 +2,7 @@
 
 ## 1.10.1 / 2019-10-07
 
-* [Fixed] Use fetchall instead of iterating cursor. See [#4664](https://github.com/DataDog/integrations-core/pull/4664).
+* [Fixed] Use fetchall instead of iterating cursor for custom queries. This fixes an issue with the JDBC driver. See [#4664](https://github.com/DataDog/integrations-core/pull/4664).
 
 ## 1.10.0 / 2019-08-24
 
