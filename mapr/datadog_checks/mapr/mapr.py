@@ -55,7 +55,7 @@ class MaprCheck(AgentCheck):
         if auth_ticket:
             os.environ['MAPR_TICKETFILE_LOCATION'] = auth_ticket
         elif not os.environ.get('MAPR_TICKETFILE_LOCATION'):
-            self.log.info("MAPR_TICKETFILE_LOCATION environment variable not set, this may cause authentication issues")
+            self.log.warn("MAPR_TICKETFILE_LOCATION environment variable not set, this may cause authentication issues")
 
     def check(self, _):
         if ck is None:
