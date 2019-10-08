@@ -18,9 +18,11 @@ Istio is included in the Datadog Agent. [Install the Datadog Agent][2] on your I
 
 ### Configuration
 
-#### Connect the Agent
+Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][3]) to connect to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options.
 
-Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [Agent's configuration directory][3]) to connect to Istio. See the [sample istio.d/conf.yaml][4] for all available configuration options:
+#### Metric Collection
+
+Add this configuration block to your `istio.d/conf.yaml` file to start gathering your Istio Metrics:
 
 ```
 init_config:
@@ -36,7 +38,7 @@ instances:
 
 Each of the endpoints is optional, but at least one must be configured. See the [Istio documentation][5] to learn more about the Prometheus adapter.
 
-#### Disable sidecar injection
+##### Disable sidecar injection
 
 If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.
 
@@ -58,6 +60,30 @@ This can also be done with the `kubectl patch` command.
 ```
 kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"annotations":{"sidecar.istio.io/inject":"false"}}}}}'
 ```
+
+#### Log collection
+
+Istio contains two types of logs. Envoy access logs that are collected with the [Envoy integration][12] and [Istio logs][11].
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
+
+    ```
+      (...)
+        env:
+          (...)
+          - name: DD_LOGS_ENABLED
+              value: "true"
+          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+              value: "true"
+      (...)
+    ```
+
+2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5] or mount the `/var/log/pods` directory if you are not using docker.
+
+3. [Restart the Agent][2].
+
 
 ### Validation
 
@@ -93,3 +119,5 @@ Additional helpful documentation, links, and articles:
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/monitor-istio-with-datadog
 [10]: https://docs.datadoghq.com/agent/kubernetes
+[11]: https://istio.io/docs/tasks/telemetry/logs/collecting-logs/
+[12]: https://docs.datadoghq.com/integrations/envoy/#log-collection
