@@ -55,7 +55,7 @@ Then update the `/opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/fluentd.conf` w
   </store>
 ```
 
-Refer to [fluent_datadog_plugin][11] documentation for more details about the option you can use.
+Refer to [fluent_datadog_plugin][11] documentation for more details about the options you can use.
 
 
 ### Validation
