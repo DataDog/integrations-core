@@ -370,7 +370,7 @@ class CadvisorPrometheusScraperMixin(object):
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
             pod = self._get_pod_by_metric_label(sample[self.SAMPLE_LABELS])
             if pod is not None and is_static_pending_pod(pod):
-                pod_tags = tagger.tag('kubernetes_pod_uid://%s' % pod["metadata"]["uid"], tagger.HIGH) or None
+                pod_tags = tagger.tag('kubernetes_pod_uid://%s' % pod["metadata"]["uid"], tagger.HIGH)
                 if not pod_tags:
                     continue
                 tags += pod_tags
@@ -405,7 +405,7 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH) or None
+            tags = tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH)
             if not tags:
                 continue
             tags += scraper_config['custom_tags']
