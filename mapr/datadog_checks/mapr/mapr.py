@@ -32,7 +32,7 @@ All the metrics are distributed over multiple topics, one for each host. This wa
 to the topic relevant to the current host and consume everything.
 
 Note: The MapR documentation https://mapr.com/docs/61/AdministratorGuide/spyglass-on-streams.html states that
-there is one topic per host per metric name. This is wrong starting with 6.1+, there is only one topic per host now.
+there is one topic per host per metric name. This is no longer true starting with 6.1+, there is only one topic per host now.
 To support older versions of MapR, the check should be updated to subscribe those multiple topics.
 """
 
