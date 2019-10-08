@@ -53,8 +53,8 @@ def tox_configure(config):
 
 def add_style_checker(config, sections, make_envconfig, reader):
     flake8_opts = ''
-    # flake8-logging-format is enabled by default
-    # to disable it, add this in your tox.ini:
+    # `flake8-logging-format` is enabled by default.
+    # To disable it, add this config to the integration tox.ini:
     #   [testenv]
     #   dd_check_style_log_format = false
     if is_affirmative(sections.get('testenv', {}).get(STYLE_LOG_FORMAT, 'true')):
