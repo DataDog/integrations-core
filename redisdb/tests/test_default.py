@@ -82,7 +82,9 @@ def test_metadata(master_instance, version_metadata):
         for name, value in version_metadata.items():
             m.assert_any_call('test:123', name, value)
 
-        assert m.call_count == len(version_metadata)
+        # We parse the version set in tox which is X.Y so we don't
+        # know `version.patch`, and therefore also `version.raw`.
+        assert m.call_count == len(version_metadata) + 2
 
 
 @pytest.mark.integration
