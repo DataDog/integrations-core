@@ -8,8 +8,6 @@ import os
 import tox
 import tox.config
 
-from datadog_checks.base import is_affirmative
-
 STYLE_CHECK_ENV_NAME = 'style'
 STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
@@ -57,7 +55,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
     # To disable it, add this config to the integration tox.ini:
     #   [testenv]
     #   dd_check_style_log_format = false
-    if is_affirmative(sections.get('testenv', {}).get(STYLE_LOG_FORMAT, 'true')):
+    if str(sections.get('testenv', {}).get(STYLE_LOG_FORMAT, 'true')).lower() == 'true':
         flake8_opts = '--enable-extensions=G'  # enable flake8-logging-format
 
     # testenv:style
