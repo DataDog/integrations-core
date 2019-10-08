@@ -470,4 +470,4 @@ class Redis(AgentCheck):
 
     def _collect_metadata(self, info):
         if info and 'redis_version' in info:
-            self.service_metadata('version', info['redis_version'])
+            self.set_metadata('version', info['redis_version'])

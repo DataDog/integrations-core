@@ -7,6 +7,7 @@ import time
 import pytest
 import redis
 
+from datadog_checks.base.utils.metadata.version import parse_semver
 from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from datadog_checks.redisdb import Redis
 
@@ -94,3 +95,12 @@ def master_instance():
 @pytest.fixture
 def check():
     return Redis('redisdb', {}, {}, None)
+
+
+@pytest.fixture(scope='session')
+def version_metadata():
+    master = redis.Redis(host=HOST, port=MASTER_PORT, db=14)
+    version = master.info()['redis_version']
+    metadata = {'version.scheme': 'semver', 'version.raw': version}
+    metadata.update(('version.{}'.format(name), value) for name, value in parse_semver(version, {}).items())
+    return metadata
