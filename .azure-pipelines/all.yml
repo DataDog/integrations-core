@@ -9,7 +9,7 @@ pr:
     - master
   paths:
     include:
-    - datadog_checks_base/datadog_checks/*
+    - datadog_checks_base/*
 
 variables:
   DDEV_COLOR: 1
