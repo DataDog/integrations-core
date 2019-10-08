@@ -8,9 +8,12 @@ import os
 import tox
 import tox.config
 
+from datadog_checks.base import is_affirmative
+
 STYLE_CHECK_ENV_NAME = 'style'
 STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
+STYLE_LOG_FORMAT = 'dd_check_style_log_format'
 E2E_READY_CONDITION = 'e2e ready if'
 
 
@@ -49,6 +52,14 @@ def tox_configure(config):
 
 
 def add_style_checker(config, sections, make_envconfig, reader):
+    flake8_opts = ''
+    # flake8-logging-format is enabled by default
+    # to disable it, add this in your tox.ini:
+    #   [testenv]
+    #   dd_check_style_log_format = false
+    if is_affirmative(sections.get('testenv', {}).get(STYLE_LOG_FORMAT, 'true')):
+        flake8_opts = '--enable-extensions=G'  # enable flake8-logging-format
+
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
     sections[section] = {
@@ -58,7 +69,11 @@ def add_style_checker(config, sections, make_envconfig, reader):
         'basepython': 'python3',
         'skip_install': 'true',
         'deps': 'flake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
-        'commands': 'flake8 --config=../.flake8 .\nblack --check --diff .\nisort --check-only --diff --recursive .',
+        'commands': '\n'.join([
+            'flake8 --config=../.flake8 {} .'.format(flake8_opts),
+            'black --check --diff .',
+            'isort --check-only --diff --recursive .'
+        ]),
     }
 
     # Always add the environment configurations
