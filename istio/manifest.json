@@ -1,6 +1,7 @@
 {
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "creates_events": false,
   "description": "The istio integration collects data from the istio service mesh and mixer.",
