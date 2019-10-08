@@ -26,7 +26,7 @@ METRICS_SUBMITTED_METRIC_NAME = "mapr.metrics.submitted"
 SERVICE_CHECK = "mapr.can_connect"
 
 """
-All mapr metrics go through a Stream topic (similar to a Kafka topic) and are consumed by OpenTSDB, a timeserie
+All mapr metrics go through a Stream topic (similar to a Kafka topic) and are consumed by OpenTSDB, a timeseries
 database.
 All the metrics are distributed over multiple topics, one for each host. This way, the check instance can subscribe
 to the topic relevant to the current host and consume everything.
