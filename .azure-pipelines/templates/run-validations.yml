@@ -9,10 +9,8 @@ steps:
 - script: ddev validate config
   displayName: 'Validate default configuration files'
 
-# Only test on core until ddev is released with this validation available
-- ${{ if eq(parameters.repo, 'core') }}:
-  - script: ddev validate dashboards
-    displayName: "Validate dashboard definition files"
+- script: ddev validate dashboards
+  displayName: 'Validate dashboard definition files'
 
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate dep
