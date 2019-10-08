@@ -229,7 +229,7 @@ class __AgentCheck(object):
     @property
     def metadata_manager(self):
         if self._metadata_manager is None:
-            if not self.check_id:
+            if not self.check_id and not using_stub_aggregator:
                 raise RuntimeError('Attribute `check_id` must be set')
 
             self._metadata_manager = MetadataManager(self.name, self.check_id, self.log, self.METADATA_TRANSFORMERS)
