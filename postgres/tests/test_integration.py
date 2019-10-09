@@ -7,11 +7,8 @@ import psycopg2
 import pytest
 
 from datadog_checks.postgres import PostgreSql
-from .utils import requires_over_10
-from .common import check_bgw_metrics, check_common_metrics
 
-from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
-
+from .common import DB_NAME, HOST, PORT, check_bgw_metrics, check_common_metrics
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -112,18 +109,3 @@ def test_activity_metrics(aggregator, check, pg_instance):
     expected_tags = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test']
     for name in ACTIVITY_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
-
-
-@requires_over_10
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_wrong_version(aggregator, check, pg_instance):
-    # Enforce to cache wrong version
-    db_key = ('localhost', 5432, 'datadog_test')
-    check.versions[db_key] = [9, 6, 0]
-
-    check.check(pg_instance)
-    assert db_key not in check.versions  # version invalidated
-
-    check.check(pg_instance)
-    assert check.versions[db_key][0] == int(POSTGRES_VERSION)
