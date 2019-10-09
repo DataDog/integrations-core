@@ -1,6 +1,7 @@
 # Profile for F5 BIG-IP devices
 #
-# You need the MIB compiled to get the data. For example, run:
+# You need the MIB compiled to get the data. The check will fetch it
+# automatically for you, but otherwise you can run the following command:
 # $ /opt/datadog-agent/embedded/bin/python /opt/datadog-agent/embedded/bin/mibdump.py  --destination-directory=/opt/datadog-agent/embedded/lib/python2.7/site-packages/pysnmp_mibs F5-BIGIP-SYSTEM-MIB
 #
 # Then you can use it this way in your SNMP configuration:

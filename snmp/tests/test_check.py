@@ -8,6 +8,7 @@ import socket
 import time
 
 import mock
+import pysnmp_mibs
 import pytest
 import yaml
 
@@ -549,7 +550,7 @@ def test_profile_sys_object_unknown(aggregator):
     aggregator.all_metrics_asserted()
 
 
-def test_profile_sys_object_no_metrics(aggregator):
+def test_profile_sys_object_no_metrics():
     """If an instance is created without metrics and there is no profile defined, an error is raised."""
     instance = common.generate_instance_config([])
     with pytest.raises(ConfigurationError):
@@ -582,3 +583,20 @@ def test_discovery(aggregator):
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=check_tags, count=1)
     aggregator.assert_all_metrics_covered()
+
+
+def test_fetch_mib():
+    instance = common.generate_instance_config(common.DUMMY_MIB_OID)
+    # Try a small MIB
+    instance['metrics'][0]['MIB'] = 'A3COM-AUDL-R1-MIB'
+    instance['enforce_mib_constraints'] = False
+    # Remove it
+    path = os.path.join(os.path.dirname(pysnmp_mibs.__file__), 'A3COM-AUDL-R1-MIB.py')
+    # Make sure it doesn't exist
+    if os.path.exists(path):
+        os.unlink(path)
+    pyc = '{}c'.format(path)
+    if os.path.exists(pyc):
+        os.unlink(pyc)
+    SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+    assert os.path.exists(path)
