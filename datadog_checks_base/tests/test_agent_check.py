@@ -384,7 +384,7 @@ class TestCheckInitializations:
             def __init__(self, *args, **kwargs):
                 super(TestCheck, self).__init__(*args, **kwargs)
                 self.state = 1
-                self.initialize = mock.MagicMock(side_effort=self._initialize)
+                self.initialize = mock.MagicMock(side_effect=self._initialize)
                 self.check_initializations.append(self.initialize)
 
             def _initialize(self):
