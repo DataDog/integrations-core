@@ -4,8 +4,8 @@
 import psycopg2
 import pytest
 from mock import MagicMock
-from datadog_checks.postgres import util
 
+from datadog_checks.postgres import util
 
 # Mark the entire module as tests of type `unit`
 pytestmark = pytest.mark.unit
