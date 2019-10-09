@@ -3,13 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import mock
 import pytest
 import requests
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.elastic import ESCheck
 
-from .common import HERE, PASSWORD, URL, USER
+from .common import HERE, PASSWORD, URL, USER, ELASTIC_VERSION
 
 CUSTOM_TAGS = ['foo:bar', 'baz']
 COMPOSE_FILES_MAP = {
@@ -54,6 +55,21 @@ def instance():
 @pytest.fixture(scope='session')
 def instance_normalize_hostname():
     return {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': CUSTOM_TAGS, 'node_name_as_host': True}
+
+
+@pytest.fixture(scope='session')
+def version_metadata():
+    parts = ELASTIC_VERSION.split('.')
+    major = parts[0]
+    minor = parts[1] if len(parts) > 1 else mock.ANY
+    patch = parts[2] if len(parts) > 2 else mock.ANY
+    return {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': mock.ANY,
+    }
 
 
 def _cluster_tags():
