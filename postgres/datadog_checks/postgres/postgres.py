@@ -66,7 +66,7 @@ class PostgreSql(AgentCheck):
 
     # keep track of host/port present in any configured instance
     _known_servers = set()
-    _known_servers_lock = threading.RLock()
+    _known_servers_lock = threading.Lock()
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
