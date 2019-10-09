@@ -7,11 +7,9 @@ import psycopg2
 import pytest
 
 from datadog_checks.postgres import PostgreSql
+
+from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
-from .common import check_bgw_metrics, check_common_metrics
-
-from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
-
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 
@@ -124,6 +122,19 @@ def test_wrong_version(aggregator, check, pg_instance):
 
     check.check(pg_instance)
     assert db_key not in check.versions  # version invalidated
+    assert db_key not in check.instance_metrics
+    assert db_key not in check.bgw_metrics
+    assert db_key not in check.archiver_metrics
+    assert check.db_bgw_metrics == []
+    assert check.db_archiver_metrics == []
+    assert db_key not in check.replication_metrics
+    assert db_key not in check.activity_metrics
 
     check.check(pg_instance)
     assert check.versions[db_key][0] == int(POSTGRES_VERSION)
+    assert db_key in check.instance_metrics
+    assert db_key in check.bgw_metrics
+    assert db_key in check.archiver_metrics
+    assert check.db_bgw_metrics != []
+    assert check.db_archiver_metrics != []
+    assert db_key in check.replication_metrics
