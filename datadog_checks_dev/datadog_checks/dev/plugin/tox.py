@@ -67,11 +67,13 @@ def add_style_checker(config, sections, make_envconfig, reader):
         'basepython': 'python3',
         'skip_install': 'true',
         'deps': 'flake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
-        'commands': '\n'.join([
-            'flake8 --config=../.flake8 {} .'.format(flake8_opts),
-            'black --check --diff .',
-            'isort --check-only --diff --recursive .'
-        ]),
+        'commands': '\n'.join(
+            [
+                'flake8 --config=../.flake8 {} .'.format(flake8_opts),
+                'black --check --diff .',
+                'isort --check-only --diff --recursive .',
+            ]
+        ),
     }
 
     # Always add the environment configurations
