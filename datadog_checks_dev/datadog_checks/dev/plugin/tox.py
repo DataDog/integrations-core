@@ -11,7 +11,6 @@ import tox.config
 STYLE_CHECK_ENV_NAME = 'style'
 STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
-STYLE_LOGGING_FORMAT = 'dd_check_style_logging_format'
 E2E_READY_CONDITION = 'e2e ready if'
 
 
