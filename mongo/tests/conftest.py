@@ -114,7 +114,7 @@ def version_metadata():
         'version.major': major,
         'version.minor': minor,
         'version.patch': mock.ANY,
-        'version.raw': mock.ANY
+        'version.raw': mock.ANY,
     }
 
 
