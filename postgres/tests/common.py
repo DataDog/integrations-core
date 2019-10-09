@@ -10,7 +10,7 @@ PORT = '5432'
 USER = 'datadog'
 PASSWORD = 'datadog'
 DB_NAME = 'datadog_test'
-POSTGRES_VERSION = os.environ['POSTGRES_VERSION']
+POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 
 COMMON_METRICS = [
     'postgresql.before_xid_wraparound',

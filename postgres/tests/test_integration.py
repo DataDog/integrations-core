@@ -1,14 +1,13 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
 
 import psycopg2
 import pytest
 
 from datadog_checks.postgres import PostgreSql
 
-from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
+from .common import DB_NAME, HOST, PORT, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
