@@ -340,22 +340,21 @@ class PostgreSql(AgentCheck):
         metrics_data = self.activity_metrics.get(key)
 
         if metrics_data is None:
-            query = self.ACTIVITY_QUERY_10 if self._is_10_or_above(key, db) else self.ACTIVITY_QUERY_LT_10
-            metrics_query = None
+            query = ACTIVITY_QUERY_10 if self._is_10_or_above(key, db) else ACTIVITY_QUERY_LT_10
             if self._is_9_6_or_above(key, db):
-                metrics_query = self.ACTIVITY_METRICS_9_6
+                metrics_query = ACTIVITY_METRICS_9_6
             elif self._is_9_2_or_above(key, db):
-                metrics_query = self.ACTIVITY_METRICS_9_2
+                metrics_query = ACTIVITY_METRICS_9_2
             elif self._is_8_3_or_above(key, db):
-                metrics_query = self.ACTIVITY_METRICS_8_3
+                metrics_query = ACTIVITY_METRICS_8_3
             else:
-                metrics_query = self.ACTIVITY_METRICS_LT_8_3
+                metrics_query = ACTIVITY_METRICS_LT_8_3
 
             for i, q in enumerate(metrics_query):
                 if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=user)
 
-            metrics = {k: v for k, v in zip(metrics_query, self.ACTIVITY_DD_METRICS)}
+            metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
             self.activity_metrics[key] = (metrics, query)
         else:
             metrics, query = metrics_data
@@ -527,7 +526,7 @@ class PostgreSql(AgentCheck):
         metric_scope = [CONNECTION_METRICS, LOCK_METRICS]
 
         if collect_function_metrics:
-            metric_scope.append(self.FUNCTION_METRICS)
+            metric_scope.append(FUNCTION_METRICS)
         if collect_count_metrics:
             metric_scope.append(self._get_count_metrics(table_count_limit))
 
