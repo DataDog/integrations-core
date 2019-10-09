@@ -10,7 +10,7 @@ parameters:
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
-  displayName: '${{ coalesce(parameters.display, parameters.check) }}'
+  displayName: '${{ coalesce(parameters.display, parameters.check) }} - Linux'
 
   pool:
     vmImage: 'ubuntu-16.04'
