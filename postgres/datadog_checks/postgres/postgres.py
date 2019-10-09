@@ -717,6 +717,13 @@ GROUP BY datid, datname
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
+        except psycopg2.errors.UndefinedFunction as e:
+            log_func(e)
+            log_func("It seems the PG version has been incorrectly identified as %s. A reattempt to identify the right version will happen on next agent run." % self.versions[key])
+            del self.versions[key]
+            self.replication_metrics = {}
+            db.rollback()
+            return None
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
             db.rollback()
@@ -861,6 +868,7 @@ GROUP BY datid, datname
                 self._query_scope(cursor, scope, key, db, instance_tags, scope in custom_metrics, relations_config)
 
             cursor.close()
+
         except (psycopg2.InterfaceError, socket.error) as e:
             self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
