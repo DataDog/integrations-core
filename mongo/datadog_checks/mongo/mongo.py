@@ -884,6 +884,7 @@ class MongoDb(AgentCheck):
             self.set_metadata('version', mongo_version)
         except Exception:
             self.log.exception("Error when collecting the version from the mongo server.")
+            mongo_version = '0.0'
 
         # Handle replica data, if any
         # See
@@ -1036,7 +1037,7 @@ class MongoDb(AgentCheck):
                 submit_method, metric_name_alias = self._resolve_metric(metric_name, metrics_to_collect)
                 submit_method(self, metric_name_alias, val, tags=metrics_tags)
 
-        if is_affirmative(instance.get('collections_indexes_stats')) and mongo_version:
+        if is_affirmative(instance.get('collections_indexes_stats')):
             if LooseVersion(mongo_version) >= LooseVersion("3.2"):
                 self._collect_indexes_stats(instance, db, tags)
             else:
