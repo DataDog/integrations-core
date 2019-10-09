@@ -50,14 +50,6 @@ def tox_configure(config):
 
 
 def add_style_checker(config, sections, make_envconfig, reader):
-    flake8_opts = ''
-    # `flake8-logging-format` is enabled by default.
-    # To disable it, add this config to the integration tox.ini:
-    #   [testenv]
-    #   dd_check_style_logging_format = false
-    if str(sections.get('testenv', {}).get(STYLE_LOGGING_FORMAT, 'true')).lower() == 'true':
-        flake8_opts = '--enable-extensions=G'  # enable flake8-logging-format
-
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
     sections[section] = {
@@ -69,9 +61,12 @@ def add_style_checker(config, sections, make_envconfig, reader):
         'deps': 'flake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
         'commands': '\n'.join(
             [
-                'flake8 --config=../.flake8 {} .'.format(flake8_opts),
+                'flake8 --config=../.flake8 .',
                 'black --check --diff .',
                 'isort --check-only --diff --recursive .',
+                'python -c "print(\'\\n[WARNING] Complying with following lint rules is recommended, '
+                'but not mandatory, yet.\')"',
+                '- flake8 --enable-extensions=G --select=G .',  # lint `flake8-logging-format`
             ]
         ),
     }
