@@ -108,9 +108,11 @@ class ESCheck(AgentCheck):
         """
         try:
             data = self._get_data(config.url, config, send_sc=False)
+            raw_version = data['version']['number']
+            self.set_metadata('version', raw_version)
             # pre-release versions of elasticearch are suffixed with -rcX etc..
             # peel that off so that the map below doesn't error out
-            raw_version = data['version']['number'].split('-')[0]
+            raw_version = raw_version.split('-')[0]
             version = [int(p) for p in raw_version.split('.')[0:3]]
         except AuthenticationError:
             raise
@@ -118,7 +120,6 @@ class ESCheck(AgentCheck):
             self.warning("Error while trying to get Elasticsearch version from %s %s" % (config.url, str(e)))
             version = [1, 0, 0]
 
-        self.set_metadata('version', raw_version)
         self.log.debug("Elasticsearch version is %s" % version)
         return version
 
