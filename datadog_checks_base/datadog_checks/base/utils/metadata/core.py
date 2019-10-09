@@ -105,8 +105,8 @@ class MetadataManager(object):
         # Although we define the default fields to send in code i.e. the default whitelist, there
         # may be cases where a subclass (for example of OpenMetricsBaseCheck) would want to ignore
         # just a few fields, hence for convenience we have the ability to also pass a blacklist.
-        whitelist = config.get('metadata_whitelist', options.get('whitelist', []))
-        blacklist = config.get('metadata_blacklist', options.get('blacklist', DEFAULT_BLACKLIST))
+        whitelist = config.get('metadata_whitelist', options.get('whitelist')) or ()
+        blacklist = config.get('metadata_blacklist', options.get('blacklist', DEFAULT_BLACKLIST)) or ()
         blacklist = re.compile('|'.join(blacklist), re.IGNORECASE)
 
         transformed_data = {}

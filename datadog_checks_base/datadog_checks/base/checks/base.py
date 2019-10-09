@@ -91,6 +91,10 @@ class __AgentCheck(object):
     # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
     METADATA_TRANSFORMERS = None
 
+    # Default fields to whitelist for metadata submission
+    METADATA_DEFAULT_CONFIG_INIT_CONFIG = None
+    METADATA_DEFAULT_CONFIG_INSTANCE = None
+
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
     METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
@@ -213,7 +217,7 @@ class __AgentCheck(object):
             self.metric_limiter = Limiter(self.name, 'metrics', metric_limit, self.warning)
 
         # Functions that will be called exactly once (if successful) before the first check run
-        self.check_initializations = deque()
+        self.check_initializations = deque([self.send_config_metadata])
 
     @staticmethod
     def load_config(yaml_str):
@@ -495,6 +499,12 @@ class __AgentCheck(object):
         :param options: keyword arguments to pass to any defined transformer
         """
         self.metadata_manager.submit(name, value, options)
+
+    def send_config_metadata(self):
+        self.set_metadata('config', self.instance, section='instance', whitelist=self.METADATA_DEFAULT_CONFIG_INSTANCE)
+        self.set_metadata(
+            'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
+        )
 
     def set_external_tags(self, external_tags):
         # Example of external_tags format
