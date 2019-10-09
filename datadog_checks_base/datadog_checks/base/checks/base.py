@@ -9,7 +9,7 @@ import logging
 import re
 import traceback
 import unicodedata
-from collections import defaultdict
+from collections import defaultdict, deque
 from os.path import basename
 
 import yaml
@@ -211,6 +211,9 @@ class __AgentCheck(object):
             metric_limit = self.DEFAULT_METRIC_LIMIT
         if metric_limit > 0:
             self.metric_limiter = Limiter(self.name, 'metrics', metric_limit, self.warning)
+
+        # Functions that will be called exactly once (if successful) before the first check run
+        self.check_initializations = deque()
 
     @staticmethod
     def load_config(yaml_str):
@@ -600,6 +603,14 @@ class __AgentCheck(object):
 
     def run(self):
         try:
+            while self.check_initializations:
+                initialization = self.check_initializations.popleft()
+                try:
+                    initialization()
+                except Exception:
+                    self.check_initializations.appendleft(initialization)
+                    raise
+
             instance = copy.deepcopy(self.instances[0])
 
             if 'set_breakpoint' in self.init_config:

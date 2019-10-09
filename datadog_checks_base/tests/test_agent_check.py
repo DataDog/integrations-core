@@ -376,3 +376,51 @@ class TestLimits:
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
         assert len(aggregator.metrics("metric")) == 10
+
+
+class TestCheckInitializations:
+    def test_success_only_once(self):
+        class TestCheck(AgentCheck):
+            def __init__(self, *args, **kwargs):
+                super(TestCheck, self).__init__(*args, **kwargs)
+                self.state = 1
+                self.initialize = mock.MagicMock(side_effect=self._initialize)
+                self.check_initializations.append(self.initialize)
+
+            def _initialize(self):
+                self.state += 1
+                if self.state % 2:
+                    raise Exception('is odd')
+
+            def check(self, _):
+                pass
+
+        check = TestCheck('test', {}, [{}])
+        check.run()
+        check.run()
+        check.run()
+
+        assert check.initialize.call_count == 1
+
+    def test_error_retry(self):
+        class TestCheck(AgentCheck):
+            def __init__(self, *args, **kwargs):
+                super(TestCheck, self).__init__(*args, **kwargs)
+                self.state = 0
+                self.initialize = mock.MagicMock(side_effect=self._initialize)
+                self.check_initializations.append(self.initialize)
+
+            def _initialize(self):
+                self.state += 1
+                if self.state % 2:
+                    raise Exception('is odd')
+
+            def check(self, _):
+                pass
+
+        check = TestCheck('test', {}, [{}])
+        check.run()
+        check.run()
+        check.run()
+
+        assert check.initialize.call_count == 2
