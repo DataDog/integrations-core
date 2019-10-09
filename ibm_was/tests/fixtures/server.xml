@@ -8871,6 +8871,12 @@
 					<TimeStatistic ID="1" lastSampleTime="1541641446468" max="0" min="0" name="ServiceTime" startTime="1541641445375" totalTime="0" unit="MILLISECOND"/>
 				</Stat>
 			</Stat>
+			<Stat name="xdProcessModule">
+				<DoubleStatistic ID="1" double="0.29668912581386736" lastSampleTime="1568667667254" name="overallCPUUtilization" startTime="1568393052570" unit="Process.unit.none"/>
+				<DoubleStatistic ID="2" double="0.33291678784837747" lastSampleTime="1568667667254" name="recentCPUUtilization" startTime="1568393052572" unit="Process.unit.none"/>
+				<CountStatistic ID="3" count="261552" lastSampleTime="1568667667254" name="residentMemory" startTime="1568393052573" unit="unit.kbyte"/>
+				<CountStatistic ID="4" count="9317244" lastSampleTime="1568667667254" name="totalMemory" startTime="1568393052574" unit="unit.kbyte"/>
+			</Stat>
 		</Server>
 	</Node>
 </PerformanceMonitor>
