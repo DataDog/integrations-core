@@ -11,7 +11,7 @@ import tox.config
 STYLE_CHECK_ENV_NAME = 'style'
 STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
-STYLE_LOG_FORMAT = 'dd_check_style_log_format'
+STYLE_LOGGING_FORMAT = 'dd_check_style_logging_format'
 E2E_READY_CONDITION = 'e2e ready if'
 
 
@@ -54,8 +54,8 @@ def add_style_checker(config, sections, make_envconfig, reader):
     # `flake8-logging-format` is enabled by default.
     # To disable it, add this config to the integration tox.ini:
     #   [testenv]
-    #   dd_check_style_log_format = false
-    if str(sections.get('testenv', {}).get(STYLE_LOG_FORMAT, 'true')).lower() == 'true':
+    #   dd_check_style_logging_format = false
+    if str(sections.get('testenv', {}).get(STYLE_LOGGING_FORMAT, 'true')).lower() == 'true':
         flake8_opts = '--enable-extensions=G'  # enable flake8-logging-format
 
     # testenv:style
