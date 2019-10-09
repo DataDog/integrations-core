@@ -88,6 +88,8 @@ init_config:
   ## One of definition_file or definition needs to be defined.
   ## definition_file points to a file with the same structure as
   ## global_metrics, whereas definition inlines it directly here.
+  ## When using a profile present on the profiles directory of the
+  ## configuration, you can directly pass the filename.
   ## sysObjectID can be set to match the devices that are going to
   ## automatically use this profile.
   #

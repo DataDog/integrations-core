@@ -76,7 +76,7 @@ class SnmpCheck(AgentCheck):
             filename = profile_data.get('definition_file')
             if filename:
                 if not os.path.isabs(filename):
-                    filename = os.path.join(confd, 'snmp.d', filename)
+                    filename = os.path.join(confd, 'snmp.d', 'profiles', filename)
                 try:
                     with open(filename) as f:
                         data = yaml.safe_load(f)

@@ -7,7 +7,7 @@
 # init_config:
 #   profiles:
 #     f5-big-ip:
-#       definition_file: profiles/f5-big-ip.yaml
+#       definition_file: f5-big-ip.yaml
 #       sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.43
 #
 # Memory stats
