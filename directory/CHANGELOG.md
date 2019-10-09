@@ -1,5 +1,9 @@
 # CHANGELOG - directory
 
+## 1.4.1 / 2019-10-09
+
+* [Fixed] Explain filetagname logic in the example config file. See [#4524](https://github.com/DataDog/integrations-core/pull/4524).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3499](https://github.com/DataDog/integrations-core/pull/3499).
