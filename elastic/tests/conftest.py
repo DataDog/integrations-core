@@ -70,14 +70,16 @@ def version_metadata():
     major = parts[0]
     minor = parts[1] if len(parts) > 1 else mock.ANY
     patch = parts[2] if len(parts) > 2 else mock.ANY
-    return exclude_undefined_keys({
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': mock.ANY,
-        'version.release': release
-    })
+    return exclude_undefined_keys(
+        {
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': mock.ANY,
+            'version.release': release,
+        }
+    )
 
 
 def _cluster_tags():
