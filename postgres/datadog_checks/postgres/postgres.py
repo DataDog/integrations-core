@@ -1,9 +1,8 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 import socket
-import string
 import threading
 from contextlib import closing
 
@@ -12,6 +11,36 @@ from six import iteritems
 from six.moves import zip_longest
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+
+from .util import (
+    ACTIVITY_DD_METRICS,
+    ACTIVITY_METRICS_8_3,
+    ACTIVITY_METRICS_9_2,
+    ACTIVITY_METRICS_9_6,
+    ACTIVITY_METRICS_LT_8_3,
+    ACTIVITY_QUERY_10,
+    ACTIVITY_QUERY_LT_10,
+    COMMON_ARCHIVER_METRICS,
+    COMMON_BGW_METRICS,
+    COMMON_METRICS,
+    CONNECTION_METRICS,
+    COUNT_METRICS,
+    DATABASE_SIZE_METRICS,
+    FUNCTION_METRICS,
+    IDX_METRICS,
+    LOCK_METRICS,
+    NEWER_91_BGW_METRICS,
+    NEWER_92_BGW_METRICS,
+    NEWER_92_METRICS,
+    REL_METRICS,
+    REPLICATION_METRICS,
+    REPLICATION_METRICS_9_1,
+    REPLICATION_METRICS_9_2,
+    REPLICATION_METRICS_10,
+    SIZE_METRICS,
+    STATIO_METRICS,
+    fmt,
+)
 
 MAX_CUSTOM_RESULTS = 100
 TABLE_COUNT_LIMIT = 200
@@ -26,340 +55,14 @@ class ShouldRestartException(Exception):
     pass
 
 
-class PartialFormatter(string.Formatter):
-    """Follows PEP3101, used to format only specified args in a string.
-    Ex:
-    > print("This is a {type} with {nb_params} parameters.".format(type='string'))
-    > "This is a string with {nb_params} parameters."
-    """
-
-    def get_value(self, key, args, kwargs):
-        if isinstance(key, str):
-            return kwargs.get(key, '{' + key + '}')
-        else:
-            return string.Formatter.get_value(self, key, args, kwargs)
-
-
-fmt = PartialFormatter()
-
-
 class PostgreSql(AgentCheck):
-    """Collects per-database, and optionally per-relation metrics, custom metrics
-    """
+    """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
     SOURCE_TYPE_NAME = 'postgresql'
     RATE = AgentCheck.rate
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = 'postgres.can_connect'
-
-    # turning columns into tags
-
-    COMMON_METRICS = {
-        'numbackends': ('postgresql.connections', GAUGE),
-        'xact_commit': ('postgresql.commits', RATE),
-        'xact_rollback': ('postgresql.rollbacks', RATE),
-        'blks_read': ('postgresql.disk_read', RATE),
-        'blks_hit': ('postgresql.buffer_hit', RATE),
-        'tup_returned': ('postgresql.rows_returned', RATE),
-        'tup_fetched': ('postgresql.rows_fetched', RATE),
-        'tup_inserted': ('postgresql.rows_inserted', RATE),
-        'tup_updated': ('postgresql.rows_updated', RATE),
-        'tup_deleted': ('postgresql.rows_deleted', RATE),
-        '2^31 - age(datfrozenxid) as wraparound': ('postgresql.before_xid_wraparound', GAUGE),
-    }
-
-    DATABASE_SIZE_METRICS = {'pg_database_size(psd.datname) as pg_database_size': ('postgresql.database_size', GAUGE)}
-
-    NEWER_92_METRICS = {
-        'deadlocks': ('postgresql.deadlocks', RATE),
-        'temp_bytes': ('postgresql.temp_bytes', RATE),
-        'temp_files': ('postgresql.temp_files', RATE),
-    }
-
-    COMMON_BGW_METRICS = {
-        'checkpoints_timed': ('postgresql.bgwriter.checkpoints_timed', MONOTONIC),
-        'checkpoints_req': ('postgresql.bgwriter.checkpoints_requested', MONOTONIC),
-        'buffers_checkpoint': ('postgresql.bgwriter.buffers_checkpoint', MONOTONIC),
-        'buffers_clean': ('postgresql.bgwriter.buffers_clean', MONOTONIC),
-        'maxwritten_clean': ('postgresql.bgwriter.maxwritten_clean', MONOTONIC),
-        'buffers_backend': ('postgresql.bgwriter.buffers_backend', MONOTONIC),
-        'buffers_alloc': ('postgresql.bgwriter.buffers_alloc', MONOTONIC),
-    }
-
-    NEWER_91_BGW_METRICS = {'buffers_backend_fsync': ('postgresql.bgwriter.buffers_backend_fsync', MONOTONIC)}
-
-    NEWER_92_BGW_METRICS = {
-        'checkpoint_write_time': ('postgresql.bgwriter.write_time', MONOTONIC),
-        'checkpoint_sync_time': ('postgresql.bgwriter.sync_time', MONOTONIC),
-    }
-
-    COMMON_ARCHIVER_METRICS = {
-        'archived_count': ('postgresql.archiver.archived_count', MONOTONIC),
-        'failed_count': ('postgresql.archiver.failed_count', MONOTONIC),
-    }
-
-    LOCK_METRICS = {
-        'descriptors': [('mode', 'lock_mode'), ('nspname', 'schema'), ('datname', 'db'), ('relname', 'table')],
-        'metrics': {'lock_count': ('postgresql.locks', GAUGE)},
-        'query': """
-SELECT mode,
-       pn.nspname,
-       pd.datname,
-       pc.relname,
-       count(*) AS {metrics_columns}
-  FROM pg_locks l
-  JOIN pg_database pd ON (l.database = pd.oid)
-  JOIN pg_class pc ON (l.relation = pc.oid)
-  LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
- WHERE l.mode IS NOT NULL
-   AND pc.relname NOT LIKE 'pg_%%'
- GROUP BY pd.datname, pc.relname, pn.nspname, mode""",
-        'relation': False,
-    }
-
-    REL_METRICS = {
-        'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
-        # This field contains old metrics that need to be deprecated. For now we keep sending them.
-        'deprecated_metrics': {'idx_tup_fetch': ('postgresql.index_rows_fetched', RATE)},
-        'metrics': {
-            'seq_scan': ('postgresql.seq_scans', RATE),
-            'seq_tup_read': ('postgresql.seq_rows_read', RATE),
-            'idx_scan': ('postgresql.index_scans', RATE),
-            'idx_tup_fetch': ('postgresql.index_rel_rows_fetched', RATE),
-            'n_tup_ins': ('postgresql.rows_inserted', RATE),
-            'n_tup_upd': ('postgresql.rows_updated', RATE),
-            'n_tup_del': ('postgresql.rows_deleted', RATE),
-            'n_tup_hot_upd': ('postgresql.rows_hot_updated', RATE),
-            'n_live_tup': ('postgresql.live_rows', GAUGE),
-            'n_dead_tup': ('postgresql.dead_rows', GAUGE),
-        },
-        'query': """
-SELECT relname,schemaname,{metrics_columns}
-  FROM pg_stat_user_tables
- WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
-        'relation': True,
-    }
-
-    IDX_METRICS = {
-        'descriptors': [('relname', 'table'), ('schemaname', 'schema'), ('indexrelname', 'index')],
-        'metrics': {
-            'idx_scan': ('postgresql.index_scans', RATE),
-            'idx_tup_read': ('postgresql.index_rows_read', RATE),
-            'idx_tup_fetch': ('postgresql.index_rows_fetched', RATE),
-        },
-        'query': """
-SELECT relname,
-       schemaname,
-       indexrelname,
-       {metrics_columns}
-  FROM pg_stat_user_indexes
- WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
-        'relation': True,
-    }
-
-    SIZE_METRICS = {
-        'descriptors': [('nspname', 'schema'), ('relname', 'table')],
-        'metrics': {
-            'pg_table_size(C.oid) as table_size': ('postgresql.table_size', GAUGE),
-            'pg_indexes_size(C.oid) as index_size': ('postgresql.index_size', GAUGE),
-            'pg_total_relation_size(C.oid) as total_size': ('postgresql.total_size', GAUGE),
-        },
-        'relation': True,
-        'query': """
-SELECT
-  N.nspname,
-  relname,
-  {metrics_columns}
-FROM pg_class C
-LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
-WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
-  nspname !~ '^pg_toast' AND
-  relkind IN ('r') AND
-  ( relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[]) )""",
-    }
-
-    COUNT_METRICS = {
-        'descriptors': [('schemaname', 'schema')],
-        'metrics': {'pg_stat_user_tables': ('postgresql.table.count', GAUGE)},
-        'relation': False,
-        'use_global_db_tag': True,
-        'query': fmt.format(
-            """
-SELECT schemaname, count(*) FROM
-(
-  SELECT schemaname
-  FROM {metrics_columns}
-  ORDER BY schemaname, relname
-  LIMIT {table_count_limit}
-) AS subquery GROUP BY schemaname
-        """
-        ),
-    }
-
-    q1 = (
-        'CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN 0 ELSE GREATEST '
-        '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
-    )
-    q2 = 'abs(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn()))'
-    REPLICATION_METRICS_10 = {
-        q1: ('postgresql.replication_delay', GAUGE),
-        q2: ('postgresql.replication_delay_bytes', GAUGE),
-    }
-
-    q = (
-        'CASE WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location() THEN 0 ELSE GREATEST '
-        '(0, EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())) END'
-    )
-    REPLICATION_METRICS_9_1 = {q: ('postgresql.replication_delay', GAUGE)}
-
-    q1 = (
-        'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) '
-        'AS replication_delay_bytes_dup'
-    )
-    q2 = (
-        'abs(pg_xlog_location_diff(pg_last_xlog_receive_location(), pg_last_xlog_replay_location())) '
-        'AS replication_delay_bytes'
-    )
-    REPLICATION_METRICS_9_2 = {
-        # postgres.replication_delay_bytes is deprecated and will be removed in a future version.
-        # Please use postgresql.replication_delay_bytes instead.
-        q1: ('postgres.replication_delay_bytes', GAUGE),
-        q2: ('postgresql.replication_delay_bytes', GAUGE),
-    }
-
-    REPLICATION_METRICS = {
-        'descriptors': [],
-        'metrics': {},
-        'relation': False,
-        'query': """
-SELECT {metrics_columns}
- WHERE (SELECT pg_is_in_recovery())""",
-    }
-
-    CONNECTION_METRICS = {
-        'descriptors': [],
-        'metrics': {
-            'MAX(setting) AS max_connections': ('postgresql.max_connections', GAUGE),
-            'SUM(numbackends)/MAX(setting) AS pct_connections': ('postgresql.percent_usage_connections', GAUGE),
-        },
-        'relation': False,
-        'query': """
-WITH max_con AS (SELECT setting::float FROM pg_settings WHERE name = 'max_connections')
-SELECT {metrics_columns}
-  FROM pg_stat_database, max_con
-""",
-    }
-
-    STATIO_METRICS = {
-        'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
-        'metrics': {
-            'heap_blks_read': ('postgresql.heap_blocks_read', RATE),
-            'heap_blks_hit': ('postgresql.heap_blocks_hit', RATE),
-            'idx_blks_read': ('postgresql.index_blocks_read', RATE),
-            'idx_blks_hit': ('postgresql.index_blocks_hit', RATE),
-            'toast_blks_read': ('postgresql.toast_blocks_read', RATE),
-            'toast_blks_hit': ('postgresql.toast_blocks_hit', RATE),
-            'tidx_blks_read': ('postgresql.toast_index_blocks_read', RATE),
-            'tidx_blks_hit': ('postgresql.toast_index_blocks_hit', RATE),
-        },
-        'query': """
-SELECT relname,
-       schemaname,
-       {metrics_columns}
-  FROM pg_statio_user_tables
- WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
-        'relation': True,
-    }
-
-    FUNCTION_METRICS = {
-        'descriptors': [('schemaname', 'schema'), ('funcname', 'function')],
-        'metrics': {
-            'calls': ('postgresql.function.calls', RATE),
-            'total_time': ('postgresql.function.total_time', RATE),
-            'self_time': ('postgresql.function.self_time', RATE),
-        },
-        'query': """
-WITH overloaded_funcs AS (
- SELECT funcname
-   FROM pg_stat_user_functions s
-  GROUP BY s.funcname
- HAVING COUNT(*) > 1
-)
-SELECT s.schemaname,
-       CASE WHEN o.funcname IS NULL OR p.proargnames IS NULL THEN p.proname
-            ELSE p.proname || '_' || array_to_string(p.proargnames, '_')
-        END funcname,
-        {metrics_columns}
-  FROM pg_proc p
-  JOIN pg_stat_user_functions s
-    ON p.oid = s.funcid
-  LEFT JOIN overloaded_funcs o
-    ON o.funcname = s.funcname;
-""",
-        'relation': False,
-    }
-
-    # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
-    ACTIVITY_METRICS_9_6 = [
-        "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
-        "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-        "THEN 1 ELSE null END )",
-        "COUNT(CASE WHEN wait_event is NOT NULL AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    ]
-
-    # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.2
-    ACTIVITY_METRICS_9_2 = [
-        "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
-        "SUM(CASE WHEN state = 'idle in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-        "THEN 1 ELSE null END )",
-        "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    ]
-
-    # The metrics we retrieve from pg_stat_activity when the postgres version >= 8.3
-    ACTIVITY_METRICS_8_3 = [
-        "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
-        "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-        "THEN 1 ELSE null END )",
-        "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    ]
-
-    # The metrics we retrieve from pg_stat_activity when the postgres version < 8.3
-    ACTIVITY_METRICS_LT_8_3 = [
-        "SUM(CASE WHEN query_start IS NOT NULL THEN 1 ELSE 0 END)",
-        "SUM(CASE WHEN current_query LIKE '<IDLE> in transaction' THEN 1 ELSE 0 END)",
-        "COUNT(CASE WHEN state = 'active' AND (query !~ '^autovacuum:' AND usename NOT IN ('postgres', '{dd__user}'))"
-        "THEN 1 ELSE null END )",
-        "COUNT(CASE WHEN waiting = 't' AND query !~ '^autovacuum:' THEN 1 ELSE null END )",
-    ]
-
-    # The metrics we collect from pg_stat_activity that we zip with one of the lists above
-    ACTIVITY_DD_METRICS = [
-        ('postgresql.transactions.open', GAUGE),
-        ('postgresql.transactions.idle_in_transaction', GAUGE),
-        ('postgresql.active_queries', GAUGE),
-        ('postgresql.waiting_queries', GAUGE),
-    ]
-
-    # The base query for postgres version >= 10
-    ACTIVITY_QUERY_10 = """
-SELECT datname,
-    {metrics_columns}
-FROM pg_stat_activity
-WHERE backend_type = 'client backend'
-GROUP BY datid, datname
-"""
-
-    # The base query for postgres version < 10
-    ACTIVITY_QUERY_LT_10 = """
-SELECT datname,
-    {metrics_columns}
-FROM pg_stat_activity
-GROUP BY datid, datname
-"""
 
     # keep track of host/port present in any configured instance
     _known_servers = set()
@@ -497,13 +200,13 @@ GROUP BY datid, datname
 
             # select the right set of metrics to collect depending on postgres version
             if self._is_9_2_or_above(key, db):
-                self.instance_metrics[key] = dict(self.COMMON_METRICS, **self.NEWER_92_METRICS)
+                self.instance_metrics[key] = dict(COMMON_METRICS, **NEWER_92_METRICS)
             else:
-                self.instance_metrics[key] = dict(self.COMMON_METRICS)
+                self.instance_metrics[key] = dict(COMMON_METRICS)
 
             # add size metrics if needed
             if database_size_metrics:
-                self.instance_metrics[key].update(self.DATABASE_SIZE_METRICS)
+                self.instance_metrics[key].update(DATABASE_SIZE_METRICS)
 
             metrics = self.instance_metrics.get(key)
 
@@ -532,7 +235,7 @@ GROUP BY datid, datname
     def _get_bgw_metrics(self, key, db):
         """Use either COMMON_BGW_METRICS or COMMON_BGW_METRICS + NEWER_92_BGW_METRICS
         depending on the postgres version.
-        Uses a dictionnary to save the result for each instance
+        Uses a dictionary to save the result for each instance
         """
         # Extended 9.2+ metrics if needed
         metrics = self.bgw_metrics.get(key)
@@ -552,11 +255,11 @@ GROUP BY datid, datname
 
             self.db_bgw_metrics.append(sub_key)
 
-            self.bgw_metrics[key] = dict(self.COMMON_BGW_METRICS)
+            self.bgw_metrics[key] = dict(COMMON_BGW_METRICS)
             if self._is_9_1_or_above(key, db):
-                self.bgw_metrics[key].update(self.NEWER_91_BGW_METRICS)
+                self.bgw_metrics[key].update(NEWER_91_BGW_METRICS)
             if self._is_9_2_or_above(key, db):
-                self.bgw_metrics[key].update(self.NEWER_92_BGW_METRICS)
+                self.bgw_metrics[key].update(NEWER_92_BGW_METRICS)
 
             metrics = self.bgw_metrics.get(key)
 
@@ -571,8 +274,8 @@ GROUP BY datid, datname
         }
 
     def _get_count_metrics(self, table_count_limit):
-        metrics = dict(self.COUNT_METRICS)
-        metrics['query'] = self.COUNT_METRICS['query'].format(
+        metrics = dict(COUNT_METRICS)
+        metrics['query'] = COUNT_METRICS['query'].format(
             metrics_columns="{metrics_columns}", table_count_limit=table_count_limit
         )
         return metrics
@@ -599,7 +302,7 @@ GROUP BY datid, datname
 
             self.db_archiver_metrics.append(sub_key)
 
-            self.archiver_metrics[key] = dict(self.COMMON_ARCHIVER_METRICS)
+            self.archiver_metrics[key] = dict(COMMON_ARCHIVER_METRICS)
             metrics = self.archiver_metrics.get(key)
 
         if not metrics:
@@ -620,12 +323,12 @@ GROUP BY datid, datname
         """
         metrics = self.replication_metrics.get(key)
         if self._is_10_or_above(key, db) and metrics is None:
-            self.replication_metrics[key] = dict(self.REPLICATION_METRICS_10)
+            self.replication_metrics[key] = dict(REPLICATION_METRICS_10)
             metrics = self.replication_metrics.get(key)
         elif self._is_9_1_or_above(key, db) and metrics is None:
-            self.replication_metrics[key] = dict(self.REPLICATION_METRICS_9_1)
+            self.replication_metrics[key] = dict(REPLICATION_METRICS_9_1)
             if self._is_9_2_or_above(key, db):
-                self.replication_metrics[key].update(self.REPLICATION_METRICS_9_2)
+                self.replication_metrics[key].update(REPLICATION_METRICS_9_2)
             metrics = self.replication_metrics.get(key)
         return metrics
 
@@ -637,22 +340,21 @@ GROUP BY datid, datname
         metrics_data = self.activity_metrics.get(key)
 
         if metrics_data is None:
-            query = self.ACTIVITY_QUERY_10 if self._is_10_or_above(key, db) else self.ACTIVITY_QUERY_LT_10
-            metrics_query = None
+            query = ACTIVITY_QUERY_10 if self._is_10_or_above(key, db) else ACTIVITY_QUERY_LT_10
             if self._is_9_6_or_above(key, db):
-                metrics_query = self.ACTIVITY_METRICS_9_6
+                metrics_query = ACTIVITY_METRICS_9_6
             elif self._is_9_2_or_above(key, db):
-                metrics_query = self.ACTIVITY_METRICS_9_2
+                metrics_query = ACTIVITY_METRICS_9_2
             elif self._is_8_3_or_above(key, db):
-                metrics_query = self.ACTIVITY_METRICS_8_3
+                metrics_query = ACTIVITY_METRICS_8_3
             else:
-                metrics_query = self.ACTIVITY_METRICS_LT_8_3
+                metrics_query = ACTIVITY_METRICS_LT_8_3
 
             for i, q in enumerate(metrics_query):
                 if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=user)
 
-            metrics = {k: v for k, v in zip(metrics_query, self.ACTIVITY_DD_METRICS)}
+            metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
             self.activity_metrics[key] = (metrics, query)
         else:
             metrics, query = metrics_data
@@ -695,7 +397,7 @@ GROUP BY datid, datname
         if scope is None:
             return None
 
-        if scope == self.REPLICATION_METRICS or not self._is_above(key, db, [9, 0, 0]):
+        if scope == REPLICATION_METRICS or not self._is_above(key, db, [9, 0, 0]):
             log_func = self.log.debug
         else:
             log_func = self.log.warning
@@ -821,24 +523,24 @@ GROUP BY datid, datname
         bgw_instance_metrics = self._get_bgw_metrics(key, db)
         archiver_instance_metrics = self._get_archiver_metrics(key, db)
 
-        metric_scope = [self.CONNECTION_METRICS, self.LOCK_METRICS]
+        metric_scope = [CONNECTION_METRICS, LOCK_METRICS]
 
         if collect_function_metrics:
-            metric_scope.append(self.FUNCTION_METRICS)
+            metric_scope.append(FUNCTION_METRICS)
         if collect_count_metrics:
             metric_scope.append(self._get_count_metrics(table_count_limit))
 
         # Do we need relation-specific metrics?
         relations_config = {}
         if relations:
-            metric_scope += [self.REL_METRICS, self.IDX_METRICS, self.SIZE_METRICS, self.STATIO_METRICS]
+            metric_scope += [REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(relations)
 
         replication_metrics = self._get_replication_metrics(key, db)
         if replication_metrics is not None:
             # FIXME: constants shouldn't be modified
-            self.REPLICATION_METRICS['metrics'] = replication_metrics
-            metric_scope.append(self.REPLICATION_METRICS)
+            REPLICATION_METRICS['metrics'] = replication_metrics
+            metric_scope.append(REPLICATION_METRICS)
 
         try:
             cursor = db.cursor()
@@ -861,6 +563,7 @@ GROUP BY datid, datname
                 self._query_scope(cursor, scope, key, db, instance_tags, scope in custom_metrics, relations_config)
 
             cursor.close()
+
         except (psycopg2.InterfaceError, socket.error) as e:
             self.log.error("Connection error: %s" % str(e))
             raise ShouldRestartException
