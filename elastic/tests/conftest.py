@@ -10,7 +10,7 @@ import requests
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.elastic import ESCheck
 
-from .common import HERE, PASSWORD, URL, USER, ELASTIC_VERSION
+from .common import ELASTIC_VERSION, HERE, PASSWORD, URL, USER
 
 CUSTOM_TAGS = ['foo:bar', 'baz']
 COMPOSE_FILES_MAP = {
