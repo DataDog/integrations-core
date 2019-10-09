@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.postgres import PostgreSql
 
-from .common import DB_NAME, HOST, PORT, check_bgw_metrics, check_common_metrics, POSTGRES_VERSION
+from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']

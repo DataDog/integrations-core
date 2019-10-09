@@ -434,7 +434,8 @@ class PostgreSql(AgentCheck):
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
-                "It seems the PG version has been incorrectly identified as %s. A reattempt to identify the right version will happen on next agent run."
+                "It seems the PG version has been incorrectly identified as %s. "
+                "A reattempt to identify the right version will happen on next agent run."
                 % self.versions[key]
             )
             self._clean_state(key)
