@@ -1,7 +1,6 @@
 parameters:
   job_name: ''
   check: ''
-  display: ''
   test: true
   test_e2e: false
   benchmark: false
@@ -10,7 +9,7 @@ parameters:
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
-  displayName: '${{ parameters.display }}'
+  displayName: '${{ parameters.check }}'
 
   pool:
     vmImage: 'windows-2019'
