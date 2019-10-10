@@ -376,7 +376,7 @@ def test_submit_summary_with_monotonic_count(aggregator, mocked_prometheus_check
     _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
     _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['send_counts_as_monotonic'] = True
+    mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic'] = True
     check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
     aggregator.assert_metric(
         'prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
@@ -417,7 +417,7 @@ def test_submit_histogram_with_monotonic_count(aggregator, mocked_prometheus_che
         [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
     )
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['send_counts_as_monotonic'] = True
+    mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic'] = True
     check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
     aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
     aggregator.assert_metric(

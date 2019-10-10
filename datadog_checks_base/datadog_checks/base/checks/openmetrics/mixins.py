@@ -172,8 +172,11 @@ class OpenMetricsScraperMixin(object):
             instance.get('send_monotonic_counter', default_instance.get('send_monotonic_counter', True))
         )
 
-        config['send_counts_as_monotonic'] = is_affirmative(
-            instance.get('send_counts_as_monotonic', default_instance.get('send_counts_as_monotonic', False))
+        config['send_distribution_counts_as_monotonic'] = is_affirmative(
+            instance.get(
+                'send_distribution_counts_as_monotonic',
+                default_instance.get('send_distribution_counts_as_monotonic', False),
+            )
         )
 
         # If the `labels_mapper` dictionary is provided, the metrics labels names
@@ -648,7 +651,7 @@ class OpenMetricsScraperMixin(object):
             elif sample[self.SAMPLE_NAME].endswith("_count"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self._submit_distribution_count(
-                    scraper_config['send_counts_as_monotonic'],
+                    scraper_config['send_distribution_counts_as_monotonic'],
                     "{}.{}.count".format(scraper_config['namespace'], metric_name),
                     val,
                     tags=tags,
@@ -689,7 +692,7 @@ class OpenMetricsScraperMixin(object):
                 if scraper_config['send_histograms_buckets']:
                     tags.append("upper_bound:none")
                 self._submit_distribution_count(
-                    scraper_config['send_counts_as_monotonic'],
+                    scraper_config['send_distribution_counts_as_monotonic'],
                     "{}.{}.count".format(scraper_config['namespace'], metric_name),
                     val,
                     tags=tags,
@@ -702,7 +705,7 @@ class OpenMetricsScraperMixin(object):
                     sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
                     tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                     self._submit_distribution_count(
-                        scraper_config['send_counts_as_monotonic'],
+                        scraper_config['send_distribution_counts_as_monotonic'],
                         "{}.{}.count".format(scraper_config['namespace'], metric_name),
                         val,
                         tags=tags,
