@@ -68,6 +68,7 @@ def test_warning_args_errors():
 
     assert ["should not raise error: %s"] == check.warnings
 
+
 class TestMetricNormalization:
     def test_default(self):
         check = AgentCheck()
