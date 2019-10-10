@@ -83,7 +83,7 @@ class Lighttpd(AgentCheck):
             msg = "Unsupported value of 'auth_type' variable in Lighttpd config: {}".format(auth_type)
             raise Exception(msg)
 
-        self.log.debug("Connecting to %s" % url)
+        self.log.debug("Connecting to %s", url)
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
@@ -140,7 +140,7 @@ class Lighttpd(AgentCheck):
             url_suffix = self.URL_SUFFIX_PER_VERSION[server_version]
             if self.assumed_url.get(instance['lighttpd_status_url']) is None and url[-len(url_suffix) :] != url_suffix:
                 self.assumed_url[instance['lighttpd_status_url']] = '%s%s' % (url, url_suffix)
-                self.warning("Assuming url was not correct. Trying to add %s suffix to the url" % url_suffix)
+                self.warning("Assuming url was not correct. Trying to add %s suffix to the url", url_suffix)
                 self.check(instance)
             else:
                 raise Exception(
@@ -157,5 +157,5 @@ class Lighttpd(AgentCheck):
             return "Unknown"
 
         version = int(match.group(1))
-        self.log.debug("Lighttpd server version is %s" % version)
+        self.log.debug("Lighttpd server version is %s", version)
         return version
