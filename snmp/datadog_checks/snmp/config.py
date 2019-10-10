@@ -27,7 +27,7 @@ class InstanceConfig:
     DEFAULT_ALLOWED_FAILURES = 3
     DEFAULT_BULK_THRESHOLD = 5
 
-    def __init__(self, instance, warning, debug, global_metrics, mibs_path, profiles, profiles_by_oid):
+    def __init__(self, instance, warning, log, global_metrics, mibs_path, profiles, profiles_by_oid):
         self.instance = instance
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
@@ -74,16 +74,16 @@ class InstanceConfig:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
-            self.metrics, self.enforce_constraints, warning, debug
+            self.metrics, self.enforce_constraints, warning, log
         )
 
         self.auth_data = self.get_auth_data(instance)
         self.context_data = hlapi.ContextData(*self.get_context_data(instance))
 
-    def refresh_with_profile(self, profile, warning, debug):
+    def refresh_with_profile(self, profile, warning, log):
         self.metrics.extend(profile['definition'])
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
-            self.metrics, self.enforce_constraints, warning, debug
+            self.metrics, self.enforce_constraints, warning, log
         )
 
     def call_cmd(self, cmd, *args, **kwargs):
@@ -170,7 +170,7 @@ class InstanceConfig:
 
         return context_engine_id, context_name
 
-    def parse_metrics(self, metrics, enforce_constraints, warning, debug):
+    def parse_metrics(self, metrics, enforce_constraints, warning, log):
         """Parse configuration and returns data to be used for SNMP queries.
 
         `raw_oids` is a list of SNMP numerical OIDs to query.
@@ -228,7 +228,7 @@ class InstanceConfig:
             try:
                 self.mib_view_controller.mibBuilder.loadModule(mib)
             except MibNotFoundError:
-                debug("Couldn't found mib %s, trying to fetch it", mib)
+                log.debug("Couldn't found mib %s, trying to fetch it", mib)
                 self.fetch_mib(mib)
 
         return table_oids, raw_oids, mibs_to_load
