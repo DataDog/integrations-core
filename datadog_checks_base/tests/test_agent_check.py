@@ -46,6 +46,28 @@ def test_log_critical_error():
         check.log.critical('test')
 
 
+def test_warning_ok():
+    check = AgentCheck()
+
+    check.warning("foo")
+    check.warning("hello %s%s", "world", "!")
+
+    assert ["foo", "hello world!"] == check.warnings
+
+
+def test_warning_args_errors():
+    check = AgentCheck()
+
+    check.warning("should not raise error: %s")
+
+    with pytest.raises(TypeError):
+        check.warning("not enough arguments: %s %s", "a")
+
+    with pytest.raises(TypeError):
+        check.warning("too many arguments: %s %s", "a", "b", "c")
+
+    assert ["should not raise error: %s"] == check.warnings
+
 class TestMetricNormalization:
     def test_default(self):
         check = AgentCheck()
