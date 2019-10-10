@@ -529,8 +529,9 @@ class __AgentCheck(object):
         Using *args is intended to make warning work like log.warn/debug/info/etc
         and make it compliant with flake8 logging format linter.
 
-        :param list args: format string args used to format warning_message e.g. `warning_message % args`
         :param str warning_message: the warning message.
+        :param list args: format string args used to format warning_message e.g. `warning_message % args`
+        :param dict kwargs: not used for now, but added to match Python logger's `warning` method signature
         """
         warning_message = to_string(warning_message)
         # Interpolate message only if args is not empty. Same behavior as python logger:
