@@ -1,0 +1,10 @@
+pr:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - datadog_checks_base/datadog_checks/*
+
+jobs:
+- template: './templates/test-all-checks.yml'

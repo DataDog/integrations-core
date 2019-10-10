@@ -1,6 +1,9 @@
 parameters:
   repo: 'core'
 
+variables:
+  DDEV_COLOR: 1
+
 steps:
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate agent-reqs

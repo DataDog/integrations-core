@@ -1,0 +1,7 @@
+trigger:
+  branches:
+    include:
+    - master
+
+jobs:
+- template: './templates/test-all-checks.yml'
