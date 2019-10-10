@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 1.12.0 / 2019-10-10
+
+* [Added] Add profile for F5 BIG-IP devices. See [#4674](https://github.com/DataDog/integrations-core/pull/4674).
+
 ## 1.11.0 / 2019-09-19
 
 * [Fixed] Handle bytes in network_address. See [#4577](https://github.com/DataDog/integrations-core/pull/4577).
