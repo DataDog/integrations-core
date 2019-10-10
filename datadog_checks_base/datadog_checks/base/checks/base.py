@@ -535,7 +535,7 @@ class __AgentCheck(object):
         """
         warning_message = to_string(warning_message)
         # Interpolate message only if args is not empty. Same behavior as python logger:
-        # https://github.com/python/cpython/blob/master/Lib/logging/__init__.py#L368-L369
+        # https://github.com/python/cpython/blob/1dbe5373851acb85ba91f0be7b83c69563acd68d/Lib/logging/__init__.py#L368-L369
         if args:
             warning_message = warning_message % args
         frame = inspect.currentframe().f_back
