@@ -1,3 +1,6 @@
+control_plane.connected_state: 1
+control_plane.pending_requests: 0
+control_plane.rate_limit_enforced: 0
 cluster.in.0000.bind_errors: 0
 cluster.in.0000.lb_healthy_panic: 0
 cluster.in.0000.lb_local_cluster_not_ok: 0
@@ -3927,6 +3930,9 @@ cluster_manager.cds.update_failure: 358
 cluster_manager.cds.update_rejected: 0
 cluster_manager.cds.update_success: 41168
 cluster_manager.cds.version: 16342930368626771589
+cluster_manager.cds.control_plane.connected_state: 1
+cluster_manager.cds.control_plane.pending_requests: 0
+cluster_manager.cds.control_plane.rate_limit_enforced: 0
 cluster_manager.cluster_added: 57
 cluster_manager.cluster_modified: 0
 cluster_manager.cluster_removed: 0
@@ -4099,6 +4105,9 @@ http.http.rds.0000.update_failure: 52
 http.http.rds.0000.update_rejected: 0
 http.http.rds.0000.update_success: 4128
 http.http.rds.0000.version: 3369434034820988330
+http.http.rds.0000.control_plane.connected_state: 1
+http.http.rds.0000.control_plane.pending_requests: 0
+http.http.rds.0000.control_plane.rate_limit_enforced: 0
 http.http.rq_direct_response: 0
 http.http.rq_redirect: 0
 http.http.rq_total: 0
@@ -4317,11 +4326,15 @@ listener.admin.http.admin.downstream_rq_2xx: 3
 listener.admin.http.admin.downstream_rq_3xx: 0
 listener.admin.http.admin.downstream_rq_4xx: 0
 listener.admin.http.admin.downstream_rq_5xx: 0
+listener_manager.lds.config_reload: 0
 listener_manager.lds.update_attempt: 41529
 listener_manager.lds.update_failure: 355
 listener_manager.lds.update_rejected: 0
 listener_manager.lds.update_success: 41174
 listener_manager.lds.version: 11382070713926594635
+listener_manager.lds.control_plane.connected_state: 1
+listener_manager.lds.control_plane.pending_requests: 0
+listener_manager.lds.control_plane.rate_limit_enforced: 0
 listener_manager.listener_added: 46
 listener_manager.listener_create_failure: 0
 listener_manager.listener_create_success: 184
