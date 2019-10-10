@@ -208,7 +208,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
     ```
 
     
-3. Next, in the same Fargate task, define a log configuration with AWS FireLens as the log driver, and outputting data to Fluent Bit. Here is an example snippet of a task definition where the FireLens is the log driver, and it is outputting data into Fluent Bit:
+3. Next, in the same Fargate task, define a log configuration with AWS FireLens as the log driver, and with data being output to Fluent Bit. Here is an example snippet of a task definition where the FireLens is the log driver, and it is outputting data to Fluent Bit:
 
     
     ```
