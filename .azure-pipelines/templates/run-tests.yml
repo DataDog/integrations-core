@@ -25,4 +25,4 @@ steps:
   condition: succeededOrFailed()
   inputs:
     testResultsFiles: '**/test-*.xml'
-    testRunTitle: 'Publish test results'
+    testRunTitle: '${{ parameters.check }}'
