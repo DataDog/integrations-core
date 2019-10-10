@@ -3,13 +3,13 @@ trigger:
     include:
     - master
 
-pr: none
-#   branches:
-#     include:
-#     - master
-#   paths:
-#     include:
-#     - datadog_checks_base/datadog_checks/*
+pr:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - datadog_checks_base/datadog_checks/*
 
 variables:
   DDEV_COLOR: 1
