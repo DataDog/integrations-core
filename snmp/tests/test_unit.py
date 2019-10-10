@@ -7,7 +7,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import ConfigurationError, AgentCheck
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
@@ -17,17 +17,15 @@ from . import common
 pytestmark = pytest.mark.unit
 
 
-def warning(*args):
-    pass
-
-
 @mock.patch("datadog_checks.snmp.config.hlapi")
 def test_parse_metrics(hlapi_mock):
+    check = AgentCheck()
+
     # Unsupported metric
     metrics = [{"foo": "bar"}]
     config = InstanceConfig(
         {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3"}]},
-        warning,
+        check.warning,
         [],
         None,
         {},
@@ -35,11 +33,11 @@ def test_parse_metrics(hlapi_mock):
     )
     hlapi_mock.reset_mock()
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning)
 
     # Simple OID
     metrics = [{"OID": "1.2.3"}]
-    table, raw, mibs = config.parse_metrics(metrics, False, warning)
+    table, raw, mibs = config.parse_metrics(metrics, False, check.warning)
     assert table == {}
     assert mibs == set()
     assert len(raw) == 1
@@ -49,11 +47,11 @@ def test_parse_metrics(hlapi_mock):
     # MIB with no symbol or table
     metrics = [{"MIB": "foo_mib"}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning)
 
     # MIB with symbol
     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
-    table, raw, mibs = config.parse_metrics(metrics, False, warning)
+    table, raw, mibs = config.parse_metrics(metrics, False, check.warning)
     assert raw == []
     assert mibs == {"foo_mib"}
     assert len(table) == 1
@@ -63,11 +61,11 @@ def test_parse_metrics(hlapi_mock):
     # MIB with table, no symbols
     metrics = [{"MIB": "foo_mib", "table": "foo"}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning)
 
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
-    table, raw, mibs = config.parse_metrics(metrics, True, warning)
+    table, raw, mibs = config.parse_metrics(metrics, True, check.warning)
     assert raw == []
     assert mibs == set()
     assert len(table) == 1
@@ -79,18 +77,18 @@ def test_parse_metrics(hlapi_mock):
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning)
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo"}]}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning)
 
     # MIB with table, symbols, metrics_tags index
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
     ]
-    table, raw, mibs = config.parse_metrics(metrics, True, warning)
+    table, raw, mibs = config.parse_metrics(metrics, True, check.warning)
     assert raw == []
     assert mibs == set()
     assert len(table) == 1
@@ -103,7 +101,7 @@ def test_parse_metrics(hlapi_mock):
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
     ]
-    table, raw, mibs = config.parse_metrics(metrics, True, warning)
+    table, raw, mibs = config.parse_metrics(metrics, True, check.warning)
     assert raw == []
     assert mibs == set()
     assert len(table) == 1
