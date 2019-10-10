@@ -47,6 +47,7 @@ def instance_ssl():
 def instance_vts():
     return {'nginx_status_url': 'http://{}:{}/vts_status'.format(HOST, PORT), 'tags': TAGS, 'use_vts': True}
 
+
 @pytest.fixture(scope='session')
 def version_metadata():
     version = NGINX_VERSION.split(':')[1]
