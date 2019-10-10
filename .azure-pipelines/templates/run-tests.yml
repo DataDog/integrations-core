@@ -1,5 +1,5 @@
 parameters:
-  job_name: ''
+  test_run: ''
   check: ''
   test: false
   test_e2e: false
@@ -7,7 +7,7 @@ parameters:
 
 steps:
 - ${{ if eq(parameters.test, 'true') }}:
-  - script: ddev test --cov --pytest-args="--junit-xml=junit/test-results.xml --junit-prefix='${{ parameters.job_name }}'" ${{ parameters.check }}
+  - script: ddev test --cov --pytest-args="--junit-xml=junit/test-results.xml --junit-prefix='${{ parameters.test_run }}'" ${{ parameters.check }}
     displayName: 'Run tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
@@ -26,4 +26,4 @@ steps:
   condition: succeededOrFailed()
   inputs:
     testResultsFiles: '**/test-*.xml'
-    testRunTitle: '${{ parameters.job_name }}'
+    testRunTitle: '${{ parameters.test_run }}'
