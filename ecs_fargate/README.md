@@ -164,7 +164,7 @@ You can monitor Fargate logs by using the AWS FireLens integration built on Data
 
 #### Fluent Bit and FireLens
 
-Configure the AWS FireLens integration built on Datadogs Fluentbit output plugin to connect your FireLens monitored log data to Datadog Logs. 
+Configure the AWS FireLens integration built on Datadog's Fluent Bit output plugin to connect your FireLens monitored log data to Datadog Logs. 
 
 1. Enable Fluent Bit in the FireLens log router container in your Fargate task. For more information about enabling FireLens, see the dedicated [AWS Firelens docs][28]. For more information about Fargate container definitons, see the [AWS docs on Container Definitions][26]. AWS reccomends that you use [the regional Docker image][32]. Here is an example snippet of a task definition where the Fluent Bit image is configured:
     
@@ -185,7 +185,7 @@ Configure the AWS FireLens integration built on Datadogs Fluentbit output plugin
     ```
 
     
-2. Next, in the same Fargate task, define a log configuration with AWS FireLens as the log driver, and outputting data to Fluent Bit. Here is an example snippet of a task definition where the FireLens is the log driver, and it is outputting data into Fluent Bit:
+2. Next, in the same Fargate task, define a log configuration with AWS FireLens as the log driver, and with data being output to Fluent Bit. Here is an example snippet of a task definition where the FireLens is the log driver, and it is outputting data to Fluent Bit:
 
     
     ```
@@ -293,5 +293,8 @@ Need help? Contact [Datadog support][19].
 [29]: https://docs.datadoghq.com/graphing/infrastructure/livecontainers/?tab=linuxwindows
 [30]: https://app.datadoghq.com/logs
 [31]: https://docs.datadoghq.com/monitors/monitor_types/
+<<<<<<< HEAD
 [32]: https://github.com/aws/containers-roadmap/tree/master/preview-programs/firelens#using-the-aws-for-fluent-bit-image
 [33]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/ 
+=======
+>>>>>>> origin/kaylyn/fargate-fluentbit
