@@ -523,7 +523,7 @@ class __AgentCheck(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
-    def warning(self, warning_message, *args):
+    def warning(self, warning_message, *args, **kwargs):
         """Log a warning message and display it in the Agent's status page.
 
         Using *args is intended to make warning work like log.warn/debug/info/etc
