@@ -93,6 +93,7 @@ class SnmpCheck(AgentCheck):
         self._config = InstanceConfig(
             self.instance,
             self.warning,
+            self.log.debug,
             self.init_config.get('global_metrics', []),
             self.mibs_path,
             self.profiles,
@@ -133,6 +134,7 @@ class SnmpCheck(AgentCheck):
                 host_config = InstanceConfig(
                     instance,
                     self.warning,
+                    self.log.debug,
                     self.init_config.get('global_metrics', []),
                     self.mibs_path,
                     self.profiles,
@@ -149,7 +151,7 @@ class SnmpCheck(AgentCheck):
                         continue
                 else:
                     profile = self.profiles_by_oid[sys_object_oid]
-                    host_config.refresh_with_profile(self.profiles[profile], self.warning)
+                    host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log.debug)
                 config.discovered_instances[host] = host_config
             time_elapsed = time.time() - start_time
             if discovery_interval - time_elapsed > 0:
@@ -358,7 +360,7 @@ class SnmpCheck(AgentCheck):
                 if sys_object_oid not in self.profiles_by_oid:
                     raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
                 profile = self.profiles_by_oid[sys_object_oid]
-                config.refresh_with_profile(self.profiles[profile], self.warning)
+                config.refresh_with_profile(self.profiles[profile], self.warning, self.log.debug)
 
             if config.table_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.table_oids))
