@@ -103,6 +103,8 @@ class Nginx(AgentCheck):
         funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
         conn = None
         handled = None
+        version_received = False
+
         for row in metrics:
             try:
                 name, value, tags, metric_type = row
@@ -134,9 +136,13 @@ class Nginx(AgentCheck):
 
                 if name == 'nginx.version':
                     self.set_metadata('version', value)
+                    version_received = True
 
             except Exception as e:
                 self.log.error(u'Could not submit metric: %s: %s' % (repr(row), str(e)))
+        
+        if not version_received:
+            self.log.debug (u"Could not get NGINX version info")
 
     @classmethod
     def _get_instance_params(cls, instance):
