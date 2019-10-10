@@ -854,6 +854,7 @@ class PostgreSql(AgentCheck):
             self._get_custom_queries(db, tags, custom_queries)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
+            self._clean_state(key)
             db = self.get_connection(key, host, port, user, password, dbname, ssl, tags, use_cached=False)
             self._collect_stats(
                 key,
