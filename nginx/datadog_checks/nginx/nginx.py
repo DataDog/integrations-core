@@ -131,6 +131,10 @@ class Nginx(AgentCheck):
                     func_count(name + "_count", value, tags)
                 func = funcs[metric_type]
                 func(name, value, tags)
+
+                if name == 'nginx.version':
+                    self.set_metadata('version', value)
+
             except Exception as e:
                 self.log.error(u'Could not submit metric: %s: %s' % (repr(row), str(e)))
 
@@ -204,6 +208,7 @@ class Nginx(AgentCheck):
                 self.log.exception("Error querying {} metrics at {}: {}".format(endpoint, url, e))
 
         return payload
+    
 
     @classmethod
     def parse_text(cls, raw, tags=None):
@@ -303,3 +308,4 @@ class Nginx(AgentCheck):
                     output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
 
         return output
+
