@@ -35,7 +35,7 @@ jobs:
 
   - template: './run-tests.yml'
     parameters:
-      test_run: '${{ coalesce(parameters.job_name, parameters.check) }}_windows'
+      test_run: '${{ coalesce(parameters.job_name, parameters.check) }}.windows'
       check: ${{ parameters.check }}
       test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
