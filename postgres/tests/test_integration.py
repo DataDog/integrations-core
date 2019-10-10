@@ -125,6 +125,7 @@ def test_wrong_version(aggregator, check, pg_instance):
     assert_state_clean(check, db_key)
 
     check.check(pg_instance)
+    assert check.versions[db_key][0] == int(POSTGRES_VERSION)
     assert_state_set(check, db_key)
 
 
@@ -162,7 +163,7 @@ def assert_state_clean(check, db_key):
 
 
 def assert_state_set(check, db_key):
-    assert check.versions[db_key][0] == int(POSTGRES_VERSION)
+    assert db_key in check.versions
     assert db_key in check.instance_metrics
     assert db_key in check.bgw_metrics
     assert db_key in check.archiver_metrics
