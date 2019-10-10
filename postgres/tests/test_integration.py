@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from unittest import mock
 
 import psycopg2
 import pytest
 
 from datadog_checks.postgres import PostgreSql
+from datadog_checks.postgres.postgres import ShouldRestartException
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
@@ -120,6 +122,35 @@ def test_wrong_version(aggregator, check, pg_instance):
     check.versions[db_key] = [9, 6, 0]
 
     check.check(pg_instance)
+    assert_state_clean(check, db_key)
+
+    check.check(pg_instance)
+    assert_state_set(check, db_key)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_state_clears_on_connection_error(check, pg_instance):
+    db_key = ('localhost', 5432, 'datadog_test')
+
+    check.check(pg_instance)
+    assert_state_set(check, db_key)
+
+    def throw_exception_first_time(*args, **kwargs):
+        throw_exception_first_time.counter += 1
+        if throw_exception_first_time.counter > 1:
+            pass  # avoid throwing exception again
+        else:
+            raise ShouldRestartException
+
+    throw_exception_first_time.counter = 0
+
+    with mock.patch('datadog_checks.postgres.PostgreSql._collect_stats', side_effect=throw_exception_first_time):
+        check.check(pg_instance)
+    assert_state_clean(check, db_key)
+
+
+def assert_state_clean(check, db_key):
     assert db_key not in check.versions  # version invalidated
     assert db_key not in check.instance_metrics
     assert db_key not in check.bgw_metrics
@@ -129,7 +160,8 @@ def test_wrong_version(aggregator, check, pg_instance):
     assert db_key not in check.replication_metrics
     assert db_key not in check.activity_metrics
 
-    check.check(pg_instance)
+
+def assert_state_set(check, db_key):
     assert check.versions[db_key][0] == int(POSTGRES_VERSION)
     assert db_key in check.instance_metrics
     assert db_key in check.bgw_metrics
