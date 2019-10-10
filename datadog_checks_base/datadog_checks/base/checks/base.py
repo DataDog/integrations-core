@@ -533,13 +533,21 @@ class __AgentCheck(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
-    def warning(self, warning_message):
+    def warning(self, warning_message, *args, **kwargs):
         """Log a warning message and display it in the Agent's status page.
 
+        Using *args is intended to make warning work like log.warn/debug/info/etc
+        and make it compliant with flake8 logging format linter.
+
         :param str warning_message: the warning message.
+        :param list args: format string args used to format warning_message e.g. `warning_message % args`
+        :param dict kwargs: not used for now, but added to match Python logger's `warning` method signature
         """
         warning_message = to_string(warning_message)
-
+        # Interpolate message only if args is not empty. Same behavior as python logger:
+        # https://github.com/python/cpython/blob/1dbe5373851acb85ba91f0be7b83c69563acd68d/Lib/logging/__init__.py#L368-L369
+        if args:
+            warning_message = warning_message % args
         frame = inspect.currentframe().f_back
         lineno = frame.f_lineno
         # only log the last part of the filename, not the full path
