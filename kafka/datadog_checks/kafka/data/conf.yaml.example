@@ -230,7 +230,7 @@ init_config:
             metric_type: gauge
             alias: kafka.producer.batch_size_max
           compression-rate-avg:
-            metric_type: rate
+            metric_type: gauge
             alias: kafka.producer.compression_rate_avg
           record-queue-time-avg:
             metric_type: gauge
