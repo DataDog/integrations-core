@@ -62,7 +62,7 @@ class DruidCheck(AgentCheck):
             return resp.json()
         except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
             self.warning(
-                "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
+                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable".format(url, e)
             )
         except requests.exceptions.Timeout as e:
-            self.warning("Connection timeout when connecting to %s: %s", url, e)
+            self.warning("Connection timeout when connecting to {}: {}".format(url, e))
