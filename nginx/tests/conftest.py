@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import pytest
 import mock
+import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.nginx import Nginx
 
-from .common import HERE, HOST, PORT, PORT_SSL, TAGS, USING_VTS, NGINX_VERSION
+from .common import HERE, HOST, NGINX_VERSION, PORT, PORT_SSL, TAGS, USING_VTS
 
 
 @pytest.fixture(scope='session')
@@ -51,8 +51,11 @@ def instance_vts():
 @pytest.fixture(scope='session')
 def version_metadata():
     # vts currently defaults to using version 1.13
-    version = '1.13' if USING_VTS else version = NGINX_VERSION.split(':')[1]
-    
+    if USING_VTS:
+        version = '1.13'
+    else:
+        version = NGINX_VERSION.split(':')[1]
+
     major, minor = version.split('.')
 
     return {

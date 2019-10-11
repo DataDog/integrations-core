@@ -143,7 +143,6 @@ class Nginx(AgentCheck):
 
             except Exception as e:
                 self.log.error(u'Could not submit metric: %s: %s' % (repr(row), str(e)))
-        
 
     @classmethod
     def _get_instance_params(cls, instance):
@@ -215,15 +214,13 @@ class Nginx(AgentCheck):
                 self.log.exception("Error querying {} metrics at {}: {}".format(endpoint, url, e))
 
         return payload
-    
+
     def _set_version_metadata(self, version):
         if version:
             self.set_metadata('version', version)
             self.log.debug(u"Nginx version `server`: {}".format(version))
         else:
             self.log.warning(u"could not retrieve nginx version info")
-        
-    
 
     @classmethod
     def parse_text(cls, raw, tags=None):
@@ -323,4 +320,3 @@ class Nginx(AgentCheck):
                     output.append((metric_base, int((timestamp - EPOCH).total_seconds()), tags, 'gauge'))
 
         return output
-
