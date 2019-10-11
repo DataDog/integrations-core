@@ -82,7 +82,6 @@ class Nginx(AgentCheck):
 
         if not use_plus_api:
             response, content_type, version = self._get_data(instance, url)
-
             # for unpaid versions
             self._set_version_metadata(version)
 
@@ -217,7 +216,10 @@ class Nginx(AgentCheck):
 
     def _set_version_metadata(self, version):
         if version:
+            if '/' in version:
+                version = version.split('/')[1]
             self.set_metadata('version', version)
+            
             self.log.debug(u"Nginx version `server`: {}".format(version))
         else:
             self.log.warning(u"could not retrieve nginx version info")
