@@ -293,8 +293,5 @@ Need help? Contact [Datadog support][19].
 [29]: https://docs.datadoghq.com/graphing/infrastructure/livecontainers/?tab=linuxwindows
 [30]: https://app.datadoghq.com/logs
 [31]: https://docs.datadoghq.com/monitors/monitor_types/
-<<<<<<< HEAD
 [32]: https://github.com/aws/containers-roadmap/tree/master/preview-programs/firelens#using-the-aws-for-fluent-bit-image
 [33]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/ 
-=======
->>>>>>> origin/kaylyn/fargate-fluentbit
