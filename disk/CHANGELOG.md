@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 2.5.1 / 2019-10-11
+
+* [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
+
 ## 2.5.0 / 2019-08-24
 
 * [Added] Remove legacy collection method. See [#4417](https://github.com/DataDog/integrations-core/pull/4417).
