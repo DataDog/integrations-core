@@ -62,7 +62,6 @@ COUNT_METRICS = {
     'mapr.db.updateandget_rpcs',
     'mapr.db.valuecache_hits',
     'mapr.db.valuecache_lookups',
-    'mapr.drill.queries_completed',
     'mapr.fs.bulk_writes',
     'mapr.fs.bulk_writesbytes',
     'mapr.fs.kvstore_delete',
@@ -100,6 +99,7 @@ COUNT_METRICS = {
 
 MONOTONIC_COUNTER_METRICS = {
     'mapr.cldb.containers_created',
+    'mapr.drill.queries_completed',
     'mapr.process.context_switch_involuntary',
     'mapr.process.context_switch_voluntary',
     'mapr.process.cpu_time.syst',
