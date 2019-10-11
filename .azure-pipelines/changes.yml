@@ -71,3 +71,87 @@ jobs:
     job_name: Changed_10
     display: Linux_10
     validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_11
+    display: Linux_11
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_12
+    display: Linux_12
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_13
+    display: Linux_13
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_14
+    display: Linux_14
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_15
+    display: Linux_15
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_16
+    display: Linux_16
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_17
+    display: Linux_17
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_18
+    display: Linux_18
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_19
+    display: Linux_19
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_20
+    display: Linux_20
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_21
+    display: Linux_21
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_22
+    display: Linux_22
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_23
+    display: Linux_23
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_24
+    display: Linux_24
+    validate: true
