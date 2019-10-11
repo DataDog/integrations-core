@@ -1,5 +1,10 @@
 # CHANGELOG - ECS Fargate
 
+## 2.4.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+* [Fixed] Fix ecs_fargate timeout. See [#4518](https://github.com/DataDog/integrations-core/pull/4518).
+
 ## 2.3.0 / 2019-08-24
 
 * [Added] Update with proxy settings and request wrapper. See [#3477](https://github.com/DataDog/integrations-core/pull/3477).
