@@ -26,7 +26,7 @@ PROCESS_PRIOS = {'<': 'high', 'N': 'low', 'L': 'locked'}
 class MoreUnixCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         super(MoreUnixCheck, self).__init__(*args, **kwargs)
-        self.tags = self.instances[0].get('tags', [])
+        self.tags = self.instance.get('tags', [])
         self.set_paths()
 
     def check(self, instance):
