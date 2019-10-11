@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
 import threading
 import time
 from collections import defaultdict
@@ -18,6 +19,14 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
 from .config import InstanceConfig
+
+try:
+    from datadog_agent import get_config
+except ImportError:
+
+    def get_config(value):
+        return ''
+
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -62,9 +71,12 @@ class SnmpCheck(AgentCheck):
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
         self.profiles = init_config.get('profiles', {})
         self.profiles_by_oid = {}
+        confd = get_config('confd_path')
         for profile, profile_data in self.profiles.items():
             filename = profile_data.get('definition_file')
             if filename:
+                if not os.path.isabs(filename):
+                    filename = os.path.join(confd, 'snmp.d', 'profiles', filename)
                 try:
                     with open(filename) as f:
                         data = yaml.safe_load(f)
@@ -81,6 +93,7 @@ class SnmpCheck(AgentCheck):
         self._config = InstanceConfig(
             self.instance,
             self.warning,
+            self.log,
             self.init_config.get('global_metrics', []),
             self.mibs_path,
             self.profiles,
@@ -121,6 +134,7 @@ class SnmpCheck(AgentCheck):
                 host_config = InstanceConfig(
                     instance,
                     self.warning,
+                    self.log,
                     self.init_config.get('global_metrics', []),
                     self.mibs_path,
                     self.profiles,
@@ -137,7 +151,7 @@ class SnmpCheck(AgentCheck):
                         continue
                 else:
                     profile = self.profiles_by_oid[sys_object_oid]
-                    host_config.refresh_with_profile(self.profiles[profile], self.warning)
+                    host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
                 config.discovered_instances[host] = host_config
             time_elapsed = time.time() - start_time
             if discovery_interval - time_elapsed > 0:
@@ -176,7 +190,7 @@ class SnmpCheck(AgentCheck):
 
         for oid in bulk_oids:
             try:
-                self.log.debug('Running SNMP command getBulk on OID %s', oid)
+                self.log.debug('Running SNMP command getBulk on OID %r', oid)
                 binds_iterator = config.call_cmd(
                     hlapi.bulkCmd,
                     self._NON_REPEATERS,
@@ -288,7 +302,7 @@ class SnmpCheck(AgentCheck):
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
-        self.log.debug('Running SNMP command on OID %s', oid)
+        self.log.debug('Running SNMP command on OID %r', oid)
         error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
         self.raise_on_error_indication(error_indication, config.ip_address)
         self.log.debug('Returned vars: %s', var_binds)
@@ -346,7 +360,7 @@ class SnmpCheck(AgentCheck):
                 if sys_object_oid not in self.profiles_by_oid:
                     raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
                 profile = self.profiles_by_oid[sys_object_oid]
-                config.refresh_with_profile(self.profiles[profile], self.warning)
+                config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
 
             if config.table_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.table_oids))

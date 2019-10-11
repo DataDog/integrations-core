@@ -61,7 +61,7 @@ class Ceph(AgentCheck):
                 output, _, _ = get_subprocess_output(args.split(), self.log)
                 res = json.loads(output)
             except Exception as e:
-                self.log.warning('Unable to parse data from cmd=%s: %s' % (cmd, str(e)))
+                self.log.warning('Unable to parse data from cmd=%s: %s', cmd, e)
                 continue
 
             name = cmd.replace(' ', '_')

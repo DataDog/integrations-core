@@ -151,6 +151,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
         env_vars['DD_TRACEMALLOC_DEBUG'] = '1'
         env_vars['DD_TRACEMALLOC_WHITELIST'] = check
 
+        if on_ci:
+            env_vars.setdefault('DD_AGGREGATOR_STOP_TIMEOUT', '10')
+            env_vars.setdefault('DD_FORWARDER_STOP_TIMEOUT', '10')
+
         instances = config
         if isinstance(config, dict):
             instances = config.get('instances', [config])
@@ -167,7 +171,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
                     'sampling_collection_interval', DEFAULT_SAMPLING_COLLECTION_INTERVAL
                 )
 
-    environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key, python)
+    environment = interface(
+        check, env, base_package, config, env_vars, metadata, agent_build, api_key, python, not bool(agent)
+    )
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)
     environment.update_agent()

@@ -32,8 +32,10 @@ class IbmWasCheck(AgentCheck):
         validation.validate_config(instance)
         collect_stats = self.setup_configured_stats(instance)
         url = instance.get('servlet_url')
+        self.custom_queries_units_gauge = set(instance.get('custom_queries_units_gauge', []))
 
         nested_tags, metric_categories = self.append_custom_queries(instance, collect_stats)
+        self.custom_stats = list(nested_tags)
         custom_tags = instance.get('tags', [])
 
         service_check_tags = list(custom_tags)
@@ -101,8 +103,14 @@ class IbmWasCheck(AgentCheck):
             ensure_unicode(child.get('name')), prefix='{}.{}'.format(self.METRIC_PREFIX, prefix), fix_case=True
         )
 
-        # includes deprecated JVM metrics that were reporting as count instead of gauge
-        self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
+        tag = child.tag
+        if (
+            child.get('unit', '').lower() in self.custom_queries_units_gauge
+            and prefix in self.custom_stats
+            and tag == 'CountStatistic'
+        ):
+            tag = 'TimeStatistic'
+        self.metric_type_mapping[tag](metric_name, value, tags=tags)
 
         # creates new JVM metrics correctly as gauges
         if prefix == "jvm":

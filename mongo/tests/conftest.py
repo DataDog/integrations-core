@@ -4,6 +4,7 @@
 import os
 import time
 
+import mock
 import pymongo
 import pytest
 
@@ -103,6 +104,18 @@ def instance_1valid_and_1invalid_custom_queries():
 @pytest.fixture
 def check():
     return MongoDb('mongo', {}, {})
+
+
+@pytest.fixture(scope='session')
+def version_metadata():
+    major, minor = common.MONGODB_VERSION.split('.')[:2]
+    return {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': mock.ANY,
+    }
 
 
 def setup_sharding(compose_file):

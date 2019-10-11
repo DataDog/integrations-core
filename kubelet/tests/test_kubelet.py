@@ -118,6 +118,13 @@ COMMON_TAGS = {
     "container_id://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": ['pod_name:pi-kff76'],
     "kubernetes_pod_uid://12ceeaa9-33ca-11e6-ac8f-42010af00003": ['pod_name:dd-agent-ntepl'],
     "container_id://32fc50ecfe24df055f6d56037acb966337eef7282ad5c203a1be58f2dd2fe743": ['pod_name:dd-agent-ntepl'],
+    "container_id://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479": [
+        'kube_container_name:datadog-agent'
+    ],
+    "container_id://326b384481ca95204018e3e837c61e522b64a3b86c3804142a22b2d1db9dbd7b": [
+        'kube_container_name:datadog-agent'
+    ],
+    "container_id://6d8c6a05731b52195998c438fdca271b967b171f6c894f11ba59aa2f4deff10c": ['pod_name:cassandra-0'],
 }
 
 METRICS_WITH_DEVICE_TAG = {
@@ -449,24 +456,24 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
         mock.call(
             'kubernetes.cpu.requests',
             0.1,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.memory.requests',
             209715200.0,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.memory.limits',
             314572800.0,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
-        mock.call('kubernetes.memory.requests', 134217728.0, instance_tags),
-        mock.call('kubernetes.cpu.limits', 0.25, instance_tags),
-        mock.call('kubernetes.memory.limits', 536870912.0, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags + ["pod_name:demo-app-success-c485bc67b-klj45"]),
+        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.memory.requests', 134217728.0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.limits', 0.25, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.memory.limits', 536870912.0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
     if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
@@ -492,27 +499,29 @@ def test_report_container_state_metrics(monkeypatch, tagger):
         mock.call(
             'kubernetes.containers.last_state.terminated',
             1,
-            instance_tags
-            + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
+            + instance_tags
             + ['reason:OOMKilled'],
         ),
         mock.call(
             'kubernetes.containers.state.waiting',
             1,
-            instance_tags
-            + ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
+            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
+            + instance_tags
             + ['reason:CrashLoopBackOff'],
         ),
         mock.call(
             'kubernetes.containers.restarts',
             1,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.containers.restarts',
             0,
-            instance_tags + ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
+        mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
@@ -523,6 +532,20 @@ def test_report_container_state_metrics(monkeypatch, tagger):
         raise AssertionError('kubernetes.containers.state.* was submitted with a transient reason')
     if any(map(lambda e: not any(x for x in e if x.startswith('reason:')), container_state_gauges)):
         raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
+
+
+def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
+    # Reset tagger without tags
+    tagger.reset()
+    tagger.set_tags({})
+
+    check = mock_kubelet_check(monkeypatch, [{}])
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+    # Test that we get only the node related metrics (no calls to the tagger for these ones)
+    aggregator.assert_metric('kubernetes.memory.capacity')
+    aggregator.assert_metric('kubernetes.cpu.capacity')
+    aggregator.assert_all_metrics_covered()
 
 
 def test_pod_expiration(monkeypatch, aggregator, tagger):
@@ -677,11 +700,11 @@ def test_report_container_requests_limits(monkeypatch, tagger):
     check._report_container_spec_metrics(pod_list, tags)
 
     calls = [
-        mock.call('kubernetes.cpu.requests', 0.5, tags),
-        mock.call('kubernetes.memory.requests', 1073741824.0, tags),
-        mock.call('kubernetes.ephemeral-storage.requests', 0.5, tags),
-        mock.call('kubernetes.cpu.limits', 0.5, tags),
-        mock.call('kubernetes.memory.limits', 1073741824.0, tags),
-        mock.call('kubernetes.ephemeral-storage.limits', 2147483648.0, tags),
+        mock.call('kubernetes.cpu.requests', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.memory.requests', 1073741824.0, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.ephemeral-storage.requests', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.cpu.limits', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.memory.limits', 1073741824.0, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.ephemeral-storage.limits', 2147483648.0, ['pod_name:cassandra-0'] + tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)

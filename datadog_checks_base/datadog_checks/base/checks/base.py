@@ -9,7 +9,7 @@ import logging
 import re
 import traceback
 import unicodedata
-from collections import defaultdict
+from collections import defaultdict, deque
 from os.path import basename
 
 import yaml
@@ -21,6 +21,7 @@ from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
+from ..utils.metadata import MetadataManager
 from ..utils.proxy import config_proxy_skip
 
 try:
@@ -73,7 +74,27 @@ class __AgentCheck(object):
 
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
-    HTTP_CONFIG_REMAPPER = None  # Used by `self.http` RequestsWrapper
+    # Used by `self.http` for an instance of RequestsWrapper
+    HTTP_CONFIG_REMAPPER = None
+
+    # Used by `self.set_metadata` for an instance of MetadataManager
+    #
+    # This is a mapping of metadata names to functions. When you call `self.set_metadata(name, value, **options)`,
+    # if `name` is in this mapping then the corresponding function will be called with the `value`, and the
+    # return value(s) will be sent instead.
+    #
+    # Transformer functions must satisfy the following signature:
+    #
+    #    def transform_<NAME>(value: Any, options: dict) -> Union[str, Dict[str, str]]:
+    #
+    # If the return type is a string, then it will be sent as the value for `name`. If the return type is
+    # a mapping type, then each key will be considered a `name` and will be sent with its (str) value.
+    METADATA_TRANSFORMERS = None
+
+    # Default fields to whitelist for metadata submission
+    METADATA_DEFAULT_CONFIG_INIT_CONFIG = None
+    METADATA_DEFAULT_CONFIG_INSTANCE = None
+
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
     METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
@@ -135,6 +156,9 @@ class __AgentCheck(object):
         # Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         self._http = None
 
+        # Used for sending metadata via Go bindings
+        self._metadata_manager = None
+
         # Save the dynamically detected integration version
         self._check_version = None
 
@@ -192,6 +216,9 @@ class __AgentCheck(object):
         if metric_limit > 0:
             self.metric_limiter = Limiter(self.name, 'metrics', metric_limit, self.warning)
 
+        # Functions that will be called exactly once (if successful) before the first check run
+        self.check_initializations = deque([self.send_config_metadata])
+
     @staticmethod
     def load_config(yaml_str):
         """
@@ -205,6 +232,16 @@ class __AgentCheck(object):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
+
+    @property
+    def metadata_manager(self):
+        if self._metadata_manager is None:
+            if not self.check_id and not using_stub_aggregator:
+                raise RuntimeError('Attribute `check_id` must be set')
+
+            self._metadata_manager = MetadataManager(self.name, self.check_id, self.log, self.METADATA_TRANSFORMERS)
+
+        return self._metadata_manager
 
     @property
     def check_version(self):
@@ -449,9 +486,25 @@ class __AgentCheck(object):
             self.log.warning(self._deprecations[deprecation_key][1])
             self._deprecations[deprecation_key][0] = True
 
-    # TODO(olivier): implement service_metadata if it's worth it
+    # TODO: Remove once our checks stop calling it
     def service_metadata(self, meta_name, value):
         pass
+
+    def set_metadata(self, name, value, **options):
+        """Updates the cached metadata ``name`` with ``value``, which is then sent by the Agent at regular intervals.
+
+        :param str name: the name of the metadata
+        :param object value: the value for the metadata. if ``name`` has no transformer defined then the
+                             raw ``value`` will be submitted and therefore it must be a ``str``
+        :param options: keyword arguments to pass to any defined transformer
+        """
+        self.metadata_manager.submit(name, value, options)
+
+    def send_config_metadata(self):
+        self.set_metadata('config', self.instance, section='instance', whitelist=self.METADATA_DEFAULT_CONFIG_INSTANCE)
+        self.set_metadata(
+            'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
+        )
 
     def set_external_tags(self, external_tags):
         # Example of external_tags format
@@ -480,13 +533,21 @@ class __AgentCheck(object):
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
-    def warning(self, warning_message):
+    def warning(self, warning_message, *args, **kwargs):
         """Log a warning message and display it in the Agent's status page.
 
+        Using *args is intended to make warning work like log.warn/debug/info/etc
+        and make it compliant with flake8 logging format linter.
+
         :param str warning_message: the warning message.
+        :param list args: format string args used to format warning_message e.g. `warning_message % args`
+        :param dict kwargs: not used for now, but added to match Python logger's `warning` method signature
         """
         warning_message = to_string(warning_message)
-
+        # Interpolate message only if args is not empty. Same behavior as python logger:
+        # https://github.com/python/cpython/blob/1dbe5373851acb85ba91f0be7b83c69563acd68d/Lib/logging/__init__.py#L368-L369
+        if args:
+            warning_message = warning_message % args
         frame = inspect.currentframe().f_back
         lineno = frame.f_lineno
         # only log the last part of the filename, not the full path
@@ -560,6 +621,14 @@ class __AgentCheck(object):
 
     def run(self):
         try:
+            while self.check_initializations:
+                initialization = self.check_initializations.popleft()
+                try:
+                    initialization()
+                except Exception:
+                    self.check_initializations.appendleft(initialization)
+                    raise
+
             instance = copy.deepcopy(self.instances[0])
 
             if 'set_breakpoint' in self.init_config:
