@@ -28,7 +28,7 @@ datadog-elastic==1.14.0
 datadog-envoy==1.10.0
 datadog-etcd==2.0.0
 datadog-exchange-server==1.5.0; sys_platform == 'win32'
-datadog-fluentd==1.3.0
+datadog-fluentd==1.4.0
 datadog-gearmand==1.3.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.4.1
 datadog-gitlab==2.5.1
