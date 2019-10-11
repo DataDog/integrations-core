@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
 
 import pytest
 
@@ -11,8 +12,10 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
 
 def test_check(aggregator, check, instance):
     check.check(instance)
+    time.sleep(2)
+    check.check(instance)
     for mname in common.COMMON_METRICS:
-        aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
+        aggregator.assert_metric(mname, at_least=1, tags=['cluster:webs', 'varnish_name:default'])
 
 
 def test_inclusion_filter(aggregator, check, instance):
