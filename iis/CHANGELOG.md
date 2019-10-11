@@ -1,5 +1,9 @@
 # CHANGELOG - iis
 
+## 2.7.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+
 ## 2.6.1 / 2019-06-18
 
 * [Fixed] Rename lower case manifest.in. See [#3858](https://github.com/DataDog/integrations-core/pull/3858).
