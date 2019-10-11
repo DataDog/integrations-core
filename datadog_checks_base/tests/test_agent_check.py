@@ -3,6 +3,9 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from collections import OrderedDict
+
 import mock
 import pytest
 from six import PY3
@@ -44,6 +47,29 @@ def test_log_critical_error():
 
     with pytest.raises(NotImplementedError):
         check.log.critical('test')
+
+
+def test_warning_ok():
+    check = AgentCheck()
+
+    check.warning("foo")
+    check.warning("hello %s%s", "world", "!")
+
+    assert ["foo", "hello world!"] == check.warnings
+
+
+def test_warning_args_errors():
+    check = AgentCheck()
+
+    check.warning("should not raise error: %s")
+
+    with pytest.raises(TypeError):
+        check.warning("not enough arguments: %s %s", "a")
+
+    with pytest.raises(TypeError):
+        check.warning("too many arguments: %s %s", "a", "b", "c")
+
+    assert ["should not raise error: %s"] == check.warnings
 
 
 class TestMetricNormalization:
@@ -116,6 +142,16 @@ class TestMetrics:
 
         aggregator.assert_metric('test.metric')
 
+    def test_namespace_override(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        methods = ('gauge', 'count', 'monotonic_count', 'rate', 'histogram', 'historate', 'increment', 'decrement')
+        for method in methods:
+            getattr(check, method)('metric', 0, raw=True)
+
+        aggregator.assert_metric('metric', count=len(methods))
+
     def test_non_float_metric(self, aggregator):
         check = AgentCheck()
         metric_name = 'test_metric'
@@ -182,6 +218,13 @@ class TestServiceChecks:
 
         check.service_check('service_check', AgentCheck.OK)
         aggregator.assert_service_check('test.service_check', status=AgentCheck.OK)
+
+    def test_namespace_override(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        check.service_check('service_check', AgentCheck.OK, raw=True)
+        aggregator.assert_service_check('service_check', status=AgentCheck.OK)
 
 
 class TestTags:
@@ -359,3 +402,97 @@ class TestLimits:
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
         assert len(aggregator.metrics("metric")) == 10
+
+
+class TestCheckInitializations:
+    def test_default(self):
+        class TestCheck(AgentCheck):
+            def check(self, _):
+                pass
+
+        check = TestCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+
+        with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+            check.run()
+
+            assert m.call_count == 0
+
+    def test_default_config_sent(self):
+        class TestCheck(AgentCheck):
+            METADATA_DEFAULT_CONFIG_INIT_CONFIG = ['foo']
+            METADATA_DEFAULT_CONFIG_INSTANCE = ['bar']
+
+            def check(self, _):
+                pass
+
+        # Ordered by call order in `AgentCheck.send_config_metadata`
+        value_map = OrderedDict((('instance', 'mock'), ('init_config', 5)))
+
+        config = {'foo': value_map['init_config'], 'bar': value_map['instance']}
+        check = TestCheck('test', config, [config])
+        check.check_id = 'test:123'
+
+        with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+            check.run()
+
+            assert m.call_count == 2
+            check.run()
+            assert m.call_count == 2
+
+            for (config_type, value), call_args in zip(value_map.items(), m.call_args_list):
+                args, _ = call_args
+                assert args[0] == 'test:123'
+                assert args[1] == 'config.{}'.format(config_type)
+
+                data = json.loads(args[2])[0]
+
+                assert data.pop('is_set', None) is True
+                assert data.pop('value', None) == value
+                assert not data
+
+    def test_success_only_once(self):
+        class TestCheck(AgentCheck):
+            def __init__(self, *args, **kwargs):
+                super(TestCheck, self).__init__(*args, **kwargs)
+                self.state = 1
+                self.initialize = mock.MagicMock(side_effect=self._initialize)
+                self.check_initializations.append(self.initialize)
+
+            def _initialize(self):
+                self.state += 1
+                if self.state % 2:
+                    raise Exception('is odd')
+
+            def check(self, _):
+                pass
+
+        check = TestCheck('test', {}, [{}])
+        check.run()
+        check.run()
+        check.run()
+
+        assert check.initialize.call_count == 1
+
+    def test_error_retry(self):
+        class TestCheck(AgentCheck):
+            def __init__(self, *args, **kwargs):
+                super(TestCheck, self).__init__(*args, **kwargs)
+                self.state = 0
+                self.initialize = mock.MagicMock(side_effect=self._initialize)
+                self.check_initializations.append(self.initialize)
+
+            def _initialize(self):
+                self.state += 1
+                if self.state % 2:
+                    raise Exception('is odd')
+
+            def check(self, _):
+                pass
+
+        check = TestCheck('test', {}, [{}])
+        check.run()
+        check.run()
+        check.run()
+
+        assert check.initialize.call_count == 2

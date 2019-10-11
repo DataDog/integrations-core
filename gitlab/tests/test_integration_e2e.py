@@ -33,7 +33,7 @@ def test_check_integration(aggregator):
     instance = CONFIG['instances'][0]
     init_config = CONFIG['init_config']
 
-    gitlab = GitlabCheck('gitlab', init_config, {}, instances=[instance])
+    gitlab = GitlabCheck('gitlab', init_config, instances=[instance])
 
     gitlab.check(instance)
     gitlab.check(instance)

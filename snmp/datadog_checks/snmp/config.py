@@ -1,9 +1,20 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import ipaddress
+import os
+from collections import defaultdict
+
+import pysnmp_mibs
 from pyasn1.type.univ import OctetString
+from pysmi.codegen import PySnmpCodeGen
+from pysmi.compiler import MibCompiler
+from pysmi.parser import SmiStarParser
+from pysmi.reader import HttpReader
+from pysmi.writer import PyFileWriter
 from pysnmp import hlapi
 from pysnmp.smi import builder, view
+from pysnmp.smi.error import MibNotFoundError
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -13,31 +24,70 @@ class InstanceConfig:
 
     DEFAULT_RETRIES = 5
     DEFAULT_TIMEOUT = 1
+    DEFAULT_ALLOWED_FAILURES = 3
+    DEFAULT_BULK_THRESHOLD = 5
 
-    def __init__(self, instance, warning, global_metrics, mibs_path, profiles):
+    def __init__(self, instance, warning, log, global_metrics, mibs_path, profiles, profiles_by_oid):
+        self.instance = instance
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
-        self.profile = instance.get('profile')
+        profile = instance.get('profile')
         if is_affirmative(instance.get('use_global_metrics', True)):
             self.metrics.extend(global_metrics)
-        if self.profile:
-            if self.profile not in profiles:
-                raise ConfigurationError("Unknown profile '{}'".format(self.profile))
-            self.metrics.extend(profiles[self.profile]['definition'])
+        if profile:
+            if profile not in profiles:
+                raise ConfigurationError("Unknown profile '{}'".format(profile))
+            self.metrics.extend(profiles[profile]['definition'])
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self.snmp_engine, self.mib_view_controller = self.create_snmp_engine(mibs_path)
+        self.ip_address = None
+        self.ip_network = None
+        self.discovered_instances = {}
+        self.failing_instances = defaultdict(int)
+        self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
+        self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
-        self.transport = self.get_transport_target(instance, timeout, retries)
 
-        self.ip_address = instance['ip_address']
+        ip_address = instance.get('ip_address')
+        network_address = instance.get('network_address')
+
+        if not ip_address and not network_address:
+            raise ConfigurationError('An IP address or a network address needs to be specified')
+
+        if ip_address and network_address:
+            raise ConfigurationError('Only one of IP address and network address must be specified')
+
+        if ip_address:
+            self.transport = self.get_transport_target(instance, timeout, retries)
+
+            self.ip_address = ip_address
+            self.tags.append('snmp_device:{}'.format(self.ip_address))
+
+        if network_address:
+            if isinstance(network_address, bytes):
+                network_address = network_address.decode('utf-8')
+            self.ip_network = ipaddress.ip_network(network_address)
+
+        if not self.metrics and not profiles_by_oid:
+            raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
+
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
-            self.metrics, self.enforce_constraints, warning
+            self.metrics, self.enforce_constraints, warning, log
         )
-        self.tags.append('snmp_device:{}'.format(self.ip_address))
+
         self.auth_data = self.get_auth_data(instance)
         self.context_data = hlapi.ContextData(*self.get_context_data(instance))
+
+    def refresh_with_profile(self, profile, warning, log):
+        self.metrics.extend(profile['definition'])
+        self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
+            self.metrics, self.enforce_constraints, warning, log
+        )
+
+    def call_cmd(self, cmd, *args, **kwargs):
+        return cmd(self.snmp_engine, self.auth_data, self.transport, self.context_data, *args, **kwargs)
 
     @staticmethod
     def create_snmp_engine(mibs_path):
@@ -60,8 +110,6 @@ class InstanceConfig:
         """
         Generate a Transport target object based on the instance's configuration
         """
-        if 'ip_address' not in instance:
-            raise ConfigurationError('An IP address needs to be specified')
         ip_address = instance['ip_address']
         port = int(instance.get('port', 161))  # Default SNMP port
         return hlapi.UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
@@ -122,12 +170,15 @@ class InstanceConfig:
 
         return context_engine_id, context_name
 
-    @staticmethod
-    def parse_metrics(metrics, enforce_constraints, warning):
-        if not metrics:
-            raise ConfigurationError('Metrics list must contain at least one metric')
+    def parse_metrics(self, metrics, enforce_constraints, warning, log):
+        """Parse configuration and returns data to be used for SNMP queries.
+
+        `raw_oids` is a list of SNMP numerical OIDs to query.
+        `table_oids` is a dictionnary of SNMP tables to symbols to query.
+        `mibs_to_load` contains the relevant MIBs used for querying.
+        """
         raw_oids = []
-        table_oids = []
+        table_oids = {}
         mibs_to_load = set()
         # Check the metrics completely defined
         for metric in metrics:
@@ -140,15 +191,17 @@ class InstanceConfig:
                 if 'symbol' in metric:
                     to_query = metric['symbol']
                     try:
-                        table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], to_query)))
+                        table_oids[hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], to_query))] = []
                     except Exception as e:
                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                 elif 'symbols' not in metric:
                     raise ConfigurationError('When specifying a table, you must specify a list of symbols')
                 else:
+                    symbols = []
+                    table_oids[hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], metric['table']))] = symbols
                     for symbol in metric['symbols']:
                         try:
-                            table_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], symbol)))
+                            symbols.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], symbol)))
                         except Exception as e:
                             warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                     if 'metric_tags' in metric:
@@ -160,7 +213,7 @@ class InstanceConfig:
                             if 'column' in metric_tag:
                                 # In case it's a column, we need to query it as well
                                 try:
-                                    table_oids.append(
+                                    symbols.append(
                                         hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], metric_tag.get('column')))
                                     )
                                 except Exception as e:
@@ -171,4 +224,22 @@ class InstanceConfig:
             else:
                 raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
 
+        for mib in mibs_to_load:
+            try:
+                self.mib_view_controller.mibBuilder.loadModule(mib)
+            except MibNotFoundError:
+                log.debug("Couldn't found mib %s, trying to fetch it", mib)
+                self.fetch_mib(mib)
+
         return table_oids, raw_oids, mibs_to_load
+
+    @staticmethod
+    def fetch_mib(mib):
+        target_directory = os.path.dirname(pysnmp_mibs.__file__)
+
+        reader = HttpReader('mibs.snmplabs.com', 80, '/asn1/@mib@')
+        mibCompiler = MibCompiler(SmiStarParser(), PySnmpCodeGen(), PyFileWriter(target_directory))
+
+        mibCompiler.addSources(reader)
+
+        mibCompiler.compile(mib)

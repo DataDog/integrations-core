@@ -81,14 +81,23 @@ NGINX Plus users can also utilize `stub_status`, but since that module provides 
 For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_api_module][7] instead. For example, enable the `/api` endpoint in your main NGINX configuration file (`/etc/nginx/conf.d/default.conf`):
 
   ```
-  server { 
-    listen 8080; 
-    location /api { 
+  server {
+    listen 8080;
+    location /api {
       api write=on;
     }
-  } 
+  }
   ```
 
+To get more detailed metrics with NGINX Plus (such as 2xx / 3xx / 4xx / 5xx response counts per second), set a `status_zone` on the servers you want to monitor. For example:
+
+  ```
+  server {
+    listen 80;
+    status_zone <ZONE_NAME>;
+    ...
+  }
+  ```
 
 Reload NGINX to enable the status or API endpoint. There's no need for a full restart.
 
@@ -145,7 +154,7 @@ sudo nginx -t && sudo nginx -s reload
 
 3. [Restart the Agent][9].
 
-**Note**: The default NGINX log format does not have a request response time. To include it into your logs, update the NGINX log format by adding the following configuration block in the `http` section of your NGINX configuration file (`/etc/nginx/nginx.conf`): 
+**Note**: The default NGINX log format does not have a request response time. To include it into your logs, update the NGINX log format by adding the following configuration block in the `http` section of your NGINX configuration file (`/etc/nginx/nginx.conf`):
 
 ```
 http {
@@ -200,14 +209,17 @@ The NGINX check does not include any events.
 Returns `CRITICAL` if the Agent cannot connect to NGINX to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][13].
+
+* [Why do my logs not have the expected timestamp?][13]
+
+Need help? Contact [Datadog support][14].
 
 ## Further Reading
 Additional helpful documentation, links, and articles:
 
-* [How to monitor NGINX][14]
-* [How to collect NGINX metrics][15]
-* [How to monitor NGINX with Datadog][16]
+* [How to monitor NGINX][15]
+* [How to collect NGINX metrics][16]
+* [How to monitor NGINX with Datadog][17]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
@@ -221,7 +233,8 @@ Additional helpful documentation, links, and articles:
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
-[13]: https://docs.datadoghq.com/help
-[14]: https://www.datadoghq.com/blog/how-to-monitor-nginx
-[15]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
-[16]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html
+[13]: https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp/
+[14]: https://docs.datadoghq.com/help
+[15]: https://www.datadoghq.com/blog/how-to-monitor-nginx
+[16]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
+[17]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html

@@ -11,20 +11,22 @@ class TrelloClient:
     def __init__(self, config):
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
         self.team_list_map = {
-            'Agent': '5ae1e3d62a5167779e65e87d',
             'Containers': '5ae1cab495edd80852396c71',
+            'Core': '5ae1e3d62a5167779e65e87d',
             'Integrations': '5ae1e3e2c81fff836d00497e',
             'Logs': '5aeca4c19707c4222bf6d883',
+            'Platform': '5d9b687492952e6578ecf04d',
             'Process': '5aeca4c8621e4359b9cb9c27',
             'Trace': '5bcf3ffbe0651642ae029038',
         }
         self.label_team_map = {
             'team/agent-apm': 'Trace',
-            'team/agent-core': 'Agent',
+            'team/agent-core': 'Core',
             'team/burrito': 'Process',
             'team/containers': 'Containers',
             'team/integrations': 'Integrations',
             'team/logs': 'Logs',
+            'team/platform': 'Platform',
         }
 
     def create_card(self, team, name, body):

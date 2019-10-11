@@ -43,4 +43,4 @@ def instance():
 
 @pytest.fixture()
 def check():
-    return IbmWasCheck('ibm_was', {}, {})
+    return lambda instance: IbmWasCheck('ibm_was', {}, [instance or common.INSTANCE])

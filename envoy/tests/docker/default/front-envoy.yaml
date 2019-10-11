@@ -34,19 +34,61 @@ static_resources:
     type: strict_dns
     lb_policy: round_robin
     http2_protocol_options: {}
-    hosts:
-    - socket_address:
-        address: service1
-        port_value: 80
+    load_assignment:
+      cluster_name: service1
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: service1
+                port_value: 80
   - name: service2
     connect_timeout: 0.25s
     type: strict_dns
     lb_policy: round_robin
     http2_protocol_options: {}
-    hosts:
-    - socket_address:
-        address: service2
-        port_value: 80
+    load_assignment:
+      cluster_name: service2
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: service2
+                port_value: 80
+  - name: xds_cluster
+    http2_protocol_options: {}
+    connect_timeout: 1s
+    type: LOGICAL_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: xds_cluster
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: xds
+                port_value: 8080
+dynamic_resources:
+  cds_config:
+    api_config_source:
+      api_type: GRPC
+      grpc_services:
+      - envoy_grpc:
+          cluster_name: xds_cluster
+      set_node_on_first_message_only: true
+  lds_config:
+    api_config_source:
+      api_type: GRPC
+      grpc_services:
+      - envoy_grpc:
+          cluster_name: xds_cluster
+      set_node_on_first_message_only: true
+node:
+  cluster: e2e-test-cluster
+  id: e2e-test-id
 admin:
   access_log_path: "/dev/null"
   address:

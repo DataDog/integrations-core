@@ -5,6 +5,7 @@ import os
 from copy import deepcopy
 
 import mock
+import pytest
 
 from .common import FIXTURES_PATH
 from .utils import mocked_perform_request
@@ -57,3 +58,35 @@ def test_nest_payload(check):
     expected = {"foo": {"bar": payload}}
 
     assert result == expected
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        (
+            "legacy auth config",
+            {'user': 'legacy_foo', 'password': 'legacy_bar'},
+            {'auth': ('legacy_foo', 'legacy_bar')},
+        ),
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'ssl_validation': True}, {'verify': True}),
+        ("legacy ssl config False", {'ssl_validation': False}, {'verify': False}),
+    ],
+)
+def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
+    instance = deepcopy(instance)
+    instance.update(extra_config)
+
+    c = check(instance)
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200, content='{}')
+
+        c.check(instance)
+
+        http_wargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_wargs.update(expected_http_kwargs)
+
+        r.get.assert_called_with('http://localhost:8080/nginx_status', **http_wargs)

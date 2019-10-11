@@ -1,5 +1,28 @@
 # CHANGELOG - kafka_consumer
 
+## 2.1.0 / 2019-10-09
+
+* [Added] Add support for fetching consumer offsets stored in Kafka to `monitor_unlisted_consumer_groups`. See [#3957](https://github.com/DataDog/integrations-core/pull/3957). Thanks [jeffwidman](https://github.com/jeffwidman).
+
+## 2.0.1 / 2019-08-27
+
+* [Fixed] Fix logger call during exceptions. See [#4440](https://github.com/DataDog/integrations-core/pull/4440).
+
+## 2.0.0 / 2019-08-24
+
+* [Changed] Drop `source:kafka` from tags.. See [#4400](https://github.com/DataDog/integrations-core/pull/4400). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Force initial population of the cluster cache. See [#4394](https://github.com/DataDog/integrations-core/pull/4394). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Add flag `monitor_all_broker_highwatermarks`, refactor. See [#4385](https://github.com/DataDog/integrations-core/pull/4385). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Fixed] Fix kafka_consumer python3 compatibility check regression. See [#4387](https://github.com/DataDog/integrations-core/pull/4387).
+* [Added] Better manage partitions that are in the middle of failover. See [#4382](https://github.com/DataDog/integrations-core/pull/4382). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Document kafka_client_api_version. See [#4381](https://github.com/DataDog/integrations-core/pull/4381). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Make the Zookeeper client instance long-lived. See [#4378](https://github.com/DataDog/integrations-core/pull/4378). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Document that fetching consumer offsets from Zookeeper is deprecated. See [#4272](https://github.com/DataDog/integrations-core/pull/4272). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Cleanup pointless retries that query the wrong brokers / duplicate kafka-python functionality. See [#4271](https://github.com/DataDog/integrations-core/pull/4271). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Changed] Remove rarely used zookeeper-specific min collection interval. See [#4269](https://github.com/DataDog/integrations-core/pull/4269). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Bump Kazoo to 2.6.1 to pull in some minor bugfixes. See [#4260](https://github.com/DataDog/integrations-core/pull/4260). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Remove unnecessary constants and cleanup error handling. See [#4256](https://github.com/DataDog/integrations-core/pull/4256). Thanks [jeffwidman](https://github.com/jeffwidman).
+
 ## 1.10.0 / 2019-06-19
 
 * [Added] Refactor check to support different versions easily. See [#3929](https://github.com/DataDog/integrations-core/pull/3929).

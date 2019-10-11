@@ -76,6 +76,13 @@ instances:
     #
     # send_histograms_buckets: true
 
+    ## @param send_distribution_buckets - boolean - optional - default: false
+    ## Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.
+    ##
+    ## Learn more about distribution metrics: https://docs.datadoghq.com/developers/metrics/distributions/
+    #
+    # send_distribution_buckets: false
+
     ## @param send_monotonic_counter - boolean - optional - default: true
     ## Set send_monotonic_counter to true to send counters as monotonic counter.
     #

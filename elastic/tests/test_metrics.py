@@ -56,6 +56,10 @@ def test_stats_for_version():
     metrics = stats_for_version([6, 3, 0])
     assert len(metrics) == 180
 
+    # v7.2.0
+    metrics = stats_for_version([7, 2, 0])
+    assert len(metrics) == 177
+
 
 @pytest.mark.unit
 def test_pshard_stats_for_version():
@@ -106,6 +110,10 @@ def test_pshard_stats_for_version():
     # v6.3.0
     pshard_metrics = pshard_stats_for_version([6, 3, 0])
     assert len(pshard_metrics) == 34
+
+    # v7.2.0
+    pshard_metrics = pshard_stats_for_version([7, 2, 0])
+    assert len(pshard_metrics) == 36
 
 
 @pytest.mark.unit

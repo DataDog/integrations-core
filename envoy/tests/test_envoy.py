@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import mock
+import pytest
 
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
@@ -11,6 +14,7 @@ from .common import INSTANCES, response
 CHECK_NAME = 'envoy'
 
 
+@pytest.mark.usefixtures('dd_environment')
 def test_success(aggregator):
     instance = INSTANCES['main']
     c = Envoy(CHECK_NAME, {}, [instance])
@@ -36,7 +40,7 @@ def test_success_fixture(aggregator):
 
     num_metrics = len(response('multiple_services').content.decode().splitlines())
     num_metrics -= sum(c.unknown_metrics.values()) + sum(c.unknown_tags.values())
-    assert 4186 <= metrics_collected == num_metrics
+    assert 4215 <= metrics_collected == num_metrics
 
 
 def test_success_fixture_whitelist(aggregator):
@@ -90,3 +94,29 @@ def test_unknown():
         c.check(instance)
 
     assert sum(c.unknown_metrics.values()) == 5
+
+
+@pytest.mark.parametrize(
+    'test_case, extra_config, expected_http_kwargs',
+    [
+        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
+        ("legacy ssl config True", {'verify_ssl': True}, {'verify': True}),
+        ("legacy ssl config False", {'verify_ssl': False}, {'verify': False}),
+        ("legacy ssl config unset", {}, {'verify': True}),
+    ],
+)
+def test_config(test_case, extra_config, expected_http_kwargs):
+    instance = deepcopy(INSTANCES['main'])
+    instance.update(extra_config)
+    check = Envoy(CHECK_NAME, {}, instances=[instance])
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200)
+
+        check.check(instance)
+
+        http_wargs = dict(
+            auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
+        )
+        http_wargs.update(expected_http_kwargs)
+        r.get.assert_called_with('http://localhost:8001/stats', **http_wargs)

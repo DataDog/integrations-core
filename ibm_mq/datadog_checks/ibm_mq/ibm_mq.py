@@ -23,7 +23,7 @@ else:
     SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
 
     STATUS_MQCHS_UNKNOWN = -1
-    CHANNEL_STATUS_MAP = {
+    CHANNEL_STATUS_NAME_MAPPING = {
         pymqi.CMQCFC.MQCHS_INACTIVE: "inactive",
         pymqi.CMQCFC.MQCHS_BINDING: "binding",
         pymqi.CMQCFC.MQCHS_STARTING: "starting",
@@ -36,20 +36,6 @@ else:
         pymqi.CMQCFC.MQCHS_INITIALIZING: "initializing",
         STATUS_MQCHS_UNKNOWN: "unknown",
     }
-
-    SERVICE_CHECK_MAP = {
-        pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STARTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_RUNNING: AgentCheck.OK,
-        pymqi.CMQCFC.MQCHS_STOPPING: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_RETRYING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_STOPPED: AgentCheck.CRITICAL,
-        pymqi.CMQCFC.MQCHS_REQUESTING: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_PAUSED: AgentCheck.WARNING,
-        pymqi.CMQCFC.MQCHS_INITIALIZING: AgentCheck.WARNING,
-    }
-
 
 log = logging.getLogger(__file__)
 
@@ -234,19 +220,25 @@ class IbmMqCheck(AgentCheck):
             mname = '{}.channel.channels'.format(self.METRIC_PREFIX)
             self.gauge(mname, channels, tags=tags)
 
-        # grab all the discoverable channels
-        self._submit_channel_status(queue_manager, '*', tags, config)
-
-        # check specific channels as well
-        # if a channel is not listed in the above one, a user may want to check it specifically,
-        # in this case it'll fail
+        # Check specific channels
+        # If a channel is not discoverable, a user may want to check it specifically.
+        # Specific channels are checked first to send channel metrics and `ibm_mq.channel` service checks
+        # at the same time, but the end result is the same in any order.
         for channel in config.channels:
             self._submit_channel_status(queue_manager, channel, tags, config)
 
-    def _submit_channel_status(self, queue_manager, search_channel_name, tags, config):
+        # Grab all the discoverable channels
+        self._submit_channel_status(queue_manager, '*', tags, config, config.channels)
+
+    def _submit_channel_status(self, queue_manager, search_channel_name, tags, config, channels_to_skip=None):
         """Submit channel status
+
+        Note: Error 3065 (MQRCCF_CHL_STATUS_NOT_FOUND) might indicate that the channel has not been used.
+        More info: https://www.ibm.com/support/knowledgecenter/SSFKSJ_7.1.0/com.ibm.mq.doc/fm16690_.htm
+
         :param search_channel_name might contain wildcard characters
         """
+        channels_to_skip = channels_to_skip or []
         search_channel_tags = tags + ["channel:{}".format(search_channel_name)]
         try:
             args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(search_channel_name)}
@@ -254,31 +246,36 @@ class IbmMqCheck(AgentCheck):
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.OK, search_channel_tags)
         except pymqi.MQMIError as e:
-            self.log.warning("Error getting CHANNEL stats {}".format(e))
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, search_channel_tags)
+            if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND:
+                self.log.debug("Channel status not found for channel {}: {}".format(search_channel_name, e))
+            else:
+                self.log.warning("Error getting CHANNEL status for channel {}: {}".format(search_channel_name, e))
         else:
             for channel_info in response:
                 channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                if channel_name in channels_to_skip:
+                    continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
 
                 channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
 
                 self._submit_channel_count(channel_name, channel_status, channel_tags)
-                self._submit_status_check(channel_name, channel_status, channel_tags)
+                self._submit_status_check(channel_name, channel_status, channel_tags, config)
 
-    def _submit_status_check(self, channel_name, channel_status, channel_tags):
-        if channel_status in SERVICE_CHECK_MAP:
-            service_check_status = SERVICE_CHECK_MAP[channel_status]
+    def _submit_status_check(self, channel_name, channel_status, channel_tags, config):
+        if channel_status in config.channel_status_mapping:
+            service_check_status = config.channel_status_mapping[channel_status]
         else:
             self.log.warning("Status `{}` not found for channel `{}`".format(channel_status, channel_name))
             service_check_status = AgentCheck.UNKNOWN
         self.service_check(self.CHANNEL_STATUS_SERVICE_CHECK, service_check_status, channel_tags)
 
     def _submit_channel_count(self, channel_name, channel_status, channel_tags):
-        if channel_status not in CHANNEL_STATUS_MAP:
+        if channel_status not in CHANNEL_STATUS_NAME_MAPPING:
             self.log.warning("Status `{}` not found for channel `{}`".format(channel_status, channel_name))
             channel_status = STATUS_MQCHS_UNKNOWN
 
-        for status, status_label in iteritems(CHANNEL_STATUS_MAP):
+        for status, status_label in iteritems(CHANNEL_STATUS_NAME_MAPPING):
             status_active = int(status == channel_status)
             self.gauge(self.CHANNEL_COUNT_CHECK, status_active, tags=channel_tags + ["status:" + status_label])

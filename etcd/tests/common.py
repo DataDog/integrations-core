@@ -11,3 +11,24 @@ HOST = get_docker_hostname()
 PORT = '23790'
 V3_PREVIEW = os.getenv('V3_PREVIEW') == 'true'
 URL = 'http://{}:{}'.format(HOST, PORT)
+
+LEGACY_INSTANCE = {'url': URL, 'use_preview': False}
+
+STORE_METRICS = [
+    'compareanddelete.fail',
+    'compareanddelete.success',
+    'compareandswap.fail',
+    'compareandswap.success',
+    'create.fail',
+    'create.success',
+    'delete.fail',
+    'delete.success',
+    'expire.count',
+    'gets.fail',
+    'gets.success',
+    'sets.fail',
+    'sets.success',
+    'update.fail',
+    'update.success',
+    'watchers',
+]

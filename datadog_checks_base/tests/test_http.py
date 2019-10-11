@@ -17,7 +17,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
 from datadog_checks.dev import EnvVars
-from datadog_checks.dev.utils import running_on_appveyor
+from datadog_checks.dev.utils import running_on_windows_ci
 
 pytestmark = pytest.mark.http
 
@@ -271,6 +271,31 @@ class TestAuth:
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
+    def test_config_kerberos_cache(self):
+        instance = {'kerberos_cache': '/test/file'}
+        init_config = {}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert os.environ.get('KRB5CCNAME') is None
+
+        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+            assert http.get('https://www.google.com') == '/test/file'
+
+        assert os.environ.get('KRB5CCNAME') is None
+
+    def test_config_kerberos_cache_restores_rollback(self):
+        instance = {'kerberos_cache': '/test/file'}
+        init_config = {}
+
+        http = RequestsWrapper(instance, init_config)
+
+        with EnvVars({'KRB5CCNAME': 'old'}):
+            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+                assert http.get('https://www.google.com') == '/test/file'
+
+            assert os.environ.get('KRB5CCNAME') == 'old'
+
     def test_config_kerberos_keytab_file_rollback(self):
         instance = {'kerberos_keytab': '/test/file'}
         init_config = {}
@@ -303,6 +328,62 @@ class TestAuth:
                 hostname_override=None,
                 principal=None,
             )
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_kerberos_auth_noconf(self, kerberos):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(kerberos["url"])
+
+        assert response.status_code == 401
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_kerberos_auth_principal_inexistent(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'kerberos_auth': 'required',
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+            'kerberos_keytab': kerberos["keytab"],
+            'kerberos_principal': "user/doesnotexist@{}".format(kerberos["realm"]),
+            'kerberos_force_initiate': 'false',
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+        assert response.status_code == 401
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_kerberos_auth_principal_incache_nokeytab(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'kerberos_auth': 'required',
+            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_principal': "user/nokeytab@{}".format(kerberos["realm"]),
+            'kerberos_force_initiate': 'true',
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+        assert response.status_code == 200
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_kerberos_auth_principal_inkeytab_nocache(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'kerberos_auth': 'required',
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_cache': "DIR:{}".format(kerberos["tmp_dir"]),
+            'kerberos_keytab': kerberos["keytab"],
+            'kerberos_principal': "user/inkeytab@{}".format(kerberos["realm"]),
+            'kerberos_force_initiate': 'true',
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+        assert response.status_code == 200
 
     def test_config_ntlm(self):
         instance = {'ntlm_domain': 'domain\\user', 'password': 'pass'}
@@ -455,7 +536,7 @@ class TestProxies:
 
         http.get('https://www.google.com')
 
-    @pytest.mark.skipif(running_on_appveyor(), reason="Cannot run on appveyor")
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
     def test_socks5_proxy(self, socks5_proxy):
         instance = {'proxy': {'http': 'socks5h://{}'.format(socks5_proxy)}}
         init_config = {}

@@ -47,8 +47,10 @@ IO_METRICS = {'io_service_bytes_recursive': 'ecs.fargate.io.bytes.', 'io_service
 
 
 class FargateCheck(AgentCheck):
+
+    HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}
+
     def check(self, instance):
-        timeout = float(instance.get('timeout', DEFAULT_TIMEOUT))
         metadata_endpoint = API_ENDPOINT + METADATA_ROUTE
         stats_endpoint = API_ENDPOINT + STATS_ROUTE
         custom_tags = instance.get('tags', [])
@@ -56,7 +58,9 @@ class FargateCheck(AgentCheck):
         try:
             request = self.http.get(metadata_endpoint)
         except requests.exceptions.Timeout:
-            msg = 'Fargate {} endpoint timed out after {} seconds'.format(metadata_endpoint, timeout)
+            msg = 'Fargate {} endpoint timed out after {} seconds'.format(
+                metadata_endpoint, self.http.options['timeout']
+            )
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.exception(msg)
             return
@@ -110,7 +114,7 @@ class FargateCheck(AgentCheck):
         try:
             request = self.http.get(stats_endpoint)
         except requests.exceptions.Timeout:
-            msg = 'Fargate {} endpoint timed out after {} seconds'.format(stats_endpoint, timeout)
+            msg = 'Fargate {} endpoint timed out after {} seconds'.format(stats_endpoint, self.http.options['timeout'])
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
             return

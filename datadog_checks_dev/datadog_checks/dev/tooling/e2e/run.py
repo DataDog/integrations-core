@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from ..._env import E2E_ENV_VAR_PREFIX, E2E_SET_UP, E2E_TEAR_DOWN
 from ...subprocess import run_command
-from ...utils import chdir, path_join
+from ...utils import chdir, get_ci_env_vars, path_join
 from ..constants import get_root
 from .format import parse_config_from_result
 
@@ -13,7 +13,7 @@ def start_environment(check, env):
     env_vars = {
         E2E_TEAR_DOWN: 'false',
         'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
-        'TOX_TESTENV_PASSENV': '{} PYTEST_ADDOPTS'.format(E2E_TEAR_DOWN),
+        'TOX_TESTENV_PASSENV': '{} PYTEST_ADDOPTS {}'.format(E2E_TEAR_DOWN, ' '.join(get_ci_env_vars())),
     }
 
     with chdir(path_join(get_root(), check), env_vars=env_vars):
@@ -27,7 +27,9 @@ def stop_environment(check, env, metadata=None):
     env_vars = {
         E2E_SET_UP: 'false',
         'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
-        'TOX_TESTENV_PASSENV': '{}* {} PYTEST_ADDOPTS'.format(E2E_ENV_VAR_PREFIX, E2E_SET_UP),
+        'TOX_TESTENV_PASSENV': '{}* {} PYTEST_ADDOPTS {}'.format(
+            E2E_ENV_VAR_PREFIX, E2E_SET_UP, ' '.join(get_ci_env_vars())
+        ),
     }
     env_vars.update((metadata or {}).get('env_vars', {}))
 

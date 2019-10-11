@@ -2,3 +2,6 @@
    2 LISTEN
    1 State
    2 TIME-WAIT
+   1 SYN-SENT
+   1 SYN-RECV
+   2 CLOSING

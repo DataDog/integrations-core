@@ -82,8 +82,16 @@ def replay_check_run(agent_collector, stub_aggregator):
         for data in aggregator.get('metrics', []):
             for _, value in data['points']:
                 metric_type = stub_aggregator.METRIC_ENUM_MAP[data['type']]
-                stub_aggregator.submit_metric(
-                    check_name, check_id, metric_type, data['metric'], value, data['tags'], data['host'], data.get('device')
+                stub_aggregator.submit_metric_e2e(
+                    # device is only present when replaying e2e tests. In integration tests it will be a tag
+                    check_name,
+                    check_id,
+                    metric_type,
+                    data['metric'],
+                    value,
+                    data['tags'],
+                    data['host'],
+                    data.get('device'),
                 )
 
         for data in aggregator.get('service_checks', []):
@@ -102,7 +110,9 @@ def serialize_data(data):
     # Using base64 ensures:
     # 1. Printing to stdout won't fail
     # 2. Easy parsing since there are no spaces
-    return urlsafe_b64encode(data.encode('utf-8')).decode('utf-8')
+    #
+    # TODO: Remove str() when we drop Python 2
+    return str(urlsafe_b64encode(data.encode('utf-8')).decode('utf-8'))
 
 
 def deserialize_data(data):

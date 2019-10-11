@@ -416,8 +416,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = instance_tags[:]
-                tags += tagger.tag('%s' % replace_container_rt_prefix(cid), tagger.HIGH) or []
+                tags = tagger.tag(replace_container_rt_prefix(cid), tagger.HIGH)
+                if not tags:
+                    continue
+                tags += instance_tags
 
                 try:
                     for resource, value_str in iteritems(ctr.get('resources', {}).get('requests', {})):
@@ -455,8 +457,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 if self.pod_list_utils.is_excluded(cid, pod_uid):
                     continue
 
-                tags = instance_tags[:]
-                tags += tagger.tag('%s' % replace_container_rt_prefix(cid), tagger.ORCHESTRATOR) or []
+                tags = tagger.tag(replace_container_rt_prefix(cid), tagger.ORCHESTRATOR)
+                if not tags:
+                    continue
+                tags += instance_tags
 
                 restart_count = ctr_status.get('restartCount', 0)
                 self.gauge(self.NAMESPACE + '.containers.restarts', restart_count, tags)

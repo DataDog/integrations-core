@@ -7,18 +7,14 @@ import re
 import socket
 import ssl
 import time
-import warnings
 from datetime import datetime
 
 import _strptime  # noqa
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from requests_ntlm import HttpNtlmAuth
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import ensure_unicode
-from datadog_checks.base.checks import NetworkCheck, Status
+from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
@@ -33,60 +29,69 @@ CONTENT_LENGTH = 200
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
 
 
-class HTTPCheck(NetworkCheck):
+class HTTPCheck(AgentCheck):
     SOURCE_TYPE_NAME = 'system'
     SC_STATUS = 'http.can_connect'
     SC_SSL_CERT = 'http.ssl_cert'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        NetworkCheck.__init__(self, name, init_config, agentConfig, instances)
+    HTTP_CONFIG_REMAPPER = {
+        'client_cert': {'name': 'tls_cert'},
+        'client_key': {'name': 'tls_private_key'},
+        'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': True},
+        'ignore_ssl_warning': {'name': 'tls_ignore_warning'},
+        'ca_certs': {'name': 'tls_ca_cert'},
+    }
+
+    def __init__(self, name, init_config, instances):
+        super(HTTPCheck, self).__init__(name, init_config, instances)
 
         self.ca_certs = init_config.get('ca_certs')
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
 
-    def _check(self, instance):
+        self.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = self.ca_certs
+
+        if is_affirmative(self.instance.get('disable_ssl_validation', True)):
+            # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
+            self.http.options['verify'] = False
+
+    def check(self, instance):
         (
             addr,
-            ntlm_domain,
-            username,
-            password,
             client_cert,
             client_key,
             method,
             data,
             http_response_status_code,
-            timeout,
             include_content,
             headers,
             response_time,
             content_match,
             reverse_content_match,
             tags,
-            disable_ssl_validation,
             ssl_expire,
             instance_ca_certs,
             weakcipher,
             check_hostname,
-            ignore_ssl_warning,
-            skip_proxy,
             allow_redirects,
             stream,
         ) = from_instance(instance, self.ca_certs)
-
+        timeout = self.http.options['timeout'][0]
         start = time.time()
+        # allows default headers to be included based on `include_default_headers` flag
+        self.http.options['headers'] = headers
 
         def send_status_up(logMsg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.debug(logMsg)
-            service_checks.append((self.SC_STATUS, Status.UP, "UP"))
+            service_checks.append((self.SC_STATUS, AgentCheck.OK, "UP"))
 
         def send_status_down(loginfo, down_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.info(loginfo)
             if include_content:
                 down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
-            service_checks.append((self.SC_STATUS, Status.DOWN, down_msg))
+            service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
 
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
@@ -94,87 +99,49 @@ class HTTPCheck(NetworkCheck):
         instance_name = self.normalize(instance['name'])
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
+        service_checks_tags = self._get_service_checks_tags(instance)
         r = None
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to {}".format(addr))
-
-            suppress_warning = False
-            if disable_ssl_validation and parsed_uri.scheme == "https":
-                explicit_validation = 'disable_ssl_validation' in instance
-                if ignore_ssl_warning:
-                    if explicit_validation:
-                        suppress_warning = True
-                else:
-                    # Log if we're skipping SSL validation for HTTPS URLs
-                    if explicit_validation:
-                        self.log.debug("Skipping SSL certificate validation for {} based on configuration".format(addr))
-
-                    # Emit a warning if disable_ssl_validation is not explicitly set and we're not ignoring warnings
-                    else:
-                        self.warning(
-                            "Parameter disable_ssl_validation for {} is not explicitly set, "
-                            "defaults to true".format(addr)
-                        )
-
-            instance_proxy = self.get_instance_proxy(instance, addr)
-            self.log.debug("Proxies used for {} - {}".format(addr, instance_proxy))
-
-            auth = None
-            if password is not None:
-                if username is not None:
-                    auth = (username, password)
-                elif ntlm_domain is not None:
-                    auth = HttpNtlmAuth(ntlm_domain, password)
-
-            sess = requests.Session()
-            sess.trust_env = False
+            self.http.session.trust_env = False
             if weakcipher:
                 base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-                sess.mount(base_addr, WeakCiphersAdapter())
+                self.http.session.mount(base_addr, WeakCiphersAdapter())
                 self.log.debug(
                     "Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
                         base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS
                     )
                 )
 
-            with warnings.catch_warnings():
-                # Suppress warnings from urllib3 only if disable_ssl_validation is explicitly set to True
-                #  and ignore_ssl_warning is True
-                if suppress_warning:
-                    warnings.simplefilter('ignore', InsecureRequestWarning)
+            # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
+            if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
+                self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
 
-                # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
-                if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
-                    headers['Content-Type'] = 'application/x-www-form-urlencoded'
-
-                r = sess.request(
-                    method.upper(),
-                    addr,
-                    auth=auth,
-                    timeout=timeout,
-                    headers=headers,
-                    proxies=instance_proxy,
-                    allow_redirects=allow_redirects,
-                    stream=stream,
-                    verify=False if disable_ssl_validation else instance_ca_certs,
-                    json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
-                    data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
-                    cert=(client_cert, client_key) if client_cert and client_key else None,
-                )
-
+            r = getattr(self.http, method.lower())(
+                addr,
+                persist=True,
+                allow_redirects=allow_redirects,
+                stream=stream,
+                json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
+                data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
+            )
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
             self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
             service_checks.append(
-                (self.SC_STATUS, Status.DOWN, "{}. Connection failed after {} ms".format(str(e), length))
+                (self.SC_STATUS, AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length))
             )
 
         except socket.error as e:
             length = int((time.time() - start) * 1000)
             self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
             service_checks.append(
-                (self.SC_STATUS, Status.DOWN, "Socket error: {}. Connection failed after {} ms".format(repr(e), length))
+                (
+                    self.SC_STATUS,
+                    AgentCheck.CRITICAL,
+                    "Socket error: {}. Connection failed after {} ms".format(repr(e), length),
+                )
             )
 
         except Exception as e:
@@ -211,7 +178,7 @@ class HTTPCheck(NetworkCheck):
 
                 self.log.info(message)
 
-                service_checks.append((self.SC_STATUS, Status.DOWN, message))
+                service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, message))
 
             if not service_checks:
                 # Host is UP
@@ -248,14 +215,16 @@ class HTTPCheck(NetworkCheck):
         finally:
             if r is not None:
                 r.close()
+            # resets the wrapper Session object
+            self.http._session = None
 
         # Report status metrics as well
         if service_checks:
-            can_status = 1 if service_checks[0][1] == "UP" else 0
+            can_status = 1 if service_checks[0][1] == AgentCheck.OK else 0
             self.gauge('network.http.can_connect', can_status, tags=tags_list)
 
             # cant_connect is useful for top lists
-            cant_status = 0 if service_checks[0][1] == "UP" else 1
+            cant_status = 0 if service_checks[0][1] == AgentCheck.OK else 1
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
@@ -270,9 +239,11 @@ class HTTPCheck(NetworkCheck):
 
             service_checks.append((self.SC_SSL_CERT, status, msg))
 
-        return service_checks
+        for status in service_checks:
+            sc_name, status, msg = status
+            self.report_as_service_check(sc_name, status, service_checks_tags, msg)
 
-    def report_as_service_check(self, sc_name, status, instance, msg=None):
+    def _get_service_checks_tags(self, instance):
         instance_name = self.normalize(instance['name'])
         url = instance.get('url', None)
         if url is not None:
@@ -283,7 +254,9 @@ class HTTPCheck(NetworkCheck):
         # Only add the URL tag if it's not already present
         if not any(filter(re.compile('^url:').match, tags)):
             tags.append('url:{}'.format(url))
+        return tags
 
+    def report_as_service_check(self, sc_name, status, tags, msg=None):
         if sc_name == self.SC_STATUS:
             # format the HTTP response body into the event
             if isinstance(msg, tuple):
@@ -296,7 +269,7 @@ class HTTPCheck(NetworkCheck):
                 msg = '{} {}\n\n{}'.format(code, reason, content)
                 msg = msg.rstrip()
 
-        self.service_check(sc_name, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
+        self.service_check(sc_name, status, tags=tags, message=msg)
 
     def check_cert_expiration(
         self, instance, timeout, instance_ca_certs, check_hostname, client_cert=None, client_key=None
@@ -338,13 +311,13 @@ class HTTPCheck(NetworkCheck):
             msg = str(e)
             if 'expiration' in msg:
                 self.log.debug("error: {}. Cert might be expired.".format(e))
-                return Status.DOWN, 0, 0, msg
+                return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
                 self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
-                return Status.CRITICAL, 0, 0, msg
+                return AgentCheck.CRITICAL, 0, 0, msg
             else:
                 self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
-                return Status.DOWN, 0, 0, msg
+                return AgentCheck.CRITICAL, 0, 0, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         time_left = exp_date - datetime.utcnow()
@@ -356,7 +329,7 @@ class HTTPCheck(NetworkCheck):
 
         if seconds_left < seconds_critical:
             return (
-                Status.CRITICAL,
+                AgentCheck.CRITICAL,
                 days_left,
                 seconds_left,
                 "This cert TTL is critical: only {} days before it expires".format(days_left),
@@ -364,11 +337,11 @@ class HTTPCheck(NetworkCheck):
 
         elif seconds_left < seconds_warning:
             return (
-                Status.WARNING,
+                AgentCheck.WARNING,
                 days_left,
                 seconds_left,
                 "This cert is almost expired, only {} days left".format(days_left),
             )
 
         else:
-            return Status.UP, days_left, seconds_left, "Days left: {}".format(days_left)
+            return AgentCheck.OK, days_left, seconds_left, "Days left: {}".format(days_left)

@@ -4,8 +4,7 @@
 
 import pytest
 
-from .common import DB_NAME, HOST, PORT
-from .test_common import check_bgw_metrics, check_common_metrics
+from .common import DB_NAME, HOST, PORT, check_bgw_metrics, check_common_metrics
 
 
 @pytest.mark.e2e

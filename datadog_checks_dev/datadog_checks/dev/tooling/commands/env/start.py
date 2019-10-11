@@ -2,13 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import platform
+import time
 
 import click
 import pyperclip
 
-from ....utils import dir_exists, file_exists, path_join
+from ....utils import dir_exists, file_exists, path_join, running_on_ci
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
-from ...e2e.agent import DEFAULT_PYTHON_VERSION
+from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
+from ...git import get_current_branch
 from ...testing import get_available_tox_envs, get_tox_env_python_version
 from ...utils import get_tox_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
@@ -43,11 +46,14 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
         'Ex: -e DD_URL=app.datadoghq.com -e DD_API_KEY=123456'
     ),
 )
+@click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
 @click.pass_context
-def start(ctx, check, env, agent, python, dev, base, env_vars):
+def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
+
+    on_ci = running_on_ci()
 
     base_package = None
     if base:
@@ -66,7 +72,8 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
 
     if env not in envs:
         echo_failure('`{}` is not an available environment.'.format(env))
-        echo_info('See what is available via `ddev env ls {}`.'.format(check))
+        echo_info('Available environments for {}:\n    {}'.format(check, '\n    '.join(envs)))
+        echo_info('You can also use `ddev env ls {}` to see available environments.'.format(check))
         abort()
 
     env_python_version = get_tox_env_python_version(env)
@@ -79,6 +86,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
             'To influence the Agent Python version, use the `-py/--python` option.'.format(env, python)
         )
 
+    if profile_memory and python < 3:
+        profile_memory = False
+        echo_warning('Collecting metrics about memory usage is only supported on Python 3+.')
+
     api_key = ctx.obj['dd_api_key']
     if api_key is None:
         echo_warning(
@@ -87,14 +98,22 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
             'by doing `ddev config set dd_api_key`.'
         )
 
+    if profile_memory and not api_key:
+        profile_memory = False
+        echo_warning('No API key is set; collecting metrics about memory usage will be disabled.')
+
     echo_waiting('Setting up environment `{}`... '.format(env), nl=False)
     config, metadata, error = start_environment(check, env)
 
     if error:
-        echo_failure('failed!')
-        echo_waiting('Stopping the environment...')
-        stop_environment(check, env, metadata=metadata)
-        abort(error)
+        if 'does not support this platform' in error:
+            echo_warning(error)
+            abort(code=0)
+        else:
+            echo_failure('failed!')
+            echo_waiting('Stopping the environment...')
+            stop_environment(check, env, metadata=metadata)
+            abort(error)
     echo_success('success!')
 
     env_type = metadata['env_type']
@@ -121,7 +140,40 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
     for key, value in metadata.get('env_vars', {}).items():
         env_vars.setdefault(key, value)
 
-    environment = interface(check, env, base_package, config, env_vars, metadata, agent_build, api_key, python)
+    if profile_memory:
+        plat = platform.system()
+        try:
+            branch = get_current_branch()
+        except Exception:
+            branch = 'unknown'
+            echo_warning('Unable to detect the current Git branch, defaulting to `{}`.'.format(branch))
+
+        env_vars['DD_TRACEMALLOC_DEBUG'] = '1'
+        env_vars['DD_TRACEMALLOC_WHITELIST'] = check
+
+        if on_ci:
+            env_vars.setdefault('DD_AGGREGATOR_STOP_TIMEOUT', '10')
+            env_vars.setdefault('DD_FORWARDER_STOP_TIMEOUT', '10')
+
+        instances = config
+        if isinstance(config, dict):
+            instances = config.get('instances', [config])
+
+        for instance in instances:
+            instance['__memory_profiling_tags'] = [
+                'platform:{}'.format(plat),
+                'env:{}'.format(env),
+                'branch:{}'.format(branch),
+            ]
+
+            if on_ci:
+                instance['min_collection_interval'] = metadata.get(
+                    'sampling_collection_interval', DEFAULT_SAMPLING_COLLECTION_INTERVAL
+                )
+
+    environment = interface(
+        check, env, base_package, config, env_vars, metadata, agent_build, api_key, python, not bool(agent)
+    )
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)
     environment.update_agent()
@@ -193,6 +245,30 @@ def start(ctx, check, env, agent, python, dev, base, env_vars):
         else:
             environment.update_check()
             echo_success('success!')
+
+    if dev or base or start_commands:
+        echo_waiting('Reloading the environment to reflect changes... ', nl=False)
+        result = environment.restart_agent()
+
+        if result.code:
+            click.echo()
+            echo_info(result.stdout + result.stderr)
+            echo_failure('An error occurred.')
+            echo_waiting('Stopping the environment...')
+            stop_environment(check, env, metadata=metadata)
+            echo_waiting('Stopping the Agent...')
+            environment.stop_agent()
+            environment.remove_config()
+        else:
+            echo_success('success!')
+
+    # Ensure this happens after all time-consuming steps
+    if profile_memory and on_ci:
+        environment.metadata['sampling_start_time'] = time.time()
+
+        echo_waiting('Updating metadata... '.format(env), nl=False)
+        environment.write_config()
+        echo_success('success!')
 
     click.echo()
 

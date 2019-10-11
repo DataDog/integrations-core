@@ -874,3 +874,21 @@ kube_hpa_status_condition{namespace="default",hpa="myhpa",condition="unknown",st
 kube_hpa_status_condition{namespace="default",hpa="myhpa",condition="true",status="ScalingLimited"} 1
 kube_hpa_status_condition{namespace="default",hpa="myhpa",condition="false",status="ScalingLimited"} 0
 kube_hpa_status_condition{namespace="default",hpa="myhpa",condition="unknown",status="ScalingLimited"} 0
+# HELP kube_verticalpodautoscaler_labels Kubernetes labels converted to Prometheus labels.
+# TYPE kube_verticalpodautoscaler_labels gauge
+kube_verticalpodautoscaler_labels{label_app="foobar",namespace="ns1",target_api_version="extensions/v1beta1",target_kind="Deployment",target_name="deployment1",verticalpodautoscaler="vpa1"} 1
+# HELP kube_verticalpodautoscaler_spec_updatepolicy_updatemode Update mode of the VPA.
+# TYPE kube_verticalpodautoscaler_spec_updatepolicy_updatemode gauge
+kube_verticalpodautoscaler_spec_updatepolicy_updatemode{namespace="default",target_api_version="extensions/v1beta1",target_kind="Deployment",target_name="deployment1",update_mode="Recreate",verticalpodautoscaler="vpa1"} 1
+# HELP kube_verticalpodautoscaler_status_recommendation_containerrecommendations_lowerbound Minimum resources the container can use before the VPA updater evicts it.
+# TYPE kube_verticalpodautoscaler_status_recommendation_containerrecommendations_lowerbound gauge
+kube_verticalpodautoscaler_status_recommendation_containerrecommendations_lowerbound{container="container1",namespace="default",resource="cpu",target_api_version="extensions/v1beta1",target_kind="Deployment",target_name="deployment1",unit="core",verticalpodautoscaler="vpa1"} 1
+# HELP kube_verticalpodautoscaler_status_recommendation_containerrecommendations_upperbound Maximum resources the container can use before the VPA updater evicts it.
+# TYPE kube_verticalpodautoscaler_status_recommendation_containerrecommendations_upperbound gauge
+kube_verticalpodautoscaler_status_recommendation_containerrecommendations_upperbound{container="container1",namespace="default",resource="cpu",target_api_version="extensions/v1beta1",target_kind="Deployment",target_name="deployment1",unit="core",verticalpodautoscaler="vpa1"} 4
+# HELP kube_verticalpodautoscaler_status_recommendation_containerrecommendations_target Target resources the VPA recommends for the container.
+# TYPE kube_verticalpodautoscaler_status_recommendation_containerrecommendations_target gauge
+kube_verticalpodautoscaler_status_recommendation_containerrecommendations_target{container="container1",namespace="default",resource="cpu",target_api_version="extensions/v1beta1",target_kind="Deployment",target_name="deployment1",unit="core",verticalpodautoscaler="vpa1"} 3
+# HELP kube_verticalpodautoscaler_status_recommendation_containerrecommendations_uncappedtarget Target resources the VPA recommends for the container ignoring bounds.
+# TYPE kube_verticalpodautoscaler_status_recommendation_containerrecommendations_uncappedtarget gauge
+kube_verticalpodautoscaler_status_recommendation_containerrecommendations_uncappedtarget{container="container1",namespace="default",resource="cpu",target_api_version="extensions/v1beta1",target_kind="Deployment",target_name="deployment1",unit="core",verticalpodautoscaler="vpa1"} 6

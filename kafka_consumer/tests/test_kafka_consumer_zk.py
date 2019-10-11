@@ -19,14 +19,25 @@ BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
 
-@pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')
-def test_check_zk(aggregator, zk_instance):
+@pytest.mark.usefixtures('dd_environment')
+def test_check_zk_basic_case_integration(aggregator, zk_instance):
     """
     Testing Kafka_consumer check.
     """
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [zk_instance])
     kafka_consumer_check.check(zk_instance)
 
+    _assert_check_zk_basic_case(aggregator, zk_instance)
+
+
+@pytest.mark.e2e
+def test_check_zk_basic_case_e2e(dd_agent_check, zk_instance):
+    aggregator = dd_agent_check(zk_instance)
+
+    _assert_check_zk_basic_case(aggregator, zk_instance)
+
+
+def _assert_check_zk_basic_case(aggregator, zk_instance):
     for name, consumer_group in zk_instance['consumer_groups'].items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
@@ -41,7 +52,7 @@ def test_check_zk(aggregator, zk_instance):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')
+@pytest.mark.usefixtures('dd_environment')
 def test_multiple_servers_zk(aggregator, zk_instance):
     """
     Testing Kafka_consumer check.
@@ -69,7 +80,7 @@ def test_multiple_servers_zk(aggregator, zk_instance):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')
+@pytest.mark.usefixtures('dd_environment')
 def test_check_no_groups_zk(aggregator, zk_instance):
     """
     Testing Kafka_consumer check grabbing groups from ZK
@@ -92,7 +103,7 @@ def test_check_no_groups_zk(aggregator, zk_instance):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('dd_environment', 'kafka_producer', 'zk_consumer')
+@pytest.mark.usefixtures('dd_environment')
 def test_check_no_partitions_zk(aggregator, zk_instance):
     """
     Testing Kafka_consumer check grabbing partitions from ZK
