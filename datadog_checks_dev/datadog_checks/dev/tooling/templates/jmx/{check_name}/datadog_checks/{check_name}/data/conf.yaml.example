@@ -1,5 +1,14 @@
 init_config:
 
+  ## Whether or not this file is a configuration for a JMX integration
+  #
+  is_jmx: true
+
+  ## @param collect_default_metrics - boolean - required
+  ## Whether or not the check should collect all default metrics for this integration.
+  #
+  collect_default_metrics: true
+
 instances:
 
   -
