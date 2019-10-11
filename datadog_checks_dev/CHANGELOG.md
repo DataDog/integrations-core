@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.38.0 / 2019-10-11
+
+* [Added] Add option for device testing in e2e. See [#4693](https://github.com/DataDog/integrations-core/pull/4693).
+* [Fixed] Fix lint flake8-logging-format command. See [#4728](https://github.com/DataDog/integrations-core/pull/4728).
+* [Added] Add flake8-logging-format. See [#4711](https://github.com/DataDog/integrations-core/pull/4711).
+
 ## 0.37.0 / 2019-10-09
 
 * [Added] Increase default Agent flush timeout. See [#4714](https://github.com/DataDog/integrations-core/pull/4714).
