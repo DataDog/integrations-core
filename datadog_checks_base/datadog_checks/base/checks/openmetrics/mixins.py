@@ -271,6 +271,19 @@ class OpenMetricsScraperMixin(object):
 
         config['telemetry'] = is_affirmative(instance.get('telemetry', default_instance.get('telemetry', False)))
 
+        # The metric name services use to indicate build information
+        config['metadata_metric_name'] = instance.get(
+            'metadata_metric_name', default_instance.get('metadata_metric_name', 'version')
+        )
+
+        # Map of metadata key names to label names
+        config['_default_metadata_label_map'] = {'version': 'version'}
+        config['_default_metadata_label_map'].update(
+            instance.get('metadata_label_map', default_instance.get('metadata_label_map', {}))
+        )
+
+        config['_default_metric_transformers'] = {config['metadata_metric_name']: self.transform_metadata}
+
         return config
 
     def parse_metric_family(self, response, scraper_config):
@@ -357,8 +370,18 @@ class OpenMetricsScraperMixin(object):
         Note that if the instance has a 'tags' attribute, it will be pushed
         automatically as additional custom tags and added to the metrics
         """
+        transformers = dict(scraper_config['_default_metric_transformers'])
+        if metric_transformers:
+            transformers.update(metric_transformers)
+
         for metric in self.scrape_metrics(scraper_config):
-            self.process_metric(metric, scraper_config, metric_transformers=metric_transformers)
+            self.process_metric(metric, scraper_config, metric_transformers=transformers)
+
+    def transform_metadata(self, metric, scraper_config):
+        labels = metric.samples[0][self.SAMPLE_LABELS]
+        for metadata_name, label_name in iteritems(scraper_config['_default_metadata_label_map']):
+            if label_name in labels:
+                self.set_metadata(metadata_name, labels[label_name])
 
     def _telemetry_metric_name_with_namespace(self, metric_name, scraper_config):
         return '{}.{}.{}'.format(scraper_config['namespace'], 'telemetry', metric_name)

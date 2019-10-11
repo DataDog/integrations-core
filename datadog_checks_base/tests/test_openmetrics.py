@@ -37,14 +37,6 @@ class MockResponse:
         pass
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 PROMETHEUS_CHECK_INSTANCE = {
     'prometheus_url': 'http://fake.endpoint:10055/metrics',
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
@@ -55,12 +47,31 @@ PROMETHEUS_CHECK_INSTANCE = {
 }
 
 
+OPENMETRICS_CHECK_INSTANCE = {
+    'prometheus_url': 'http://fake.endpoint:10055/metrics',
+    'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
+    'namespace': 'openmetrics',
+}
+
+
 @pytest.fixture
 def mocked_prometheus_check():
     check = OpenMetricsBaseCheck('prometheus_check', {}, {})
     check.log = logging.getLogger('datadog-prometheus.test')
     check.log.debug = mock.MagicMock()
     return check
+
+
+@pytest.fixture
+def mocked_openmetrics_check_factory():
+    def factory(instance):
+        check = OpenMetricsBaseCheck('openmetrics_check', {}, [instance])
+        check.check_id = 'test:123'
+        check.log = logging.getLogger('datadog-openmetrics.test')
+        check.log.debug = mock.MagicMock()
+        return check
+
+    return factory
 
 
 @pytest.fixture
@@ -87,7 +98,7 @@ def text_data():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-        assert len(text_data) == 14494
+        assert len(text_data) == 14694
 
     return text_data
 
@@ -115,7 +126,11 @@ def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_c
     check.process_metric = mock.MagicMock()
     check.process(mocked_prometheus_scraper_config)
     check.poll.assert_called_with(mocked_prometheus_scraper_config)
-    check.process_metric.assert_called_with(ref_gauge, mocked_prometheus_scraper_config, metric_transformers=None)
+    check.process_metric.assert_called_with(
+        ref_gauge,
+        mocked_prometheus_scraper_config,
+        metric_transformers=mocked_prometheus_scraper_config['_default_metric_transformers'],
+    )
 
 
 def test_process_metric_gauge(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
@@ -154,8 +169,8 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
         response = check.poll(mocked_prometheus_scraper_config)
         messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
         messages.sort(key=lambda x: x.name)
-        assert len(messages) == 40
-        assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
+        assert len(messages) == 41
+        assert messages[-1].name == 'version'
 
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -2047,3 +2062,41 @@ def test_filter_metrics(
         'filter.pod.restart', tags=['pod:kube-dns-autoscaler-97162954-mf6d3', 'namespace:kube-system'], value=42
     )
     aggregator.assert_all_metrics_covered()
+
+
+def test_metadata_default(mocked_openmetrics_check_factory, text_data):
+    instance = dict(OPENMETRICS_CHECK_INSTANCE)
+    check = mocked_openmetrics_check_factory(instance)
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.check(instance)
+
+        m.assert_any_call('test:123', 'version.major', '1')
+        m.assert_any_call('test:123', 'version.minor', '6')
+        m.assert_any_call('test:123', 'version.patch', '0')
+        m.assert_any_call('test:123', 'version.release', 'beta.0.680')
+        m.assert_any_call('test:123', 'version.build', '3872cb93abf948-dirty')
+        m.assert_any_call('test:123', 'version.raw', 'v1.6.0-beta.0.680+3872cb93abf948-dirty')
+        m.assert_any_call('test:123', 'version.scheme', 'semver')
+        assert m.call_count == 7
+
+
+def test_metadata_metric_name(mocked_openmetrics_check_factory, text_data):
+    instance = dict(OPENMETRICS_CHECK_INSTANCE)
+    instance['metadata_metric_name'] = 'kubernetes_build_info'
+    instance['metadata_label_map'] = {'version': 'gitVersion'}
+    check = mocked_openmetrics_check_factory(instance)
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.check(instance)
+
+        m.assert_any_call('test:123', 'version.major', '1')
+        m.assert_any_call('test:123', 'version.minor', '6')
+        m.assert_any_call('test:123', 'version.patch', '0')
+        m.assert_any_call('test:123', 'version.release', 'alpha.0.680')
+        m.assert_any_call('test:123', 'version.build', '3872cb93abf948-dirty')
+        m.assert_any_call('test:123', 'version.raw', 'v1.6.0-alpha.0.680+3872cb93abf948-dirty')
+        m.assert_any_call('test:123', 'version.scheme', 'semver')
+        assert m.call_count == 7

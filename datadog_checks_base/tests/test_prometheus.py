@@ -101,7 +101,7 @@ def text_data():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-        assert len(text_data) == 14494
+        assert len(text_data) == 14694
 
     return text_data
 
@@ -157,12 +157,12 @@ def test_parse_metric_family_text(text_data, mocked_prometheus_check):
     messages = list(check.parse_metric_family(response))
     # total metrics are 41 but one is typeless and we expect it not to be
     # parsed...
-    assert len(messages) == 40
+    assert len(messages) == 41
     # ...unless the check ovverrides the type manually
     check.type_overrides = {"go_goroutines": "gauge"}
     response = MockResponse(text_data, 'text/plain; version=0.0.4')
     messages = list(check.parse_metric_family(response))
-    assert len(messages) == 41
+    assert len(messages) == 42
     # Tests correct parsing of counters
     _counter = metrics_pb2.MetricFamily()
     _counter.name = 'skydns_skydns_dns_cachemiss_count_total'
@@ -350,8 +350,8 @@ def test_poll_text_plain(mocked_prometheus_check, text_data):
         response = check.poll("http://fake.endpoint:10055/metrics")
         messages = list(check.parse_metric_family(response))
         messages.sort(key=lambda x: x.name)
-        assert len(messages) == 40
-        assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
+        assert len(messages) == 41
+        assert messages[-1].name == 'version'
 
 
 def test_submit_gauge_with_labels(mocked_prometheus_check, ref_gauge):
