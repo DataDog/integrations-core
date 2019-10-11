@@ -14,12 +14,60 @@ variables:
 jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed
-    display: Linux
+    job_name: Changed_1
+    display: Linux_1
     validate: true
 
-- template: './templates/test-single-windows.yml'
+- template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed
-    check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check'
-    display: Windows
+    job_name: Changed_2
+    display: Linux_2
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_3
+    display: Linux_3
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_4
+    display: Linux_4
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_5
+    display: Linux_5
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_6
+    display: Linux_6
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_7
+    display: Linux_7
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_8
+    display: Linux_8
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_9
+    display: Linux_9
+    validate: true
+
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Changed_10
+    display: Linux_10
+    validate: true
