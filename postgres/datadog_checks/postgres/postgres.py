@@ -66,7 +66,7 @@ class PostgreSql(AgentCheck):
 
     # keep track of host/port present in any configured instance
     _known_servers = set()
-    _known_servers_lock = threading.RLock()
+    _known_servers_lock = threading.Lock()
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -87,6 +87,16 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
             )
+
+    def _clean_state(self, key):
+        self.versions.pop(key, None)
+        self.instance_metrics.pop(key, None)
+        self.bgw_metrics.pop(key, None)
+        self.archiver_metrics.pop(key, None)
+        self.db_bgw_metrics = []
+        self.db_archiver_metrics = []
+        self.replication_metrics.pop(key, None)
+        self.activity_metrics.pop(key, None)
 
     @classmethod
     def _server_known(cls, host, port):
@@ -406,6 +416,7 @@ class PostgreSql(AgentCheck):
         cols = list(scope['metrics'])  # list of metrics to query, in some order
         # we must remember that order to parse results
 
+        results = None
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
@@ -419,10 +430,18 @@ class PostgreSql(AgentCheck):
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
+
+        except psycopg2.errors.UndefinedFunction as e:
+            log_func(e)
+            log_func(
+                "It seems the PG version has been incorrectly identified as %s. "
+                "A reattempt to identify the right version will happen on next agent run." % self.versions[key]
+            )
+            self._clean_state(key)
+            db.rollback()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
             db.rollback()
-            return None
 
         if not results:
             return None
@@ -835,6 +854,7 @@ class PostgreSql(AgentCheck):
             self._get_custom_queries(db, tags, custom_queries)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
+            self._clean_state(key)
             db = self.get_connection(key, host, port, user, password, dbname, ssl, tags, use_cached=False)
             self._collect_stats(
                 key,
