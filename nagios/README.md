@@ -33,6 +33,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 | `<INIT_CONFIG>`      | blank or `{}`                                |
 | `<INSTANCE_CONFIG>`  | `{"nagios_conf": "/etc/nagios3/nagios.cfg"}` |
 
+**Note**: The containerized Agent should be able to access the `/etc/nagios3/nagios.cfg` file to enable the Datadog-Nagios integration.
+
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `nagios` under the Checks section.
