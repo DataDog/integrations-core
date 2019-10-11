@@ -1,5 +1,23 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.4.0 / 2019-10-11
+
+* [Added] Add an option to send histograms/summary counts as monotonic counters. See [#4629](https://github.com/DataDog/integrations-core/pull/4629).
+* [Added] Add option for device testing in e2e. See [#4693](https://github.com/DataDog/integrations-core/pull/4693).
+* [Added] Update self.warning to accept *args. See [#4731](https://github.com/DataDog/integrations-core/pull/4731).
+* [Added] Send configuration metadata by default. See [#4730](https://github.com/DataDog/integrations-core/pull/4730).
+* [Added] Add mechanism to execute setup steps before the first check run. See [#4713](https://github.com/DataDog/integrations-core/pull/4713).
+* [Added] Implement Python API for setting check metadata. See [#4686](https://github.com/DataDog/integrations-core/pull/4686).
+* [Added] Upgrade Paramiko to version 2.6.0. See [#4685](https://github.com/DataDog/integrations-core/pull/4685). Thanks [daniel-savo](https://github.com/daniel-savo).
+* [Added] Add support for fetching consumer offsets stored in Kafka to `monitor_unlisted_consumer_groups`. See [#3957](https://github.com/DataDog/integrations-core/pull/3957). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Support submitting memory profiling metrics during E2E. See [#4635](https://github.com/DataDog/integrations-core/pull/4635).
+* [Added] Add a way to submit non-namespaced metrics and service checks. See [#4637](https://github.com/DataDog/integrations-core/pull/4637).
+* [Added] Add duplication assertion methods to aggregator stub. See [#4521](https://github.com/DataDog/integrations-core/pull/4521).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+* [Deprecated] Add a deprecated warning message to NetworkCheck. See [#4560](https://github.com/DataDog/integrations-core/pull/4560).
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+* [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
+
 ## 9.3.2 / 2019-08-30
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).
