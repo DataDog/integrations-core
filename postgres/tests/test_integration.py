@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
-
 import psycopg2
 import pytest
 
@@ -152,7 +151,7 @@ def test_state_clears_on_connection_error(check, pg_instance):
 
 
 def assert_state_clean(check, db_key):
-    assert db_key not in check.versions  # version invalidated
+    assert db_key not in check.versions
     assert db_key not in check.instance_metrics
     assert db_key not in check.bgw_metrics
     assert db_key not in check.archiver_metrics
@@ -166,7 +165,8 @@ def assert_state_set(check, db_key):
     assert db_key in check.versions
     assert db_key in check.instance_metrics
     assert db_key in check.bgw_metrics
-    assert db_key in check.archiver_metrics
+    if POSTGRES_VERSION != '9.3':
+        assert db_key in check.archiver_metrics
+        assert check.db_archiver_metrics != []
     assert check.db_bgw_metrics != []
-    assert check.db_archiver_metrics != []
     assert db_key in check.replication_metrics
