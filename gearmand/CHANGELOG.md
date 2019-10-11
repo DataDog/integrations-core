@@ -1,5 +1,9 @@
 # CHANGELOG - gearmand
 
+## 1.3.1 / 2019-10-11
+
+* [Fixed] Fix misleading gearman.workers metric (#4515). See [#4520](https://github.com/DataDog/integrations-core/pull/4520). Thanks [orgito](https://github.com/orgito).
+
 ## 1.3.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3508](https://github.com/DataDog/integrations-core/pull/3508).
