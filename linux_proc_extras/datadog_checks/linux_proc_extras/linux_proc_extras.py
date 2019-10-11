@@ -42,7 +42,7 @@ class MoreUnixCheck(AgentCheck):
         self.get_process_states()
 
     def set_paths(self):
-        proc_location = datadog_agent.get_config('procfs_path', '/proc').rstrip('/')
+        proc_location = (datadog_agent.get_config('procfs_path') or '/proc').rstrip('/')
 
         self.proc_path_map = {
             "inode_info": "sys/fs/inode-nr",
