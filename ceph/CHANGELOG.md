@@ -1,5 +1,9 @@
 # CHANGELOG - ceph
 
+## 1.8.0 / 2019-10-11
+
+* [Added] Adhere to logging call convention. See [#4738](https://github.com/DataDog/integrations-core/pull/4738).
+
 ## 1.7.0 / 2019-08-24
 
 * [Added] Remove unused version command. See [#4249](https://github.com/DataDog/integrations-core/pull/4249).
