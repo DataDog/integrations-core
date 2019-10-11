@@ -5,9 +5,6 @@ parameters:
   test_e2e: false
   benchmark: false
 
-variables:
-  DDEV_COLOR: 1
-
 steps:
 - ${{ if eq(parameters.test, 'true') }}:
   - script: ddev test --cov --pytest-args="--junit-xml=junit/test-results.xml --junit-prefix='${{ parameters.test_run }}'" ${{ parameters.check }}

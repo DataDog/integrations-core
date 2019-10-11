@@ -3,5 +3,8 @@ trigger:
     include:
     - master
 
+variables:
+  DDEV_COLOR: 1
+
 jobs:
 - template: './templates/test-all-checks.yml'
