@@ -153,8 +153,9 @@ def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_pro
     check = mocked_prometheus_check
     check.process_metric(filtered_gauge, mocked_prometheus_scraper_config, metric_transformers={})
     check.log.debug.assert_called_with(
-        "Unable to handle metric: process_start_time_seconds - "
-        "error: No handler function named 'process_start_time_seconds' defined"
+        'Skipping metric `%s` as it is not defined in the metrics mapper, '
+        'has no transformer function, nor does it match any wildcards.',
+        'process_start_time_seconds',
     )
     aggregator.assert_all_metrics_covered()
 
