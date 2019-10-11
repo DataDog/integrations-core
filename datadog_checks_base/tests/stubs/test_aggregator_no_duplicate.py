@@ -24,11 +24,11 @@ def test_assert_no_duplicate_message(aggregator):
     expected_msg = '''
 Duplicate metrics found:
   - check.metric.dup1
-      MetricStub(name='check.metric.dup1', type=0, value=1.0, tags=['aa'], hostname='')
-      MetricStub(name='check.metric.dup1', type=0, value=2.0, tags=['aa'], hostname='')
+      MetricStub(name='check.metric.dup1', type=0, value=1.0, tags=['aa'], hostname='', device=None)
+      MetricStub(name='check.metric.dup1', type=0, value=2.0, tags=['aa'], hostname='', device=None)
   - check.metric.dup2
-      MetricStub(name='check.metric.dup2', type=0, value=3.0, tags=['aa'], hostname='')
-      MetricStub(name='check.metric.dup2', type=0, value=4.0, tags=['aa'], hostname='')
+      MetricStub(name='check.metric.dup2', type=0, value=3.0, tags=['aa'], hostname='', device=None)
+      MetricStub(name='check.metric.dup2', type=0, value=4.0, tags=['aa'], hostname='', device=None)
 '''
     print("\n===\n{}\n===\n".format(expected_msg.strip()))
     print("\n===\n{}\n===\n".format(actual_msg.strip()))
