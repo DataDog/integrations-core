@@ -198,6 +198,9 @@ jobs:
     - checkName: linux_proc_extras
       displayName: Linux proc extras
       os: linux
+    - checkName: mapr
+      displayName: MapR
+      os: linux
     - checkName: mapreduce
       displayName: MapReduce
       os: linux

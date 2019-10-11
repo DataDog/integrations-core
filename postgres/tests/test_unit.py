@@ -5,6 +5,8 @@ import psycopg2
 import pytest
 from mock import MagicMock
 
+from datadog_checks.postgres import util
+
 # Mark the entire module as tests of type `unit`
 pytestmark = pytest.mark.unit
 
@@ -17,7 +19,7 @@ def test_get_instance_metrics_lt_92(check):
     """
     check._is_9_2_or_above.return_value = False
     res = check._get_instance_metrics(KEY, 'dbname', False, False)
-    assert res['metrics'] == check.COMMON_METRICS
+    assert res['metrics'] == util.COMMON_METRICS
 
 
 def test_get_instance_metrics_92(check):
@@ -26,7 +28,7 @@ def test_get_instance_metrics_92(check):
     """
     check._is_9_2_or_above.return_value = True
     res = check._get_instance_metrics(KEY, 'dbname', False, False)
-    assert res['metrics'] == dict(check.COMMON_METRICS, **check.NEWER_92_METRICS)
+    assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
 
 def test_get_instance_metrics_state(check):
@@ -34,10 +36,10 @@ def test_get_instance_metrics_state(check):
     Ensure data is consistent when the function is called more than once
     """
     res = check._get_instance_metrics(KEY, 'dbname', False, False)
-    assert res['metrics'] == dict(check.COMMON_METRICS, **check.NEWER_92_METRICS)
+    assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
     check._is_9_2_or_above.side_effect = Exception  # metrics were cached so this shouldn't be called
     res = check._get_instance_metrics(KEY, 'dbname', [], False)
-    assert res['metrics'] == dict(check.COMMON_METRICS, **check.NEWER_92_METRICS)
+    assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
     # also check what happens when `metrics` is not valid
     check.instance_metrics[KEY] = []
@@ -49,9 +51,9 @@ def test_get_instance_metrics_database_size_metrics(check):
     """
     Test the function behaves correctly when `database_size_metrics` is passed
     """
-    expected = check.COMMON_METRICS
-    expected.update(check.NEWER_92_METRICS)
-    expected.update(check.DATABASE_SIZE_METRICS)
+    expected = util.COMMON_METRICS
+    expected.update(util.NEWER_92_METRICS)
+    expected.update(util.DATABASE_SIZE_METRICS)
     res = check._get_instance_metrics(KEY, 'dbname', True, False)
     assert res['metrics'] == expected
 

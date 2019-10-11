@@ -65,9 +65,9 @@ class Lighttpd(AgentCheck):
         super(Lighttpd, self).__init__(name, init_config, instances)
         self.assumed_url = {}
 
-        if 'auth_type' in self.instance:
-            if self.instance['auth_type'] == 'digest':
-                auth = self.http.options['auth']
+        if self.instance.get('auth_type', 'basic').lower() == 'digest':
+            auth = self.http.options['auth']
+            if auth is not None:
                 self.http.options['auth'] = requests.auth.HTTPDigestAuth(auth[0], auth[1])
 
     def check(self, instance):
@@ -79,11 +79,11 @@ class Lighttpd(AgentCheck):
         tags = instance.get('tags', [])
         auth_type = instance.get('auth_type', 'basic').lower()
 
-        if self.http.options['auth'] is None:
+        if auth_type not in ('basic', 'digest'):
             msg = "Unsupported value of 'auth_type' variable in Lighttpd config: {}".format(auth_type)
             raise Exception(msg)
 
-        self.log.debug("Connecting to %s" % url)
+        self.log.debug("Connecting to %s", url)
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
@@ -140,7 +140,7 @@ class Lighttpd(AgentCheck):
             url_suffix = self.URL_SUFFIX_PER_VERSION[server_version]
             if self.assumed_url.get(instance['lighttpd_status_url']) is None and url[-len(url_suffix) :] != url_suffix:
                 self.assumed_url[instance['lighttpd_status_url']] = '%s%s' % (url, url_suffix)
-                self.warning("Assuming url was not correct. Trying to add %s suffix to the url" % url_suffix)
+                self.warning("Assuming url was not correct. Trying to add %s suffix to the url", url_suffix)
                 self.check(instance)
             else:
                 raise Exception(
@@ -157,5 +157,5 @@ class Lighttpd(AgentCheck):
             return "Unknown"
 
         version = int(match.group(1))
-        self.log.debug("Lighttpd server version is %s" % version)
+        self.log.debug("Lighttpd server version is %s", version)
         return version

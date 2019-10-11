@@ -316,17 +316,18 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
 
     if repo == 'integrations-core':
         options = OrderedDict(
-            (('1', 'Integrations'), ('2', 'Containers'), ('3', 'Agent'), ('s', 'Skip'), ('q', 'Quit'))
+            (('1', 'Integrations'), ('2', 'Containers'), ('3', 'Core'), ('4', 'Platform'), ('s', 'Skip'), ('q', 'Quit'))
         )
     else:
         options = OrderedDict(
             (
-                ('1', 'Agent'),
+                ('1', 'Core'),
                 ('2', 'Containers'),
                 ('3', 'Logs'),
-                ('4', 'Process'),
-                ('5', 'Trace'),
-                ('6', 'Integrations'),
+                ('4', 'Platform'),
+                ('5', 'Process'),
+                ('6', 'Trace'),
+                ('7', 'Integrations'),
                 ('s', 'Skip'),
                 ('q', 'Quit'),
             )

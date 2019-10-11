@@ -17,20 +17,28 @@ from . import common
 pytestmark = pytest.mark.unit
 
 
-def warning(*args):
-    pass
-
-
 @mock.patch("datadog_checks.snmp.config.hlapi")
 def test_parse_metrics(hlapi_mock):
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    check = SnmpCheck('snmp', {}, [instance])
     # Unsupported metric
     metrics = [{"foo": "bar"}]
+    config = InstanceConfig(
+        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3"}]},
+        check.warning,
+        check.log,
+        [],
+        None,
+        {},
+        {},
+    )
+    hlapi_mock.reset_mock()
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # Simple OID
     metrics = [{"OID": "1.2.3"}]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, False, warning)
+    table, raw, mibs = config.parse_metrics(metrics, False, check.warning, check.log)
     assert table == {}
     assert mibs == set()
     assert len(raw) == 1
@@ -40,11 +48,11 @@ def test_parse_metrics(hlapi_mock):
     # MIB with no symbol or table
     metrics = [{"MIB": "foo_mib"}]
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # MIB with symbol
     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, False, warning)
+    table, raw, mibs = config.parse_metrics(metrics, False, check.warning, check.log)
     assert raw == []
     assert mibs == {"foo_mib"}
     assert len(table) == 1
@@ -54,11 +62,11 @@ def test_parse_metrics(hlapi_mock):
     # MIB with table, no symbols
     metrics = [{"MIB": "foo_mib", "table": "foo"}]
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
+    table, raw, mibs = config.parse_metrics(metrics, True, check.warning, check.log)
     assert raw == []
     assert mibs == set()
     assert len(table) == 1
@@ -70,18 +78,18 @@ def test_parse_metrics(hlapi_mock):
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo"}]}]
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # MIB with table, symbols, metrics_tags index
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
     ]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
+    table, raw, mibs = config.parse_metrics(metrics, True, check.warning, check.log)
     assert raw == []
     assert mibs == set()
     assert len(table) == 1
@@ -94,7 +102,7 @@ def test_parse_metrics(hlapi_mock):
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
     ]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
+    table, raw, mibs = config.parse_metrics(metrics, True, check.warning, check.log)
     assert raw == []
     assert mibs == set()
     assert len(table) == 1
@@ -151,7 +159,7 @@ def test_removing_host():
     check = SnmpCheck('snmp', {}, [instance])
     warnings = []
     check.warning = warnings.append
-    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, [], '', {}, {})
+    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, None, [], '', {}, {})
     msg = 'No SNMP response received before timeout for instance 1.1.1.1'
 
     check.check(instance)

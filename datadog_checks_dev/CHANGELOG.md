@@ -1,5 +1,17 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.37.0 / 2019-10-09
+
+* [Added] Increase default Agent flush timeout. See [#4714](https://github.com/DataDog/integrations-core/pull/4714).
+* [Fixed] Remove default version from env test. See [#4718](https://github.com/DataDog/integrations-core/pull/4718).
+* [Fixed] Handle other Agent images in E2E. See [#4710](https://github.com/DataDog/integrations-core/pull/4710).
+
+## 0.36.0 / 2019-10-07
+
+* [Added] Update teams in ddev trello tool. See [#4702](https://github.com/DataDog/integrations-core/pull/4702).
+* [Added] Add dashboard validation. See [#4694](https://github.com/DataDog/integrations-core/pull/4694).
+* [Fixed] Don't use a7. See [#4680](https://github.com/DataDog/integrations-core/pull/4680).
+
 ## 0.35.1 / 2019-09-30
 
 * [Fixed] Auto detect changes and run tests when yaml files change. See [#4657](https://github.com/DataDog/integrations-core/pull/4657).

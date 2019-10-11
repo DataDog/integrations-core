@@ -123,6 +123,21 @@ instances:
     #     tag_keys:
     #       - "threadKey"
 
+    ## @param custom_queries_units_gauge - list - optional - default: []
+    ## List of unit names used to map CountStatistic to gauge in custom queries.
+    ## By default CountStatistic stats are submitted as monotonic count, but some of them actually contain
+    ## data which are gauge, as they have data with a unit. To get that behavior, the unit can be added here
+    ## and the check will translate the metric type.
+    ##
+    ## For example:
+    ## <Stat name="xdProcessModule">
+    ##   <CountStatistic ID="4" count="11779168" name="totalMemory" unit="unit.kbyte" ... />
+    ## </Stat>
+    ##
+    ## would be submitted as a count, but will be as a gauge if `unit.kbyte` is present in `custom_queries_units_gauge`.
+    #
+    # custom_queries_units_gauge: [kilobyte, second, unit.kbyte]
+
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
