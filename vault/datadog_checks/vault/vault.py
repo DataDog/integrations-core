@@ -57,8 +57,9 @@ class Vault(AgentCheck):
         self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=tags)
 
     def check_leader_v1(self, config, tags):
-        url = config['api_url'] + '/sys/leader'
-        leader_data = self.access_api(url, tags)
+        path = '/sys/leader'
+        url = config['api_url']
+        leader_data = self.access_api(url, path, tags)
 
         is_leader = is_affirmative(leader_data.get('is_self'))
         tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
@@ -84,9 +85,10 @@ class Vault(AgentCheck):
             config['leader'] = current_leader
 
     def check_health_v1(self, config, tags):
-        url = config['api_url'] + '/sys/health'
+        path = '/sys/health'
+        url = config['api_url']
         health_params = {'standbyok': True, 'perfstandbyok': True}
-        health_data = self.access_api(url, tags, params=health_params)
+        health_data = self.access_api(url, path, tags, params=health_params)
 
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
@@ -141,16 +143,21 @@ class Vault(AgentCheck):
 
         return config
 
-    def access_api(self, url, tags, params=None):
+    def access_api(self, url, path, tags, params=None):
         try:
-            response = self.http.get(url, params=params)
-            response.raise_for_status()
+            response = self.http.get(url + path, params=params)
             json_data = response.json()
+            response.raise_for_status()
         except requests.exceptions.HTTPError:
-            msg = 'The Vault endpoint `{}` returned {}.'.format(url, response.status_code)
-            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
-            self.log.exception(msg)
-            raise ApiUnreachable
+            if path.endswith("/sys/health") and response.status_code in (429, 472, 473, 501, 503):
+                # Expected HTTP Error codes for /sys/health endpoint
+                # https://www.vaultproject.io/api/system/health.html
+                pass
+            else:
+                msg = 'The Vault endpoint `{}` returned {}.'.format(url, response.status_code)
+                self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
+                self.log.exception(msg)
+                raise ApiUnreachable
         except JSONDecodeError:
             msg = 'The Vault endpoint `{}` returned invalid json data.'.format(url)
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
