@@ -50,15 +50,15 @@ def instance_vts():
 
 @pytest.fixture(scope='session')
 def version_metadata():
-    version = NGINX_VERSION.split(':')[1]
-    if '-' not in version:
-        # what should it return with vts?
-        major, minor = version.split('.')
+    # vts currently defaults to using version 1.13
+    version = '1.13' if USING_VTS else version = NGINX_VERSION.split(':')[1]
+    
+    major, minor = version.split('.')
 
-        return {
-            'version.scheme': 'semver',
-            'version.major': major,
-            'version.minor': minor,
-            'version.patch': mock.ANY,
-            'version.raw': mock.ANY,
-        }
+    return {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': mock.ANY,
+    }
