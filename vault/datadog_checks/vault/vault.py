@@ -145,7 +145,8 @@ class Vault(AgentCheck):
 
     def access_api(self, url, path, tags, params=None):
         try:
-            response = self.http.get(url + path, params=params)
+            full_url = url + path
+            response = self.http.get(full_url, params=params)
             json_data = response.json()
             response.raise_for_status()
         except requests.exceptions.HTTPError:
@@ -154,22 +155,22 @@ class Vault(AgentCheck):
                 # https://www.vaultproject.io/api/system/health.html
                 pass
             else:
-                msg = 'The Vault endpoint `{}` returned {}.'.format(url, response.status_code)
+                msg = 'The Vault endpoint `{}` returned {}.'.format(full_url, response.status_code)
                 self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
                 self.log.exception(msg)
                 raise ApiUnreachable
         except JSONDecodeError:
-            msg = 'The Vault endpoint `{}` returned invalid json data.'.format(url)
+            msg = 'The Vault endpoint `{}` returned invalid json data.'.format(full_url)
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
             self.log.exception(msg)
             raise ApiUnreachable
         except requests.exceptions.Timeout:
-            msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'])
+            msg = 'Vault endpoint `{}` timed out after {} seconds'.format(full_url, self.http.options['timeout'])
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
             self.log.exception(msg)
             raise ApiUnreachable
         except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
-            msg = 'Error accessing Vault endpoint `{}`'.format(url)
+            msg = 'Error accessing Vault endpoint `{}`'.format(full_url)
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
             self.log.exception(msg)
             raise ApiUnreachable
