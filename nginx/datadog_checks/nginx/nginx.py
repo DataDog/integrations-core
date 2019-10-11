@@ -81,7 +81,11 @@ class Nginx(AgentCheck):
         url, use_plus_api, plus_api_version = self._get_instance_params(instance)
 
         if not use_plus_api:
-            response, content_type = self._get_data(instance, url)
+            response, content_type, version = self._get_data(instance, url)
+
+            # for unpaid versions
+            self._set_version_metadata(version)
+
             self.log.debug(u"Nginx status `response`: {}".format(response))
             self.log.debug(u"Nginx status `content_type`: {}".format(content_type))
 
@@ -103,7 +107,6 @@ class Nginx(AgentCheck):
         funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
         conn = None
         handled = None
-        version_received = False
 
         for row in metrics:
             try:
@@ -134,15 +137,13 @@ class Nginx(AgentCheck):
                 func = funcs[metric_type]
                 func(name, value, tags)
 
+                # for vts and plus versions
                 if name == 'nginx.version':
-                    self.set_metadata('version', value)
-                    version_received = True
+                    self._set_version_metadata(value)
 
             except Exception as e:
                 self.log.error(u'Could not submit metric: %s: %s' % (repr(row), str(e)))
         
-        if not version_received:
-            self.log.debug (u"Could not get NGINX version info")
 
     @classmethod
     def _get_instance_params(cls, instance):
@@ -158,7 +159,7 @@ class Nginx(AgentCheck):
 
         body = r.content
         resp_headers = r.headers
-        return body, resp_headers.get('content-type', 'text/plain')
+        return body, resp_headers.get('content-type', 'text/plain'), resp_headers.get('server')
 
     def _perform_request(self, url):
         r = self.http.get(url)
@@ -214,6 +215,14 @@ class Nginx(AgentCheck):
                 self.log.exception("Error querying {} metrics at {}: {}".format(endpoint, url, e))
 
         return payload
+    
+    def _set_version_metadata(self, version):
+        if version:
+            self.set_metadata('version', version)
+            self.log.debug(u"Nginx version `server`: {}".format(version))
+        else:
+            self.log.warning(u"could not retrieve nginx version info")
+        
     
 
     @classmethod
