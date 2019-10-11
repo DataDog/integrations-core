@@ -52,10 +52,15 @@ instances:
     ## @param conntrack_path - string - optional
     ## Linux only.
     ## The location of the conntrack executable in order to get the stats from conntrack -S.
-    ## It will be run with sudo, so an entry needs to be added to the sudoers file.
+    ## It will be run with sudo by default, so an entry needs to be added to the sudoers file.
     ## By default, these metrics will not be sent.
     #
     # conntrack_path: /usr/sbin/conntrack
+
+    ## @param disable_sudo_conntrack - boolean - optional - default: false
+    ## Disable sudo when running conntrack -S (sudo isn't normally available in containers)
+    #
+    # disable_sudo_conntrack: false
 
     ## @param whitelist_conntrack_metrics - list of string - optional - default: ["max", "count"]
     ## Linux only.

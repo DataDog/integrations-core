@@ -132,7 +132,7 @@ def test_add_conntrack_stats_metrics(aggregator, check):
     )
     with mock.patch('datadog_checks.network.network.get_subprocess_output') as subprocess:
         subprocess.return_value = mocked_conntrack_stats, None, None
-        check._add_conntrack_stats_metrics(None, ['foo:bar'])
+        check._add_conntrack_stats_metrics(None, None, ['foo:bar'])
 
         for metric, value in iteritems(CONNTRACK_STATS):
             aggregator.assert_metric(metric, value=value[0], tags=['foo:bar', 'cpu:0'])
