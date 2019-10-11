@@ -4,7 +4,7 @@
 
 * [Added] Add an option to send histograms/summary counts as monotonic counters. See [#4629](https://github.com/DataDog/integrations-core/pull/4629).
 * [Added] Add option for device testing in e2e. See [#4693](https://github.com/DataDog/integrations-core/pull/4693).
-* [Added] Update self.warning to accept *args. See [#4731](https://github.com/DataDog/integrations-core/pull/4731).
+* [Added] Update self.warning to accept `*args`. See [#4731](https://github.com/DataDog/integrations-core/pull/4731).
 * [Added] Send configuration metadata by default. See [#4730](https://github.com/DataDog/integrations-core/pull/4730).
 * [Added] Add mechanism to execute setup steps before the first check run. See [#4713](https://github.com/DataDog/integrations-core/pull/4713).
 * [Added] Implement Python API for setting check metadata. See [#4686](https://github.com/DataDog/integrations-core/pull/4686).
