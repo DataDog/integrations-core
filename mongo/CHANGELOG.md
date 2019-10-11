@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 1.12.0 / 2019-10-11
+
+* [Added] Submit version metadata. See [#4722](https://github.com/DataDog/integrations-core/pull/4722).
+
 ## 1.11.0 / 2019-07-13
 
 * [Added] Upgrade pymongo to 3.8. See [#4095](https://github.com/DataDog/integrations-core/pull/4095).

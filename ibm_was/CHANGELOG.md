@@ -1,5 +1,9 @@
 # CHANGELOG - IBM WAS
 
+## 1.3.0 / 2019-10-11
+
+* [Added] Add an option for custom count with units. See [#4628](https://github.com/DataDog/integrations-core/pull/4628).
+
 ## 1.2.3 / 2019-09-23
 
 * [Fixed] Don't assume nested tags exist. See [#4605](https://github.com/DataDog/integrations-core/pull/4605).

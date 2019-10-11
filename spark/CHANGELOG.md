@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.9.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.8.1 / 2019-07-18
 
 * [Fixed] Remove unused configs and code for spark check. See [#4133](https://github.com/DataDog/integrations-core/pull/4133).

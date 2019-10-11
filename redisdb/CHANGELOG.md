@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 1.13.0 / 2019-10-11
+
+* [Added] Submit version metadata. See [#4705](https://github.com/DataDog/integrations-core/pull/4705).
+
 ## 1.12.2 / 2019-10-04
 
 * [Fixed] Don't display warning for default keys value. See [#4641](https://github.com/DataDog/integrations-core/pull/4641).

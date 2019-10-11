@@ -1,5 +1,11 @@
 # CHANGELOG - lighttpd
 
+## 1.6.0 / 2019-10-11
+
+* [Fixed] Fix lighttpd logging format. See [#4716](https://github.com/DataDog/integrations-core/pull/4716).
+* [Fixed] Fix support for no authentication. See [#4689](https://github.com/DataDog/integrations-core/pull/4689).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.5.0 / 2019-08-24
 
 * [Fixed] Update __init__ method params. See [#4243](https://github.com/DataDog/integrations-core/pull/4243).

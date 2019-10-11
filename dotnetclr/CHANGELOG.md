@@ -1,5 +1,9 @@
 # CHANGELOG - Dotnetclr
 
+## 1.4.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+
 ## 1.3.1 / 2019-06-18
 
 * [Fixed] Rename lower case manifest.in. See [#3858](https://github.com/DataDog/integrations-core/pull/3858).
