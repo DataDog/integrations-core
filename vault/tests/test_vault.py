@@ -170,7 +170,8 @@ class TestVault:
                         'server_time_utc': 1529357080,
                         'standby': False,
                         'version': '0.10.2',
-                    }
+                    },
+                    status_code=503,
                 )
             return requests_get(url, *args, **kwargs)
 
@@ -249,7 +250,8 @@ class TestVault:
                         'server_time_utc': 1529357080,
                         'standby': False,
                         'version': '0.10.2',
-                    }
+                    },
+                    status_code=501,
                 )
             return requests_get(url, *args, **kwargs)
 
