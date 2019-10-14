@@ -94,7 +94,6 @@ resource "null_resource" "linkerd-init" {
 resource "google_container_cluster" "gke_cluster" {
   name = replace("linkerd-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
   location = random_shuffle.az.result[0]
-  node_version = "1.13.7-gke.24"
   min_master_version = "1.13.7-gke.24"
 
   lifecycle {
