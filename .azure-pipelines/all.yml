@@ -19,15 +19,15 @@ jobs:
   parameters:
     checks:
     - checkName: mesos_master
-      displayName: Mesos Master
+      displayName: Mesos Master Linux
       os: linux
     - checkName: mesos_slave
-      displayName: Mesos Slave
+      displayName: Mesos Slave Linux
       os: linux
 
     - checkName: mesos_master
-      displayName: Mesos Master
+      displayName: Mesos Master Windows
       os: windows
     - checkName: mesos_slave
-      displayName: Mesos Slave
+      displayName: Mesos Slave Windows
       os: windows
