@@ -162,3 +162,14 @@ def test_cert_warning_seconds(aggregator, instance_local_cert_warning_seconds):
     aggregator.assert_metric('tls.days_left', count=1)
     aggregator.assert_metric('tls.seconds_left', count=1)
     aggregator.assert_all_metrics_covered()
+
+
+def test_tls_wrong_server(aggregator):
+    instance = {'server': '%%elb%%', 'validate_hostname': 'false'}
+    c = TLSCheck('tls', {}, [instance])
+    c.check(instance)
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_CAN_CONNECT,
+        status=c.CRITICAL,
+        message='Unable to resolve host %%elb%%:443, check your DNS: nodename nor servname provided, or not known',
+    )

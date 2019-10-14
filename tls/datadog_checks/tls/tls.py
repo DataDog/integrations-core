@@ -296,7 +296,9 @@ class TLSCheck(AgentCheck):
         except socket.gaierror as e:
             err_code, message = e.args
             if err_code == socket.EAI_NODATA or err_code == socket.EAI_NONAME:
-                raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))
+                raise socket.error(
+                    'Unable to resolve host {}:{}, check your DNS: {}'.format(self._server, self._port, message)
+                )
 
             raise
 
