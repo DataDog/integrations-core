@@ -14,9 +14,39 @@ The Agent's Squid check is included in the [Datadog Agent][2] package. No additi
 
 ### Configuration
 
+#### Metric Collection
+
 1. Edit the `squid.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample squid.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `squid.d/conf.yaml` file to start collecting your Squid logs:
+
+    ```yaml
+    logs:
+          - type: file
+            path: /var/log/squid/cache.log
+            service: "<SERVICE-NAME>"
+            source: squid
+          - type: file
+            path: /var/log/squid/access.log
+            service: "<SERVICE-NAME>"
+            source: squid
+      ```
+
+    Change the `path` and `service` parameter values and configure them for your environment.
+
+3. [Restart the Agent][5].
 
 ### Validation
 
