@@ -9,37 +9,65 @@ from . import common
 
 pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
 
+TAGS = ['cluster:webs', 'varnish_name:default']
+
 
 def test_check(aggregator, check, instance):
-    _check_repeat(check, instance)
+    check.check(instance)
+    missing_metrics = []
     for mname in common.COMMON_METRICS:
-        aggregator.assert_metric(mname, at_least=1, tags=['cluster:webs', 'varnish_name:default'])
+        try:
+            aggregator.assert_metric(mname, count=1, tags=TAGS)
+        except AssertionError:
+            missing_metrics.append(mname)
+    _retry_missing_metrics(aggregator, check, instance, missing_metrics)
 
 
 def test_inclusion_filter(aggregator, check, instance):
     instance['metrics_filter'] = ['SMA.*']
 
-    _check_repeat(check, instance)
+    check.check(instance)
+    missing_included_metrics = []
+    excluded_metrics = []
+
     for mname in common.COMMON_METRICS:
         if 'SMA.' in mname:
-            aggregator.assert_metric(mname, at_least=1, tags=['cluster:webs', 'varnish_name:default'])
+            try:
+                aggregator.assert_metric(mname, count=1, tags=TAGS)
+            except AssertionError:
+                missing_included_metrics.append(mname)
         else:
-            aggregator.assert_metric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
+            excluded_metrics.append(mname)
+
+    _retry_missing_metrics(aggregator, check, instance, missing_included_metrics)
+    for mname in excluded_metrics:  # Only check for excluded metrics once all metrics have been generated
+        aggregator.assert_metric(mname, count=0)
 
 
 def test_exclusion_filter(aggregator, check, instance):
     instance['metrics_filter'] = ['^SMA.Transient.c_req']
+    missing_included_metrics = []
+    excluded_metrics = []
 
-    _check_repeat(check, instance)
+    check.check(instance)
     for mname in common.COMMON_METRICS:
         if 'SMA.Transient.c_req' in mname:
-            aggregator.assert_metric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
+            excluded_metrics.append(mname)
         elif 'varnish.uptime' not in mname:
-            aggregator.assert_metric(mname, at_least=1, tags=['cluster:webs', 'varnish_name:default'])
+            try:
+                aggregator.assert_metric(mname, count=1, tags=TAGS)
+            except AssertionError:
+                missing_included_metrics.append(mname)
+
+    _retry_missing_metrics(aggregator, check, instance, missing_included_metrics)
+    for mname in excluded_metrics:  # Only check for excluded metrics once all metrics have been generated
+        aggregator.assert_metric(mname, count=0)
 
 
-def _check_repeat(check, instance):
-    # Ensure all metrics are generated
-    check.check(instance)
-    time.sleep(2)
-    check.check(instance)
+def _retry_missing_metrics(aggregator, check, instance, missing_metrics):
+    # Not all metrics are always generated at once
+    if missing_metrics:
+        time.sleep(2)
+        check.check(instance)
+        for mname in missing_metrics:
+            aggregator.assert_metric(mname, count=1, tags=TAGS)
