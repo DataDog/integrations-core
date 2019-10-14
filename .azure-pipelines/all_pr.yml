@@ -6,6 +6,8 @@ pr:
     include:
     - datadog_checks_base/datadog_checks/*
 
+trigger: none
+
 variables:
   DDEV_COLOR: 1
 
