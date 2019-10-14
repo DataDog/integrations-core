@@ -29,7 +29,7 @@ class TrelloClient:
             'team/platform': 'Platform',
         }
 
-    def create_card(self, team, name, body):
+    def create_card(self, team, name, body, members=None):
         rate_limited = False
         error = None
         response = None
@@ -40,6 +40,8 @@ class TrelloClient:
             # It appears the character limit for descriptions is ~5000
             'desc': body[:5000],
         }
+        if members:
+            params['idMembers'] = ','.join(members)
         params.update(self.auth)
 
         try:

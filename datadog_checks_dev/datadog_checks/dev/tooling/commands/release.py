@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import random
 import time
 from collections import OrderedDict, namedtuple
 from datetime import datetime
@@ -70,13 +71,14 @@ def validate_version(ctx, param, value):
         raise click.BadParameter('needs to be in semver format x.y[.z]')
 
 
-def create_trello_card(client, teams, pr_title, pr_url, pr_body):
+def create_trello_card(client, teams, pr_title, pr_url, pr_body, pr_author, config):
     body = u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
 
     for team in teams:
+        members = pick_card_members(config, pr_author, team)
         creation_attempts = 3
         for attempt in range(3):
-            rate_limited, error, response = client.create_card(team, pr_title, body)
+            rate_limited, error, response = client.create_card(team, pr_title, body, members)
             if rate_limited:
                 wait_time = 10
                 echo_warning(
@@ -99,6 +101,26 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body):
                 echo_success('Created card for team {}: '.format(team), nl=False)
                 echo_info(response.json().get('url'))
                 break
+
+
+def pick_card_members(config, author, team):
+    """Return a list of members to assign to the created card.
+
+    In practice it returns one trello users which is not the PR author, for the given team.
+    For it to work, you a `trello_user_$team` table in your ddev configuration,
+    with keys being github users and values being their corresponding trello
+    IDs (not names).
+
+    For example::
+        [trello_users_integrations]
+        john = "xxxxxxxxxxxxxxxxxxxxx"
+        alice = "yyyyyyyyyyyyyyyyyyyy"
+    """
+    users = config.get('trello_users_{}'.format(team.lower()))
+    if not users:
+        return
+    member = random.choice([key for user, key in users.items() if user != author])
+    return [member]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage the release of checks')
@@ -422,7 +444,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
 
         teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
         if teams:
-            create_trello_card(trello, teams, pr_title, pr_url, pr_body)
+            create_trello_card(trello, teams, pr_title, pr_url, pr_body, pr_author, user_config)
             continue
 
         finished = False
@@ -485,7 +507,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 echo_warning('Exited at {}'.format(format_commit_id(commit_id)))
                 return
             else:
-                create_trello_card(trello, [value], pr_title, pr_url, pr_body)
+                create_trello_card(trello, [value], pr_title, pr_url, pr_body, pr_author, user_config)
 
             finished = True
 
