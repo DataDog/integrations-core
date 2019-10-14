@@ -3,6 +3,8 @@ trigger:
     include:
     - master
 
+pr: none
+
 variables:
   DDEV_COLOR: 1
 
