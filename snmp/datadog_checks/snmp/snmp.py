@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import ipaddress
+import json
 import os
 import threading
 import time
@@ -21,10 +23,16 @@ from datadog_checks.base.errors import CheckException
 from .config import InstanceConfig
 
 try:
-    from datadog_agent import get_config
+    from datadog_agent import get_config, read_persistent_cache, write_persistent_cache
 except ImportError:
 
     def get_config(value):
+        return ''
+
+    def write_persistent_cache(value, key):
+        pass
+
+    def read_persistent_cache(value):
         return ''
 
 
@@ -57,6 +65,7 @@ class SnmpCheck(AgentCheck):
 
     SC_STATUS = 'snmp.can_check'
     _running = True
+    _thread = None
     _NON_REPEATERS = 0
     _MAX_REPETITIONS = 25
 
@@ -90,8 +99,11 @@ class SnmpCheck(AgentCheck):
                 self.profiles_by_oid[sys_object_oid] = profile
 
         self.instance['name'] = self._get_instance_key(self.instance)
-        self._config = InstanceConfig(
-            self.instance,
+        self._config = self._build_config(self.instance)
+
+    def _build_config(self, instance):
+        return InstanceConfig(
+            instance,
             self.warning,
             self.log,
             self.init_config.get('global_metrics', []),
@@ -99,10 +111,6 @@ class SnmpCheck(AgentCheck):
             self.profiles,
             self.profiles_by_oid,
         )
-        if self._config.ip_network:
-            self._thread = threading.Thread(target=self.discover_instances, name=self.name)
-            self._thread.daemon = True
-            self._thread.start()
 
     def _get_instance_key(self, instance):
         key = instance.get('name')
@@ -131,15 +139,7 @@ class SnmpCheck(AgentCheck):
                 instance.pop('network_address')
                 instance['ip_address'] = host
 
-                host_config = InstanceConfig(
-                    instance,
-                    self.warning,
-                    self.log,
-                    self.init_config.get('global_metrics', []),
-                    self.mibs_path,
-                    self.profiles,
-                    self.profiles_by_oid,
-                )
+                host_config = self._build_config(instance)
                 try:
                     sys_object_oid = self.fetch_sysobject_oid(host_config)
                 except Exception as e:
@@ -153,6 +153,9 @@ class SnmpCheck(AgentCheck):
                     profile = self.profiles_by_oid[sys_object_oid]
                     host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
                 config.discovered_instances[host] = host_config
+
+            write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
+
             time_elapsed = time.time() - start_time
             if discovery_interval - time_elapsed > 0:
                 time.sleep(discovery_interval - time_elapsed)
@@ -329,13 +332,36 @@ class SnmpCheck(AgentCheck):
             all_binds.extend(var_binds_table)
         return all_binds, error
 
+    def _start_discovery(self):
+        cache = read_persistent_cache(self.check_id)
+        if cache:
+            hosts = json.loads(cache)
+            for host in hosts:
+                try:
+                    ipaddress.ip_address(host)
+                except ValueError:
+                    write_persistent_cache(self.check_id, json.dumps([]))
+                    break
+                instance = self.instance.copy()
+                instance.pop('network_address')
+                instance['ip_address'] = host
+
+                host_config = self._build_config(instance)
+                self._config.discovered_instances[host] = host_config
+
+        self._thread = threading.Thread(target=self.discover_instances, name=self.name)
+        self._thread.daemon = True
+        self._thread.start()
+
     def check(self, instance):
         """
         Perform two series of SNMP requests, one for all that have MIB associated
         and should be looked up and one for those specified by oids.
         """
         config = self._config
-        if instance.get('network_address'):
+        if self._config.ip_network:
+            if self._thread is None:
+                self._start_discovery()
             for host, discovered in list(config.discovered_instances.items()):
                 if self._check_with_config(discovered):
                     config.failing_instances[host] += 1
