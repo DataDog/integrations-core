@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import platform
-
 import pytest
 from six import iteritems
 
@@ -12,8 +10,6 @@ from datadog_checks.mesos_slave import MesosSlave
 from .common import CHECK_NAME
 
 
-# Linux only: https://github.com/docker/for-mac/issues/1031
-@pytest.mark.skipif(platform.system() != 'Linux', reason='Only runs on Unix systems')
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check_integration(instance, aggregator):
