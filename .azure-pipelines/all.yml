@@ -18,14 +18,14 @@ jobs:
 - template: './templates/test-all.yml'
   parameters:
     checks:
-    - checkName: datadog_checks_base (Linux)
-      displayName: Datadog Checks Base
+    - checkName: datadog_checks_base
+      displayName: Datadog Checks Base (Linux)
       os: linux
-    - checkName: datadog_checks_dev (Linux)
-      displayName: Datadog Checks Dev
+    - checkName: datadog_checks_dev
+      displayName: Datadog Checks Dev (Linux)
       os: linux
-    - checkName: datadog_checks_base (Windows)
-      displayName: Datadog Checks Base
+    - checkName: datadog_checks_base
+      displayName: Datadog Checks Base (Windows)
       os: windows
     - checkName: datadog_checks_dev
       displayName: Datadog Checks Dev (Windows)
