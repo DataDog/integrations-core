@@ -633,6 +633,7 @@ class MySql(AgentCheck):
     def _collect_metadata(self, db):
         version = self._get_version(db)
         self.service_metadata('version', ".".join(version))
+        self.set_metadata('version', ".",join(version))
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
