@@ -125,7 +125,7 @@ def dd_agent_check(request, aggregator):
         python_path = os.environ[E2E_PARENT_PYTHON]
         env = os.environ['TOX_ENV_NAME']
 
-        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
+        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json', '-l', 'debug']
 
         if config:
             config = format_config(config)
