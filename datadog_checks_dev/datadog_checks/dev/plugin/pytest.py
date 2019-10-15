@@ -147,10 +147,11 @@ def dd_agent_check(request, aggregator):
         if AGENT_COLLECTOR_SEPARATOR not in result.stdout:
             run_command('docker logs dd_{}_{}'.format(check, env))
             raise ValueError(
-                '{}{}\nCould find `{}` in the output'.format(result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR)
+                '\n{}{}\nCould find `{}` in the output'.format(result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR)
             )
 
         _, _, collector_output = result.stdout.partition(AGENT_COLLECTOR_SEPARATOR)
+        collector_output = '\n'.join(line for line in collector_output.splitlines() if not line.startswith('2019'))
         collector = json.loads(collector_output.strip())
 
         replay_check_run(collector, aggregator)
