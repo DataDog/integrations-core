@@ -679,7 +679,7 @@ class OpenMetricsScraperMixin(object):
                 self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
-            if sample[self.SAMPLE_NAME].endswith("_sum"):
+            if sample[self.SAMPLE_NAME].endswith("_sum") and not scraper_config['send_distribution_buckets']:
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                 self.gauge(
                     "{}.{}.sum".format(scraper_config['namespace'], metric_name),
@@ -687,7 +687,7 @@ class OpenMetricsScraperMixin(object):
                     tags=tags,
                     hostname=custom_hostname,
                 )
-            elif sample[self.SAMPLE_NAME].endswith("_count"):
+            elif sample[self.SAMPLE_NAME].endswith("_count") and not scraper_config['send_distribution_buckets']:
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                 if scraper_config['send_histograms_buckets']:
                     tags.append("upper_bound:none")
