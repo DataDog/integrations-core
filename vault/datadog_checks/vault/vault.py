@@ -30,6 +30,17 @@ class Vault(AgentCheck):
         'ssl_ignore_warning': {'name': 'tls_ignore_warning'},
     }
 
+    # Expected HTTP Error codes for /sys/health endpoint
+    # https://www.vaultproject.io/api/system/health.html
+    SYS_HEALTH_DEFAULT_CODES = {
+        200: "initialized, unsealed, and active",
+        429: "unsealed and standby",
+        472: "data recovery mode replication secondary and active",
+        473: "performance standby",
+        501: "not initialized",
+        503: "sealed",
+    }
+
     def __init__(self, name, init_config, instances):
         super(Vault, self).__init__(name, init_config, instances)
         self.api_versions = {
@@ -152,18 +163,9 @@ class Vault(AgentCheck):
         except requests.exceptions.HTTPError:
             rsc = response.status_code
             msg = 'The Vault endpoint `{}` returned {}'.format(full_url, rsc)
-            sys_health_default_codes = {
-                # 200: "initialized, unsealed, and active",
-                429: "unsealed and standby",
-                472: "data recovery mode replication secondary and active",
-                473: "performance standby",
-                501: "not initialized",
-                503: "sealed",
-            }
-            if path.endswith("/sys/health") and rsc in sys_health_default_codes:
-                # Expected HTTP Error codes for /sys/health endpoint
-                # https://www.vaultproject.io/api/system/health.html
-                msg = '{} - node is {}.'.format(msg, sys_health_default_codes[rsc])
+            if path.endswith("/sys/health") and rsc in self.SYS_HEALTH_DEFAULT_CODES:
+                # Ignores expected HTTPError status codes for `/sys/health` endpoint.
+                msg = '{} - node is {}.'.format(msg, self.SYS_HEALTH_DEFAULT_CODES[rsc])
                 self.log.debug(msg)
                 pass
             else:
