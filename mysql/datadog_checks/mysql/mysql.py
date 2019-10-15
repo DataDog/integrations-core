@@ -690,15 +690,18 @@ class MySql(AgentCheck):
             flavor = "Official MySQL" if flavor != "MariaDB" else "MariaDB"
             version = version.split('.')
             self.mysql_version[hostkey] = {
-                "version": version
+                "version": version,
                 "flavor": flavor
             }
             return self.mysql_version[hostkey]
 
     @classmethod
     def _get_is_mariadb(cls, db):
-        hostkey = self._get_host_key()
-        return self.mysql_version[hostkey]["flavor"] == "MariaDB"
+        with closing(db.cursor()) as cursor:
+            cursor.execute('SELECT VERSION() LIKE "%MariaDB%"')
+            result = cursor.fetchone()
+
+            return result[0] == 1
 
     def _collect_all_scalars(self, key, dictionary):
         if key not in dictionary or dictionary[key] is None:
