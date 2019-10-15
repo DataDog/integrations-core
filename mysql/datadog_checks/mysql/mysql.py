@@ -284,6 +284,7 @@ class MySql(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         self.mysql_version = {}
         self.qcache_stats = {}
+        # self.is_mariadb = False
 
     @classmethod
     def get_library_versions(cls):
@@ -631,9 +632,12 @@ class MySql(AgentCheck):
         return False
 
     def _collect_metadata(self, db):
-        version = self._get_version(db)
-        self.service_metadata('version', ".".join(version))
-        self.set_metadata('version', ".",join(version))
+        version_metadata = self._get_version_metadata(db)
+        if "version" in version_metadata:
+            self.service_metadata('version', ".".join(version_metadata["version"]))
+        if "flavor" in version_metadata:
+            self.set_metadata('mysql_version', version_metadata)
+
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
@@ -657,7 +661,7 @@ class MySql(AgentCheck):
         # so let's be careful when we compute the version number
 
         try:
-            mysql_version = self._get_version(db)
+            mysql_version = self._get_version_metadata(db)["version"]
         except Exception as e:
             self.warning("Cannot compute mysql version, assuming it's older.: %s" % str(e))
             return False
@@ -668,11 +672,10 @@ class MySql(AgentCheck):
 
         return version >= compat_version
 
-    def _get_version(self, db):
+    def _get_version_metadata(self, db):
         hostkey = self._get_host_key()
         if hostkey in self.mysql_version:
-            version = self.mysql_version[hostkey]
-            return version
+            return self.mysql_version[hostkey]
 
         # Get MySQL version
         with closing(db.cursor()) as cursor:
@@ -682,18 +685,20 @@ class MySql(AgentCheck):
             # Version might include a description e.g. 4.1.26-log.
             # See
             # http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
-            version = result[0].split('-')
-            version = version[0].split('.')
-            self.mysql_version[hostkey] = version
-            return version
+            # `other` contains mysql flavor such as MariaDB
+            [version, flavor] = result[0].split('-')
+            flavor = "Official MySQL" if flavor != "MariaDB" else "MariaDB"
+            version = version.split('.')
+            self.mysql_version[hostkey] = {
+                "version": version
+                "flavor": flavor
+            }
+            return self.mysql_version[hostkey]
 
     @classmethod
     def _get_is_mariadb(cls, db):
-        with closing(db.cursor()) as cursor:
-            cursor.execute('SELECT VERSION() LIKE "%MariaDB%"')
-            result = cursor.fetchone()
-
-            return result[0] == 1
+        hostkey = self._get_host_key()
+        return self.mysql_version[hostkey]["flavor"] == "MariaDB"
 
     def _collect_all_scalars(self, key, dictionary):
         if key not in dictionary or dictionary[key] is None:
