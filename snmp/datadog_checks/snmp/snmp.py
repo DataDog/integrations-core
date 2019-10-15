@@ -365,7 +365,7 @@ class SnmpCheck(AgentCheck):
             for host, discovered in list(config.discovered_instances.items()):
                 if self._check_with_config(discovered):
                     config.failing_instances[host] += 1
-                    if config.failing_instances[host] > config.allowed_failures:
+                    if config.failing_instances[host] >= config.allowed_failures:
                         # Remove it from discovered instances, we'll re-discover it later if it reappears
                         config.discovered_instances.pop(host)
                         # Reset the failure counter as well
