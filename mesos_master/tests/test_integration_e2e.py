@@ -1,12 +1,18 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import platform
+
 import pytest
 from six import iteritems
 
 from datadog_checks.mesos_master import MesosMaster
 
 from .common import BASIC_METRICS, CHECK_NAME, INSTANCE
+
+# Does not work on windows. The zookeeper image are not compatible with windows architecture.
+# Error: "no matching manifest for windows/amd64 10.0.17763 in the manifest list entries"
+pytest.mark.skipif(platform.system() == 'Windows', reason="Docker images not compatible with windows architecture")
 
 
 @pytest.mark.integration

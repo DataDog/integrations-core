@@ -9,8 +9,9 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_master import MesosMaster
 
-# Linux only: https://github.com/docker/for-mac/issues/1031
-pytestmark = pytest.mark.skipif(platform.system() != 'Linux', reason='Only runs on Unix systems')
+# Does not work on windows. The zookeeper image are not compatible with windows architecture.
+# Error: "no matching manifest for windows/amd64 10.0.17763 in the manifest list entries"
+pytest.mark.skipif(platform.system() == 'Windows', reason="Docker images not compatible with windows architecture")
 
 
 @pytest.mark.integration
