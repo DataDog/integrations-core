@@ -219,7 +219,7 @@ class Nginx(AgentCheck):
             if '/' in version:
                 version = version.split('/')[1]
             self.set_metadata('version', version)
-            
+
             self.log.debug(u"Nginx version `server`: {}".format(version))
         else:
             self.log.warning(u"could not retrieve nginx version info")

@@ -55,7 +55,7 @@ def version_metadata():
         version = '1.13'
     else:
         version = NGINX_VERSION.split(':')[1]
-    
+
     major, minor = version.split('.')
 
     return {
