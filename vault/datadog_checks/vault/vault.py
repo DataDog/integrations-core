@@ -150,12 +150,23 @@ class Vault(AgentCheck):
             json_data = response.json()
             response.raise_for_status()
         except requests.exceptions.HTTPError:
-            if path.endswith("/sys/health") and response.status_code in (429, 472, 473, 501, 503):
+            rsc = response.status_code
+            msg = 'The Vault endpoint `{}` returned {}'.format(full_url, rsc)
+            sys_health_default_codes = {
+                # 200: "initialized, unsealed, and active",
+                429: "unsealed and standby",
+                472: "data recovery mode replication secondary and active",
+                473: "performance standby",
+                501: "not initialized",
+                503: "sealed",
+            }
+            if path.endswith("/sys/health") and rsc in sys_health_default_codes:
                 # Expected HTTP Error codes for /sys/health endpoint
                 # https://www.vaultproject.io/api/system/health.html
+                msg = '{} - node is {}.'.format(msg, sys_health_default_codes[rsc])
+                self.log.debug(msg)
                 pass
             else:
-                msg = 'The Vault endpoint `{}` returned {}.'.format(full_url, response.status_code)
                 self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
                 self.log.exception(msg)
                 raise ApiUnreachable
