@@ -10,6 +10,8 @@ from datadog_checks.vault.errors import ApiUnreachable
 
 from .common import INSTANCES, MockResponse
 
+pytestmark = pytest.mark.usefixtures('dd_environment')
+
 
 class TestVault:
     def test_bad_config(self, aggregator):

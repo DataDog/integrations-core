@@ -27,7 +27,7 @@ def instance():
     return INSTANCES['main']
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def dd_environment():
     instance = INSTANCES['main']
 
