@@ -71,11 +71,20 @@ def validate_version(ctx, param, value):
         raise click.BadParameter('needs to be in semver format x.y[.z]')
 
 
-def create_trello_card(client, teams, pr_title, pr_url, pr_body, pr_author, config):
+def create_trello_card(client, teams, pr_title, pr_url, pr_body, pr_author, config, dry_run):
     body = u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
 
     for team in teams:
         members = pick_card_members(config, pr_author, team)
+        if dry_run:
+            echo_success(
+                'Will create a card for team {}: '.format(team), nl=False)
+            if members:
+                echo_info('({}) {}'.format(members, pr_title))
+            else:
+                echo_info(pr_title)
+            continue
+
         creation_attempts = 3
         for attempt in range(3):
             rate_limited, error, response = client.create_card(team, pr_title, body, members)
@@ -331,11 +340,6 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
     diff_data = [tuple(line.split(None, 1)) for line in reversed(result.stdout.splitlines())]
     num_changes = len(diff_data)
 
-    if dry_run:
-        for _, commit_subject in diff_data:
-            echo_info(commit_subject)
-        return
-
     if repo == 'integrations-core':
         options = OrderedDict(
             (('1', 'Integrations'), ('2', 'Containers'), ('3', 'Core'), ('4', 'Platform'), ('s', 'Skip'), ('q', 'Quit'))
@@ -444,7 +448,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
 
         teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
         if teams:
-            create_trello_card(trello, teams, pr_title, pr_url, pr_body, pr_author, user_config)
+            create_trello_card(trello, teams, pr_title, pr_url, pr_body, pr_author, user_config, dry_run)
             continue
 
         finished = False
@@ -507,7 +511,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 echo_warning('Exited at {}'.format(format_commit_id(commit_id)))
                 return
             else:
-                create_trello_card(trello, [value], pr_title, pr_url, pr_body, pr_author, user_config)
+                create_trello_card(trello, [value], pr_title, pr_url, pr_body, pr_author, user_config, dry_run)
 
             finished = True
 
