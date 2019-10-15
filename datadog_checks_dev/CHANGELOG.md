@@ -2,7 +2,7 @@
 
 ## 0.38.1 / 2019-10-15
 
-* [Fixed] Fix ddev testable command to properly use the tag, fallback on the branch if absent.. See [#4775](https://github.com/DataDog/integrations-core/pull/4775).
+* [Fixed] Fix ddev testable command to properly use the tag, fallback on the branch if absent. See [#4775](https://github.com/DataDog/integrations-core/pull/4775).
 
 ## 0.38.0 / 2019-10-11
 
