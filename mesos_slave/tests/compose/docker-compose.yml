@@ -4,7 +4,7 @@ version: "3.5"
 # - https://github.com/mesosphere/docker-containers/tree/master/mesos
 services:
   zookeeper:
-    image: zookeeper:3.5
+    image: bobrik/zookeeper
     environment:
       ZK_CONFIG: tickTime=2000,initLimit=10,syncLimit=5,maxClientCnxns=128,forceSync=no,clientPort=2181
       ZK_ID: 1
