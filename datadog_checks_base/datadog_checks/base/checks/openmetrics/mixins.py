@@ -499,7 +499,7 @@ class OpenMetricsScraperMixin(object):
             if scraper_config['_metrics_wildcards'] is None:
                 scraper_config['_metrics_wildcards'] = [x for x in scraper_config['metrics_mapper'] if '*' in x]
 
-            # try matching wildcard (generic check)
+            # try matching wildcard
             for wildcard in scraper_config['_metrics_wildcards']:
                 if fnmatchcase(metric.name, wildcard):
                     self.submit_openmetric(metric.name, metric, scraper_config)
