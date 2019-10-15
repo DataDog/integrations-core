@@ -98,7 +98,7 @@ def text_data():
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'prometheus', 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-        assert len(text_data) == 14694
+        assert len(text_data) == 14494
 
     return text_data
 
@@ -170,8 +170,8 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
         response = check.poll(mocked_prometheus_scraper_config)
         messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
         messages.sort(key=lambda x: x.name)
-        assert len(messages) == 41
-        assert messages[-1].name == 'version'
+        assert len(messages) == 40
+        assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
 
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -2073,17 +2073,10 @@ def test_metadata_default(mocked_openmetrics_check_factory, text_data):
     with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
         check.check(instance)
 
-        m.assert_any_call('test:123', 'version.major', '1')
-        m.assert_any_call('test:123', 'version.minor', '6')
-        m.assert_any_call('test:123', 'version.patch', '0')
-        m.assert_any_call('test:123', 'version.release', 'beta.0.680')
-        m.assert_any_call('test:123', 'version.build', '3872cb93abf948-dirty')
-        m.assert_any_call('test:123', 'version.raw', 'v1.6.0-beta.0.680+3872cb93abf948-dirty')
-        m.assert_any_call('test:123', 'version.scheme', 'semver')
-        assert m.call_count == 7
+        assert m.call_count == 0
 
 
-def test_metadata_metric_name(mocked_openmetrics_check_factory, text_data):
+def test_metadata_transformer(mocked_openmetrics_check_factory, text_data):
     instance = dict(OPENMETRICS_CHECK_INSTANCE)
     instance['metadata_metric_name'] = 'kubernetes_build_info'
     instance['metadata_label_map'] = {'version': 'gitVersion'}

@@ -106,9 +106,6 @@ http_response_size_bytes_count{handler="prometheus"} 25
 # HELP kubernetes_build_info A metric with a constant '1' value labeled by major, minor, git version, git commit, git tree state, build date, Go version, and compiler from which Kubernetes was built, and platform on which it is running.
 # TYPE kubernetes_build_info gauge
 kubernetes_build_info{buildDate="2016-11-18T23:57:26Z",compiler="gc",gitCommit="3872cb93abf9482d770e651b5fe14667a6fca7e0",gitTreeState="dirty",gitVersion="v1.6.0-alpha.0.680+3872cb93abf948-dirty",goVersion="go1.7.3",major="1",minor="6+",platform="linux/amd64"} 1
-# HELP version Duplicate of kubernetes_build_info to test default metadata collection
-# TYPE version gauge
-version{buildDate="2016-11-18T23:57:26Z",version="v1.6.0-beta.0.680+3872cb93abf948-dirty"} 1
 # HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
 # TYPE process_cpu_seconds_total counter
 process_cpu_seconds_total 449.77
