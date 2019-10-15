@@ -77,6 +77,16 @@ def instance_complex():
 def instance_error():
     return {'server': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
+@pytest.fixture(scope='session')
+def version_metadata():
+    major, minor = MYSQL_VERSION.split('.')[:2]
+    return {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': mock.ANY,
+    }
 
 def init_master():
     conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
@@ -133,3 +143,4 @@ def _mysql_docker_repo():
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'
+
