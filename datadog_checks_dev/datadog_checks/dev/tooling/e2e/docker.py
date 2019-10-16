@@ -207,7 +207,7 @@ class DockerInterface(object):
                 '-e',
                 'DD_API_KEY={}'.format(self.api_key),
                 '-e',
-                'DD_C_STACKTRACE_COLLECTION: true',
+                'DD_C_STACKTRACE_COLLECTION=true',
                 # Run expvar on a random port
                 '-e',
                 'DD_EXPVAR_PORT=0',
