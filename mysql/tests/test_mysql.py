@@ -251,11 +251,10 @@ def test__get_server_pid():
 
 def test_metadata(instance_basic, version_metadata):
     mysql_check = MySql(common.CHECK_NAME, {}, {})
-    mysql_check.check(instance_basic)
     mysql_check.check_id = 'test:123'
 
     with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        mysql_check.check(instance)
+        mysql_check.check(instance_basic)
         for name, value in version_metadata.items():
             m.assert_any_call('test:123', name, value)
 
