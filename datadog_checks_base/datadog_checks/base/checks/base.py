@@ -117,7 +117,7 @@ class __AgentCheck(object):
 
         Agent 6,7 signature:
 
-            AgentCheck(name, init_config, instances)
+            AgentCheck(name, init_config, instances)    # instances contain only 1 instance
             AgentCheck.check(instance)
 
         Agent 8 signature:
