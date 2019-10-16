@@ -63,26 +63,25 @@ class Etcd(OpenMetricsBaseCheck):
 
     def __init__(self, name, init_config, instances):
 
-        if instances is not None:
-            for instance in instances:
-                # For legacy check ensure prometheus_url is set so
-                # OpenMetricsBaseCheck instantiation succeeds
-                if not is_affirmative(instance.get('use_preview', False)):
-                    instance.setdefault('prometheus_url', '')
-                    self.HTTP_CONFIG_REMAPPER = {
-                        'ssl_keyfile': {'name': 'tls_private_key'},
-                        'ssl_certfile': {'name': 'tls_cert'},
-                        'ssl_cert_validation': {'name': 'tls_verify'},
-                        'ssl_ca_certs': {'name': 'tls_ca_cert'},
-                    }
-                else:
-                    self.HTTP_CONFIG_REMAPPER = {
-                        'ssl_cert': {'name': 'tls_cert'},
-                        'ssl_private_key': {'name': 'tls_private_key'},
-                        'ssl_ca_cert': {'name': 'tls_ca_cert'},
-                        'ssl_verify': {'name': 'tls_verify'},
-                        'prometheus_timeout': {'name': 'timeout'},
-                    }
+        instance = instances[0]
+        if is_affirmative(instance.get('use_preview', True)):
+            self.HTTP_CONFIG_REMAPPER = {
+                'ssl_cert': {'name': 'tls_cert'},
+                'ssl_private_key': {'name': 'tls_private_key'},
+                'ssl_ca_cert': {'name': 'tls_ca_cert'},
+                'ssl_verify': {'name': 'tls_verify'},
+                'prometheus_timeout': {'name': 'timeout'},
+            }
+        else:
+            # For legacy check ensure prometheus_url is set so
+            # OpenMetricsBaseCheck instantiation succeeds
+            instance.setdefault('prometheus_url', '')
+            self.HTTP_CONFIG_REMAPPER = {
+                'ssl_keyfile': {'name': 'tls_private_key'},
+                'ssl_certfile': {'name': 'tls_cert'},
+                'ssl_cert_validation': {'name': 'tls_verify'},
+                'ssl_ca_certs': {'name': 'tls_ca_cert'},
+            }
 
         super(Etcd, self).__init__(
             name,
