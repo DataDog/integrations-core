@@ -19,6 +19,16 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             metrics:
             - bar
             - foo
+
+
+    Agent 5 signature:
+
+        OpenMetricsBaseCheck(name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=None)
+
+    Agent 6 signature:
+
+        OpenMetricsBaseCheck(name, init_config, instances, default_instances=None, default_namespace=None)
+
     """
 
     DEFAULT_METRIC_LIMIT = 2000

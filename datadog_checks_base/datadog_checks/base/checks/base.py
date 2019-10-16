@@ -110,6 +110,14 @@ class __AgentCheck(object):
         the Agent might create several different Check instances and the method would be
         called as many times.
 
+        Agent 5 signature:
+
+            AgentCheck(name, init_config, agentConfig, instances=None)
+
+        Agent 6 signature:
+
+            AgentCheck(name, init_config, instances)
+
         :warning: when loading a Custom check, the Agent will inspect the module searching
             for a subclass of `AgentCheck`. If such a class exists but has been derived in
             turn, it'll be ignored - **you should never derive from an existing Check**.

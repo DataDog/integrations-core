@@ -9,47 +9,83 @@ FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtur
 
 
 class TestSignature:
+    INIT_CONFIG = {'my_init_config': 'foo bar init config'}
+    AGENT_CONFIG = {'my_agent_config': 'foo bar agent config'}
+
     def test_default_legacy_basic(self):
-        check = OpenMetricsBaseCheck('openmetrics_check', {}, {})
+        check = OpenMetricsBaseCheck('openmetrics_check', self.INIT_CONFIG, self.AGENT_CONFIG)
 
         assert check.default_instances == {}
         assert check.default_namespace is None
+        assert check.agentConfig == {'my_agent_config': 'foo bar agent config'}
+        assert check.name == 'openmetrics_check'
+        assert check.init_config == {'my_init_config': 'foo bar init config'}
 
     def test_default_instances(self):
         instance = {'prometheus_url': 'endpoint'}
-        check = OpenMetricsBaseCheck('openmetrics_check', {}, [instance], default_namespace='openmetrics')
+        check = OpenMetricsBaseCheck('openmetrics_check', self.INIT_CONFIG, [instance], default_namespace='openmetrics')
 
         assert check.default_instances == {}
         assert check.default_namespace == 'openmetrics'
         assert 'endpoint' in check.config_map
+        assert check.instance == instance
+        assert check.agentConfig == {}
+        assert check.name == 'openmetrics_check'
+        assert check.init_config == {'my_init_config': 'foo bar init config'}
 
     def test_default_instances_legacy(self):
         instance = {'prometheus_url': 'endpoint'}
-        check = OpenMetricsBaseCheck('openmetrics_check', {}, {}, [instance], default_namespace='openmetrics')
+        check = OpenMetricsBaseCheck(
+            'openmetrics_check', self.INIT_CONFIG, self.AGENT_CONFIG, [instance], default_namespace='openmetrics'
+        )
 
         assert check.default_instances == {}
         assert check.default_namespace == 'openmetrics'
         assert 'endpoint' in check.config_map
+        assert check.instance == instance
+        assert check.agentConfig == {'my_agent_config': 'foo bar agent config'}
+        assert check.name == 'openmetrics_check'
+        assert check.init_config == {'my_init_config': 'foo bar init config'}
 
     def test_default_instances_legacy_kwarg(self):
         instance1 = {'prometheus_url': 'endpoint1'}
         instance2 = {'prometheus_url': 'endpoint2'}
         check = OpenMetricsBaseCheck(
-            'openmetrics_check', {}, {}, instances=[instance1, instance2], default_namespace='openmetrics'
+            'openmetrics_check',
+            self.INIT_CONFIG,
+            {},
+            instances=[instance1, instance2],
+            default_instances={'my_inst': {'foo': 'bar'}},
+            default_namespace='openmetrics',
         )
 
-        assert check.default_instances == {}
+        assert check.default_instances == {'my_inst': {'foo': 'bar'}}
         assert check.default_namespace == 'openmetrics'
         assert 'endpoint1' in check.config_map
         assert 'endpoint2' in check.config_map
+        assert check.instance == instance1
+        assert check.agentConfig == {}
+        assert check.name == 'openmetrics_check'
+        assert check.init_config == {'my_init_config': 'foo bar init config'}
 
     def test_args_legacy(self):
         instance = {'prometheus_url': 'endpoint'}
-        check = OpenMetricsBaseCheck('openmetrics_check', {}, {}, [instance], None, 'openmetrics')
+        check = OpenMetricsBaseCheck(
+            'openmetrics_check',
+            self.INIT_CONFIG,
+            self.AGENT_CONFIG,
+            [instance],
+            {'my_inst': {'foo': 'bar'}},
+            'openmetrics',
+        )
 
-        assert check.default_instances == {}
+        assert check.default_instances == {'my_inst': {'foo': 'bar'}}
         assert check.default_namespace == 'openmetrics'
         assert 'endpoint' in check.config_map
+        assert check.instance == instance
+        assert check.agentConfig == {'my_agent_config': 'foo bar agent config'}
+        assert check.name == 'openmetrics_check'
+        assert check.init_config == {'my_init_config': 'foo bar init config'}
 
 
 def test_rate_override():
