@@ -73,7 +73,7 @@ def test_warning_args_errors():
 
 
 @pytest.mark.parametrize(
-    'case_name, check, expected_properties',
+    'case_name, check, expected_attributes',
     [
         (
             'agent 5 signature: only args',
@@ -230,9 +230,9 @@ def test_warning_args_errors():
         ),
     ],
 )
-def test_agent_signature(case_name, check, expected_properties):
-    for attr, value in expected_properties.items():
-        assert getattr(check, attr) == value
+def test_agent_signature(case_name, check, expected_attributes):
+    actual_attributes = {attr: getattr(check, attr) for attr in expected_attributes}
+    assert expected_attributes == actual_attributes
 
 
 class TestMetricNormalization:
