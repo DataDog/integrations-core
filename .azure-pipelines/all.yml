@@ -18,273 +18,303 @@ jobs:
 - template: './templates/test-all.yml'
   parameters:
     checks:
-    - checkName: envoy_01
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_00
       os: linux
-    - checkName: envoy_02
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_01
       os: linux
-    - checkName: envoy_03
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_02
       os: linux
-    - checkName: envoy_04
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_03
       os: linux
-    - checkName: envoy_05
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_04
       os: linux
-    - checkName: envoy_06
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_05
       os: linux
-    - checkName: envoy_07
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_06
       os: linux
-    - checkName: envoy_08
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_07
       os: linux
-    - checkName: envoy_09
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_08
       os: linux
-    - checkName: envoy_11
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_09
       os: linux
-    - checkName: envoy_12
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_10
       os: linux
-    - checkName: envoy_13
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_11
       os: linux
-    - checkName: envoy_14
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_12
       os: linux
-    - checkName: envoy_15
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_13
       os: linux
-    - checkName: envoy_16
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_14
       os: linux
-    - checkName: envoy_17
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_15
       os: linux
-    - checkName: envoy_18
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_16
       os: linux
-    - checkName: envoy_19
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_17
       os: linux
-    - checkName: envoy_21
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_18
       os: linux
-    - checkName: envoy_22
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_19
       os: linux
-    - checkName: envoy_23
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_20
       os: linux
-    - checkName: envoy_24
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_21
       os: linux
-    - checkName: envoy_25
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_22
       os: linux
-    - checkName: envoy_26
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_23
       os: linux
-    - checkName: envoy_27
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_24
       os: linux
-    - checkName: envoy_28
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_25
       os: linux
-    - checkName: envoy_29
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_26
       os: linux
-    - checkName: envoy_31
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_27
       os: linux
-    - checkName: envoy_32
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_28
       os: linux
-    - checkName: envoy_33
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_29
       os: linux
-    - checkName: envoy_34
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_30
       os: linux
-    - checkName: envoy_35
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_31
       os: linux
-    - checkName: envoy_36
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_32
       os: linux
-    - checkName: envoy_37
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_33
       os: linux
-    - checkName: envoy_38
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_34
       os: linux
-    - checkName: envoy_39
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_35
       os: linux
-    - checkName: envoy_41
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_36
       os: linux
-    - checkName: envoy_42
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_37
       os: linux
-    - checkName: envoy_43
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_38
       os: linux
-    - checkName: envoy_44
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_39
       os: linux
-    - checkName: envoy_45
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_40
       os: linux
-    - checkName: envoy_46
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_41
       os: linux
-    - checkName: envoy_47
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_42
       os: linux
-    - checkName: envoy_48
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_43
       os: linux
-    - checkName: envoy_49
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_44
       os: linux
-    - checkName: envoy_51
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_45
       os: linux
-    - checkName: envoy_52
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_46
       os: linux
-    - checkName: envoy_53
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_47
       os: linux
-    - checkName: envoy_54
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_48
       os: linux
-    - checkName: envoy_55
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_49
       os: linux
-    - checkName: envoy_56
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_50
       os: linux
-    - checkName: envoy_57
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_51
       os: linux
-    - checkName: envoy_58
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_52
       os: linux
-    - checkName: envoy_59
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_53
       os: linux
-    - checkName: envoy_61
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_54
       os: linux
-    - checkName: envoy_62
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_55
       os: linux
-    - checkName: envoy_63
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_56
       os: linux
-    - checkName: envoy_64
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_57
       os: linux
-    - checkName: envoy_65
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_58
       os: linux
-    - checkName: envoy_66
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_59
       os: linux
-    - checkName: envoy_67
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_60
       os: linux
-    - checkName: envoy_68
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_61
       os: linux
-    - checkName: envoy_69
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_62
       os: linux
-    - checkName: envoy_71
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_63
       os: linux
-    - checkName: envoy_72
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_64
       os: linux
-    - checkName: envoy_73
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_65
       os: linux
-    - checkName: envoy_74
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_66
       os: linux
-    - checkName: envoy_75
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_67
       os: linux
-    - checkName: envoy_76
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_68
       os: linux
-    - checkName: envoy_77
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_69
       os: linux
-    - checkName: envoy_78
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_70
       os: linux
-    - checkName: envoy_79
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_71
       os: linux
-    - checkName: envoy_81
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_72
       os: linux
-    - checkName: envoy_82
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_73
       os: linux
-    - checkName: envoy_83
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_74
       os: linux
-    - checkName: envoy_84
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_75
       os: linux
-    - checkName: envoy_85
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_76
       os: linux
-    - checkName: envoy_86
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_77
       os: linux
-    - checkName: envoy_87
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_78
       os: linux
-    - checkName: envoy_88
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_79
       os: linux
-    - checkName: envoy_89
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_80
       os: linux
-    - checkName: envoy_91
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_81
       os: linux
-    - checkName: envoy_92
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_82
       os: linux
-    - checkName: envoy_93
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_83
       os: linux
-    - checkName: envoy_94
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_84
       os: linux
-    - checkName: envoy_95
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_85
       os: linux
-    - checkName: envoy_96
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_86
       os: linux
-    - checkName: envoy_97
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_87
       os: linux
-    - checkName: envoy_98
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_88
       os: linux
-    - checkName: envoy_99
-      displayName: Envoy
+    - checkName: envoy
+      displayName: Envoy_89
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_90
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_91
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_92
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_93
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_94
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_95
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_96
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_97
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_98
+      os: linux
+    - checkName: envoy
+      displayName: Envoy_99
       os: linux
