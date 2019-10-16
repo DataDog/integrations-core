@@ -164,9 +164,7 @@ class Vault(AgentCheck):
             msg = 'The Vault endpoint `{}` returned {}'.format(full_url, rsc)
             if path.endswith("/sys/health") and rsc in self.SYS_HEALTH_DEFAULT_CODES:
                 # Ignores expected HTTPError status codes for `/sys/health` endpoint.
-                msg = '{} - node is {}.'.format(msg, self.SYS_HEALTH_DEFAULT_CODES[rsc])
-                self.log.debug(msg)
-                pass
+                self.log.debug('{} - node is {}.'.format(msg, self.SYS_HEALTH_DEFAULT_CODES[rsc]))
             else:
                 self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
                 self.log.exception(msg)
