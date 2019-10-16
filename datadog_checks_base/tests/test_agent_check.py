@@ -72,6 +72,146 @@ def test_warning_args_errors():
     assert ["should not raise error: %s"] == check.warnings
 
 
+@pytest.mark.parametrize(
+    'case_name, check, expected_properties',
+    [
+        (
+            'agent 5 signature: only args',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}, [{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: instances as kwarg',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: agentConfig and instances as kwarg',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: init_config, agentConfig and instances as kwarg',
+            AgentCheck('check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: name, init_config, agentConfig and instances as kwarg',
+            AgentCheck(name='check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: no instances',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 5 signature: no instances and agentConfig as kwarg',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 5 signature: no instances and init_config, agentConfig as kwarg',
+            AgentCheck('check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 5 signature: no instances and name, init_config, agentConfig as kwarg',
+            AgentCheck(name='check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 6 signature: only args',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, [{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: instances as kwarg',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: init_config, instances as kwarg',
+            AgentCheck('check_name', init_config={'init_conf1': 'init_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: name, init_config, instances as kwarg',
+            AgentCheck(name='check_name', init_config={'init_conf1': 'init_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+    ],
+)
+def test_agent_signature(case_name, check, expected_properties):
+    for attr, value in expected_properties.items():
+        assert getattr(check, attr) == value
+
+
 class TestMetricNormalization:
     def test_default(self):
         check = AgentCheck()
