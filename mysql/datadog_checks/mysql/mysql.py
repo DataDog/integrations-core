@@ -279,9 +279,9 @@ class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
-
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    
+    def __init__(self, name, init_config, instances=None):
+        AgentCheck.__init__(self, name, init_config, instances)
         self.mysql_version = {}
         self.qcache_stats = {}
         # self.is_mariadb = False
