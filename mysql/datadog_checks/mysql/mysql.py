@@ -315,8 +315,7 @@ class MySql(AgentCheck):
             try:
                 # Metadata collection
                 self._collect_metadata(db)
-                self._submit_metadata()
-
+                
                 # Metric collection
                 self._collect_metrics(db, tags, options, queries, max_custom_queries)
                 self._collect_system_metrics(host, db, tags)
@@ -644,8 +643,12 @@ class MySql(AgentCheck):
             version, _ , other = result[0].partition('-')
             self.version = version
             self.set_metadata('version', version)
-            self.flavor = other if other == "MariaDB" else "MySQL"
-            self.set_metadata('flavor', flavor)
+            if other == "MariaDB":
+                self.flavor = other
+            else:
+                self.flavor = "MySQL"
+                self.set_metadata('build', other)
+            self.set_metadata('flavor', self.flavor)
 
        
     def _submit_metrics(self, variables, db_results, tags):
