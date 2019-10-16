@@ -8,6 +8,7 @@ HERE = get_here()
 HOST = get_docker_hostname()
 MYSQL_USERNAME = 'cactiuser'
 MYSQL_PASSWORD = 'cactipass'
+MYSQL_PORT = 3306
 DATABASE = 'cacti'
 
 # ID
@@ -18,6 +19,7 @@ RRD_PATH = '/var/www/html/cacti/rra'
 INSTANCE_INTEGRATION = {
     'mysql_host': HOST,
     'mysql_user': MYSQL_USERNAME,
+    'mysql_port': MYSQL_PORT,
     'mysql_password': MYSQL_PASSWORD,
     'rrd_path': RRD_PATH,
     'collect_task_metrics': True,
