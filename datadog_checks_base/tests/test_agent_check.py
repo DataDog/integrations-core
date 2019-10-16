@@ -87,7 +87,9 @@ def test_warning_args_errors():
         ),
         (
             'agent 5 signature: instances as kwarg',
-            AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]),
+            AgentCheck(
+                'check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]
+            ),
             {
                 'name': 'check_name',
                 'init_config': {'init_conf1': 'init_value1'},
@@ -97,7 +99,12 @@ def test_warning_args_errors():
         ),
         (
             'agent 5 signature: agentConfig and instances as kwarg',
-            AgentCheck('check_name', {'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]),
+            AgentCheck(
+                'check_name',
+                {'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+                instances=[{'foo': 'bar'}],
+            ),
             {
                 'name': 'check_name',
                 'init_config': {'init_conf1': 'init_value1'},
@@ -107,7 +114,12 @@ def test_warning_args_errors():
         ),
         (
             'agent 5 signature: init_config, agentConfig and instances as kwarg',
-            AgentCheck('check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]),
+            AgentCheck(
+                'check_name',
+                init_config={'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+                instances=[{'foo': 'bar'}],
+            ),
             {
                 'name': 'check_name',
                 'init_config': {'init_conf1': 'init_value1'},
@@ -117,7 +129,12 @@ def test_warning_args_errors():
         ),
         (
             'agent 5 signature: name, init_config, agentConfig and instances as kwarg',
-            AgentCheck(name='check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]),
+            AgentCheck(
+                name='check_name',
+                init_config={'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+                instances=[{'foo': 'bar'}],
+            ),
             {
                 'name': 'check_name',
                 'init_config': {'init_conf1': 'init_value1'},
@@ -147,7 +164,9 @@ def test_warning_args_errors():
         ),
         (
             'agent 5 signature: no instances and init_config, agentConfig as kwarg',
-            AgentCheck('check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}),
+            AgentCheck(
+                'check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}
+            ),
             {
                 'name': 'check_name',
                 'init_config': {'init_conf1': 'init_value1'},
@@ -157,7 +176,11 @@ def test_warning_args_errors():
         ),
         (
             'agent 5 signature: no instances and name, init_config, agentConfig as kwarg',
-            AgentCheck(name='check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}),
+            AgentCheck(
+                name='check_name',
+                init_config={'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+            ),
             {
                 'name': 'check_name',
                 'init_config': {'init_conf1': 'init_value1'},
