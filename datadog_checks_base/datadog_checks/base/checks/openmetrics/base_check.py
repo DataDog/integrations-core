@@ -52,12 +52,17 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.default_namespace = default_namespace
 
         # pre-generate the scraper configurations
+
         if 'instances' in kwargs:
             instances = kwargs['instances']
         elif len(args) == 4:
+            # instances from legacy signature
             instances = args[3]
-        else:
+        elif isinstance(args[2], list):
+            # instances from new signature
             instances = args[2]
+        else:
+            instances = None
 
         if instances is not None:
             for instance in instances:

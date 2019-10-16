@@ -142,14 +142,14 @@ class __AgentCheck(object):
         if len(args) > 1:
             self.init_config = args[1]
         if len(args) > 2:
-            if len(args) > 3 or 'instances' in kwargs:
+            if isinstance(args[2], list):
+                # new-style init: the 3rd argument is `instances`
+                self.instances = args[2]
+            else:
                 # old-style init: the 3rd argument is `agentConfig`
                 self.agentConfig = args[2]
                 if len(args) > 3:
                     self.instances = args[3]
-            else:
-                # new-style init: the 3rd argument is `instances`
-                self.instances = args[2]
 
         # Agent 6+ will only have one instance
         self.instance = self.instances[0] if self.instances else None
