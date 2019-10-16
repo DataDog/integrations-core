@@ -79,12 +79,12 @@ def instance_error():
 
 @pytest.fixture(scope='session')
 def version_metadata():
-    major, minor = MYSQL_VERSION.split('.')[:2]
+    major, minor, patch = MYSQL_VERSION.split('.')
     return {
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,
-        'version.patch': mock.ANY,
+        'version.patch': patch,
         'version.raw': mock.ANY,
     }
 

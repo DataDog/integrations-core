@@ -636,20 +636,17 @@ class MySql(AgentCheck):
         with closing(db.cursor()) as cursor:
             cursor.execute('SELECT VERSION()')
             result = cursor.fetchone()
-
+            
             # Version might include a build or a flavor 
             # e.g. 4.1.26-log, 4.1.26-MariaDB
             # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
             # and https://mariadb.com/kb/en/library/version/ 
-            [version, other] = result[0].split('-')
+            version, _ , other = result[0].partition('-')
             self.version = version
-            self.flavor = other if other == "MariaDB" else "Official MySQL"
+            self.set_metadata('version', version)
+            self.flavor = other if other == "MariaDB" else "MySQL"
+            self.set_metadata('flavor', flavor)
 
-    
-    def _submit_metadata(self):
-        self.service_metadata('version', version)
-        self.set_metadata('version', version)
-        self.set_metadata('flavor', flavor)
        
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
