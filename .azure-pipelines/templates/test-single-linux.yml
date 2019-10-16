@@ -9,7 +9,7 @@ parameters:
   repo: 'core'
 
 jobs:
-- job: '${{ coalesce(parameters.job_name, parameters.check) }}_Linux'
+- job: '${{ coalesce(parameters.job_name, parameters.display) }}_Linux'
   displayName: '${{ parameters.display }}'
 
   pool:
