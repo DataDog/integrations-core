@@ -13,7 +13,7 @@ steps:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
-  - script: ddev env test --base --new-env --profile-memory ${{ parameters.check }}
+  - script: ddev env test --base --new-env ${{ parameters.check }}
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
