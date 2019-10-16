@@ -8,7 +8,7 @@ HERE = get_here()
 HOST = get_docker_hostname()
 MYSQL_USERNAME = 'cactiuser'
 MYSQL_PASSWORD = 'cactipass'
-MYSQL_PORT = 3306
+MYSQL_PORT = 5306
 DATABASE = 'cacti'
 
 # ID
