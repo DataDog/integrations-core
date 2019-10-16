@@ -19,17 +19,6 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             metrics:
             - bar
             - foo
-
-
-    Agent 5 signature:
-
-        OpenMetricsBaseCheck(name, init_config, agentConfig, instances=None, default_instances=None,
-                             default_namespace=None)
-
-    Agent 6 signature:
-
-        OpenMetricsBaseCheck(name, init_config, instances, default_instances=None, default_namespace=None)
-
     """
 
     DEFAULT_METRIC_LIMIT = 2000
@@ -53,17 +42,12 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.default_namespace = default_namespace
 
         # pre-generate the scraper configurations
-
         if 'instances' in kwargs:
             instances = kwargs['instances']
         elif len(args) == 4:
-            # instances from legacy signature
             instances = args[3]
-        elif isinstance(args[2], list):
-            # instances from new signature
-            instances = args[2]
         else:
-            instances = None
+            instances = args[2]
 
         if instances is not None:
             for instance in instances:
