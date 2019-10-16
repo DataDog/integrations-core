@@ -192,7 +192,7 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
     "logConfiguration": {
 	    "logDriver": "awsfirelens",
 	    "options": {
-		    "Name": "datadog",
+		    "name": "datadog",
 		    "apiKey": "<DATADOG_API_KEY>",
             "dd_service": "firelens-test",
             "dd_source": "redis",
