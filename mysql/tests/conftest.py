@@ -88,6 +88,9 @@ def version_metadata():
         'version.raw': mock.ANY,
     }
 
+@pytest.fixture(scope='session')
+def 
+
 def init_master():
     conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
     _add_dog_user(conn)
