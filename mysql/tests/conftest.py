@@ -78,18 +78,18 @@ def instance_error():
     return {'server': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
 @pytest.fixture(scope='session')
-def version_metadata():
+def collect_metadata():
     major, minor, patch = MYSQL_VERSION.split('.')
+    flavor = "MariaDB" if MYSQL_FLAVOR == "mariadb" else "MySQL"
     return {
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,
         'version.raw': mock.ANY,
+        'flavor': flavor
     }
 
-@pytest.fixture(scope='session')
-def 
 
 def init_master():
     conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
