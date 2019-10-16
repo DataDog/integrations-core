@@ -282,9 +282,9 @@ class MySql(AgentCheck):
     
     def __init__(self, name, init_config, instances=None):
         AgentCheck.__init__(self, name, init_config, instances)
-        self.mysql_version = {}
+        self.version = ''
+        self.flavor = ''
         self.qcache_stats = {}
-        # self.is_mariadb = False
 
     @classmethod
     def get_library_versions(cls):
@@ -315,6 +315,7 @@ class MySql(AgentCheck):
             try:
                 # Metadata collection
                 self._collect_metadata(db)
+                self._submit_metadata()
 
                 # Metric collection
                 self._collect_metrics(db, tags, options, queries, max_custom_queries)
@@ -535,7 +536,7 @@ class MySql(AgentCheck):
 
         if is_affirmative(options.get('replication', False)):
             # Get replica stats
-            is_mariadb = self._get_is_mariadb(db)
+            is_mariadb = True if self.flavor == "MariaDB" else False
             replication_channel = options.get('replication_channel')
             if replication_channel:
                 self.service_check_tags.append("channel:{0}".format(replication_channel))
@@ -632,12 +633,25 @@ class MySql(AgentCheck):
         return False
 
     def _collect_metadata(self, db):
-        version_metadata = self._get_version_metadata(db)
-        if "version" in version_metadata:
-            self.service_metadata('version', ".".join(version_metadata["version"]))
-        if "flavor" in version_metadata:
-            self.set_metadata('mysql_version', version_metadata)
+        with closing(db.cursor()) as cursor:
+            cursor.execute('SELECT VERSION()')
+            result = cursor.fetchone()
 
+            # Version might include a build or a flavor 
+            # e.g. 4.1.26-log, 4.1.26-MariaDB
+            # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
+            # and https://mariadb.com/kb/en/library/version/ 
+            [version, other] = result[0].split('-')
+            self.version = version
+            self.flavor = other if other == "MariaDB" else "Official MySQL"
+
+    
+    def _submit_metadata(self):
+        self.service_metadata('version', version)
+        self.set_metadata('version', version)
+        self.set_metadata('version.flavor', flavor)
+        # where do I submit the flavor?
+            
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
@@ -661,7 +675,7 @@ class MySql(AgentCheck):
         # so let's be careful when we compute the version number
 
         try:
-            mysql_version = self._get_version_metadata(db)["version"]
+            mysql_version = self.version.split('.')
         except Exception as e:
             self.warning("Cannot compute mysql version, assuming it's older.: %s" % str(e))
             return False
@@ -671,37 +685,6 @@ class MySql(AgentCheck):
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
 
         return version >= compat_version
-
-    def _get_version_metadata(self, db):
-        hostkey = self._get_host_key()
-        if hostkey in self.mysql_version:
-            return self.mysql_version[hostkey]
-
-        # Get MySQL version
-        with closing(db.cursor()) as cursor:
-            cursor.execute('SELECT VERSION()')
-            result = cursor.fetchone()
-
-            # Version might include a description e.g. 4.1.26-log, -debug, -standard
-            # See
-            # http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
-            # `other` contains mysql flavor such as MariaDB
-            [version, flavor] = result[0].split('-')
-            flavor = "Official MySQL" if flavor != "MariaDB" else "MariaDB"
-            version = version.split('.')
-            self.mysql_version[hostkey] = {
-                "version": version,
-                "flavor": flavor
-            }
-            return self.mysql_version[hostkey]
-
-    @classmethod
-    def _get_is_mariadb(cls, db):
-        with closing(db.cursor()) as cursor:
-            cursor.execute('SELECT VERSION() LIKE "%MariaDB%"')
-            result = cursor.fetchone()
-
-            return result[0] == 1
 
     def _collect_all_scalars(self, key, dictionary):
         if key not in dictionary or dictionary[key] is None:
