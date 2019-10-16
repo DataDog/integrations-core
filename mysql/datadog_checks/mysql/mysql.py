@@ -649,10 +649,8 @@ class MySql(AgentCheck):
     def _submit_metadata(self):
         self.service_metadata('version', version)
         self.set_metadata('version', version)
-        self.set_metadata('version.flavor', flavor)
-        # where do I submit the flavor?
-            
-
+        self.set_metadata('flavor', flavor)
+       
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
             metric_name, metric_type = metric
