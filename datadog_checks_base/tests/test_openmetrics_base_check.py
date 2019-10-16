@@ -53,7 +53,7 @@ class TestSignature:
         check = OpenMetricsBaseCheck(
             'openmetrics_check',
             self.INIT_CONFIG,
-            {},
+            self.AGENT_CONFIG,
             instances=[instance1, instance2],
             default_instances={'my_inst': {'foo': 'bar'}},
             default_namespace='openmetrics',
@@ -64,7 +64,7 @@ class TestSignature:
         assert 'endpoint1' in check.config_map
         assert 'endpoint2' in check.config_map
         assert check.instance == instance1
-        assert check.agentConfig == {}
+        assert check.agentConfig == {'my_agent_config': 'foo bar agent config'}
         assert check.name == 'openmetrics_check'
         assert check.init_config == {'my_init_config': 'foo bar init config'}
 
