@@ -94,7 +94,7 @@ datadog-rabbitmq==1.10.0
 datadog-redisdb==1.13.0
 datadog-riak==1.6.0
 datadog-riakcs==2.1.0
-datadog-snmp==1.14.0
+datadog-snmp==1.14.1
 datadog-solr==1.2.0
 datadog-spark==1.9.0
 datadog-sqlserver==1.14.0; sys_platform != 'darwin'
