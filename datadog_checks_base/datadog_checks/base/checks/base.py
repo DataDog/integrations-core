@@ -113,10 +113,17 @@ class __AgentCheck(object):
         Agent 5 signature:
 
             AgentCheck(name, init_config, agentConfig, instances=None)
+            AgentCheck.check(instance)
 
-        Agent 6 signature:
+        Agent 6,7 signature:
 
             AgentCheck(name, init_config, instances)
+            AgentCheck.check(instance)
+
+        Agent 8 signature:
+
+            AgentCheck(name, init_config, instance)     # one instance
+            AgentCheck.check()                          # no more instance argument for check method
 
         :warning: when loading a Custom check, the Agent will inspect the module searching
             for a subclass of `AgentCheck`. If such a class exists but has been derived in
