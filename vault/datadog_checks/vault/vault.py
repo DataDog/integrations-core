@@ -98,8 +98,7 @@ class Vault(AgentCheck):
     def check_health_v1(self, config, tags):
         path = '/sys/health'
         url = config['api_url']
-        health_params = {'standbyok': True, 'perfstandbyok': True}
-        health_data = self.access_api(url, path, tags, params=health_params)
+        health_data = self.access_api(url, path, tags)
 
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
