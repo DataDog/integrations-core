@@ -18,349 +18,273 @@ jobs:
 - template: './templates/test-all.yml'
   parameters:
     checks:
-    - checkName: datadog_checks_base
-      displayName: Datadog Checks Base
-      os: linux
-    - checkName: datadog_checks_dev
-      displayName: Datadog Checks Dev
-      os: linux
-    - checkName: datadog_checks_downloader
-      displayName: Datadog Checks Downloader
-      os: linux
-    - checkName: active_directory
-      displayName: Active Directory
-      os: windows
-    - checkName: activemq_xml
-      displayName: ActiveMQ XML
-      os: linux
-    - checkName: aerospike
-      displayName: Aerospike
-      os: linux
-    - checkName: ambari
-      displayName: Ambari
-      os: linux
-    - checkName: apache
-      displayName: Apache
-      os: linux
-    - checkName: aspdotnet
-      displayName: ASP.NET
-      os: windows
-    - checkName: btrfs
-      displayName: Btrfs
-      os: linux
-    - checkName: cacti
-      displayName: Cacti
-      os: linux
-    - checkName: cassandra_nodetool
-      displayName: Cassandra Nodetool
-      os: linux
-    - checkName: ceph
-      displayName: Ceph
-      os: linux
-    - checkName: cisco_aci
-      displayName: Cisco ACI
-      os: linux
-    - checkName: cockroachdb
-      displayName: CockroachDB
-      os: linux
-    - checkName: consul
-      displayName: Consul
-      os: linux
-    - checkName: coredns
-      displayName: CoreDNS
-      os: linux
-    - checkName: couch
-      displayName: CouchDB
-      os: linux
-    - checkName: couchbase
-      displayName: Couchbase
-      os: linux
-    - checkName: crio
-      displayName: CRI-O
-      os: linux
-    - checkName: directory
-      displayName: Directory
-      os: linux
-    - checkName: disk
-      displayName: Disk (Linux)
-      os: linux
-    - checkName: disk
-      displayName: Disk (Windows)
-      os: windows
-    - checkName: dns_check
-      displayName: DNS
-      os: linux
-    - checkName: dotnetclr
-      displayName: .NET CLR
-      os: windows
-    - checkName: ecs_fargate
-      displayName: Amazon ECS Fargate
-      os: linux
-    - checkName: elastic
-      displayName: Elasticsearch
-      os: linux
-    - checkName: envoy
+    - checkName: envoy_01
       displayName: Envoy
       os: linux
-    - checkName: etcd
-      displayName: etcd
+    - checkName: envoy_02
+      displayName: Envoy
       os: linux
-    - checkName: exchange_server
-      displayName: Exchange Server
-      os: windows
-    - checkName: fluentd
-      displayName: fluentd
+    - checkName: envoy_03
+      displayName: Envoy
       os: linux
-    - checkName: gearmand
-      displayName: Gearman
+    - checkName: envoy_04
+      displayName: Envoy
       os: linux
-    - checkName: gitlab
-      displayName: Gitlab
+    - checkName: envoy_05
+      displayName: Envoy
       os: linux
-    - checkName: gitlab_runner
-      displayName: Gitlab Runner
+    - checkName: envoy_06
+      displayName: Envoy
       os: linux
-    - checkName: go_expvar
-      displayName: Go-Expvar
+    - checkName: envoy_07
+      displayName: Envoy
       os: linux
-    - checkName: gunicorn
-      displayName: Gunicorn
+    - checkName: envoy_08
+      displayName: Envoy
       os: linux
-    - checkName: haproxy
-      displayName: HAProxy
+    - checkName: envoy_09
+      displayName: Envoy
       os: linux
-    - checkName: harbor
-      displayName: Harbor
+    - checkName: envoy_11
+      displayName: Envoy
       os: linux
-    - checkName: hdfs_datanode
-      displayName: HDFS Datanode
+    - checkName: envoy_12
+      displayName: Envoy
       os: linux
-    - checkName: hdfs_namenode
-      displayName: HDFS Namenode
+    - checkName: envoy_13
+      displayName: Envoy
       os: linux
-    - checkName: http_check
-      displayName: HTTP
+    - checkName: envoy_14
+      displayName: Envoy
       os: linux
-    - checkName: ibm_db2
-      displayName: IBM Db2
+    - checkName: envoy_15
+      displayName: Envoy
       os: linux
-    - checkName: ibm_mq
-      displayName: IBM MQ
+    - checkName: envoy_16
+      displayName: Envoy
       os: linux
-    - checkName: ibm_was
-      displayName: IBM WAS
+    - checkName: envoy_17
+      displayName: Envoy
       os: linux
-    - checkName: iis
-      displayName: IIS
-      os: windows
-    - checkName: istio
-      displayName: Istio
+    - checkName: envoy_18
+      displayName: Envoy
       os: linux
-    - checkName: kafka_consumer
-      displayName: Kafka Consumer
+    - checkName: envoy_19
+      displayName: Envoy
       os: linux
-    - checkName: kong
-      displayName: Kong
+    - checkName: envoy_21
+      displayName: Envoy
       os: linux
-    - checkName: kube_apiserver_metrics
-      displayName: Kubernetes API server metrics
+    - checkName: envoy_22
+      displayName: Envoy
       os: linux
-    - checkName: kube_controller_manager
-      displayName: Kubernetes Controller Manager
+    - checkName: envoy_23
+      displayName: Envoy
       os: linux
-    - checkName: kube_dns
-      displayName: Kube DNS
+    - checkName: envoy_24
+      displayName: Envoy
       os: linux
-    - checkName: kube_metrics_server
-      displayName: Kube metrics server
+    - checkName: envoy_25
+      displayName: Envoy
       os: linux
-    - checkName: kube_proxy
-      displayName: Kube Proxy
+    - checkName: envoy_26
+      displayName: Envoy
       os: linux
-    - checkName: kube_scheduler
-      displayName: Kubernetes Scheduler
+    - checkName: envoy_27
+      displayName: Envoy
       os: linux
-    - checkName: kubelet
-      displayName: Kubelet
+    - checkName: envoy_28
+      displayName: Envoy
       os: linux
-    - checkName: kubernetes_state
-      displayName: Kubernetes State
+    - checkName: envoy_29
+      displayName: Envoy
       os: linux
-    - checkName: kyototycoon
-      displayName: Kyoto Tycoon
+    - checkName: envoy_31
+      displayName: Envoy
       os: linux
-    - checkName: lighttpd
-      displayName: Lighttpd
+    - checkName: envoy_32
+      displayName: Envoy
       os: linux
-    - checkName: linkerd
-      displayName: Linkerd
+    - checkName: envoy_33
+      displayName: Envoy
       os: linux
-    - checkName: linux_proc_extras
-      displayName: Linux proc extras
+    - checkName: envoy_34
+      displayName: Envoy
       os: linux
-    - checkName: mapr
-      displayName: MapR
+    - checkName: envoy_35
+      displayName: Envoy
       os: linux
-    - checkName: mapreduce
-      displayName: MapReduce
+    - checkName: envoy_36
+      displayName: Envoy
       os: linux
-    - checkName: marathon
-      displayName: Marathon
+    - checkName: envoy_37
+      displayName: Envoy
       os: linux
-    - checkName: mcache
-      displayName: Memcached
+    - checkName: envoy_38
+      displayName: Envoy
       os: linux
-    - checkName: mesos_master
-      displayName: Mesos Master
+    - checkName: envoy_39
+      displayName: Envoy
       os: linux
-    - checkName: mesos_slave
-      displayName: Mesos Slave
+    - checkName: envoy_41
+      displayName: Envoy
       os: linux
-    - checkName: mongo
-      displayName: MongoDB
+    - checkName: envoy_42
+      displayName: Envoy
       os: linux
-    - checkName: mysql
-      displayName: MySQL
+    - checkName: envoy_43
+      displayName: Envoy
       os: linux
-    - checkName: nagios
-      displayName: Nagios
+    - checkName: envoy_44
+      displayName: Envoy
       os: linux
-    - checkName: network
-      displayName: Network
+    - checkName: envoy_45
+      displayName: Envoy
       os: linux
-    - checkName: nfsstat
-      displayName: NFSstat
+    - checkName: envoy_46
+      displayName: Envoy
       os: linux
-    - checkName: nginx
-      displayName: NGINX
+    - checkName: envoy_47
+      displayName: Envoy
       os: linux
-    - checkName: nginx_ingress_controller
-      displayName: NGINX Ingress Controller
+    - checkName: envoy_48
+      displayName: Envoy
       os: linux
-    - checkName: openldap
-      displayName: OpenLDAP
+    - checkName: envoy_49
+      displayName: Envoy
       os: linux
-    - checkName: openmetrics
-      displayName: OpenMetrics
+    - checkName: envoy_51
+      displayName: Envoy
       os: linux
-    - checkName: openstack
-      displayName: OpenStack
+    - checkName: envoy_52
+      displayName: Envoy
       os: linux
-    - checkName: openstack_controller
-      displayName: OpenStack Controller
+    - checkName: envoy_53
+      displayName: Envoy
       os: linux
-    - checkName: oracle
-      displayName: Oracle Database
+    - checkName: envoy_54
+      displayName: Envoy
       os: linux
-    - checkName: pdh_check
-      displayName: PDH
-      os: windows
-    - checkName: pgbouncer
-      displayName: PGBouncer
+    - checkName: envoy_55
+      displayName: Envoy
       os: linux
-    - checkName: php_fpm
-      displayName: PHP-FPM
+    - checkName: envoy_56
+      displayName: Envoy
       os: linux
-    - checkName: postfix
-      displayName: Postfix
+    - checkName: envoy_57
+      displayName: Envoy
       os: linux
-    - checkName: postgres
-      displayName: Postgres
+    - checkName: envoy_58
+      displayName: Envoy
       os: linux
-    - checkName: powerdns_recursor
-      displayName: PowerDNS Recursor
+    - checkName: envoy_59
+      displayName: Envoy
       os: linux
-    - checkName: process
-      displayName: Process
+    - checkName: envoy_61
+      displayName: Envoy
       os: linux
-    - checkName: prometheus
-      displayName: Prometheus
+    - checkName: envoy_62
+      displayName: Envoy
       os: linux
-    - checkName: rabbitmq
-      displayName: RabbitMQ
+    - checkName: envoy_63
+      displayName: Envoy
       os: linux
-    - checkName: redisdb
-      displayName: Redis
+    - checkName: envoy_64
+      displayName: Envoy
       os: linux
-    - checkName: riak
-      displayName: Riak
+    - checkName: envoy_65
+      displayName: Envoy
       os: linux
-    - checkName: riakcs
-      displayName: Riak CS
+    - checkName: envoy_66
+      displayName: Envoy
       os: linux
-    - checkName: snmp
-      displayName: SNMP
+    - checkName: envoy_67
+      displayName: Envoy
       os: linux
-    - checkName: spark
-      displayName: Spark
+    - checkName: envoy_68
+      displayName: Envoy
       os: linux
-    - checkName: sqlserver
-      displayName: SQL Server (Linux)
+    - checkName: envoy_69
+      displayName: Envoy
       os: linux
-    - checkName: sqlserver
-      displayName: SQL Server (Windows)
-      os: windows
-    - checkName: squid
-      displayName: Squid
+    - checkName: envoy_71
+      displayName: Envoy
       os: linux
-    - checkName: ssh_check
-      displayName: SSH
+    - checkName: envoy_72
+      displayName: Envoy
       os: linux
-    - checkName: statsd
-      displayName: StatsD
+    - checkName: envoy_73
+      displayName: Envoy
       os: linux
-    - checkName: supervisord
-      displayName: Supervisord
+    - checkName: envoy_74
+      displayName: Envoy
       os: linux
-    - checkName: system_core
-      displayName: System Core
+    - checkName: envoy_75
+      displayName: Envoy
       os: linux
-    - checkName: system_swap
-      displayName: System Swap
+    - checkName: envoy_76
+      displayName: Envoy
       os: linux
-    - checkName: tcp_check
-      displayName: TCP
+    - checkName: envoy_77
+      displayName: Envoy
       os: linux
-    - checkName: teamcity
-      displayName: TeamCity
+    - checkName: envoy_78
+      displayName: Envoy
       os: linux
-    - checkName: tls
-      displayName: TLS
+    - checkName: envoy_79
+      displayName: Envoy
       os: linux
-    - checkName: tokumx
-      displayName: TokuMX
+    - checkName: envoy_81
+      displayName: Envoy
       os: linux
-    - checkName: twemproxy
-      displayName: Twemproxy
+    - checkName: envoy_82
+      displayName: Envoy
       os: linux
-    - checkName: twistlock
-      displayName: Twistlock
+    - checkName: envoy_83
+      displayName: Envoy
       os: linux
-    - checkName: varnish
-      displayName: Varnish
+    - checkName: envoy_84
+      displayName: Envoy
       os: linux
-    - checkName: vault
-      displayName: Vault
+    - checkName: envoy_85
+      displayName: Envoy
       os: linux
-    - checkName: vertica
-      displayName: Vertica
+    - checkName: envoy_86
+      displayName: Envoy
       os: linux
-    - checkName: vsphere
-      displayName: vSphere
+    - checkName: envoy_87
+      displayName: Envoy
       os: linux
-    - checkName: win32_event_log
-      displayName: Win32 Event Log
-      os: windows
-    - checkName: windows_service
-      displayName: Windows Service
-      os: windows
-    - checkName: wmi_check
-      displayName: WMI
-      os: windows
-    - checkName: yarn
-      displayName: Yarn
+    - checkName: envoy_88
+      displayName: Envoy
       os: linux
-    - checkName: zk
-      displayName: ZooKeeper
+    - checkName: envoy_89
+      displayName: Envoy
       os: linux
-
+    - checkName: envoy_91
+      displayName: Envoy
+      os: linux
+    - checkName: envoy_92
+      displayName: Envoy
+      os: linux
+    - checkName: envoy_93
+      displayName: Envoy
+      os: linux
+    - checkName: envoy_94
+      displayName: Envoy
+      os: linux
+    - checkName: envoy_95
+      displayName: Envoy
+      os: linux
+    - checkName: envoy_96
+      displayName: Envoy
+      os: linux
+    - checkName: envoy_97
+      displayName: Envoy
+      os: linux
+    - checkName: envoy_98
+      displayName: Envoy
+      os: linux
+    - checkName: envoy_99
+      displayName: Envoy
+      os: linux
