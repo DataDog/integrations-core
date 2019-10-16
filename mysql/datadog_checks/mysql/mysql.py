@@ -682,7 +682,7 @@ class MySql(AgentCheck):
             cursor.execute('SELECT VERSION()')
             result = cursor.fetchone()
 
-            # Version might include a description e.g. 4.1.26-log.
+            # Version might include a description e.g. 4.1.26-log, -debug, -standard
             # See
             # http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
             # `other` contains mysql flavor such as MariaDB
