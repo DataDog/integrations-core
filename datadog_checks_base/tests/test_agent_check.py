@@ -189,8 +189,18 @@ def test_warning_args_errors():
             },
         ),
         (
-            'agent 6 signature: only args',
+            'agent 6 signature: only args (instances as list)',
             AgentCheck('check_name', {'init_conf1': 'init_value1'}, [{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: only args (instances as tuple)',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, ({'foo': 'bar'},)),
             {
                 'name': 'check_name',
                 'init_config': {'init_conf1': 'init_value1'},
