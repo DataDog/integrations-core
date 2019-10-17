@@ -105,7 +105,7 @@ class IbmWasCheck(AgentCheck):
 
         tag = child.tag
         if (
-            child.get('unit', '').lower() in self.custom_queries_units_gauge
+            child.get('unit') in self.custom_queries_units_gauge
             and prefix in self.custom_stats
             and tag == 'CountStatistic'
         ):

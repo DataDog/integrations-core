@@ -314,7 +314,7 @@ class RequestsWrapper(object):
                 stack.enter_context(hook())
 
             if persist:
-                return getattr(self.session, method)(url, **options)
+                return getattr(self.session, method)(url, **self.populate_options(options))
             else:
                 return getattr(requests, method)(url, **self.populate_options(options))
 

@@ -31,7 +31,10 @@ def py3(check):
 
     echo_info(u"Validating python3 compatibility of {}...".format(check))
     cmd = ["pylint", "-f", "json", "--py3k", "-d", "W1618", "--persistent", "no", "--exit-zero", path_to_module]
-    results = json.loads(run_command(cmd, capture='stdout').stdout)
+    echo_info(u"\tRunning: {}".format(' '.join(cmd)))
+
+    output = run_command(cmd, capture='stdout', check=True).stdout
+    results = json.loads(output) if output else None
 
     if results:
         echo_failure(u"Incompatibilities were found for {}:".format(check))

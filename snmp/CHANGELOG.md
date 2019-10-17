@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 1.14.1 / 2019-10-16
+
+* [Fixed] Fix allowed host failure retry logic. See [#4782](https://github.com/DataDog/integrations-core/pull/4782).
+
 ## 1.14.0 / 2019-10-14
 
 * [Added] Store discovered hosts. See [#4712](https://github.com/DataDog/integrations-core/pull/4712).

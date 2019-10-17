@@ -171,15 +171,12 @@ def test_removing_host():
 
     check.check(instance)
     assert warnings == [msg, msg, msg]
-
-    check.check(instance)
-    assert warnings == [msg, msg, msg, msg]
     # Instance has been removed
     assert check._config.discovered_instances == {}
 
     check.check(instance)
     # No new warnings produced
-    assert warnings == [msg, msg, msg, msg]
+    assert warnings == [msg, msg, msg]
 
 
 @mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")

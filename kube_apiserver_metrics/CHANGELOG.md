@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+## 1.1.1 / 2019-10-16
+
+* [Fixed] Use default port for kube apiserver metrics auto conf. See [#4785](https://github.com/DataDog/integrations-core/pull/4785).
+
 ## 1.1.0 / 2019-10-11
 
 * [Added] Scrape apiserver_request_total metric introduced in v1.15. See [#4546](https://github.com/DataDog/integrations-core/pull/4546).
