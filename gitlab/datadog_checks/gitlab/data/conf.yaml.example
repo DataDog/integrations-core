@@ -31,7 +31,6 @@ init_config:
     - go_memstats_other_sys_bytes
     - go_memstats_stack_inuse_bytes
     - go_memstats_stack_inuse_bytes
-    - go_memstats_stack_sys_bytes
     - go_memstats_sys_bytes
     - go_threads
     - http_request_duration_microseconds
