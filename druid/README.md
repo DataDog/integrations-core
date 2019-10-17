@@ -80,7 +80,7 @@ Use the default configuration of your `druid.d/conf.yaml` file to activate the c
       logs_enabled: true
     ```
 
-2. Add this configuration block to your `druid.d/conf.yaml` file to start collecting your Druid logs:
+2. Uncomment and edit this configuration block at the bottom of your `druid.d/conf.yaml`:
 
     ```yaml
       logs:
