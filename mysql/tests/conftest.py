@@ -97,7 +97,8 @@ def version_metadata():
             'version.minor': minor,
             'version.patch': patch,
             'version.raw': mock.ANY,
-            'flavor': flavor
+            'version.build': mock.ANY,
+            'flavor': flavor,
     }
 
 
