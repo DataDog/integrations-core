@@ -101,9 +101,11 @@ sudo nginx -t && sudo nginx -s reload
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized section](#containerized).
 
 #### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized section](#containerized).
+
 ##### Metric collection
 
 1. Set the `nginx_status_url` parameter to `http://localhost:81/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][6] for all available configuration options.
@@ -177,7 +179,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
 | `<INSTANCE_CONFIG>`  | `{"nginx_status_url": "http://%%host%%:81/nginx_status/"}` |
 
-**Note**: This `<INSTANCE_CONFIG>` configuration works only with NGINX Open Source, if you are using NGINX Plus, inline the corresponding instance configuration.
+**Note**: This `<INSTANCE_CONFIG>` configuration works only with NGINX Open Source. If you are using NGINX Plus, inline the corresponding instance configuration.
 
 ##### Log collection
 
