@@ -4,6 +4,7 @@
 import gc
 import linecache
 import os
+import threading
 from datetime import datetime
 
 from binary import BinaryUnits, convert_units
@@ -180,6 +181,9 @@ def gather_diff(
         f.write('Total difference: {}{} {}\n'.format(get_sign(total), amount, unit))
 
 
+profile_lock = threading.Lock()
+
+
 def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
     """
     This will track all memory (de-)allocations that occur during the lifetime of function ``f``.
@@ -214,21 +218,22 @@ def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
     frames = int(config.get('profile_memory_frames', DEFAULT_FRAMES))
     run_gc = bool(int(config.get('profile_memory_gc', DEFAULT_GC)))
 
-    try:
-        gc.disable()
-        gc.collect()
-
-        tracemalloc.start(frames)
-
-        f(*args, **kwargs)
-
-        if run_gc:
+    with profile_lock:
+        try:
+            gc.disable()
             gc.collect()
 
-        snapshot = tracemalloc.take_snapshot()
-    finally:
-        tracemalloc.stop()
-        gc.enable()
+            tracemalloc.start(frames)
+
+            f(*args, **kwargs)
+
+            if run_gc:
+                gc.collect()
+
+            snapshot = tracemalloc.take_snapshot()
+        finally:
+            tracemalloc.stop()
+            gc.enable()
 
     verbose = bool(int(config.get('profile_memory_verbose', DEFAULT_VERBOSITY)))
     if not verbose:
