@@ -136,7 +136,10 @@ instances:
     ##
     ## would be submitted as a count, but will be as a gauge if `unit.kbyte` is present in `custom_queries_units_gauge`.
     #
-    # custom_queries_units_gauge: [kilobyte, second, unit.kbyte]
+    # custom_queries_units_gauge:
+    #   - unit.kbyte
+    #   - kilobyte
+    #   - second
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.

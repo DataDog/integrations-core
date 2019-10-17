@@ -1,0 +1,8 @@
+{
+  "datacenter": "localhost",
+  "log_level": "DEBUG",
+  "ui": true,
+  "ports": {
+    "dns": 5300
+  }
+}

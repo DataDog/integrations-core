@@ -1,5 +1,13 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.4.2 / 2019-10-17
+
+* [Fixed] Fix RequestsWrapper session `timeout`. See [#4811](https://github.com/DataDog/integrations-core/pull/4811).
+
+## 9.4.1 / 2019-10-17
+
+* [Fixed] Avoid sending additional gauges for openmetrics histograms if using distribution metrics. See [#4780](https://github.com/DataDog/integrations-core/pull/4780).
+
 ## 9.4.0 / 2019-10-11
 
 * [Added] Add an option to send histograms/summary counts as monotonic counters. See [#4629](https://github.com/DataDog/integrations-core/pull/4629).
