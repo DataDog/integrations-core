@@ -645,17 +645,17 @@ class MySql(AgentCheck):
             builds = ('log', 'standard', 'debug', 'valgrind', 'embedded')
             parts = result[0].split('-')
             self.version = parts[0]
-            
-            if len(parts) > 1:
-                for data in parts:
-                    if data == "MariaDB":
-                        self.flavor = "MariaDB"
-                    if data != "MariaDB" and self.flavor == '':
-                        self.flavor = "MySQL"
-                    if data in builds:
-                        self.build = data
 
-            self.set_metadata('version', self.version + '-' + self.build)
+            for data in parts:
+                if data == "MariaDB":
+                    self.flavor = "MariaDB"
+                if data != "MariaDB" and self.flavor == '':
+                    self.flavor = "MySQL"
+                if data in builds:
+                    self.build = data
+            # format version data to conform to semver
+            version_metadata = self.version + '+' + self.build if self.build != '' else self.version
+            self.set_metadata('version', version_metadata)
             self.set_metadata('flavor', self.flavor)
 
        

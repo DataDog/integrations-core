@@ -255,7 +255,7 @@ def test_version_metadata(instance_basic, version_metadata):
 
     with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
         mysql_check.check(instance_basic)
-        
+        import pdb; pdb.set_trace()
         for name, value in version_metadata.items():
             m.assert_any_call('test:123', name, value)
             
