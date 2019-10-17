@@ -279,7 +279,7 @@ class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
-    
+
     def __init__(self, name, init_config, instances=None):
         AgentCheck.__init__(self, name, init_config, instances)
         self.version = ''
@@ -316,7 +316,7 @@ class MySql(AgentCheck):
             try:
                 # Metadata collection
                 self._collect_metadata(db)
-                
+
                 # Metric collection
                 self._collect_metrics(db, tags, options, queries, max_custom_queries)
                 self._collect_system_metrics(host, db, tags)
@@ -636,8 +636,8 @@ class MySql(AgentCheck):
         with closing(db.cursor()) as cursor:
             cursor.execute('SELECT VERSION()')
             result = cursor.fetchone()
-            
-            # Version might include a build, a flavor, or both 
+
+            # Version might include a build, a flavor, or both
             # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
             # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
             # https://mariadb.com/kb/en/library/version/
@@ -658,7 +658,6 @@ class MySql(AgentCheck):
             self.set_metadata('version', version_metadata)
             self.set_metadata('flavor', self.flavor)
 
-       
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
             metric_name, metric_type = metric

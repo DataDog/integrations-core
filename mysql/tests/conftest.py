@@ -3,15 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import mock
 import pymysql
 import pytest
-import mock
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-# from datadog_checks.mysql import MySql
 
 from . import common, tags
+
+# from datadog_checks.mysql import MySql
+
 
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
@@ -79,9 +81,11 @@ def instance_complex():
 def instance_error():
     return {'server': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
+
 # @pytest.fixture
 # def mysql_check():
 #     return Mysql()
+
 
 @pytest.fixture(scope='session')
 def version_metadata():
@@ -92,13 +96,13 @@ def version_metadata():
     flavor = "MariaDB" if MYSQL_FLAVOR == "mariadb" else "MySQL"
 
     return {
-            'version.scheme': 'semver',
-            'version.major': major,
-            'version.minor': minor,
-            'version.patch': patch,
-            'version.raw': mock.ANY,
-            'version.build': mock.ANY,
-            'flavor': flavor,
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': mock.ANY,
+        'version.build': mock.ANY,
+        'flavor': flavor,
     }
 
 
@@ -157,4 +161,3 @@ def _mysql_docker_repo():
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'
-
