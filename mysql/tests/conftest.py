@@ -89,9 +89,10 @@ def instance_error():
 
 @pytest.fixture(scope='session')
 def version_metadata():
-    parts = MYSQL_VERSION.split('.')
-    major, minor = parts[:2]
-    patch = parts[2] if len(parts) > 2 else mock.ANY
+    parts = MYSQL_VERSION.split('-')
+    version = parts[0].split('.')
+    major, minor = version[:2]
+    patch = version[2] if len(version) > 2 else mock.ANY
 
     flavor = "MariaDB" if MYSQL_FLAVOR == "mariadb" else "MySQL"
 

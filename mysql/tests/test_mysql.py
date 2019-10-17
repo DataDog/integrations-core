@@ -257,7 +257,6 @@ def test_version_metadata(instance_basic, version_metadata):
         mysql_check.check(instance_basic)
 
         for name, value in version_metadata.items():
-            import pdb; pdb.set_trace()
             m.assert_any_call('test:123', name, value)
 
         assert m.call_count == len(version_metadata)
