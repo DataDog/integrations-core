@@ -653,9 +653,11 @@ class MySql(AgentCheck):
                     self.flavor = "MySQL"
                 if data in builds:
                     self.build = data
-            # format version data to conform to semver
-            version_metadata = self.version + '+' + self.build if self.build != '' else self.version
-            self.set_metadata('version', version_metadata)
+
+            if self.build == '':
+                self.build = 'unspecified'
+            # format version data to conform to semve
+            self.set_metadata('version', self.version + '+' + self.build)
             self.set_metadata('flavor', self.flavor)
 
     def _submit_metrics(self, variables, db_results, tags):
