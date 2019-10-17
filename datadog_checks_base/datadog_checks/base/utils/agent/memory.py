@@ -10,7 +10,10 @@ from binary import BinaryUnits, convert_units
 
 from .common import METRIC_PROFILE_NAMESPACE
 
-import tracemalloc
+try:
+    import tracemalloc
+except ImportError:
+    tracemalloc = None
 
 
 DEFAULT_FRAMES = 100
