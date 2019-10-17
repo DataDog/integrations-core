@@ -5,9 +5,11 @@ import os
 
 import pymysql
 import pytest
+import mock
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
+# from datadog_checks.mysql import MySql
 
 from . import common, tags
 
@@ -77,17 +79,25 @@ def instance_complex():
 def instance_error():
     return {'server': common.HOST, 'user': 'unknown', 'pass': common.PASS}
 
+# @pytest.fixture
+# def mysql_check():
+#     return Mysql()
+
 @pytest.fixture(scope='session')
-def collect_metadata():
-    major, minor, patch = MYSQL_VERSION.split('.')
+def version_metadata():
+    parts = MYSQL_VERSION.split('.')
+    major, minor = parts[:2]
+    patch = parts[2] if len(parts) > 2 else mock.ANY
+
     flavor = "MariaDB" if MYSQL_FLAVOR == "mariadb" else "MySQL"
+
     return {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': mock.ANY,
-        'flavor': flavor
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': mock.ANY,
+            'flavor': flavor
     }
 
 
