@@ -98,10 +98,6 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
             'by doing `ddev config set dd_api_key`.'
         )
 
-    if profile_memory and not api_key:
-        profile_memory = False
-        echo_warning('No API key is set; collecting metrics about memory usage will be disabled.')
-
     echo_waiting('Setting up environment `{}`... '.format(env), nl=False)
     config, metadata, error = start_environment(check, env)
 
