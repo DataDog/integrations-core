@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.38.3 / 2019-10-17
+
+* [Fixed] Fix CHANGELOG.md template to make it work with `ddev release changelog`. See [#4808](https://github.com/DataDog/integrations-core/pull/4808).
+
 ## 0.38.2 / 2019-10-17
 
 * [Fixed] Handle the case of pylint returning empty output. See [#4801](https://github.com/DataDog/integrations-core/pull/4801).
