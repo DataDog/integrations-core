@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.dev import get_docker_hostname, get_here
+import os
 
 CHECK_NAME = 'apache'
 
@@ -33,3 +34,5 @@ APACHE_GAUGES = [
 ]
 
 APACHE_RATES = ['apache.net.bytes_per_s', 'apache.net.request_per_s']
+
+APACHE_VERSION = os.getenv('APACHE_VERSION')
