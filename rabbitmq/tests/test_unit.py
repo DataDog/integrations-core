@@ -9,7 +9,7 @@ from tests.common import EXCHANGE_MESSAGE_STATS
 
 import datadog_checks
 from datadog_checks.rabbitmq import RabbitMQ
-from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, RabbitMQException
+from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, OVERVIEW_TYPE, RabbitMQException
 
 from . import common
 
@@ -92,6 +92,14 @@ def test__get_metrics(check, aggregator):
 
     assert check._get_metrics(data, NODE_TYPE, []) == 3
     assert check._get_metrics({}, NODE_TYPE, []) == 0
+
+
+@pytest.mark.unit
+def test__get_metrics_3_1(check, aggregator):
+    data = {'queue_totals': []}
+
+    metrics = check._get_metrics(data, OVERVIEW_TYPE, [])
+    assert metrics == 0
 
 
 @pytest.mark.unit
