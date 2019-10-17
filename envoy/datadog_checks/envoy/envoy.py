@@ -31,9 +31,6 @@ class Envoy(AgentCheck):
         self.caching_metrics = None
 
     def check(self, instance):
-        for i in range(1000):
-            self.log.debug('Testing {}'.format(i))
-
         custom_tags = instance.get('tags', [])
 
         try:
@@ -92,7 +89,8 @@ class Envoy(AgentCheck):
                 metric, tags, method = parse_metric(envoy_metric)
             except UnknownMetric:
                 if envoy_metric not in self.unknown_metrics:
-                    self.log.debug('Unknown metric `{}`'.format(envoy_metric))
+                    for _ in range(1000):
+                        self.log.debug('Unknown metric `{}`'.format(envoy_metric))
                 self.unknown_metrics[envoy_metric] += 1
                 continue
             except UnknownTags as e:
