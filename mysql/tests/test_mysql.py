@@ -250,9 +250,6 @@ def test__get_server_pid():
 
 
 def test_version_metadata(instance_basic, version_metadata):
-    # mysql_check = MySql(common.CHECK_NAME, {}, {})
-    # mysql_check.check(instance_basic)
-    # mysql_check.check_id = 'test:123'
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.check_id = 'test:123' 
 
@@ -261,7 +258,5 @@ def test_version_metadata(instance_basic, version_metadata):
         
         for name, value in version_metadata.items():
             m.assert_any_call('test:123', name, value)
-        
+            
         assert m.call_count == len(version_metadata)
-
-# def test_flavor_metadata(flavor_metadata):
