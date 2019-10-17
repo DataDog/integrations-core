@@ -64,8 +64,9 @@ class Lighttpd(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(Lighttpd, self).__init__(name, init_config, instances)
         self.assumed_url = {}
+        self.auth_type = self.instance.get('auth_type', 'basic').lower()
 
-        if self.instance.get('auth_type', 'basic').lower() == 'digest':
+        if self.auth_type == 'digest':
             auth = self.http.options['auth']
             if auth is not None:
                 self.http.options['auth'] = requests.auth.HTTPDigestAuth(auth[0], auth[1])
@@ -77,10 +78,9 @@ class Lighttpd(AgentCheck):
         url = self.assumed_url.get(instance['lighttpd_status_url'], instance['lighttpd_status_url'])
 
         tags = instance.get('tags', [])
-        auth_type = instance.get('auth_type', 'basic').lower()
 
-        if auth_type not in ('basic', 'digest'):
-            msg = "Unsupported value of 'auth_type' variable in Lighttpd config: {}".format(auth_type)
+        if self.auth_type not in ('basic', 'digest'):
+            msg = "Unsupported value of 'auth_type' variable in Lighttpd config: {}".format(self.auth_type)
             raise Exception(msg)
 
         self.log.debug("Connecting to %s", url)
