@@ -31,6 +31,9 @@ class Envoy(AgentCheck):
         self.caching_metrics = None
 
     def check(self, instance):
+        for i in range(1000):
+            self.log.debug('Testing {}'.format(i))
+
         custom_tags = instance.get('tags', [])
 
         try:
