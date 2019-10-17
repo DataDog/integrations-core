@@ -284,6 +284,7 @@ class MySql(AgentCheck):
         AgentCheck.__init__(self, name, init_config, instances)
         self.version = ''
         self.flavor = ''
+        self.build = ''
         self.qcache_stats = {}
 
     @classmethod
@@ -636,18 +637,25 @@ class MySql(AgentCheck):
             cursor.execute('SELECT VERSION()')
             result = cursor.fetchone()
             
-            # Version might include a build or a flavor 
-            # e.g. 4.1.26-log, 4.1.26-MariaDB
+            # Version might include a build, a flavor, or both 
+            # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
             # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
-            # and https://mariadb.com/kb/en/library/version/ 
-            version, _ , other = result[0].partition('-')
-            self.version = version
-            self.set_metadata('version', version)
-            if other == "MariaDB":
-                self.flavor = other
-            else:
-                self.flavor = "MySQL"
-                self.set_metadata('build', other)
+            # https://mariadb.com/kb/en/library/version/
+            # and https://mariadb.com/kb/en/library/server-system-variables/#version
+            builds = ('log', 'standard', 'debug', 'valgrind', 'embedded')
+            parts = result[0].split('-')
+            self.version = parts[0]
+            
+            if len(parts) > 1:
+                for data in parts:
+                    if data == "MariaDB":
+                        self.flavor = "MariaDB"
+                    if data != "MariaDB" and self.flavor == '':
+                        self.flavor = "MySQL"
+                    if data in builds:
+                        self.build = data
+
+            self.set_metadata('version', self.version + '-' + self.build)
             self.set_metadata('flavor', self.flavor)
 
        
