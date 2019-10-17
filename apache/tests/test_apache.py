@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import pytest
 import mock
+import pytest
 
 from datadog_checks.apache import Apache
 
@@ -63,6 +63,7 @@ def test_e2e(dd_agent_check):
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
 
     aggregator.assert_all_metrics_covered()
+
 
 def test_metadata(check, version_metadata):
     check = check(STATUS_CONFIG)

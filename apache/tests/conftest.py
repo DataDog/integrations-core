@@ -4,15 +4,15 @@
 
 import os
 
+import mock
 import pytest
 import requests
-import mock
 
 from datadog_checks.apache import Apache
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
-from .common import BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL, APACHE_VERSION
+from .common import APACHE_VERSION, BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL
 
 
 @pytest.fixture(scope="session")
@@ -38,6 +38,7 @@ def generate_metrics():
 @pytest.fixture
 def check():
     return lambda instance: Apache(CHECK_NAME, {}, [instance])
+
 
 @pytest.fixture(scope="session")
 def version_metadata():
