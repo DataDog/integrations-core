@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.38.2 / 2019-10-17
+
+* [Fixed] Handle the case of pylint returning empty output. See [#4801](https://github.com/DataDog/integrations-core/pull/4801).
+
 ## 0.38.1 / 2019-10-15
 
 * [Fixed] Fix ddev testable command to properly use the tag, fallback on the branch if absent. See [#4775](https://github.com/DataDog/integrations-core/pull/4775).
