@@ -75,7 +75,7 @@ class Apache(AgentCheck):
             if len(values) == 2:  # match
                 metric, value = values
                 if metric == '<dl><dt>Server Version':
-                   self._collect_metadata(value)
+                    self._collect_metadata(value)
                 try:
                     value = float(value)
                 except ValueError:
