@@ -2,7 +2,7 @@
 
 ## 2.6.1 / 2019-10-17
 
-* [Fixed] adds missing go_memstats_stack_sys_bytes metric in conf file. See [#4800](https://github.com/DataDog/integrations-core/pull/4800).
+* [Fixed] Add missing go_memstats_stack_sys_bytes metric in conf file. See [#4800](https://github.com/DataDog/integrations-core/pull/4800).
 
 ## 2.6.0 / 2019-10-11
 
