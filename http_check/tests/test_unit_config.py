@@ -72,3 +72,25 @@ def test_from_instance():
     expected_headers = agent_headers({}).get('User-Agent')
     assert headers["X-Auth-Token"] == "SOME-AUTH-TOKEN", headers
     assert expected_headers == headers.get('User-Agent'), headers
+
+
+def test_instance_ca_cert():
+    """
+    `instance_ca_cert` should default to the trusted ca_cert of the system
+    if `tls_ca_cert` and `ca_certs` are unavailable.
+    """
+    # Ensure that 'tls_ca_cert' takes precedence
+    params_with_all = from_instance({'url': 'https://example2.com', 'name': 'UpService', 'tls_ca_cert': 'foobar', 'ca_certs': 'barfoo'}, 'default_ca_cert')
+    assert params_with_all[13] == 'foobar'
+
+    # Original config option for ca_certs
+    params_only_ca_certs = from_instance({'url': 'https://example2.com', 'name': 'UpService', 'ca_certs': 'ca_cert'})
+    assert params_only_ca_certs[13] == 'ca_cert'
+
+    # Default if there is no cert path is configured
+    params_no_certs = from_instance({'url': 'https://example2.com', 'name': 'UpService'}, 'default_ca_cert')
+    assert params_no_certs[13] == 'default_ca_cert'
+
+    # No default ca_cert
+    params_no_default = from_instance({'url': 'https://example2.com', 'name': 'UpService'})
+    assert params_no_default[13] is None
