@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 1.7.0 / 2019-10-18
+
+* [Added] Allows certain expected HTTP error status_codes for the `/sys/health` endpoint. See [#4745](https://github.com/DataDog/integrations-core/pull/4745).
+
 ## 1.6.0 / 2019-10-07
 
 * [Fixed] Fix crash in HA mode. See [#4698](https://github.com/DataDog/integrations-core/pull/4698).
