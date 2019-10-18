@@ -30,6 +30,17 @@ class Vault(AgentCheck):
         'ssl_ignore_warning': {'name': 'tls_ignore_warning'},
     }
 
+    # Expected HTTP Error codes for /sys/health endpoint
+    # https://www.vaultproject.io/api/system/health.html
+    SYS_HEALTH_DEFAULT_CODES = {
+        200: "initialized, unsealed, and active",
+        429: "unsealed and standby",
+        472: "data recovery mode replication secondary and active",
+        473: "performance standby",
+        501: "not initialized",
+        503: "sealed",
+    }
+
     def __init__(self, name, init_config, instances):
         super(Vault, self).__init__(name, init_config, instances)
         self.api_versions = {
@@ -57,8 +68,9 @@ class Vault(AgentCheck):
         self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=tags)
 
     def check_leader_v1(self, config, tags):
-        url = config['api_url'] + '/sys/leader'
-        leader_data = self.access_api(url, tags)
+        path = '/sys/leader'
+        url = config['api_url']
+        leader_data = self.access_api(url, path, tags)
 
         is_leader = is_affirmative(leader_data.get('is_self'))
         tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
@@ -84,9 +96,9 @@ class Vault(AgentCheck):
             config['leader'] = current_leader
 
     def check_health_v1(self, config, tags):
-        url = config['api_url'] + '/sys/health'
-        health_params = {'standbyok': True, 'perfstandbyok': True}
-        health_data = self.access_api(url, tags, params=health_params)
+        path = '/sys/health'
+        url = config['api_url']
+        health_data = self.access_api(url, path, tags)
 
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
@@ -141,28 +153,34 @@ class Vault(AgentCheck):
 
         return config
 
-    def access_api(self, url, tags, params=None):
+    def access_api(self, url, path, tags, params=None):
         try:
-            response = self.http.get(url, params=params)
-            response.raise_for_status()
+            full_url = url + path
+            response = self.http.get(full_url, params=params)
             json_data = response.json()
+            response.raise_for_status()
         except requests.exceptions.HTTPError:
-            msg = 'The Vault endpoint `{}` returned {}.'.format(url, response.status_code)
-            self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
-            self.log.exception(msg)
-            raise ApiUnreachable
+            rsc = response.status_code
+            msg = 'The Vault endpoint `{}` returned {}'.format(full_url, rsc)
+            if path.endswith("/sys/health") and rsc in self.SYS_HEALTH_DEFAULT_CODES:
+                # Ignores expected HTTPError status codes for `/sys/health` endpoint.
+                self.log.debug('{} - node is {}.'.format(msg, self.SYS_HEALTH_DEFAULT_CODES[rsc]))
+            else:
+                self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
+                self.log.exception(msg)
+                raise ApiUnreachable
         except JSONDecodeError:
-            msg = 'The Vault endpoint `{}` returned invalid json data.'.format(url)
+            msg = 'The Vault endpoint `{}` returned invalid json data.'.format(full_url)
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
             self.log.exception(msg)
             raise ApiUnreachable
         except requests.exceptions.Timeout:
-            msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'])
+            msg = 'Vault endpoint `{}` timed out after {} seconds'.format(full_url, self.http.options['timeout'])
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
             self.log.exception(msg)
             raise ApiUnreachable
         except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
-            msg = 'Error accessing Vault endpoint `{}`'.format(url)
+            msg = 'Error accessing Vault endpoint `{}`'.format(full_url)
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.CRITICAL, message=msg, tags=tags)
             self.log.exception(msg)
             raise ApiUnreachable
