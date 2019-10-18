@@ -12,19 +12,22 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The MapR check is included in the [Datadog Agent][2] package but requires additional setup operations.
 
-1. Add `/opt/mapr/lib/` to your `ld.so.conf` file (usually in `/etc`). This will help the *mapr-streams-library* used by the agent find the required shared libraries.
-2. Create a password for the `dd-agent` user, then add this user to every node of the cluster with the same `UID`/`GID` so it is recognized by MapR. See [Managing users and groups][10] for additional details.
-3. Install the Agent on every host you want to monitor.
-4. Generate a [long-lived ticket][8] for the `dd-agent` user.
-5. Make sure the ticket is readable by the `dd-agent` user.
-6. Configure the integration (see below)
+1. Create a `dd-agent` user with a password on every node in the cluster with the same `UID`/`GID` so it is recognized by MapR. See [Managing users and groups][10] for additional details.
+2. Install the agent on every node you want to monitor.
+3. Install the library *mapr-streams-library* with the following command `/opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python`
+4. Add `/opt/mapr/lib/` to your `/etc/ld.so.conf` (or a file in `/etc/ld.so.conf.d/`). This is required to help the *mapr-streams-library* used by the agent to find the mapr shared libraries.
+5. Generate a [long-lived ticket][8] for the `dd-agent` user.
+6. Make sure the ticket is readable by the `dd-agent` user.
+7. Configure the integration (see below)
+
+Note: If you don't have "security" enabled in the cluster, you can continue without a ticket.
 
 
 ### Configuration
 #### Metric collection
 
 1. Edit the `mapr.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your MapR performance data. See the [sample mapr.d/conf.yaml][3] for all available configuration options.
-2. Set the `ticket_location` parameter to a path to the long-lived ticket you have created.
+2. Set the `ticket_location` parameter in the config to a path to the long-lived ticket you have created.
 3. [Restart the Agent][4].
 
 #### Log collection
@@ -44,12 +47,12 @@ Then update the `/opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/fluentd.conf` w
     include_tag_key true
     tag_key service_name
   </store>
-  <store> # This new section also forwards the logs to Datadog
+  <store> # This new section also forwards all the logs to Datadog
     @type datadog
     @id dd_agent
     include_tag_key true
     dd_source mapr
-    dd_tags "flo:test"
+    dd_tags "<KEY>:<VALUE>"
     service <YOUR_SERVICE_NAME>
     api_key <YOUR_API_KEY>
   </store>
