@@ -10,15 +10,13 @@ from datadog_checks.postgres import util
 # Mark the entire module as tests of type `unit`
 pytestmark = pytest.mark.unit
 
-KEY = ('localhost', '5432', 'dbname')
-
 
 def test_get_instance_metrics_lt_92(check):
     """
     check output when 9.2+
     """
     check._is_9_2_or_above.return_value = False
-    res = check._get_instance_metrics(KEY, 'dbname', False, False)
+    res = check._get_instance_metrics(False, False)
     assert res['metrics'] == util.COMMON_METRICS
 
 
@@ -27,7 +25,7 @@ def test_get_instance_metrics_92(check):
     check output when <9.2
     """
     check._is_9_2_or_above.return_value = True
-    res = check._get_instance_metrics(KEY, 'dbname', False, False)
+    res = check._get_instance_metrics(False, False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
 
@@ -35,15 +33,15 @@ def test_get_instance_metrics_state(check):
     """
     Ensure data is consistent when the function is called more than once
     """
-    res = check._get_instance_metrics(KEY, 'dbname', False, False)
+    res = check._get_instance_metrics(False, False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
     check._is_9_2_or_above.side_effect = Exception  # metrics were cached so this shouldn't be called
-    res = check._get_instance_metrics(KEY, 'dbname', [], False)
+    res = check._get_instance_metrics([], False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
     # also check what happens when `metrics` is not valid
-    check.instance_metrics[KEY] = []
-    res = check._get_instance_metrics(KEY, 'dbname', False, False)
+    check.instance_metrics = []
+    res = check._get_instance_metrics(False, False)
     assert res is None
 
 
@@ -54,7 +52,7 @@ def test_get_instance_metrics_database_size_metrics(check):
     expected = util.COMMON_METRICS
     expected.update(util.NEWER_92_METRICS)
     expected.update(util.DATABASE_SIZE_METRICS)
-    res = check._get_instance_metrics(KEY, 'dbname', True, False)
+    res = check._get_instance_metrics(True, False)
     assert res['metrics'] == expected
 
 
@@ -63,26 +61,12 @@ def test_get_instance_with_default(check):
     Test the contents of the query string with different `collect_default_db` values
     """
     collect_default_db = False
-    res = check._get_instance_metrics(KEY, 'dbname', False, collect_default_db)
+    res = check._get_instance_metrics(False, collect_default_db)
     assert "  AND psd.datname not ilike 'postgres'" in res['query']
 
     collect_default_db = True
-    res = check._get_instance_metrics(KEY, 'dbname', False, collect_default_db)
+    res = check._get_instance_metrics(False, collect_default_db)
     assert "  AND psd.datname not ilike 'postgres'" not in res['query']
-
-
-def test_get_instance_metrics_instance(check):
-    """
-    Test the caching system preventing instance metrics to be collected more than
-    once when two instances are configured for the same server but different databases
-    """
-    res = check._get_instance_metrics(KEY, 'dbname', False, False)
-    assert res is not None
-    # 2nd round, same host/port combo: we shouldn't collect anything
-    another = ('localhost', '5432', 'FOO')
-    res = check._get_instance_metrics(another, 'dbname', False, False)
-    assert res is None
-    assert check.instance_metrics[another] == []
 
 
 def test_get_version(check):
@@ -93,23 +77,27 @@ def test_get_version(check):
 
     # Test #.#.# style versions
     db.cursor().fetchone.return_value = ['9.5.3']
-    assert check._get_version('regular_version', db) == [9, 5, 3]
+    assert check._get_version(db) == [9, 5, 3]
 
     # Test #.# style versions
     db.cursor().fetchone.return_value = ['10.2']
-    assert check._get_version('short_version', db) == [10, 2]
+    check._clean_state()
+    assert check._get_version(db) == [10, 2]
 
     # Test #beta# style versions
     db.cursor().fetchone.return_value = ['11beta3']
-    assert check._get_version('beta_version', db) == [11, -1, 3]
+    check._clean_state()
+    assert check._get_version(db) == [11, -1, 3]
 
     # Test #rc# style versions
     db.cursor().fetchone.return_value = ['11rc1']
-    assert check._get_version('rc_version', db) == [11, -1, 1]
+    check._clean_state()
+    assert check._get_version(db) == [11, -1, 1]
 
     # Test #unknown# style versions
     db.cursor().fetchone.return_value = ['11nightly3']
-    assert check._get_version('unknown_version', db) == [11, -1, 3]
+    check._clean_state()
+    assert check._get_version(db) == [11, -1, 3]
 
 
 def test_is_above(check):
@@ -120,40 +108,45 @@ def test_is_above(check):
 
     # Test major versions
     db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above('smaller major', db, [9, 5, 4])
-    assert check._is_above('larger major', db, [11, 0, 0]) is False
+    assert check._is_above(db, [9, 5, 4])
+    assert check._is_above(db, [11, 0, 0]) is False
 
     # Test minor versions
     db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above('smaller minor', db, [10, 4, 4])
-    assert check._is_above('larger minor', db, [10, 6, 4]) is False
+    assert check._is_above(db, [10, 4, 4])
+    assert check._is_above(db, [10, 6, 4]) is False
 
     # Test patch versions
     db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above('smaller patch', db, [10, 5, 3])
-    assert check._is_above('larger patch', db, [10, 5, 5]) is False
+    assert check._is_above(db, [10, 5, 3])
+    assert check._is_above(db, [10, 5, 5]) is False
 
     # Test same version, _is_above() returns True for greater than or equal to
     db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above('same_version', db, [10, 5, 4])
+    assert check._is_above(db, [10, 5, 4])
 
     # Test beta version above
     db.cursor().fetchone.return_value = ['11beta4']
-    assert check._is_above('newer_beta_version', db, [11, -1, 3])
+    check._clean_state()
+    check._clean_state()
+    assert check._is_above(db, [11, -1, 3])
 
     # Test beta version against official version
     db.cursor().fetchone.return_value = ['11.0.0']
-    assert check._is_above('official_release', db, [11, -1, 3])
+    check._clean_state()
+    assert check._is_above(db, [11, -1, 3])
 
     # Test versions of unequal length
     db.cursor().fetchone.return_value = ['10.0']
-    assert check._is_above('unequal_length', db, [10, 0])
-    assert check._is_above('unequal_length', db, [10, 0, 0])
-    assert check._is_above('unequal_length', db, [10, 0, 1]) is False
+    check._clean_state()
+    assert check._is_above(db, [10, 0])
+    assert check._is_above(db, [10, 0, 0])
+    assert check._is_above(db, [10, 0, 1]) is False
 
     # Test return value is not a list
     db.cursor().fetchone.return_value = "foo"
-    assert check._is_above('smth not a list', db, [10, 0]) is False
+    check._clean_state()
+    assert check._is_above(db, [10, 0]) is False
 
 
 def test_malformed_get_custom_queries(check):

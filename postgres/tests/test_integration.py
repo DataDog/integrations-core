@@ -4,9 +4,9 @@
 import mock
 import psycopg2
 import pytest
+import socket
 
 from datadog_checks.postgres import PostgreSql
-from datadog_checks.postgres.postgres import ShouldRestartException
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
@@ -141,7 +141,7 @@ def test_state_clears_on_connection_error(check, pg_instance):
         if throw_exception_first_time.counter > 1:
             pass  # avoid throwing exception again
         else:
-            raise ShouldRestartException
+            raise socket.error
 
     throw_exception_first_time.counter = 0
 
