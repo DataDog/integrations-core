@@ -72,7 +72,10 @@ class Vault(AgentCheck):
     def check_leader_v1(self, config, tags):
         url = config['api_url'] + '/sys/leader'
         leader_data = self.access_api(url, tags, ignore_status_codes=Vault.SYS_LEADER_DEFAULT_CODES)
-        if 'errors' in leader_data:
+        errors = leader_data.get('errors')
+        if errors:
+            error_msg = ";".join(errors)
+            self.log.error("Unable to fetch leader data from vault. Reason: %s", error_msg)
             return
 
         is_leader = is_affirmative(leader_data.get('is_self'))
@@ -133,7 +136,7 @@ class Vault(AgentCheck):
                 api_version = api_url[-1]
                 if api_version not in self.api_versions:
                     self.log.warning(
-                        'Unknown Vault API version `%s`, using version ' '`%s`', api_version, self.DEFAULT_API_VERSION
+                        'Unknown Vault API version `%s`, using version `%s`', api_version, self.DEFAULT_API_VERSION
                     )
                     api_url = api_url[:-1] + self.DEFAULT_API_VERSION
                     api_version = self.DEFAULT_API_VERSION
