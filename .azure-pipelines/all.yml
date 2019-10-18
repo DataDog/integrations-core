@@ -283,6 +283,9 @@ jobs:
     - checkName: powerdns_recursor
       displayName: PowerDNS Recursor
       os: linux
+    - checkName: presto
+      displayName: Presto
+      os: linux
     - checkName: process
       displayName: Process
       os: linux
