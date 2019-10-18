@@ -166,6 +166,9 @@ jobs:
     - checkName: istio
       displayName: Istio
       os: linux
+    - checkName: jboss_wildfly
+      displayName: JBoss/WildFly
+      os: linux
     - checkName: kafka_consumer
       displayName: Kafka Consumer
       os: linux
