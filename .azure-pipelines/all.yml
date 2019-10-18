@@ -21,12 +21,12 @@ jobs:
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)
       os: linux
-    - checkName: datadog_checks_dev
-      displayName: Datadog Checks Dev (Linux)
-      os: linux
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Windows)
       os: windows
+    - checkName: datadog_checks_dev
+      displayName: Datadog Checks Dev (Linux)
+      os: linux
     - checkName: datadog_checks_dev
       displayName: Datadog Checks Dev (Windows)
       os: windows
