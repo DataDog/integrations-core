@@ -19,11 +19,17 @@ jobs:
   parameters:
     checks:
     - checkName: datadog_checks_base
-      displayName: Datadog Checks Base
+      displayName: Datadog Checks Base (Linux)
+      os: linux
+    - checkName: datadog_checks_base
+      displayName: Datadog Checks Base (Windows)
+      os: windows
+    - checkName: datadog_checks_dev
+      displayName: Datadog Checks Dev (Linux)
       os: linux
     - checkName: datadog_checks_dev
-      displayName: Datadog Checks Dev
-      os: linux
+      displayName: Datadog Checks Dev (Windows)
+      os: windows
     - checkName: datadog_checks_downloader
       displayName: Datadog Checks Downloader
       os: linux
