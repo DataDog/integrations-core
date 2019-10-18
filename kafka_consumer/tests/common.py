@@ -14,6 +14,9 @@ ZK_CONNECT_STR = '{}:2181'.format(HOST)
 TOPICS = ['marvel', 'dc']
 PARTITIONS = [0, 1]
 
+# TODO: Remove
+E2E_METADATA = {'start_commands': ['pip install kafka-python==1.4.7']}
+
 
 def is_supported(flavor):
     """

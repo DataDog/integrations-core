@@ -40,6 +40,7 @@ class LocalAgentInterface(object):
         agent_build=None,
         api_key=None,
         python_version=DEFAULT_PYTHON_VERSION,
+        default_agent=False,
     ):
         self.check = check
         self.env = env

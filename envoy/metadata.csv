@@ -4,11 +4,18 @@ envoy.runtime.override_dir_not_exists,count,,occurrence,,Total number of loads t
 envoy.runtime.override_dir_exists,count,,occurrence,,Total number of loads that did use an override directory,0,envoy,loads with override directory
 envoy.runtime.load_success,count,,success,,Total number of load attempts that were successful,1,envoy,successful loads
 envoy.runtime.num_keys,gauge,,location,,Number of keys currently loaded,0,envoy,keys loaded
+envoy.control_plane.connected_state,gauge,,connection,,A boolean (1 for connected and 0 for disconnected) that indicates the current connection state with management server,0,envoy,
+envoy.control_plane.pending_requests,gauge,,request,,Total number of pending requests when the rate limit was enforced,0,envoy,
+envoy.control_plane.rate_limit_enforced,count,,occurrence,,Total number of times rate limit was enforced for management server requests,0,envoy,
 envoy.cluster_manager.cds.config_reload,count,,request,,Total API fetches that resulted in a config reload due to a different config,0,envoy,cds config reloads
 envoy.cluster_manager.cds.update_attempt,count,,request,,Total API fetches attempted,0,envoy,cds total api accesses
 envoy.cluster_manager.cds.update_success,count,,request,,Total API fetches completed successfully,1,envoy,cds successful api accesses
-envoy.cluster_manager.cds.update_failure,count,,request,,Total API fetches that failed (either network or schema errors),-1,envoy,cds failed api accesses
+envoy.cluster_manager.cds.update_failure,count,,request,,Total API fetches that failed because of network errors,-1,envoy,cds failed api accesses
+envoy.cluster_manager.cds.update_rejected,count,,request,,Total API fetches that failed because of schema/validation errors,-1,envoy,cds rejected api accesses
 envoy.cluster_manager.cds.version,gauge,,item,,Hash of the contents from the last successful API fetch,0,envoy,
+envoy.cluster_manager.cds.control_plane.connected_state,gauge,,connection,,A boolean (1 for connected and 0 for disconnected) that indicates the current connection state with management server,0,envoy,cds control plane state
+envoy.cluster_manager.cds.control_plane.pending_requests,gauge,,request,,Total number of pending requests when the rate limit was enforced,0,envoy,cds pending control plane requests
+envoy.cluster_manager.cds.control_plane.rate_limit_enforced,count,,occurrence,,Total number of times rate limit was enforced for management server requests,0,envoy,cds rate limit enforcements
 envoy.http.no_route,count,,request,,Total requests that had no route and resulted in a 404,-1,envoy,
 envoy.http.no_cluster,count,,request,,Total requests in which the target cluster did not exist and resulted in a 404,-1,envoy,
 envoy.http.rq_redirect,count,,request,,Total requests that resulted in a redirect response,0,envoy,
@@ -35,8 +42,12 @@ envoy.http.buffer.rq_timeout,count,,timeout,,Total requests that timed out waiti
 envoy.http.rds.config_reload,count,,request,,Total API fetches that resulted in a config reload due to a different config,0,envoy,rds config reloads
 envoy.http.rds.update_attempt,count,,request,,Total API fetches attempted,0,envoy,rds total api accesses
 envoy.http.rds.update_success,count,,request,,Total API fetches completed successfully,1,envoy,rds successful api accesses
-envoy.http.rds.update_failure,count,,request,,Total API fetches that failed (either network or schema errors),-1,envoy,rds failed api accesses
+envoy.http.rds.update_failure,count,,request,,Total API fetches that failed because of network errors,-1,envoy,rds failed api accesses
+envoy.http.rds.update_rejected,count,,request,,Total API fetches that failed because of schema/validation errors,-1,envoy,rds rejected api accesses
 envoy.http.rds.version,gauge,,item,,Hash of the contents from the last successful API fetch,0,envoy,
+envoy.http.rds.control_plane.connected_state,gauge,,connection,,A boolean (1 for connected and 0 for disconnected) that indicates the current connection state with management server,0,envoy,rds control plane state
+envoy.http.rds.control_plane.pending_requests,gauge,,request,,Total number of pending requests when the rate limit was enforced,0,envoy,rds pending control plane requests
+envoy.http.rds.control_plane.rate_limit_enforced,count,,occurrence,,Total number of times rate limit was enforced for management server requests,0,envoy,rds rate limit enforcements
 envoy.tcp.downstream_cx_total,count,,connection,,Total number of connections handled by the filter,0,envoy,
 envoy.tcp.downstream_cx_no_route,count,,connection,,Number of connections for which no matching route was found,-1,envoy,
 envoy.tcp.downstream_cx_tx_bytes_total,count,,byte,,Total bytes written to the downstream connection,0,envoy,
@@ -121,6 +132,15 @@ envoy.listener_manager.listener_create_failure,count,,host,,Total failed listene
 envoy.listener_manager.total_listeners_warming,gauge,,host,,Number of currently warming listeners,0,envoy,
 envoy.listener_manager.total_listeners_active,gauge,,host,,Number of currently active listeners,0,envoy,
 envoy.listener_manager.total_listeners_draining,gauge,,host,,Number of currently draining listeners,0,envoy,
+envoy.listener_manager.lds.config_reload,count,,request,,Total API fetches that resulted in a config reload due to a different config,0,envoy,lds config reloads
+envoy.listener_manager.lds.update_attempt,count,,request,,Total API fetches attempted,0,envoy,lds total api accesses
+envoy.listener_manager.lds.update_success,count,,request,,Total API fetches completed successfully,1,envoy,lds successful api accesses
+envoy.listener_manager.lds.update_failure,count,,request,,Total API fetches that failed because of network errors,-1,envoy,lds failed api accesses
+envoy.listener_manager.lds.update_rejected,count,,request,,Total API fetches that failed because of schema/validation errors,-1,envoy,lds rejected api accesses
+envoy.listener_manager.lds.version,gauge,,item,,Hash of the contents from the last successful API fetch,0,envoy,
+envoy.listener_manager.lds.control_plane.connected_state,gauge,,connection,,A boolean (1 for connected and 0 for disconnected) that indicates the current connection state with management server,0,envoy,lds control plane state
+envoy.listener_manager.lds.control_plane.pending_requests,gauge,,request,,Total number of pending requests when the rate limit was enforced,0,envoy,lds pending control plane requests
+envoy.listener_manager.lds.control_plane.rate_limit_enforced,count,,occurrence,,Total number of times rate limit was enforced for management server requests,0,envoy,lds rate limit enforcements
 envoy.http.downstream_cx_total,count,,connection,,Total connections,0,envoy,
 envoy.http.downstream_cx_ssl_total,count,,connection,,Total TLS connections,0,envoy,
 envoy.http.downstream_cx_http1_total,count,,connection,,Total HTTP/1.1 connections,0,envoy,

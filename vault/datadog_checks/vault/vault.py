@@ -58,7 +58,7 @@ class Vault(AgentCheck):
 
     def check_leader_v1(self, config, tags):
         url = config['api_url'] + '/sys/leader'
-        leader_data = self.access_api(url, config, tags)
+        leader_data = self.access_api(url, tags)
 
         is_leader = is_affirmative(leader_data.get('is_self'))
         tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
@@ -85,7 +85,8 @@ class Vault(AgentCheck):
 
     def check_health_v1(self, config, tags):
         url = config['api_url'] + '/sys/health'
-        health_data = self.access_api(url, config, tags)
+        health_params = {'standbyok': True, 'perfstandbyok': True}
+        health_data = self.access_api(url, tags, params=health_params)
 
         cluster_name = health_data.get('cluster_name')
         if cluster_name:
@@ -140,9 +141,9 @@ class Vault(AgentCheck):
 
         return config
 
-    def access_api(self, url, config, tags):
+    def access_api(self, url, tags, params=None):
         try:
-            response = self.http.get(url)
+            response = self.http.get(url, params=params)
             response.raise_for_status()
             json_data = response.json()
         except requests.exceptions.HTTPError:

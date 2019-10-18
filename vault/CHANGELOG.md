@@ -1,5 +1,10 @@
 # CHANGELOG - Vault
 
+## 1.6.0 / 2019-10-07
+
+* [Fixed] Fix crash in HA mode. See [#4698](https://github.com/DataDog/integrations-core/pull/4698).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.5.0 / 2019-08-24
 
 * [Added] Add requests wrapper to vault. See [#4259](https://github.com/DataDog/integrations-core/pull/4259).

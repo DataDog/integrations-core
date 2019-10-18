@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 3.2.1 / 2019-10-11
+
+* [Fixed] Add cache invalidation and better thread lock. See [#4723](https://github.com/DataDog/integrations-core/pull/4723).
+
 ## 3.2.0 / 2019-09-10
 
 * [Added] Add schema tag to Lock and Size metrics. See [#3721](https://github.com/DataDog/integrations-core/pull/3721). Thanks [fischaz](https://github.com/fischaz).

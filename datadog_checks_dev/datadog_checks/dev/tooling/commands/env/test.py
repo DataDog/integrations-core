@@ -18,7 +18,6 @@ from .stop import stop
 @click.option(
     '--agent',
     '-a',
-    default='6',
     help=(
         'The agent build to use e.g. a Docker image like `datadog/agent:6.5.2`. For '
         'Docker environments you can use an integer corresponding to fields in the '
@@ -43,9 +42,9 @@ from .stop import stop
     ),
 )
 @click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
-@click.option('--retry', '-r', help='Number of retries for each tox env', type=click.INT)
+@click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
 @click.pass_context
-def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
+def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True)
     tests_ran = False
@@ -59,6 +58,9 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
     # Default to testing the local development version.
     if dev is None:
         dev = True
+
+    if profile_memory and not new_env:
+        echo_warning('Ignoring --profile-memory, to utilize that you must also select --new-env')
 
     for check, envs in check_envs:
         if not envs:
@@ -74,7 +76,15 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
         for env in envs:
             if new_env:
                 ctx.invoke(
-                    start, check=check, env=env, agent=agent, python=python, dev=dev, base=base, env_vars=env_vars
+                    start,
+                    check=check,
+                    env=env,
+                    agent=agent,
+                    python=python,
+                    dev=dev,
+                    base=base,
+                    env_vars=env_vars,
+                    profile_memory=profile_memory,
                 )
             elif env not in config_envs:
                 continue
@@ -89,10 +99,10 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
                         checks=['{}:{}'.format(check, env)],
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
-                        retry=retry,
                     )
             finally:
                 if new_env:
                     ctx.invoke(stop, check=check, env=env)
+
     if not tests_ran:
         echo_info('Nothing to test!')

@@ -2,11 +2,19 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import os
 from collections import defaultdict
 
+import pysnmp_mibs
 from pyasn1.type.univ import OctetString
+from pysmi.codegen import PySnmpCodeGen
+from pysmi.compiler import MibCompiler
+from pysmi.parser import SmiStarParser
+from pysmi.reader import HttpReader
+from pysmi.writer import PyFileWriter
 from pysnmp import hlapi
 from pysnmp.smi import builder, view
+from pysnmp.smi.error import MibNotFoundError
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -19,7 +27,7 @@ class InstanceConfig:
     DEFAULT_ALLOWED_FAILURES = 3
     DEFAULT_BULK_THRESHOLD = 5
 
-    def __init__(self, instance, warning, global_metrics, mibs_path, profiles, profiles_by_oid):
+    def __init__(self, instance, warning, log, global_metrics, mibs_path, profiles, profiles_by_oid):
         self.instance = instance
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
@@ -66,16 +74,16 @@ class InstanceConfig:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
-            self.metrics, self.enforce_constraints, warning
+            self.metrics, self.enforce_constraints, warning, log
         )
 
         self.auth_data = self.get_auth_data(instance)
         self.context_data = hlapi.ContextData(*self.get_context_data(instance))
 
-    def refresh_with_profile(self, profile, warning):
+    def refresh_with_profile(self, profile, warning, log):
         self.metrics.extend(profile['definition'])
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
-            self.metrics, self.enforce_constraints, warning
+            self.metrics, self.enforce_constraints, warning, log
         )
 
     def call_cmd(self, cmd, *args, **kwargs):
@@ -162,8 +170,7 @@ class InstanceConfig:
 
         return context_engine_id, context_name
 
-    @staticmethod
-    def parse_metrics(metrics, enforce_constraints, warning):
+    def parse_metrics(self, metrics, enforce_constraints, warning, log):
         """Parse configuration and returns data to be used for SNMP queries.
 
         `raw_oids` is a list of SNMP numerical OIDs to query.
@@ -217,4 +224,22 @@ class InstanceConfig:
             else:
                 raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
 
+        for mib in mibs_to_load:
+            try:
+                self.mib_view_controller.mibBuilder.loadModule(mib)
+            except MibNotFoundError:
+                log.debug("Couldn't found mib %s, trying to fetch it", mib)
+                self.fetch_mib(mib)
+
         return table_oids, raw_oids, mibs_to_load
+
+    @staticmethod
+    def fetch_mib(mib):
+        target_directory = os.path.dirname(pysnmp_mibs.__file__)
+
+        reader = HttpReader('mibs.snmplabs.com', 80, '/asn1/@mib@')
+        mibCompiler = MibCompiler(SmiStarParser(), PySnmpCodeGen(), PyFileWriter(target_directory))
+
+        mibCompiler.addSources(reader)
+
+        mibCompiler.compile(mib)

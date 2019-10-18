@@ -1,5 +1,10 @@
 # CHANGELOG - rabbitmq
 
+## 1.10.0 / 2019-10-11
+
+* [Added] verifies if `root` is dict before doing `.get`. See [#4668](https://github.com/DataDog/integrations-core/pull/4668).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.9.2 / 2019-09-18
 
 * [Fixed] Ignore empty data for metrics limit. See [#4544](https://github.com/DataDog/integrations-core/pull/4544).

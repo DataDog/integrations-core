@@ -29,7 +29,9 @@
   "integration_id": "etcd",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Etcd Overview": "assets/dashboards/etcd_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

@@ -1,5 +1,14 @@
 # CHANGELOG - etcd
 
+## 2.0.1 / 2019-10-16
+
+* [Fixed] Set use_preview to True in init as well. See [#4792](https://github.com/DataDog/integrations-core/pull/4792).
+
+## 2.0.0 / 2019-10-11
+
+* [Changed] Etcd uses V3 preview by default. See [#4656](https://github.com/DataDog/integrations-core/pull/4656).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.9.0 / 2019-08-24
 
 * [Added] Add requests wrapper to etcd. See [#4323](https://github.com/DataDog/integrations-core/pull/4323).

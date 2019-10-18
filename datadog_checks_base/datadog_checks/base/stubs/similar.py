@@ -152,4 +152,6 @@ def _compute_score(scores):
 
 
 def _is_similar_text_score(a, b):
+    if b is None:
+        return 0
     return SequenceMatcher(None, a, b).ratio()

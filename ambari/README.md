@@ -6,7 +6,7 @@ This check monitors [Ambari][1] through the Datadog Agent.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying these instructions.
 
 ### Installation
 
@@ -76,7 +76,7 @@ Returns `OK` if the cluster is reachable, otherwise returns `CRITICAL`.
 
 **ambari.state**:<br>
 Returns `OK` if the service is installed or running, `WARNING` if the service is stopping or uninstalling,
-or `CRITICAL` if the service is uninstalled or stopped. For a complete enumeration, see [this file][8].
+or `CRITICAL` if the service is uninstalled or stopped.
 
 ### Events
 

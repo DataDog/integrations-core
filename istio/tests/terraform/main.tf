@@ -37,8 +37,7 @@ resource "local_file" "kubeconfig" {
 resource "google_container_cluster" "gke_cluster" {
   name = replace("istio-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
   location = random_shuffle.az.result[0]
-  node_version = "1.13.7-gke.8"
-  min_master_version = "1.13.7-gke.8"
+  min_master_version = "1.13.7-gke.24"
 
   lifecycle {
     ignore_changes = ["node_pool"]

@@ -1,5 +1,21 @@
 # CHANGELOG - snmp
 
+## 1.14.1 / 2019-10-16
+
+* [Fixed] Fix allowed host failure retry logic. See [#4782](https://github.com/DataDog/integrations-core/pull/4782).
+
+## 1.14.0 / 2019-10-14
+
+* [Added] Store discovered hosts. See [#4712](https://github.com/DataDog/integrations-core/pull/4712).
+
+## 1.13.0 / 2019-10-11
+
+* [Added] Automatically fetch MIBs that we don't know about. See [#4732](https://github.com/DataDog/integrations-core/pull/4732).
+
+## 1.12.0 / 2019-10-10
+
+* [Added] Add profile for F5 BIG-IP devices. See [#4674](https://github.com/DataDog/integrations-core/pull/4674).
+
 ## 1.11.0 / 2019-09-19
 
 * [Fixed] Handle bytes in network_address. See [#4577](https://github.com/DataDog/integrations-core/pull/4577).

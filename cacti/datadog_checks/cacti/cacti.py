@@ -36,9 +36,11 @@ CACTI_TO_DD = {
 
 
 class CactiCheck(AgentCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(CactiCheck, self).__init__(name, init_config, instances)
         self.last_ts = {}
+        # Load the instance config
+        self.config = self._get_config(instances[0])
 
     @staticmethod
     def get_library_versions():
@@ -50,26 +52,30 @@ class CactiCheck(AgentCheck):
         if rrdtool is None:
             raise Exception("Unable to import python rrdtool module")
 
-        # Load the instance config
-        config = self._get_config(instance)
-
-        connection = pymysql.connect(config.host, config.user, config.password, config.db)
+        connection = self._get_connection()
 
         self.log.debug("Connected to MySQL to fetch Cacti metadata")
 
         # Get whitelist patterns, if available
-        patterns = self._get_whitelist_patterns(config.whitelist)
+        patterns = self._get_whitelist_patterns(self.config.whitelist)
 
         # Fetch the RRD metadata from MySQL
-        rrd_meta = self._fetch_rrd_meta(connection, config.rrd_path, patterns, config.field_names, config.tags)
+        rrd_meta = self._fetch_rrd_meta(
+            connection, self.config.rrd_path, patterns, self.config.field_names, self.config.tags
+        )
 
         # Load the metrics from each RRD, tracking the count as we go
         metric_count = 0
         for hostname, device_name, rrd_path in rrd_meta:
-            m_count = self._read_rrd(rrd_path, hostname, device_name, config.tags)
+            m_count = self._read_rrd(rrd_path, hostname, device_name, self.config.tags)
             metric_count += m_count
 
-        self.gauge('cacti.metrics.count', metric_count, tags=config.tags)
+        self.gauge('cacti.metrics.count', metric_count, tags=self.config.tags)
+
+    def _get_connection(self):
+        return pymysql.connect(
+            self.config.host, self.config.user, self.config.password, self.config.db, self.config.port
+        )
 
     def _get_whitelist_patterns(self, whitelist=None):
         patterns = []
@@ -96,16 +102,17 @@ class CactiCheck(AgentCheck):
         user = instance.get('mysql_user')
         password = instance.get('mysql_password', '') or ''
         db = instance.get('mysql_db', 'cacti')
+        port = instance.get('mysql_port')
         rrd_path = instance.get('rrd_path')
         whitelist = instance.get('rrd_whitelist')
         field_names = instance.get('field_names', ['ifName', 'dskDevice'])
         tags = instance.get('tags', [])
 
         Config = namedtuple(
-            'Config', ['host', 'user', 'password', 'db', 'rrd_path', 'whitelist', 'field_names', 'tags']
+            'Config', ['host', 'user', 'password', 'db', 'port', 'rrd_path', 'whitelist', 'field_names', 'tags']
         )
 
-        return Config(host, user, password, db, rrd_path, whitelist, field_names, tags)
+        return Config(host, user, password, db, port, rrd_path, whitelist, field_names, tags)
 
     @staticmethod
     def _get_rrd_info(rrd_path):

@@ -1,5 +1,9 @@
 # CHANGELOG - nginx
 
+## 3.4.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 3.3.0 / 2019-08-24
 
 * [Added] Add requests wrapper to Nginx. See [#4268](https://github.com/DataDog/integrations-core/pull/4268).

@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.1.0 / 2019-10-09
+
+* [Added] Add support for fetching consumer offsets stored in Kafka to `monitor_unlisted_consumer_groups`. See [#3957](https://github.com/DataDog/integrations-core/pull/3957). Thanks [jeffwidman](https://github.com/jeffwidman).
+
 ## 2.0.1 / 2019-08-27
 
 * [Fixed] Fix logger call during exceptions. See [#4440](https://github.com/DataDog/integrations-core/pull/4440).

@@ -283,11 +283,14 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
     echo_info('Branch `{}` will be compared to `master`.'.format(current_release_branch))
 
     echo_waiting('Getting diff... ', nl=False)
-    diif_command = 'git --no-pager log "--pretty=format:%H %s" {}..master'
+    diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..master'
 
     with chdir(root):
-        result = run_command(diif_command.format(current_release_branch), capture=True)
+        # compare with the local tag first
+        reftag = '{}{}'.format('refs/tags/', current_release_branch)
+        result = run_command(diff_command.format(reftag), capture=True)
         if result.code:
+            # if it didn't work, compare with a branch.
             origin_release_branch = 'origin/{}'.format(current_release_branch)
             echo_failure('failed!')
             echo_waiting(
@@ -297,9 +300,9 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 nl=False,
             )
 
-            result = run_command(diif_command.format(origin_release_branch), capture=True)
+            result = run_command(diff_command.format(origin_release_branch), capture=True)
             if result.code:
-                abort('Unable to get the diif.')
+                abort('Unable to get the diff.')
             else:
                 echo_success('success!')
         else:
@@ -316,17 +319,18 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
 
     if repo == 'integrations-core':
         options = OrderedDict(
-            (('1', 'Integrations'), ('2', 'Containers'), ('3', 'Agent'), ('s', 'Skip'), ('q', 'Quit'))
+            (('1', 'Integrations'), ('2', 'Containers'), ('3', 'Core'), ('4', 'Platform'), ('s', 'Skip'), ('q', 'Quit'))
         )
     else:
         options = OrderedDict(
             (
-                ('1', 'Agent'),
+                ('1', 'Core'),
                 ('2', 'Containers'),
                 ('3', 'Logs'),
-                ('4', 'Process'),
-                ('5', 'Trace'),
-                ('6', 'Integrations'),
+                ('4', 'Platform'),
+                ('5', 'Process'),
+                ('6', 'Trace'),
+                ('7', 'Integrations'),
                 ('s', 'Skip'),
                 ('q', 'Quit'),
             )

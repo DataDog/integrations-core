@@ -5,7 +5,7 @@ import re
 
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
-from .constants import TESTABLE_FILE_EXTENSIONS, get_root
+from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_EXTENSIONS, get_root
 from .git import files_changed
 from .utils import get_testable_checks
 
@@ -216,9 +216,10 @@ def pytest_coverage_sources(*checks):
 
 def testable_files(files):
     """
-    Given a list of files, return the files that have an extension listed in TESTABLE_FILE_EXTENSIONS
+    Given a list of files, return the files that have an extension listed in TESTABLE_FILE_EXTENSIONS and are
+    not blacklisted by NON_TESTABLE_FILES (metrics.yaml, auto_conf.yaml)
     """
-    return [f for f in files if f.endswith(TESTABLE_FILE_EXTENSIONS)]
+    return [f for f in files if f.endswith(TESTABLE_FILE_EXTENSIONS) and not f.endswith(NON_TESTABLE_FILES)]
 
 
 def get_changed_checks():

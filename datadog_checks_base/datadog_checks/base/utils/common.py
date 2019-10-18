@@ -5,7 +5,7 @@ import os
 import re
 from decimal import ROUND_HALF_UP, Decimal
 
-from six import PY3, text_type
+from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
 
 
@@ -22,6 +22,10 @@ def ensure_unicode(s):
 
 
 to_string = ensure_unicode if PY3 else ensure_bytes
+
+
+def exclude_undefined_keys(mapping):
+    return {key: value for key, value in iteritems(mapping) if value is not None}
 
 
 def round_value(value, precision=0, rounding_method=ROUND_HALF_UP):

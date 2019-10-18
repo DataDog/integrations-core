@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_datanode
 
+## 1.9.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.8.0 / 2019-07-09
 
 * [Added] Use the new RequestsWrapper for connecting to services. See [#4056](https://github.com/DataDog/integrations-core/pull/4056).

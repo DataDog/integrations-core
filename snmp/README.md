@@ -117,7 +117,10 @@ There are a few ways to specify the metrics to collect. See the [sample snmp.d/c
 
 ##### Use your own MIB
 
-To use your own MIB with the Datadog Agent, convert it to the [PySNMP][5] format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][6].
+Since Agent v6.15, MIBs hosted at http://mibs.snmplabs.com/asn1 will be fetched automatically the first
+time the check finds a reference in the configuration.
+
+To use your own MIB with the Datadog Agent, convert it to the [PySNMP][5] format. This can be done using the `mibdump.py` script that ships with PySNMP. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][6].
 
 Since Datadog Agent v5.14, the Agent's PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (refer to the [changelog][7]). This means that the `build-pysnmp-mib` which shipped with the Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
 
@@ -197,7 +200,7 @@ Example using the `CISCO-TCP-MIB.my`:
  Ignored MIBs:
  Failed MIBs:
 
- #ls /opt/datadog-agent/pysnmp/custom_mibpy/
+ # ls /opt/datadog-agent/pysnmp/custom_mibpy/
 CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
 
 ```

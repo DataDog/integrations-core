@@ -1,5 +1,9 @@
 # CHANGELOG - OpenMetrics
 
+## 1.3.0 / 2019-10-11
+
+* [Added] Add an option to send histograms/summary counts as monotonic counters. See [#4629](https://github.com/DataDog/integrations-core/pull/4629).
+
 ## 1.2.0 / 2019-06-01
 
 * [Added] Use Kube service account bearer token for authentication. See [#3829](https://github.com/DataDog/integrations-core/pull/3829).

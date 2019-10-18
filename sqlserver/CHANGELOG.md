@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.14.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+
 ## 1.13.0 / 2019-07-13
 
 * [Added] Allow SQLNCLI11 provider in SQL server. See [#4097](https://github.com/DataDog/integrations-core/pull/4097).

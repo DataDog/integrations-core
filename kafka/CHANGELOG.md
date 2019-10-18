@@ -1,5 +1,9 @@
 # CHANGELOG - kafka
 
+## 2.0.2 / 2019-10-11
+
+* [Fixed] Fix the missing Kafka producer metrics. See [#4737](https://github.com/DataDog/integrations-core/pull/4737). Thanks [Epokhe](https://github.com/Epokhe).
+
 ## 2.0.1 / 2019-08-24
 
 * [Fixed] Treat `kafka.producer.compression_rate` as a ratio. See [#4293](https://github.com/DataDog/integrations-core/pull/4293).

@@ -21,7 +21,7 @@ def test_e2e(dd_agent_check, instance):
 
 
 def _test_check(aggregator):
-    aggregator.assert_metric('vault.is_leader', value=0, tags=['instance:foobar', 'is_leader:false'], count=1)
+    aggregator.assert_metric('vault.is_leader', value=1, tags=['instance:foobar', 'is_leader:true'], count=1)
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, AgentCheck.OK)

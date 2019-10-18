@@ -13,6 +13,7 @@ import redis
 from datadog_checks.redisdb import Redis
 
 from .common import HOST, PASSWORD, PORT
+from .utils import requires_static_version
 
 # Following metrics are tagged by db
 DB_TAGGED_METRICS = ['redis.persist.percent', 'redis.expires.percent', 'redis.persist', 'redis.keys', 'redis.expires']
@@ -69,15 +70,21 @@ def test_service_check(aggregator, redis_auth, redis_instance):
     assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
 
 
-@pytest.mark.integration
-def test_service_metadata(redis_instance):
-    """
-    The Agent toolkit doesn't support service_metadata yet, so we use Mock
-    """
+@requires_static_version
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata(master_instance, version_metadata):
     redis_check = Redis('redisdb', {}, {})
-    redis_check._collect_metadata = mock.MagicMock()
-    redis_check.check(redis_instance)
-    redis_check._collect_metadata.assert_called_once()
+    redis_check.check_id = 'test:123'
+
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        redis_check.check(master_instance)
+
+        for name, value in version_metadata.items():
+            m.assert_any_call('test:123', name, value)
+
+        # We parse the version set in tox which is X.Y so we don't
+        # know `version.patch`, and therefore also `version.raw`.
+        assert m.call_count == len(version_metadata) + 2
 
 
 @pytest.mark.integration

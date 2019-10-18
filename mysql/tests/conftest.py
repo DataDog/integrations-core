@@ -124,9 +124,10 @@ def _wait_for_it_script():
 
 def _mysql_docker_repo():
     if MYSQL_FLAVOR == 'mysql':
-        if MYSQL_VERSION == '5.5':
-            return 'jfullaondo/mysql-replication'
-        elif MYSQL_VERSION in ('5.6', '5.7'):
+        # The image for testing Mysql 5.5 is located at `jfullaondo/mysql-replication` or `bergerx/mysql-replication`
+        # Warning: This image is a bit flaky on CI (it has been removed
+        # https://github.com/DataDog/integrations-core/pull/4669)
+        if MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
         elif MYSQL_VERSION == '8.0':
             return 'bitnami/mysql'

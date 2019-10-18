@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import os
+import time
 
 import mock
 import pytest
@@ -17,20 +18,28 @@ from . import common
 pytestmark = pytest.mark.unit
 
 
-def warning(*args):
-    pass
-
-
 @mock.patch("datadog_checks.snmp.config.hlapi")
 def test_parse_metrics(hlapi_mock):
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    check = SnmpCheck('snmp', {}, [instance])
     # Unsupported metric
     metrics = [{"foo": "bar"}]
+    config = InstanceConfig(
+        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3"}]},
+        check.warning,
+        check.log,
+        [],
+        None,
+        {},
+        {},
+    )
+    hlapi_mock.reset_mock()
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # Simple OID
     metrics = [{"OID": "1.2.3"}]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, False, warning)
+    table, raw, mibs = config.parse_metrics(metrics, False, check.warning, check.log)
     assert table == {}
     assert mibs == set()
     assert len(raw) == 1
@@ -40,11 +49,11 @@ def test_parse_metrics(hlapi_mock):
     # MIB with no symbol or table
     metrics = [{"MIB": "foo_mib"}]
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # MIB with symbol
     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, False, warning)
+    table, raw, mibs = config.parse_metrics(metrics, False, check.warning, check.log)
     assert raw == []
     assert mibs == {"foo_mib"}
     assert len(table) == 1
@@ -54,11 +63,11 @@ def test_parse_metrics(hlapi_mock):
     # MIB with table, no symbols
     metrics = [{"MIB": "foo_mib", "table": "foo"}]
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
+    table, raw, mibs = config.parse_metrics(metrics, True, check.warning, check.log)
     assert raw == []
     assert mibs == set()
     assert len(table) == 1
@@ -70,18 +79,18 @@ def test_parse_metrics(hlapi_mock):
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo"}]}]
     with pytest.raises(Exception):
-        InstanceConfig.parse_metrics(metrics, False, warning)
+        config.parse_metrics(metrics, False, check.warning, check.log)
 
     # MIB with table, symbols, metrics_tags index
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
     ]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
+    table, raw, mibs = config.parse_metrics(metrics, True, check.warning, check.log)
     assert raw == []
     assert mibs == set()
     assert len(table) == 1
@@ -94,7 +103,7 @@ def test_parse_metrics(hlapi_mock):
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
     ]
-    table, raw, mibs = InstanceConfig.parse_metrics(metrics, True, warning)
+    table, raw, mibs = config.parse_metrics(metrics, True, check.warning, check.log)
     assert raw == []
     assert mibs == set()
     assert len(table) == 1
@@ -151,7 +160,7 @@ def test_removing_host():
     check = SnmpCheck('snmp', {}, [instance])
     warnings = []
     check.warning = warnings.append
-    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, [], '', {}, {})
+    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, None, [], '', {}, {})
     msg = 'No SNMP response received before timeout for instance 1.1.1.1'
 
     check.check(instance)
@@ -162,12 +171,65 @@ def test_removing_host():
 
     check.check(instance)
     assert warnings == [msg, msg, msg]
-
-    check.check(instance)
-    assert warnings == [msg, msg, msg, msg]
     # Instance has been removed
     assert check._config.discovered_instances == {}
 
     check.check(instance)
     # No new warnings produced
-    assert warnings == [msg, msg, msg, msg]
+    assert warnings == [msg, msg, msg]
+
+
+@mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
+def test_cache_discovered_host(read_mock):
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.0.0/24'
+
+    read_mock.return_value = '["192.168.0.1"]'
+    check = SnmpCheck('snmp', {}, [instance])
+    check.check(instance)
+
+    assert '192.168.0.1' in check._config.discovered_instances
+
+
+@mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
+@mock.patch("datadog_checks.snmp.snmp.write_persistent_cache")
+def test_cache_corrupted(write_mock, read_mock):
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.0.0/24'
+    read_mock.return_value = '["192.168.0."]'
+    check = SnmpCheck('snmp', {}, [instance])
+    check.check(instance)
+
+    assert not check._config.discovered_instances
+    write_mock.assert_called_once_with('', '[]')
+
+
+@mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
+@mock.patch("datadog_checks.snmp.snmp.write_persistent_cache")
+def test_cache_building(write_mock, read_mock):
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+
+    read_mock.return_value = '[]'
+
+    discovered_instance = instance.copy()
+    discovered_instance['ip_address'] = '192.168.0.1'
+
+    instance['network_address'] = '192.168.0.0/31'
+
+    check = SnmpCheck('snmp', {}, [instance])
+
+    check._config.discovered_instances['192.168.0.1'] = InstanceConfig(discovered_instance, None, None, [], '', {}, {})
+    check._start_discovery()
+
+    try:
+        for _ in range(30):
+            if write_mock.call_count:
+                break
+            time.sleep(1)
+    finally:
+        check._running = False
+
+    write_mock.assert_called_once_with('', '["192.168.0.1"]')

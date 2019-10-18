@@ -10,7 +10,7 @@ import redis
 from datadog_checks.dev import LazyFunction, RetryError, docker_run
 from datadog_checks.redisdb import Redis
 
-from .common import HOST, MASTER_PORT, PASSWORD, PORT, REPLICA_PORT
+from .common import HOST, MASTER_PORT, PASSWORD, PORT, REDIS_VERSION, REPLICA_PORT
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -94,3 +94,9 @@ def master_instance():
 @pytest.fixture
 def check():
     return Redis('redisdb', {}, {}, None)
+
+
+@pytest.fixture(scope='session')
+def version_metadata():
+    major, minor = REDIS_VERSION.split('.')
+    return {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
