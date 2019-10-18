@@ -93,6 +93,9 @@ jobs:
     - checkName: dotnetclr
       displayName: .NET CLR
       os: windows
+    - checkName: druid
+      displayName: Druid
+      os: linux
     - checkName: ecs_fargate
       displayName: Amazon ECS Fargate
       os: linux
