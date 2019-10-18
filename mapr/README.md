@@ -18,7 +18,7 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 4. Add `/opt/mapr/lib/` to your `/etc/ld.so.conf` (or a file in `/etc/ld.so.conf.d/`). This is required to help the *mapr-streams-library* used by the Agent to find the MapR shared libraries.
 5. Generate a [long-lived ticket][8] for the `dd-agent` user.
 6. Make sure the ticket is readable by the `dd-agent` user.
-7. Configure the integration (see below)
+7. Configure the integration (see below).
 
 **Note**: If you don't have "security" enabled in the cluster, you can continue without a ticket.
 
