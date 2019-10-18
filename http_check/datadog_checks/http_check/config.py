@@ -52,7 +52,7 @@ def from_instance(instance, default_ca_certs=None):
         raise ConfigurationError("The url {} must start with the scheme http or https".format(url))
     include_content = is_affirmative(instance.get('include_content', False))
     ssl_expire = is_affirmative(instance.get('check_certificate_expiration', True))
-    instance_ca_certs = instance.get('ca_certs', default_ca_certs)
+    instance_ca_certs = instance.get('tls_ca_cert', instance.get('ca_certs', default_ca_certs))
     weakcipher = is_affirmative(instance.get('weakciphers', False))
     check_hostname = is_affirmative(instance.get('check_hostname', True))
     allow_redirects = is_affirmative(instance.get('allow_redirects', True))
