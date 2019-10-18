@@ -172,7 +172,8 @@ class TestVault:
                         'server_time_utc': 1529357080,
                         'standby': False,
                         'version': '0.10.2',
-                    }
+                    },
+                    status_code=503,
                 )
             return requests_get(url, *args, **kwargs)
 
@@ -251,7 +252,8 @@ class TestVault:
                         'server_time_utc': 1529357080,
                         'standby': False,
                         'version': '0.10.2',
-                    }
+                    },
+                    status_code=501,
                 )
             return requests_get(url, *args, **kwargs)
 
@@ -344,7 +346,6 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/health':
-                status_code = 200 if kwargs.get('params', {}).get('standbyok') else 429
                 return MockResponse(
                     {
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
@@ -358,7 +359,7 @@ class TestVault:
                         'performance_standby': False,
                         'version': '0.10.2',
                     },
-                    status_code,
+                    status_code=429,
                 )
             return requests_get(url, *args, **kwargs)
 
@@ -378,7 +379,6 @@ class TestVault:
 
         def mock_requests_get(url, *args, **kwargs):
             if url == config['api_url'] + '/sys/health':
-                status_code = 200 if kwargs.get('params', {}).get('perfstandbyok') else 473
                 return MockResponse(
                     {
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
@@ -392,7 +392,7 @@ class TestVault:
                         'performance_standby': True,
                         'version': '0.10.2',
                     },
-                    status_code,
+                    status_code=473,
                 )
             return requests_get(url, *args, **kwargs)
 
