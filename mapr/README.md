@@ -27,7 +27,7 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 #### Metric collection
 
 1. Edit the `mapr.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your MapR performance data. See the [sample mapr.d/conf.yaml][3] for all available configuration options.
-2. Set the `ticket_location` parameter in the config to a path to the long-lived ticket you have created.
+2. Set the `ticket_location` parameter in the config to the path of the long-lived ticket you created.
 3. [Restart the Agent][4].
 
 #### Log collection
