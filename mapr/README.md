@@ -13,7 +13,7 @@ Follow the instructions below to install and configure this check for an Agent r
 The MapR check is included in the [Datadog Agent][2] package but requires additional setup operations.
 
 1. Create a `dd-agent` user with a password on every node in the cluster with the same `UID`/`GID` so it is recognized by MapR. See [Managing users and groups][10] for additional details.
-2. Install the agent on every node you want to monitor.
+2. Install the Agent on every node you want to monitor.
 3. Install the library *mapr-streams-library* with the following command `/opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python`
 4. Add `/opt/mapr/lib/` to your `/etc/ld.so.conf` (or a file in `/etc/ld.so.conf.d/`). This is required to help the *mapr-streams-library* used by the agent to find the mapr shared libraries.
 5. Generate a [long-lived ticket][8] for the `dd-agent` user.
