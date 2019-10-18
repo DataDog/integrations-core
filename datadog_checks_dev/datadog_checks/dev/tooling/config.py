@@ -26,7 +26,7 @@ DEFAULT_CONFIG = OrderedDict(
         ('repo', 'core'),
         ('color', bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None),
         ('dd_api_key', os.getenv('DD_API_KEY')),
-        ('agent6', OrderedDict((('docker', 'datadog/agent-dev:arbll-nostrip'), ('local', 'latest')))),
+        ('agent6', OrderedDict((('docker', 'datadog/agent:6.15.0-rc.1'), ('local', 'latest')))),
         ('agent5', OrderedDict((('docker', 'datadog/dev-dd-agent:master'), ('local', 'latest')))),
         ('github', OrderedDict((('user', ''), ('token', '')))),
         ('pypi', OrderedDict((('user', ''), ('pass', '')))),
