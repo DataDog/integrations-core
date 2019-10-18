@@ -205,6 +205,27 @@ class HAProxy(AgentCheck):
 
         return response.splitlines()
 
+    def _collect_version_from_http(self, url):
+        # the csv format does not offer version info, therefore we need to get the HTML page
+        r = self.http.get(url)
+        r.raise_for_status()
+        raw_version = ""
+        for line in r.iter_lines(decode_unicode=True):
+            if "HAProxy version" in line:
+                raw_version = line
+                break
+
+        if raw_version == "":
+            self.log.debug("unable to find HAProxy version info")
+        else:
+            m = re.search(r"\d+\.\d+\.*\d*", raw_version)
+            version = m.group(0)
+            self.log.debug(u"HAProxy version is {}".format(version))
+            self.set_metadata("version", version)
+
+    def _collect_version_from_socket(self, url):
+        pass
+
     def _process_data(
         self,
         data,
