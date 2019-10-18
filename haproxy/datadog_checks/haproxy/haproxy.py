@@ -101,13 +101,15 @@ class HAProxy(AgentCheck):
     def check(self, instance):
         url = instance.get('url')
         self.log.debug('Processing HAProxy data for %s' % url)
-
+        import pdb; pdb.set_trace()
         parsed_url = urlparse(url)
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
-            data = self._fetch_socket_data(parsed_url)
-
+            info, data = self._fetch_socket_data(parsed_url)
+            self._collect_version_from_socket(info)
+            data = data.splitlines()
         else:
+            self._collect_version_from_http(url)
             data = self._fetch_url_data(url)
 
         collect_aggregates_only = instance.get('collect_aggregates_only', True)
@@ -193,7 +195,7 @@ class HAProxy(AgentCheck):
         else:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
-        sock.send(b"show stat\r\n")
+        sock.send(b"show info;show stat\r\n")
 
         response = ""
         output = sock.recv(BUFSIZE)
@@ -203,14 +205,17 @@ class HAProxy(AgentCheck):
 
         sock.close()
 
-        return response.splitlines()
+        # separate data from `show info` and `show stat` with blank line
+        return response.split('\n\n')
 
     def _collect_version_from_http(self, url):
         # the csv format does not offer version info, therefore we need to get the HTML page
+        self.log.debug("collecting version info for HAProxy from {}".format(url))
+
         r = self.http.get(url)
         r.raise_for_status()
         raw_version = ""
-        for line in r.iter_lines(decode_unicode=True):
+        for line in r.content.splitlines():
             if "HAProxy version" in line:
                 raw_version = line
                 break
@@ -223,7 +228,9 @@ class HAProxy(AgentCheck):
             self.log.debug(u"HAProxy version is {}".format(version))
             self.set_metadata("version", version)
 
-    def _collect_version_from_socket(self, url):
+    def _collect_version_from_socket(self, info):
+        # `show stat` does not return version info, we will need to query version separately
+
         pass
 
     def _process_data(

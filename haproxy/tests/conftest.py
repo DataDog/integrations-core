@@ -46,7 +46,8 @@ def dd_environment():
         service_name="haproxy-open",
         conditions=[WaitFor(wait_for_haproxy_open)],
     ):
-        if platform_supports_sockets:
+        # IMPORTANT: REMOVE when done testing
+        if True:
             with TempDir() as temp_dir:
                 host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
                 env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
@@ -65,6 +66,7 @@ def dd_environment():
                         # it won't work without access
                         chown_args = []
                         user = getpass.getuser()
+                        import pdb; pdb.set_trace()
                         if user != 'root':
                             chown_args += ['sudo']
                         chown_args += ["chown", user, host_socket_path]
