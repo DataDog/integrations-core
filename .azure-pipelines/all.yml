@@ -10,6 +10,7 @@ pr:
   paths:
     include:
     - datadog_checks_base/datadog_checks/*
+    - .azure-pipelines/*
 
 variables:
   DDEV_COLOR: 1
