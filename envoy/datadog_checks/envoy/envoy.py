@@ -89,7 +89,7 @@ class Envoy(AgentCheck):
                 metric, tags, method = parse_metric(envoy_metric)
             except UnknownMetric:
                 if envoy_metric not in self.unknown_metrics:
-                    for _ in range(1000000):
+                    for _ in range(10000000):
                         self.log.debug('Unknown metric `{}`'.format(envoy_metric))
                 self.unknown_metrics[envoy_metric] += 1
                 continue
