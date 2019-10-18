@@ -123,8 +123,13 @@ class PostgreSql(AgentCheck):
 
     def _get_version(self, key, db):
         if key not in self.versions:
-            cursor = db.cursor()
-            cursor.execute('SHOW SERVER_VERSION;')
+            try:
+                cursor = db.cursor()
+                cursor.execute('SHOW SERVER_VERSION;')
+            except (psycopg2.InterfaceError, socket.error) as e:
+                self.log.error('Connection error: %s', e)
+                raise ShouldRestartException
+
             version = cursor.fetchone()[0]
             try:
                 version_parts = version.split(' ')[0].split('.')
