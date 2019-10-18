@@ -289,9 +289,9 @@ Need help? Contact [Datadog support][19].
 [25]: https://www.datadoghq.com/blog/monitor-aws-fargate
 [26]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions
 [27]: https://docs.datadoghq.com/integrations/fluentbit/
-[28]: https://github.com/aws/containers-roadmap/tree/master/preview-programs/firelens
+[28]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html
 [29]: https://docs.datadoghq.com/graphing/infrastructure/livecontainers/?tab=linuxwindows
 [30]: https://app.datadoghq.com/logs
 [31]: https://docs.datadoghq.com/monitors/monitor_types/
-[32]: https://github.com/aws/containers-roadmap/tree/master/preview-programs/firelens#using-the-aws-for-fluent-bit-image
+[32]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
 [33]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/ 
