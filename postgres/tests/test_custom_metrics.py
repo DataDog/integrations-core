@@ -24,7 +24,7 @@ def test_custom_metrics(aggregator, pg_instance):
             ],
         }
     )
-    postgres_check = PostgreSql('postgres', {}, [])
+    postgres_check = PostgreSql('postgres', {}, [pg_instance])
     postgres_check.check(pg_instance)
 
     tags = ['customdb:a', 'server:{}'.format(pg_instance['host']), 'port:{}'.format(pg_instance['port'])]
@@ -54,7 +54,7 @@ def test_custom_queries(aggregator, pg_instance):
             ]
         }
     )
-    postgres_check = PostgreSql('postgres', {}, [])
+    postgres_check = PostgreSql('postgres', {}, [pg_instance])
     postgres_check.check(pg_instance)
     tags = [
         'db:{}'.format(pg_instance['dbname']),

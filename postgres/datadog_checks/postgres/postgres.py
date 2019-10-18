@@ -64,14 +64,14 @@ class PostgreSql(AgentCheck):
     _known_servers = set()
     _known_servers_lock = threading.Lock()
 
-    def __init__(self, name, init_config, instances=None):
+    def __init__(self, name, init_config, instances):
         AgentCheck.__init__(self, name, init_config, instances)
         self._clean_state()
         self.db = None
-        self.custom_metrics = {}
+        self.custom_metrics = None
 
         # Deprecate custom_metrics in favor of custom_queries
-        if instances is not None and any('custom_metrics' in instance for instance in instances):
+        if any('custom_metrics' in instance for instance in instances):
             self.warning(
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
@@ -284,7 +284,7 @@ class PostgreSql(AgentCheck):
             self.db_bgw_metrics.append(sub_key)
 
             self.bgw_metrics = dict(COMMON_BGW_METRICS)
-            if self._is_9_1_or_abovedb():
+            if self._is_9_1_or_above(db):
                 self.bgw_metrics.update(NEWER_91_BGW_METRICS)
             if self._is_9_2_or_above(db):
                 self.bgw_metrics.update(NEWER_92_BGW_METRICS)
@@ -315,9 +315,9 @@ class PostgreSql(AgentCheck):
         """
         # While there's only one set for now, prepare for future additions to
         # the table, mirroring _get_bgw_metrics()
-        metrics = self.archiver_metrics.get()
+        metrics = self.archiver_metrics
 
-        if self._is_9_4_or_above(db) and metrics is None:
+        if metrics is None and self._is_9_4_or_above(db):
             # Collect from only one instance. See _get_bgw_metrics() for details on why.
             sub_key = self.key[:2]
             if sub_key in self.db_archiver_metrics:
