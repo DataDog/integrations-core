@@ -80,7 +80,10 @@ def test_instance_ca_cert():
     if `tls_ca_cert` and `ca_certs` are unavailable.
     """
     # Ensure that 'tls_ca_cert' takes precedence
-    params_with_all = from_instance({'url': 'https://example2.com', 'name': 'UpService', 'tls_ca_cert': 'foobar', 'ca_certs': 'barfoo'}, 'default_ca_cert')
+    params_with_all = from_instance(
+        {'url': 'https://example2.com', 'name': 'UpService', 'tls_ca_cert': 'foobar', 'ca_certs': 'barfoo'},
+        'default_ca_cert',
+    )
     assert params_with_all[13] == 'foobar'
 
     # Original config option for ca_certs
