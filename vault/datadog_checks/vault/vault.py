@@ -72,6 +72,8 @@ class Vault(AgentCheck):
     def check_leader_v1(self, config, tags):
         url = config['api_url'] + '/sys/leader'
         leader_data = self.access_api(url, tags, ignore_status_codes=Vault.SYS_LEADER_DEFAULT_CODES)
+        if 'errors' in leader_data:
+            return
 
         is_leader = is_affirmative(leader_data.get('is_self'))
         tags.append('is_leader:{}'.format('true' if is_leader else 'false'))
