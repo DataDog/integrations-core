@@ -51,10 +51,6 @@ ALL_SCHEMAS = object()
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 
 
-class ShouldRestartException(Exception):
-    pass
-
-
 class PostgreSql(AgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
@@ -123,13 +119,8 @@ class PostgreSql(AgentCheck):
 
     def _get_version(self, key, db):
         if key not in self.versions:
-            try:
-                cursor = db.cursor()
-                cursor.execute('SHOW SERVER_VERSION;')
-            except (psycopg2.InterfaceError, socket.error) as e:
-                self.log.error('Connection error: %s', e)
-                raise ShouldRestartException
-
+            cursor = db.cursor()
+            cursor.execute('SHOW SERVER_VERSION;')
             version = cursor.fetchone()[0]
             try:
                 version_parts = version.split(' ')[0].split('.')
@@ -566,31 +557,26 @@ class PostgreSql(AgentCheck):
             REPLICATION_METRICS['metrics'] = replication_metrics
             metric_scope.append(REPLICATION_METRICS)
 
-        try:
-            cursor = db.cursor()
-            results_len = self._query_scope(
-                cursor, db_instance_metrics, key, db, instance_tags, False, relations_config
+        cursor = db.cursor()
+        results_len = self._query_scope(
+            cursor, db_instance_metrics, key, db, instance_tags, False, relations_config
+        )
+        if results_len is not None:
+            self.gauge(
+                "postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")]
             )
-            if results_len is not None:
-                self.gauge(
-                    "postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")]
-                )
 
-            self._query_scope(cursor, bgw_instance_metrics, key, db, instance_tags, False, relations_config)
-            self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, False, relations_config)
+        self._query_scope(cursor, bgw_instance_metrics, key, db, instance_tags, False, relations_config)
+        self._query_scope(cursor, archiver_instance_metrics, key, db, instance_tags, False, relations_config)
 
-            if collect_activity_metrics:
-                activity_metrics = self._get_activity_metrics(key, db, user)
-                self._query_scope(cursor, activity_metrics, key, db, instance_tags, False, relations_config)
+        if collect_activity_metrics:
+            activity_metrics = self._get_activity_metrics(key, db, user)
+            self._query_scope(cursor, activity_metrics, key, db, instance_tags, False, relations_config)
 
-            for scope in list(metric_scope) + custom_metrics:
-                self._query_scope(cursor, scope, key, db, instance_tags, scope in custom_metrics, relations_config)
+        for scope in list(metric_scope) + custom_metrics:
+            self._query_scope(cursor, scope, key, db, instance_tags, scope in custom_metrics, relations_config)
 
-            cursor.close()
-
-        except (psycopg2.InterfaceError, socket.error) as e:
-            self.log.error("Connection error: %s" % str(e))
-            raise ShouldRestartException
+        cursor.close()
 
     @classmethod
     def _get_service_check_tags(cls, host, port, tags):
@@ -857,8 +843,9 @@ class PostgreSql(AgentCheck):
                 collect_default_db,
             )
             self._get_custom_queries(db, tags, custom_queries)
-        except ShouldRestartException:
-            self.log.info("Resetting the connection")
+        except (psycopg2.InterfaceError, socket.error) as e:
+            self.log.error('Connection error: %s', e)
+            self.log.info('Resetting the connection')
             self._clean_state(key)
             db = self.get_connection(key, host, port, user, password, dbname, ssl, tags, use_cached=False)
             self._collect_stats(
