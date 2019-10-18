@@ -20,7 +20,7 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 6. Make sure the ticket is readable by the `dd-agent` user.
 7. Configure the integration (see below)
 
-Note: If you don't have "security" enabled in the cluster, you can continue without a ticket.
+**Note**: If you don't have "security" enabled in the cluster, you can continue without a ticket.
 
 
 ### Configuration
