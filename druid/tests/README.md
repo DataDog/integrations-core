@@ -12,7 +12,7 @@
 
 4) Start the Datadog Agent
 
-5) Start Druid `./bin/start-micro-quickstart`. 
+5) Start Druid `<DRUID>/bin/start-micro-quickstart`. 
 
    Druid will start sending metrics to the agent.
    
