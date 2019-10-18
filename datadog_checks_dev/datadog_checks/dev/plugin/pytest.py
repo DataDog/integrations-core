@@ -125,7 +125,7 @@ def dd_agent_check(request, aggregator):
         python_path = os.environ[E2E_PARENT_PYTHON]
         env = os.environ['TOX_ENV_NAME']
 
-        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json', '-l', 'debug']
+        check_command = [python_path, '-m', 'datadog_checks.dev', 'env', 'check', check, env, '--json']
 
         if config:
             config = format_config(config)
@@ -145,13 +145,11 @@ def dd_agent_check(request, aggregator):
 
         result = run_command(check_command, capture=True)
         if AGENT_COLLECTOR_SEPARATOR not in result.stdout:
-            run_command('docker logs dd_{}_{}'.format(check, env))
             raise ValueError(
                 '\n{}{}\nCould find `{}` in the output'.format(result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR)
             )
 
         _, _, collector_output = result.stdout.partition(AGENT_COLLECTOR_SEPARATOR)
-        collector_output = '\n'.join(line for line in collector_output.splitlines() if not line.startswith('2019'))
         collector = json.loads(collector_output.strip())
 
         replay_check_run(collector, aggregator)
