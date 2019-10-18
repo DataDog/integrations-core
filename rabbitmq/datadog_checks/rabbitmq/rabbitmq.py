@@ -531,14 +531,13 @@ class RabbitMQ(AgentCheck):
             # Walk down through the data path, e.g. foo/bar => d['foo']['bar']
             root = data
             keys = attribute.split('/')
-            value = None
-            try:  # In RabbitMQ 3.1.x queue_totals is a list instead of a dict
-                for path in keys[:-1]:
-                    root = root.get(path, {})
-                value = root.get(keys[-1], None)
-            except AttributeError as e:
-                if isinstance(root, dict):
-                    raise e
+
+            # In RabbitMQ 3.1.x queue_totals is an empty list instead of a dict when initialising
+            for path in keys[:-1]:
+                if not isinstance(root, dict):
+                    break
+                root = root.get(path, {})
+            value = root.get(keys[-1], None) if isinstance(root, dict) else None
 
             if value is not None:
                 try:
