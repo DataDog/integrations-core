@@ -141,6 +141,9 @@ jobs:
     - checkName: http_check
       displayName: HTTP
       os: linux
+    - checkName: hyperv
+      displayName: HyperV
+      os: windows
     - checkName: ibm_db2
       displayName: IBM Db2
       os: linux
