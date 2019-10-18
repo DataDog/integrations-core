@@ -47,7 +47,7 @@ Then update the `/opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/fluentd.conf` w
     include_tag_key true
     tag_key service_name
   </store>
-  <store> # This new section also forwards all the logs to Datadog
+  <store> # This section also forwards all the logs to Datadog:
     @type datadog
     @id dd_agent
     include_tag_key true
