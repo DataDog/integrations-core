@@ -13,7 +13,7 @@ jobs:
   displayName: '${{ parameters.display }}'
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'win1803'
 
   steps:
   - template: './checkout-code.yml'
