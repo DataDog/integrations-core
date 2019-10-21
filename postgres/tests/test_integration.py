@@ -1,10 +1,11 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import socket
+
 import mock
 import psycopg2
 import pytest
-import socket
 
 from datadog_checks.postgres import PostgreSql
 

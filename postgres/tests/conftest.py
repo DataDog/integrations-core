@@ -42,6 +42,7 @@ def integration_check():
         c = PostgreSql('postgres', {}, [instance])
         c._is_9_2_or_above = mock.MagicMock()
         return c
+
     return _check
 
 

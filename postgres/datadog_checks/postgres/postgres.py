@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import re
 import socket
-import threading
 from contextlib import closing
 
 import psycopg2
@@ -60,7 +60,6 @@ class PostgreSql(AgentCheck):
     MONOTONIC = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = 'postgres.can_connect'
 
-
     def __init__(self, name, init_config, instances):
         AgentCheck.__init__(self, name, init_config, instances)
         self._clean_state()
@@ -113,7 +112,6 @@ class PostgreSql(AgentCheck):
         self.db_archiver_metrics = []
         self.replication_metrics = None
         self.activity_metrics = None
-
 
     def _get_replication_role(self, db):
         cursor = db.cursor()
@@ -331,7 +329,7 @@ class PostgreSql(AgentCheck):
         metrics_data = self.activity_metrics
 
         if metrics_data is None:
-            query = ACTIVITY_QUERY_10 if self._is_10_or_above( db) else ACTIVITY_QUERY_LT_10
+            query = ACTIVITY_QUERY_10 if self._is_10_or_above(db) else ACTIVITY_QUERY_LT_10
             if self._is_9_6_or_above(db):
                 metrics_query = ACTIVITY_METRICS_9_6
             elif self._is_9_2_or_above(db):
@@ -537,18 +535,14 @@ class PostgreSql(AgentCheck):
 
         replication_metrics = self._get_replication_metrics(db)
         if replication_metrics is not None:
-            # FIXME: constants shouldn't be modified
-            REPLICATION_METRICS['metrics'] = replication_metrics
-            metric_scope.append(REPLICATION_METRICS)
+            replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
+            replication_metrics_query['metrics'] = replication_metrics
+            metric_scope.append(replication_metrics_query)
 
         cursor = db.cursor()
-        results_len = self._query_scope(
-            cursor, db_instance_metrics, db, instance_tags, False, relations_config
-        )
+        results_len = self._query_scope(cursor, db_instance_metrics, db, instance_tags, False, relations_config)
         if results_len is not None:
-            self.gauge(
-                "postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")]
-            )
+            self.gauge("postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")])
 
         self._query_scope(cursor, bgw_instance_metrics, db, instance_tags, False, relations_config)
         self._query_scope(cursor, archiver_instance_metrics, db, instance_tags, False, relations_config)
@@ -801,7 +795,7 @@ class PostgreSql(AgentCheck):
                 collect_default_db,
             )
             self._get_custom_queries(db, tags, custom_queries)
-        except (psycopg2.InterfaceError, socket.error) as e:
+        except (psycopg2.InterfaceError, socket.error):
             self.log.info("Connection error, will retry on next agent run")
             self._clean_state()
 

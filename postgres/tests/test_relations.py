@@ -3,8 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-from datadog_checks.postgres import PostgreSql
-
 RELATION_METRICS = [
     'postgresql.seq_scans',
     'postgresql.seq_rows_read',
