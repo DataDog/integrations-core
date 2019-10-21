@@ -101,7 +101,6 @@ class HAProxy(AgentCheck):
     def check(self, instance):
         url = instance.get('url')
         self.log.debug('Processing HAProxy data for %s' % url)
-        import pdb; pdb.set_trace()
         parsed_url = urlparse(url)
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
@@ -219,7 +218,7 @@ class HAProxy(AgentCheck):
             if "HAProxy version" in line:
                 raw_version = line
                 break
-
+        
         if raw_version == "":
             self.log.debug("unable to find HAProxy version info")
         else:

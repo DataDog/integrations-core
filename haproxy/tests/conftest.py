@@ -47,7 +47,7 @@ def dd_environment():
         conditions=[WaitFor(wait_for_haproxy_open)],
     ):
         # IMPORTANT: REMOVE when done testing
-        if True:
+        if platform_supports_sockets:
             with TempDir() as temp_dir:
                 host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
                 env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
@@ -106,6 +106,15 @@ def haproxy_mock():
 @pytest.fixture(scope="module")
 def haproxy_mock_evil():
     filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
+    with open(filepath, 'rb') as f:
+        data = f.read()
+    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
+    yield p.start()
+    p.stop()
+
+@pytest.fixture(scope="module")
+def haproxy_mock_version():
+    filepath = os.path.join(HERE, 'fixtures', 'version_mock')
     with open(filepath, 'rb') as f:
         data = f.read()
     p = mock.patch('requests.get', return_value=mock.Mock(content=data))
