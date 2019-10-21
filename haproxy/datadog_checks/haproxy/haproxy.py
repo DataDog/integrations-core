@@ -180,6 +180,26 @@ class HAProxy(AgentCheck):
 
             return content.splitlines()
 
+    def _collect_version_from_http(self, url):
+        # the csv format does not offer version info, therefore we need to get the HTML page
+        self.log.debug("collecting version info for HAProxy from {}".format(url))
+
+        r = self.http.get(url)
+        r.raise_for_status()
+        raw_version = ""
+        for line in r.content.splitlines():
+            if "HAProxy version" in line:
+                raw_version = line
+                break
+
+        if raw_version == "":
+            self.log.debug("unable to find HAProxy version info")
+        else:
+            m = re.search(r"\d+\.\d+\.*\d*", raw_version)
+            version = m.group(0)
+            self.log.debug(u"HAProxy version is {}".format(version))
+            self.set_metadata('version', version)
+
     def _fetch_socket_data(self, parsed_url):
         ''' Hit a given stats socket and return the stats lines '''
 
@@ -194,6 +214,7 @@ class HAProxy(AgentCheck):
         else:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
+        # returns both version info and stats data
         sock.send(b"show info;show stat\r\n")
 
         response = ""
@@ -203,34 +224,21 @@ class HAProxy(AgentCheck):
             output = sock.recv(BUFSIZE)
 
         sock.close()
-
-        # separate data from `show info` and `show stat` with blank line
+        # return data from `show info` and `show stat` separately
         return response.split('\n\n')
 
-    def _collect_version_from_http(self, url):
-        # the csv format does not offer version info, therefore we need to get the HTML page
-        self.log.debug("collecting version info for HAProxy from {}".format(url))
-
-        r = self.http.get(url)
-        r.raise_for_status()
-        raw_version = ""
-        for line in r.content.splitlines():
-            if "HAProxy version" in line:
-                raw_version = line
-                break
-        
-        if raw_version == "":
-            self.log.debug("unable to find HAProxy version info")
-        else:
-            m = re.search(r"\d+\.\d+\.*\d*", raw_version)
-            version = m.group(0)
-            self.log.debug(u"HAProxy version is {}".format(version))
-            self.set_metadata("version", version)
-
     def _collect_version_from_socket(self, info):
-        # `show stat` does not return version info, we will need to query version separately
-
-        pass
+        version = ''
+        for line in info.splitlines():
+            key, value = line.split(':')
+            if key == 'Version':
+                version = value
+                break
+        if version == '':
+            self.log.debug("unable to collect version info from socket")
+        else:
+            self.log.debug("HAProxy version is {}".format(version))
+            self.set_metadata('version', version)
 
     def _process_data(
         self,

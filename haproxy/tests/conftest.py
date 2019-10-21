@@ -14,6 +14,7 @@ from datadog_checks.haproxy import HAProxy
 from .common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
+    HAPROXY_VERSION,
     HERE,
     PASSWORD,
     STATS_URL,
@@ -66,7 +67,9 @@ def dd_environment():
                         # it won't work without access
                         chown_args = []
                         user = getpass.getuser()
-                        import pdb; pdb.set_trace()
+                        import pdb
+
+                        pdb.set_trace()
                         if user != 'root':
                             chown_args += ['sudo']
                         chown_args += ["chown", user, host_socket_path]
@@ -112,11 +115,14 @@ def haproxy_mock_evil():
     yield p.start()
     p.stop()
 
-@pytest.fixture(scope="module")
-def haproxy_mock_version():
-    filepath = os.path.join(HERE, 'fixtures', 'version_mock')
-    with open(filepath, 'rb') as f:
-        data = f.read()
-    p = mock.patch('requests.get', return_value=mock.Mock(content=data))
-    yield p.start()
-    p.stop()
+
+@pytest.fixture(scope="session")
+def version_metadata():
+    major, minor, patch = HAPROXY_VERSION.split('.')
+    return {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': mock.ANY,
+    }

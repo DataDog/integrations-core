@@ -5,6 +5,7 @@
 import copy
 import os
 
+import mock
 import pytest
 
 from datadog_checks.haproxy import HAProxy
@@ -215,3 +216,44 @@ def test_e2e(dd_agent_check, instance):
     _test_backend_hosts(aggregator, count=2)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_version_metadata_http(check, version_metadata):
+    config = copy.deepcopy(CHECK_CONFIG_OPEN)
+    check = check(config)
+    check.check_id = 'test:123'
+
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.check(config)
+        for name, value in version_metadata.items():
+            m.assert_any_call('test:123', name, value)
+        assert m.call_count == len(version_metadata)
+
+
+@requires_socket_support
+@pytest.mark.usefixtures('dd_environment')
+def test_version_metadata_unix_socket(check, version_metadata):
+    config = copy.deepcopy(CONFIG_UNIXSOCKET)
+    check = check(config)
+    check.check_id = 'test:123'
+
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.check(config)
+        for name, value in version_metadata.items():
+            m.assert_any_call('test:123', name, value)
+        assert m.call_count == len(version_metadata)
+
+
+@requires_socket_support
+@pytest.mark.usefixtures('dd_environment')
+def test_version_metadata_tcp_socket(check, version_metadata):
+    config = copy.deepcopy(CONFIG_TCPSOCKET)
+    check = check(config)
+    check.check_id = 'test:123'
+
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.check(config)
+        for name, value in version_metadata.items():
+            m.assert_any_call('test:123', name, value)
+        assert m.call_count == len(version_metadata)
