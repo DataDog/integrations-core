@@ -16,7 +16,7 @@ def test_get_instance_metrics_lt_92(check):
     check output when 9.2+
     """
     check._is_9_2_or_above.return_value = False
-    res = check._get_instance_metrics(False, False)
+    res = check._get_instance_metrics('dbname', False, False)
     assert res['metrics'] == util.COMMON_METRICS
 
 
@@ -25,7 +25,7 @@ def test_get_instance_metrics_92(check):
     check output when <9.2
     """
     check._is_9_2_or_above.return_value = True
-    res = check._get_instance_metrics(False, False)
+    res = check._get_instance_metrics('dbname', False, False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
 
@@ -33,10 +33,10 @@ def test_get_instance_metrics_state(check):
     """
     Ensure data is consistent when the function is called more than once
     """
-    res = check._get_instance_metrics(False, False)
+    res = check._get_instance_metrics('dbname', False, False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
     check._is_9_2_or_above.side_effect = Exception  # metrics were cached so this shouldn't be called
-    res = check._get_instance_metrics([], False)
+    res = check._get_instance_metrics('dbname', [], False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
 
@@ -47,7 +47,7 @@ def test_get_instance_metrics_database_size_metrics(check):
     expected = util.COMMON_METRICS
     expected.update(util.NEWER_92_METRICS)
     expected.update(util.DATABASE_SIZE_METRICS)
-    res = check._get_instance_metrics(True, False)
+    res = check._get_instance_metrics('dbname', True, False)
     assert res['metrics'] == expected
 
 
@@ -56,11 +56,11 @@ def test_get_instance_with_default(check):
     Test the contents of the query string with different `collect_default_db` values
     """
     collect_default_db = False
-    res = check._get_instance_metrics(False, collect_default_db)
+    res = check._get_instance_metrics('dbname', False, collect_default_db)
     assert "  AND psd.datname not ilike 'postgres'" in res['query']
 
     collect_default_db = True
-    res = check._get_instance_metrics(False, collect_default_db)
+    res = check._get_instance_metrics('dbname', False, collect_default_db)
     assert "  AND psd.datname not ilike 'postgres'" not in res['query']
 
 
@@ -122,7 +122,6 @@ def test_is_above(check):
 
     # Test beta version above
     db.cursor().fetchone.return_value = ['11beta4']
-    check._clean_state()
     check._clean_state()
     assert check._is_above(db, [11, -1, 3])
 
