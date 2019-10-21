@@ -180,14 +180,24 @@ class InstanceConfig:
         raw_oids = []
         table_oids = {}
         mibs_to_load = set()
+        loaded_table = {}
+
+        def get_table_symbols(mib, table):
+            key = (mib, table)
+            if key in loaded_table:
+                table_object = loaded_table[key]
+            else:
+                table_object = hlapi.ObjectType(hlapi.ObjectIdentity(mib, table))
+                loaded_table[key] = table_object
+                table_oids[table_object] = []
+            return table_oids[table_object]
+
         # Check the metrics completely defined
         for metric in metrics:
             if 'MIB' in metric:
                 if not ('table' in metric or 'symbol' in metric):
                     raise ConfigurationError('When specifying a MIB, you must specify either table or symbol')
-                if not enforce_constraints:
-                    # We need this only if we don't enforce constraints to be able to lookup MIBs manually
-                    mibs_to_load.add(metric['MIB'])
+                mibs_to_load.add(metric['MIB'])
                 if 'symbol' in metric:
                     to_query = metric['symbol']
                     try:
@@ -197,8 +207,7 @@ class InstanceConfig:
                 elif 'symbols' not in metric:
                     raise ConfigurationError('When specifying a table, you must specify a list of symbols')
                 else:
-                    symbols = []
-                    table_oids[hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], metric['table']))] = symbols
+                    symbols = get_table_symbols(metric['MIB'], metric['table'])
                     for symbol in metric['symbols']:
                         try:
                             symbols.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], symbol)))
@@ -212,12 +221,20 @@ class InstanceConfig:
                                 )
                             if 'column' in metric_tag:
                                 # In case it's a column, we need to query it as well
+                                mib = metric_tag.get('MIB', metric['MIB'])
                                 try:
-                                    symbols.append(
-                                        hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], metric_tag.get('column')))
-                                    )
+                                    object_type = hlapi.ObjectType(hlapi.ObjectIdentity(mib, metric_tag['column']))
                                 except Exception as e:
                                     warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+                                if 'table' in metric_tag:
+                                    tag_symbols = get_table_symbols(mib, metric_tag['table'])
+                                    tag_symbols.append(object_type)
+                                elif mib != metric['MIB']:
+                                    raise ConfigurationError(
+                                        'When tagging from a different MIB, the table must be specified'
+                                    )
+                                else:
+                                    symbols.append(object_type)
 
             elif 'OID' in metric:
                 raw_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID'])))

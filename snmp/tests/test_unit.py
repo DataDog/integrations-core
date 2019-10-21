@@ -69,7 +69,7 @@ def test_parse_metrics(hlapi_mock):
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
     table, raw, mibs = config.parse_metrics(metrics, True, check.warning, check.log)
     assert raw == []
-    assert mibs == set()
+    assert mibs == {"foo_mib"}
     assert len(table) == 1
     assert len(list(table.values())[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
@@ -92,7 +92,7 @@ def test_parse_metrics(hlapi_mock):
     ]
     table, raw, mibs = config.parse_metrics(metrics, True, check.warning, check.log)
     assert raw == []
-    assert mibs == set()
+    assert mibs == {"foo_mib"}
     assert len(table) == 1
     assert len(list(table.values())[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
@@ -105,7 +105,7 @@ def test_parse_metrics(hlapi_mock):
     ]
     table, raw, mibs = config.parse_metrics(metrics, True, check.warning, check.log)
     assert raw == []
-    assert mibs == set()
+    assert mibs == {"foo_mib"}
     assert len(table) == 1
     assert len(list(table.values())[0]) == 3
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
