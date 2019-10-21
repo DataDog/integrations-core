@@ -6,7 +6,7 @@
 
 2) Extract Druid.
 
-3) Follow main [README.md](../README.md) "Connect Druid to DogStatsD" step for setting up Druid.  
+3) Follow the main [README.md](../README.md) "Connect Druid to DogStatsD" step for setting up Druid.  
 
    The java properties that need to be updated is located here: `<DRUID>/conf/druid/single-server/micro-quickstart/_common/common.runtime.properties`  
 
