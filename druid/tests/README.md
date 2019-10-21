@@ -1,6 +1,6 @@
 # Druid Dev Readme
 
-## Quick Start Druid for testing statsd emitter
+## Quick start Druid for testing StatsD emitter
 
 1) Download Druid and extract files: https://druid.apache.org/downloads.html
 
