@@ -9,6 +9,13 @@ coredns.request_duration.seconds.sum,gauge,,second,,duration to process each que
 coredns.request_duration.seconds.count,count,,second,,duration to process each query,-1,coredns,request duration
 coredns.proxy_request_duration.seconds.sum,gauge,,second,,duration per upstream interaction,-1,coredns,proxy request duration
 coredns.proxy_request_duration.seconds.count,count,,second,,duration per upstream interaction,-1,coredns,proxy request duration
+coredns.forward_request_duration.seconds.sum,gauge,,second,,duration per upstream interaction,-1,coredns,forward request duration
+coredns.forward_request_duration.seconds.count,count,,second,,duration per upstream interaction,-1,coredns,forward request duration
+coredns.forward_request_count,count,,request,,query count per upstream,1,coredns,forward request count
+coredns.forward_response_rcode_count,count,,response,,count of RCODEs per upstream,0,coredns,forward rcodes
+coredns.forward_healthcheck_failure_count,count,,entry,,number of failed health checks per upstream,-1,coredns,forward failed healthchecks
+coredns.forward_healthcheck_broken_count,count,,entry,,counter of when all upstreams are unhealthy,-1,coredns,forward all healthchecks broken
+coredns.forward_sockets_open,gauge,,connection,,number of sockets open per upstream,-1,coredns,forward open sockets
 coredns.request_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,coredns,request size
 coredns.request_size.bytes.count,count,,byte,,size of the request in bytes,0,coredns,request size
 coredns.response_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,coredns,response size

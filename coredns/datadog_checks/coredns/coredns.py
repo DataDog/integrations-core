@@ -16,6 +16,12 @@ DEFAULT_METRICS = {
     'coredns_proxy_request_duration_seconds': 'proxy_request_duration.seconds',
     'coredns_cache_size': 'cache_size.count',
     'coredns_panic_count_total': 'panic_count.count',
+    'coredns_forward_request_duration_seconds': 'forward_request_duration.seconds',
+    'coredns_forward_request_count_total': 'forward_request_count',
+    'coredns_forward_response_rcode_count_total': 'forward_response_rcode_count',
+    'coredns_forward_healthcheck_failure_count_total': 'forward_healthcheck_failure_count',
+    'coredns_forward_healthcheck_broken_count_total': 'forward_healthcheck_broken_count',
+    'coredns_forward_sockets_open': 'forward_sockets_open',
 }
 
 

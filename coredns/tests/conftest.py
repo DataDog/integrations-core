@@ -15,10 +15,12 @@ from datadog_checks.utils.common import get_docker_hostname
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FOLDER = os.path.join(HERE, 'docker', 'coredns')
 HOST = get_docker_hostname()
+ATHOST = "@{}".format(HOST)
 PORT = '9153'
 URL = "http://{}:{}/metrics".format(HOST, PORT)
 
-DIG_ARGS = ["dig", "google.com", "@127.0.0.1", "-p", "54"]
+# One lookup each for the forward and proxy plugins
+DIG_ARGS = ["dig", "google.com", ATHOST, "example.com", ATHOST, "-p", "54"]
 
 
 def init_coredns():
