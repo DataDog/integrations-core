@@ -164,7 +164,9 @@ class HAProxy(AgentCheck):
 
         response = self.http.get(url)
         response.raise_for_status()
+        return self._decode_response(response)
 
+    def _decode_response(self, response):
         # it only needs additional decoding in py3, so skip it if it's py2
         if PY2:
             return response.content.splitlines()
@@ -187,7 +189,7 @@ class HAProxy(AgentCheck):
         r = self.http.get(url)
         r.raise_for_status()
         raw_version = ""
-        for line in r.content.splitlines():
+        for line in self._decode_response(r):
             if "HAProxy version" in line:
                 raw_version = line
                 break
