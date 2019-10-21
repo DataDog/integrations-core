@@ -2,7 +2,7 @@
 
 ## Quick start Druid for testing StatsD emitter
 
-1) Download Druid and extract files: https://druid.apache.org/downloads.html
+1) Download Druid and the extract files: https://druid.apache.org/downloads.html
 
 2) Extract Druid
 
