@@ -67,7 +67,7 @@ class PostgreSql(AgentCheck):
         self.custom_metrics = None
 
         # Deprecate custom_metrics in favor of custom_queries
-        if any('custom_metrics' in instance for instance in instances):
+        if 'custom_metrics' in self.instance:
             self.warning(
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
