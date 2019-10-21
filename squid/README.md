@@ -30,7 +30,7 @@ Follow the instructions below to configure this check for an Agent running on a 
     logs_enabled: true
     ```
 
-2. Add this configuration block to your `squid.d/conf.yaml` file:
+2. Uncomment and edit this configuration block at the bottom of your `squid.d/conf.yaml` file:
 
     ```yaml
     logs:
