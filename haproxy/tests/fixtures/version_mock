@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><head><title>Statistics Report for HAProxy</title>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<style type="text/css"><!--
+body { font-family: arial, helvetica, sans-serif; font-size: 12px; font-weight: normal; color: black; background: white;}
+th,td { font-size: 10px;}
+h1 { font-size: x-large; margin-bottom: 0.5em;}
+h2 { font-family: helvetica, arial; font-size: x-large; font-weight: bold; font-style: italic; color: #6020a0; margin-top: 0em; margin-bottom: 0em;}
+h3 { font-family: helvetica, arial; font-size: 16px; font-weight: bold; color: #b00040; background: #e8e8d0; margin-top: 0em; margin-bottom: 0em;}
+li { margin-top: 0.25em; margin-right: 2em;}
+.hr {margin-top: 0.25em; border-color: black; border-bottom-style: solid;}
+.titre	{background: #20D0D0;color: #000000; font-weight: bold; text-align: center;}
+.total	{background: #20D0D0;color: #ffff80;}
+.frontend	{background: #e8e8d0;}
+.socket	{background: #d0d0d0;}
+.backend	{background: #e8e8d0;}
+.active0	{background: #ff9090;}
+.active1	{background: #ffd020;}
+.active2	{background: #ffffa0;}
+.active3	{background: #c0ffc0;}
+.active4	{background: #ffffa0;}
+.active5	{background: #a0e0a0;}
+.active6	{background: #e0e0e0;}
+.backup0	{background: #ff9090;}
+.backup1	{background: #ff80ff;}
+.backup2	{background: #c060ff;}
+.backup3	{background: #b0d0ff;}
+.backup4	{background: #c060ff;}
+.backup5	{background: #90b0e0;}
+.backup6	{background: #e0e0e0;}
+.maintain	{background: #c07820;}
+.rls      {letter-spacing: 0.2em; margin-right: 1px;}
+
+a.px:link {color: #ffff40; text-decoration: none;}a.px:visited {color: #ffff40; text-decoration: none;}a.px:hover {color: #ffffff; text-decoration: none;}a.lfsb:link {color: #000000; text-decoration: none;}a.lfsb:visited {color: #000000; text-decoration: none;}a.lfsb:hover {color: #505050; text-decoration: none;}
+table.tbl { border-collapse: collapse; border-style: none;}
+table.tbl td { text-align: right; border-width: 1px 1px 1px 1px; border-style: solid solid solid solid; padding: 2px 3px; border-color: gray; white-space: nowrap;}
+table.tbl td.ac { text-align: center;}
+table.tbl th { border-width: 1px; border-style: solid solid solid solid; border-color: gray;}
+table.tbl th.pxname { background: #b00040; color: #ffff40; font-weight: bold; border-style: solid solid none solid; padding: 2px 3px; white-space: nowrap;}
+table.tbl th.empty { border-style: none; empty-cells: hide; background: white;}
+table.tbl th.desc { background: white; border-style: solid solid none solid; text-align: left; padding: 2px 3px;}
+
+table.lgd { border-collapse: collapse; border-width: 1px; border-style: none none none solid; border-color: black;}
+table.lgd td { border-width: 1px; border-style: solid solid solid solid; border-color: gray; padding: 2px;}
+table.lgd td.noborder { border-style: none; padding: 2px; white-space: nowrap;}
+u {text-decoration:none; border-bottom: 1px dotted black;}
+-->
+</style></head>
+<body><h1><a href="http://www.haproxy.org/" style="text-decoration: none;">HAProxy version 1.4.26, released 2015/01/30</a></h1>
+<h2>Statistics Report for pid 1</h2>
+<hr width="100%" class="hr">
+<h3>&gt; General process information</h3>
+<table border=0><tr><td align="left" nowrap width="1%">
+<p><b>pid = </b> 1 (process #1, nbproc = 1)<br>
+<b>uptime = </b> 0d 0h00m28s<br>
+<b>system limits:</b> memmax = unlimited; ulimit-n = 8203<br>
+<b>maxsock = </b> 8203; <b>maxconn = </b> 4096; <b>maxpipes = </b> 0<br>
+current conns = 1; current pipes = 0/0<br>
+Running tasks: 1/1<br>
+</td><td align="center" nowrap>
+<table class="lgd"><tr>
+<td class="active3">&nbsp;</td><td class="noborder">active UP </td><td class="backup3">&nbsp;</td><td class="noborder">backup UP </td></tr><tr>
+<td class="active2"></td><td class="noborder">active UP, going down </td><td class="backup2"></td><td class="noborder">backup UP, going down </td></tr><tr>
+<td class="active1"></td><td class="noborder">active DOWN, going up </td><td class="backup1"></td><td class="noborder">backup DOWN, going up </td></tr><tr>
+<td class="active0"></td><td class="noborder">active or backup DOWN &nbsp;</td><td class="active6"></td><td class="noborder">not checked </td></tr><tr>
+<td class="maintain"></td><td class="noborder" colspan="3">active or backup DOWN for maintenance (MAINT) &nbsp;</td></tr></table>
+Note: UP with load-balancing disabled is reported as "NOLB".</td><td align="left" valign="top" nowrap width="1%"><b>Display option:</b><ul style="margin-top: 0.25em;"><li><a href="/stats;up">Hide 'DOWN' servers</a><br>
+<li><a href="/stats;norefresh">Disable refresh</a><br>
+<li><a href="/stats">Refresh now</a><br>
+<li><a href="/stats;csv;norefresh">CSV export</a><br>
+</ul></td><td align="left" valign="top" nowrap width="1%"><b>External resources:</b><ul style="margin-top: 0.25em;">
+<li><a href="http://www.haproxy.org/">Primary site</a><br>
+<li><a href="http://www.haproxy.org/#down">Updates (v1.4)</a><br>
+<li><a href="http://www.haproxy.org/#docs">Online manual</a><br>
+</ul></td></tr></table>
+<table class="tbl" width="100%">
+<tr class="titre"><th class="pxname" width="10%"><a name="public"></a><a class=px href="#public">public</a></th><th class="empty" width="90%"></th></tr>
+</table>
+<table class="tbl" width="100%">
+<tr class="titre"><th rowspan=2></th><th colspan=3>Queue</th><th colspan=3>Session rate</th><th colspan=5>Sessions</th><th colspan=2>Bytes</th><th colspan=2>Denied</th><th colspan=3>Errors</th><th colspan=2>Warnings</th><th colspan=9>Server</th></tr>
+<tr class="titre"><th>Cur</th><th>Max</th><th>Limit</th><th>Cur</th><th>Max</th><th>Limit</th><th>Cur</th><th>Max</th><th>Limit</th><th>Total</th><th>LbTot</th><th>In</th><th>Out</th><th>Req</th><th>Resp</th><th>Req</th><th>Conn</th><th>Resp</th><th>Retr</th><th>Redis</th><th>Status</th><th>LastChk</th><th>Wght</th><th>Act</th><th>Bck</th><th>Chk</th><th>Dwn</th><th>Dwntme</th><th>Thrtle</th>
+</tr><tr class="frontend"><td class=ac><a name="public/Frontend"></a><a class=lfsb href="#public/Frontend">Frontend</a></td><td colspan=3></td><td title="Cur: 1 req/s"><u>1</u></td><td title="Max: 1 req/s"><u>1</u></td><td>-</td><td>1</td><td>1</td><td><span class="rls">2</span>000</td><td title="4 requests: 1xx=0, 2xx=3, 3xx=0, 4xx=0, 5xx=0, other=0"><u>4</u></td><td></td><td>479</td><td>1<span class="rls">6</span>258</td><td>0</td><td>0</td><td>0</td><td></td><td></td><td></td><td></td><td class=ac>OPEN</td><td class=ac colspan=8></td></tr></table><p>
+<table class="tbl" width="100%">
+<tr class="titre"><th class="pxname" width="10%"><a name="datadog"></a><a class=px href="#datadog">datadog</a></th><th class="empty" width="90%"></th></tr>
+</table>
+<table class="tbl" width="100%">
+<tr class="titre"><th rowspan=2></th><th colspan=3>Queue</th><th colspan=3>Session rate</th><th colspan=5>Sessions</th><th colspan=2>Bytes</th><th colspan=2>Denied</th><th colspan=3>Errors</th><th colspan=2>Warnings</th><th colspan=9>Server</th></tr>
+<tr class="titre"><th>Cur</th><th>Max</th><th>Limit</th><th>Cur</th><th>Max</th><th>Limit</th><th>Cur</th><th>Max</th><th>Limit</th><th>Total</th><th>LbTot</th><th>In</th><th>Out</th><th>Req</th><th>Resp</th><th>Req</th><th>Conn</th><th>Resp</th><th>Retr</th><th>Redis</th><th>Status</th><th>LastChk</th><th>Wght</th><th>Act</th><th>Bck</th><th>Chk</th><th>Dwn</th><th>Dwntme</th><th>Thrtle</th>
+</tr><tr class="active6"><td class=ac><a name="datadog/singleton:8080"></a><a class=lfsb href="#datadog/singleton:8080">singleton:8080</a></td><td>0</td><td>0</td><td>-</td><td>0</td><td>0</td><td></td><td>0</td><td>0</td><td>-</td><td title="rsp codes: 1xx=0, 2xx=0, 3xx=0, 4xx=0, 5xx=0, other=0"><u>0</u></td><td>0</td><td>0</td><td>0</td><td></td><td>0</td><td></td><td>0</td><td title="Connection resets during transfers: 0 client, 0 server"><u>0</u></td><td>0</td><td>0</td><td class=ac></td><td></td><td class=ac>1</td><td class=ac>Y</td><td class=ac>-</td><td colspan=3></td><td class=ac>-</td></tr>
+<tr class="active6"><td class=ac><a name="datadog/singleton:8081"></a><a class=lfsb href="#datadog/singleton:8081">singleton:8081</a></td><td>0</td><td>0</td><td>-</td><td>0</td><td>0</td><td></td><td>0</td><td>0</td><td>-</td><td title="rsp codes: 1xx=0, 2xx=0, 3xx=0, 4xx=0, 5xx=0, other=0"><u>0</u></td><td>0</td><td>0</td><td>0</td><td></td><td>0</td><td></td><td>0</td><td title="Connection resets during transfers: 0 client, 0 server"><u>0</u></td><td>0</td><td>0</td><td class=ac></td><td></td><td class=ac>1</td><td class=ac>Y</td><td class=ac>-</td><td colspan=3></td><td class=ac>-</td></tr>
+<tr class="active6"><td class=ac><a name="datadog/otherserver"></a><a class=lfsb href="#datadog/otherserver">otherserver</a></td><td>0</td><td>0</td><td>-</td><td>0</td><td>0</td><td></td><td>0</td><td>0</td><td>-</td><td title="rsp codes: 1xx=0, 2xx=0, 3xx=0, 4xx=0, 5xx=0, other=0"><u>0</u></td><td>0</td><td>0</td><td>0</td><td></td><td>0</td><td></td><td>0</td><td title="Connection resets during transfers: 0 client, 0 server"><u>0</u></td><td>0</td><td>0</td><td class=ac></td><td></td><td class=ac>1</td><td class=ac>Y</td><td class=ac>-</td><td colspan=3></td><td class=ac>-</td></tr>
+<tr class="backend"><td class=ac><a name="datadog/Backend"></a><a class=lfsb href="#datadog/Backend">Backend</a></td><td>0</td><td>0</td><td></td><td>1</td><td>1</td><td></td><td>1</td><td>1</td><td>0</td><td title="rsp codes: 1xx=0 2xx=3 3xx=0 4xx=0 5xx=0 other=0"><u>4</u></td><td>0</td><td>479</td><td>1<span class="rls">6</span>258</td><td>0</td><td>0</td><td></td><td>0</td><td title="Connection resets during transfers: 0 client, 0 server"><u>0</u></td><td>0</td><td>0</td><td class=ac>28s UP</td><td class=ac>&nbsp;</td><td class=ac>3</td><td class=ac>3</td><td class=ac>0</td><td class=ac>&nbsp;</td><td>0</td><td>0s</td><td></td></tr></table><p>
+<table class="tbl" width="100%">
+<tr class="titre"><th class="pxname" width="10%"><a name="anotherbackend"></a><a class=px href="#anotherbackend">anotherbackend</a></th><th class="empty" width="90%"></th></tr>
+</table>
+<table class="tbl" width="100%">
+<tr class="titre"><th rowspan=2></th><th colspan=3>Queue</th><th colspan=3>Session rate</th><th colspan=5>Sessions</th><th colspan=2>Bytes</th><th colspan=2>Denied</th><th colspan=3>Errors</th><th colspan=2>Warnings</th><th colspan=9>Server</th></tr>
+<tr class="titre"><th>Cur</th><th>Max</th><th>Limit</th><th>Cur</th><th>Max</th><th>Limit</th><th>Cur</th><th>Max</th><th>Limit</th><th>Total</th><th>LbTot</th><th>In</th><th>Out</th><th>Req</th><th>Resp</th><th>Req</th><th>Conn</th><th>Resp</th><th>Retr</th><th>Redis</th><th>Status</th><th>LastChk</th><th>Wght</th><th>Act</th><th>Bck</th><th>Chk</th><th>Dwn</th><th>Dwntme</th><th>Thrtle</th>
+</tr><tr class="active6"><td class=ac><a name="anotherbackend/singleton:8080"></a><a class=lfsb href="#anotherbackend/singleton:8080">singleton:8080</a></td><td>0</td><td>0</td><td>-</td><td>0</td><td>0</td><td></td><td>0</td><td>0</td><td>-</td><td title="rsp codes: 1xx=0, 2xx=0, 3xx=0, 4xx=0, 5xx=0, other=0"><u>0</u></td><td>0</td><td>0</td><td>0</td><td></td><td>0</td><td></td><td>0</td><td title="Connection resets during transfers: 0 client, 0 server"><u>0</u></td><td>0</td><td>0</td><td class=ac></td><td></td><td class=ac>1</td><td class=ac>Y</td><td class=ac>-</td><td colspan=3></td><td class=ac>-</td></tr>
+<tr class="active6"><td class=ac><a name="anotherbackend/singleton:8081"></a><a class=lfsb href="#anotherbackend/singleton:8081">singleton:8081</a></td><td>0</td><td>0</td><td>-</td><td>0</td><td>0</td><td></td><td>0</td><td>0</td><td>-</td><td title="rsp codes: 1xx=0, 2xx=0, 3xx=0, 4xx=0, 5xx=0, other=0"><u>0</u></td><td>0</td><td>0</td><td>0</td><td></td><td>0</td><td></td><td>0</td><td title="Connection resets during transfers: 0 client, 0 server"><u>0</u></td><td>0</td><td>0</td><td class=ac></td><td></td><td class=ac>1</td><td class=ac>Y</td><td class=ac>-</td><td colspan=3></td><td class=ac>-</td></tr>
+<tr class="active6"><td class=ac><a name="anotherbackend/otherserver"></a><a class=lfsb href="#anotherbackend/otherserver">otherserver</a></td><td>0</td><td>0</td><td>-</td><td>0</td><td>0</td><td></td><td>0</td><td>0</td><td>-</td><td title="rsp codes: 1xx=0, 2xx=0, 3xx=0, 4xx=0, 5xx=0, other=0"><u>0</u></td><td>0</td><td>0</td><td>0</td><td></td><td>0</td><td></td><td>0</td><td title="Connection resets during transfers: 0 client, 0 server"><u>0</u></td><td>0</td><td>0</td><td class=ac></td><td></td><td class=ac>1</td><td class=ac>Y</td><td class=ac>-</td><td colspan=3></td><td class=ac>-</td></tr>
+<tr class="backend"><td class=ac><a name="anotherbackend/Backend"></a><a class=lfsb href="#anotherbackend/Backend">Backend</a></td><td>0</td><td>0</td><td></td><td>0</td><td>0</td><td></td><td>0</td><td>0</td><td>0</td><td title="rsp codes: 1xx=0 2xx=0 3xx=0 4xx=0 5xx=0 other=0"><u>0</u></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td></td><td>0</td><td title="Connection resets during transfers: 0 client, 0 server"><u>0</u></td><td>0</td><td>0</td><td class=ac>28s UP</td><td class=ac>&nbsp;</td><td class=ac>3</td><td class=ac>3</td><td class=ac>0</td><td class=ac>&nbsp;</td><td>0</td><td>0s</td><td></td></tr></table><p>
+</body></html>
