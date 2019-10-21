@@ -10,7 +10,7 @@
 
 Update the Java properties located at: `<DRUID>/conf/druid/single-server/micro-quickstart/_common/common.runtime.properties`  
 
-4) Start the Datadog Agent
+4) Start the Datadog Agent.
 
 5) Start Druid `<DRUID>/bin/start-micro-quickstart`. 
 
