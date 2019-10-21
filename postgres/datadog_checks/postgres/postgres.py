@@ -105,7 +105,7 @@ class PostgreSql(AgentCheck):
         return tags
 
     def _clean_state(self):
-        self.version = None
+        self._version = None
         self.instance_metrics = None
         self.bgw_metrics = None
         self.archiver_metrics = None
@@ -121,11 +121,12 @@ class PostgreSql(AgentCheck):
         # value fetched for role is of <type 'bool'>
         return "standby" if role else "master"
 
-    def _get_version(self, db):
-        if self.version is None:
-            self.version = get_version(db)
-        self.service_metadata('version', [self.version['major'], self.version['minor'], self.version['patch']])
-        return self.version
+    @property
+    def version(self):
+        if self._version is None:
+            self._version = get_version(self.db)
+            self.service_metadata('version', [self._version['major'], self._version['minor'], self._version['patch']])
+        return self._version
 
     def _get_instance_metrics(self, database_size_metrics, collect_default_db):
         """
@@ -143,7 +144,7 @@ class PostgreSql(AgentCheck):
 
         if metrics is None:
             # select the right set of metrics to collect depending on postgres version
-            if is_9_2_or_above(self.get_version()):
+            if is_9_2_or_above(self.version):
                 self.instance_metrics = dict(COMMON_METRICS, **NEWER_92_METRICS)
             else:
                 self.instance_metrics = dict(COMMON_METRICS)
@@ -195,9 +196,9 @@ class PostgreSql(AgentCheck):
             self.db_bgw_metrics.append(sub_key)
 
             self.bgw_metrics = dict(COMMON_BGW_METRICS)
-            if is_9_1_or_above(self._get_version()):
+            if is_9_1_or_above(self.version):
                 self.bgw_metrics.update(NEWER_91_BGW_METRICS)
-            if _is_9_2_or_above(self._get_version()):
+            if is_9_2_or_above(self.version):
                 self.bgw_metrics.update(NEWER_92_BGW_METRICS)
 
             metrics = self.bgw_metrics
@@ -228,7 +229,7 @@ class PostgreSql(AgentCheck):
         # the table, mirroring _get_bgw_metrics()
         metrics = self.archiver_metrics
 
-        if metrics is None and is_9_4_or_above(self._get_version()):
+        if metrics is None and is_9_4_or_above(self.version):
             # Collect from only one instance. See _get_bgw_metrics() for details on why.
             sub_key = self.key[:2]
             if sub_key in self.db_archiver_metrics:
@@ -264,9 +265,9 @@ class PostgreSql(AgentCheck):
         if is_10_or_above(self.get_version()) and metrics is None:
             self.replication_metrics = dict(REPLICATION_METRICS_10)
             metrics = self.replication_metrics
-        elif is_9_1_or_above(self._get_version()) and metrics is None:
+        elif is_9_1_or_above(self.version) and metrics is None:
             self.replication_metrics = dict(REPLICATION_METRICS_9_1)
-            if is_9_2_or_above(self._get_version()):
+            if is_9_2_or_above(self.version):
                 self.replication_metrics.update(REPLICATION_METRICS_9_2)
             metrics = self.replication_metrics
         return metrics
@@ -280,11 +281,11 @@ class PostgreSql(AgentCheck):
 
         if metrics_data is None:
             query = ACTIVITY_QUERY_10 if self._is_10_or_above(db) else ACTIVITY_QUERY_LT_10
-            if is_9_6_or_above(self._get_version()):
+            if is_9_6_or_above(self.version):
                 metrics_query = ACTIVITY_METRICS_9_6
-            elif is_9_2_or_above(self._get_version()):
+            elif is_9_2_or_above(self.version):
                 metrics_query = ACTIVITY_METRICS_9_2
-            elif is_8_3_or_above(self._get_version()):
+            elif is_8_3_or_above(self.version):
                 metrics_query = ACTIVITY_METRICS_8_3
             else:
                 metrics_query = ACTIVITY_METRICS_LT_8_3
@@ -336,7 +337,7 @@ class PostgreSql(AgentCheck):
         if scope is None:
             return None
 
-        if scope == REPLICATION_METRICS or not is_above(self._get_version(), "9.0.0"):
+        if scope == REPLICATION_METRICS or not is_above(self.version, "9.0.0"):
             log_func = self.log.debug
         else:
             log_func = self.log.warning
@@ -364,7 +365,7 @@ class PostgreSql(AgentCheck):
             log_func(e)
             log_func(
                 "It seems the PG version has been incorrectly identified as %s. "
-                "A reattempt to identify the right version will happen on next agent run." % self.version
+                "A reattempt to identify the right version will happen on next agent run." % self._version
             )
             self._clean_state()
             db.rollback()

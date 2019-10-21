@@ -6,6 +6,7 @@ import pytest
 from mock import MagicMock
 
 from datadog_checks.postgres import util
+from semver import VersionInfo
 
 pytestmark = pytest.mark.unit
 
@@ -14,7 +15,7 @@ def test_get_instance_metrics_lt_92(check):
     """
     check output when 9.2+
     """
-    check._is_9_2_or_above.return_value = False
+    check._version = VersionInfo(9, 1, 0)
     res = check._get_instance_metrics(False, False)
     assert res['metrics'] == util.COMMON_METRICS
 
@@ -23,7 +24,7 @@ def test_get_instance_metrics_92(check):
     """
     check output when <9.2
     """
-    check._is_9_2_or_above.return_value = True
+    check._version = VersionInfo(9, 2, 0)
     res = check._get_instance_metrics(False, False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
@@ -34,7 +35,7 @@ def test_get_instance_metrics_state(check):
     """
     res = check._get_instance_metrics(False, False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
-    check._is_9_2_or_above.side_effect = Exception  # metrics were cached so this shouldn't be called
+    check._version = 'foo'  # metrics were cached so this shouldn't be called
     res = check._get_instance_metrics([], False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 

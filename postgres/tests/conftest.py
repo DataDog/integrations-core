@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
+from semver import VersionInfo
 
 from .common import DB_NAME, HOST, PASSWORD, PORT, USER
 
@@ -31,8 +32,7 @@ def dd_environment(e2e_instance):
 @pytest.fixture
 def check():
     c = PostgreSql('postgres', {}, [{'dbname': 'dbname', 'host': 'localhost', 'port': '5432'}])
-    c._is_9_2_or_above = mock.MagicMock()
-    PostgreSql._known_servers = set()  # reset the global state
+    c._version = VersionInfo(9, 2, 0)
     return c
 
 
@@ -40,7 +40,6 @@ def check():
 def integration_check():
     def _check(instance):
         c = PostgreSql('postgres', {}, [instance])
-        c._is_9_2_or_above = mock.MagicMock()
         return c
 
     return _check

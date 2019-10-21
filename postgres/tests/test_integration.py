@@ -158,7 +158,7 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
 
 
 def assert_state_clean(check):
-    assert check.version is None
+    assert check._version is None
     assert check.instance_metrics is None
     assert check.bgw_metrics is None
     assert check.archiver_metrics is None
@@ -169,7 +169,7 @@ def assert_state_clean(check):
 
 
 def assert_state_set(check,):
-    assert check.version
+    assert check._version
     assert check.instance_metrics
     assert check.bgw_metrics
     if POSTGRES_VERSION != '9.3':
