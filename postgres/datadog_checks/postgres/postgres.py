@@ -60,9 +60,6 @@ class PostgreSql(AgentCheck):
     MONOTONIC = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = 'postgres.can_connect'
 
-    # keep track of host/port present in any configured instance
-    _known_servers = set()
-    _known_servers_lock = threading.Lock()
 
     def __init__(self, name, init_config, instances):
         AgentCheck.__init__(self, name, init_config, instances)
@@ -117,21 +114,6 @@ class PostgreSql(AgentCheck):
         self.replication_metrics = None
         self.activity_metrics = None
 
-    @classmethod
-    def _server_known(cls, host, port):
-        """
-        Return whether the hostname and port combination was already seen
-        """
-        with PostgreSql._known_servers_lock:
-            return (host, port) in PostgreSql._known_servers
-
-    @classmethod
-    def _set_server_known(cls, host, port):
-        """
-        Store the host/port combination for this server
-        """
-        with PostgreSql._known_servers_lock:
-            PostgreSql._known_servers.add((host, port))
 
     def _get_replication_role(self, db):
         cursor = db.cursor()
@@ -212,20 +194,6 @@ class PostgreSql(AgentCheck):
         metrics = self.instance_metrics
 
         if metrics is None:
-            host, port, dbname = self.key
-            # check whether we already collected server-wide metrics for this
-            # postgres instance
-            if self._server_known(host, port):
-                # explicitly set instance metrics for this key to an empty list
-                # so we don't get here more than once
-                self.instance_metrics = []
-                self.log.debug(
-                    "Not collecting instance metrics for key: {} as "
-                    "they are already collected by another instance".format(self.key)
-                )
-                return None
-            self._set_server_known(host, port)
-
             # select the right set of metrics to collect depending on postgres version
             if self._is_9_2_or_above():
                 self.instance_metrics = dict(COMMON_METRICS, **NEWER_92_METRICS)
@@ -237,11 +205,6 @@ class PostgreSql(AgentCheck):
                 self.instance_metrics.update(DATABASE_SIZE_METRICS)
 
             metrics = self.instance_metrics
-
-        # this will happen when the current key contains a postgres server that
-        # we already know, let's avoid to collect duplicates
-        if not metrics:
-            return None
 
         res = {
             'descriptors': [('psd.datname', 'db')],

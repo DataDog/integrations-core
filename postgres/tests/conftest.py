@@ -35,12 +35,14 @@ def check():
     PostgreSql._known_servers = set()  # reset the global state
     return c
 
+
 @pytest.fixture
 def integration_check():
-    c = PostgreSql('postgres', {}, [{'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}])
-    c._is_9_2_or_above = mock.MagicMock()
-    PostgreSql._known_servers = set()  # reset the global state
-    return c
+    def _check(instance):
+        c = PostgreSql('postgres', {}, [instance])
+        c._is_9_2_or_above = mock.MagicMock()
+        return c
+    return _check
 
 
 @pytest.fixture

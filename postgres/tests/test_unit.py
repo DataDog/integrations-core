@@ -39,11 +39,6 @@ def test_get_instance_metrics_state(check):
     res = check._get_instance_metrics([], False)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
-    # also check what happens when `metrics` is not valid
-    check.instance_metrics = []
-    res = check._get_instance_metrics(False, False)
-    assert res is None
-
 
 def test_get_instance_metrics_database_size_metrics(check):
     """
