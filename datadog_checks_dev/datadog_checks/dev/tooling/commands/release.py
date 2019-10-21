@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 import time
 from collections import OrderedDict, namedtuple
 from datetime import datetime
@@ -30,7 +31,7 @@ from ..constants import (
     VERSION_BUMP,
     get_agent_release_requirements,
     get_root,
-)
+    INTEGRATION_PREFIX_PATTERN)
 from ..git import get_commits_since, get_current_branch, git_commit, git_tag
 from ..github import (
     from_contributor,
@@ -773,7 +774,8 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
 
         author = payload.get('user', {}).get('login')
         author_url = payload.get('user', {}).get('html_url')
-        title = '[{}] {}'.format(changelog_type, payload.get('title'))
+        title = re.sub(INTEGRATION_PREFIX_PATTERN, r'', payload.get('title')).strip()
+        title = '[{}] {}'.format(changelog_type, title)
 
         entry = ChangelogEntry(pr_num, title, payload.get('html_url'), author, author_url, from_contributor(payload))
 
