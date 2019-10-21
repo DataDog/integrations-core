@@ -177,7 +177,7 @@ class PostgreSql(AgentCheck):
     def _is_10_or_above(self):
         return self._is_above([10, 0, 0])
 
-    def _get_instance_metrics(self, db, database_size_metrics, collect_default_db):
+    def _get_instance_metrics(self, database_size_metrics, collect_default_db):
         """
         Add NEWER_92_METRICS to the default set of COMMON_METRICS when server
         version is 9.2 or later.

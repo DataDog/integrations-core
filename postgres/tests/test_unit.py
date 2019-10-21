@@ -125,7 +125,6 @@ def test_is_above(check):
     # Test beta version above
     db.cursor().fetchone.return_value = ['11beta4']
     check._clean_state()
-    check._clean_state()
     assert check._is_above([11, -1, 3])
 
     # Test beta version against official version

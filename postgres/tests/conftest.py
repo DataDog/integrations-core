@@ -32,7 +32,6 @@ def dd_environment(e2e_instance):
 def check():
     c = PostgreSql('postgres', {}, [{'dbname': 'dbname', 'host': 'localhost', 'port': '5432'}])
     c._is_9_2_or_above = mock.MagicMock()
-    PostgreSql._known_servers = set()  # reset the global state
     return c
 
 
