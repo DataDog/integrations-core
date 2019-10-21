@@ -148,9 +148,6 @@ jobs:
     - checkName: hive
       displayName: Hive
       os: linux
-    - checkName: hyperv
-      displayName: HyperV
-      os: windows
     - checkName: ibm_db2
       displayName: IBM Db2
       os: linux
