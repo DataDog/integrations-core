@@ -52,6 +52,17 @@ Unless the PR is marked with the proper exclusion label, the title will be used
 to automatically fill the changelog entries. For this reason the title must be
 concise but explanatory.
 
+When a PR is only related to **one** integration, it should be prefix with the 
+technical integration name. Examples:
+
+```
+http_check: add logs
+istio: add timeout configuration
+ambari: use RequestsWrapper
+```
+
+If more than one integration are changed in the same PR, prefix can be omitted.
+
 ### Commit Messages
 
 Please don't be this person: `git commit -m "Fixed stuff"`. Take a moment to
