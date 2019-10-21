@@ -14,5 +14,5 @@ Update the Java properties located at: `<DRUID>/conf/druid/single-server/micro-q
 
 5) Start Druid `<DRUID>/bin/start-micro-quickstart`. 
 
-   Druid will start sending metrics to the agent.
+   Druid will start sending metrics to the Agent.
    
