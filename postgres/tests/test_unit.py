@@ -7,7 +7,6 @@ from mock import MagicMock
 
 from datadog_checks.postgres import util
 
-# Mark the entire module as tests of type `unit`
 pytestmark = pytest.mark.unit
 
 
@@ -62,86 +61,6 @@ def test_get_instance_with_default(check):
     collect_default_db = True
     res = check._get_instance_metrics(False, collect_default_db)
     assert "  AND psd.datname not ilike 'postgres'" not in res['query']
-
-
-def test_get_version(check):
-    """
-    Test _get_version() to make sure the check is properly parsing Postgres versions
-    """
-    db = MagicMock()
-
-    # Test #.#.# style versions
-    db.cursor().fetchone.return_value = ['9.5.3']
-    assert check._get_version(db) == [9, 5, 3]
-
-    # Test #.# style versions
-    db.cursor().fetchone.return_value = ['10.2']
-    check._clean_state()
-    assert check._get_version(db) == [10, 2]
-
-    # Test #beta# style versions
-    db.cursor().fetchone.return_value = ['11beta3']
-    check._clean_state()
-    assert check._get_version(db) == [11, -1, 3]
-
-    # Test #rc# style versions
-    db.cursor().fetchone.return_value = ['11rc1']
-    check._clean_state()
-    assert check._get_version(db) == [11, -1, 1]
-
-    # Test #unknown# style versions
-    db.cursor().fetchone.return_value = ['11nightly3']
-    check._clean_state()
-    assert check._get_version(db) == [11, -1, 3]
-
-
-def test_is_above(check):
-    """
-    Test _is_above() to make sure the check is properly determining order of versions
-    """
-    db = MagicMock()
-
-    # Test major versions
-    db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above(db, [9, 5, 4])
-    assert check._is_above(db, [11, 0, 0]) is False
-
-    # Test minor versions
-    db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above(db, [10, 4, 4])
-    assert check._is_above(db, [10, 6, 4]) is False
-
-    # Test patch versions
-    db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above(db, [10, 5, 3])
-    assert check._is_above(db, [10, 5, 5]) is False
-
-    # Test same version, _is_above() returns True for greater than or equal to
-    db.cursor().fetchone.return_value = ['10.5.4']
-    assert check._is_above(db, [10, 5, 4])
-
-    # Test beta version above
-    db.cursor().fetchone.return_value = ['11beta4']
-    check._clean_state()
-    check._clean_state()
-    assert check._is_above(db, [11, -1, 3])
-
-    # Test beta version against official version
-    db.cursor().fetchone.return_value = ['11.0.0']
-    check._clean_state()
-    assert check._is_above(db, [11, -1, 3])
-
-    # Test versions of unequal length
-    db.cursor().fetchone.return_value = ['10.0']
-    check._clean_state()
-    assert check._is_above(db, [10, 0])
-    assert check._is_above(db, [10, 0, 0])
-    assert check._is_above(db, [10, 0, 1]) is False
-
-    # Test return value is not a list
-    db.cursor().fetchone.return_value = "foo"
-    check._clean_state()
-    assert check._is_above(db, [10, 0]) is False
 
 
 def test_malformed_get_custom_queries(check):

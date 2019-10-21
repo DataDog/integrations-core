@@ -7,8 +7,9 @@ import socket
 from contextlib import closing
 
 import psycopg2
+from .version_utils import get_version, is_above, is_9_2_or_above, is_9_1_or_above, is_10_or_above, is_9_6_or_above, \
+    is_8_3_or_above
 from six import iteritems
-from six.moves import zip_longest
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
@@ -122,60 +123,9 @@ class PostgreSql(AgentCheck):
 
     def _get_version(self, db):
         if self.version is None:
-            cursor = db.cursor()
-            cursor.execute('SHOW SERVER_VERSION;')
-            version = cursor.fetchone()[0]
-            try:
-                version_parts = version.split(' ')[0].split('.')
-                version = [int(part) for part in version_parts]
-            except Exception:
-                # Postgres might be in development, with format \d+[beta|rc]\d+
-                match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', version)
-                if match:
-                    version_parts = list(match.groups())
-
-                    # We found a valid development version
-                    if len(version_parts) == 3:
-                        # Replace development tag with a negative number to properly compare versions
-                        version_parts[1] = -1
-                        version = [int(part) for part in version_parts]
-
-            self.version = version
-
-        self.service_metadata('version', self.version)
+            self.version = get_version(db)
+        self.service_metadata('version', [self.version['major'], self.version['minor'], self.version['patch']])
         return self.version
-
-    def _is_above(self, db, version_to_compare):
-        version = self._get_version(db)
-        if type(version) == list:
-            # iterate from major down to bugfix
-            for v, vc in zip_longest(version, version_to_compare, fillvalue=0):
-                if v == vc:
-                    continue
-
-                return v > vc
-
-            # return True if version is the same
-            return True
-        return False
-
-    def _is_8_3_or_above(self, db):
-        return self._is_above(db, [8, 3, 0])
-
-    def _is_9_1_or_above(self, db):
-        return self._is_above(db, [9, 1, 0])
-
-    def _is_9_2_or_above(self, db):
-        return self._is_above(db, [9, 2, 0])
-
-    def _is_9_4_or_above(self, db):
-        return self._is_above(db, [9, 4, 0])
-
-    def _is_9_6_or_above(self, db):
-        return self._is_above(db, [9, 6, 0])
-
-    def _is_10_or_above(self, db):
-        return self._is_above(db, [10, 0, 0])
 
     def _get_instance_metrics(self, database_size_metrics, collect_default_db):
         """
@@ -193,7 +143,7 @@ class PostgreSql(AgentCheck):
 
         if metrics is None:
             # select the right set of metrics to collect depending on postgres version
-            if self._is_9_2_or_above():
+            if is_9_2_or_above(self.get_version()):
                 self.instance_metrics = dict(COMMON_METRICS, **NEWER_92_METRICS)
             else:
                 self.instance_metrics = dict(COMMON_METRICS)
@@ -245,9 +195,9 @@ class PostgreSql(AgentCheck):
             self.db_bgw_metrics.append(sub_key)
 
             self.bgw_metrics = dict(COMMON_BGW_METRICS)
-            if self._is_9_1_or_above(db):
+            if is_9_1_or_above(self._get_version()):
                 self.bgw_metrics.update(NEWER_91_BGW_METRICS)
-            if self._is_9_2_or_above(db):
+            if _is_9_2_or_above(self._get_version()):
                 self.bgw_metrics.update(NEWER_92_BGW_METRICS)
 
             metrics = self.bgw_metrics
@@ -278,7 +228,7 @@ class PostgreSql(AgentCheck):
         # the table, mirroring _get_bgw_metrics()
         metrics = self.archiver_metrics
 
-        if metrics is None and self._is_9_4_or_above(db):
+        if metrics is None and is_9_4_or_above(self._get_version()):
             # Collect from only one instance. See _get_bgw_metrics() for details on why.
             sub_key = self.key[:2]
             if sub_key in self.db_archiver_metrics:
@@ -311,12 +261,12 @@ class PostgreSql(AgentCheck):
         Uses a dictionnary to save the result for each instance
         """
         metrics = self.replication_metrics
-        if self._is_10_or_above(db) and metrics is None:
+        if is_10_or_above(self.get_version()) and metrics is None:
             self.replication_metrics = dict(REPLICATION_METRICS_10)
             metrics = self.replication_metrics
-        elif self._is_9_1_or_above(db) and metrics is None:
+        elif is_9_1_or_above(self._get_version()) and metrics is None:
             self.replication_metrics = dict(REPLICATION_METRICS_9_1)
-            if self._is_9_2_or_above(db):
+            if is_9_2_or_above(self._get_version()):
                 self.replication_metrics.update(REPLICATION_METRICS_9_2)
             metrics = self.replication_metrics
         return metrics
@@ -330,11 +280,11 @@ class PostgreSql(AgentCheck):
 
         if metrics_data is None:
             query = ACTIVITY_QUERY_10 if self._is_10_or_above(db) else ACTIVITY_QUERY_LT_10
-            if self._is_9_6_or_above(db):
+            if is_9_6_or_above(self._get_version()):
                 metrics_query = ACTIVITY_METRICS_9_6
-            elif self._is_9_2_or_above(db):
+            elif is_9_2_or_above(self._get_version()):
                 metrics_query = ACTIVITY_METRICS_9_2
-            elif self._is_8_3_or_above(db):
+            elif is_8_3_or_above(self._get_version()):
                 metrics_query = ACTIVITY_METRICS_8_3
             else:
                 metrics_query = ACTIVITY_METRICS_LT_8_3
@@ -386,7 +336,7 @@ class PostgreSql(AgentCheck):
         if scope is None:
             return None
 
-        if scope == REPLICATION_METRICS or not self._is_above(db, [9, 0, 0]):
+        if scope == REPLICATION_METRICS or not is_above(self._get_version(), "9.0.0"):
             log_func = self.log.debug
         else:
             log_func = self.log.warning
