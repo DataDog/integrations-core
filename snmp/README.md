@@ -272,7 +272,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][16
 
 
 ### Custom metrics
-The SNMP check can potentially emit [custom metrics][10], which may impact your [billing][11].
+Metrics collected by the SNMP integration are considered [custom metrics][10], which impacts your [bill][11].
 
 ### Validation
 
