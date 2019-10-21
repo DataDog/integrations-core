@@ -128,7 +128,7 @@ class PostgreSql(AgentCheck):
             self.service_metadata('version', [self._version['major'], self._version['minor'], self._version['patch']])
         return self._version
 
-    def _get_instance_metrics(self, db, database_size_metrics, collect_default_db):
+    def _get_instance_metrics(self, database_size_metrics, collect_default_db):
         """
         Add NEWER_92_METRICS to the default set of COMMON_METRICS when server
         version is 9.2 or later.
