@@ -8,7 +8,7 @@ import semver
 
 CHANGELOG_LABEL_PREFIX = 'changelog/'
 CHANGELOG_TYPE_NONE = 'no-changelog'
-INTEGRATION_PREFIX_PATTERN = r'^[a-z_]+:'
+INTEGRATION_PREFIX_PATTERN = r'^[a-z0-9_]+:'
 VERSION_BUMP = OrderedDict(
     [
         ('Added', semver.bump_minor),
