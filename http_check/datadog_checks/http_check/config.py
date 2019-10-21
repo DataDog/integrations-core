@@ -11,13 +11,26 @@ DEFAULT_EXPECTED_CODE = r'(1|2|3)\d\d'
 
 Config = namedtuple(
     'Config',
-    'url, client_cert,'
-    'client_key, method, data, http_response_status_code,'
-    'include_content, headers, response_time,'
-    'content_match, reverse_content_match, tags,'
-    'ssl_expire, instance_ca_certs,'
-    'weakcipher, check_hostname,'
-    'allow_redirects, stream',
+    [
+        'url',
+        'client_cert',
+        'client_key',
+        'method',
+        'data',
+        'http_response_status_code',
+        'include_content',
+        'headers',
+        'response_time',
+        'content_match',
+        'reverse_content_match',
+        'tags',
+        'ssl_expire',
+        'instance_ca_certs',
+        'weakcipher',
+        'check_hostname',
+        'allow_redirects',
+        'stream',
+    ],
 )
 
 
