@@ -177,7 +177,7 @@ class PostgreSql(AgentCheck):
     def _is_10_or_above(self):
         return self._is_above([10, 0, 0])
 
-    def _get_instance_metrics(self, database_size_metrics, collect_default_db):
+    def _get_instance_metrics(self, db, database_size_metrics, collect_default_db):
         """
         Add NEWER_92_METRICS to the default set of COMMON_METRICS when server
         version is 9.2 or later.
@@ -516,8 +516,8 @@ class PostgreSql(AgentCheck):
         """
 
         db_instance_metrics = self._get_instance_metrics(collect_database_size_metrics, collect_default_db)
-        bgw_instance_metrics = self._get_bgw_metrics(db)
-        archiver_instance_metrics = self._get_archiver_metrics(db)
+        bgw_instance_metrics = self._get_bgw_metrics()
+        archiver_instance_metrics = self._get_archiver_metrics()
 
         metric_scope = [CONNECTION_METRICS, LOCK_METRICS]
 
@@ -532,7 +532,7 @@ class PostgreSql(AgentCheck):
             metric_scope += [REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(relations)
 
-        replication_metrics = self._get_replication_metrics(db)
+        replication_metrics = self._get_replication_metrics()
         if replication_metrics is not None:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
             replication_metrics_query['metrics'] = replication_metrics
@@ -774,7 +774,7 @@ class PostgreSql(AgentCheck):
             self._connect(host, port, user, password, dbname, ssl, tags)
             if tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            version = self._get_version(db)
+            version = self._get_version()
             self.log.debug("Running check against version %s" % version)
             self._collect_stats(
                 user,
