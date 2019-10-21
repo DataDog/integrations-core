@@ -4,7 +4,7 @@
 
 1) Download Druid and the extract files: https://druid.apache.org/downloads.html
 
-2) Extract Druid
+2) Extract Druid.
 
 3) Follow main [README.md](../README.md) "Connect Druid to DogStatsD" step for setting up Druid.  
 
