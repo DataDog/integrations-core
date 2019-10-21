@@ -40,6 +40,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             self.count = 0
             self.previous_run_max_ts = 0
             self.current_run_max_ts = 0
+            self.active = True
 
         def set_previous_and_reset_current_ts(self):
             if self.current_run_max_ts > 0:
@@ -50,6 +51,21 @@ class KubernetesState(OpenMetricsBaseCheck):
             if job_ts != 0 and job_ts > self.previous_run_max_ts:
                 self.count += count
                 self.current_run_max_ts = max(self.current_run_max_ts, job_ts)
+
+            # Handle jobs with no timestamps
+            if job_ts == 0 and self.active:
+                self.count += 1
+                self.active = False
+                self.current_run_max_ts = -1
+
+        def update_active(self, active):
+            # active jobs only if they have not been already counted
+            if active == 1:
+                if self.current_run_max_ts != -1:
+                    self.active = True
+            elif active == 0:
+                self.active = False
+                self.current_run_max_ts = 0
 
     DEFAULT_METRIC_LIMIT = 0
 
@@ -79,6 +95,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_pod_container_status_waiting_reason': self.kube_pod_container_status_waiting_reason,
             'kube_pod_container_status_terminated_reason': self.kube_pod_container_status_terminated_reason,
             'kube_cronjob_next_schedule_time': self.kube_cronjob_next_schedule_time,
+            'kube_job_status_active': self.kube_job_status_active,
             'kube_job_complete': self.kube_job_complete,
             'kube_job_failed': self.kube_job_failed,
             'kube_job_status_failed': self.kube_job_status_failed,
@@ -286,7 +303,6 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_job_spec_active_dealine_seconds',
                     'kube_job_spec_completions',
                     'kube_job_spec_parallelism',
-                    'kube_job_status_active',
                     'kube_job_status_completion_time',  # We could compute the duration=completion-start as a gauge
                     'kube_job_status_start_time',
                     'kube_verticalpodautoscaler_labels',
@@ -439,8 +455,6 @@ class KubernetesState(OpenMetricsBaseCheck):
         if ts.isdigit():
             return int(ts)
         else:
-            msg = 'Cannot extract ts from job name {}'
-            self.log.debug(msg, name)
             return 0
 
     # Labels attached: namespace, pod
@@ -528,6 +542,19 @@ class KubernetesState(OpenMetricsBaseCheck):
                 self.service_check(check_basename, self.CRITICAL, tags=tags, message=message)
             else:
                 self.service_check(check_basename, self.OK, tags=tags)
+
+    def kube_job_status_active(self, metric, scraper_config):
+        for sample in metric.samples:
+            tags = [] + scraper_config['custom_tags']
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                if label_name == 'job' or label_name == 'job_name':
+                    trimmed_job = self._trim_job_tag(label_value)
+                    tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
+                else:
+                    tags.append(self._format_tag(label_name, label_value, scraper_config))
+            # Update active status of jobs
+            self.failed_job_counts[frozenset(tags)].update_active(sample[self.SAMPLE_VALUE])
+            self.succeeded_job_counts[frozenset(tags)].update_active(sample[self.SAMPLE_VALUE])
 
     def kube_job_complete(self, metric, scraper_config):
         service_check_name = scraper_config['namespace'] + '.job.complete'

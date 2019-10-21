@@ -172,6 +172,7 @@ kube_job_spec_parallelism{job="hello-1509998460",namespace="default"} 1
 kube_job_status_active{job="hello-1509998340",namespace="default"} 0
 kube_job_status_active{job="hello-1509998400",namespace="default"} 0
 kube_job_status_active{job="hello-1509998460",namespace="default"} 0
+kube_job_status_active{job_name="bangkok",namespace="default"} 1
 # HELP kube_job_status_completion_time CompletionTime represents time when the job was completed.
 # TYPE kube_job_status_completion_time counter
 kube_job_status_completion_time{job="hello-1509998340",namespace="default"} 1.509998351e+09
@@ -198,6 +199,7 @@ kube_job_status_succeeded{job="hello-1509998460",namespace="default"} 1
 kube_job_status_succeeded{job_name="hello2-1509998340",namespace="default"} 1
 kube_job_status_succeeded{job_name="hello2-1509998400",namespace="default"} 1
 kube_job_status_succeeded{job_name="hello2-1509998460",namespace="default"} 1
+kube_job_status_succeeded{job_name="bangkok",namespace="default"} 1
 # HELP kube_namespace_created Unix creation timestamp
 # TYPE kube_namespace_created gauge
 kube_namespace_created{namespace="default"} 1.508406437e+09

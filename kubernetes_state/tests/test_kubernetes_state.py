@@ -454,6 +454,49 @@ def test_job_counts(aggregator, instance):
     )
 
 
+def test_no_timestamp_jobs(aggregator, instance):
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    payload = mock_from_file("prometheus.txt")
+    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+
+    for _ in range(2):
+        check.check(instance)
+
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:bangkok', 'optional:tag1'], value=1
+    )
+
+    # Re-run check to make sure we don't count the same jobs
+    check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:bangkok', 'optional:tag1'], value=1
+    )
+
+    # Edit the payload and rerun the check
+    payload = payload.replace(
+        b'kube_job_status_active{job_name="bangkok",namespace="default"} 1',
+        b'kube_job_status_active{job_name="bangkok",namespace="default"} 0',
+    )
+
+    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:bangkok', 'optional:tag1'], value=1
+    )
+
+    # Edit the payload and rerun the check
+    payload = payload.replace(
+        b'kube_job_status_active{job_name="bangkok",namespace="default"} 0',
+        b'kube_job_status_active{job_name="bangkok",namespace="default"} 1',
+    )
+
+    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:bangkok', 'optional:tag1'], value=2
+    )
+
+
 def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
 
@@ -466,11 +509,11 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90270.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=908.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1282.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90403.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=918.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1286.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=368.0)
     aggregator.assert_metric(
         NAMESPACE + '.telemetry.collector.metrics.count',
         tags=['resource_name:pod', 'resource_namespace:default', 'optional:tag1'],
