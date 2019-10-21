@@ -32,16 +32,16 @@ class Vault(AgentCheck):
 
     # Expected HTTP Error codes for /sys/health endpoint
     # https://www.vaultproject.io/api/system/health.html
-    SYS_HEALTH_DEFAULT_CODES = [
+    SYS_HEALTH_DEFAULT_CODES = {
         200,  # "initialized, unsealed, and active",
         429,  # "unsealed and standby",
         472,  # "data recovery mode replication secondary and active",
         473,  # "performance standby",
         501,  # "not initialized",
         503,  # "sealed",
-    ]
+    }
 
-    SYS_LEADER_DEFAULT_CODES = [503]  # "sealed"
+    SYS_LEADER_DEFAULT_CODES = {503}  # "sealed"
 
     def __init__(self, name, init_config, instances):
         super(Vault, self).__init__(name, init_config, instances)
