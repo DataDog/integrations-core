@@ -12,9 +12,6 @@ from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
 
-# from datadog_checks.mysql import MySql
-
-
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
@@ -80,11 +77,6 @@ def instance_complex():
 @pytest.fixture(scope='session')
 def instance_error():
     return {'server': common.HOST, 'user': 'unknown', 'pass': common.PASS}
-
-
-# @pytest.fixture
-# def mysql_check():
-#     return Mysql()
 
 
 @pytest.fixture(scope='session')
