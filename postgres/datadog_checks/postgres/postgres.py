@@ -769,7 +769,7 @@ class PostgreSql(AgentCheck):
                         )
 
                     m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
-                    self.log.debug("Method: %s", str(mtype))
+                    self.log.debug("Method: %s", mtype)
             except Exception as e:
                 raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
 
