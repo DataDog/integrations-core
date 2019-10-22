@@ -4,6 +4,10 @@ instances:
 
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
+    ## By default, the Cilium integration collects `cilium-agent` metrics.
+    ## If you would like to collect the `cilium-operator` metrics, enable
+    ## the `collect_operator_metrics` option and update the url.
+    ## Cilium operator metrics are exposed on port 6942.
     #
   - prometheus_url: http://localhost:9090/metrics
 
@@ -19,3 +23,8 @@ instances:
     ## Overrides the default timeout value in second
     #
     # prometheus_timeout: 10
+
+    ## @param collect_operator_metrics - boolean - optional - default: false
+    ## Enable to collect `cilium-operator` metrics.
+    #
+    # collect_operator_metrics: false
