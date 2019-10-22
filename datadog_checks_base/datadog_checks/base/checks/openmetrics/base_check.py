@@ -60,7 +60,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             # instances from agent 5 signature
             instances = args[3]
         elif isinstance(args[2], (tuple, list)):
-            # instances from new signature
+            # instances from agent 6 signature
             instances = args[2]
         else:
             instances = None
