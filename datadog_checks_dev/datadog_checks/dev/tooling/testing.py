@@ -190,7 +190,6 @@ def construct_pytest_options(
     if coverage:
         pytest_options += (
             # `junit-xml` config is added to pytest options in tox.ini since we need tox variable {envname}
-
             # Junit test results class prefix
             ' --junit-prefix={check}'
             # Located at the root of each repo
