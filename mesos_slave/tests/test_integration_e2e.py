@@ -11,9 +11,11 @@ from datadog_checks.mesos_slave import MesosSlave
 
 from .common import CHECK_NAME
 
+# Does not work on windows. The zookeeper image are not compatible with windows architecture.
+# Error: "no matching manifest for windows/amd64 10.0.17763 in the manifest list entries"
+pytest.mark.skipif(platform.system() == 'Windows', reason="Docker images not compatible with windows architecture")
 
-# Linux only: https://github.com/docker/for-mac/issues/1031
-@pytest.mark.skipif(platform.system() != 'Linux', reason='Only runs on Unix systems')
+
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check_integration(instance, aggregator):
