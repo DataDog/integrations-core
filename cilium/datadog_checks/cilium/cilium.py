@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheck
 
-DEFAULT_METRICS = {
+AGENT_METRICS = {
     'cilium_agent_api_process_time_seconds': 'agent.api_process_time.seconds',
     'cilium_agent_bootstrap_seconds': 'agent.bootstrap.seconds',
     'cilium_bpf_map_ops_total': 'bpf.map_ops.total',
@@ -58,10 +58,21 @@ DEFAULT_METRICS = {
     'cilium_triggers_policy_update_total': 'triggers_policy.update.total',
     'cilium_unreachable_health_endpoints': 'unreachable.health_endpoints',
     'cilium_unreachable_nodes': 'unreachable.nodes',
-
     # Metrics unsure if needed
     'cilium_event_ts': 'event_timestamp',
-}g
+}
+
+OPERATOR_METRICS = {
+    'cilium_operator_process_cpu_seconds_total': 'operator.process.cpu.seconds',
+    'cilium_operator_process_max_fds': 'operator.process.max_fds',
+    'cilium_operator_process_open_fds': 'operator.process.open_fds',
+    'cilium_operator_process_resident_memory_bytes': 'operator.process.resident_memory.bytes',
+    'cilium_operator_process_start_time_seconds': 'operator.process.start_time.seconds',
+    'cilium_operator_process_virtual_memory_bytes': 'operator.process.virtual_memory.bytes',
+    'cilium_operator_process_virtual_memory_max_bytes': 'operator.process.virtual_memory_max.bytes',
+    # TODO: ENI metrics are not listed
+}
+
 
 
 class CiliumCheck(OpenMetricsBaseCheck):
@@ -69,7 +80,7 @@ class CiliumCheck(OpenMetricsBaseCheck):
     Collect Cilium metrics from Prometheus endpoint
     """
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         pass
 
 
