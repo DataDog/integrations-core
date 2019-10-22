@@ -10,5 +10,16 @@ def dd_environment():
 
 
 @pytest.fixture
-def instance():
-    return {}
+def agent_instance():
+    return {
+        'agent_endpoint': 'localhost:9090/metrics',
+        'tags': ['pod_test']
+    }
+
+
+@pytest.fixture
+def operator_instance():
+    return {
+        'agent_endpoint': ' localhost:6942/metrics', 
+        'tags': ['operator_test']
+    }
