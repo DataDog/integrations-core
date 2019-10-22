@@ -1,5 +1,10 @@
 # CHANGELOG - datadog_checks_base
 
+## 9.5.0 / 2019-10-22
+
+* [Added] Upgrade psycopg2-binary to 2.8.4. See [#4840](https://github.com/DataDog/integrations-core/pull/4840).
+* [Added] Add mechanism to submit metadata from OpenMetrics checks. See [#4757](https://github.com/DataDog/integrations-core/pull/4757).
+
 ## 9.4.2 / 2019-10-17
 
 * [Fixed] Fix RequestsWrapper session `timeout`. See [#4811](https://github.com/DataDog/integrations-core/pull/4811).
