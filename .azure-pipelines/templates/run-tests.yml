@@ -25,5 +25,5 @@ steps:
 - task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
   condition: succeededOrFailed()
   inputs:
-    testResultsFiles: '**/test-*.xml'
+    testResultsFiles: 'junit/*.xml'
     testRunTitle: '${{ parameters.test_run }}'
