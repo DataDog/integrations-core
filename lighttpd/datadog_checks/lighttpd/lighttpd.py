@@ -4,7 +4,6 @@
 
 import re
 
-import requests
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
@@ -65,11 +64,6 @@ class Lighttpd(AgentCheck):
         super(Lighttpd, self).__init__(name, init_config, instances)
         self.assumed_url = {}
 
-        if self.instance.get('auth_type', 'basic').lower() == 'digest':
-            auth = self.http.options['auth']
-            if auth is not None:
-                self.http.options['auth'] = requests.auth.HTTPDigestAuth(auth[0], auth[1])
-
     def check(self, instance):
         if 'lighttpd_status_url' not in instance:
             raise Exception("Missing 'lighttpd_status_url' variable in Lighttpd config")
@@ -77,13 +71,8 @@ class Lighttpd(AgentCheck):
         url = self.assumed_url.get(instance['lighttpd_status_url'], instance['lighttpd_status_url'])
 
         tags = instance.get('tags', [])
-        auth_type = instance.get('auth_type', 'basic').lower()
 
-        if auth_type not in ('basic', 'digest'):
-            msg = "Unsupported value of 'auth_type' variable in Lighttpd config: {}".format(auth_type)
-            raise Exception(msg)
-
-        self.log.debug("Connecting to %s", url)
+        self.log.debug("Connecting to %s" % url)
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)

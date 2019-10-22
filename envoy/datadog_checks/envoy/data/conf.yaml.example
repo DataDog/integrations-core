@@ -114,6 +114,12 @@ instances:
     #
     # skip_proxy: false
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param ntlm_domain - string - optional
     ## If your services uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM Auth,

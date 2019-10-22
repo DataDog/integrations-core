@@ -32,6 +32,12 @@ instances:
     #
   - url: <DRUID_INSTANCE_URL>
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param username - string - optional
     ## The username to use if your Druid instance is behind basic auth.
     #
