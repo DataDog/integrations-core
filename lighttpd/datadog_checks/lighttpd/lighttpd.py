@@ -72,7 +72,7 @@ class Lighttpd(AgentCheck):
 
         tags = instance.get('tags', [])
 
-        self.log.debug("Connecting to %s" % url)
+        self.log.debug("Connecting to %s", url)
 
         # Submit a service check for status page availability.
         parsed_url = urlparse(url)
