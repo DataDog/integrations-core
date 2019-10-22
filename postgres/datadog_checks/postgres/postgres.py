@@ -304,7 +304,7 @@ class PostgreSql(AgentCheck):
             'relation': False,
         }
 
-    def _get_replication_metrics(self, db):
+    def _get_replication_metrics(self):
         """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
         REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
         postgres version.
