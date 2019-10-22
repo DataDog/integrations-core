@@ -233,8 +233,10 @@ def test_version_metadata_http(check, version_metadata):
 
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
-def test_version_metadata_unix_socket(check, version_metadata):
+def test_version_metadata_unix_socket(check, version_metadata, dd_environment):
     config = copy.deepcopy(CONFIG_UNIXSOCKET)
+    unixsocket_url = dd_environment["unixsocket_url"]
+    config['url'] = unixsocket_url
     check = check(config)
     check.check_id = 'test:123'
 
