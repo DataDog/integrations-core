@@ -226,8 +226,8 @@ class HAProxy(AgentCheck):
             output = sock.recv(BUFSIZE)
         sock.close()
         # return data from `show info` and `show stat` separately
-        print(response.split('\n\n'))
-        return response.split('\n\n')
+        # getting the first 2 values as the third one is empty string
+        return response.split('\n\n')[:2]
 
     def _collect_version_from_socket(self, info):
         version = ''
