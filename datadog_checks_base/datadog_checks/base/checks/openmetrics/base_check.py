@@ -57,7 +57,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         if 'instances' in kwargs:
             instances = kwargs['instances']
         elif len(args) == 4:
-            # instances from legacy signature
+            # instances from agent 5 signature
             instances = args[3]
         elif isinstance(args[2], (tuple, list)):
             # instances from new signature
