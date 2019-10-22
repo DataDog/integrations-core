@@ -148,11 +148,11 @@ jobs:
     - checkName: hdfs_namenode
       displayName: HDFS Namenode
       os: linux
-    - checkName: http_check
-      displayName: HTTP
-      os: linux
     - checkName: hive
       displayName: Hive
+      os: linux
+    - checkName: http_check
+      displayName: HTTP
       os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
