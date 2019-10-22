@@ -81,8 +81,24 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
 
     def __init__(self, name, init_config, instances):
-        pass
+       super(CiliumCheck, self).__init__(name, init_config, instances=self.instance)
 
 
     def check(self, instance):
-        pass
+        endpoint = None
+        agent_endpoint = instance.get('agent_endpoint')
+        operator_endpoint = instance.get('operator_endpoint')
+
+        # Check if collecting metrics from Cilium operator or agent
+        if instance.get('collect_operator_metrics', False):
+            if operator_endpoint:
+                endpoint = operator_endpoint
+            else:
+                self.log.warning("Collecting Cilium operator metrics but no endpoint provided")
+        else:
+            if agent_endpoint:
+                endpoint = agent_endpoint
+        
+
+        
+
