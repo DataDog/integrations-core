@@ -158,6 +158,7 @@ def fix_coverage_report(check, report_file):
 
 
 def construct_pytest_options(
+    check,
     verbose=0,
     color=None,
     enter_pdb=False,
@@ -188,6 +189,10 @@ def construct_pytest_options(
 
     if coverage:
         pytest_options += (
+            # Junit test results class prefix
+            ' --junit-prefix={check}'
+            # Junit result file. {envname} is the tox for current environ.
+            # ' --junit-xml=junit/result.{{envname}}.xml'
             # Located at the root of each repo
             ' --cov-config=../.coveragerc'
             # Use the same .coverage file to aggregate results
@@ -195,8 +200,8 @@ def construct_pytest_options(
             # Show no coverage report until the end
             ' --cov-report='
             # This will be formatted to the appropriate coverage paths for each package
-            ' {}'
-        )
+            ' --cov={check}'
+        ).format(check=check)
 
     if marker:
         pytest_options += ' -m "{}"'.format(marker)
@@ -208,10 +213,6 @@ def construct_pytest_options(
         pytest_options += ' {}'.format(pytest_args)
 
     return pytest_options
-
-
-def pytest_coverage_sources(*checks):
-    return ' '.join(' '.join('--cov={}'.format(source) for source in coverage_sources(check)) for check in checks)
 
 
 def testable_files(files):

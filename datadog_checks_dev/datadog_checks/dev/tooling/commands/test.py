@@ -10,7 +10,7 @@ from ..._env import E2E_PARENT_PYTHON
 from ...subprocess import run_command
 from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci
 from ..constants import get_root
-from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
+from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 
@@ -86,17 +86,6 @@ def test(
     if e2e:
         marker = 'e2e'
 
-    pytest_options = construct_pytest_options(
-        verbose=verbose,
-        color=color,
-        enter_pdb=enter_pdb,
-        debug=debug,
-        bench=bench,
-        coverage=coverage,
-        marker=marker,
-        test_filter=test_filter,
-        pytest_args=pytest_args,
-    )
     coverage_show_missing_lines = str(cov_missing or testing_on_ci)
 
     test_env_vars = {
@@ -110,7 +99,6 @@ def test(
             'DOCKER_* COMPOSE_*'
         ),
         'DDEV_COV_MISSING': coverage_show_missing_lines,
-        'PYTEST_ADDOPTS': pytest_options,
     }
 
     if passenv:
@@ -133,6 +121,19 @@ def test(
         if not envs:
             continue
 
+        test_env_vars['PYTEST_ADDOPTS'] = construct_pytest_options(
+            check=check,
+            verbose=verbose,
+            color=color,
+            enter_pdb=enter_pdb,
+            debug=debug,
+            bench=bench,
+            coverage=coverage,
+            marker=marker,
+            test_filter=test_filter,
+            pytest_args=pytest_args,
+        )
+
         # This is for ensuring proper spacing between output of multiple checks' tests.
         # Basically this avoids printing a new line before the first check's tests.
         output_separator = '\n' if tests_ran else ''
@@ -140,9 +141,6 @@ def test(
         # For performance reasons we're generating what to test on the fly and therefore
         # need a way to tell if anything ran since we don't know anything upfront.
         tests_ran = True
-
-        if coverage:
-            test_env_vars['PYTEST_ADDOPTS'] = pytest_options.format(pytest_coverage_sources(check))
 
         if verbose:
             echo_info('pytest options: `{}`'.format(test_env_vars['PYTEST_ADDOPTS']))
