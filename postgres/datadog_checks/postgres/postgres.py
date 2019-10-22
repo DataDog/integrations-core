@@ -202,8 +202,7 @@ class PostgreSql(AgentCheck):
                 # so we don't get here more than once
                 self.instance_metrics[key] = []
                 self.log.debug(
-                    "Not collecting instance metrics for key: %s as they are already collected by another instance",
-                    key,
+                    "Not collecting instance metrics for key: %s as they are already collected by another instance", key
                 )
                 return None
             self._set_server_known(host, port)
@@ -304,8 +303,7 @@ class PostgreSql(AgentCheck):
             if sub_key in self.db_archiver_metrics:
                 self.archiver_metrics[key] = None
                 self.log.debug(
-                    "Not collecting archiver metrics for key: %s as they are already collected by another instance",
-                    key,
+                    "Not collecting archiver metrics for key: %s as they are already collected by another instance", key
                 )
                 return None
 
