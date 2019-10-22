@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuite errors="0" failures="0" name="pytest" skipped="1" tests="3" time="3.195"><testcase classname="lighttpd.tests.test_check" file="tests/test_check.py" line="22" name="test_lighttpd" time="1.686"><system-err>Creating network &quot;auth_default&quot; with the default driver
+Creating auth_lighttpd_1 ... 
+#x1B[1A#x1B[2KCreating auth_lighttpd_1 ... #x1B[32mdone#x1B[0m#x1B[1B</system-err></testcase><testcase classname="lighttpd.tests.test_check" file="tests/test_check.py" line="35" name="test_service_check_ko" time="0.004"></testcase><testcase classname="lighttpd.tests.test_check" file="tests/test_check.py" line="43" name="test_e2e" time="1.388"><skipped message="Not running E2E tests" type="pytest.skip">/Users/alexandre.yang/repos/dd/integrations-core/datadog_checks_dev/datadog_checks/dev/plugin/pytest.py:107: Not running E2E tests</skipped><system-err>Stopping auth_lighttpd_1 ... 
+#x1B[1A#x1B[2KStopping auth_lighttpd_1 ... #x1B[32mdone#x1B[0m#x1B[1BRemoving auth_lighttpd_1 ... 
+#x1B[1A#x1B[2KRemoving auth_lighttpd_1 ... #x1B[32mdone#x1B[0m#x1B[1BRemoving network auth_default
+</system-err></testcase></testsuite>

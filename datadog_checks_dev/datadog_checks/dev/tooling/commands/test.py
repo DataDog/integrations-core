@@ -10,7 +10,7 @@ from ..._env import E2E_PARENT_PYTHON
 from ...subprocess import run_command
 from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci
 from ..constants import get_root
-from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs
+from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 
@@ -121,7 +121,16 @@ def test(
         if not envs:
             continue
 
-        test_env_vars['PYTEST_ADDOPTS'] = construct_pytest_options(
+        # This is for ensuring proper spacing between output of multiple checks' tests.
+        # Basically this avoids printing a new line before the first check's tests.
+        output_separator = '\n' if tests_ran else ''
+
+        # For performance reasons we're generating what to test on the fly and therefore
+        # need a way to tell if anything ran since we don't know anything upfront.
+        tests_ran = True
+
+        # Build pytest options
+        pytest_options = construct_pytest_options(
             check=check,
             verbose=verbose,
             color=color,
@@ -133,14 +142,9 @@ def test(
             test_filter=test_filter,
             pytest_args=pytest_args,
         )
-
-        # This is for ensuring proper spacing between output of multiple checks' tests.
-        # Basically this avoids printing a new line before the first check's tests.
-        output_separator = '\n' if tests_ran else ''
-
-        # For performance reasons we're generating what to test on the fly and therefore
-        # need a way to tell if anything ran since we don't know anything upfront.
-        tests_ran = True
+        if coverage:
+            pytest_options = pytest_options.format(pytest_coverage_sources(check))
+        test_env_vars['PYTEST_ADDOPTS'] = pytest_options
 
         if verbose:
             echo_info('pytest options: `{}`'.format(test_env_vars['PYTEST_ADDOPTS']))

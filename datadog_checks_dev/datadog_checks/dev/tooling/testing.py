@@ -200,7 +200,7 @@ def construct_pytest_options(
             # Show no coverage report until the end
             ' --cov-report='
             # This will be formatted to the appropriate coverage paths for each package
-            ' --cov={check}'
+            ' {{}}'
         ).format(check=check)
 
     if marker:
@@ -213,6 +213,10 @@ def construct_pytest_options(
         pytest_options += ' {}'.format(pytest_args)
 
     return pytest_options
+
+
+def pytest_coverage_sources(*checks):
+    return ' '.join(' '.join('--cov={}'.format(source) for source in coverage_sources(check)) for check in checks)
 
 
 def testable_files(files):
