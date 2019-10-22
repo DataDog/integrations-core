@@ -202,7 +202,7 @@ class PostgreSql(AgentCheck):
                 # so we don't get here more than once
                 self.instance_metrics[key] = []
                 self.log.debug(
-                    "Not collecting instance metrics for key: %s as " "they are already collected by another instance",
+                    "Not collecting instance metrics for key: %s as they are already collected by another instance",
                     key,
                 )
                 return None
@@ -258,7 +258,7 @@ class PostgreSql(AgentCheck):
             if sub_key in self.db_bgw_metrics:
                 self.bgw_metrics[key] = None
                 self.log.debug(
-                    "Not collecting bgw metrics for key: %s as " "they are already collected by another instance", key
+                    "Not collecting bgw metrics for key: %s as they are already collected by another instance", key
                 )
                 return None
 
@@ -304,7 +304,7 @@ class PostgreSql(AgentCheck):
             if sub_key in self.db_archiver_metrics:
                 self.archiver_metrics[key] = None
                 self.log.debug(
-                    "Not collecting archiver metrics for key: %s as " "they are already collected by another instance",
+                    "Not collecting archiver metrics for key: %s as they are already collected by another instance",
                     key,
                 )
                 return None
@@ -702,7 +702,7 @@ class PostgreSql(AgentCheck):
                         column_type = column.get('type')
                         if not column_type:
                             self.log.error(
-                                "column field `type` is required for column `%s` " "of metric_prefix `%s`",
+                                "column field `type` is required for column `%s` of metric_prefix `%s`",
                                 name,
                                 metric_prefix,
                             )
@@ -713,7 +713,7 @@ class PostgreSql(AgentCheck):
                         else:
                             if not hasattr(self, column_type):
                                 self.log.error(
-                                    "invalid submission method `%s` for column `%s` of " "metric_prefix `%s`",
+                                    "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
                                     column_type,
                                     name,
                                     metric_prefix,
@@ -723,7 +723,7 @@ class PostgreSql(AgentCheck):
                                 metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
                             except (ValueError, TypeError):
                                 self.log.error(
-                                    "non-numeric value `%s` for metric column `%s` of " "metric_prefix `%s`",
+                                    "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
                                     value,
                                     name,
                                     metric_prefix,
