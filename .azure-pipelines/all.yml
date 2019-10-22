@@ -10,6 +10,7 @@ pr:
   paths:
     include:
     - datadog_checks_base/datadog_checks/*
+    - .azure-pipelines/*
 
 variables:
   DDEV_COLOR: 1
@@ -99,6 +100,9 @@ jobs:
     - checkName: dotnetclr
       displayName: .NET CLR
       os: windows
+    - checkName: druid
+      displayName: Druid
+      os: linux
     - checkName: ecs_fargate
       displayName: Amazon ECS Fargate
       os: linux
@@ -147,6 +151,9 @@ jobs:
     - checkName: http_check
       displayName: HTTP
       os: linux
+    - checkName: hive
+      displayName: Hive
+      os: linux
     - checkName: ibm_db2
       displayName: IBM Db2
       os: linux
@@ -161,6 +168,9 @@ jobs:
       os: windows
     - checkName: istio
       displayName: Istio
+      os: linux
+    - checkName: jboss_wildfly
+      displayName: JBoss/WildFly
       os: linux
     - checkName: kafka_consumer
       displayName: Kafka Consumer
@@ -275,6 +285,9 @@ jobs:
       os: linux
     - checkName: powerdns_recursor
       displayName: PowerDNS Recursor
+      os: linux
+    - checkName: presto
+      displayName: Presto
       os: linux
     - checkName: process
       displayName: Process
