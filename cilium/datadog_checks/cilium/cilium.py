@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.base import OpenMetricsBaseCheck
+from datadog_checks.base import OpenMetricsBaseCheck, ConfigurationError
 
 AGENT_METRICS = {
     'cilium_agent_api_process_time_seconds': 'agent.api_process_time.seconds',
@@ -81,10 +81,12 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
 
     def __init__(self, name, init_config, instances):
-       super(CiliumCheck, self).__init__(name, init_config, instances=self.instance)
+       super(CiliumCheck, self).__init__(name, init_config, self._create_cilium_instance(self.instance))
 
-
-    def check(self, instance):
+    def _create_cilium_instance(self, instance):
+        """
+        Set up Cilium instance so it can be used in OpenMetricsBaseCheck
+        """
         endpoint = None
         agent_endpoint = instance.get('agent_endpoint')
         operator_endpoint = instance.get('operator_endpoint')
@@ -94,10 +96,22 @@ class CiliumCheck(OpenMetricsBaseCheck):
             if operator_endpoint:
                 endpoint = operator_endpoint
             else:
-                self.log.warning("Collecting Cilium operator metrics but no endpoint provided")
+                ConfigurationError("Collecting Cilium operator metrics but no prometheus endpoint provided")
         else:
             if agent_endpoint:
                 endpoint = agent_endpoint
+            else:
+                ConfigurationError("Unable to find prometheus endpoint in config file.")
+
+        metrics = [AGENT_METRICS, OPERATOR_METRICS]
+        metrics.extend(instance.get('metrics', []))
+
+        instance.update({'prometheus_url': endpoint, 'namespace': 'coredns', 'metrics': metrics})
+
+        return instance
+
+        
+        
         
 
         
