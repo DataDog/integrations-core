@@ -81,12 +81,13 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
 
     def __init__(self, name, init_config, instances):
-       super(CiliumCheck, self).__init__(name, init_config, self._create_cilium_instance(self.instance))
+       super(CiliumCheck, self).__init__(name, init_config, self._create_cilium_instance())
 
-    def _create_cilium_instance(self, instance):
+    def _create_cilium_instance(self):
         """
         Set up Cilium instance so it can be used in OpenMetricsBaseCheck
         """
+        instance = self.instance
         endpoint = None
         metrics = None
         agent_endpoint = instance.get('agent_endpoint')
@@ -107,7 +108,6 @@ class CiliumCheck(OpenMetricsBaseCheck):
                 metrics = [AGENT_METRICS]
 
         metrics.extend(instance.get('metrics', []))
-
 
         instance.update({'prometheus_url': endpoint, 'namespace': 'cilium', 'metrics': metrics})
 
