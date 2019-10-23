@@ -27,11 +27,13 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-Cilium does not include any metrics.
+See [metadata.csv][6] for a list of all metrics provided by this integration.
 
 ### Service Checks
 
-Cilium does not include any service checks.
+`cilium.prometheus.health`:
+
+Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
 
 ### Events
 
@@ -39,11 +41,12 @@ Cilium does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][7].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://cilium.io/
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://github.com/DataDog/integrations-core/blob/master/cilium/datadog_checks/cilium/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[6]: https://docs.datadoghq.com/help
+[6]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
+[7]: https://docs.datadoghq.com/help
