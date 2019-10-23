@@ -86,17 +86,6 @@ def test(
     if e2e:
         marker = 'e2e'
 
-    pytest_options = construct_pytest_options(
-        verbose=verbose,
-        color=color,
-        enter_pdb=enter_pdb,
-        debug=debug,
-        bench=bench,
-        coverage=coverage,
-        marker=marker,
-        test_filter=test_filter,
-        pytest_args=pytest_args,
-    )
     coverage_show_missing_lines = str(cov_missing or testing_on_ci)
 
     test_env_vars = {
@@ -110,7 +99,6 @@ def test(
             'DOCKER_* COMPOSE_*'
         ),
         'DDEV_COV_MISSING': coverage_show_missing_lines,
-        'PYTEST_ADDOPTS': pytest_options,
     }
 
     if passenv:
@@ -141,8 +129,22 @@ def test(
         # need a way to tell if anything ran since we don't know anything upfront.
         tests_ran = True
 
+        # Build pytest options
+        pytest_options = construct_pytest_options(
+            check=check,
+            verbose=verbose,
+            color=color,
+            enter_pdb=enter_pdb,
+            debug=debug,
+            bench=bench,
+            coverage=coverage,
+            marker=marker,
+            test_filter=test_filter,
+            pytest_args=pytest_args,
+        )
         if coverage:
-            test_env_vars['PYTEST_ADDOPTS'] = pytest_options.format(pytest_coverage_sources(check))
+            pytest_options = pytest_options.format(pytest_coverage_sources(check))
+        test_env_vars['PYTEST_ADDOPTS'] = pytest_options
 
         if verbose:
             echo_info('pytest options: `{}`'.format(test_env_vars['PYTEST_ADDOPTS']))

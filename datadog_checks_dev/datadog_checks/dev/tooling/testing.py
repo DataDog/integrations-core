@@ -158,6 +158,7 @@ def fix_coverage_report(check, report_file):
 
 
 def construct_pytest_options(
+    check,
     verbose=0,
     color=None,
     enter_pdb=False,
@@ -188,6 +189,9 @@ def construct_pytest_options(
 
     if coverage:
         pytest_options += (
+            # `junit-xml` config is added to pytest options in tox.ini since we need tox variable {envname}
+            # Junit test results class prefix
+            ' --junit-prefix={check}'
             # Located at the root of each repo
             ' --cov-config=../.coveragerc'
             # Use the same .coverage file to aggregate results
@@ -195,8 +199,8 @@ def construct_pytest_options(
             # Show no coverage report until the end
             ' --cov-report='
             # This will be formatted to the appropriate coverage paths for each package
-            ' {}'
-        )
+            ' {{}}'
+        ).format(check=check)
 
     if marker:
         pytest_options += ' -m "{}"'.format(marker)
