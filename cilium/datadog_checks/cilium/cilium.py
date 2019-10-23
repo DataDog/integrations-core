@@ -81,9 +81,6 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
 
     def __init__(self, name, init_config, instances):
-       super(CiliumCheck, self).__init__(name, init_config, self._create_cilium_instance())
-
-    def _create_cilium_instance(self):
         """
         Set up Cilium instance so it can be used in OpenMetricsBaseCheck
         """
@@ -92,16 +89,18 @@ class CiliumCheck(OpenMetricsBaseCheck):
         metrics = None
         agent_endpoint = instance.get('agent_endpoint')
         operator_endpoint = instance.get('operator_endpoint')
+
+        # Cannot have both cilium-agent and cilium-operator metrics enabled
         if agent_endpoint and operator_endpoint:
             ConfigurationError("Only one endpoint needs to be specified")
 
+        # Must have at least one endpoint enabled
         if not agent_endpoint and not operator_endpoint:
             ConfigurationError("Must provide at least one endpoint")
 
-        # Check if collecting metrics from Cilium operator or agent
         if operator_endpoint:
-                endpoint = operator_endpoint
-                metrics = [OPERATOR_METRICS]
+            endpoint = operator_endpoint
+            metrics = [OPERATOR_METRICS]
         else:
             if agent_endpoint:
                 endpoint = agent_endpoint
@@ -109,9 +108,16 @@ class CiliumCheck(OpenMetricsBaseCheck):
 
         metrics.extend(instance.get('metrics', []))
 
-        instance.update({'prometheus_url': endpoint, 'namespace': 'cilium', 'metrics': metrics})
+        instance.update({
+            'prometheus_url': endpoint,
+            'namespace': 'cilium',
+            'metrics': metrics,
+            'prometheus_timeout': instance.get('timeout', 10)
+        })
 
-        return instance
+        super(CiliumCheck, self).__init__(name, init_config, instance)
+
+
 
         
         
