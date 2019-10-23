@@ -30,10 +30,19 @@ def dd_environment(e2e_instance):
 
 @pytest.fixture
 def check():
-    c = PostgreSql('postgres', {}, {})
+    c = PostgreSql('postgres', {}, [{'dbname': 'dbname', 'host': 'localhost', 'port': '5432'}])
     c._is_9_2_or_above = mock.MagicMock()
-    PostgreSql._known_servers = set()  # reset the global state
     return c
+
+
+@pytest.fixture
+def integration_check():
+    def _check(instance):
+        c = PostgreSql('postgres', {}, [instance])
+        c._is_9_2_or_above = mock.MagicMock()
+        return c
+
+    return _check
 
 
 @pytest.fixture
