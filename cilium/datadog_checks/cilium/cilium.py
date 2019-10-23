@@ -79,17 +79,13 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
 
     def __init__(self, name, init_config, instances):
-        super(CiliumCheck, self).__init__(name, init_config, instances=self._generate_instances(instances))
+        instance = {}
+        endpoint = None
+        metrics = None
 
-    def _generate_instances(self, instances):
-        """
-        Set up Cilium instance so it can be used in OpenMetricsBaseCheck
-        """
-        generated_instances = []
+        if instances:
+            instance = instances[0]
 
-        for instance in instances:
-            endpoint = None
-            metrics = None
             agent_endpoint = instance.get('agent_endpoint')
             operator_endpoint = instance.get('operator_endpoint')
 
@@ -119,6 +115,5 @@ class CiliumCheck(OpenMetricsBaseCheck):
                     'prometheus_timeout': instance.get('timeout', 10),
                 }
             )
-            generated_instances.append(instance)
 
-        return generated_instances
+        super(CiliumCheck, self).__init__(name, init_config, instances=[instance])
