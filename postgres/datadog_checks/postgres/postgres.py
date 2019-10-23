@@ -8,7 +8,7 @@ from contextlib import closing
 
 import psycopg2
 from .version_utils import get_version, is_above, is_9_2_or_above, is_9_1_or_above, is_10_or_above, is_9_6_or_above, \
-    is_8_3_or_above
+    is_8_3_or_above, V9
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -337,7 +337,7 @@ class PostgreSql(AgentCheck):
         if scope is None:
             return None
 
-        if scope == REPLICATION_METRICS or not is_above(self.version, "9.0.0"):
+        if scope == REPLICATION_METRICS or not is_above(self.version, V9):
             log_func = self.log.debug
         else:
             log_func = self.log.warning
