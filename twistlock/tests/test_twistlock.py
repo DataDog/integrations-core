@@ -75,14 +75,21 @@ def test_check(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_config_project():
+def test_config_project(aggregator):
 
     project = 'foo'
-    qparams = {'project': project} if project else None
+    project_tag = 'project:{}'.format(project)
+    qparams = {'project': project}
 
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
     with mock.patch('requests.get', side_effect=mock_get, autospec=True):
+        check.check(instance)
         response = check.http.get('/containers', params=qparams)
+
+    # Check if "project" param is sent to request
     assert "project" in response.params
+    # Check if metrics are tagged with the project.
+    for metric in METRICS:
+        aggregator.assert_metric_has_tag(metric, project_tag)
