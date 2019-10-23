@@ -16,7 +16,8 @@
   "categories": [
     "data-store",
     "os & system",
-    "processing"
+    "processing",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
