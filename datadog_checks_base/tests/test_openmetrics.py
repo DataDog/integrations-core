@@ -37,14 +37,6 @@ class MockResponse:
         pass
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 PROMETHEUS_CHECK_INSTANCE = {
     'prometheus_url': 'http://fake.endpoint:10055/metrics',
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
@@ -55,12 +47,31 @@ PROMETHEUS_CHECK_INSTANCE = {
 }
 
 
+OPENMETRICS_CHECK_INSTANCE = {
+    'prometheus_url': 'http://fake.endpoint:10055/metrics',
+    'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
+    'namespace': 'openmetrics',
+}
+
+
 @pytest.fixture
 def mocked_prometheus_check():
     check = OpenMetricsBaseCheck('prometheus_check', {}, {})
     check.log = logging.getLogger('datadog-prometheus.test')
     check.log.debug = mock.MagicMock()
     return check
+
+
+@pytest.fixture
+def mocked_openmetrics_check_factory():
+    def factory(instance):
+        check = OpenMetricsBaseCheck('openmetrics_check', {}, [instance])
+        check.check_id = 'test:123'
+        check.log = logging.getLogger('datadog-openmetrics.test')
+        check.log.debug = mock.MagicMock()
+        return check
+
+    return factory
 
 
 @pytest.fixture
@@ -115,7 +126,11 @@ def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_c
     check.process_metric = mock.MagicMock()
     check.process(mocked_prometheus_scraper_config)
     check.poll.assert_called_with(mocked_prometheus_scraper_config)
-    check.process_metric.assert_called_with(ref_gauge, mocked_prometheus_scraper_config, metric_transformers=None)
+    check.process_metric.assert_called_with(
+        ref_gauge,
+        mocked_prometheus_scraper_config,
+        metric_transformers=mocked_prometheus_scraper_config['_default_metric_transformers'],
+    )
 
 
 def test_process_metric_gauge(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
@@ -138,8 +153,9 @@ def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_pro
     check = mocked_prometheus_check
     check.process_metric(filtered_gauge, mocked_prometheus_scraper_config, metric_transformers={})
     check.log.debug.assert_called_with(
-        "Unable to handle metric: process_start_time_seconds - "
-        "error: No handler function named 'process_start_time_seconds' defined"
+        'Skipping metric `%s` as it is not defined in the metrics mapper, '
+        'has no transformer function, nor does it match any wildcards.',
+        'process_start_time_seconds',
     )
     aggregator.assert_all_metrics_covered()
 
@@ -2048,3 +2064,34 @@ def test_filter_metrics(
         'filter.pod.restart', tags=['pod:kube-dns-autoscaler-97162954-mf6d3', 'namespace:kube-system'], value=42
     )
     aggregator.assert_all_metrics_covered()
+
+
+def test_metadata_default(mocked_openmetrics_check_factory, text_data):
+    instance = dict(OPENMETRICS_CHECK_INSTANCE)
+    check = mocked_openmetrics_check_factory(instance)
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.check(instance)
+
+        assert m.call_count == 0
+
+
+def test_metadata_transformer(mocked_openmetrics_check_factory, text_data):
+    instance = dict(OPENMETRICS_CHECK_INSTANCE)
+    instance['metadata_metric_name'] = 'kubernetes_build_info'
+    instance['metadata_label_map'] = {'version': 'gitVersion'}
+    check = mocked_openmetrics_check_factory(instance)
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.check(instance)
+
+        m.assert_any_call('test:123', 'version.major', '1')
+        m.assert_any_call('test:123', 'version.minor', '6')
+        m.assert_any_call('test:123', 'version.patch', '0')
+        m.assert_any_call('test:123', 'version.release', 'alpha.0.680')
+        m.assert_any_call('test:123', 'version.build', '3872cb93abf948-dirty')
+        m.assert_any_call('test:123', 'version.raw', 'v1.6.0-alpha.0.680+3872cb93abf948-dirty')
+        m.assert_any_call('test:123', 'version.scheme', 'semver')
+        assert m.call_count == 7

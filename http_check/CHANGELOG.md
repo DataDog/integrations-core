@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 4.3.1 / 2019-10-18
+
+* [Fixed] Ensure the correct tls_ca_cert value is used. See [#4819](https://github.com/DataDog/integrations-core/pull/4819).
+
 ## 4.3.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).

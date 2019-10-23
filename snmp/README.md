@@ -211,7 +211,7 @@ The Agent looks for the converted MIB Python files by specifying the destination
 
 ##### Profiles
 
-To group configuration, the check allows defining profiles to reuse metric definitions on several instances. Profiles define metrics the same way as instances, either inline or in separate files. Each instance can only match a single profile. For example you can define a profile in the `init_config` section:
+To group configurations, the check allows defining profiles to reuse metric definitions on several instances. Profiles define metrics the same way as instances, either inline in the configuration file or in separate files. Each instance can only match a single profile. For example, you can define a profile in the `init_config` section:
 
 ```yaml
 init_config:
@@ -272,7 +272,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][16
 
 
 ### Custom metrics
-The SNMP check can potentially emit [custom metrics][10], which may impact your [billing][11].
+Metrics collected by the SNMP integration are considered [custom metrics][10], which impacts your [bill][11].
 
 ### Validation
 

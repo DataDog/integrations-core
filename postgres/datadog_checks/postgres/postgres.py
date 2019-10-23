@@ -255,7 +255,7 @@ class PostgreSql(AgentCheck):
             'relation': False,
         }
 
-    def _get_replication_metrics(self, db):
+    def _get_replication_metrics(self):
         """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
         REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
         postgres version.
@@ -465,7 +465,6 @@ class PostgreSql(AgentCheck):
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
-
         db_instance_metrics = self._get_instance_metrics(collect_database_size_metrics, collect_default_db)
         bgw_instance_metrics = self._get_bgw_metrics()
         archiver_instance_metrics = self._get_archiver_metrics()
@@ -545,6 +544,7 @@ class PostgreSql(AgentCheck):
                         sslmode=ssl,
                         application_name="datadog-agent",
                     )
+
             except Exception as e:
                 message = u'Error establishing postgres connection: %s' % (str(e))
                 service_check_tags = self._get_service_check_tags(host, tags)
@@ -719,7 +719,6 @@ class PostgreSql(AgentCheck):
         tags = self.tags
 
         # Collect metrics
-        db = None
         try:
             # Check version
             self._connect(host, port, user, password, dbname, ssl, tags)

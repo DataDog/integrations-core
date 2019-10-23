@@ -23,52 +23,62 @@ def test_from_instance():
         assert 'scheme' in str(e)
 
     # defaults
-    params = from_instance({'url': 'https://example.com', 'name': 'UpService'})
-    assert len(params) == 18
+    config = from_instance({'url': 'https://example.com', 'name': 'UpService'})
+    assert len(config) == 18
 
     # `url` is mandatory
-    assert params[0] == 'https://example.com'
-    # defualt `client_cert` is None
-    assert params[1] is None
-    # defualt `client_key` is None
-    assert params[2] is None
-    # default `method` is get
-    assert params[3] == 'get'
-    # default `data` is an empty dict
-    assert params[4] == {}
-    # default `http_response_status_code`
-    assert params[5] == DEFAULT_EXPECTED_CODE
-    # default `include_content` is False
-    assert params[6] is False
-    # default headers
-    assert params[7] == agent_headers({})
-    # default `collect_response_time` is True
-    assert params[8] is True
-    # default `content_match` is None
-    assert params[9] is None
-    # default `reverse_content_match` is False
-    assert params[10] is False
-    # default `tags` is an empty list
-    assert params[11] == []
-    # default `check_certificate_expiration` is True
-    assert params[12] is True
-    # default `ca_certs`, it's mocked we don't care
-    assert params[13] != ''
-    # default `weakciphers` is False
-    assert params[14] is False
-    # default `check_hostname` is True
-    assert params[15] is True
-    # default `allow_redirects` is True
-    assert params[16] is True
-    # default `stream` is False
-    assert params[17] is False
+    assert config.url == 'https://example.com'
+
+    # assert defaults
+    assert config.client_cert is None
+    assert config.client_key is None
+    assert config.method == 'get'
+    assert config.data == {}
+    assert config.http_response_status_code == DEFAULT_EXPECTED_CODE
+    assert config.include_content is False
+    assert config.headers == agent_headers({})
+    assert config.response_time is True
+    assert config.content_match is None
+    assert config.reverse_content_match is False
+    assert config.tags == []
+    assert config.ssl_expire is True
+    assert config.instance_ca_certs != ''  # `ca_certs`, it's mocked we don't care
+    assert config.weakcipher is False
+    assert config.check_hostname is True
+    assert config.allow_redirects is True
+    assert config.stream is False
 
     # headers
-    params = from_instance(
+    config = from_instance(
         {'url': 'https://example.com', 'name': 'UpService', 'headers': {"X-Auth-Token": "SOME-AUTH-TOKEN"}}
     )
 
-    headers = params[7]
+    headers = config.headers
     expected_headers = agent_headers({}).get('User-Agent')
     assert headers["X-Auth-Token"] == "SOME-AUTH-TOKEN", headers
     assert expected_headers == headers.get('User-Agent'), headers
+
+
+def test_instance_ca_cert():
+    """
+    `instance_ca_cert` should default to the trusted ca_cert of the system
+    if `tls_ca_cert` and `ca_certs` are unavailable.
+    """
+    # Ensure that 'tls_ca_cert' takes precedence
+    params_with_all = from_instance(
+        {'url': 'https://example2.com', 'name': 'UpService', 'tls_ca_cert': 'foobar', 'ca_certs': 'barfoo'},
+        'default_ca_cert',
+    )
+    assert params_with_all.instance_ca_certs == 'foobar'
+
+    # Original config option for ca_certs
+    params_only_ca_certs = from_instance({'url': 'https://example2.com', 'name': 'UpService', 'ca_certs': 'ca_cert'})
+    assert params_only_ca_certs.instance_ca_certs == 'ca_cert'
+
+    # Default if there is no cert path is configured
+    params_no_certs = from_instance({'url': 'https://example2.com', 'name': 'UpService'}, 'default_ca_cert')
+    assert params_no_certs.instance_ca_certs == 'default_ca_cert'
+
+    # No default ca_cert
+    params_no_default = from_instance({'url': 'https://example2.com', 'name': 'UpService'})
+    assert params_no_default.instance_ca_certs is None
