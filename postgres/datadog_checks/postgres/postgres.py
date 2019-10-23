@@ -768,7 +768,6 @@ class PostgreSql(AgentCheck):
         tags = self.tags
 
         # Collect metrics
-        db = None
         try:
             # Check version
             self._connect(host, port, user, password, dbname, ssl, tags)
