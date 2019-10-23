@@ -74,7 +74,7 @@ class InstanceConfig:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
-            self.metrics, self.enforce_constraints, warning, log
+            self.metrics, warning, log
         )
 
         self.auth_data = self.get_auth_data(instance)
@@ -83,7 +83,7 @@ class InstanceConfig:
     def refresh_with_profile(self, profile, warning, log):
         self.metrics.extend(profile['definition'])
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
-            self.metrics, self.enforce_constraints, warning, log
+            self.metrics, warning, log
         )
 
     def call_cmd(self, cmd, *args, **kwargs):
@@ -170,7 +170,7 @@ class InstanceConfig:
 
         return context_engine_id, context_name
 
-    def parse_metrics(self, metrics, enforce_constraints, warning, log):
+    def parse_metrics(self, metrics, warning, log):
         """Parse configuration and returns data to be used for SNMP queries.
 
         `raw_oids` is a list of SNMP numerical OIDs to query.
@@ -226,15 +226,16 @@ class InstanceConfig:
                                     object_type = hlapi.ObjectType(hlapi.ObjectIdentity(mib, metric_tag['column']))
                                 except Exception as e:
                                     warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
-                                if 'table' in metric_tag:
-                                    tag_symbols = get_table_symbols(mib, metric_tag['table'])
-                                    tag_symbols.append(object_type)
-                                elif mib != metric['MIB']:
-                                    raise ConfigurationError(
-                                        'When tagging from a different MIB, the table must be specified'
-                                    )
                                 else:
-                                    symbols.append(object_type)
+                                    if 'table' in metric_tag:
+                                        tag_symbols = get_table_symbols(mib, metric_tag['table'])
+                                        tag_symbols.append(object_type)
+                                    elif mib != metric['MIB']:
+                                        raise ConfigurationError(
+                                            'When tagging from a different MIB, the table must be specified'
+                                        )
+                                    else:
+                                        symbols.append(object_type)
 
             elif 'OID' in metric:
                 raw_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID'])))
