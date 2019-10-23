@@ -164,7 +164,7 @@ def test_malformed_get_custom_queries(check):
     malformed_custom_query['metric_prefix'] = 'postgresql'
     check._get_custom_queries([], [malformed_custom_query])
     check.log.error.assert_called_once_with(
-        "custom query field `query` is required for metric_prefix `{}`".format(malformed_custom_query['metric_prefix'])
+        "custom query field `query` is required for metric_prefix `%s`", malformed_custom_query['metric_prefix']
     )
     check.log.reset_mock()
 
@@ -172,19 +172,17 @@ def test_malformed_get_custom_queries(check):
     malformed_custom_query['query'] = 'SELECT num FROM sometable'
     check._get_custom_queries([], [malformed_custom_query])
     check.log.error.assert_called_once_with(
-        "custom query field `columns` is required for metric_prefix `{}`".format(
-            malformed_custom_query['metric_prefix']
-        )
+        "custom query field `columns` is required for metric_prefix `%s`", malformed_custom_query['metric_prefix']
     )
     check.log.reset_mock()
 
     # Make sure we gracefully handle an error while performing custom queries
     malformed_custom_query_column = {}
     malformed_custom_query['columns'] = [malformed_custom_query_column]
-    db.cursor().execute.side_effect = psycopg2.ProgrammingError
+    db.cursor().execute.side_effect = psycopg2.ProgrammingError('FOO')
     check._get_custom_queries([], [malformed_custom_query])
     check.log.error.assert_called_once_with(
-        "Error executing query for metric_prefix {}: ".format(malformed_custom_query['metric_prefix'])
+        "Error executing query for metric_prefix %s: %s", malformed_custom_query['metric_prefix'], 'FOO'
     )
     check.log.reset_mock()
 
@@ -196,9 +194,10 @@ def test_malformed_get_custom_queries(check):
     db.cursor().__iter__.return_value = iter([query_return])
     check._get_custom_queries([], [malformed_custom_query])
     check.log.error.assert_called_once_with(
-        "query result for metric_prefix {}: expected {} columns, got {}".format(
-            malformed_custom_query['metric_prefix'], len(malformed_custom_query['columns']), len(query_return)
-        )
+        "query result for metric_prefix %s: expected %s columns, got %s",
+        malformed_custom_query['metric_prefix'],
+        len(malformed_custom_query['columns']),
+        len(query_return),
     )
     check.log.reset_mock()
 
@@ -206,7 +205,7 @@ def test_malformed_get_custom_queries(check):
     db.cursor().__iter__.return_value = iter([[]])
     check._get_custom_queries([], [malformed_custom_query])
     check.log.debug.assert_called_with(
-        "query result for metric_prefix {}: returned an empty result".format(malformed_custom_query['metric_prefix'])
+        "query result for metric_prefix %s: returned an empty result", malformed_custom_query['metric_prefix']
     )
     check.log.reset_mock()
 
@@ -215,7 +214,7 @@ def test_malformed_get_custom_queries(check):
     db.cursor().__iter__.return_value = iter([[1337]])
     check._get_custom_queries([], [malformed_custom_query])
     check.log.error.assert_called_once_with(
-        "column field `name` is required for metric_prefix `{}`".format(malformed_custom_query['metric_prefix'])
+        "column field `name` is required for metric_prefix `%s`", malformed_custom_query['metric_prefix']
     )
     check.log.reset_mock()
 
@@ -224,8 +223,9 @@ def test_malformed_get_custom_queries(check):
     db.cursor().__iter__.return_value = iter([[1337]])
     check._get_custom_queries([], [malformed_custom_query])
     check.log.error.assert_called_once_with(
-        "column field `type` is required for column `{}` "
-        "of metric_prefix `{}`".format(malformed_custom_query_column['name'], malformed_custom_query['metric_prefix'])
+        "column field `type` is required for column `%s` of metric_prefix `%s`",
+        malformed_custom_query_column['name'],
+        malformed_custom_query['metric_prefix'],
     )
     check.log.reset_mock()
 
@@ -234,12 +234,10 @@ def test_malformed_get_custom_queries(check):
     db.cursor().__iter__.return_value = iter([[1337]])
     check._get_custom_queries([], [malformed_custom_query])
     check.log.error.assert_called_once_with(
-        "invalid submission method `{}` for column `{}` of "
-        "metric_prefix `{}`".format(
-            malformed_custom_query_column['type'],
-            malformed_custom_query_column['name'],
-            malformed_custom_query['metric_prefix'],
-        )
+        "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
+        malformed_custom_query_column['type'],
+        malformed_custom_query_column['name'],
+        malformed_custom_query['metric_prefix'],
     )
     check.log.reset_mock()
 
@@ -250,8 +248,8 @@ def test_malformed_get_custom_queries(check):
     db.cursor().__iter__.return_value = iter([[query_return]])
     check._get_custom_queries([], [malformed_custom_query])
     check.log.error.assert_called_once_with(
-        "non-numeric value `{}` for metric column `{}` of "
-        "metric_prefix `{}`".format(
-            query_return, malformed_custom_query_column['name'], malformed_custom_query['metric_prefix']
-        )
+        "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
+        query_return,
+        malformed_custom_query_column['name'],
+        malformed_custom_query['metric_prefix'],
     )
