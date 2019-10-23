@@ -1,22 +1,5 @@
-trigger:
-  branches:
-    include:
-    - master
-
-pr:
-  branches:
-    include:
-    - master
-  paths:
-    include:
-    - datadog_checks_base/datadog_checks/*
-    - .azure-pipelines/*
-
-variables:
-  DDEV_COLOR: 1
-
 jobs:
-- template: './templates/test-all.yml'
+- template: './test-all.yml'
   parameters:
     checks:
     - checkName: datadog_checks_base
