@@ -54,9 +54,6 @@ class TwistlockCheck(AgentCheck):
         if not self.config.username or not self.config.password:
             raise Exception('The Twistlock check requires both a username and a password')
 
-        if self.config.project:
-            self.config.tags.append("project:{}".format(self.config.project))
-
         # alert if a scan hasn't been able to run in a few hours and then in a day
         # only calculate this once per check run
         self.current_date = datetime.now(tz.tzutc())

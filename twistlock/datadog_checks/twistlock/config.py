@@ -16,3 +16,5 @@ class Config:
         self.username = instance.get('username')
         self.password = instance.get('password')
         self.project = instance.get('project')
+        if self.project:
+            self.tags.append("project:{}".format(self.project))
