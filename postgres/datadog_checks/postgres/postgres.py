@@ -237,8 +237,7 @@ class PostgreSql(AgentCheck):
             if sub_key in self.db_bgw_metrics:
                 self.bgw_metrics = None
                 self.log.debug(
-                    "Not collecting bgw metrics for key: %s as they are already collected by another instance",
-                    self.key
+                    "Not collecting bgw metrics for key: %s as they are already collected by another instance", self.key
                 )
                 return None
 
@@ -285,7 +284,7 @@ class PostgreSql(AgentCheck):
                 self.archiver_metrics = None
                 self.log.debug(
                     "Not collecting archiver metrics for key: %s as they are already collected by another instance",
-                    self.key
+                    self.key,
                 )
                 return None
 
