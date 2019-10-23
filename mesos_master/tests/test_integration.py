@@ -13,6 +13,7 @@ from .common import not_windows_ci
 pytestmark = not_windows_ci
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_service_check(bad_instance, aggregator):
     check = MesosMaster('mesos_master', {}, [bad_instance])
