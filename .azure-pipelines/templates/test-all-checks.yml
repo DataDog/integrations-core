@@ -1,5 +1,5 @@
 jobs:
-- template: './templates/test-all.yml'
+- template: './test-all.yml'
   parameters:
     checks:
     - checkName: datadog_checks_base
