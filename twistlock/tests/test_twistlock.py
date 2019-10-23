@@ -41,11 +41,10 @@ HERE = get_here()
 
 
 class MockResponse:
-    def __init__(self, j, **kwargs):
+    def __init__(self, j):
         self.text = j
         self._json = j
         self.status_code = 200
-        self.params = kwargs['params'] if 'params' in kwargs else None
 
     def json(self):
         return json.loads(self._json)
@@ -57,7 +56,7 @@ def mock_get(url, *args, **kwargs):
     f_name = os.path.join(HERE, 'fixtures', path)
     with open(f_name, 'r') as f:
         text_data = f.read()
-        return MockResponse(text_data, **kwargs)
+        return MockResponse(text_data)
 
 
 def test_check(aggregator):
@@ -84,12 +83,19 @@ def test_config_project(aggregator):
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get, autospec=True):
+    with mock.patch('requests.get', side_effect=mock_get, autospec=True) as r:
         check.check(instance)
-        response = check.http.get('/containers', params=qparams)
 
-    # Check if "project" param is sent to request
-    assert "project" in response.params
+        r.assert_called_with(
+            mock.ANY,
+            params=qparams,
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+        )
     # Check if metrics are tagged with the project.
     for metric in METRICS:
         aggregator.assert_metric_has_tag(metric, project_tag)
