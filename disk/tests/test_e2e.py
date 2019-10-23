@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import sys
-
 import pytest
 
 from . import common
