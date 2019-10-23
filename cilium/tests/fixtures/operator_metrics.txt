@@ -1,0 +1,21 @@
+# HELP cilium_operator_process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE cilium_operator_process_cpu_seconds_total counter
+cilium_operator_process_cpu_seconds_total 261.63
+# HELP cilium_operator_process_max_fds Maximum number of open file descriptors.
+# TYPE cilium_operator_process_max_fds gauge
+cilium_operator_process_max_fds 1.048576e+06
+# HELP cilium_operator_process_open_fds Number of open file descriptors.
+# TYPE cilium_operator_process_open_fds gauge
+cilium_operator_process_open_fds 11
+# HELP cilium_operator_process_resident_memory_bytes Resident memory size in bytes.
+# TYPE cilium_operator_process_resident_memory_bytes gauge
+cilium_operator_process_resident_memory_bytes 4.358144e+07
+# HELP cilium_operator_process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE cilium_operator_process_start_time_seconds gauge
+cilium_operator_process_start_time_seconds 1.5712346723e+09
+# HELP cilium_operator_process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE cilium_operator_process_virtual_memory_bytes gauge
+cilium_operator_process_virtual_memory_bytes 1.625088e+08
+# HELP cilium_operator_process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE cilium_operator_process_virtual_memory_max_bytes gauge
+cilium_operator_process_virtual_memory_max_bytes -1
