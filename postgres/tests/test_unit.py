@@ -4,9 +4,9 @@
 import psycopg2
 import pytest
 from mock import MagicMock
+from semver import VersionInfo
 
 from datadog_checks.postgres import util
-from semver import VersionInfo
 
 pytestmark = pytest.mark.unit
 

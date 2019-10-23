@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import re
-import semver
 
+import semver
 
 V8_3 = semver.parse("8.3.0")
 V9 = semver.parse("9.0.0")

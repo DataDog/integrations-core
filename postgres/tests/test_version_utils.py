@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-
-from semver import VersionInfo
 from mock import MagicMock
+from semver import VersionInfo
+
 from datadog_checks.postgres.version_utils import get_version, is_above
 
 pytestmark = pytest.mark.unit

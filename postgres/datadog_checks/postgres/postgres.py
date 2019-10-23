@@ -7,8 +7,6 @@ import socket
 from contextlib import closing
 
 import psycopg2
-from .version_utils import get_version, is_above, is_9_2_or_above, is_9_1_or_above, is_10_or_above, is_9_6_or_above, \
-    is_8_3_or_above, V9
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -41,6 +39,16 @@ from .util import (
     SIZE_METRICS,
     STATIO_METRICS,
     fmt,
+)
+from .version_utils import (
+    V9,
+    get_version,
+    is_8_3_or_above,
+    is_9_1_or_above,
+    is_9_2_or_above,
+    is_9_6_or_above,
+    is_10_or_above,
+    is_above,
 )
 
 MAX_CUSTOM_RESULTS = 100
