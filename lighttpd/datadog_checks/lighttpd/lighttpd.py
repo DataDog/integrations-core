@@ -17,6 +17,7 @@ class Lighttpd(AgentCheck):
 
     See http://redmine.lighttpd.net/projects/1/wiki/Docs_ModStatus for Lighttpd details
     See http://redmine.lighttpd.net/projects/lighttpd2/wiki/Mod_status for Lighttpd2 details
+
     """
 
     SERVICE_CHECK_NAME = 'lighttpd.can_connect'
