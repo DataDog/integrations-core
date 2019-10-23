@@ -73,18 +73,14 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
-        self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
-            self.metrics, warning, log
-        )
+        self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(self.metrics, warning, log)
 
         self.auth_data = self.get_auth_data(instance)
         self.context_data = hlapi.ContextData(*self.get_context_data(instance))
 
     def refresh_with_profile(self, profile, warning, log):
         self.metrics.extend(profile['definition'])
-        self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(
-            self.metrics, warning, log
-        )
+        self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(self.metrics, warning, log)
 
     def call_cmd(self, cmd, *args, **kwargs):
         return cmd(self.snmp_engine, self.auth_data, self.transport, self.context_data, *args, **kwargs)
@@ -180,17 +176,16 @@ class InstanceConfig:
         raw_oids = []
         table_oids = {}
         mibs_to_load = set()
-        loaded_table = {}
 
         def get_table_symbols(mib, table):
             key = (mib, table)
-            if key in loaded_table:
-                table_object = loaded_table[key]
-            else:
-                table_object = hlapi.ObjectType(hlapi.ObjectIdentity(mib, table))
-                loaded_table[key] = table_object
-                table_oids[table_object] = []
-            return table_oids[table_object]
+            if key in table_oids:
+                return table_oids[key][1]
+
+            table_object = hlapi.ObjectType(hlapi.ObjectIdentity(mib, table))
+            symbols = []
+            table_oids[key] = (table_object, symbols)
+            return symbols
 
         # Check the metrics completely defined
         for metric in metrics:
@@ -201,7 +196,7 @@ class InstanceConfig:
                 if 'symbol' in metric:
                     to_query = metric['symbol']
                     try:
-                        table_oids[hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], to_query))] = []
+                        get_table_symbols(metric['MIB'], to_query)
                     except Exception as e:
                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                 elif 'symbols' not in metric:
@@ -249,7 +244,7 @@ class InstanceConfig:
                 log.debug("Couldn't found mib %s, trying to fetch it", mib)
                 self.fetch_mib(mib)
 
-        return table_oids, raw_oids, mibs_to_load
+        return dict(table_oids.values()), raw_oids, mibs_to_load
 
     @staticmethod
     def fetch_mib(mib):
