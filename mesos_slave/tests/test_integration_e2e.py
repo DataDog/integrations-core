@@ -1,19 +1,15 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import platform
-
 import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.mesos_slave import MesosSlave
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, not_windows_ci
 
-# Does not work on windows. The zookeeper image are not compatible with windows architecture.
-# Error: "no matching manifest for windows/amd64 10.0.17763 in the manifest list entries"
-pytest.mark.skipif(platform.system() == 'Windows', reason="Docker images not compatible with windows architecture")
+pytestmark = not_windows_ci
 
 
 @pytest.mark.integration
