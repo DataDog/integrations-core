@@ -600,3 +600,45 @@ def test_fetch_mib():
         os.unlink(pyc)
     SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
     assert os.path.exists(path)
+
+
+def test_different_mibs(aggregator):
+    metrics = [
+        {
+            'MIB': 'ENTITY-SENSOR-MIB',
+            'table': 'entitySensorObjects',
+            'symbols': ['entPhySensorValue'],
+            'metric_tags': [
+                {'tag': 'desc', 'column': 'entLogicalDescr', 'table': 'entLogicalTable', 'MIB': 'ENTITY-MIB'}
+            ],
+        }
+    ]
+    instance = common.generate_instance_config(metrics)
+    instance['community_string'] = 'entity'
+    check = common.create_check(instance)
+
+    check.check(instance)
+    aggregator.assert_metric_has_tag_prefix('snmp.entPhySensorValue', 'desc')
+
+
+def test_different_tables(aggregator):
+    metrics = [
+        {
+            'MIB': 'IF-MIB',
+            'table': 'ifTable',
+            'symbols': ['ifInOctets', 'ifOutOctets'],
+            'metric_tags': [
+                {'tag': 'interface', 'column': 'ifDescr'},
+                {'tag': 'speed', 'column': 'ifHighSpeed', 'table': 'ifXTable'},
+            ],
+        }
+    ]
+    instance = common.generate_instance_config(metrics)
+    instance['community_string'] = 'if'
+    # Enforce bulk to trigger table usage
+    instance['bulk_threshold'] = 1
+    instance['enforce_mib_constraints'] = False
+    check = common.create_check(instance)
+
+    check.check(instance)
+    aggregator.assert_metric_has_tag_prefix('snmp.ifInOctets', 'speed')
