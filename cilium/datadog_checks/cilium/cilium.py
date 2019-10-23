@@ -104,10 +104,10 @@ class CiliumCheck(OpenMetricsBaseCheck):
         else:
             if agent_endpoint:
                 endpoint = agent_endpoint
-                metrics = [AGENT_METRICS
+                metrics = [AGENT_METRICS]
 
         metrics.extend(instance.get('metrics', []))
-        
+
 
         instance.update({'prometheus_url': endpoint, 'namespace': 'cilium', 'metrics': metrics})
 
