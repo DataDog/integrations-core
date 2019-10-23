@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 1.7.1 / 2019-10-21
+
+* [Fixed] Fix is_leader when vault sealed. See [#4838](https://github.com/DataDog/integrations-core/pull/4838).
+
 ## 1.7.0 / 2019-10-18
 
 * [Added] Allows certain expected HTTP error status_codes for the `/sys/health` endpoint. See [#4745](https://github.com/DataDog/integrations-core/pull/4745).

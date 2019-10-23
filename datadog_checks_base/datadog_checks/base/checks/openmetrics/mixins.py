@@ -271,6 +271,20 @@ class OpenMetricsScraperMixin(object):
 
         config['telemetry'] = is_affirmative(instance.get('telemetry', default_instance.get('telemetry', False)))
 
+        # The metric name services use to indicate build information
+        config['metadata_metric_name'] = instance.get(
+            'metadata_metric_name', default_instance.get('metadata_metric_name')
+        )
+
+        # Map of metadata key names to label names
+        config['metadata_label_map'] = instance.get(
+            'metadata_label_map', default_instance.get('metadata_label_map', {})
+        )
+
+        config['_default_metric_transformers'] = {}
+        if config['metadata_metric_name'] and config['metadata_label_map']:
+            config['_default_metric_transformers'][config['metadata_metric_name']] = self.transform_metadata
+
         return config
 
     def parse_metric_family(self, response, scraper_config):
@@ -357,8 +371,18 @@ class OpenMetricsScraperMixin(object):
         Note that if the instance has a 'tags' attribute, it will be pushed
         automatically as additional custom tags and added to the metrics
         """
+        transformers = scraper_config['_default_metric_transformers'].copy()
+        if metric_transformers:
+            transformers.update(metric_transformers)
+
         for metric in self.scrape_metrics(scraper_config):
-            self.process_metric(metric, scraper_config, metric_transformers=metric_transformers)
+            self.process_metric(metric, scraper_config, metric_transformers=transformers)
+
+    def transform_metadata(self, metric, scraper_config):
+        labels = metric.samples[0][self.SAMPLE_LABELS]
+        for metadata_name, label_name in iteritems(scraper_config['metadata_label_map']):
+            if label_name in labels:
+                self.set_metadata(metadata_name, labels[label_name])
 
     def _telemetry_metric_name_with_namespace(self, metric_name, scraper_config):
         return '{}.{}.{}'.format(scraper_config['namespace'], 'telemetry', metric_name)
@@ -461,28 +485,31 @@ class OpenMetricsScraperMixin(object):
         try:
             self.submit_openmetric(scraper_config['metrics_mapper'][metric.name], metric, scraper_config)
         except KeyError:
-            if metric_transformers is not None:
-                if metric.name in metric_transformers:
-                    try:
-                        # Get the transformer function for this specific metric
-                        transformer = metric_transformers[metric.name]
-                        transformer(metric, scraper_config)
-                    except Exception as err:
-                        self.log.warning("Error handling metric: {} - error: {}".format(metric.name, err))
-                else:
-                    self.log.debug(
-                        "Unable to handle metric: {0} - error: "
-                        "No handler function named '{0}' defined".format(metric.name)
-                    )
-            else:
-                # build the wildcard list if first pass
-                if scraper_config['_metrics_wildcards'] is None:
-                    scraper_config['_metrics_wildcards'] = [x for x in scraper_config['metrics_mapper'] if '*' in x]
+            if metric_transformers is not None and metric.name in metric_transformers:
+                try:
+                    # Get the transformer function for this specific metric
+                    transformer = metric_transformers[metric.name]
+                    transformer(metric, scraper_config)
+                except Exception as err:
+                    self.log.warning('Error handling metric: {} - error: {}'.format(metric.name, err))
 
-                # try matching wildcard (generic check)
-                for wildcard in scraper_config['_metrics_wildcards']:
-                    if fnmatchcase(metric.name, wildcard):
-                        self.submit_openmetric(metric.name, metric, scraper_config)
+                return
+
+            # build the wildcard list if first pass
+            if scraper_config['_metrics_wildcards'] is None:
+                scraper_config['_metrics_wildcards'] = [x for x in scraper_config['metrics_mapper'] if '*' in x]
+
+            # try matching wildcard
+            for wildcard in scraper_config['_metrics_wildcards']:
+                if fnmatchcase(metric.name, wildcard):
+                    self.submit_openmetric(metric.name, metric, scraper_config)
+                    return
+
+            self.log.debug(
+                'Skipping metric `%s` as it is not defined in the metrics mapper, '
+                'has no transformer function, nor does it match any wildcards.',
+                metric.name,
+            )
 
     def poll(self, scraper_config, headers=None):
         """
