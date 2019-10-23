@@ -5,4 +5,4 @@ from datadog_checks.cilium import CiliumCheck
 
 
 def test_generate_instance_agent(agent_instance):
-    check = CiliumCheck('cilium', {}, agent_instance)
+    check = CiliumCheck('cilium', {}, [agent_instance])

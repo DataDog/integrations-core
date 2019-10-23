@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.base import OpenMetricsBaseCheck, ConfigurationError
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 
 AGENT_METRICS = {
     'cilium_agent_api_process_time_seconds': 'agent.api_process_time.seconds',
@@ -36,7 +36,7 @@ AGENT_METRICS = {
     'cilium_nodes_all_events_received_total': 'nodes.all_events_received.total',
     'cilium_nodes_all_num': 'nodes.managed.total',
     'cilium_policy_count': 'policy.count',
-    'cilium_policy_endpoint_enforcement_status': 'policy.endpoint_enforcement_status', # double check
+    'cilium_policy_endpoint_enforcement_status': 'policy.endpoint_enforcement_status',  # double check
     'cilium_policy_import_errors': 'policy.import_errors.count',
     'cilium_policy_l7_denied_total': 'policy.l7_denied.total',
     'cilium_policy_l7_forwarded_total': 'policy.l7_forwarded.total',
@@ -58,7 +58,6 @@ AGENT_METRICS = {
     'cilium_triggers_policy_update_total': 'triggers_policy.update.total',
     'cilium_unreachable_health_endpoints': 'unreachable.health_endpoints',
     'cilium_unreachable_nodes': 'unreachable.nodes',
-    # Metrics unsure if needed
     'cilium_event_ts': 'event_timestamp',
 }
 
@@ -74,54 +73,52 @@ OPERATOR_METRICS = {
 }
 
 
-
 class CiliumCheck(OpenMetricsBaseCheck):
     """
     Collect Cilium metrics from Prometheus endpoint
     """
 
     def __init__(self, name, init_config, instances):
+        super(CiliumCheck, self).__init__(name, init_config, instances=self._generate_instances(instances))
+
+    def _generate_instances(self, instances):
         """
         Set up Cilium instance so it can be used in OpenMetricsBaseCheck
         """
-        instance = self.instance
-        endpoint = None
-        metrics = None
-        agent_endpoint = instance.get('agent_endpoint')
-        operator_endpoint = instance.get('operator_endpoint')
+        generated_instances = []
 
-        # Cannot have both cilium-agent and cilium-operator metrics enabled
-        if agent_endpoint and operator_endpoint:
-            ConfigurationError("Only one endpoint needs to be specified")
+        for instance in instances:
+            endpoint = None
+            metrics = None
+            agent_endpoint = instance.get('agent_endpoint')
+            operator_endpoint = instance.get('operator_endpoint')
 
-        # Must have at least one endpoint enabled
-        if not agent_endpoint and not operator_endpoint:
-            ConfigurationError("Must provide at least one endpoint")
+            # Cannot have both cilium-agent and cilium-operator metrics enabled
+            if agent_endpoint and operator_endpoint:
+                ConfigurationError("Only one endpoint needs to be specified")
 
-        if operator_endpoint:
-            endpoint = operator_endpoint
-            metrics = [OPERATOR_METRICS]
-        else:
-            if agent_endpoint:
-                endpoint = agent_endpoint
-                metrics = [AGENT_METRICS]
+            # Must have at least one endpoint enabled
+            if not agent_endpoint and not operator_endpoint:
+                ConfigurationError("Must provide at least one endpoint")
 
-        metrics.extend(instance.get('metrics', []))
+            if operator_endpoint:
+                endpoint = operator_endpoint
+                metrics = [OPERATOR_METRICS]
+            else:
+                if agent_endpoint:
+                    endpoint = agent_endpoint
+                    metrics = [AGENT_METRICS]
 
-        instance.update({
-            'prometheus_url': endpoint,
-            'namespace': 'cilium',
-            'metrics': metrics,
-            'prometheus_timeout': instance.get('timeout', 10)
-        })
+            metrics.extend(instance.get('metrics', []))
 
-        super(CiliumCheck, self).__init__(name, init_config, instance)
+            instance.update(
+                {
+                    'prometheus_url': endpoint,
+                    'namespace': 'cilium',
+                    'metrics': metrics,
+                    'prometheus_timeout': instance.get('timeout', 10),
+                }
+            )
+            generated_instances.append(instance)
 
-
-
-        
-        
-        
-
-        
-
+        return generated_instances
