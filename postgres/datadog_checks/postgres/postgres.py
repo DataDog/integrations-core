@@ -73,6 +73,7 @@ class PostgreSql(AgentCheck):
         AgentCheck.__init__(self, name, init_config, instances)
         self._clean_state()
         self.db = None
+        self._version = None
         self.custom_metrics = None
 
         # Deprecate custom_metrics in favor of custom_queries
@@ -270,7 +271,7 @@ class PostgreSql(AgentCheck):
         Uses a dictionnary to save the result for each instance
         """
         metrics = self.replication_metrics
-        if is_10_or_above(self.get_version()) and metrics is None:
+        if is_10_or_above(self.version) and metrics is None:
             self.replication_metrics = dict(REPLICATION_METRICS_10)
             metrics = self.replication_metrics
         elif is_9_1_or_above(self.version) and metrics is None:
@@ -732,7 +733,7 @@ class PostgreSql(AgentCheck):
             self._connect(host, port, user, password, dbname, ssl, tags)
             if tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            version = self._get_version()
+            version = self.version
             self.log.debug("Running check against version %s" % version)
             self._collect_stats(
                 user,
