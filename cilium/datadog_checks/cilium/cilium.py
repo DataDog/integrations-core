@@ -88,25 +88,28 @@ class CiliumCheck(OpenMetricsBaseCheck):
         Set up Cilium instance so it can be used in OpenMetricsBaseCheck
         """
         endpoint = None
+        metrics = None
         agent_endpoint = instance.get('agent_endpoint')
         operator_endpoint = instance.get('operator_endpoint')
+        if agent_endpoint and operator_endpoint:
+            ConfigurationError("Only one endpoint needs to be specified")
+
+        if not agent_endpoint and not operator_endpoint:
+            ConfigurationError("Must provide at least one endpoint")
 
         # Check if collecting metrics from Cilium operator or agent
-        if instance.get('collect_operator_metrics', False):
-            if operator_endpoint:
+        if operator_endpoint:
                 endpoint = operator_endpoint
-            else:
-                ConfigurationError("Collecting Cilium operator metrics but no prometheus endpoint provided")
+                metrics = [OPERATOR_METRICS]
         else:
             if agent_endpoint:
                 endpoint = agent_endpoint
-            else:
-                ConfigurationError("Unable to find prometheus endpoint in config file.")
+                metrics = [AGENT_METRICS
 
-        metrics = [AGENT_METRICS, OPERATOR_METRICS]
         metrics.extend(instance.get('metrics', []))
+        
 
-        instance.update({'prometheus_url': endpoint, 'namespace': 'coredns', 'metrics': metrics})
+        instance.update({'prometheus_url': endpoint, 'namespace': 'cilium', 'metrics': metrics})
 
         return instance
 

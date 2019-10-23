@@ -5,20 +5,15 @@ instances:
     ## @param agent_endpoint - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     ## By default, the Cilium integration collects `cilium-agent` metrics.
+    ## One of agent_endpoint or operator_endpoint must be provided.
     #
   - agent_endpoint: http://localhost:9090/metrics
 
     ## @param operator_endpoint - string - optional
-    ## If you would like to collect the `cilium-operator` metrics, enable
-    ## the `collect_operator_metrics` option.
+    ## Enable to collect `cilium-operator` metrics.
     ## Cilium operator metrics are exposed on port 6942.
     #
     # operator_endpoint: http://localhost:6942/metrics
-
-    ## @param collect_operator_metrics - boolean - optional - default: false
-    ## Enable to collect `cilium-operator` metrics.
-    #
-    # collect_operator_metrics: false
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metrics, events and service checks emitted by this integration.
