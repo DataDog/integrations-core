@@ -26,6 +26,14 @@ Follow the instructions below to configure this check for an Agent running on a 
         ## url used to connect to the Memcached instance.
         #
         - url: localhost
+
+      # ...
+
+      # logs:
+			#   - type: file
+			#     path: /var/log/memcached.log
+			#     source: memcached
+			#     service: memcached
     ```
 
 2. [Restart the Agent][5] to begin sending Memcache metrics to Datadog.
@@ -50,6 +58,23 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 See [metadata.csv][7] for a list of metrics provided by this check.
 
 The check only collects `memcache.slabs.*` metrics if you set `options.slabs: true` in `mcache.d/conf.yaml`. Likewise, it only collects `memcache.items.*` metrics if you set `options.items: true`.
+
+### Logs
+
+**Available for Agent >6.0**
+
+Add this configuration block to your `mcache.d/conf.yaml` file to start collecting your Memcached Logs:
+
+    ```yaml
+			logs:
+			  - type: file
+			    path: /var/log/memcached.log
+			    source: memcached
+			    service: memcached
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment.
+    [Restart the Agent][5] to validate these changes.
 
 
 ### Events
