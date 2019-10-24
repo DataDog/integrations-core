@@ -46,6 +46,7 @@ from .version_utils import (
     is_8_3_or_above,
     is_9_1_or_above,
     is_9_2_or_above,
+    is_9_4_or_above,
     is_9_6_or_above,
     is_10_or_above,
     is_above,
