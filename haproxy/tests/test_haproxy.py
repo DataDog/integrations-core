@@ -228,6 +228,7 @@ def test_version_metadata_http(check, version_metadata):
         check.check(config)
         for name, value in version_metadata.items():
             m.assert_any_call('test:123', name, value)
+        print(m.__dict__)
         assert m.call_count == len(version_metadata)
 
 
