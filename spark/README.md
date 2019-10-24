@@ -58,7 +58,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 |----------------------|---------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `spark`                                                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                               |
-| `<INSTANCE_CONFIG>`  | <pre>{"spark_url": "%%host%%:8080", "cluster_name":&lt;CLUSTER_NAME&gt;"}</pre> |
+| `<INSTANCE_CONFIG>`  | `{"spark_url": "%%host%%:8080", "cluster_name":"<CLUSTER_NAME>"}` |
 
 ### Validation
 
