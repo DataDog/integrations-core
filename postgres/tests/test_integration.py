@@ -8,6 +8,7 @@ import psycopg2
 import pytest
 
 from datadog_checks.postgres import PostgreSql
+from semver import VersionInfo
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
@@ -126,13 +127,13 @@ def test_activity_metrics(aggregator, integration_check, pg_instance):
 def test_wrong_version(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     # Enforce to cache wrong version
-    check.version = [9, 6, 0]
+    check._version = VersionInfo(*[9, 6, 0])
 
     check.check(pg_instance)
     assert_state_clean(check)
 
     check.check(pg_instance)
-    assert check.version[0] == int(POSTGRES_VERSION)
+    assert check._version.major == int(POSTGRES_VERSION)
     assert_state_set(check)
 
 
