@@ -144,6 +144,7 @@ def test(
             marker=marker,
             test_filter=test_filter,
             pytest_args=pytest_args,
+            e2e=e2e,
         )
         if coverage:
             pytest_options = pytest_options.format(pytest_coverage_sources(check))

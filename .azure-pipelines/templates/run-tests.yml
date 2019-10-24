@@ -13,13 +13,13 @@ steps:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
-  - script: ddev env test --base --new-env --profile-memory ${{ parameters.check }}
+  - script: ddev env test --base --new-env --profile-memory --junit ${{ parameters.check }}
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
 
 - ${{ if eq(parameters.benchmark, 'true') }}:
-  - script: ddev test --bench --pytest-args="--junitxml=junit/test-bench-results.xml" ${{ parameters.check }}
+  - script: ddev test --bench --junit ${{ parameters.check }}
     displayName: 'Run benchmarks'
 
 - task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
