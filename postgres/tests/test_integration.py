@@ -6,9 +6,9 @@ import socket
 import mock
 import psycopg2
 import pytest
+from semver import VersionInfo
 
 from datadog_checks.postgres import PostgreSql
-from semver import VersionInfo
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10

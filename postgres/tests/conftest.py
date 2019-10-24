@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-import mock
 import psycopg2
 import pytest
 from semver import VersionInfo

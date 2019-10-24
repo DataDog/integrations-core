@@ -733,7 +733,7 @@ class PostgreSql(AgentCheck):
             self._connect(host, port, user, password, dbname, ssl, tags)
             if tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            self.log.debug("Running check against version %s" % self.version)
+            self.log.debug("Running check against version %s", self.version)
             self._collect_stats(
                 user,
                 tags,
