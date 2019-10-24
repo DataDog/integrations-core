@@ -189,7 +189,10 @@ def construct_pytest_options(
 
     if coverage:
         pytest_options += (
-            # `junit-xml` config is added to pytest options in tox.ini since we need tox variable {envname}
+            # junit report file must contain the env name to handle multiple envs
+            # $TOX_ENV_NAME is a tox injected variable
+            # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
+            ' --junit-xml=.junit/test-$TOX_ENV_NAME.xml'
             # Junit test results class prefix
             ' --junit-prefix={check}'
             # Located at the root of each repo
