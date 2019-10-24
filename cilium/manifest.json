@@ -4,9 +4,9 @@
   "manifest_version": "1.0.0",
   "name": "cilium",
   "metric_prefix": "cilium.",
-  "metric_to_check": "",
+  "metric_to_check": "cilium.endpoint.count",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Collect per pod agent metrics and cluster-wide operator metrics",
   "guid": "1d9db288-4678-4ede-9ba0-8b04a8ae31c2",
   "support": "core",
   "supported_os": [
