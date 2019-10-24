@@ -197,14 +197,13 @@ class PostgreSql(AgentCheck):
             if sub_key in self.db_bgw_metrics:
                 self.bgw_metrics = None
                 self.log.debug(
-                    "Not collecting bgw metrics for key: {0} as "
-                    "they are already collected by another instance".format(self.key)
+                    "Not collecting bgw metrics for key: %s as they are already collected by another instance", self.key
                 )
                 return None
 
             self.db_bgw_metrics.append(sub_key)
-
             self.bgw_metrics = dict(COMMON_BGW_METRICS)
+
             if is_9_1_or_above(self.version):
                 self.bgw_metrics.update(NEWER_91_BGW_METRICS)
             if is_9_2_or_above(self.version):
@@ -244,8 +243,8 @@ class PostgreSql(AgentCheck):
             if sub_key in self.db_archiver_metrics:
                 self.archiver_metrics = None
                 self.log.debug(
-                    "Not collecting archiver metrics for key: {0} as "
-                    "they are already collected by another instance".format(self.key)
+                    "Not collecting archiver metrics for key: %s as they are already collected by another instance",
+                    self.key,
                 )
                 return None
 
@@ -339,7 +338,7 @@ class PostgreSql(AgentCheck):
                 if len(schemas) == 0:
                     config[name]['schemas'] = [ALL_SCHEMAS]
             else:
-                self.log.warning('Unhandled relations config type: {}'.format(element))
+                self.log.warning('Unhandled relations config type: %s', element)
         return config
 
     def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, relations_config):
@@ -362,10 +361,10 @@ class PostgreSql(AgentCheck):
             if scope['relation'] and len(relations_config) > 0:
                 rel_names = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_name' in v)
                 rel_regex = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_regex' in v)
-                self.log.debug("Running query: {} with relations matching: {}".format(query, rel_names + rel_regex))
+                self.log.debug("Running query: %s with relations matching: %s", query, rel_names + rel_regex)
                 cursor.execute(query.format(relations_names=rel_names, relations_regexes=rel_regex))
             else:
-                self.log.debug("Running query: %s" % query)
+                self.log.debug("Running query: %s", query)
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
@@ -387,9 +386,7 @@ class PostgreSql(AgentCheck):
 
         if is_custom_metrics and len(results) > MAX_CUSTOM_RESULTS:
             self.warning(
-                "Query: {0} returned more than {1} results ({2}). Truncating".format(
-                    query, MAX_CUSTOM_RESULTS, len(results)
-                )
+                "Query: %s returned more than %s results (%s). Truncating", query, MAX_CUSTOM_RESULTS, len(results)
             )
             results = results[:MAX_CUSTOM_RESULTS]
 
@@ -580,36 +577,35 @@ class PostgreSql(AgentCheck):
 
             query = custom_query.get('query')
             if not query:
-                self.log.error("custom query field `query` is required for metric_prefix `{}`".format(metric_prefix))
+                self.log.error("custom query field `query` is required for metric_prefix `%s`", metric_prefix)
                 continue
 
             columns = custom_query.get('columns')
             if not columns:
-                self.log.error("custom query field `columns` is required for metric_prefix `{}`".format(metric_prefix))
+                self.log.error("custom query field `columns` is required for metric_prefix `%s`", metric_prefix)
                 continue
 
             cursor = self.db.cursor()
             with closing(cursor) as cursor:
                 try:
-                    self.log.debug("Running query: {}".format(query))
+                    self.log.debug("Running query: %s", query)
                     cursor.execute(query)
                 except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
-                    self.log.error("Error executing query for metric_prefix {}: {}".format(metric_prefix, str(e)))
+                    self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                     self.db.rollback()
                     continue
 
                 for row in cursor:
                     if not row:
-                        self.log.debug(
-                            "query result for metric_prefix {}: returned an empty result".format(metric_prefix)
-                        )
+                        self.log.debug("query result for metric_prefix %s: returned an empty result", metric_prefix)
                         continue
 
                     if len(columns) != len(row):
                         self.log.error(
-                            "query result for metric_prefix {}: expected {} columns, got {}".format(
-                                metric_prefix, len(columns), len(row)
-                            )
+                            "query result for metric_prefix %s: expected %s columns, got %s",
+                            metric_prefix,
+                            len(columns),
+                            len(row),
                         )
                         continue
 
@@ -624,16 +620,15 @@ class PostgreSql(AgentCheck):
 
                         name = column.get('name')
                         if not name:
-                            self.log.error(
-                                "column field `name` is required for metric_prefix `{}`".format(metric_prefix)
-                            )
+                            self.log.error("column field `name` is required for metric_prefix `%s`", metric_prefix)
                             break
 
                         column_type = column.get('type')
                         if not column_type:
                             self.log.error(
-                                "column field `type` is required for column `{}` "
-                                "of metric_prefix `{}`".format(name, metric_prefix)
+                                "column field `type` is required for column `%s` of metric_prefix `%s`",
+                                name,
+                                metric_prefix,
                             )
                             break
 
@@ -642,16 +637,20 @@ class PostgreSql(AgentCheck):
                         else:
                             if not hasattr(self, column_type):
                                 self.log.error(
-                                    "invalid submission method `{}` for column `{}` of "
-                                    "metric_prefix `{}`".format(column_type, name, metric_prefix)
+                                    "invalid submission method `%s` for column `%s` of metric_prefix `%s`",
+                                    column_type,
+                                    name,
+                                    metric_prefix,
                                 )
                                 break
                             try:
                                 metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
                             except (ValueError, TypeError):
                                 self.log.error(
-                                    "non-numeric value `{}` for metric column `{}` of "
-                                    "metric_prefix `{}`".format(value, name, metric_prefix)
+                                    "non-numeric value `%s` for metric column `%s` of metric_prefix `%s`",
+                                    value,
+                                    name,
+                                    metric_prefix,
                                 )
                                 break
 
@@ -674,7 +673,7 @@ class PostgreSql(AgentCheck):
                 if param not in m:
                     raise ConfigurationError('Missing {} parameter in custom metric'.format(param))
 
-            self.log.debug("Metric: {0}".format(m))
+            self.log.debug("Metric: %s", m)
 
             # Old formatting to new formatting. The first params is always the columns names from which to
             # read metrics. The `relation` param instructs the check to replace the next '%s' with the list of
@@ -694,7 +693,7 @@ class PostgreSql(AgentCheck):
                         )
 
                     m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
-                    self.log.debug("Method: %s" % (str(mtype)))
+                    self.log.debug("Method: %s", mtype)
             except Exception as e:
                 raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
 
@@ -722,7 +721,7 @@ class PostgreSql(AgentCheck):
 
         (host, port, dbname) = self.key
 
-        self.log.debug("Custom metrics: %s" % custom_metrics)
+        self.log.debug("Custom metrics: %s", custom_metrics)
 
         tag_replication_role = is_affirmative(self.instance.get('tag_replication_role', False))
         tags = self.tags
@@ -760,4 +759,4 @@ class PostgreSql(AgentCheck):
                 # commit to close the current query transaction
                 self.db.commit()
             except Exception as e:
-                self.log.warning("Unable to commit: {0}".format(e))
+                self.log.warning("Unable to commit: %s", e)
