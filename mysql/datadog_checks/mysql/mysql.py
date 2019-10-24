@@ -6,7 +6,7 @@ from __future__ import division
 
 import re
 import traceback
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from contextlib import closing, contextmanager
 
 import pymysql
@@ -282,10 +282,43 @@ class MySql(AgentCheck):
 
     def __init__(self, name, init_config, instances=None):
         AgentCheck.__init__(self, name, init_config, instances)
-        self.version = ''
-        self.flavor = ''
-        self.build = ''
         self.qcache_stats = {}
+        self._metadata = None
+        self.db = None
+
+    @property
+    def metadata(self):
+        if not self._metadata:
+            self._metadata = self.get_metadata()
+            self.set_metadata('version', self._metadata.version + '+' + self._metadata.build)
+            self.set_metadata('flavor', self._metadata.flavor)
+        return self._metadata
+
+    def get_metadata(self):
+        MySQLMetadata = namedtuple('MySQLMetadata', ['version', 'flavor', 'build'])
+        with closing(self.db.cursor()) as cursor:
+            cursor.execute('SELECT VERSION()')
+            result = cursor.fetchone()
+
+            # Version might include a build, a flavor, or both
+            # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
+            # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
+            # https://mariadb.com/kb/en/library/version/
+            # and https://mariadb.com/kb/en/library/server-system-variables/#version
+            builds = ('log', 'standard', 'debug', 'valgrind', 'embedded')
+            parts = result[0].split('-')
+            version, flavor, build = [parts[0], '', '']
+
+            for data in parts:
+                if data == "MariaDB":
+                    flavor = "MariaDB"
+                if data != "MariaDB" and flavor == '':
+                    flavor = "MySQL"
+                if data in builds:
+                    build = data
+            if build == '':
+                build = 'unspecified'
+            return MySQLMetadata(version, flavor, build)
 
     @classmethod
     def get_library_versions(cls):
@@ -314,8 +347,7 @@ class MySql(AgentCheck):
 
         with self._connect(host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags) as db:
             try:
-                # Metadata collection
-                self._collect_metadata(db)
+                self.db = db
 
                 # Metric collection
                 self._collect_metrics(db, tags, options, queries, max_custom_queries)
@@ -536,7 +568,7 @@ class MySql(AgentCheck):
 
         if is_affirmative(options.get('replication', False)):
             # Get replica stats
-            is_mariadb = True if self.flavor == "MariaDB" else False
+            is_mariadb = self.metadata.flavor == "MariaDB"
             replication_channel = options.get('replication_channel')
             if replication_channel:
                 self.service_check_tags.append("channel:{0}".format(replication_channel))
@@ -632,34 +664,6 @@ class MySql(AgentCheck):
 
         return False
 
-    def _collect_metadata(self, db):
-        with closing(db.cursor()) as cursor:
-            cursor.execute('SELECT VERSION()')
-            result = cursor.fetchone()
-
-            # Version might include a build, a flavor, or both
-            # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
-            # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
-            # https://mariadb.com/kb/en/library/version/
-            # and https://mariadb.com/kb/en/library/server-system-variables/#version
-            builds = ('log', 'standard', 'debug', 'valgrind', 'embedded')
-            parts = result[0].split('-')
-            self.version = parts[0]
-
-            for data in parts:
-                if data == "MariaDB":
-                    self.flavor = "MariaDB"
-                if data != "MariaDB" and self.flavor == '':
-                    self.flavor = "MySQL"
-                if data in builds:
-                    self.build = data
-
-            if self.build == '':
-                self.build = 'unspecified'
-            # format version data to conform to semve
-            self.set_metadata('version', self.version + '+' + self.build)
-            self.set_metadata('flavor', self.flavor)
-
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
             metric_name, metric_type = metric
@@ -682,7 +686,7 @@ class MySql(AgentCheck):
         # so let's be careful when we compute the version number
 
         try:
-            mysql_version = self.version.split('.')
+            mysql_version = self.metadata.version.split('.')
         except Exception as e:
             self.warning("Cannot compute mysql version, assuming it's older.: %s" % str(e))
             return False
