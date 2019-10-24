@@ -72,3 +72,30 @@ def test_check(aggregator):
         aggregator.assert_metric_has_tag(metric, customtag)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_config_project(aggregator):
+
+    project = 'foo'
+    project_tag = 'project:{}'.format(project)
+    qparams = {'project': project}
+
+    instance['project'] = project
+    check = TwistlockCheck('twistlock', {}, [instance])
+
+    with mock.patch('requests.get', side_effect=mock_get, autospec=True) as r:
+        check.check(instance)
+
+        r.assert_called_with(
+            mock.ANY,
+            params=qparams,
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+        )
+    # Check if metrics are tagged with the project.
+    for metric in METRICS:
+        aggregator.assert_metric_has_tag(metric, project_tag)
