@@ -38,7 +38,7 @@ LOGGER = logging.getLogger(__file__)
 DEFAULT_TIMEOUT = 10
 
 STANDARD_FIELDS = {
-    'auth_type': None,
+    'auth_type': '',
     'connect_timeout': None,
     'extra_headers': None,
     'headers': None,
@@ -171,15 +171,12 @@ class RequestsWrapper(object):
         auth = None
         if config['password']:
             if config['username']:
-                if config['auth_type']:
-                    auth_type = config.get('auth_type', 'basic').lower()
-                    if auth_type == 'digest':
-                        auth = requests.auth.HTTPDigestAuth(config['username'], config['password'])
-                    else:
-                        if auth_type != 'basic':
-                            self.logger.debug('auth_type {} is not supported, defaulting to basic'.format(auth_type))
-                        auth = (config['username'], config['password'])
+                auth_type = config.get('auth_type', 'basic').lower()
+                if auth_type == 'digest':
+                    auth = requests.auth.HTTPDigestAuth(config['username'], config['password'])
                 else:
+                    if auth_type != 'basic':
+                        self.logger.debug('auth_type {} is not supported, defaulting to basic'.format(auth_type))
                     auth = (config['username'], config['password'])
 
             elif config['ntlm_domain']:
