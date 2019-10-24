@@ -49,6 +49,7 @@ from .version_utils import (
     is_9_6_or_above,
     is_10_or_above,
     is_above,
+    transform_version,
 )
 
 MAX_CUSTOM_RESULTS = 100
@@ -68,6 +69,7 @@ class PostgreSql(AgentCheck):
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = 'postgres.can_connect'
+    METADATA_TRANSFORMERS = {'version': transform_version}
 
     def __init__(self, name, init_config, instances):
         AgentCheck.__init__(self, name, init_config, instances)
@@ -133,7 +135,8 @@ class PostgreSql(AgentCheck):
     @property
     def version(self):
         if self._version is None:
-            self._version = get_version(self.db)
+            raw_version, self._version = get_version(self.db)
+            self.set_metadata('version', raw_version)
             self.service_metadata('version', [self._version['major'], self._version['minor'], self._version['patch']])
         return self._version
 

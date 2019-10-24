@@ -5,7 +5,7 @@ import pytest
 from mock import MagicMock
 from semver import VersionInfo
 
-from datadog_checks.postgres.version_utils import get_version, is_above
+from datadog_checks.postgres.version_utils import _parse_version, get_version, is_above, transform_version
 
 pytestmark = pytest.mark.unit
 
@@ -18,23 +18,28 @@ def test_get_version():
 
     # Test #.#.# style versions
     db.cursor().fetchone.return_value = ['9.5.3']
-    assert get_version(db) == VersionInfo(9, 5, 3)
+    _, version = get_version(db)
+    assert version == VersionInfo(9, 5, 3)
 
     # Test #.# style versions
     db.cursor().fetchone.return_value = ['10.2']
-    assert get_version(db) == VersionInfo(10, 2, 0)
+    _, version = get_version(db)
+    assert version == VersionInfo(10, 2, 0)
 
     # Test #beta# style versions
     db.cursor().fetchone.return_value = ['11beta3']
-    assert get_version(db) == VersionInfo(11, -1, 3)
+    _, version = get_version(db)
+    assert version == VersionInfo(11, 0, 0, prerelease='beta.3')
 
     # Test #rc# style versions
     db.cursor().fetchone.return_value = ['11rc1']
-    assert get_version(db) == VersionInfo(11, -1, 1)
+    _, version = get_version(db)
+    assert version == VersionInfo(11, 0, 0, prerelease='rc.1')
 
     # Test #unknown# style versions
     db.cursor().fetchone.return_value = ['11nightly3']
-    assert get_version(db) == VersionInfo(11, -1, 3)
+    _, version = get_version(db)
+    assert version == VersionInfo(11, 0, 0, 'nightly.3')
 
 
 def test_is_above():
@@ -60,20 +65,55 @@ def test_is_above():
     # Test beta version above
     db = MagicMock()
     db.cursor().fetchone.return_value = ['11beta4']
-    version = get_version(db)
-    assert version > VersionInfo(11, -1, 3)
+    _, version = get_version(db)
+    assert version > _parse_version('11beta3')
 
     # Test beta version against official version
     version = VersionInfo(11, 0, 0)
-    assert version > VersionInfo(11, -1, 3)
+    assert version > _parse_version('11beta3')
 
     # Test versions of unequal length
     db.cursor().fetchone.return_value = ['10.0']
-    version = get_version(db)
+    _, version = get_version(db)
     assert is_above(version, "10.0.0")
     assert is_above(version, "10.0.1") is False
 
     # Test return value is not a list
     db.cursor().fetchone.return_value = "foo"
-    version = get_version(db)
+    _, version = get_version(db)
     assert is_above(version, "10.0.0") is False
+
+
+def test_transform_version():
+    version = transform_version('11beta4')
+    expected = {
+        'version.raw': '11beta4',
+        'version.major': 11,
+        'version.minor': 0,
+        'version.patch': 0,
+        'version.build': 'beta.4',
+        'version.scheme': 'semver',
+    }
+    assert expected == version
+
+    version = transform_version('10.0')
+    expected = {
+        'version.raw': '10.0',
+        'version.major': 10,
+        'version.minor': 0,
+        'version.patch': 0,
+        'version.build': None,
+        'version.scheme': 'semver',
+    }
+    assert expected == version
+
+    version = transform_version('10.5.4')
+    expected = {
+        'version.raw': '10.5.4',
+        'version.major': 10,
+        'version.minor': 5,
+        'version.patch': 4,
+        'version.build': None,
+        'version.scheme': 'semver',
+    }
+    assert expected == version
