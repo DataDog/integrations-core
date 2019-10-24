@@ -569,7 +569,7 @@ class __AgentCheck(object):
         no_proxy_settings = {'http': None, 'https': None, 'no': []}
 
         # First we read the proxy configuration from datadog.conf
-        proxies = self.agentConfig.get('proxy', datadog_agent.get_config('proxy'))
+        proxies = datadog_agent.get_config('proxy')
         if proxies:
             proxies = proxies.copy()
 
