@@ -276,6 +276,7 @@ SYNTHETIC_VARS = {
 
 BUILDS = ('log', 'standard', 'debug', 'valgrind', 'embedded')
 
+
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
