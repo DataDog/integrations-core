@@ -292,7 +292,7 @@ class PostgreSql(AgentCheck):
         metrics_data = self.activity_metrics
 
         if metrics_data is None:
-            query = ACTIVITY_QUERY_10 if self._is_10_or_above(db) else ACTIVITY_QUERY_LT_10
+            query = ACTIVITY_QUERY_10 if is_10_or_above(self.version) else ACTIVITY_QUERY_LT_10
             if is_9_6_or_above(self.version):
                 metrics_query = ACTIVITY_METRICS_9_6
             elif is_9_2_or_above(self.version):
