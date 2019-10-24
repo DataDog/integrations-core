@@ -113,16 +113,16 @@ class PostgreSql(AgentCheck):
         self.replication_metrics = None
         self.activity_metrics = None
 
-    def _get_replication_role(self, db):
-        cursor = db.cursor()
+    def _get_replication_role(self):
+        cursor = self.db.cursor()
         cursor.execute('SELECT pg_is_in_recovery();')
         role = cursor.fetchone()[0]
         # value fetched for role is of <type 'bool'>
         return "standby" if role else "master"
 
-    def _get_version(self, db):
+    def _get_version(self):
         if self.version is None:
-            cursor = db.cursor()
+            cursor = self.db.cursor()
             cursor.execute('SHOW SERVER_VERSION;')
             version = cursor.fetchone()[0]
             try:
@@ -145,8 +145,8 @@ class PostgreSql(AgentCheck):
         self.service_metadata('version', self.version)
         return self.version
 
-    def _is_above(self, db, version_to_compare):
-        version = self._get_version(db)
+    def _is_above(self, version_to_compare):
+        version = self._get_version()
         if type(version) == list:
             # iterate from major down to bugfix
             for v, vc in zip_longest(version, version_to_compare, fillvalue=0):
@@ -159,25 +159,25 @@ class PostgreSql(AgentCheck):
             return True
         return False
 
-    def _is_8_3_or_above(self, db):
-        return self._is_above(db, [8, 3, 0])
+    def _is_8_3_or_above(self):
+        return self._is_above([8, 3, 0])
 
-    def _is_9_1_or_above(self, db):
-        return self._is_above(db, [9, 1, 0])
+    def _is_9_1_or_above(self):
+        return self._is_above([9, 1, 0])
 
-    def _is_9_2_or_above(self, db):
-        return self._is_above(db, [9, 2, 0])
+    def _is_9_2_or_above(self):
+        return self._is_above([9, 2, 0])
 
-    def _is_9_4_or_above(self, db):
-        return self._is_above(db, [9, 4, 0])
+    def _is_9_4_or_above(self):
+        return self._is_above([9, 4, 0])
 
-    def _is_9_6_or_above(self, db):
-        return self._is_above(db, [9, 6, 0])
+    def _is_9_6_or_above(self):
+        return self._is_above([9, 6, 0])
 
-    def _is_10_or_above(self, db):
-        return self._is_above(db, [10, 0, 0])
+    def _is_10_or_above(self):
+        return self._is_above([10, 0, 0])
 
-    def _get_instance_metrics(self, db, database_size_metrics, collect_default_db):
+    def _get_instance_metrics(self, database_size_metrics, collect_default_db):
         """
         Add NEWER_92_METRICS to the default set of COMMON_METRICS when server
         version is 9.2 or later.
@@ -193,7 +193,7 @@ class PostgreSql(AgentCheck):
 
         if metrics is None:
             # select the right set of metrics to collect depending on postgres version
-            if self._is_9_2_or_above(db):
+            if self._is_9_2_or_above():
                 self.instance_metrics = dict(COMMON_METRICS, **NEWER_92_METRICS)
             else:
                 self.instance_metrics = dict(COMMON_METRICS)
@@ -221,7 +221,7 @@ class PostgreSql(AgentCheck):
 
         return res
 
-    def _get_bgw_metrics(self, db):
+    def _get_bgw_metrics(self):
         """Use either COMMON_BGW_METRICS or COMMON_BGW_METRICS + NEWER_92_BGW_METRICS
         depending on the postgres version.
         Uses a dictionary to save the result for each instance
@@ -244,9 +244,9 @@ class PostgreSql(AgentCheck):
             self.db_bgw_metrics.append(sub_key)
 
             self.bgw_metrics = dict(COMMON_BGW_METRICS)
-            if self._is_9_1_or_above(db):
+            if self._is_9_1_or_above():
                 self.bgw_metrics.update(NEWER_91_BGW_METRICS)
-            if self._is_9_2_or_above(db):
+            if self._is_9_2_or_above():
                 self.bgw_metrics.update(NEWER_92_BGW_METRICS)
 
             metrics = self.bgw_metrics
@@ -268,7 +268,7 @@ class PostgreSql(AgentCheck):
         )
         return metrics
 
-    def _get_archiver_metrics(self, db):
+    def _get_archiver_metrics(self):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
         defined in 9.4 (first version to have this table).
         Uses a dictionary to save the result for each instance
@@ -277,7 +277,7 @@ class PostgreSql(AgentCheck):
         # the table, mirroring _get_bgw_metrics()
         metrics = self.archiver_metrics
 
-        if metrics is None and self._is_9_4_or_above(db):
+        if metrics is None and self._is_9_4_or_above():
             # Collect from only one instance. See _get_bgw_metrics() for details on why.
             sub_key = self.key[:2]
             if sub_key in self.db_archiver_metrics:
@@ -303,24 +303,24 @@ class PostgreSql(AgentCheck):
             'relation': False,
         }
 
-    def _get_replication_metrics(self, db):
+    def _get_replication_metrics(self):
         """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
         REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
         postgres version.
         Uses a dictionnary to save the result for each instance
         """
         metrics = self.replication_metrics
-        if self._is_10_or_above(db) and metrics is None:
+        if self._is_10_or_above() and metrics is None:
             self.replication_metrics = dict(REPLICATION_METRICS_10)
             metrics = self.replication_metrics
-        elif self._is_9_1_or_above(db) and metrics is None:
+        elif self._is_9_1_or_above() and metrics is None:
             self.replication_metrics = dict(REPLICATION_METRICS_9_1)
-            if self._is_9_2_or_above(db):
+            if self._is_9_2_or_above():
                 self.replication_metrics.update(REPLICATION_METRICS_9_2)
             metrics = self.replication_metrics
         return metrics
 
-    def _get_activity_metrics(self, db, user):
+    def _get_activity_metrics(self, user):
         """ Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
         depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
         Uses a dictionnary to save the result for each instance
@@ -328,12 +328,12 @@ class PostgreSql(AgentCheck):
         metrics_data = self.activity_metrics
 
         if metrics_data is None:
-            query = ACTIVITY_QUERY_10 if self._is_10_or_above(db) else ACTIVITY_QUERY_LT_10
-            if self._is_9_6_or_above(db):
+            query = ACTIVITY_QUERY_10 if self._is_10_or_above() else ACTIVITY_QUERY_LT_10
+            if self._is_9_6_or_above():
                 metrics_query = ACTIVITY_METRICS_9_6
-            elif self._is_9_2_or_above(db):
+            elif self._is_9_2_or_above():
                 metrics_query = ACTIVITY_METRICS_9_2
-            elif self._is_8_3_or_above(db):
+            elif self._is_8_3_or_above():
                 metrics_query = ACTIVITY_METRICS_8_3
             else:
                 metrics_query = ACTIVITY_METRICS_LT_8_3
@@ -381,11 +381,11 @@ class PostgreSql(AgentCheck):
                 self.log.warning('Unhandled relations config type: %s', element)
         return config
 
-    def _query_scope(self, cursor, scope, db, instance_tags, is_custom_metrics, relations_config):
+    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, relations_config):
         if scope is None:
             return None
 
-        if scope == REPLICATION_METRICS or not self._is_above(db, [9, 0, 0]):
+        if scope == REPLICATION_METRICS or not self._is_above([9, 0, 0]):
             log_func = self.log.debug
         else:
             log_func = self.log.warning
@@ -416,10 +416,10 @@ class PostgreSql(AgentCheck):
                 "A reattempt to identify the right version will happen on next agent run." % self.version
             )
             self._clean_state()
-            db.rollback()
+            self.db.rollback()
         except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
             log_func("Not all metrics may be available: %s" % str(e))
-            db.rollback()
+            self.db.rollback()
 
         if not results:
             return None
@@ -495,7 +495,6 @@ class PostgreSql(AgentCheck):
 
     def _collect_stats(
         self,
-        db,
         user,
         instance_tags,
         relations,
@@ -512,10 +511,9 @@ class PostgreSql(AgentCheck):
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
-
-        db_instance_metrics = self._get_instance_metrics(db, collect_database_size_metrics, collect_default_db)
-        bgw_instance_metrics = self._get_bgw_metrics(db)
-        archiver_instance_metrics = self._get_archiver_metrics(db)
+        db_instance_metrics = self._get_instance_metrics(collect_database_size_metrics, collect_default_db)
+        bgw_instance_metrics = self._get_bgw_metrics()
+        archiver_instance_metrics = self._get_archiver_metrics()
 
         metric_scope = [CONNECTION_METRICS, LOCK_METRICS]
 
@@ -530,26 +528,26 @@ class PostgreSql(AgentCheck):
             metric_scope += [REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(relations)
 
-        replication_metrics = self._get_replication_metrics(db)
+        replication_metrics = self._get_replication_metrics()
         if replication_metrics is not None:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
             replication_metrics_query['metrics'] = replication_metrics
             metric_scope.append(replication_metrics_query)
 
-        cursor = db.cursor()
-        results_len = self._query_scope(cursor, db_instance_metrics, db, instance_tags, False, relations_config)
+        cursor = self.db.cursor()
+        results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False, relations_config)
         if results_len is not None:
             self.gauge("postgresql.db.count", results_len, tags=[t for t in instance_tags if not t.startswith("db:")])
 
-        self._query_scope(cursor, bgw_instance_metrics, db, instance_tags, False, relations_config)
-        self._query_scope(cursor, archiver_instance_metrics, db, instance_tags, False, relations_config)
+        self._query_scope(cursor, bgw_instance_metrics, instance_tags, False, relations_config)
+        self._query_scope(cursor, archiver_instance_metrics, instance_tags, False, relations_config)
 
         if collect_activity_metrics:
-            activity_metrics = self._get_activity_metrics(db, user)
-            self._query_scope(cursor, activity_metrics, db, instance_tags, False, relations_config)
+            activity_metrics = self._get_activity_metrics(user)
+            self._query_scope(cursor, activity_metrics, instance_tags, False, relations_config)
 
         for scope in list(metric_scope) + custom_metrics:
-            self._query_scope(cursor, scope, db, instance_tags, scope in custom_metrics, relations_config)
+            self._query_scope(cursor, scope, instance_tags, scope in custom_metrics, relations_config)
 
         cursor.close()
 
@@ -560,23 +558,21 @@ class PostgreSql(AgentCheck):
         service_check_tags = list(set(service_check_tags))
         return service_check_tags
 
-    def get_connection(self, host, port, user, password, dbname, ssl, tags, use_cached=True):
+    def _connect(self, host, port, user, password, dbname, ssl, tags):
         """Get and memoize connections to instances"""
-        if self.db and use_cached:
-            conn = self.db
-            if conn.status != psycopg2.extensions.STATUS_READY:
+        if self.db:
+            if self.db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
-                conn.rollback()
-            return conn
+                self.db.rollback()
         elif host != "" and user != "":
             try:
                 if host == 'localhost' and password == '':
                     # Use ident method
-                    connection = psycopg2.connect(
+                    self.db = psycopg2.connect(
                         "user=%s dbname=%s, application_name=%s" % (user, dbname, "datadog-agent")
                     )
                 elif port != '':
-                    connection = psycopg2.connect(
+                    self.db = psycopg2.connect(
                         host=host,
                         port=port,
                         user=user,
@@ -586,7 +582,7 @@ class PostgreSql(AgentCheck):
                         application_name="datadog-agent",
                     )
                 else:
-                    connection = psycopg2.connect(
+                    self.db = psycopg2.connect(
                         host=host,
                         user=user,
                         password=password,
@@ -594,8 +590,7 @@ class PostgreSql(AgentCheck):
                         sslmode=ssl,
                         application_name="datadog-agent",
                     )
-                self.db = connection
-                return connection
+
             except Exception as e:
                 message = u'Error establishing postgres connection: %s' % (str(e))
                 service_check_tags = self._get_service_check_tags(host, tags)
@@ -609,7 +604,7 @@ class PostgreSql(AgentCheck):
             elif not user:
                 raise ConfigurationError('Please specify a user to connect to Postgres as.')
 
-    def _get_custom_queries(self, db, tags, custom_queries):
+    def _get_custom_queries(self, tags, custom_queries):
         """
         Given a list of custom_queries, execute each query and parse the result for metrics
         """
@@ -630,14 +625,14 @@ class PostgreSql(AgentCheck):
                 self.log.error("custom query field `columns` is required for metric_prefix `%s`", metric_prefix)
                 continue
 
-            cursor = db.cursor()
+            cursor = self.db.cursor()
             with closing(cursor) as cursor:
                 try:
                     self.log.debug("Running query: %s", query)
                     cursor.execute(query)
                 except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
                     self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
-                    db.rollback()
+                    self.db.rollback()
                     continue
 
                 for row in cursor:
@@ -772,16 +767,14 @@ class PostgreSql(AgentCheck):
         tags = self.tags
 
         # Collect metrics
-        db = None
         try:
             # Check version
-            db = self.get_connection(host, port, user, password, dbname, ssl, tags)
+            self._connect(host, port, user, password, dbname, ssl, tags)
             if tag_replication_role:
-                tags.extend(["replication_role:{}".format(self._get_replication_role(db))])
-            version = self._get_version(db)
+                tags.extend(["replication_role:{}".format(self._get_replication_role())])
+            version = self._get_version()
             self.log.debug("Running check against version %s" % version)
             self._collect_stats(
-                db,
                 user,
                 tags,
                 self.relations,
@@ -793,17 +786,17 @@ class PostgreSql(AgentCheck):
                 collect_database_size_metrics,
                 collect_default_db,
             )
-            self._get_custom_queries(db, tags, custom_queries)
+            self._get_custom_queries(tags, custom_queries)
         except (psycopg2.InterfaceError, socket.error):
             self.log.info("Connection error, will retry on next agent run")
             self._clean_state()
 
-        if db is not None:
+        if self.db is not None:
             service_check_tags = self._get_service_check_tags(host, tags)
             message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, message=message)
             try:
                 # commit to close the current query transaction
-                db.commit()
+                self.db.commit()
             except Exception as e:
                 self.log.warning("Unable to commit: %s", e)
