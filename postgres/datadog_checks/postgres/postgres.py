@@ -137,7 +137,7 @@ class PostgreSql(AgentCheck):
         if self._version is None:
             raw_version, self._version = get_version(self.db)
             self.set_metadata('version', raw_version)
-            self.service_metadata('version', [self._version['major'], self._version['minor'], self._version['patch']])
+            self.service_metadata('version', [self._version.major, self._version.minor, self._version.patch])
         return self._version
 
     def _get_instance_metrics(self, database_size_metrics, collect_default_db):
