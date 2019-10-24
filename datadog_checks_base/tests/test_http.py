@@ -184,7 +184,7 @@ class TestAuth:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
-        assert http.options['auth'] == ('user', 'pass')
+        assert isinstance(http.options['auth'], requests.auth.HTTPBasicAuth)
 
     def test_config_basic_authtype(self):
         instance = {'username': 'user', 'password': 'pass', 'auth_type': 'basic'}

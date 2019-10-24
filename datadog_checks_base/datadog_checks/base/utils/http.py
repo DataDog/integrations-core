@@ -181,7 +181,7 @@ class RequestsWrapper(object):
                         self.logger.debug('auth_type {} is not supported, defaulting to basic'.format(auth_type))
                         auth = requests.auth.HTTPBasicAuth(config['username'], config['password'])
                 else:
-                    auth = (config['username'], config['password'])
+                    auth = requests.auth.HTTPBasicAuth(config['username'], config['password'])
 
             elif config['ntlm_domain']:
                 ensure_ntlm()
