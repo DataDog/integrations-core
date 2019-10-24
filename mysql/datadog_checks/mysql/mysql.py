@@ -274,6 +274,7 @@ SYNTHETIC_VARS = {
     'Qcache_instant_utilization': ('mysql.performance.qcache.utilization.instant', GAUGE),
 }
 
+BUILDS = ('log', 'standard', 'debug', 'valgrind', 'embedded')
 
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
@@ -281,22 +282,14 @@ class MySql(AgentCheck):
     DEFAULT_MAX_CUSTOM_QUERIES = 20
 
     def __init__(self, name, init_config, instances=None):
-        AgentCheck.__init__(self, name, init_config, instances)
+        super(MySql, self).__init__(name, init_config, instances)
+        self.agentConfig = {}
         self.qcache_stats = {}
-        self._metadata = None
-        self.db = None
+        self.metadata = None
 
-    @property
-    def metadata(self):
-        if not self._metadata:
-            self._metadata = self.get_metadata()
-            self.set_metadata('version', self._metadata.version + '+' + self._metadata.build)
-            self.set_metadata('flavor', self._metadata.flavor)
-        return self._metadata
-
-    def get_metadata(self):
+    def _get_metadata(self, db):
         MySQLMetadata = namedtuple('MySQLMetadata', ['version', 'flavor', 'build'])
-        with closing(self.db.cursor()) as cursor:
+        with closing(db.cursor()) as cursor:
             cursor.execute('SELECT VERSION()')
             result = cursor.fetchone()
 
@@ -305,7 +298,6 @@ class MySql(AgentCheck):
             # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
             # https://mariadb.com/kb/en/library/version/
             # and https://mariadb.com/kb/en/library/server-system-variables/#version
-            builds = ('log', 'standard', 'debug', 'valgrind', 'embedded')
             parts = result[0].split('-')
             version, flavor, build = [parts[0], '', '']
 
@@ -314,11 +306,17 @@ class MySql(AgentCheck):
                     flavor = "MariaDB"
                 if data != "MariaDB" and flavor == '':
                     flavor = "MySQL"
-                if data in builds:
+                if data in BUILDS:
                     build = data
             if build == '':
                 build = 'unspecified'
-            return MySQLMetadata(version, flavor, build)
+
+            self.metadata = MySQLMetadata(version, flavor, build)
+            return self.metadata
+
+    def _send_metadata(self):
+        self.set_metadata('version', self.metadata.version + '+' + self.metadata.build)
+        self.set_metadata('flavor', self.metadata.flavor)
 
     @classmethod
     def get_library_versions(cls):
@@ -347,7 +345,9 @@ class MySql(AgentCheck):
 
         with self._connect(host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags) as db:
             try:
-                self.db = db
+                # metadata collection
+                self._get_metadata(db)
+                self._send_metadata()
 
                 # Metric collection
                 self._collect_metrics(db, tags, options, queries, max_custom_queries)
