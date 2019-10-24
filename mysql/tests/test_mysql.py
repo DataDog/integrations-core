@@ -20,7 +20,7 @@ from .common import MYSQL_VERSION_PARSED
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_minimal_config(aggregator, instance_basic):
-    mysql_check = MySql(common.CHECK_NAME, {})
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
     mysql_check.check(instance_basic)
 
     # Test service check
@@ -135,7 +135,7 @@ def test_connection_failure(aggregator, instance_error):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config_replica(aggregator, instance_complex):
-    mysql_check = MySql(common.CHECK_NAME, {})
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_complex])
     config = copy.deepcopy(instance_complex)
     config['port'] = common.SLAVE_PORT
     mysql_check.check(config)
@@ -220,7 +220,7 @@ def test__get_server_pid():
     """
     Test the logic looping through the processes searching for `mysqld`
     """
-    mysql_check = MySql(common.CHECK_NAME, {})
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
     mysql_check._get_pid_file_variable = mock.MagicMock(return_value=None)
     mysql_check.log = mock.MagicMock()
     dummy_proc = subprocess.Popen(["python"])
