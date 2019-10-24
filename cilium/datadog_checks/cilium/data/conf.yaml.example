@@ -10,7 +10,7 @@ instances:
   - agent_endpoint: http://localhost:9090/metrics
 
     ## @param operator_endpoint - string - optional
-    ## Enable to collect `cilium-operator` metrics.
+    ## Provide instead of `agent_endpoint` to collect `cilium-operator` metrics.
     ## Cilium operator metrics are exposed on port 6942.
     #
     # operator_endpoint: http://localhost:6942/metrics
