@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
+
 from .metrics import AGENT_METRICS, OPERATOR_METRICS
+
 
 class CiliumCheck(OpenMetricsBaseCheck):
     """
@@ -32,9 +34,8 @@ class CiliumCheck(OpenMetricsBaseCheck):
                 endpoint = operator_endpoint
                 metrics = [OPERATOR_METRICS]
             else:
-                if agent_endpoint:
-                    endpoint = agent_endpoint
-                    metrics = [AGENT_METRICS]
+                endpoint = agent_endpoint
+                metrics = [AGENT_METRICS]
 
             metrics.extend(instance.get('metrics', []))
 
