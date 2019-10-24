@@ -23,7 +23,9 @@
   "is_public": false,
   "integration_id": "mapr",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "MapR - Overview": "assets/dashboards/mapr_overview.json"
+    },
     "monitors": {},
     "service_checks": "assets/service_checks.json"
   }

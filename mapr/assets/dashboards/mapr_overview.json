@@ -1,0 +1,1350 @@
+{
+    "board_title": "MapR - Overview", 
+    "read_only": false, 
+    "author_info": {
+        "author_name": "Datadog"
+    }, 
+    "description": "This dashboard provides a high-level overview of your MapR 6.1+ deployment so you can monitor its performance and resource usage. For further reading on monitoring MapR:\n\n- [Monitoring the cluster (MapR)](https://mapr.com/docs/61/AdministratorGuide/Monitoring-the-Cluster.html)\n- [Metric collection (MapR)](https://mapr.com/docs/61/AdministratorGuide/MetricsCollections.html)\n- [Datadog's MapR integration docs](https://docs.datadoghq.com/integrations/mapr)\n\nClone this template dashboard to make changes and add your own graphs and widgets.", 
+    "board_bgtype": "board_graph", 
+    "created": "2019-09-23T17:38:22.356539+00:00", 
+    "new_id": "2db-kqp-3h5", 
+    "modified": "2019-10-17T14:22:06.078771+00:00", 
+    "created_by": {
+        "verified": true, 
+        "name": "Datadog", 
+        "access_role": "st", 
+        "disabled": false, 
+        "is_admin": false, 
+        "handle": "support@datadoghq.com", 
+        "role": null, 
+        "email": "support@datadoghq.com" 
+    }, 
+    "template_variables": [
+        {
+            "default": "*", 
+            "prefix": "clustername", 
+            "name": "clustername"
+        }, 
+        {
+            "default": "*", 
+            "prefix": null, 
+            "name": "scope"
+        }
+    ], 
+    "isIntegration": false, 
+    "originalHeight": 80, 
+    "originalWidth": "calc(100% - 32px)", 
+    "widgets": [
+        {
+            "board_id": "mcg-3zy-6ru", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "Timeseries", 
+            "title_text": "Remote reads & writes", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.fs.writes{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "purple", 
+                            "type": "solid"
+                        }, 
+                        "type": "line", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.reads{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "green", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 9, 
+            "x": 122, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "mcg-3zy-6ru", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "Timeseries", 
+            "title_text": "Local reads & writes", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.fs.local_reads{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "green", 
+                            "type": "solid"
+                        }, 
+                        "type": "line", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.local_writes{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "purple", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 30, 
+            "x": 122, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "mcg-3zy-6ru", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "mapr.fs.kvstore_scan, mapr.fs.kvstore_delete, mapr.fs.kvstore_insert, mapr.fs.kvstore_lookup", 
+            "title_text": "KVStore (scan/delete/insert/lookup)", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.fs.kvstore_scan{$clustername,$scope}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "line", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.kvstore_delete{$clustername,$scope}", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.kvstore_insert{$clustername,$scope}", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.kvstore_lookup{$clustername,$scope}", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 51, 
+            "x": 163, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "mapr.fs.statstype_create, mapr.fs.statstype_write, mapr.fs.statstype_read, mapr.fs.statstype_lookup", 
+            "title_text": "Statstype (read/write/create/lookup)", 
+            "height": 18, 
+            "tile_def": {
+                "autoscale": true, 
+                "yaxis": {
+                    "min": "auto", 
+                    "max": "auto", 
+                    "scale": "linear", 
+                    "label": "", 
+                    "includeZero": true
+                }, 
+                "color_by_groups": [], 
+                "xaxis": {
+                    "min": "auto", 
+                    "max": "auto", 
+                    "scale": "linear", 
+                    "label": "", 
+                    "includeZero": true
+                }, 
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.fs.statstype_create{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "line", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.statstype_write{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.statstype_read{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.statstype_lookup{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }
+                ]
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 51, 
+            "x": 122, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "sizing": "fit", 
+            "title": false, 
+            "url": "https://mapr.com/assets/images/MapR_logo_red.png", 
+            "type": "image", 
+            "margin": "", 
+            "height": 12, 
+            "width": 35, 
+            "y": 1, 
+            "x": 2, 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "query_value", 
+            "generated_title": "Query Value", 
+            "title_text": "CPU count", 
+            "height": 10, 
+            "tile_def": {
+                "viz": "query_value", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.cldb.cluster_cpu_total{$clustername,$scope}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": null, 
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_red", 
+                                "comparator": ">", 
+                                "value": null
+                            }, 
+                            {
+                                "palette": "white_on_yellow", 
+                                "comparator": ">=", 
+                                "value": null
+                            }, 
+                            {
+                                "palette": "white_on_green", 
+                                "comparator": "<", 
+                                "value": null
+                            }
+                        ]
+                    }
+                ], 
+                "autoscale": true, 
+                "custom_unit": "CPUs"
+            }, 
+            "width": 17, 
+            "add_timeframe": true, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 23, 
+            "x": 2, 
+            "legend_size": "0", 
+            "autoscale": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "x": 20, 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "query_value", 
+            "title_align": "left", 
+            "title_text": "Node count", 
+            "height": 10, 
+            "tile_def": {
+                "title_size": "16", 
+                "title_align": "left", 
+                "custom_unit": null, 
+                "precision": "2", 
+                "viz": "query_value", 
+                "autoscale": true, 
+                "requests": [
+                    {
+                        "q": "avg:mapr.cldb.nodes_in_cluster{$clustername,$scope}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": null, 
+                        "conditional_formats": []
+                    }
+                ]
+            }, 
+            "width": 17, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 23, 
+            "autoscale": true, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "x": 20, 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "query_value", 
+            "title_align": "left", 
+            "title_text": "Available memory", 
+            "height": 10, 
+            "tile_def": {
+                "title_size": "16", 
+                "title_align": "left", 
+                "custom_unit": "%", 
+                "precision": "2", 
+                "viz": "query_value", 
+                "autoscale": true, 
+                "requests": [
+                    {
+                        "q": "(avg:mapr.cldb.cluster_memory_capacity{$scope,$clustername}-avg:mapr.cldb.cluster_memory_used{$scope,$clustername})/avg:mapr.cldb.cluster_memory_capacity{$scope,$clustername}*100", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": null, 
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_red", 
+                                "comparator": "<", 
+                                "value": "15"
+                            }
+                        ]
+                    }
+                ]
+            }, 
+            "width": 17, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 49, 
+            "autoscale": true, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "Query Value", 
+            "title_text": "Disk space utilization", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.cldb.cluster_disk_capacity{$scope,$clustername}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "cool", 
+                            "type": "solid"
+                        }, 
+                        "type": "area", 
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_red", 
+                                "comparator": ">", 
+                                "value": null
+                            }, 
+                            {
+                                "palette": "white_on_yellow", 
+                                "comparator": ">=", 
+                                "value": null
+                            }, 
+                            {
+                                "palette": "white_on_green", 
+                                "comparator": "<", 
+                                "value": null
+                            }
+                        ]
+                    }, 
+                    {
+                        "q": "avg:mapr.cldb.cluster_diskspace_used{$scope,$clustername}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "cool", 
+                            "type": "solid"
+                        }, 
+                        "type": "area"
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 9, 
+            "x": 39, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "title_align": "left", 
+            "title_text": "Memory utilization", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "title_size": "16", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.cldb.cluster_memory_capacity{$scope,$clustername}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "cool", 
+                            "type": "solid"
+                        }, 
+                        "type": "area", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.cldb.cluster_memory_used{$scope,$clustername}", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "cool", 
+                            "type": "solid"
+                        }, 
+                        "type": "area"
+                    }
+                ], 
+                "title_align": "left", 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 30, 
+            "x": 39, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "title_align": "left", 
+            "title_text": "CPUs busy", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "title_size": "16", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.cldb.cluster_cpubusy_percent{$clustername,$scope}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "orange", 
+                            "type": "solid"
+                        }, 
+                        "type": "line", 
+                        "conditional_formats": []
+                    }
+                ], 
+                "title_align": "left", 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 9, 
+            "x": 80, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "mapr.db.valuecache_hits, mapr.db.valuecache_lookups", 
+            "title_text": "Operations that used value cache (hit/lookup)", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.db.valuecache_lookups{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.db.valuecache_hits{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars"
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 81, 
+            "x": 39, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "mapr.streams.listen_msgs, mapr.streams.produce_msgs, mapr.streams.produce_msgs", 
+            "title_text": "Messages produced & read", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.streams.listen_msgs{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "green", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.streams.produce_msgs{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "purple", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars"
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 81, 
+            "x": 122, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "x": 2, 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "query_value", 
+            "title_align": "left", 
+            "title_text": "Available disk space", 
+            "height": 10, 
+            "tile_def": {
+                "title_size": "16", 
+                "title_align": "left", 
+                "custom_unit": "%", 
+                "precision": "2", 
+                "viz": "query_value", 
+                "autoscale": true, 
+                "requests": [
+                    {
+                        "q": "(avg:mapr.cldb.disk_space_available{$scope,$clustername}/avg:mapr.cldb.cluster_disk_capacity{$scope,$clustername})*100", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": null, 
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_green", 
+                                "comparator": ">", 
+                                "value": "25"
+                            }
+                        ]
+                    }
+                ]
+            }, 
+            "width": 17, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 49, 
+            "autoscale": true, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "query_value", 
+            "generated_title": "Query Value", 
+            "title_text": "Container count", 
+            "height": 10, 
+            "tile_def": {
+                "viz": "query_value", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.cldb.containers{$clustername,$scope}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": null, 
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_red", 
+                                "comparator": ">", 
+                                "value": null
+                            }, 
+                            {
+                                "palette": "white_on_yellow", 
+                                "comparator": ">=", 
+                                "value": null
+                            }, 
+                            {
+                                "palette": "white_on_green", 
+                                "comparator": "<", 
+                                "value": null
+                            }
+                        ]
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 17, 
+            "add_timeframe": true, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 36, 
+            "x": 2, 
+            "legend_size": "0", 
+            "autoscale": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "height": 6, 
+            "viz": "note", 
+            "background_color": "gray", 
+            "show_tick": true, 
+            "title": false, 
+            "tick_pos": "50%", 
+            "text_align": "center", 
+            "content": "Health status", 
+            "bgcolor": "pink", 
+            "html": "MapR File System", 
+            "legend_size": "0", 
+            "type": "note", 
+            "isShared": false, 
+            "refresh_every": 30000, 
+            "auto_refresh": false, 
+            "tick": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "add_timeframe": true, 
+            "font_size": "18", 
+            "tick_edge": "bottom", 
+            "y": 1, 
+            "x": 122, 
+            "width": 81
+        }, 
+        {
+            "height": 6, 
+            "viz": "note", 
+            "background_color": "gray", 
+            "show_tick": true, 
+            "title": false, 
+            "tick_pos": "50%", 
+            "text_align": "center", 
+            "content": "File System", 
+            "bgcolor": "gray", 
+            "html": "Resource Utilization", 
+            "legend_size": "0", 
+            "type": "note", 
+            "isShared": false, 
+            "refresh_every": 30000, 
+            "auto_refresh": false, 
+            "tick": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "add_timeframe": true, 
+            "font_size": "18", 
+            "tick_edge": "bottom", 
+            "y": 1, 
+            "x": 39, 
+            "width": 81
+        }, 
+        {
+            "height": 6, 
+            "viz": "note", 
+            "background_color": "gray", 
+            "show_tick": true, 
+            "title": false, 
+            "tick_pos": "50%", 
+            "text_align": "center", 
+            "content": "Resource utilization", 
+            "bgcolor": "pink", 
+            "html": "MapR Database", 
+            "legend_size": "0", 
+            "type": "note", 
+            "isShared": false, 
+            "refresh_every": 30000, 
+            "auto_refresh": false, 
+            "tick": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "add_timeframe": true, 
+            "font_size": "18", 
+            "tick_edge": "bottom", 
+            "y": 52, 
+            "x": 39, 
+            "width": 81
+        }, 
+        {
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "title_align": "left", 
+            "title_text": "Read & write bytes", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "title_size": "16", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.db.table.read_bytes{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "green", 
+                            "type": "solid"
+                        }, 
+                        "type": "line", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.db.table.write_bytes{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "purple", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }
+                ], 
+                "title_align": "left", 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 60, 
+            "x": 80, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "height": 6, 
+            "viz": "note", 
+            "background_color": "gray", 
+            "show_tick": true, 
+            "title": false, 
+            "tick_pos": "50%", 
+            "text_align": "center", 
+            "content": "MapR Database (MapR-DB)", 
+            "bgcolor": "pink", 
+            "html": "MapR Event Store", 
+            "legend_size": "0", 
+            "type": "note", 
+            "isShared": false, 
+            "refresh_every": 30000, 
+            "auto_refresh": false, 
+            "tick": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "add_timeframe": true, 
+            "font_size": "18", 
+            "tick_edge": "bottom", 
+            "y": 73, 
+            "x": 122, 
+            "width": 81
+        }, 
+        {
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "title_align": "left", 
+            "title_text": "Producer & consumer RPCs", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "title_size": "16", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.streams.listen_rpcs{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "green", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.streams.produce_rpcs{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "purple", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars"
+                    }
+                ], 
+                "title_align": "left", 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 81, 
+            "x": 163, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "mapr.topology.utilization", 
+            "title_text": "CPU utilization by process", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.process.cpu_percent{$clustername,$scope} by {process_name}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "line", 
+                        "conditional_formats": []
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 30, 
+            "x": 80, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "mapr.fs.read_cachehits, mapr.fs.read_cachemisses", 
+            "title_text": "Read cache hits & misses", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.fs.read_cachehits{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "cool", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.read_cachemisses{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "warm", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars"
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 9, 
+            "x": 163, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "mapr.db.table.read_rows, mapr.db.table.resp_rows", 
+            "title_text": "Rows read & returned", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.db.table.read_rows{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "green", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.db.table.resp_rows{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "purple", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars"
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 81, 
+            "x": 80, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "x": 20, 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "query_value", 
+            "title_align": "left", 
+            "title_text": "Volume count", 
+            "height": 10, 
+            "tile_def": {
+                "title_size": "16", 
+                "title_align": "left", 
+                "precision": "2", 
+                "custom_unit": null, 
+                "viz": "query_value", 
+                "autoscale": true, 
+                "requests": [
+                    {
+                        "q": "avg:mapr.cldb.volumes{$clustername,$scope}", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": null, 
+                        "conditional_formats": []
+                    }
+                ]
+            }, 
+            "width": 17, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 36, 
+            "autoscale": true, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "board_id": "2db-kqp-3h5", 
+            "title_align": "left", 
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "generated_title": "Timeseries", 
+            "title_text": "RPCs completed (get/put/scan/append/increment)", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.db.get_rpcs{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.db.put_rpcs{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars"
+                    }, 
+                    {
+                        "q": "avg:mapr.db.append_rpcs{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars"
+                    }, 
+                    {
+                        "q": "avg:mapr.db.increment_rpcs{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars"
+                    }, 
+                    {
+                        "q": "avg:mapr.db.scan_rpcs{$clustername,$scope}.as_count()", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "dog_classic", 
+                            "type": "solid"
+                        }, 
+                        "type": "bars"
+                    }
+                ], 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 60, 
+            "x": 39, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "title_size": 16, 
+            "time": {}, 
+            "title": true, 
+            "type": "timeseries", 
+            "title_align": "left", 
+            "title_text": "Local read & write bytes", 
+            "height": 18, 
+            "tile_def": {
+                "viz": "timeseries", 
+                "title_size": "16", 
+                "requests": [
+                    {
+                        "q": "avg:mapr.fs.local_writebytes{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "purple", 
+                            "type": "solid"
+                        }, 
+                        "type": "line", 
+                        "conditional_formats": []
+                    }, 
+                    {
+                        "q": "avg:mapr.fs.local_readbytes{$clustername,$scope}.as_count()", 
+                        "aggregator": "avg", 
+                        "style": {
+                            "width": "normal", 
+                            "palette": "green", 
+                            "type": "solid"
+                        }, 
+                        "type": "line"
+                    }
+                ], 
+                "title_align": "left", 
+                "autoscale": true
+            }, 
+            "width": 40, 
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }, 
+            "error": null, 
+            "y": 30, 
+            "x": 163, 
+            "legend_size": "0", 
+            "add_timeframe": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "isShared": false
+        }, 
+        {
+            "height": 6, 
+            "viz": "note", 
+            "tick_pos": "50%", 
+            "title": false, 
+            "background_color": "gray", 
+            "text_align": "center", 
+            "content": "Resource utilization", 
+            "bgcolor": "gray", 
+            "html": "Cluster Health", 
+            "legend_size": "0", 
+            "type": "note", 
+            "isShared": false, 
+            "refresh_every": 30000, 
+            "auto_refresh": false, 
+            "tick": true, 
+            "scaleFactor": 1, 
+            "legend": false, 
+            "add_timeframe": true, 
+            "font_size": "18", 
+            "tick_edge": "bottom", 
+            "y": 15, 
+            "x": 2, 
+            "width": 35
+        }
+    ], 
+    "disableEditing": false, 
+    "disableCog": false, 
+    "id": 840637, 
+    "isShared": false
+}
