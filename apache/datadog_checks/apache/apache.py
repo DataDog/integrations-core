@@ -74,6 +74,8 @@ class Apache(AgentCheck):
             values = line.split(': ')
             if len(values) == 2:  # match
                 metric, value = values
+                if metric == '<dl><dt>Server Version':
+                    self._collect_metadata(value)
                 try:
                     value = float(value)
                 except ValueError:
@@ -105,3 +107,9 @@ class Apache(AgentCheck):
                     ("No metrics were fetched for this instance. Make sure that %s is the proper url.")
                     % instance['apache_status_url']
                 )
+
+    def _collect_metadata(self, value):
+        raw_version = value.split(' ')[0]
+        version = raw_version.split('/')[1]
+        self.set_metadata('version', version)
+        self.log.debug("found apache version {}".format(version))
