@@ -19,7 +19,14 @@ def agent_instance():
 
 @pytest.fixture
 def operator_instance():
-    return {'operator_endpoint': ' localhost:6942/metrics', 'tags': ['operator_test']}
+    return {'operator_endpoint': ' localhost:6942/metrics', 'tags': ['operator_test'], 'send_distribution_buckets': True}
+
+@pytest.fixture
+def both_instance():
+    return {
+        'agent_endpoint': 'localhost:9090/metrics',
+        'operator_endpoint': ' localhost:6942/metrics',
+    }
 
 
 @pytest.fixture()
