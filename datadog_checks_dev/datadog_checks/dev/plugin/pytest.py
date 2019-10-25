@@ -153,7 +153,7 @@ def dd_agent_check(request, aggregator):
         collector_output = collector_output.strip()
         if not collector_output.endswith(']'):
             # JMX needs some additional cleanup
-            collector_output = collector_output[:collector_output.rfind(']') + 1]
+            collector_output = collector_output[: collector_output.rfind(']') + 1]
         collector = json.loads(collector_output)
 
         replay_check_run(collector, aggregator)
