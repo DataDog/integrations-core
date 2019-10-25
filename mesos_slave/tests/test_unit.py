@@ -154,13 +154,13 @@ def test_can_connect_service_check(
     instance, aggregator, test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-
+    print("instance is {}, expected status is {}, expect_exception = {}".format(instance, expected_status, expect_exception))
+    import pdb; pdb.set_trace()
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.side_effect = request_mock_side_effects
-
+        exception_raised = False
         try:
-            check._get_state('http://hello.com', ['my:tag'])
-            exception_raised = False
+            check.check(instance)
         except CheckException:
             exception_raised = True
 
