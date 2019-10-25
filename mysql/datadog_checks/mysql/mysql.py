@@ -311,8 +311,7 @@ class MySql(AgentCheck):
             if build == '':
                 build = 'unspecified'
 
-            self.metadata = MySQLMetadata(version, flavor, build)
-            return self.metadata
+            return MySQLMetadata(version, flavor, build)
 
     def _send_metadata(self):
         self.set_metadata('version', self.metadata.version + '+' + self.metadata.build)
@@ -346,7 +345,7 @@ class MySql(AgentCheck):
         with self._connect(host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags) as db:
             try:
                 # metadata collection
-                self._get_metadata(db)
+                self.metadata = self._get_metadata(db)
                 self._send_metadata()
 
                 # Metric collection
