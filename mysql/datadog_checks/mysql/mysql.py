@@ -284,7 +284,6 @@ class MySql(AgentCheck):
 
     def __init__(self, name, init_config, instances=None):
         super(MySql, self).__init__(name, init_config, instances)
-        self.agentConfig = {}
         self.qcache_stats = {}
         self.metadata = None
 
