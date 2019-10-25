@@ -55,4 +55,3 @@ def test_e2e(dd_agent_check):
     ]
     for metric in metrics:
         aggregator.assert_metric(metric)
-    aggregator.assert_all_metrics_covered()
