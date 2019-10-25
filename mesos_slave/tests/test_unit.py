@@ -101,69 +101,132 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
 
     assert actual == expected_http_kwargs
 
+state_test_data = [
+    (
+        'OK for /state',
+        [mock.MagicMock(status_code=200, content='{}')],
+        ['url:http://hello.com/state', 'test:state'],
+        False,
+    ),
+    (
+        'failing for /state, OK for /state.json',
+        [Exception, mock.MagicMock(status_code=200, content='{}')],
+        ['url:http://hello.com/state.json', 'test:state'],
+        False,
+    ),
+    (
+        'failing for /state and failing for /state.json',
+        [Exception, Exception],
+        ['url:http://hello.com/state.json', 'test:state'],
+        True,
+    )
+]
+
+stats_test_data_old_version = [
+    (
+        'OK for /metrics/snapshot',
+        [mock.MagicMock(status_code=200, content='{}')],
+        ['url:http://hello.com/metrics/snapshot', 'test:stats'],
+        False,
+    ),
+    (
+        'Failing for /metrics/snapshot',
+        [Exception],
+        ['url:http://hello.com/metrics/snapshot', 'test:stats'],
+        True,
+    ),
+]
+
+stats_test_data_new_version = [
+    (
+        'OK for /stats.json',
+        [mock.MagicMock(status_code=200, content='{}')],
+        ['url:http://hello.com/stats.json', 'test:stats'],
+        False,
+    ),
+    (
+        'Failing for /stats.json',
+        [Exception],
+        ['url:http://hello.com/stats.json', 'test:stats'],
+        True,
+    ),
+]
+
+# @pytest.mark.parametrize(
+#     'test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception',
+#     [
+#         (
+#             'OK for /state and OK for /stats',
+#             [mock.MagicMock(status_code=200, content='{}'), mock.MagicMock(status_code=200, content='{}')],
+#             AgentCheck.OK,
+#             ['url:http://hello.com/state'],
+#             False,
+#         ),
+#         (
+#             'Failing /state, OK for /state.json, OK for /stats',
+#             [mock.MagicMock(status_code=500), mock.MagicMock(status_code=200, content='{}')],
+#             AgentCheck.OK,
+#             ['url:http://hello.com/state.json'],
+#             False,
+#         ),
+#         (
+#             'OK case with failing /state due to Timeout and fallback on /state.json',
+#             [requests.exceptions.Timeout, mock.MagicMock(status_code=200, content='{}')],
+#             AgentCheck.OK,
+#             ['my:tag', 'url:http://hello.com/state.json'],
+#             False,
+#         ),
+#         (
+#             'OK case with failing /state due to Exception and fallback on /state.json',
+#             [Exception, mock.MagicMock(status_code=200, content='{}')],
+#             AgentCheck.OK,
+#             ['my:tag', 'url:http://hello.com/state.json'],
+#             False,
+#         ),
+#         (
+#             'NOK case with failing /state and /state.json due to timeout',
+#             [requests.exceptions.Timeout, requests.exceptions.Timeout],
+#             AgentCheck.CRITICAL,
+#             ['my:tag', 'url:http://hello.com/state.json'],
+#             True,
+#         ),
+#         (
+#             'NOK case with failing /state and /state.json with bad status',
+#             [mock.MagicMock(status_code=500), mock.MagicMock(status_code=500)],
+#             AgentCheck.CRITICAL,
+#             ['my:tag', 'url:http://hello.com/state.json'],
+#             True,
+#         ),
+#     ],
+# )
 
 @pytest.mark.parametrize(
-    'test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception',
-    [
-        (
-            'OK case for /state endpoint',
-            [mock.MagicMock(status_code=200, content='{}')],
-            AgentCheck.OK,
-            ['my:tag', 'url:http://hello.com/state'],
-            False,
-        ),
-        (
-            'OK case with failing /state due to bad status and fallback on /state.json',
-            [mock.MagicMock(status_code=500), mock.MagicMock(status_code=200, content='{}')],
-            AgentCheck.OK,
-            ['my:tag', 'url:http://hello.com/state.json'],
-            False,
-        ),
-        (
-            'OK case with failing /state due to Timeout and fallback on /state.json',
-            [requests.exceptions.Timeout, mock.MagicMock(status_code=200, content='{}')],
-            AgentCheck.OK,
-            ['my:tag', 'url:http://hello.com/state.json'],
-            False,
-        ),
-        (
-            'OK case with failing /state due to Exception and fallback on /state.json',
-            [Exception, mock.MagicMock(status_code=200, content='{}')],
-            AgentCheck.OK,
-            ['my:tag', 'url:http://hello.com/state.json'],
-            False,
-        ),
-        (
-            'NOK case with failing /state and /state.json due to timeout',
-            [requests.exceptions.Timeout, requests.exceptions.Timeout],
-            AgentCheck.CRITICAL,
-            ['my:tag', 'url:http://hello.com/state.json'],
-            True,
-        ),
-        (
-            'NOK case with failing /state and /state.json with bad status',
-            [mock.MagicMock(status_code=500), mock.MagicMock(status_code=500)],
-            AgentCheck.CRITICAL,
-            ['my:tag', 'url:http://hello.com/state.json'],
-            True,
-        ),
-    ],
+    'test_case_name, request_mock_effects, expected_tags, expected_status',
+    state_test_data
 )
 @pytest.mark.integration
-def test_can_connect_service_check(
-    instance, aggregator, test_case_name, request_mock_side_effects, expected_status, expected_tags, expect_exception
+def test_can_connect_state_service_check(
+    instance, aggregator, test_case_name, request_mock_effects, expected_tags, expected_status
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-    print("instance is {}, expected status is {}, expect_exception = {}".format(instance, expected_status, expect_exception))
-    import pdb; pdb.set_trace()
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
-        r.get.side_effect = request_mock_side_effects
-        exception_raised = False
-        try:
-            check.check(instance)
-        except CheckException:
-            exception_raised = True
+        r.get.side_effect = request_mock_effects
+        check._process_state_info('http://hello.com', [], 5050, ['test:state'])
 
-        assert expect_exception == exception_raised
+    aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
+
+
+@pytest.mark.parametrize(
+    'test_case_name, request_mock_effects, expected_tags, expected_status',
+    stats_test_data_old_version + stats_test_data_new_version
+)
+@pytest.mark.integration
+def test_can_connect_stats_service_check(
+    instance, aggregator, test_case_name, request_mock_effects, expected_tags, expected_status
+):
+    check = MesosSlave('mesos_slave', {}, [instance])
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.side_effect = request_mock_effects
+        check._process_stats_info('http://hello.com', ['test:stats'])
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)

@@ -195,27 +195,28 @@ class MesosSlave(AgentCheck):
     #         master_state = self._get_json(old_endpoint)
     #     return master_state
 
-    def _get_state_metrics(self, url):
+    def _get_state_metrics(self, url, tags):
         # Mesos version >= 0.25
         endpoint = url + '/state'
         try:
             state_metrics = self._get_json(endpoint)
+            tags = tags.append("url:{}".format(endpoint))
         except CheckException:
             # Mesos version < 0.25
             old_endpoint = endpoint + '.json'
+            tags = tags.append("url:{}".format(old_endpoint))
             self.log.info(
                 'Unable to fetch state from {}, retrying with deprecated endpoint {}'.format(endpoint, old_endpoint)
             )
             state_metrics = self._get_json(old_endpoint)
-
         return state_metrics
 
-    def _get_stats_metrics(self, url):
+    def _get_stats_metrics(self, url, tags):
         endpoint = url + '/metrics/snapshot' if self.version >= [0, 22, 0] else url + '/stats.json'
+        tags.append("url:{}".format(endpoint))
         return self._get_json(endpoint)
 
     def _set_version(self, state_metrics):
-        #TODO: something is wrong with the state_metrics object in testing as it doesn't contain version info so this endpoint fails 
         if 'version' in state_metrics:
             self.version = [int(i) for i in state_metrics['version'].split('.')]
             # TODO: also set metadata here
@@ -227,10 +228,10 @@ class MesosSlave(AgentCheck):
             if master_state:
                 self.cluster_name = master_state.get('cluster')
 
-    def _set_tags(self, state_metrics, instance_tags):
-        self.tags = ['mesos_pid:{0}'.format(state_metrics['pid']), 'mesos_node:slave'] + instance_tags
+    def _set_tags(self, state_metrics, tags):
+        tags = tags + ['mesos_pid:{0}'.format(state_metrics['pid']), 'mesos_node:slave']
         if self.cluster_name:
-            self.tags.append('mesos_cluster:{0}'.format(self.cluster_name))
+            tags.append('mesos_cluster:{0}'.format(self.cluster_name))
 
     # def _get_constant_attributes(self, url, master_port, tags):
     #     state_metrics = None
@@ -259,43 +260,46 @@ class MesosSlave(AgentCheck):
                             for key_name, (metric_name, metric_func) in iteritems(self.TASK_METRICS):
                                 metric_func(self, metric_name, t['resources'][key_name], tags=task_tags)
 
-    def _process_state_info(self, url, tasks, master_port, instance_tags):
-        state_metrics = self._get_state_metrics(url)
-        if state_metrics:
-            self._set_cluster_name(url, master_port, state_metrics)
-            self._set_version(state_metrics)
-            self._set_tags(state_metrics, instance_tags)
-            self._process_tasks(tasks, state_metrics, self.tags)
+    def _process_state_info(self, url, tasks, master_port, tags):
+        try:
+            state_metrics = self._get_state_metrics(url, tags)
+            if state_metrics:
+                self._set_cluster_name(url, master_port, state_metrics)
+                self._set_version(state_metrics)
+                self._set_tags(state_metrics, tags)
+                self._process_tasks(tasks, state_metrics, tags)
 
-    def _process_stats_info(self, url):
-        stats_metrics = self._get_stats_metrics(url)
-        if stats_metrics:
-            metrics = [
-                self.SLAVE_TASKS_METRICS,
-                self.SYSTEM_METRICS,
-                self.SLAVE_RESOURCE_METRICS,
-                self.SLAVE_EXECUTORS_METRICS,
-                self.STATS_METRICS,
-            ]
-            for m in metrics:
-                for key_name, (metric_name, metric_func) in iteritems(m):
-                    if key_name in stats_metrics:
-                        metric_func(self, metric_name, stats_metrics[key_name], tags=self.tags)
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
+        except CheckException:
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags)
+
+    def _process_stats_info(self, url, tags):
+        try:
+            stats_metrics = self._get_stats_metrics(url, tags)
+            if stats_metrics:
+                metrics = [
+                    self.SLAVE_TASKS_METRICS,
+                    self.SYSTEM_METRICS,
+                    self.SLAVE_RESOURCE_METRICS,
+                    self.SLAVE_EXECUTORS_METRICS,
+                    self.STATS_METRICS,
+                ]
+                for m in metrics:
+                    for key_name, (metric_name, metric_func) in iteritems(m):
+                        if key_name in stats_metrics:
+                            metric_func(self, metric_name, stats_metrics[key_name], tags=tags)
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
+        except CheckException:
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags)
 
     def check(self, instance):
         if 'url' not in instance:
             raise Exception('Mesos instance missing "url" value.')
 
         url = instance['url']
-        instance_tags = instance.get('tags', [])
+        tags = instance.get('tags', [])
         tasks = instance.get('tasks', [])
         master_port = instance.get("master_port", DEFAULT_MASTER_PORT)
 
-        try:
-            self._process_state_info(url, tasks, master_port, instance_tags)
-            self._process_stats_info(url)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.tags)
-
-        except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.tags, message=str(e))
-            raise CheckException
+        self._process_state_info(url, tasks, master_port, tags)
+        self._process_stats_info(url, tags)
