@@ -128,7 +128,7 @@ class MorCache:
                     nb_hist_metrics += len(mor['metrics'])
                     if nb_hist_metrics >= max_historical_metrics:
                         # Adding those metrics to the batch would make it too big, yield it now
-                        self.log.info("Will request %d hist metrics", nb_hist_metrics-len(mor['metrics']))
+                        self.log.info("Will request %d hist metrics", nb_hist_metrics - len(mor['metrics']))
                         yield batch
                         batch = {}
                         nb_hist_metrics = len(mor['metrics'])
@@ -144,6 +144,32 @@ class MorCache:
             if batch:
                 self.log.info("Will request %d hist metrics", nb_hist_metrics)
                 yield batch
+
+    def legacy_mors_batch(self, key, batch_size, _=None):
+        """
+        FIXME: This has a bug with historical metrics. The `max_query_metrics` parameter on vcenter side limits
+        the number of metrics that are queryable in the same request. The `mors_batch` method fixes that issue but is
+        not yet enabled by default.
+
+        Generator returning as many dictionaries containing `batch_size` Mor
+        objects as needed to iterate all the content of the cache. This has
+        to be iterated twice, like:
+
+            for batch in cache.mors_batch('key', 100):
+                for name, mor in batch:
+                    # use the Mor object here
+        """
+        with self._mor_lock:
+            mors_dict = self._mor.get(key)
+            if mors_dict is None:
+                yield {}
+
+            mor_names = list(mors_dict)
+            mor_names.sort()
+            total = len(mor_names)
+            for idx in range(0, total, batch_size):
+                names_chunk = mor_names[idx : min(idx + batch_size, total)]
+                yield {name: mors_dict[name] for name in names_chunk}
 
     def purge(self, key, ttl):
         """

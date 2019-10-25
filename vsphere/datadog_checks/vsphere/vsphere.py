@@ -892,6 +892,13 @@ class VSphereCheck(AgentCheck):
             except Exception:
                 pass
 
+        # TODO: Remove me once the fix for `max_query_metrics` is here by default
+        mors_batch_method = (
+            self.mor_cache.mors_batch
+            if is_affirmative(instance.get('betafix_max_query_metrics'))
+            else self.mor_cache.legacy_mors_batch
+        )
+
         vm_count = 0
         custom_tags = instance.get('tags', [])
         tags = ["vcenter_server:{}".format(ensure_unicode(instance.get('name')))] + custom_tags
@@ -908,7 +915,7 @@ class VSphereCheck(AgentCheck):
         # Request metrics for several objects at once. We can limit the number of objects with batch_size
         # If batch_size is 0, process everything at once
         batch_size = self.batch_morlist_size or n_mors
-        for batch in self.mor_cache.mors_batch(i_key, batch_size, max_historical_metrics):
+        for batch in mors_batch_method(i_key, batch_size, max_historical_metrics):
             query_specs = []
             for mor in itervalues(batch):
                 if mor['mor_type'] == 'vm':
