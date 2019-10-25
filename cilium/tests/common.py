@@ -47,7 +47,7 @@ AGENT_METRICS = [
     'cilium.nodes.managed.total',
     'cilium.policy.count',
     'cilium.policy.endpoint_enforcement_status',
-    'cilium.policy.import_errors.count',
+    'cilium.policy.import_errors.count', #continue here
     'cilium.policy.l7_denied.total',
     'cilium.policy.l7_forwarded.total',
     'cilium.policy.l7_parse_errors.total',
@@ -68,8 +68,8 @@ AGENT_METRICS = [
     'cilium.triggers_policy.update_call_duration.seconds.sum',
     'cilium.triggers_policy.update_folds',
     'cilium.triggers_policy.update.total',
-    'cilium.unreachable.health_endpoints',
-    'cilium.unreachable.nodes',
+    'cilium.unreachable.health_endpoints', #"Number of health endpoints that cannot be reached"
+    'cilium.unreachable.nodes', #"Number of nodes that cannot be reached",
 ]
 
 OPERATOR_METRICS = [

@@ -1,2 +1,41 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-#coredns.panic_count.count,count,,entry,,,1,coredns,total number of panics
+cilium.agent.api_process_time.seconds.count,count,,second,,"Count of processing time for all API calls",0,cilium,api proc time count
+cilium.agent.api_process_time.seconds.sum,gauge,,second,,"Sum of processing time for all API calls",0,cilium,api proc time sum
+cilium.agent.bootstrap.seconds.count,count,,second,,"Count of bootstrap durations",0,cilium,bootstrap time count
+cilium.agent.bootstrap.seconds.sum,gauge,,second,,"Sum of bootstrap durations",0,cilium,bootstrap time sum
+cilium.bpf.map_ops.total,count,,operation,,"Total BPF map operations performed",0,cilium,bpf map ops
+cilium.controllers.failing.count,count,,unit,,"Number of failing controllers",-1,cilium, fail controllers
+cilium.controllers.runs_duration.seconds.count,count,,second,,"Count of controller processes duration",0,cilium,controller dur count
+cilium.controllers.runs_duration.seconds.sum,gauge,,second,,"Sum of controller processes duration",0,cilium,controller dur sum
+cilium.controllers.runs.total,count,,unit,,"Total number of controller runs",0,cilium,controller runs
+cilium.datapath.conntrack_gc.duration.seconds.count,count,,second,,"Count of garbage collector process duration",0,cilium,gc dur count
+cilium.datapath.conntrack_gc.duration.seconds.sum,gauge,,second,,"Sum of garbage collector process duration",0,cilium,gc dur sum
+cilium.datapath.conntrack_gc.entries,gauge,,garbage collection,,"The number of alive and deleted conntrack entries",0,cilium,conntrack entries
+cilium.datapath.conntrack_gc.key_fallbacks.total,gauge,,garbage collection,,"The total number of conntrack entries",-1,cilium,conntrack entries total
+cilium.datapath.conntrack_gc.runs.total,gauge,,garbage collection,,"Total number of the conntrack garbage collector process runs",0,cilium,gc runs
+cilium.datapath.errors.total,gauge,,error,,"Total number of errors in datapath management",-1,cilium,datapath errors
+cilium.drop_bytes.total,gauge,,byte,,"Total dropped bytes",-1,cilium,drop bytes
+cilium.drop_count.total,gauge,,packet,,"Total dropped packets",-1,cilium,drop packets
+cilium.endpoint.count,count,,unit,,"Total endpoints managed by agent",0,cilium,total endpoints
+cilium.endpoint.regeneration_time_stats.seconds.count,count,,second,,"Count of endpoint regeneration time stats",0,cilium,endpoint regen time count
+cilium.endpoint.regeneration_time_stats.seconds.sum,gauge,,second,,"Sum of endpoint regeneration time stats",0,cilium,endpoint regen time sum
+cilium.endpoint.regenerations.count,count,,unit,,"Count of completed endpoint regenerations",1,cilium,endpoint regen count
+cilium.endpoint.state,gauge,,unit,,"Count of all endpoints",0,cilium,endpoint count
+cilium.errors_warning.total,gauge,,error,,"Total error warnings",-1,cilium,error total
+cilium.event_timestamp,gauge,,time,,"Last timestamp of event received",0,cilium,event ts
+cilium.forward_bytes.total,gauge,,byte,,"Total forwarded bytes",1,cilium,forward bytes
+cilium.forward_count.total,gauge,,packet,,"Total forwarded packets",1,cilium,forward packet
+cilium.fqdn.gc_deletions.total,gauge,,unit,,"Total number of FQDNs cleaned in FQDN garbage collector job",0,cilium,fdqn total
+cilium.identity.count,count,,unit,,"Number of identities allocated",0,cilium,id count
+cilium.ip_addresses.count,count,,unit,,"Number of allocated ip_addresses",0,cilium,ip count
+cilium.ipam.events.total,gauge,,ipam,,"Number of IPAM events received by action and datapath family type",0,cilium,ipam total
+cilium.k8s_client.api_calls.count,count,,request,,"Number of API calls made to kube-apiserver",0,cilium,api call count
+cilium.k8s_client.api_latency_time.seconds.count,count,,second,,"Count of processed API call duration",-1,cilium,api latency count
+cilium.k8s_client.api_latency_time.seconds.sum,gauge,,second,,"Sum of processed API call duration",-1,cilium,api latency sum
+cilium.kubernetes.events_received.total,count,,event,,"Number of Kubernetes received events processed",0,cilium,k8s events rcv count
+cilium.kubernetes.events.total,count,,event,,"Number of Kubernetes events processed",0,cilium,k8s events count
+cilium.nodes.all_datapath_validations.total,count,,unit,,"Number of validation calls to implement the datapath implemention of a node",0,cilium,node validations
+cilium.nodes.all_events_received.total,count,,event,,"Number of node events received",0,cilium,node events rcvd
+cilium.nodes.managed.total,gauge,,node,,"Number of nodes managed",0,cilium,node managed
+cilium.policy.count,gauge,,unit,,"Number of policies currently loaded",0,cilium,policy count
+cilium.policy.endpoint_enforcement_status,gauge,,unit,,"Number of endpoints labeled by polict enforcement status",0,cilium,policy enforces endpoint count
