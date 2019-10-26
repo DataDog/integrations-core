@@ -8,13 +8,13 @@ parameters:
 steps:
 - ${{ if eq(parameters.test, 'true') }}:
   - script: ddev test --cov --junit ${{ parameters.check }}
-    displayName: 'Run Unit Integration tests'
+    displayName: 'Run unit integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
   - script: ddev env test --base --new-env --profile-memory --junit ${{ parameters.check }}
-    displayName: 'Run E2E tests'
+    displayName: 'Run e2e tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
 
