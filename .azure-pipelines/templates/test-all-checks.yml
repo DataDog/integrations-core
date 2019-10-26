@@ -8,7 +8,7 @@ jobs:
       displayName: Kafka Consumer
       os: linux
 
-    # Base and dev
+    # Datadog checks base, dev, download
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)
       os: linux
@@ -25,7 +25,7 @@ jobs:
       displayName: Datadog Checks Downloader
       os: linux
 
-    # Integrations
+    # Integrations in alphabetical order
     - checkName: active_directory
       displayName: Active Directory
       os: windows
