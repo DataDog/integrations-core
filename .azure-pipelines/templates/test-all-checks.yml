@@ -2,6 +2,13 @@ jobs:
 - template: './test-all.yml'
   parameters:
     checks:
+
+    # Run long duration jobs first (>30min)
+    - checkName: kafka_consumer
+      displayName: Kafka Consumer
+      os: linux
+
+    # Base and dev
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)
       os: linux
@@ -17,6 +24,8 @@ jobs:
     - checkName: datadog_checks_downloader
       displayName: Datadog Checks Downloader
       os: linux
+
+    # Integrations
     - checkName: active_directory
       displayName: Active Directory
       os: windows
@@ -154,9 +163,6 @@ jobs:
       os: linux
     - checkName: jboss_wildfly
       displayName: JBoss/WildFly
-      os: linux
-    - checkName: kafka_consumer
-      displayName: Kafka Consumer
       os: linux
     - checkName: kong
       displayName: Kong
