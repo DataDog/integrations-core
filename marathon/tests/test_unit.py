@@ -116,4 +116,4 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
             auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
         )
         http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://localhost:8080/v2/queue', **http_wargs)
+        r.get.assert_called_with('http://localhost:8080/v2/queue_UNIT_FAIL', **http_wargs)

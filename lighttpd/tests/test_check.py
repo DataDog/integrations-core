@@ -51,7 +51,7 @@ def test_e2e(dd_agent_check, instance):
     aggregator.assert_metric('lighttpd.performance.idle_server', tags=tags, count=2)
     aggregator.assert_metric('lighttpd.performance.uptime', tags=tags, count=2)
     aggregator.assert_metric('lighttpd.net.bytes_per_s', tags=tags, count=1)
-    aggregator.assert_metric('lighttpd.net.request_per_s', tags=tags, count=1)
+    aggregator.assert_metric('lighttpd.net.request_per_s_e2e_fail', tags=tags, count=1)
     aggregator.assert_all_metrics_covered()
 
     tags = ['host:{}'.format(common.HOST), 'port:9449', 'instance:first']
