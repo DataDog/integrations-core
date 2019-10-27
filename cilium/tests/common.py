@@ -68,8 +68,8 @@ AGENT_METRICS = [
     'cilium.triggers_policy.update_call_duration.seconds.sum',
     'cilium.triggers_policy.update_folds',
     'cilium.triggers_policy.update.total',
-    'cilium.unreachable.health_endpoints', #"Number of health endpoints that cannot be reached"
-    'cilium.unreachable.nodes', #"Number of nodes that cannot be reached",
+    'cilium.unreachable.health_endpoints',
+    'cilium.unreachable.nodes',
 ]
 
 OPERATOR_METRICS = [
