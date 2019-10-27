@@ -12,9 +12,6 @@ The Spark check collects metrics for:
 - Job state: number of jobs active, completed, skipped, failed
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The Spark check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your:
@@ -24,6 +21,9 @@ The Spark check is included in the [Datadog Agent][3] package, so you don't need
 - Spark master (if you're running Standalone Spark)
 
 ### Configuration
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `spark.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
     See the [sample spark.d/conf.yaml][5] for all available configuration options:
@@ -49,6 +49,16 @@ The Spark check is included in the [Datadog Agent][3] package, so you don't need
     Set `spark_url` and `spark_cluster_mode` according to how you're running Spark.
 
 2. [Restart the Agent][6] to start sending Spark metrics to Datadog.
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                       |
+|----------------------|---------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `spark`                                                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                               |
+| `<INSTANCE_CONFIG>`  | `{"spark_url": "%%host%%:8080", "cluster_name":"<CLUSTER_NAME>"}` |
 
 ### Validation
 
