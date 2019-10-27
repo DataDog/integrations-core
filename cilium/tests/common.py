@@ -47,7 +47,7 @@ AGENT_METRICS = [
     'cilium.nodes.managed.total',
     'cilium.policy.count',
     'cilium.policy.endpoint_enforcement_status',
-    'cilium.policy.import_errors.count', #continue here
+    'cilium.policy.import_errors.count',
     'cilium.policy.l7_denied.total',
     'cilium.policy.l7_forwarded.total',
     'cilium.policy.l7_parse_errors.total',
