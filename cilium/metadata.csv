@@ -62,3 +62,10 @@ cilium.triggers_policy.update_folds,gauge,,unit,,"Number of folds",0,cilium,fold
 cilium.triggers_policy.update.total,count,,unit,,"Total number of policy update trigger invocations",0,cilium,policy update trigger count
 cilium.unreachable.health_endpoints,gauge,,unit,,"Number of health endpoints that cannot be reached",0,cilium,unreachable health endpoint
 cilium.unreachable.nodes,gauge,,node,,"Number of nodes that cannot be reached",0,cilium,unreachable nodes
+cilium.operator.process.cpu.seconds,count,,second,,"Total user and system CPU time spent in seconds",0,cilium,cpu proc time operator
+cilium.operator.process.max_fds,gauge,,file,,"Maximum number of open file descriptors",0,cilium,operator max fd
+cilium.operator.process.open_fds,gauge,,file,,"Number of open file descriptors",0,cilium,operator open fd
+cilium.operator.process.resident_memory.bytes,gauge,,byte,,"Resident memory size in bytes",0,cilium,operator mem size
+cilium.operator.process.start_time.second,gauge,,second,,"Start time of the process since unix epoch in seconds",0,cilium,proc start time operator
+cilium.operator.process.virtual_memory.bytes,gauge,,byte,,"Virtual memory size in bytes",0,cilium,virtual mem size operator
+cilium.operator.process.virtual_memory_max.bytes,gauge,,byte,,"Maximum amount of virtual memory available in bytes",0,cilium,virtual mem size max operator
