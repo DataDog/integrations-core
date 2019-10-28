@@ -27,3 +27,4 @@ steps:
   inputs:
     testResultsFiles: '**/test-*.xml'
     testRunTitle: '${{ parameters.test_run }}'
+    mergeTestResults: true
