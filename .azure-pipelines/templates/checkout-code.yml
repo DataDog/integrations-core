@@ -1,7 +1,7 @@
 steps:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema#checkout
 - checkout: self
-  fetchDepth: 3
+  fetchDepth: 10
 
 # Azure checks out the code from the PR but leaves us in a detached state.
 # Because ddev cannot work in that state, we create a branch.
