@@ -2,7 +2,7 @@
 
 ## Overview
 
-Extract custom metrics from any prometheus endpoints.
+Extract custom metrics from any Prometheus endpoints. **Note**: Datadog recommends using the [OpenMetrics check][10] since it is more efficient and fully supports Prometheus text format. Use the Prometheus check only when the metrics endpoint does not support a text format.
 
 <div class="alert alert-warning">
 All the metrics retrieved by this integration are considered <a href="https://docs.datadoghq.com/developers/metrics/custom_metrics">custom metrics</a>.
@@ -73,3 +73,4 @@ Need help? Contact [Datadog support][4].
 [7]: https://docs.datadoghq.com/developers/prometheus
 [8]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
 [9]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[10]: https://docs.datadoghq.com/integrations/openmetrics

@@ -67,7 +67,7 @@ instances:
     #
     # whitelist_conntrack_metrics:
     #   - <METRIC_NAME>
-    #   - <METRIC_PREFIX>*
+    #   - <METRIC_PREFIX>.*
 
     ## @param blacklist_conntrack_metrics - list of strings - optional - default: []
     ## Linux only.
@@ -79,7 +79,7 @@ instances:
     #
     # blacklist_conntrack_metrics:
     #   - <METRIC_NAME>
-    #   - <METRIC_PREFIX>*
+    #   - <METRIC_PREFIX>.*
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.

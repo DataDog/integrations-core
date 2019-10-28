@@ -8,6 +8,12 @@ instances:
     #
   - servlet_url: http://localhost:<PORT>/wasPerfTool/servlet/perfservlet
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param username - string - optional
     ## The username to use for authentication againse the servlet
     #

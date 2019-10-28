@@ -65,7 +65,7 @@ Set the corresponding `source` parameter to the same channel name to benefit fro
 
 Finally, [restart the Agent][4].
 
-**Note**: For the Security logs channel, make sure that your Datadog Agent user is added to the `Event Log Readers` list.
+**Note**: For the Security logs channel, add your Datadog Agent user to the `Event Log Readers` user group.
 
 ### Filters
 Use the Windows Event Viewer GUI to list all the event logs available for capture with this integration.

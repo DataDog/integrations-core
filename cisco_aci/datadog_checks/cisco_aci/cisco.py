@@ -89,7 +89,7 @@ class CiscoACICheck(AgentCheck):
         try:
             api.login()
         except Exception as e:
-            self.log.error("Cannot login to the Cisco ACI: {}".format(e))
+            self.log.error("Cannot login to the Cisco ACI: %s", e)
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -104,7 +104,7 @@ class CiscoACICheck(AgentCheck):
             tenant = Tenant(self, api, instance, instance_hash)
             tenant.collect()
         except Exception as e:
-            self.log.error('tenant collection failed: {}'.format(e))
+            self.log.error('tenant collection failed: %s', e)
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -118,7 +118,7 @@ class CiscoACICheck(AgentCheck):
             fabric = Fabric(self, api, instance)
             fabric.collect()
         except Exception as e:
-            self.log.error('fabric collection failed: {}'.format(e))
+            self.log.error('fabric collection failed: %s', e)
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -132,7 +132,7 @@ class CiscoACICheck(AgentCheck):
             capacity = Capacity(api, instance, check_tags=self.check_tags, gauge=self.gauge, log=self.log)
             capacity.collect()
         except Exception as e:
-            self.log.error('capacity collection failed: {}'.format(e))
+            self.log.error('capacity collection failed: %s', e)
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,

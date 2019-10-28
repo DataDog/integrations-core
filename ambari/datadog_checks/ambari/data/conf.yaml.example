@@ -16,6 +16,12 @@ instances:
     #
   - url: localhost
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param user - string - optional
     ## Username created to connect to the Ambari server if using basic authentication
     #

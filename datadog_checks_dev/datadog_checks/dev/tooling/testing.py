@@ -158,15 +158,18 @@ def fix_coverage_report(check, report_file):
 
 
 def construct_pytest_options(
+    check,
     verbose=0,
     color=None,
     enter_pdb=False,
     debug=False,
     bench=False,
     coverage=False,
+    junit=False,
     marker='',
     test_filter='',
     pytest_args='',
+    e2e=False,
 ):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
@@ -185,6 +188,17 @@ def construct_pytest_options(
         pytest_options += ' --benchmark-only --benchmark-cprofile=tottime'
     else:
         pytest_options += ' --benchmark-skip'
+
+    if junit:
+        test_group = 'e2e' if e2e else 'unit'
+        pytest_options += (
+            # junit report file must contain the env name to handle multiple envs
+            # $TOX_ENV_NAME is a tox injected variable
+            # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
+            ' --junit-xml=.junit/test-{test_group}-$TOX_ENV_NAME.xml'
+            # Junit test results class prefix
+            ' --junit-prefix={check}'
+        ).format(check=check, test_group=test_group)
 
     if coverage:
         pytest_options += (
