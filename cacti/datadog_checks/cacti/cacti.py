@@ -82,7 +82,7 @@ class CactiCheck(AgentCheck):
         if whitelist:
             if not os.path.isfile(whitelist) or not os.access(whitelist, os.R_OK):
                 # Don't run the check if the whitelist is unavailable
-                self.log.exception("Unable to read whitelist file at %s" % (whitelist))
+                self.log.exception("Unable to read whitelist file at %s", whitelist)
 
             wl = open(whitelist)
             for line in wl:
@@ -130,13 +130,13 @@ class CactiCheck(AgentCheck):
             info = self._get_rrd_info(rrd_path)
         except Exception:
             # Unable to read RRD file, ignore it
-            self.log.exception("Unable to read RRD file at %s" % rrd_path)
+            self.log.exception("Unable to read RRD file at %s", rrd_path)
             return metric_count
 
         # Find the consolidation functions for the RRD metrics
         c_funcs = set([v for k, v in info.items() if k.endswith('.cf')])
         if not c_funcs:
-            self.log.debug("No funcs found for {}".format(rrd_path))
+            self.log.debug("No funcs found for %s", rrd_path)
 
         for c in list(c_funcs):
             last_ts_key = '%s.%s' % (rrd_path, c)
@@ -151,7 +151,7 @@ class CactiCheck(AgentCheck):
                 fetched = self._get_rrd_fetch(rrd_path, c, start)
             except rrdtool.error:
                 # Start time was out of range, skip this RRD
-                self.log.warn("Time %s out of range for %s" % (rrd_path, start))
+                self.log.warning("Time %s out of range for %s", rrd_path, start)
                 return metric_count
 
             # Extract the data
