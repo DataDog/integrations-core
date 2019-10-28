@@ -224,7 +224,7 @@ class __AgentCheck(object):
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
                 self.warning(
-                    'Setting max_returned_metrics to zero is not allowed, reverting ' 'to the default of %s metrics',
+                    'Setting max_returned_metrics to zero is not allowed, reverting to the default of %s metrics',
                     self.DEFAULT_METRIC_LIMIT,
                 )
         except Exception:

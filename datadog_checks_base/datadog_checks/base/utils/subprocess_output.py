@@ -59,7 +59,7 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
     out, err, returncode = subprocess_output(cmd_args, raise_on_empty_output)
 
     log.debug(
-        'get_subprocess_output returned ' '(len(out): %s ; len(err): %s ; returncode: %s)',
+        'get_subprocess_output returned (len(out): %s ; len(err): %s ; returncode: %s)',
         len(out),
         len(err),
         returncode,
