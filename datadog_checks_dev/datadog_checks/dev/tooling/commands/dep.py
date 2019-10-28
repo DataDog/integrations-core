@@ -7,7 +7,7 @@ import click
 from six import itervalues
 
 from ...utils import write_file_lines
-from ..constants import get_agent_requirements, get_root
+from ..constants import REQUIREMENTS_IN, get_agent_requirements, get_root
 from ..requirements import Package, make_catalog, read_packages, resolve_requirements
 from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
@@ -66,7 +66,7 @@ def resolve(checks, lazy, quiet):
         checks = os.listdir(root)
 
     for check_name in sorted(checks):
-        pinned_reqs_file = os.path.join(root, check_name, 'requirements.in')
+        pinned_reqs_file = os.path.join(root, check_name, REQUIREMENTS_IN)
         resolved_reqs_file = os.path.join(root, check_name, 'requirements.txt')
 
         if os.path.isfile(pinned_reqs_file):
@@ -107,7 +107,7 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
     version = version.lower()
 
     for check_name in sorted(os.listdir(root)):
-        pinned_reqs_file = os.path.join(root, check_name, 'requirements.in')
+        pinned_reqs_file = os.path.join(root, check_name, REQUIREMENTS_IN)
         resolved_reqs_file = os.path.join(root, check_name, 'requirements.txt')
 
         if os.path.isfile(pinned_reqs_file):
