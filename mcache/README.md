@@ -13,7 +13,9 @@ The Memcache check is included in the [Datadog Agent][2] package, so you don't n
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section
 
-#### Host
+#### Metric Collection
+
+##### Host
 
 1. Edit the `mcache.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
   See the [sample mcache.d/conf.yaml][4] for all available configuration options:
@@ -30,7 +32,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5] to begin sending Memcache metrics to Datadog.
 
-#### Containerized
+##### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
 
@@ -40,18 +42,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 | `<INIT_CONFIG>`      | blank or `{}`                         |
 | `<INSTANCE_CONFIG>`  | `{"url": "%%host%%","port": "11211"}` |
 
-### Validation
-
-[Run the Agent's `status` subcommand][6] and look for `mcache` under the Checks section.
-
-## Data Collected
-### Metrics
-
-See [metadata.csv][7] for a list of metrics provided by this check.
-
-The check only collects `memcache.slabs.*` metrics if you set `options.slabs: true` in `mcache.d/conf.yaml`. Likewise, it only collects `memcache.items.*` metrics if you set `options.items: true`.
-
-### Logs
+#### Log Collection
 
 **Available for Agent >6.0**
 
@@ -68,6 +59,17 @@ Add this configuration block to your `mcache.d/conf.yaml` file to start collecti
 
 Change the `path` and `service` parameter values and configure them for your environment.
 [Restart the Agent][5] to validate these changes.
+
+### Validation
+
+[Run the Agent's `status` subcommand][6] and look for `mcache` under the Checks section.
+
+## Data Collected
+### Metrics
+
+See [metadata.csv][7] for a list of metrics provided by this check.
+
+The check only collects `memcache.slabs.*` metrics if you set `options.slabs: true` in `mcache.d/conf.yaml`. Likewise, it only collects `memcache.items.*` metrics if you set `options.items: true`.
 
 
 ### Events
