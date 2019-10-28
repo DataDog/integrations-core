@@ -29,6 +29,7 @@ def display_envs(check_envs):
 @click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
+@click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
 @click.option('--marker', '-m', help='Only run tests matching given marker expression')
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.option('--pdb', 'enter_pdb', is_flag=True, help='Drop to PDB on first failure, then end test session')
@@ -48,6 +49,7 @@ def test(
     bench,
     e2e,
     coverage,
+    junit,
     cov_missing,
     marker,
     test_filter,
@@ -138,9 +140,11 @@ def test(
             debug=debug,
             bench=bench,
             coverage=coverage,
+            junit=junit,
             marker=marker,
             test_filter=test_filter,
             pytest_args=pytest_args,
+            e2e=e2e,
         )
         if coverage:
             pytest_options = pytest_options.format(pytest_coverage_sources(check))

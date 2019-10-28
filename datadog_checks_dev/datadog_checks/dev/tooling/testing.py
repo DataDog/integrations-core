@@ -165,9 +165,11 @@ def construct_pytest_options(
     debug=False,
     bench=False,
     coverage=False,
+    junit=False,
     marker='',
     test_filter='',
     pytest_args='',
+    e2e=False,
 ):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
@@ -187,11 +189,19 @@ def construct_pytest_options(
     else:
         pytest_options += ' --benchmark-skip'
 
-    if coverage:
+    if junit:
+        test_group = 'e2e' if e2e else 'unit'
         pytest_options += (
-            # `junit-xml` config is added to pytest options in tox.ini since we need tox variable {envname}
+            # junit report file must contain the env name to handle multiple envs
+            # $TOX_ENV_NAME is a tox injected variable
+            # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
+            ' --junit-xml=.junit/test-{test_group}-$TOX_ENV_NAME.xml'
             # Junit test results class prefix
             ' --junit-prefix={check}'
+        ).format(check=check, test_group=test_group)
+
+    if coverage:
+        pytest_options += (
             # Located at the root of each repo
             ' --cov-config=../.coveragerc'
             # Use the same .coverage file to aggregate results
@@ -199,8 +209,8 @@ def construct_pytest_options(
             # Show no coverage report until the end
             ' --cov-report='
             # This will be formatted to the appropriate coverage paths for each package
-            ' {{}}'
-        ).format(check=check)
+            ' {}'
+        )
 
     if marker:
         pytest_options += ' -m "{}"'.format(marker)

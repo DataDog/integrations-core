@@ -22,11 +22,11 @@ class TrelloClient:
         self.label_team_map = {
             'team/agent-apm': 'Trace',
             'team/agent-core': 'Core',
+            'team/agent-platform': 'Platform',
             'team/burrito': 'Process',
             'team/containers': 'Containers',
             'team/integrations': 'Integrations',
             'team/logs': 'Logs',
-            'team/platform': 'Platform',
         }
 
     def create_card(self, team, name, body):
