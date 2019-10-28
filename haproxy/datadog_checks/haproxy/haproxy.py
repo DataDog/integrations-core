@@ -197,8 +197,7 @@ class HAProxy(AgentCheck):
         if raw_version == "":
             self.log.debug("unable to find HAProxy version info")
         else:
-            m = re.search(r"\d+\.\d+\.*\d*", raw_version)
-            version = m.group(0)
+            version = re.search(r"HAProxy version ([^,]+)", raw_version).group(1)
             self.log.debug(u"HAProxy version is {}".format(version))
             self.set_metadata('version', version)
 
