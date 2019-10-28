@@ -89,7 +89,7 @@ class SessionWrapper:
         try:
             return response.json()
         except Exception as e:
-            self.log.warning("Exception in json parsing, returning nothing: {}".format(e))
+            self.log.warning("Exception in json parsing, returning nothing: %s", e)
             raise APIParsingException("Error parsing request: {}".format(e))
 
 
@@ -367,5 +367,5 @@ class Api:
         try:
             return response.get('imdata')
         except Exception as e:
-            self.log.warning("Exception in fetching response data: {}".format(e))
+            self.log.warning("Exception in fetching response data: %s", e)
             raise APIParsingException("Exception in fetching response data: {}".format(e))
