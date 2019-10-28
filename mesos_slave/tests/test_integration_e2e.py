@@ -21,7 +21,6 @@ pytest.mark.skipif(platform.system() == 'Windows', reason="Docker images not com
 def test_check_integration(instance, aggregator):
     check = MesosSlave('mesos_slave', {}, [instance])
     check.check(instance)
-    check.check(instance)
     assert_metrics_covered(aggregator)
 
 

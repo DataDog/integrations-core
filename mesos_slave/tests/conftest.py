@@ -39,7 +39,7 @@ def check():
 def mock(init_config, instance):
     check = MesosSlave(common.CHECK_NAME, init_config, [instance])
 
-    check._get_stats_metrics = lambda x: json.loads(read_fixture('stats.json'))
-    check._get_state_metrics = lambda x: json.loads(read_fixture('state.json'))
+    check._get_stats_metrics = lambda x, y: json.loads(read_fixture('stats.json'))
+    check._get_state_metrics = lambda x, y: json.loads(read_fixture('state.json'))
 
     return check
