@@ -57,7 +57,7 @@ cilium.process.virtual_memory.bytes,gauge,,byte,,"Virtual memory bytes",0,cilium
 cilium.process.virtual_memory.max.bytes,gauge,,byte,,"Maximum virtual memory bytes",0,cilium,max virtual mem bytes
 cilium.subprocess.start.total,count,,unit,,"Number of times that Cilium has started a subprocess",0,cilium,subproc start
 cilium.triggers_policy.update_call_duration.seconds.count,count,,second,,"Count of policy update trigger duration",0,cilium,trigger policy time count
-cilium.triggers_policy.update_call_duration.seconds.sum,count,,secound,,"Sum of policy update trigger duration",0,cilium,trigger policy time sum
+cilium.triggers_policy.update_call_duration.seconds.sum,count,,second,,"Sum of policy update trigger duration",0,cilium,trigger policy time sum
 cilium.triggers_policy.update_folds,gauge,,unit,,"Number of folds",0,cilium,fold count
 cilium.triggers_policy.update.total,count,,unit,,"Total number of policy update trigger invocations",0,cilium,policy update trigger count
 cilium.unreachable.health_endpoints,gauge,,unit,,"Number of health endpoints that cannot be reached",0,cilium,unreachable health endpoint
