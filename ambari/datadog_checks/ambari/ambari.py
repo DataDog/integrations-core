@@ -91,7 +91,7 @@ class AmbariCheck(AgentCheck):
                 external_tags.append((hostname, {'ambari': [cluster_tag]}))
                 host_metrics = host.get(METRICS_FIELD)
                 if host_metrics is None:
-                    self.warning("No metrics received for host {}".format(hostname))
+                    self.warning("No metrics received for host %s", hostname)
                     continue
 
                 metrics = self.flatten_host_metrics(host_metrics)
@@ -100,7 +100,7 @@ class AmbariCheck(AgentCheck):
                     if isinstance(value, float):
                         self._submit_gauge(metric_name, value, metric_tags, hostname)
                     else:
-                        self.warning("Expected a float for {}, received {}".format(metric_name, value))
+                        self.warning("Expected a float for %s, received %s", metric_name, value)
         self.set_external_tags(external_tags)
 
     def get_service_status_and_metrics(
@@ -125,7 +125,7 @@ class AmbariCheck(AgentCheck):
         service_resp = self._make_request(service_check_endpoint)
         if service_resp is None:
             self._submit_service_checks("state", self.CRITICAL, service_tags)
-            self.warning("No response received for service {}".format(service))
+            self.warning("No response received for service %s", service)
         else:
             state = service_resp['ServiceInfo']['state']
             self._submit_service_checks(
@@ -142,25 +142,25 @@ class AmbariCheck(AgentCheck):
         component_whitelist = {k.upper(): v for k, v in iteritems(component_whitelist)}
 
         if components_response is None or 'items' not in components_response:
-            self.log.warning("No components found for service {}.".format(service))
+            self.log.warning("No components found for service %s.", service)
             return
 
         for component in components_response['items']:
             component_name = component['ServiceComponentInfo']['component_name']
 
             if component_name not in component_whitelist:
-                self.log.debug('Component {} not whitelisted'.format(component_name))
+                self.log.debug('Component %s not whitelisted', component_name)
                 continue
             component_metrics = component.get(METRICS_FIELD)
             if component_metrics is None:
                 # Not all components provide metrics
-                self.log.debug("No metrics found for component {} for service {}".format(component_name, service))
+                self.log.debug("No metrics found for component %s for service %s", component_name, service)
                 continue
 
             for header in component_whitelist[component_name]:
                 if header not in component_metrics:
                     self.log.warning(
-                        "No {} metrics found for component {} for service {}".format(header, component_name, service)
+                        "No %s metrics found for component %s for service %s", header, component_name, service
                     )
                     continue
 
@@ -171,7 +171,7 @@ class AmbariCheck(AgentCheck):
                     if isinstance(value, float):
                         self._submit_gauge(metric_name, value, metric_tags)
                     else:
-                        self.warning("Expected a float for {}, received {}".format(metric_name, value))
+                        self.warning("Expected a float for %s, received %s", metric_name, value)
 
     def _get_hosts_info(self, base_url, cluster):
         hosts_endpoint = common.HOST_METRICS_URL.format(base_url=base_url, cluster_name=cluster)
@@ -185,10 +185,10 @@ class AmbariCheck(AgentCheck):
             return resp.json()
         except (HTTPError, ConnectionError) as e:
             self.warning(
-                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable".format(url, e)
+                "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
         except Timeout:
-            self.warning("Connection timeout when connecting to {}".format(url))
+            self.warning("Connection timeout when connecting to %s", url)
 
     def _submit_gauge(self, name, value, tags, hostname=None):
         self.gauge('{}.{}'.format(common.METRIC_PREFIX, name), value, tags, hostname=hostname)
