@@ -5,14 +5,14 @@
 This check lets you monitor SSH connectivity to remote hosts and SFTP response times.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying these instructions.
-
 ### Installation
 
 The SSH/SFTP check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server from which you'd like to test SSH connectivity.
 
 ### Configuration
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `ssh_check.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2].
     See the [sample ssh_check.d/conf.yaml][3] for all available configuration options:
@@ -32,6 +32,15 @@ The SSH/SFTP check is included in the [Datadog Agent][1] package, so you don't n
     ```
 
 2. [Restart the Agent][4] to start sending SSH/SFTP metrics and service checks to Datadog.
+
+#### Containerized
+For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                        |
+|----------------------|--------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `ssh`                                                        |
+| `<INIT_CONFIG>`      | blank or `{}`                                                |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"22", "username":"<USERNAME>"}` |
 
 ### Validation
 
