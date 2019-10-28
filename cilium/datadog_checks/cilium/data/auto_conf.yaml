@@ -28,9 +28,3 @@ instances:
     ## Overrides the default timeout value in second
     #
     # timeout: 10
-      - configMap:
-          items:
-          - key: auto_conf.yaml
-            path: auto_conf.yaml
-          name: auto-conf
-        name: custom_conf
