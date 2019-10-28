@@ -106,7 +106,6 @@ class HAProxy(AgentCheck):
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
             info, data = self._fetch_socket_data(parsed_url)
             self._collect_version_from_socket(info)
-            data = data.splitlines()
         else:
             self._collect_version_from_http(url)
             data = self._fetch_url_data(url)
@@ -226,7 +225,8 @@ class HAProxy(AgentCheck):
         sock.close()
         # return data from `show info` and `show stat` separately
         # getting the first 2 values as the third one is empty string
-        return response.split('\n\n')[:2]
+        info, data = response.split('\n\n')[:2]
+        return info, data.splitlines()
 
     def _collect_version_from_socket(self, info):
         version = ''
