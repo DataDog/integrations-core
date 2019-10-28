@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 4.2.0 / 2019-10-28
+
+* [Added] Separate realtime from historical. See [#4337](https://github.com/DataDog/integrations-core/pull/4337).
+
 ## 4.1.3 / 2019-06-19
 
 * [Fixed] Filters VMs in excluded hosts. See [#3933](https://github.com/DataDog/integrations-core/pull/3933).
