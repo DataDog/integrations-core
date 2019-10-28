@@ -895,7 +895,7 @@ class VSphereCheck(AgentCheck):
         # TODO: Remove me once the fix for `max_query_metrics` is here by default
         mors_batch_method = (
             self.mor_cache.mors_batch
-            if is_affirmative(instance.get('betafix_max_query_metrics'))
+            if is_affirmative(instance.get('fix_max_query_metrics'))
             else self.mor_cache.legacy_mors_batch
         )
 
