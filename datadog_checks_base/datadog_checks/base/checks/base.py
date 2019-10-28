@@ -224,8 +224,8 @@ class __AgentCheck(object):
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
                 self.warning(
-                    'Setting max_returned_metrics to zero is not allowed, reverting '
-                    'to the default of {} metrics'.format(self.DEFAULT_METRIC_LIMIT)
+                    'Setting max_returned_metrics to zero is not allowed, reverting ' 'to the default of %s metrics',
+                    self.DEFAULT_METRIC_LIMIT,
                 )
         except Exception:
             metric_limit = self.DEFAULT_METRIC_LIMIT
@@ -536,7 +536,7 @@ class __AgentCheck(object):
                     source_map[src_name] = self._normalize_tags_type(tags)
             datadog_agent.set_external_tags(new_tags)
         except IndexError:
-            self.log.exception('Unexpected external tags format: {}'.format(external_tags))
+            self.log.exception('Unexpected external tags format: %s', external_tags)
             raise
 
     def convert_to_underscore_separated(self, name):
@@ -714,7 +714,7 @@ class __AgentCheckPy3(__AgentCheck):
                     event[key] = event[key].decode('utf-8')
                 except UnicodeError:
                     self.log.warning(
-                        'Error decoding unicode field `{}` to utf-8 encoded string, cannot submit event'.format(key)
+                        'Error decoding unicode field `%s` to utf-8 encoded string, cannot submit event', key
                     )
                     return
 
@@ -752,7 +752,7 @@ class __AgentCheckPy3(__AgentCheck):
                         tag = tag.decode('utf-8')
                     except Exception:
                         self.log.warning(
-                            'Error decoding tag `{}` as utf-8 for metric `{}`, ignoring tag'.format(tag, metric_name)
+                            'Error decoding tag `%s` as utf-8 for metric `%s`, ignoring tag', tag, metric_name
                         )
                         continue
 
@@ -806,9 +806,7 @@ class __AgentCheckPy2(__AgentCheck):
             device_tag = self._to_bytes("device:{}".format(device_name))
             if device_tag is None:
                 self.log.warning(
-                    'Error encoding device name `{}` to utf-8 for metric `{}`, ignoring tag'.format(
-                        repr(device_name), repr(metric_name)
-                    )
+                    'Error encoding device name `%r` to utf-8 for metric `%r`, ignoring tag', device_name, metric_name
                 )
             else:
                 normalized_tags.append(device_tag)
@@ -819,11 +817,7 @@ class __AgentCheckPy2(__AgentCheck):
                     continue
                 encoded_tag = self._to_bytes(tag)
                 if encoded_tag is None:
-                    self.log.warning(
-                        'Error encoding tag `{}` to utf-8 for metric `{}`, ignoring tag'.format(
-                            repr(tag), repr(metric_name)
-                        )
-                    )
+                    self.log.warning('Error encoding tag `%r` to utf-8 for metric `%r`, ignoring tag', tag, metric_name)
                     continue
                 normalized_tags.append(encoded_tag)
 
