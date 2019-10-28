@@ -54,8 +54,9 @@ class Apache(AgentCheck):
         service_check_tags = ['host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
             self.log.debug(
-                'apache check initiating request, connect timeout %d receive %d'
-                , self.http.options['timeout'][0], self.http.options['timeout'][1]
+                'apache check initiating request, connect timeout %d receive %d',
+                self.http.options['timeout'][0],
+                self.http.options['timeout'][1],
             )
 
             r = self.http.get(url)
