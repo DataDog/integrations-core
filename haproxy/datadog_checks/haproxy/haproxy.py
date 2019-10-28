@@ -215,18 +215,21 @@ class HAProxy(AgentCheck):
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
         # returns both version info and stats data
-        bufsize = sock.send(b"show info;show stat\r\n")
+        stat = self._sock_get_response(sock, b"show stat\r\n")
+        info = self._sock_get_response(sock, b"show info\r\n")
+        # return data from `show info` and `show stat` separately
 
+        return info, stat.splitlines()
+
+    def _sock_get_response(self, sock, command):
+        sock.send(command)
         response = ""
-        output = sock.recv(bufsize)
+        output = sock.recv(BUFSIZE)
         while output:
             response += output.decode("ASCII")
-            output = sock.recv(bufsize)
+            output = sock.recv(BUFSIZE)
         sock.close()
-        # return data from `show info` and `show stat` separately
-        # getting the first 2 values as the third one is empty string
-        info, data = response.split('\n\n')[:2]
-        return info, data.splitlines()
+        return response
 
     def _collect_version_from_socket(self, info):
         version = ''
