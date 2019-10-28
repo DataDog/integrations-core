@@ -217,6 +217,8 @@ class HAProxy(AgentCheck):
         # returns both version info and stats data
         stat = self._sock_get_response(sock, b"show stat\r\n")
         info = self._sock_get_response(sock, b"show info\r\n")
+
+        sock.close()
         # return data from `show info` and `show stat` separately
 
         return info, stat.splitlines()
@@ -228,7 +230,6 @@ class HAProxy(AgentCheck):
         while output:
             response += output.decode("ASCII")
             output = sock.recv(BUFSIZE)
-        sock.close()
         return response
 
     def _collect_version_from_socket(self, info):
