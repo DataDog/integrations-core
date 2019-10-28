@@ -196,9 +196,7 @@ class ConsulCheck(AgentCheck):
             if perform_new_leader_checks or (perform_self_leader_check and agent == leader):
                 # We either emit all leadership changes or emit when we become the leader and that just happened
                 self.log.info(
-                    'Leader change from %s to %s. Sending new leader event',
-                    instance_state.last_known_leader,
-                    leader
+                    'Leader change from %s to %s. Sending new leader event', instance_state.last_known_leader, leader
                 )
 
                 self.event(
