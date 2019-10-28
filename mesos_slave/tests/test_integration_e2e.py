@@ -22,7 +22,7 @@ def test_check_integration(instance, aggregator):
 
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check, instance):
-    aggregator = dd_agent_check(instance, rate=True)
+    aggregator = dd_agent_check(instance)
     assert_metrics_covered(aggregator)
 
 
