@@ -32,9 +32,13 @@ def test_get_version():
     db.cursor().fetchone.return_value = ['11rc1']
     assert get_version(db) == VersionInfo(11, -1, 1)
 
-    # Test #unknown# style versions
+    # Test #nightly# style versions
     db.cursor().fetchone.return_value = ['11nightly3']
     assert get_version(db) == VersionInfo(11, -1, 3)
+
+    # Test #unknown# style versions
+    db.cursor().fetchone.return_value = ['dontKnow']
+    assert get_version(db) == 'dontKnow'
 
 
 def test_is_above():

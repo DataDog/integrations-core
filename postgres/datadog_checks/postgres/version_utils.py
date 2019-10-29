@@ -35,6 +35,7 @@ def get_version(db):
                 version[1] = -1
                 version = [int(part) for part in version]
             return semver.VersionInfo(*version)
+    return raw_version
 
 
 def is_above(version, version_to_compare):
