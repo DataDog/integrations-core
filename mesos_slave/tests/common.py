@@ -14,6 +14,7 @@ HERE = get_here()
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 CHECK_NAME = 'mesos_slave'
 URL = 'http://{}:5051'.format(get_docker_hostname())
+MESOS_SLAVE_VERSION = '0.22.0'
 
 INSTANCE = {'url': URL, 'tasks': ['hello'], 'tags': ['instance:mytag1']}
 

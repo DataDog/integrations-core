@@ -12,7 +12,7 @@ from six import iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.errors import CheckException, ConfigurationError
 
 DEFAULT_MASTER_PORT = 5050
 
@@ -118,10 +118,10 @@ class MesosSlave(AgentCheck):
 
     def check(self, instance):
         if 'url' not in instance:
-            raise Exception('Mesos instance missing "url" value.')
+            raise ConfigurationError('Mesos instance missing "url" value.')
 
         url = instance['url']
-        tags = set(instance.get('tags', []))
+        tags = instance.get('tags', [])
         tasks = instance.get('tasks', [])
         master_port = instance.get("master_port", DEFAULT_MASTER_PORT)
 
@@ -129,7 +129,7 @@ class MesosSlave(AgentCheck):
             self._process_state_info(url, tasks, master_port, tags)
             self._process_stats_info(url, tags)
         except CheckException as e:
-            self.log.error("Error running check mesos_slave with exception {}".format(str(e)))
+            self.log.error("Error running check mesos_slave with exception %s", e)
             raise
 
     def _process_state_info(self, url, tasks, master_port, tags):
@@ -179,9 +179,7 @@ class MesosSlave(AgentCheck):
             # Mesos version < 0.25
             old_endpoint = endpoint + '.json'
             tags.add("url:{}".format(old_endpoint))
-            self.log.info(
-                'Unable to fetch state from {}, retrying with deprecated endpoint {}'.format(endpoint, old_endpoint)
-            )
+            self.log.info('Unable to fetch state from %s, retrying with deprecated endpoint %s', endpoint, old_endpoint)
             state_metrics = self._get_json(old_endpoint)
         return state_metrics
 
@@ -196,10 +194,8 @@ class MesosSlave(AgentCheck):
             resp.raise_for_status()
         except Exception as e:
             if e.__class__ == Timeout:
-                self.warning(
-                    "Timeout for {} seconds when connecting to URL: {}".format(self.http.options['timeout'], url)
-                )
-            self.warning("Couldn't connect to URL: {} with exception: {}".format(url, str(e)))
+                self.warning("Timeout for %s seconds when connecting to URL: %s", self.http.options['timeout'], url)
+            self.warning("Couldn't connect to URL: %s with exception: %s", url, e)
             # bubble up the exception
             raise CheckException
 
@@ -208,8 +204,9 @@ class MesosSlave(AgentCheck):
 
     def _set_version(self, state_metrics):
         if 'version' in state_metrics:
-            self.version = [int(i) for i in state_metrics['version'].split('.')]
-            # TODO: also set metadata here
+            version = state_metrics['version']
+            self.version = [int(i) for i in version.split('.')]
+            self.set_metadata('version', version)
 
     def _set_cluster_name(self, url, master_port, state_metrics, tags):
         if 'master_hostname' in state_metrics:
