@@ -1,5 +1,9 @@
 # CHANGELOG - mcache
 
+## 1.7.0 / 2019-10-29
+
+* [Added] Add log section in the example configuration file. See [#4885](https://github.com/DataDog/integrations-core/pull/4885).
+
 ## 1.6.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3537](https://github.com/DataDog/integrations-core/pull/3537).
