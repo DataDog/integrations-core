@@ -416,9 +416,9 @@ class Network(AgentCheck):
 
         # Get the conntrack -S information
         conntrack_path = instance.get('conntrack_path')
-        disable_sudo_conntrack = instance.get('disable_sudo_conntrack', False)
+        try_sudo_conntrack = is_affirmative(instance.get('try_sudo_conntrack', True))
         if conntrack_path is not None:
-            self._add_conntrack_stats_metrics(conntrack_path, disable_sudo_conntrack, custom_tags)
+            self._add_conntrack_stats_metrics(conntrack_path, try_sudo_conntrack, custom_tags)
 
         # Get the rest of the metric by reading the files. Metrics available since kernel 3.6
         conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
@@ -467,16 +467,16 @@ class Network(AgentCheck):
             net_proc_base_location = proc_location
         return net_proc_base_location
 
-    def _add_conntrack_stats_metrics(self, conntrack_path, disable_sudo_conntrack, tags):
+    def _add_conntrack_stats_metrics(self, conntrack_path, try_sudo_conntrack, tags):
         """
         Parse the output of conntrack -S
         Add the parsed metrics
         """
         try:
-            if disable_sudo_conntrack is True:
-                output, _, _ = get_subprocess_output([conntrack_path, "-S"], self.log)
-            else:
-                output, _, _ = get_subprocess_output(["sudo", conntrack_path, "-S"], self.log)
+            cmd = [conntrack_path, "-S"]
+            if try_sudo_conntrack:
+                cmd.insert(0, "sudo")
+            output, _, _ = get_subprocess_output(cmd, self.log)
             # conntrack -S sample:
             # cpu=0 found=27644 invalid=19060 ignore=485633411 insert=0 insert_failed=1 \
             #       drop=1 early_drop=0 error=0 search_restart=39936711
