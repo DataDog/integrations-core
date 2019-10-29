@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
-
+from re import match
 from six import iteritems
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
@@ -75,8 +75,14 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         """
         kube_apiserver_metrics_instance = deepcopy(instance)
         endpoint = instance.get('prometheus_url')
-        scheme = instance.get('scheme', self.DEFAULT_SCHEME)
-        kube_apiserver_metrics_instance['prometheus_url'] = "{0}://{1}".format(scheme, endpoint)
+        prometheus_url = endpoint
+
+        # Allow using a proper URL without introducing a breaking change.
+        if not match('^https?://.*$', endpoint):
+            scheme = instance.get('scheme', self.DEFAULT_SCHEME)
+            prometheus_url = "{0}://{1}".format(scheme, endpoint)
+
+        kube_apiserver_metrics_instance['prometheus_url'] = prometheus_url
 
         # Most set ups are using self signed certificates as the APIServer can be used as a CA.
         ssl_verify = instance.get('ssl_verify', self.DEFAULT_SSL_VERIFY)
