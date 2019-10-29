@@ -44,11 +44,6 @@ class Network(AgentCheck):
 
     PSUTIL_FAMILY_MAPPING = {socket.AF_INET: '4', socket.AF_INET6: '6'}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
-        if instances is not None and len(instances) > 1:
-            raise Exception("Network check only supports one configured instance.")
-
     def check(self, instance):
         if instance is None:
             instance = {}
