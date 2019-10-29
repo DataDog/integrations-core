@@ -62,6 +62,7 @@ NOT_TILES = [
 TESTABLE_FILE_EXTENSIONS = ('.py', '.ini', '.in', '.txt', '.yml', '.yaml')
 NON_TESTABLE_FILES = ('auto_conf.yaml', 'metrics.yaml')
 
+REQUIREMENTS_IN = 'requirements.in'
 
 ROOT = ''
 
