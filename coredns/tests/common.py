@@ -16,4 +16,9 @@ METRICS = [
     NAMESPACE + '.proxy_request_duration.seconds.count',
     NAMESPACE + '.request_duration.seconds.sum',
     NAMESPACE + '.request_duration.seconds.count',
+    NAMESPACE + '.forward_request_count',
+    NAMESPACE + '.forward_request_duration.seconds.sum',
+    NAMESPACE + '.forward_request_duration.seconds.count',
+    NAMESPACE + '.forward_response_rcode_count',
+    NAMESPACE + '.forward_sockets_open',
 ]

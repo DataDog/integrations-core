@@ -67,10 +67,10 @@ class TailFile(object):
 
         self._f = open(self._path, 'r')
         if move_end:
-            self._log.debug("Opening file %s" % (self._path))
+            self._log.debug("Opening file %s", self._path)
             self._f.seek(0, os.SEEK_END)
         elif pos:
-            self._log.debug("Reopening file %s at %s" % (self._path, pos))
+            self._log.debug("Reopening file %s at %s", self._path, pos)
             self._f.seek(pos)
 
         return True

@@ -198,7 +198,7 @@ class PrometheusScraperMixin(object):
                     if new_type in self.METRIC_TYPES:
                         message.type = self.METRIC_TYPES.index(new_type)
                     else:
-                        self.log.debug("type override %s for %s is not a valid type name" % (new_type, message.name))
+                        self.log.debug("type override %s for %s is not a valid type name", new_type, message.name)
                 yield message
 
         elif 'text/plain' in response.headers['Content-Type']:
@@ -476,7 +476,7 @@ class PrometheusScraperMixin(object):
                         try:
                             handler(message, **kwargs)
                         except Exception as err:
-                            self.log.warning("Error handling metric: {} - error: {}".format(message.name, err))
+                            self.log.warning("Error handling metric: %s - error: %s", message.name, err)
                     else:
                         # build the wildcard list if first pass
                         if self._metrics_wildcards is None:
@@ -489,7 +489,7 @@ class PrometheusScraperMixin(object):
                                 )
 
         except AttributeError as err:
-            self.log.debug("Unable to handle metric: {} - error: {}".format(message.name, err))
+            self.log.debug("Unable to handle metric: %s - error: %s", message.name, err)
 
     def poll(self, endpoint, pFormat=PrometheusFormat.PROTOBUF, headers=None):
         """
@@ -533,7 +533,7 @@ class PrometheusScraperMixin(object):
                 endpoint, headers=headers, stream=False, timeout=self.prometheus_timeout, cert=cert, verify=verify
             )
         except requests.exceptions.SSLError:
-            self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
+            self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
         except IOError:
             if self.health_service_check:
@@ -592,7 +592,7 @@ class PrometheusScraperMixin(object):
                         else:
                             self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
                     else:
-                        self.log.debug("Metric value is not supported for metric {}.".format(metric_name))
+                        self.log.debug("Metric value is not supported for metric %s.", metric_name)
                 elif message.type == 4:
                     self._submit_gauges_from_histogram(
                         metric_name, metric, send_histograms_buckets, custom_tags, custom_hostname
@@ -607,10 +607,10 @@ class PrometheusScraperMixin(object):
                         else:
                             self._submit_gauge(metric_name, val, metric, custom_tags, custom_hostname)
                     else:
-                        self.log.debug("Metric value is not supported for metric {}.".format(metric_name))
+                        self.log.debug("Metric value is not supported for metric %s.", metric_name)
 
         else:
-            self.log.error("Metric type {} unsupported for metric {}.".format(message.type, message.name))
+            self.log.error("Metric type %s unsupported for metric %s.", message.type, message.name)
 
     def _get_hostname(self, hostname, metric):
         """
@@ -641,12 +641,12 @@ class PrometheusScraperMixin(object):
         if self._is_value_valid(val):
             self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
         else:
-            self.log.debug("Metric value is not supported for metric {}.count.".format(name))
+            self.log.debug("Metric value is not supported for metric %s.count.", name)
         val = getattr(metric, self.METRIC_TYPES[2]).sample_sum
         if self._is_value_valid(val):
             self._submit_gauge("{}.sum".format(name), val, metric, custom_tags)
         else:
-            self.log.debug("Metric value is not supported for metric {}.sum.".format(name))
+            self.log.debug("Metric value is not supported for metric %s.sum.", name)
         for quantile in getattr(metric, self.METRIC_TYPES[2]).quantile:
             val = quantile.value
             limit = quantile.quantile
@@ -659,7 +659,7 @@ class PrometheusScraperMixin(object):
                     hostname=hostname,
                 )
             else:
-                self.log.debug("Metric value is not supported for metric {}.quantile.".format(name))
+                self.log.debug("Metric value is not supported for metric %s.quantile.", name)
 
     def _submit_gauges_from_histogram(
         self, name, metric, send_histograms_buckets=True, custom_tags=None, hostname=None
@@ -677,12 +677,12 @@ class PrometheusScraperMixin(object):
             else:
                 self._submit_gauge("{}.count".format(name), val, metric, custom_tags)
         else:
-            self.log.debug("Metric value is not supported for metric {}.count.".format(name))
+            self.log.debug("Metric value is not supported for metric %s.count.", name)
         val = getattr(metric, self.METRIC_TYPES[4]).sample_sum
         if self._is_value_valid(val):
             self._submit_gauge("{}.sum".format(name), val, metric, custom_tags)
         else:
-            self.log.debug("Metric value is not supported for metric {}.sum.".format(name))
+            self.log.debug("Metric value is not supported for metric %s.sum.", name)
         if send_histograms_buckets:
             for bucket in getattr(metric, self.METRIC_TYPES[4]).bucket:
                 val = bucket.cumulative_count
@@ -696,7 +696,7 @@ class PrometheusScraperMixin(object):
                         hostname=hostname,
                     )
                 else:
-                    self.log.debug("Metric value is not supported for metric {}.count.".format(name))
+                    self.log.debug("Metric value is not supported for metric %s.count.", name)
 
     def _is_value_valid(self, val):
         return not (isnan(val) or isinf(val))
