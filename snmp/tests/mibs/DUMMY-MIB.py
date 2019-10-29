@@ -6,8 +6,14 @@
 # Using Python version 2.7.14 (default, May 11 2018, 14:04:47)
 #
 Integer, ObjectIdentifier, OctetString = mibBuilder.importSymbols("ASN1", "Integer", "ObjectIdentifier", "OctetString")
-NamedValues, = mibBuilder.importSymbols("ASN1-ENUMERATION", "NamedValues")
-ConstraintsUnion, SingleValueConstraint, ConstraintsIntersection, ValueSizeConstraint, ValueRangeConstraint = mibBuilder.importSymbols(
+(NamedValues,) = mibBuilder.importSymbols("ASN1-ENUMERATION", "NamedValues")
+(
+    ConstraintsUnion,
+    SingleValueConstraint,
+    ConstraintsIntersection,
+    ValueSizeConstraint,
+    ValueRangeConstraint,
+) = mibBuilder.importSymbols(
     "ASN1-REFINEMENT",
     "ConstraintsUnion",
     "SingleValueConstraint",
@@ -16,7 +22,26 @@ ConstraintsUnion, SingleValueConstraint, ConstraintsIntersection, ValueSizeConst
     "ValueRangeConstraint",
 )
 NotificationGroup, ModuleCompliance = mibBuilder.importSymbols("SNMPv2-CONF", "NotificationGroup", "ModuleCompliance")
-Integer32, MibScalar, MibTable, MibTableRow, MibTableColumn, NotificationType, MibIdentifier, IpAddress, TimeTicks, Counter64, Unsigned32, enterprises, iso, Gauge32, ModuleIdentity, ObjectIdentity, Bits, Counter32 = mibBuilder.importSymbols(
+(
+    Integer32,
+    MibScalar,
+    MibTable,
+    MibTableRow,
+    MibTableColumn,
+    NotificationType,
+    MibIdentifier,
+    IpAddress,
+    TimeTicks,
+    Counter64,
+    Unsigned32,
+    enterprises,
+    iso,
+    Gauge32,
+    ModuleIdentity,
+    ObjectIdentity,
+    Bits,
+    Counter32,
+) = mibBuilder.importSymbols(
     "SNMPv2-SMI",
     "Integer32",
     "MibScalar",
