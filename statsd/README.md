@@ -7,14 +7,14 @@ This check monitors the availability and uptime of non-Datadog StatsD servers. I
 This check does **NOT** forward application metrics from StatsD servers to Datadog. It collects metrics about StatsD itself.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying these instructions.
-
 ### Installation
 
 The StatsD check is included in the [Datadog Agent][1] package, so you don't need to install anything else on any servers that run StatsD.
 
 ### Configuration
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `statsd.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample statsd.d/conf.yaml][3] for all available configuration options:
 
@@ -34,6 +34,15 @@ The StatsD check is included in the [Datadog Agent][1] package, so you don't nee
     - `tags` (Optional) - Tags to be assigned to the metric.
 
 2. [Restart the Agent][4] to start sending StatsD metrics and service checks to Datadog.
+
+#### Containerized
+For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
+
+| Parameter            | Value                                 |
+|----------------------|---------------------------------------|
+| `<INTEGRATION_NAME>` | `statsd`                              |
+| `<INIT_CONFIG>`      | blank or `{}`                         |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"8126"}` |
 
 ### Validation
 
