@@ -34,7 +34,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     help='Line number to start a PDB session (0: first line, -1: last line)',
 )
 @click.option('--config', 'config_file', help='Path to a JSON check configuration to use')
-@click.option('--jmx-list', 'jmx_list', default='matching', help='JMX metrics listing method')
+@click.option('--jmx-list', 'jmx_list', help='JMX metrics listing method')
 def check_run(check, env, rate, times, pause, delay, log_level, as_json, break_point, config_file, jmx_list):
     """Run an Agent check."""
     envs = get_configured_envs(check)
