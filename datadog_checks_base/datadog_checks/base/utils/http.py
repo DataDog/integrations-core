@@ -176,7 +176,7 @@ class RequestsWrapper(object):
                     auth = requests.auth.HTTPDigestAuth(config['username'], config['password'])
                 else:
                     if auth_type != 'basic':
-                        self.logger.debug('auth_type {} is not supported, defaulting to basic'.format(auth_type))
+                        self.logger.debug('auth_type %s is not supported, defaulting to basic', auth_type)
                     auth = (config['username'], config['password'])
 
             elif config['ntlm_domain']:
@@ -303,7 +303,7 @@ class RequestsWrapper(object):
 
     def _request(self, method, url, options):
         if self.log_requests:
-            self.logger.debug(u'Sending {} request to {}'.format(method.upper(), url))
+            self.logger.debug(u'Sending %s request to %s', method.upper(), url)
 
         if self.no_proxy_uris:
             parsed_uri = urlparse(url)
