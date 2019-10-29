@@ -42,4 +42,5 @@ def assert_metrics_covered(aggregator):
         aggregator.assert_metric(v[0])
 
     aggregator.assert_all_metrics_covered()
+    # We should submit 2 service checks per check run because 2 endpoints were tried
     aggregator.assert_service_check('mesos_slave.can_connect', status=AgentCheck.OK, count=4)
