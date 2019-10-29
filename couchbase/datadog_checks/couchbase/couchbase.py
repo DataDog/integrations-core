@@ -285,7 +285,7 @@ class Couchbase(AgentCheck):
                 break
 
         except requests.exceptions.HTTPError:
-            self.log.error("Error accessing the endpoint {}".format(url))
+            self.log.error("Error accessing the endpoint %s", url)
 
         return couchbase
 
@@ -298,8 +298,9 @@ class Couchbase(AgentCheck):
                 query_data = self._get_stats(url)
             except requests.exceptions.RequestException:
                 self.log.error(
-                    "Error accessing the endpoint {}, make sure you're running at least "
-                    "couchbase 4.5 to collect the query monitoring metrics".format(url)
+                    "Error accessing the endpoint %s, make sure you're running at least "
+                    "couchbase 4.5 to collect the query monitoring metrics",
+                    url,
                 )
 
         return query_data

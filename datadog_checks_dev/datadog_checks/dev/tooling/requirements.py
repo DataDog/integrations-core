@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from ..subprocess import run_command
 from ..utils import chdir, resolve_path, stream_file_lines, write_file_lines
-from .constants import get_root
+from .constants import REQUIREMENTS_IN, get_root
 
 DEP_PATTERN = re.compile(r'([^=]+)(?:==([^;\s]+)(?:; *(.*))?)?')
 
@@ -181,7 +181,7 @@ def make_catalog(verify=False, checks=None):
     checks = checks if checks else os.listdir(root)
 
     for check_name in sorted(checks):
-        for package in read_packages(os.path.join(root, check_name, 'requirements.in')):
+        for package in read_packages(os.path.join(root, check_name, REQUIREMENTS_IN)):
             if not package.version:
                 errors.append('Unpinned dependency `{}` in the `{}` check'.format(package.name, check_name))
             catalog.add_package(check_name, package)

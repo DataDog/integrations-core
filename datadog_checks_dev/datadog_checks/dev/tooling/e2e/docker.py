@@ -6,7 +6,7 @@ from contextlib import contextmanager
 
 from ...subprocess import run_command
 from ...utils import file_exists, path_join
-from ..constants import get_root
+from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_PYTHON_VERSION,
@@ -178,15 +178,15 @@ class DockerInterface(object):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.check_mount_dir))
-        if file_exists(path_join(get_root(), self.check, 'requirements.in')):
-            command.extend(('-r', path_join(self.check_mount_dir, 'requirements.in')))
+        if file_exists(path_join(get_root(), self.check, REQUIREMENTS_IN)):
+            command.extend(('-r', path_join(self.check_mount_dir, REQUIREMENTS_IN)))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.base_mount_dir))
-        command.extend(('-r', path_join(self.base_mount_dir, 'requirements.in')))
+        command.extend(('-r', path_join(self.base_mount_dir, REQUIREMENTS_IN)))
         run_command(command, capture=True, check=True)
 
     def update_agent(self):

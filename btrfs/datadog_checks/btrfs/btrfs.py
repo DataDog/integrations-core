@@ -202,5 +202,6 @@ class BTRFS(AgentCheck):
             else:
                 self.log.debug(
                     "Could not retrieve the number of unallocated bytes for all devices,"
-                    " skipping metric for mountpoint {}".format(mountpoint)
+                    " skipping metric for mountpoint %s",
+                    mountpoint,
                 )
