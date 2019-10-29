@@ -36,35 +36,3 @@ def get_version(db):
                 version = [int(part) for part in version]
             return semver.VersionInfo(*version)
     return raw_version
-
-
-def is_above(version, version_to_compare):
-    if isinstance(version_to_compare, str):
-        version_to_compare = semver.parse(version_to_compare)
-    if version is None:
-        return False
-    return version >= version_to_compare
-
-
-def is_8_3_or_above(version):
-    return is_above(version, V8_3)
-
-
-def is_9_1_or_above(version):
-    return is_above(version, V9_1)
-
-
-def is_9_2_or_above(version):
-    return is_above(version, V9_2)
-
-
-def is_9_4_or_above(version):
-    return is_above(version, V9_4)
-
-
-def is_9_6_or_above(version):
-    return is_above(version, V9_6)
-
-
-def is_10_or_above(version):
-    return is_above(version, V10)
