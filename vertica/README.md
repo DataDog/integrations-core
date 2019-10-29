@@ -52,7 +52,7 @@ logs:
     service: vertica
 ```
 
-3. [Restart the Agent][9].
+3. [Restart the Agent][7].
 
 ### Validation
 
