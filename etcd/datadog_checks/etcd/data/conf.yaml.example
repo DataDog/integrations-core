@@ -22,7 +22,7 @@ init_config:
 
 instances:
 
-  -  
+  -
     ## @param use_preview - boolean - optional - default: true
     ## Whether or not to preview the new version of the check supporting only ETCD 3+
     #
@@ -206,6 +206,24 @@ instances:
     ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param ssl_cert - string - optional
+    ## If your prometheus endpoint is secured, enter the path to the certificate and
+    ## you should specify the private key in ssl_private_key parameter
+    ## or it can be the path to a file containing both the certificate & the private key
+    #
+    # ssl_cert: "<CERT_PATH>"
+
+    ## @param ssl_private_key - string - optional
+    ## Needed if the certificate linked in ssl_cert does not include the private key.
+    ## Note: The private key to your local certificate must be unencrypted.
+    #
+    # ssl_private_key: "<KEY_PATH>"
+
+    ## @param ssl_ca_cert - string - optional
+    ## The path to the trusted CA used for generating custom certificates.
+    #
+    # ssl_ca_cert: "<CA_CERT_PATH>"
 
     ## @param headers - list of key:value elements - optional
     ## The headers parameter allows you to send specific headers with every request.
