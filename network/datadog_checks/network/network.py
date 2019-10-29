@@ -14,7 +14,7 @@ from collections import defaultdict
 import psutil
 from six import PY3, iteritems, itervalues
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
@@ -416,9 +416,9 @@ class Network(AgentCheck):
 
         # Get the conntrack -S information
         conntrack_path = instance.get('conntrack_path')
-        try_sudo_conntrack = is_affirmative(instance.get('try_sudo_conntrack', True))
+        use_sudo_conntrack = is_affirmative(instance.get('use_sudo_conntrack', True))
         if conntrack_path is not None:
-            self._add_conntrack_stats_metrics(conntrack_path, try_sudo_conntrack, custom_tags)
+            self._add_conntrack_stats_metrics(conntrack_path, use_sudo_conntrack, custom_tags)
 
         # Get the rest of the metric by reading the files. Metrics available since kernel 3.6
         conntrack_files_location = os.path.join(proc_location, 'sys', 'net', 'netfilter')
@@ -467,14 +467,14 @@ class Network(AgentCheck):
             net_proc_base_location = proc_location
         return net_proc_base_location
 
-    def _add_conntrack_stats_metrics(self, conntrack_path, try_sudo_conntrack, tags):
+    def _add_conntrack_stats_metrics(self, conntrack_path, use_sudo_conntrack, tags):
         """
         Parse the output of conntrack -S
         Add the parsed metrics
         """
         try:
             cmd = [conntrack_path, "-S"]
-            if try_sudo_conntrack:
+            if use_sudo_conntrack:
                 cmd.insert(0, "sudo")
             output, _, _ = get_subprocess_output(cmd, self.log)
             # conntrack -S sample:

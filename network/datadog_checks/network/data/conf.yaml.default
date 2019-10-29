@@ -57,11 +57,11 @@ instances:
     #
     # conntrack_path: /usr/sbin/conntrack
 
-    ## @param try_sudo_conntrack - boolean - optional - default: true
-    ## Set to False to disable sudo when running conntrack -S 
+    ## @param use_sudo_conntrack - boolean - optional - default: true
+    ## Set to False to disable sudo when running `conntrack -S`
     ## (`sudo` isn't normally available in containers)
     #
-    # try_sudo_conntrack: true
+    # use_sudo_conntrack: true
 
     ## @param whitelist_conntrack_metrics - list of string - optional - default: ["max", "count"]
     ## Linux only.
