@@ -12,7 +12,6 @@ import pytest
 from six import PY3, iteritems
 
 from datadog_checks.dev import EnvVars
-from datadog_checks.network import Network
 
 from . import common
 
@@ -256,7 +255,6 @@ def test_cx_state_psutil(aggregator, check):
 
     with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
         mock_psutil.net_connections.return_value = conn
-        check = Network('network', {}, {})
         check._setup_metrics({})
         check._cx_state_psutil()
         for _, m in iteritems(aggregator._metrics):
