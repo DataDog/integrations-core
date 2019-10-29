@@ -11,6 +11,8 @@ Connect MongoDB to Datadog in order to:
 
 You can also create your own metrics using custom `find`, `count` and `aggregate` queries.
 
+**Note**: MongoDB v2.6+ is required for this integration.
+
 ## Setup
 ### Installation
 

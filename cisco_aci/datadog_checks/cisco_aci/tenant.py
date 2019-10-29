@@ -38,14 +38,14 @@ class Tenant:
             self.log.warning('No tenants were listed in the config, skipping tenant collection')
             return
 
-        self.log.info("collecting from %s tenants" % len(tenants))
+        self.log.info("collecting from %s tenants", len(tenants))
         # check if tenant exist before proceeding.
         for t in tenants:
             try:
                 list_apps = self.api.get_apps(t)
                 if list_apps is None:
                     break
-                self.log.info("collecting %s apps from %s" % (len(list_apps), t))
+                self.log.info("collecting %s apps from %s", len(list_apps), t)
                 for app in list_apps:
                     self._submit_app_data(t, app)
                     app_name = app.get('fvAp', {}).get('attributes', {}).get('name')
@@ -53,7 +53,7 @@ class Tenant:
                         break
                     try:
                         list_epgs = self.api.get_epgs(t, app_name)
-                        self.log.info("collecting %s endpoint groups from %s" % (len(list_epgs), app_name))
+                        self.log.info("collecting %s endpoint groups from %s", len(list_epgs), app_name)
                         self._submit_epg_data(t, app_name, list_epgs)
                     except (exceptions.APIConnectionException, exceptions.APIParsingException):
                         pass
@@ -105,7 +105,7 @@ class Tenant:
             if 'index' in attrs:
                 continue
 
-            self.log.debug("submitting metrics for: {}".format(name))
+            self.log.debug("submitting metrics for: %s", name)
             metrics = {}
 
             tenant_metrics = self.tenant_metrics.get(obj_type, {})
@@ -148,7 +148,7 @@ class Tenant:
             created = ev.get('created')
             create_date = re.search(r'\d{4}-\d{2}-\d{1,2}T\d{2}:\d{2}:\d{2}', created).group(0)
 
-            self.log.debug("ev time: {}".format(created))
+            self.log.debug("ev time: %s", created)
             strptime = datetime.datetime.strptime(create_date, '%Y-%m-%dT%H:%M:%S')
             timestamp = (strptime - datetime.datetime(1970, 1, 1)).total_seconds()
             if now - timestamp > time_window:

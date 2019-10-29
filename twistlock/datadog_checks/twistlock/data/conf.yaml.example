@@ -28,7 +28,7 @@ init_config:
     # skip_proxy: false
 
 instances:
-    ## @param endpoint - string - required
+    ## @param url - string - required
     ## The Twistlock url to connect to.
     #
   - url: 'http://localhost:8081'
@@ -42,6 +42,12 @@ instances:
     ## The password to use if services are behind basic or NTLM auth.
     #
     password: '<PASSWORD>'
+
+    ## @param project - string - optional
+    ## The Twistlock project if enabled
+    ## See https://docs.twistlock.com/docs/19.03/api/api_reference.html
+    #
+    # project: '<PROJECT_NAME>'
 
     ## @param ntlm_domain - string - optional
     ## If your services uses NTLM authentication, you can optionally
