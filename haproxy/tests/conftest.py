@@ -116,11 +116,24 @@ def haproxy_mock_evil():
 
 @pytest.fixture(scope="session")
 def version_metadata():
-    major, minor, patch = HAPROXY_VERSION.split('.')
-    return {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': mock.ANY,
-    }
+    # some version has release info
+    parts = HAPROXY_VERSION.split('-')
+    major, minor, patch = parts[0].split('.')
+    if len(parts) > 1:
+        release = parts[1]
+        return {
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': mock.ANY,
+            'version.release': release,
+        }
+    else:
+        return {
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': mock.ANY,
+        }
