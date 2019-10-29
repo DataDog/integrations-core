@@ -10,7 +10,7 @@ def test_check(aggregator, instance_basic_volume, gauge_metrics, rate_metrics):
     """
     Basic check to see if all metrics are there
     """
-    c = Disk('disk', None, {}, [instance_basic_volume])
+    c = Disk('disk', {}, [instance_basic_volume])
     c.check(instance_basic_volume)
 
     for name in chain(gauge_metrics, rate_metrics):
