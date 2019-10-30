@@ -67,7 +67,7 @@ class MetadataManager(object):
         the value of ``version.scheme`` unless ``final_scheme`` is also set, which will take precedence.
         """
         scheme, version_parts = parse_version(version, options)
-        if scheme == 'regex':
+        if scheme == 'regex' or scheme == 'parts':
             scheme = options.get('final_scheme', self.check_name)
 
         data = {'version.{}'.format(part_name): part_value for part_name, part_value in iteritems(version_parts)}
