@@ -205,19 +205,6 @@ def test_unixsocket_config(aggregator, check, dd_environment):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.e2e
-def test_e2e(dd_agent_check, instance):
-    aggregator = dd_agent_check(CHECK_CONFIG_OPEN, rate=True)
-
-    shared_tag = ["instance_url:{0}".format(STATS_URL_OPEN)]
-
-    _test_frontend_metrics(aggregator, shared_tag, count=None)
-    _test_backend_metrics(aggregator, shared_tag, count=None)
-    _test_backend_hosts(aggregator, count=2)
-
-    aggregator.assert_all_metrics_covered()
-
-
 @pytest.mark.usefixtures('dd_environment')
 def test_version_metadata_http(check, version_metadata):
     config = copy.deepcopy(CHECK_CONFIG_OPEN)
@@ -234,6 +221,7 @@ def test_version_metadata_http(check, version_metadata):
 
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
 def test_version_metadata_unix_socket(check, version_metadata, dd_environment):
     config = copy.deepcopy(CONFIG_UNIXSOCKET)
     unixsocket_url = dd_environment["unixsocket_url"]
@@ -248,8 +236,12 @@ def test_version_metadata_unix_socket(check, version_metadata, dd_environment):
         assert m.call_count == len(version_metadata)
 
 
-@requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+@pytest.mark.skipif(
+    os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'] or not platform_supports_sockets,
+    reason='Sockets with operator level are only available with haproxy 1.7',
+)
 def test_version_metadata_tcp_socket(check, version_metadata):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
     check = check(config)
@@ -260,3 +252,16 @@ def test_version_metadata_tcp_socket(check, version_metadata):
         for name, value in version_metadata.items():
             m.assert_any_call('test:123', name, value)
         assert m.call_count == len(version_metadata)
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance):
+    aggregator = dd_agent_check(CHECK_CONFIG_OPEN, rate=True)
+
+    shared_tag = ["instance_url:{0}".format(STATS_URL_OPEN)]
+
+    _test_frontend_metrics(aggregator, shared_tag, count=None)
+    _test_backend_metrics(aggregator, shared_tag, count=None)
+    _test_backend_hosts(aggregator, count=2)
+
+    aggregator.assert_all_metrics_covered()
