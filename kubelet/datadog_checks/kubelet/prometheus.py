@@ -15,7 +15,8 @@ from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
 # container-specific metrics should have all these labels
-CONTAINER_LABELS = ['container_name', 'namespace', 'pod_name', 'name', 'image', 'id']
+PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
+POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
 
 
 class CadvisorPrometheusScraperMixin(object):
@@ -107,13 +108,15 @@ class CadvisorPrometheusScraperMixin(object):
         :param metric:
         :return: bool
         """
-        for lbl in CONTAINER_LABELS:
-            if lbl == 'container_name':
-                if lbl in labels:
-                    if labels[lbl] == '' or labels[lbl] == 'POD':
-                        return False
-            if lbl not in labels:
+        label_set = set(labels)
+        if POST_1_16_CONTAINER_LABELS.issubset(label_set):
+            if labels.get('container') in ['', 'POD']:
                 return False
+        elif PRE_1_16_CONTAINER_LABELS.issubset(label_set):
+            if labels.get('container_name') in ['', 'POD']:
+                return False
+        else:
+            return False
         return True
 
     @staticmethod
@@ -125,20 +128,22 @@ class CadvisorPrometheusScraperMixin(object):
         :param metric
         :return bool
         """
-        if 'container_name' in labels:
-            if labels['container_name'] == 'POD':
-                return True
-            # containerd does not report container_name="POD"
-            elif labels['container_name'] == '' and labels.get('pod_name', False):
-                return True
+        # k8s >= 1.16
+        # docker reports container==POD (first case), containerd does not (second case)
+        if labels.get('container') == 'POD' or (labels.get('container') == '' and labels.get('pod', False)):
+            return True
+        # k8s < 1.16 && > 1.8
+        if labels.get('container_name') == 'POD' or (
+            labels.get('container_name') == '' and labels.get('pod_name', False)
+        ):
+            return True
+        # k8s < 1.8
         # container_cpu_usage_seconds_total has an id label that is a cgroup path
         # eg: /kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb
         # FIXME: this was needed because of a bug:
         # https://github.com/kubernetes/kubernetes/pull/51473
-        # starting from k8s 1.8 we can remove this
-        if 'id' in labels:
-            if labels['id'].split('/')[-1].startswith('pod'):
-                return True
+        if labels.get('id', '').split('/')[-1].startswith('pod'):
+            return True
         return False
 
     @staticmethod
@@ -161,8 +166,14 @@ class CadvisorPrometheusScraperMixin(object):
         :return str or None
         """
         namespace = CadvisorPrometheusScraperMixin._get_container_label(labels, "namespace")
-        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
-        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
+        # k8s >= 1.16
+        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod")
+        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container")
+        # k8s < 1.16
+        if not pod_name:
+            pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
+        if not container_name:
+            container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
         return self.pod_list_utils.get_cid_by_name_tuple((namespace, pod_name, container_name))
 
     def _get_entity_id_if_container_metric(self, labels):
@@ -175,7 +186,7 @@ class CadvisorPrometheusScraperMixin(object):
         """
         if CadvisorPrometheusScraperMixin._is_container_metric(labels):
             pod = self._get_pod_by_metric_label(labels)
-            if is_static_pending_pod(pod):
+            if pod is not None and is_static_pending_pod(pod):
                 # If the pod is static, ContainerStatus is unavailable.
                 # Return the pod UID so that we can collect metrics from it later on.
                 return self._get_pod_uid(labels)
@@ -188,7 +199,10 @@ class CadvisorPrometheusScraperMixin(object):
         :return: str or None
         """
         namespace = CadvisorPrometheusScraperMixin._get_container_label(labels, "namespace")
-        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
+        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod")
+        # k8s < 1.16
+        if not pod_name:
+            pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
         return self.pod_list_utils.get_uid_by_name_tuple((namespace, pod_name))
 
     def _get_pod_uid_if_pod_metric(self, labels):
@@ -232,7 +246,10 @@ class CadvisorPrometheusScraperMixin(object):
         :param labels: metric labels: iterable
         :return: list
         """
-        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
+        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container")
+        # k8s < 1.16
+        if not container_name:
+            container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
         if container_name:
             return ["kube_container_name:%s" % container_name]
         return []
