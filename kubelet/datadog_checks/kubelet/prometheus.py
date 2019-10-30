@@ -133,7 +133,9 @@ class CadvisorPrometheusScraperMixin(object):
         if labels.get('container') == 'POD' or (labels.get('container') == '' and labels.get('pod', False)):
             return True
         # k8s < 1.16 && > 1.8
-        if labels.get('container_name') == 'POD' or (labels.get('container_name') == '' and labels.get('pod_name', False)):
+        if labels.get('container_name') == 'POD' or (
+            labels.get('container_name') == '' and labels.get('pod_name', False)
+        ):
             return True
         # k8s < 1.8
         # container_cpu_usage_seconds_total has an id label that is a cgroup path

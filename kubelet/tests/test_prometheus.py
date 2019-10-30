@@ -132,9 +132,7 @@ def test_is_pod_metric():
         MockMetric(
             'foobar', {'container_name': 'POD', 'id': '/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb'}
         ),
-        MockMetric(
-            'foobaz', {'container': 'POD', 'id': '/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb'}
-        ),
+        MockMetric('foobaz', {'container': 'POD', 'id': '/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb'}),
     ]
 
     for metric in false_metrics:
@@ -177,7 +175,9 @@ def test_get_entity_id_if_container_metric(cadvisor_scraper):
             "id": "1",
         },
     )
-    assert cadvisor_scraper._get_entity_id_if_container_metric(static_pod_1_16.label) == "fbf18e171294371272adc19391eae7cc"
+    assert (
+        cadvisor_scraper._get_entity_id_if_container_metric(static_pod_1_16.label) == "fbf18e171294371272adc19391eae7cc"
+    )
 
     static_pod_1_15 = MockMetric(
         'bar',
@@ -192,7 +192,9 @@ def test_get_entity_id_if_container_metric(cadvisor_scraper):
             "id": "1",
         },
     )
-    assert cadvisor_scraper._get_entity_id_if_container_metric(static_pod_1_15.label) == "fbf18e171294371272adc19391eae7cc"
+    assert (
+        cadvisor_scraper._get_entity_id_if_container_metric(static_pod_1_15.label) == "fbf18e171294371272adc19391eae7cc"
+    )
 
     # k8s < 1.16
     static_pod_1_14 = MockMetric(
@@ -206,7 +208,9 @@ def test_get_entity_id_if_container_metric(cadvisor_scraper):
             "id": "1",
         },
     )
-    assert cadvisor_scraper._get_entity_id_if_container_metric(static_pod_1_14.label) == "fbf18e171294371272adc19391eae7cc"
+    assert (
+        cadvisor_scraper._get_entity_id_if_container_metric(static_pod_1_14.label) == "fbf18e171294371272adc19391eae7cc"
+    )
 
 
 def test_get_pod_uid(cadvisor_scraper):
