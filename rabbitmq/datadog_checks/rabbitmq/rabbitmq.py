@@ -200,6 +200,20 @@ class RabbitMQ(AgentCheck):
 
         return base_url, max_detailed, specified, custom_tags, suppress_warning
 
+    def _collect_metadata(self, base_url):
+        # Rabbit versions follow semantic versioning https://www.rabbitmq.com/changelog.html
+        # overview endpoint returns a json with rabbit version in rabbitmq_version field.
+        overview_url = urljoin(base_url, 'overview')
+        overview_response = self._get_data(overview_url)
+
+        # the response is has unicode in it so converting to a string below
+        version = str(overview_response['rabbitmq_version'])
+        if version:
+            self.set_metadata('version', version)
+            self.log.debug(u"found rabbitmq version {}".format(version))
+        else:
+            self.log.warning(u"could not retrieve rabbitmq version information")
+
     def _get_vhosts(self, instance, base_url):
         vhosts = instance.get('vhosts')
 
@@ -217,7 +231,8 @@ class RabbitMQ(AgentCheck):
             with warnings.catch_warnings():
                 vhosts = self._get_vhosts(instance, base_url)
                 self.cached_vhosts[base_url] = vhosts
-
+                # this collects and sets versioning metadata
+                self._collect_metadata(base_url)
                 limit_vhosts = []
                 if self._limit_vhosts(instance):
                     limit_vhosts = vhosts
