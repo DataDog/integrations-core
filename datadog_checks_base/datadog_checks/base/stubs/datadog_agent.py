@@ -26,7 +26,7 @@ class DatadogAgentStub(object):
     def get_version(self):
         return '0.0.0'
 
-    def log(*args, **kwargs):
+    def log(self, *args, **kwargs):
         pass
 
     def set_check_metadata(self, check_id, name, value):
