@@ -164,8 +164,14 @@ class CadvisorPrometheusScraperMixin(object):
         :return str or None
         """
         namespace = CadvisorPrometheusScraperMixin._get_container_label(labels, "namespace")
-        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
-        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
+        # k8s >= 1.16
+        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod")
+        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container")
+        # k8s < 1.16
+        if not pod_name:
+            pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
+        if not container_name:
+            container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
         return self.pod_list_utils.get_cid_by_name_tuple((namespace, pod_name, container_name))
 
     def _get_entity_id_if_container_metric(self, labels):
@@ -178,7 +184,7 @@ class CadvisorPrometheusScraperMixin(object):
         """
         if CadvisorPrometheusScraperMixin._is_container_metric(labels):
             pod = self._get_pod_by_metric_label(labels)
-            if is_static_pending_pod(pod):
+            if pod is not None and is_static_pending_pod(pod):
                 # If the pod is static, ContainerStatus is unavailable.
                 # Return the pod UID so that we can collect metrics from it later on.
                 return self._get_pod_uid(labels)
@@ -191,7 +197,10 @@ class CadvisorPrometheusScraperMixin(object):
         :return: str or None
         """
         namespace = CadvisorPrometheusScraperMixin._get_container_label(labels, "namespace")
-        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
+        pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod")
+        # k8s < 1.16
+        if not pod_name:
+            pod_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "pod_name")
         return self.pod_list_utils.get_uid_by_name_tuple((namespace, pod_name))
 
     def _get_pod_uid_if_pod_metric(self, labels):
@@ -235,7 +244,10 @@ class CadvisorPrometheusScraperMixin(object):
         :param labels: metric labels: iterable
         :return: list
         """
-        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
+        container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container")
+        # k8s < 1.16
+        if not container_name:
+            container_name = CadvisorPrometheusScraperMixin._get_container_label(labels, "container_name")
         if container_name:
             return ["kube_container_name:%s" % container_name]
         return []
