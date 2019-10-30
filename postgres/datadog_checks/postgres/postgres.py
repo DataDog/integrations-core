@@ -125,7 +125,7 @@ class PostgreSql(AgentCheck):
     def version(self):
         if self._version is None:
             self._version = get_version(self.db)
-            if isinstance(self._verison, str):
+            if isinstance(self._version, str):
                 self.log.error("Could not determine postgres version. Obtained {}", self._version)
                 self._version = None
             else:
