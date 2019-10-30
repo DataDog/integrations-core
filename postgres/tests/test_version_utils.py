@@ -36,6 +36,10 @@ def test_get_version():
     db.cursor().fetchone.return_value = ['11nightly3']
     assert get_version(db) == VersionInfo(11, -1, 3)
 
-    # Test #unknown# style versions
+
+def test_throws_exception_for_unknown_version_format():
+    db = MagicMock()
     db.cursor().fetchone.return_value = ['dontKnow']
-    assert get_version(db) == 'dontKnow'
+    with pytest.raises(Exception) as e:
+        get_version(db)
+    assert e.value.args[0] == "Cannot determine which version is dontKnow"
