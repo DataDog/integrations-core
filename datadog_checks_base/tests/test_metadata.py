@@ -269,6 +269,68 @@ class TestVersion:
             else:
                 raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
 
+    def test_parts(self):
+        check = AgentCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+
+        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.set_metadata(
+                'version',
+                '19.15.2.2',
+                scheme='parts',
+                part_map={'year': '19', 'major': '15', 'minor': '2', 'patch': '2', 'revision': '56789'},
+            )
+
+            m.assert_any_call('test:123', 'version.year', '19')
+            m.assert_any_call('test:123', 'version.major', '15')
+            m.assert_any_call('test:123', 'version.minor', '2')
+            m.assert_any_call('test:123', 'version.patch', '2')
+            m.assert_any_call('test:123', 'version.revision', '56789')
+            m.assert_any_call('test:123', 'version.raw', '19.15.2.2')
+            m.assert_any_call('test:123', 'version.scheme', 'test')
+            assert m.call_count == 7
+
+    def test_parts_final_scheme(self):
+        check = AgentCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+
+        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.set_metadata(
+                'version',
+                '19.15.2.2',
+                scheme='parts',
+                final_scheme='calver',
+                part_map={'year': '19', 'major': '15', 'minor': '2', 'patch': '2', 'revision': '56789'},
+            )
+
+            m.assert_any_call('test:123', 'version.year', '19')
+            m.assert_any_call('test:123', 'version.major', '15')
+            m.assert_any_call('test:123', 'version.minor', '2')
+            m.assert_any_call('test:123', 'version.patch', '2')
+            m.assert_any_call('test:123', 'version.revision', '56789')
+            m.assert_any_call('test:123', 'version.raw', '19.15.2.2')
+            m.assert_any_call('test:123', 'version.scheme', 'calver')
+            assert m.call_count == 7
+
+    def test_parts_no_part_map(self, caplog):
+        check = AgentCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+
+        with caplog.at_level(logging.DEBUG), mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.set_metadata('version', '1.0', scheme='parts')
+
+            assert m.call_count == 0
+
+            expected_message = (
+                'Unable to transform `version` metadata value `1.0`: '
+                'Version scheme `parts` requires a `part_map` option'
+            )
+            for _, level, message in caplog.record_tuples:
+                if level == logging.ERROR and message == expected_message:
+                    break
+            else:
+                raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
+
 
 class TestConfig:
     def test_no_section(self, caplog):
