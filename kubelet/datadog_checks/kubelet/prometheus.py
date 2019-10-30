@@ -15,7 +15,8 @@ from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_
 METRIC_TYPES = ['counter', 'gauge', 'summary']
 
 # container-specific metrics should have all these labels
-CONTAINER_LABELS = ['container_name', 'namespace', 'pod_name', 'name', 'image', 'id']
+PRE_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container_name', 'pod_name'])
+POST_1_16_CONTAINER_LABELS = set(['namespace', 'name', 'image', 'id', 'container', 'pod'])
 
 
 class CadvisorPrometheusScraperMixin(object):
@@ -107,13 +108,15 @@ class CadvisorPrometheusScraperMixin(object):
         :param metric:
         :return: bool
         """
-        for lbl in CONTAINER_LABELS:
-            if lbl == 'container_name':
-                if lbl in labels:
-                    if labels[lbl] == '' or labels[lbl] == 'POD':
-                        return False
-            if lbl not in labels:
+        label_set = set(labels)
+        if POST_1_16_CONTAINER_LABELS.issubset(label_set):
+            if labels.get('container') in ['', 'POD']:
                 return False
+        elif PRE_1_16_CONTAINER_LABELS.issubset(label_set):
+            if labels.get('container_name') in ['', 'POD']:
+                return False
+        else:
+            return False
         return True
 
     @staticmethod
@@ -125,20 +128,20 @@ class CadvisorPrometheusScraperMixin(object):
         :param metric
         :return bool
         """
-        if 'container_name' in labels:
-            if labels['container_name'] == 'POD':
-                return True
-            # containerd does not report container_name="POD"
-            elif labels['container_name'] == '' and labels.get('pod_name', False):
-                return True
+        # k8s >= 1.16
+        # docker reports container==POD (first case), containerd does not (second case)
+        if labels.get('container') == 'POD' or (labels.get('container') == '' and labels.get('pod', False)):
+            return True
+        # k8s < 1.16 && > 1.8
+        if labels.get('container_name') == 'POD' or (labels.get('container_name') == '' and labels.get('pod_name', False)):
+            return True
+        # k8s < 1.8
         # container_cpu_usage_seconds_total has an id label that is a cgroup path
         # eg: /kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb
         # FIXME: this was needed because of a bug:
         # https://github.com/kubernetes/kubernetes/pull/51473
-        # starting from k8s 1.8 we can remove this
-        if 'id' in labels:
-            if labels['id'].split('/')[-1].startswith('pod'):
-                return True
+        if labels.get('id', '').split('/')[-1].startswith('pod'):
+            return True
         return False
 
     @staticmethod
