@@ -3,7 +3,7 @@
 ## 1.12.0 / 2019-10-30
 
 * [Added] Add use_sudo option for collecting conntrack metrics with containers. See [#4920](https://github.com/DataDog/integrations-core/pull/4920).
-* [Fixed] Fix examples in conf.yaml.default  . See [#4887](https://github.com/DataDog/integrations-core/pull/4887). Thanks [q42jaap](https://github.com/q42jaap).
+* [Fixed] Fix examples in conf.yaml.default. See [#4887](https://github.com/DataDog/integrations-core/pull/4887). Thanks [q42jaap](https://github.com/q42jaap).
 
 ## 1.11.5 / 2019-10-11
 
