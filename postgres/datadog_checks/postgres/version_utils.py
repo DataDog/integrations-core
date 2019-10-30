@@ -35,4 +35,4 @@ def get_version(db):
                 version[1] = -1
                 version = [int(part) for part in version]
             return semver.VersionInfo(*version)
-    return raw_version
+    raise Exception("Cannot determine which version is {}".format(raw_version))
