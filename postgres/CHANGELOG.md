@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 3.3.0 / 2019-10-30
+
+* [Fixed] Remove multi instance from code. See [#4831](https://github.com/DataDog/integrations-core/pull/4831).
+* [Added] Upgrade psycopg2-binary to 2.8.4. See [#4840](https://github.com/DataDog/integrations-core/pull/4840).
+
 ## 3.2.1 / 2019-10-11
 
 * [Fixed] Add cache invalidation and better thread lock. See [#4723](https://github.com/DataDog/integrations-core/pull/4723).
