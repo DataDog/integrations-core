@@ -17,12 +17,12 @@ instances:
     ## @param user - string - required
     ## JMX username
     #
-    # user: <USERNAME>
+    user: <USERNAME>
 
     ## @param password - string - required
     ## JMX User Password.
     #
-    # password: <PASSWORD>
+    password: <PASSWORD>
 
     ## @param process_name_regex - string - optional
     ## XXXXXXXXXXX
