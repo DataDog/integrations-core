@@ -2,7 +2,7 @@
 
 ## 3.3.4 / 2019-10-30
 
-* [Fixed] [kubelet] fix container collection fro k8s 1.16. See [#4925](https://github.com/DataDog/integrations-core/pull/4925).
+* [Fixed] Fix container collection for k8s 1.16. See [#4925](https://github.com/DataDog/integrations-core/pull/4925).
 
 ## 3.3.3 / 2019-10-11
 
