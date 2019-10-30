@@ -125,10 +125,7 @@ class PostgreSql(AgentCheck):
     def version(self):
         if self._version is None:
             raw_version, self._version = get_version(self.db)
-            if self._version is None:
-                self.log.error("Could not determine postgres version. Obtained {}", raw_version)
-            else:
-                self.set_metadata('version', raw_version)
+            self.set_metadata('version', raw_version)
         return self._version
 
     def _get_instance_metrics(self, database_size_metrics, collect_default_db):

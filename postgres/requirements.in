@@ -1,2 +1,2 @@
 psycopg2-binary==2.8.4
-semver==2.8.1
+semver==2.9.0

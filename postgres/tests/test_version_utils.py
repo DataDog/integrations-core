@@ -40,11 +40,14 @@ def test_get_version():
     db.cursor().fetchone.return_value = ['11nightly3']
     _, version = get_version(db)
     assert version == VersionInfo(11, 0, 0, 'nightly.3')
-    # Test #unknown# style versions
+
+
+def test_throws_exception_for_unknown_version_format():
+    db = MagicMock()
     db.cursor().fetchone.return_value = ['dontKnow']
-    raw_version, version = get_version(db)
-    assert version is None
-    assert raw_version == 'dontKnow'
+    with pytest.raises(Exception) as e:
+        get_version(db)
+    assert e.value.args[0] == "Cannot determine which version is dontKnow"
 
 
 def test_transform_version():
@@ -54,7 +57,7 @@ def test_transform_version():
         'version.major': 11,
         'version.minor': 0,
         'version.patch': 0,
-        'version.build': 'beta.4',
+        'version.release': 'beta.4',
         'version.scheme': 'semver',
     }
     assert expected == version
@@ -65,7 +68,7 @@ def test_transform_version():
         'version.major': 10,
         'version.minor': 0,
         'version.patch': 0,
-        'version.build': None,
+        'version.release': None,
         'version.scheme': 'semver',
     }
     assert expected == version
@@ -76,7 +79,7 @@ def test_transform_version():
         'version.major': 10,
         'version.minor': 5,
         'version.patch': 4,
-        'version.build': None,
+        'version.release': None,
         'version.scheme': 'semver',
     }
     assert expected == version

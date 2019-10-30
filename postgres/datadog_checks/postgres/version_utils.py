@@ -23,10 +23,9 @@ def get_version(db):
 
 
 def _parse_version(raw_version):
-    version_parts = None
     try:
         # Only works for MAJOR.MINOR.PATCH(-PRE_RELEASE)
-        version_parts = semver.parse(raw_version)
+        return semver.parse_version_info(raw_version)
     except ValueError:
         try:
             # Version may be missing minor eg: 10.0
@@ -34,21 +33,14 @@ def _parse_version(raw_version):
             version = [int(part) for part in version]
             while len(version) < 3:
                 version.append(0)
-            version_parts = semver.parse('{}.{}.{}'.format(*version))
+            return semver.parse_version_info('{}.{}.{}'.format(*version))
         except ValueError as e:
             # Postgres might be in development, with format \d+[beta|rc]\d+
             match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', raw_version)
             if match:
                 version = list(match.groups())
-                version_parts = semver.parse('{}.0.0-{}.{}'.format(*version))
-    if version_parts:
-        return semver.VersionInfo(
-            major=version_parts.get('major'),
-            minor=version_parts.get('minor'),
-            patch=version_parts.get('patch'),
-            prerelease=version_parts.get('prerelease', None),
-        )
-    return None
+                return semver.parse_version_info('{}.0.0-{}.{}'.format(*version))
+    raise Exception("Cannot determine which version is {}".format(raw_version))
 
 
 def transform_version(raw_version, options=None):
@@ -57,7 +49,7 @@ def transform_version(raw_version, options=None):
         'version.major': version.major,
         'version.minor': version.minor,
         'version.patch': version.patch,
-        'version.build': version.prerelease,
+        'version.release': version.prerelease,
         'version.raw': raw_version,
         'version.scheme': 'semver',
     }
