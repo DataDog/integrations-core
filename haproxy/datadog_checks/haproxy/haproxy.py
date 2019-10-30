@@ -219,13 +219,11 @@ class HAProxy(AgentCheck):
 
         response = ""
         output = sock.recv(BUFSIZE)
-        print(output)
         while output:
             response += output.decode("ASCII")
             output = sock.recv(BUFSIZE)
         info, data = response.split('\n\n')[:2]
-        print(info)
-        print(data)
+
         sock.close()
 
         return info, data.splitlines()
