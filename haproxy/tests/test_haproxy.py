@@ -215,7 +215,8 @@ def test_version_metadata_http(check, version_metadata):
         check.check(config)
         for name, value in version_metadata.items():
             m.assert_any_call('test:123', name, value)
-        assert m.call_count == len(version_metadata)
+        # some version contains release information which is not in the test env var
+        assert m.call_count == len(version_metadata) or m.call_count == len(version_metadata) + 1
 
 
 @requires_socket_support
