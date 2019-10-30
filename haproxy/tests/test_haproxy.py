@@ -233,7 +233,8 @@ def test_version_metadata_unix_socket(check, version_metadata, dd_environment):
         check.check(config)
         for name, value in version_metadata.items():
             m.assert_any_call('test:123', name, value)
-        assert m.call_count == len(version_metadata)
+        # some version contains release information which is not in the test env var
+        assert m.call_count == len(version_metadata) or m.call_count == len(version_metadata) + 1
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -251,7 +252,8 @@ def test_version_metadata_tcp_socket(check, version_metadata):
         check.check(config)
         for name, value in version_metadata.items():
             m.assert_any_call('test:123', name, value)
-        assert m.call_count == len(version_metadata)
+        # some version contains release information which is not in the test env var
+        assert m.call_count == len(version_metadata) or m.call_count == len(version_metadata) + 1
 
 
 @pytest.mark.e2e
