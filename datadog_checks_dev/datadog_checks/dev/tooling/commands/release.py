@@ -697,7 +697,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
             version = None
 
     if sign_only or not skip_sign:
-        if len(updated_checks) == 0:
+        if not updated_checks:
             abort('There are no new checks to sign and release!')
         echo_waiting('Updating release metadata...')
         echo_info('Please touch your Yubikey immediately after entering your PIN!')
