@@ -65,7 +65,6 @@ class PostgreSql(AgentCheck):
         AgentCheck.__init__(self, name, init_config, instances)
         self._clean_state()
         self.db = None
-        self._version = None
         self.custom_metrics = None
 
         # Deprecate custom_metrics in favor of custom_queries
@@ -695,6 +694,7 @@ class PostgreSql(AgentCheck):
         return custom_metrics
 
     def check(self, instance):
+        self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata
         ssl = self.instance.get('ssl', False)
         if ssl not in SSL_MODES:
             ssl = 'require' if is_affirmative(ssl) else 'disable'
