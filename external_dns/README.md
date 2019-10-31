@@ -1,9 +1,8 @@
-# External-dns Integration
+# External DNS Integration
 
 ## Overview
 
 Get metrics from the external DNS service in real time to visualize and monitor DNS metrics collected with the Kubernetes external DNS Prometheus add on.
-
 
 For more information about external DNS, see the [Github repo][7].
 
@@ -30,28 +29,31 @@ metadata:
     service-discovery.datadoghq.com/external_dns.instances: '[[{"prometheus_url":"http://%%host%%:7979/metrics", "tags":["dns-pod:%%host%%"]}]]'
 ```
 
-
- - The "dns-pod" tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
-   pod IP. The other tags will be related to the dd-agent that is polling the
-   informations using the service discovery.
- - The service discovery annotations are done on the pod. To deploy, add the annotations to the metadata of the template's specification.
-
+- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
+  pod IP. The other tags will be related to the dd-agent that is polling the informations using the service discovery.
+- The service discovery annotations are done on the pod. To deploy, add the annotations to the metadata of the template's specification.
 
 ### Validation
 
 [Run the Agent's `status` subcommand][4] and look for `external_dns` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
+
 The external DNS check does not include any events.
 
 ### Service Checks
-The external DNS check does not include any service checks.
+
+**external_dns.prometheus.health**:<br>
+Returns `CRITICAL` if the check cannot access the metrics endpoint, otherwise returns `OK`.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
@@ -60,4 +62,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/external_dns/metadata.csv
 [6]: https://docs.datadoghq.com/help
-[7]: https://github.com/kubernetes-incubator/external-dns 
+[7]: https://github.com/kubernetes-incubator/external-dns

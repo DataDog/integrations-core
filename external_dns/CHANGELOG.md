@@ -1,2 +1,2 @@
+# CHANGELOG - External DNS
 
-* [FEATURE] Add external-dns integration
