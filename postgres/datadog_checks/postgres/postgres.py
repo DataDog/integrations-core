@@ -40,7 +40,7 @@ from .util import (
     STATIO_METRICS,
     fmt,
 )
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, get_version, transform_version
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, get_raw_version, parse_version, transform_version
 
 MAX_CUSTOM_RESULTS = 100
 TABLE_COUNT_LIMIT = 200
@@ -125,7 +125,8 @@ class PostgreSql(AgentCheck):
     @property
     def version(self):
         if self._version is None:
-            raw_version, self._version = get_version(self.db)
+            raw_version = get_raw_version(self.db)
+            self._version = parse_version(raw_version)
             self.set_metadata('version', raw_version)
         return self._version
 

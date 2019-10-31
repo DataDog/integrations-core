@@ -133,7 +133,6 @@ def test_wrong_version(aggregator, integration_check, pg_instance):
     assert_state_clean(check)
 
     check.check(pg_instance)
-    assert check._version.major == int(POSTGRES_VERSION)
     assert_state_set(check)
 
 

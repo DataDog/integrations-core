@@ -2,58 +2,46 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-from mock import MagicMock
 from semver import VersionInfo
 
-from datadog_checks.postgres.version_utils import get_version, transform_version
+from datadog_checks.postgres.version_utils import parse_version, transform_version
 
 pytestmark = pytest.mark.unit
 
 
-def test_get_version():
+def test_parse_version():
     """
     Test _get_version() to make sure the check is properly parsing Postgres versions
     """
-    db = MagicMock()
-
-    # Test #.#.# style versions
-    db.cursor().fetchone.return_value = ['9.5.3']
-    _, version = get_version(db)
+    version = parse_version('9.5.3')
     assert version == VersionInfo(9, 5, 3)
 
     # Test #.# style versions
-    db.cursor().fetchone.return_value = ['10.2']
-    _, v10_2 = get_version(db)
+    v10_2 = parse_version('10.2')
     assert v10_2 == VersionInfo(10, 2, 0)
 
-    db.cursor().fetchone.return_value = ['11']
-    _, v11 = get_version(db)
+    v11 = parse_version('11')
     assert v11 == VersionInfo(11, 0, 0)
 
     # Test #beta# style versions
-    db.cursor().fetchone.return_value = ['11beta3']
-    _, beta11 = get_version(db)
+    beta11 = parse_version('11beta3')
     assert beta11 == VersionInfo(11, 0, 0, prerelease='beta.3')
 
     assert v10_2 < beta11
     assert v11 > beta11
 
     # Test #rc# style versions
-    db.cursor().fetchone.return_value = ['11rc1']
-    _, version = get_version(db)
+    version = parse_version('11rc1')
     assert version == VersionInfo(11, 0, 0, prerelease='rc.1')
 
     # Test #nightly# style versions
-    db.cursor().fetchone.return_value = ['11nightly3']
-    _, version = get_version(db)
+    version = parse_version('11nightly3')
     assert version == VersionInfo(11, 0, 0, 'nightly.3')
 
 
 def test_throws_exception_for_unknown_version_format():
-    db = MagicMock()
-    db.cursor().fetchone.return_value = ['dontKnow']
     with pytest.raises(Exception) as e:
-        get_version(db)
+        parse_version('dontKnow')
     assert e.value.args[0] == "Cannot determine which version is dontKnow"
 
 
