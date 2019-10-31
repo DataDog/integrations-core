@@ -145,15 +145,15 @@ def test_version_metadata(integration_check, pg_instance, datadog_agent):
     # Enforce to cache wrong version
     check.check(pg_instance)
     version = POSTGRES_VERSION.split('.')
-    while len(version) < 2:
-        version.append('0')
     version_metadata = {
         'version.scheme': 'semver',
         'version.major': int(version[0]),
-        'version.minor': int(version[1]),
     }
+    if len(version) == 2:
+        version_metadata['version.minor'] = int(version[1])
+
     datadog_agent.assert_metadata('test:123', version_metadata)
-    datadog_agent.assert_metadata_count(len(version_metadata) + 2)  # for raw and patch
+    datadog_agent.assert_metadata_count(6)  # for raw and patch
 
 
 @pytest.mark.integration
@@ -178,7 +178,6 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
 
 
 def assert_state_clean(check):
-    assert check._version is None
     assert check.instance_metrics is None
     assert check.bgw_metrics is None
     assert check.archiver_metrics is None
@@ -188,8 +187,7 @@ def assert_state_clean(check):
     assert check.activity_metrics is None
 
 
-def assert_state_set(check,):
-    assert check._version
+def assert_state_set(check):
     assert check.instance_metrics
     assert check.bgw_metrics
     if POSTGRES_VERSION != '9.3':

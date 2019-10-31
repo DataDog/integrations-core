@@ -692,7 +692,6 @@ class PostgreSql(AgentCheck):
         return custom_metrics
 
     def check(self, instance):
-        self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata
         ssl = self.instance.get('ssl', False)
         if ssl not in SSL_MODES:
             ssl = 'require' if is_affirmative(ssl) else 'disable'
@@ -751,3 +750,4 @@ class PostgreSql(AgentCheck):
                 self.db.commit()
             except Exception as e:
                 self.log.warning("Unable to commit: %s", e)
+        self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata
