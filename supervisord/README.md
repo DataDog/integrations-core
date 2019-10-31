@@ -7,9 +7,6 @@
 This check monitors the uptime, status, and number of processes running under supervisord.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying these instructions.
-
 ### Installation
 
 The Supervisor check is included in the [Datadog Agent][2] package, so you don't need to install anything else on servers where Supervisor is running.
@@ -50,7 +47,9 @@ If supervisor is running as root, make sure `chmod` is set so that non-root user
 
 Reload supervisord.
 
-#### Connect the Agent
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample supervisord.d/conf.yaml][4] for all available configuration options:
 
@@ -85,6 +84,15 @@ See the [example check configuration][4] for comprehensive descriptions of other
 
 [Restart the Agent][5] to start sending Supervisor metrics to Datadog.
 
+#### Containerized
+For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                          |
+|----------------------|--------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `supervisord`                                                                  |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                  |
+| `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
+
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `supervisord` under the Checks section.
@@ -111,7 +119,7 @@ The Agent submits this service check for all child processes of supervisord (if 
 This table shows the `supervisord.process.status` that results from each supervisord status:
 
 | supervisord status | supervisord.process.status |
-| ---                | ---                        |
+|--------------------|----------------------------|
 | STOPPED            | CRITICAL                   |
 | STARTING           | UNKNOWN                    |
 | RUNNING            | OK                         |
