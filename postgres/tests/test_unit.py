@@ -179,9 +179,9 @@ def test_malformed_get_custom_queries(check):
 @pytest.mark.parametrize(
     'test_case, params',
     [
-        ('9.6.2', {'version.major': 9, 'version.minor': 6, 'version.patch': 2, 'version.build': None}),
-        ('10.0', {'version.major': 10, 'version.minor': 0, 'version.patch': 0, 'version.build': None}),
-        ('11nightly3', {'version.major': 11, 'version.minor': 0, 'version.patch': 0, 'version.build': 'nightly.3'}),
+        ('9.6.2', {'version.major': 9, 'version.minor': 6, 'version.patch': 2, 'version.release': None}),
+        ('10.0', {'version.major': 10, 'version.minor': 0, 'version.patch': 0, 'version.release': None}),
+        ('11nightly3', {'version.major': 11, 'version.minor': 0, 'version.patch': 0, 'version.release': 'nightly.3'}),
     ],
 )
 def test_version_metadata(check, test_case, params):

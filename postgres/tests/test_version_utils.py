@@ -23,13 +23,20 @@ def test_get_version():
 
     # Test #.# style versions
     db.cursor().fetchone.return_value = ['10.2']
-    _, version = get_version(db)
-    assert version == VersionInfo(10, 2, 0)
+    _, v10_2 = get_version(db)
+    assert v10_2 == VersionInfo(10, 2, 0)
+
+    db.cursor().fetchone.return_value = ['11']
+    _, v11 = get_version(db)
+    assert v11 == VersionInfo(11, 0, 0)
 
     # Test #beta# style versions
     db.cursor().fetchone.return_value = ['11beta3']
-    _, version = get_version(db)
-    assert version == VersionInfo(11, 0, 0, prerelease='beta.3')
+    _, beta11 = get_version(db)
+    assert beta11 == VersionInfo(11, 0, 0, prerelease='beta.3')
+
+    assert v10_2 < beta11
+    assert v11 > beta11
 
     # Test #rc# style versions
     db.cursor().fetchone.return_value = ['11rc1']
