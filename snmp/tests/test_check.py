@@ -708,3 +708,125 @@ def test_f5(aggregator):
                 'snmp.{}'.format(metric), tags=['interface:{}'.format(interface)] + common.CHECK_TAGS, count=1
             )
     aggregator.assert_all_metrics_covered()
+
+
+def test_router(aggregator):
+    instance = common.generate_instance_config([])
+    # We need the full path as we're not in installed mode
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'generic-router.yaml')
+    instance['community_string'] = 'network'
+    instance['profile'] = 'router'
+    instance['enforce_mib_constraints'] = False
+
+    init_config = {'profiles': {'router': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    tcp_rates = [
+        'tcpActiveOpens',
+        'tcpPassiveOpens',
+        'tcpAttemptFails',
+        'tcpEstabResets',
+        'tcpHCInSegs',
+        'tcpHCOutSegs',
+        'tcpRetransSegs',
+        'tcpInErrs',
+        'tcpOutRsts',
+    ]
+    tcp_gauges = ['tcpCurrEstab']
+    udp_rates = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
+    if_rates = [
+        'ifInErrors',
+        'ifInDiscards',
+        'ifOutErrors',
+        'ifOutDiscards',
+        'ifHCInOctets',
+        'ifHCInUcastPkts',
+        'ifHCInMulticastPkts',
+        'ifHCInBroadcastPkts',
+        'ifHCOutOctets',
+        'ifHCOutUcastPkts',
+        'ifHCOutMulticastPkts',
+        'ifHCOutBroadcastPkts',
+    ]
+    ip_rates = [
+        'ipSystemStatsHCInReceives',
+        'ipSystemStatsHCInOctets',
+        'ipSystemStatsInHdrErrors',
+        'ipSystemStatsInNoRoutes',
+        'ipSystemStatsInAddrErrors',
+        'ipSystemStatsInUnknownProtos',
+        'ipSystemStatsInTruncatedPkts',
+        'ipSystemStatsHCInForwDatagrams',
+        'ipSystemStatsReasmReqds',
+        'ipSystemStatsReasmOKs',
+        'ipSystemStatsReasmFails',
+        'ipSystemStatsInDiscards',
+        'ipSystemStatsHCInDelivers',
+        'ipSystemStatsHCOutRequests',
+        'ipSystemStatsOutNoRoutes',
+        'ipSystemStatsHCOutForwDatagrams',
+        'ipSystemStatsOutDiscards',
+        'ipSystemStatsOutFragReqds',
+        'ipSystemStatsOutFragOKs',
+        'ipSystemStatsOutFragFails',
+        'ipSystemStatsOutFragCreates',
+        'ipSystemStatsHCOutTransmits',
+        'ipSystemStatsHCOutOctets',
+        'ipSystemStatsHCInMcastPkts',
+        'ipSystemStatsHCInMcastOctets',
+        'ipSystemStatsHCOutMcastPkts',
+        'ipSystemStatsHCOutMcastOctets',
+        'ipSystemStatsHCInBcastPkts',
+        'ipSystemStatsHCOutBcastPkts',
+    ]
+    ip_if_rates = [
+        'ipIfStatsHCInOctets',
+        'ipIfStatsInHdrErrors',
+        'ipIfStatsInNoRoutes',
+        'ipIfStatsInAddrErrors',
+        'ipIfStatsInUnknownProtos',
+        'ipIfStatsInTruncatedPkts',
+        'ipIfStatsHCInForwDatagrams',
+        'ipIfStatsReasmReqds',
+        'ipIfStatsReasmOKs',
+        'ipIfStatsReasmFails',
+        'ipIfStatsInDiscards',
+        'ipIfStatsHCInDelivers',
+        'ipIfStatsHCOutRequests',
+        'ipIfStatsHCOutForwDatagrams',
+        'ipIfStatsOutDiscards',
+        'ipIfStatsOutFragReqds',
+        'ipIfStatsOutFragOKs',
+        'ipIfStatsOutFragFails',
+        'ipIfStatsOutFragCreates',
+        'ipIfStatsHCOutTransmits',
+        'ipIfStatsHCOutOctets',
+        'ipIfStatsHCInMcastPkts',
+        'ipIfStatsHCInMcastOctets',
+        'ipIfStatsHCOutMcastPkts',
+        'ipIfStatsHCOutMcastOctets',
+        'ipIfStatsHCInBcastPkts',
+        'ipIfStatsHCOutBcastPkts',
+    ]
+    for interface in ['eth0', 'eth1']:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        for metric in if_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+    for metric in tcp_rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=common.CHECK_TAGS, count=1)
+    for metric in tcp_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+    for metric in udp_rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=common.CHECK_TAGS, count=1)
+    for version in ['ipv4', 'ipv6']:
+        tags = ['ipversion:{}'.format(version)] + common.CHECK_TAGS
+        for metric in ip_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+        for metric in ip_if_rates:
+            for interface in ['17', '21']:
+                tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + common.CHECK_TAGS
+                aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
