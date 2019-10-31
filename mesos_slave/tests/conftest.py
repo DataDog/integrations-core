@@ -36,20 +36,6 @@ def check():
     return mock
 
 
-@pytest.fixture(scope="session")
-def version_metadata():
-    version = common.MESOS_SLAVE_VERSION.split('-')[0]
-    major, minor, patch = version.split('.')
-
-    return {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': version,
-    }
-
-
 def mock(init_config, instance):
     check = MesosSlave(common.CHECK_NAME, init_config, [instance])
 

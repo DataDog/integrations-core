@@ -11,6 +11,8 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_slave import MesosSlave
 
+from .common import MESOS_SLAVE_VERSION
+
 
 def test_fixtures(check, instance, aggregator):
     check = check({}, instance)
@@ -40,17 +42,23 @@ def test_fixtures(check, instance, aggregator):
     aggregator.assert_service_check('hello.ok', tags=service_check_tags, count=1, status=check.OK)
 
 
-def test_metadata(check, instance, version_metadata):
+def test_metadata(check, instance, datadog_agent):
     check = check({}, instance)
     check.check_id = 'test:123'
+    check.check(instance)
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        check.check(instance)
+    version = MESOS_SLAVE_VERSION.split('-')[0]
+    major, minor, patch = version.split('.')
 
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
-
-        assert m.call_count == len(version_metadata)
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': version,
+    }
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
 
 
 def test_default_timeout(check, instance):
