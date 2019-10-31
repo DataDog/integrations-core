@@ -1,5 +1,9 @@
 # CHANGELOG - CoreDNS
 
+## 1.3.0 / 2019-10-29
+
+* [Added] Add forward metrics. See [#4850](https://github.com/DataDog/integrations-core/pull/4850). Thanks [therc](https://github.com/therc).
+
 ## 1.2.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3492](https://github.com/DataDog/integrations-core/pull/3492).

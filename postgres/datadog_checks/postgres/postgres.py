@@ -65,6 +65,7 @@ class PostgreSql(AgentCheck):
         AgentCheck.__init__(self, name, init_config, instances)
         self._clean_state()
         self.db = None
+        self._version = None
         self.custom_metrics = None
 
         # Deprecate custom_metrics in favor of custom_queries

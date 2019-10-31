@@ -12,7 +12,6 @@ import pytest
 from six import PY3, iteritems
 
 from datadog_checks.dev import EnvVars
-from datadog_checks.network import Network
 
 from . import common
 
@@ -132,7 +131,7 @@ def test_add_conntrack_stats_metrics(aggregator, check):
     )
     with mock.patch('datadog_checks.network.network.get_subprocess_output') as subprocess:
         subprocess.return_value = mocked_conntrack_stats, None, None
-        check._add_conntrack_stats_metrics(None, ['foo:bar'])
+        check._add_conntrack_stats_metrics(None, None, ['foo:bar'])
 
         for metric, value in iteritems(CONNTRACK_STATS):
             aggregator.assert_metric(metric, value=value[0], tags=['foo:bar', 'cpu:0'])
@@ -256,7 +255,6 @@ def test_cx_state_psutil(aggregator, check):
 
     with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
         mock_psutil.net_connections.return_value = conn
-        check = Network('network', {}, {})
         check._setup_metrics({})
         check._cx_state_psutil()
         for _, m in iteritems(aggregator._metrics):
