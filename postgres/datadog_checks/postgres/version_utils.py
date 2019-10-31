@@ -33,8 +33,8 @@ def parse_version(raw_version):
         version = [int(part) for part in version]
         while len(version) < 3:
             version.append(0)
-        return semver.parse_version_info('{}.{}.{}'.format(*version))
-    except ValueError as e:
+        return semver.VersionInfo(*version)
+    except ValueError:
         # Postgres might be in development, with format \d+[beta|rc]\d+
         match = re.match(r'(\d+)([a-zA-Z]+)(\d+)', raw_version)
         if match:
