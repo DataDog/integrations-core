@@ -117,7 +117,10 @@ There are a few ways to specify the metrics to collect. See the [sample snmp.d/c
 
 ##### Use your own MIB
 
-To use your own MIB with the Datadog Agent, convert it to the [PySNMP][5] format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][6].
+Since Agent v6.15, MIBs hosted at http://mibs.snmplabs.com/asn1 will be fetched automatically the first
+time the check finds a reference in the configuration.
+
+To use your own MIB with the Datadog Agent, convert it to the [PySNMP][5] format. This can be done using the `mibdump.py` script that ships with PySNMP. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][6].
 
 Since Datadog Agent v5.14, the Agent's PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (refer to the [changelog][7]). This means that the `build-pysnmp-mib` which shipped with the Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
 
@@ -197,7 +200,7 @@ Example using the `CISCO-TCP-MIB.my`:
  Ignored MIBs:
  Failed MIBs:
 
- #ls /opt/datadog-agent/pysnmp/custom_mibpy/
+ # ls /opt/datadog-agent/pysnmp/custom_mibpy/
 CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
 
 ```
@@ -208,7 +211,7 @@ The Agent looks for the converted MIB Python files by specifying the destination
 
 ##### Profiles
 
-To group configuration, the check allows defining profiles to reuse metric definitions on several instances. Profiles define metrics the same way as instances, either inline or in separate files. Each instance can only match a single profile. For example you can define a profile in the `init_config` section:
+To group configurations, the check allows defining profiles to reuse metric definitions on several instances. Profiles define metrics the same way as instances, either inline in the configuration file or in separate files. Each instance can only match a single profile. For example, you can define a profile in the `init_config` section:
 
 ```yaml
 init_config:
@@ -269,7 +272,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][16
 
 
 ### Custom metrics
-The SNMP check can potentially emit [custom metrics][10], which may impact your [billing][11].
+Metrics collected by the SNMP integration are considered [custom metrics][10], which impacts your [bill][11].
 
 ### Validation
 

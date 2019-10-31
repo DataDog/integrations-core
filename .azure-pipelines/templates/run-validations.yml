@@ -9,6 +9,9 @@ steps:
 - script: ddev validate config
   displayName: 'Validate default configuration files'
 
+- script: ddev validate dashboards
+  displayName: 'Validate dashboard definition files'
+
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate dep
     displayName: 'Validate dependencies'

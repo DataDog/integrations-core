@@ -12,7 +12,6 @@ from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_o
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
-from .utils import run_command_with_retry
 
 
 def display_envs(check_envs):
@@ -30,6 +29,7 @@ def display_envs(check_envs):
 @click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
+@click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
 @click.option('--marker', '-m', help='Only run tests matching given marker expression')
 @click.option('--filter', '-k', 'test_filter', help='Only run tests matching given substring expression')
 @click.option('--pdb', 'enter_pdb', is_flag=True, help='Drop to PDB on first failure, then end test session')
@@ -40,7 +40,6 @@ def display_envs(check_envs):
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
-@click.option('--retry', '-r', help='Number of retries for each tox env', type=click.INT)
 @click.pass_context
 def test(
     ctx,
@@ -50,6 +49,7 @@ def test(
     bench,
     e2e,
     coverage,
+    junit,
     cov_missing,
     marker,
     test_filter,
@@ -61,7 +61,6 @@ def test(
     changed,
     cov_keep,
     pytest_args,
-    retry,
 ):
     """Run tests for Agent-based checks.
 
@@ -89,17 +88,6 @@ def test(
     if e2e:
         marker = 'e2e'
 
-    pytest_options = construct_pytest_options(
-        verbose=verbose,
-        color=color,
-        enter_pdb=enter_pdb,
-        debug=debug,
-        bench=bench,
-        coverage=coverage,
-        marker=marker,
-        test_filter=test_filter,
-        pytest_args=pytest_args,
-    )
     coverage_show_missing_lines = str(cov_missing or testing_on_ci)
 
     test_env_vars = {
@@ -113,7 +101,6 @@ def test(
             'DOCKER_* COMPOSE_*'
         ),
         'DDEV_COV_MISSING': coverage_show_missing_lines,
-        'PYTEST_ADDOPTS': pytest_options,
     }
 
     if passenv:
@@ -144,8 +131,24 @@ def test(
         # need a way to tell if anything ran since we don't know anything upfront.
         tests_ran = True
 
+        # Build pytest options
+        pytest_options = construct_pytest_options(
+            check=check,
+            verbose=verbose,
+            color=color,
+            enter_pdb=enter_pdb,
+            debug=debug,
+            bench=bench,
+            coverage=coverage,
+            junit=junit,
+            marker=marker,
+            test_filter=test_filter,
+            pytest_args=pytest_args,
+            e2e=e2e,
+        )
         if coverage:
-            test_env_vars['PYTEST_ADDOPTS'] = pytest_options.format(pytest_coverage_sources(check))
+            pytest_options = pytest_options.format(pytest_coverage_sources(check))
+        test_env_vars['PYTEST_ADDOPTS'] = pytest_options
 
         if verbose:
             echo_info('pytest options: `{}`'.format(test_env_vars['PYTEST_ADDOPTS']))
@@ -166,15 +169,14 @@ def test(
             echo_waiting(wait_text)
             echo_waiting('-' * len(wait_text))
 
-            result = run_command_with_retry(
-                retry=retry,
-                command='tox '
+            result = run_command(
+                'tox '
                 # so users won't get failures for our possibly strict CI requirements
                 '--skip-missing-interpreters '
                 # so coverage tracks the real locations instead of .tox virtual envs
                 '--develop '
                 # comma-separated list of environments
-                '-e {}'.format(','.join(envs)),
+                '-e {}'.format(','.join(envs))
             )
             if result.code:
                 abort('\nFailed!', code=result.code)

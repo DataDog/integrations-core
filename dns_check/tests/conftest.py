@@ -15,4 +15,4 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return DNSCheck('dns_check', {}, {})
+    return DNSCheck('dns_check', {}, [common.INSTANCE_INTEGRATION])

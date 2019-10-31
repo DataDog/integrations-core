@@ -38,6 +38,7 @@ LOGGER = logging.getLogger(__file__)
 DEFAULT_TIMEOUT = 10
 
 STANDARD_FIELDS = {
+    'auth_type': '',
     'connect_timeout': None,
     'extra_headers': None,
     'headers': None,
@@ -170,7 +171,14 @@ class RequestsWrapper(object):
         auth = None
         if config['password']:
             if config['username']:
-                auth = (config['username'], config['password'])
+                auth_type = config.get('auth_type', 'basic').lower()
+                if auth_type == 'digest':
+                    auth = requests.auth.HTTPDigestAuth(config['username'], config['password'])
+                else:
+                    if auth_type != 'basic':
+                        self.logger.debug('auth_type %s is not supported, defaulting to basic', auth_type)
+                    auth = (config['username'], config['password'])
+
             elif config['ntlm_domain']:
                 ensure_ntlm()
 
@@ -295,7 +303,7 @@ class RequestsWrapper(object):
 
     def _request(self, method, url, options):
         if self.log_requests:
-            self.logger.debug(u'Sending {} request to {}'.format(method.upper(), url))
+            self.logger.debug(u'Sending %s request to %s', method.upper(), url)
 
         if self.no_proxy_uris:
             parsed_uri = urlparse(url)
@@ -314,7 +322,7 @@ class RequestsWrapper(object):
                 stack.enter_context(hook())
 
             if persist:
-                return getattr(self.session, method)(url, **options)
+                return getattr(self.session, method)(url, **self.populate_options(options))
             else:
                 return getattr(requests, method)(url, **self.populate_options(options))
 

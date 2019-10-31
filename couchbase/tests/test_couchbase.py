@@ -15,6 +15,41 @@ from datadog_checks.couchbase.couchbase_consts import (
 
 from .common import BUCKET_NAME, CHECK_TAGS, PORT
 
+NODE_STATS = [
+    'cmd_get',
+    'curr_items',
+    'curr_items_tot',
+    'couch_docs_data_size',
+    'couch_docs_actual_disk_size',
+    'couch_spatial_data_size',
+    'couch_spatial_disk_size',
+    'couch_views_data_size',
+    'couch_views_actual_disk_size',
+    'ep_bg_fetched',
+    'get_hits',
+    'mem_used',
+    'ops',
+    'vb_active_num_non_resident',
+    'vb_replica_curr_items',
+]
+
+TOTAL_STATS = [
+    'hdd.free',
+    'hdd.used',
+    'hdd.total',
+    'hdd.quota_total',
+    'hdd.used_by_data',
+    'ram.used',
+    'ram.total',
+    'ram.quota_total',
+    'ram.quota_total_per_node',
+    'ram.quota_used_per_node',
+    'ram.quota_used',
+    'ram.used_by_data',
+]
+
+BUCKET_TAGS = CHECK_TAGS + ['bucket:{}'.format(BUCKET_NAME)]
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
@@ -45,7 +80,36 @@ def test_metrics(aggregator, instance, couchbase_container_ip):
     """
     couchbase = Couchbase('couchbase', {}, instances=[instance])
     couchbase.check(instance)
-    assert_basic_couchbase_metrics(aggregator, couchbase_container_ip)
+
+    # Assert each type of metric (buckets, nodes, totals) except query
+    _assert_bucket_metrics(aggregator, BUCKET_TAGS + ['device:{}'.format(BUCKET_NAME)])
+
+    # Assert 'couchbase.by_node.' metrics
+    node_tags = CHECK_TAGS + [
+        'node:{}:{}'.format(couchbase_container_ip, PORT),
+        'device:{}:{}'.format(couchbase_container_ip, PORT),
+    ]
+    _assert_stats(aggregator, node_tags)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.e2e
+def test_e2e(dd_agent_check, instance, couchbase_container_ip):
+    """
+    Test couchbase metrics not including 'couchbase.query.'
+    """
+    aggregator = dd_agent_check(instance)
+
+    # Assert each type of metric (buckets, nodes, totals) except query
+    _assert_bucket_metrics(aggregator, BUCKET_TAGS, device=BUCKET_NAME)
+
+    # Assert 'couchbase.by_node.' metrics
+    node_tags = CHECK_TAGS + ['node:{}:{}'.format(couchbase_container_ip, PORT)]
+    device = '{}:{}'.format(couchbase_container_ip, PORT)
+    _assert_stats(aggregator, node_tags, device=device)
+
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.integration
@@ -61,52 +125,24 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
 
 
-def assert_basic_couchbase_metrics(aggregator, couchbase_container_ip):
-    """
-    Assert each type of metric (buckets, nodes, totals) except query
-    """
+def _assert_bucket_metrics(aggregator, tags, device=None):
     # Assert 'couchbase.by_bucket.' metrics
     #  Because some metrics are deprecated, we can just see if we get an arbitrary number
     #  of bucket metrics. If there are more than that number, we assume that we're getting
     #  all the bucket metrics we should be getting
-    tags = CHECK_TAGS + ['device:{}'.format(BUCKET_NAME), 'bucket:{}'.format(BUCKET_NAME)]
     bucket_metric_count = 0
     for bucket_metric in aggregator.metric_names:
         if bucket_metric.find('couchbase.by_bucket.') == 0:
-            aggregator.assert_metric(bucket_metric, tags=tags, count=1)
+            aggregator.assert_metric(bucket_metric, tags=tags, count=1, device=device)
             bucket_metric_count += 1
 
     assert bucket_metric_count > 10
 
-    # Assert 'couchbase.by_node.' metrics
-    tags = CHECK_TAGS + [
-        'device:{}:{}'.format(couchbase_container_ip, PORT),
-        'node:{}:{}'.format(couchbase_container_ip, PORT),
-    ]
 
-    NODE_STATS = [
-        'curr_items',
-        'curr_items_tot',
-        'couch_docs_data_size',
-        'couch_docs_actual_disk_size',
-        'couch_views_data_size',
-        'couch_views_actual_disk_size',
-        'vb_replica_curr_items',
-    ]
+def _assert_stats(aggregator, node_tags, device=None):
     for mname in NODE_STATS:
-        aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=tags, count=1)
+        aggregator.assert_metric('couchbase.by_node.{}'.format(mname), tags=node_tags, count=1, device=device)
 
     # Assert 'couchbase.' metrics
-    TOTAL_STATS = [
-        'hdd.free',
-        'hdd.used',
-        'hdd.total',
-        'hdd.quota_total',
-        'hdd.used_by_data',
-        'ram.used',
-        'ram.total',
-        'ram.quota_total',
-        'ram.used_by_data',
-    ]
     for mname in TOTAL_STATS:
         aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)

@@ -1,5 +1,9 @@
 # CHANGELOG - cacti
 
+## 1.5.0 / 2019-10-11
+
+* [Added] Allow custom port for mysql access. See [#4654](https://github.com/DataDog/integrations-core/pull/4654).
+
 ## 1.4.0 / 2019-03-29
 
 * [Added] Adhere to code style. See [#3325](https://github.com/DataDog/integrations-core/pull/3325).

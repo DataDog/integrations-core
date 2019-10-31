@@ -58,7 +58,7 @@ def test_service_check(aggregator, instance):
 @legacy
 def test_bad_config(aggregator):
     bad_url = '{}/test'.format(URL)
-    instance = {'url': bad_url}
+    instance = {'url': bad_url, 'use_preview': False}
     check = Etcd(CHECK_NAME, {}, [instance])
 
     with pytest.raises(Exception):
@@ -69,9 +69,9 @@ def test_bad_config(aggregator):
 
 
 @legacy
-def test_metrics(instance, aggregator):
-    check = Etcd(CHECK_NAME, {}, [instance])
-    check.check(instance)
+def test_legacy_metrics(legacy_instance, aggregator):
+    check = Etcd(CHECK_NAME, {}, [legacy_instance])
+    check.check(legacy_instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
 
@@ -83,9 +83,9 @@ def test_metrics(instance, aggregator):
 
 
 @legacy
-def test_service_checks(instance, aggregator):
-    check = Etcd(CHECK_NAME, {}, [instance])
-    check.check(instance)
+def test_legacy_service_checks(legacy_instance, aggregator):
+    check = Etcd(CHECK_NAME, {}, [legacy_instance])
+    check.check(legacy_instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
 
@@ -113,7 +113,7 @@ def test_followers(aggregator):
     response = requests.get('{}/v2/stats/leader'.format(url))
     followers = list(response.json().get('followers', {}).keys())
 
-    instance = {'url': url}
+    instance = {'url': url, 'use_preview': False}
     check = Etcd(CHECK_NAME, {}, [instance])
     check.check(instance)
 
@@ -143,14 +143,14 @@ def test_followers(aggregator):
         ("legacy ssl config unset", {}, {'verify': False}),
     ],
 )
-def test_config_legacy(instance, test_case, extra_config, expected_http_kwargs):
-    instance.update(extra_config)
-    check = Etcd(CHECK_NAME, {}, [instance])
+def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_kwargs):
+    legacy_instance.update(extra_config)
+    check = Etcd(CHECK_NAME, {}, [legacy_instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
 
-        check.check(instance)
+        check.check(legacy_instance)
 
         http_kwargs = dict(
             auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
@@ -170,7 +170,7 @@ def test_config_legacy(instance, test_case, extra_config, expected_http_kwargs):
         ("timeout", {'prometheus_timeout': 100}, {'timeout': (100.0, 100.0)}),
     ],
 )
-def test_config_preview(instance, test_case, extra_config, expected_http_kwargs):
+def test_config(instance, test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [instance])
 

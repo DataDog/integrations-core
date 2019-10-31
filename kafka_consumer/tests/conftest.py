@@ -9,7 +9,7 @@ from kafka import KafkaConsumer
 
 from datadog_checks.dev import WaitFor, docker_run
 
-from .common import HERE, HOST_IP, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, ZK_CONNECT_STR
+from .common import E2E_METADATA, HERE, HOST_IP, KAFKA_CONNECT_STR, PARTITIONS, TOPICS, ZK_CONNECT_STR
 from .runners import KConsumer, Producer, ZKConsumer
 
 
@@ -48,7 +48,7 @@ def dd_environment(e2e_instance):
             'KAFKA_HOST': HOST_IP
         },
     ):
-        yield e2e_instance
+        yield e2e_instance, E2E_METADATA
 
 
 @pytest.fixture(scope='session')

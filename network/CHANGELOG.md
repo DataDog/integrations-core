@@ -1,5 +1,14 @@
 # CHANGELOG - network
 
+## 1.12.0 / 2019-10-30
+
+* [Added] Add use_sudo option for collecting conntrack metrics with containers. See [#4920](https://github.com/DataDog/integrations-core/pull/4920).
+* [Fixed] Fix examples in conf.yaml.default. See [#4887](https://github.com/DataDog/integrations-core/pull/4887). Thanks [q42jaap](https://github.com/q42jaap).
+
+## 1.11.5 / 2019-10-11
+
+* [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
+
 ## 1.11.4 / 2019-08-30
 
 * [Fixed] Fix metric submission for combined connection state. See [#4473](https://github.com/DataDog/integrations-core/pull/4473).

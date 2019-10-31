@@ -36,7 +36,15 @@ class System:
     """
 
     name = 'system'
-    fields = ('current_fault_tolerance', 'designed_fault_tolerance', 'node_count', 'node_down_count')
+    fields = (
+        'ahm_epoch',
+        'current_epoch',
+        'current_fault_tolerance',
+        'designed_fault_tolerance',
+        'last_good_epoch',
+        'node_count',
+        'node_down_count',
+    )
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 
@@ -66,7 +74,26 @@ class ProjectionStorage:
     """
 
     name = 'projection_storage'
-    fields = ('anchor_table_name', 'node_name', 'projection_name', 'ros_row_count', 'used_bytes', 'wos_row_count')
+    fields = (
+        'anchor_table_name',
+        'node_name',
+        'projection_name',
+        'ros_count',
+        'ros_row_count',
+        'ros_used_bytes',
+        'wos_row_count',
+        'wos_used_bytes',
+    )
+    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
+
+
+class StorageContainers:
+    """
+    https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/STORAGE_CONTAINERS.htm
+    """
+
+    name = 'storage_containers'
+    fields = ('delete_vector_count', 'node_name', 'projection_name', 'storage_type')
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
 
 
@@ -134,4 +161,21 @@ class ResourceUsage:
 
     name = 'resource_usage'
     fields = ('active_thread_count', 'node_name', 'request_count')
+    query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
+
+
+class ResourcePoolStatus:
+    """
+    https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/SystemTables/MONITOR/RESOURCE_POOL_STATUS.htm
+    """
+
+    name = 'resource_pool_status'
+    fields = (
+        'general_memory_borrowed_kb',
+        'max_memory_size_kb',
+        'memory_inuse_kb',
+        'node_name',
+        'pool_name',
+        'running_query_count',
+    )
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)

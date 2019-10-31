@@ -59,8 +59,10 @@ NOT_TILES = [
 
 # If a file changes in a PR with any of these file extensions,
 # a test will run against the check containing the file
-TESTABLE_FILE_EXTENSIONS = ('.py', '.ini', '.in', '.txt')
+TESTABLE_FILE_EXTENSIONS = ('.py', '.ini', '.in', '.txt', '.yml', '.yaml')
+NON_TESTABLE_FILES = ('auto_conf.yaml', 'metrics.yaml')
 
+REQUIREMENTS_IN = 'requirements.in'
 
 ROOT = ''
 

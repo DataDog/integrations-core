@@ -44,6 +44,7 @@ class AggregatorStub(object):
     )
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
+    IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
 
     def __init__(self):
         self._metrics = defaultdict(list)
@@ -56,8 +57,18 @@ class AggregatorStub(object):
     def is_aggregate(cls, mtype):
         return mtype in cls.AGGREGATE_TYPES
 
+    @classmethod
+    def ignore_metric(cls, name):
+        return name in cls.IGNORED_METRICS
+
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
-        self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
+        if not self.ignore_metric(name):
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
+
+    def submit_metric_e2e(self, check, check_id, mtype, name, value, tags, hostname, device=None):
+        # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
+        if not self.ignore_metric(name):
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
@@ -83,6 +94,7 @@ class AggregatorStub(object):
                 stub.value,
                 normalize_tags(stub.tags),
                 ensure_unicode(stub.hostname),
+                stub.device,
             )
             for stub in self._metrics.get(to_string(name), [])
         ]
@@ -207,20 +219,22 @@ class AggregatorStub(object):
             condition=condition, msg=msg, expected_stub=expected_bucket, submitted_elements=self._histogram_buckets
         )
 
-    def assert_metric(self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None):
+    def assert_metric(
+        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
+    ):
         """
         Assert a metric was processed by this stub
         """
 
         self._asserted.add(name)
-        tags = normalize_tags(tags, sort=True)
+        expected_tags = normalize_tags(tags, sort=True)
 
         candidates = []
         for metric in self.metrics(name):
             if value is not None and not self.is_aggregate(metric.type) and value != metric.value:
                 continue
 
-            if tags and tags != sorted(metric.tags):
+            if expected_tags and expected_tags != sorted(metric.tags):
                 continue
 
             if hostname and hostname != metric.hostname:
@@ -229,9 +243,12 @@ class AggregatorStub(object):
             if metric_type is not None and metric_type != metric.type:
                 continue
 
+            if device is not None and device != metric.device:
+                continue
+
             candidates.append(metric)
 
-        expected_metric = MetricStub(name, metric_type, value, tags, hostname)
+        expected_metric = MetricStub(name, metric_type, value, tags, hostname, device)
 
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
@@ -292,6 +309,70 @@ class AggregatorStub(object):
         if self.metrics_asserted_pct < 100.0:
             missing_metrics = self.not_asserted()
         assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
+
+    def assert_no_duplicate_all(self):
+        """
+        Assert no duplicate metrics and service checks have been submitted.
+        """
+        self.assert_no_duplicate_metrics()
+        self.assert_no_duplicate_service_checks()
+
+    def assert_no_duplicate_metrics(self):
+        """
+        Assert no duplicate metrics have been submitted.
+
+        Metrics are considered duplicate when all following fields match:
+            - metric name
+            - type (gauge, rate, etc)
+            - tags
+            - hostname
+        """
+        # metric types that intended to be called multiple times are ignored
+        ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]
+        metric_stubs = [m for metrics in self._metrics.values() for m in metrics if m.type not in ignored_types]
+
+        def stub_to_key_fn(stub):
+            return stub.name, stub.type, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('metric', metric_stubs, stub_to_key_fn)
+
+    def assert_no_duplicate_service_checks(self):
+        """
+        Assert no duplicate service checks have been submitted.
+
+        Service checks are considered duplicate when all following fields match:
+            - metric name
+            - status
+            - tags
+            - hostname
+        """
+        service_check_stubs = [m for metrics in self._service_checks.values() for m in metrics]
+
+        def stub_to_key_fn(stub):
+            return stub.name, stub.status, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('service_check', service_check_stubs, stub_to_key_fn)
+
+    @staticmethod
+    def _assert_no_duplicate_stub(stub_type, all_metrics, stub_to_key_fn):
+        all_contexts = defaultdict(list)
+        for metric in all_metrics:
+            context = stub_to_key_fn(metric)
+            all_contexts[context].append(metric)
+
+        dup_contexts = defaultdict(list)
+        for context, metrics in iteritems(all_contexts):
+            if len(metrics) > 1:
+                dup_contexts[context] = metrics
+
+        err_msg_lines = ["Duplicate {}s found:".format(stub_type)]
+        for key in sorted(dup_contexts):
+            contexts = dup_contexts[key]
+            err_msg_lines.append('- {}'.format(contexts[0].name))
+            for metric in contexts:
+                err_msg_lines.append('    ' + str(metric))
+
+        assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
 
     def reset(self):
         """

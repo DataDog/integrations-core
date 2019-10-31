@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
+import mock
 import pytest
 import requests
 from six import iteritems
@@ -24,7 +25,6 @@ from .common import CLUSTER_TAG, PASSWORD, URL, USER
 log = logging.getLogger('test_elastic')
 
 
-@pytest.mark.unit
 def test__join_url(elastic_check):
     adm_forwarder_joined_url = elastic_check._join_url(
         "https://localhost:9444/elasticsearch-admin", "/stats", admin_forwarder=True
@@ -35,7 +35,6 @@ def test__join_url(elastic_check):
     assert joined_url == "https://localhost:9444/stats"
 
 
-@pytest.mark.unit
 def test__get_urls(elastic_check):
     health_url, stats_url, pshard_stats_url, pending_tasks_url = elastic_check._get_urls([], True)
     assert health_url == '/_cluster/health'
@@ -74,7 +73,6 @@ def test__get_urls(elastic_check):
     assert pending_tasks_url == '/_cluster/pending_tasks'
 
 
-@pytest.mark.integration
 def test_check(dd_environment, elastic_check, instance, aggregator, cluster_tags, node_tags):
     elastic_check.check(instance)
     _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags)
@@ -111,7 +109,6 @@ def _test_check(elastic_check, instance, aggregator, cluster_tags, node_tags):
         aggregator.assert_service_check('elasticsearch.cluster_health')
 
 
-@pytest.mark.integration
 def test_node_name_as_host(dd_environment, elastic_check, instance_normalize_hostname, aggregator, node_tags):
     elastic_check.check(instance_normalize_hostname)
     node_name = node_tags[-1].split(':')[1]
@@ -120,7 +117,6 @@ def test_node_name_as_host(dd_environment, elastic_check, instance_normalize_hos
         aggregator.assert_metric(m_name, count=1, tags=node_tags, hostname=node_name)
 
 
-@pytest.mark.integration
 def test_pshard_metrics(dd_environment, elastic_check, aggregator):
     instance = {'url': URL, 'pshard_stats': True, 'username': USER, 'password': PASSWORD}
     config = from_instance(instance)
@@ -139,7 +135,6 @@ def test_pshard_metrics(dd_environment, elastic_check, aggregator):
     aggregator.assert_metric('elasticsearch.primaries.docs.count')
 
 
-@pytest.mark.integration
 def test_index_metrics(dd_environment, aggregator, elastic_check, instance, cluster_tags):
     instance['index_stats'] = True
     config = from_instance(instance)
@@ -152,7 +147,6 @@ def test_index_metrics(dd_environment, aggregator, elastic_check, instance, clus
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
 
 
-@pytest.mark.integration
 def test_health_event(dd_environment, aggregator, elastic_check):
     dummy_tags = ['elastique:recherche']
     instance = {'url': URL, 'username': USER, 'password': PASSWORD, 'tags': dummy_tags}
@@ -169,6 +163,16 @@ def test_health_event(dd_environment, aggregator, elastic_check):
         assert sorted(aggregator.events[0]['tags']) == sorted(set(['url:{}'.format(URL)] + dummy_tags + CLUSTER_TAG))
     else:
         aggregator.assert_service_check('elasticsearch.cluster_health')
+
+
+def test_metadata(dd_environment, aggregator, elastic_check, instance, version_metadata):
+    elastic_check.check_id = 'test:123'
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        elastic_check.check(instance)
+        for name, value in version_metadata.items():
+            m.assert_any_call('test:123', name, value)
+
+        assert m.call_count == len(version_metadata)
 
 
 @pytest.mark.e2e

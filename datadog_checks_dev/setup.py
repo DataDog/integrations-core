@@ -69,7 +69,6 @@ setup(
             'atomicwrites',
             'click',
             'colorama',
-            'datadog-a7',
             'docker-compose>=1.23.1,<1.24.0',
             'in-toto==0.3.0',
             'pip-tools',

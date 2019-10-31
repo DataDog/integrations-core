@@ -962,7 +962,7 @@ class MySql(AgentCheck):
             # EG: This could be an Aurora Read Instance
             self.warning(
                 """'SHOW ENGINE INNODB STATUS' returned no data.
-                If you are running an Aurora Read Instace, \
+                If you are running an Aurora Read Instance, \
                 this is expected and you should disable the innodb metrics collection"""
             )
             return {}

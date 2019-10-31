@@ -8,6 +8,16 @@ from .platform import LINUX, MAC, WINDOWS
 DEFAULT_AGENT_VERSION = 6
 DEFAULT_PYTHON_VERSION = 2
 
+# Make checks run at most once every second
+DEFAULT_SAMPLING_COLLECTION_INTERVAL = 1
+
+# Number of seconds to ensure the Agent is running for prior to shutting down
+#
+# We want each run to collect at least 10 samples. The time consuming parts like
+# spinning up Docker environments are done during the setup phase, so the test phase
+# is merely a tox invocation that runs E2E tests via `pytest`.
+DEFAULT_SAMPLING_WAIT_TIME = 15
+
 # Must be a certain length
 FAKE_API_KEY = 'a' * 32
 

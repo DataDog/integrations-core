@@ -1,5 +1,9 @@
 # CHANGELOG - openstack
 
+## 1.8.3 / 2019-10-11
+
+* [Fixed] Fix documented default for `use_agent_proxy`. See [#4517](https://github.com/DataDog/integrations-core/pull/4517).
+
 ## 1.8.2 / 2019-08-24
 
 * [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).

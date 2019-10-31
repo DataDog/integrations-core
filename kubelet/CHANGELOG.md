@@ -1,5 +1,13 @@
 # CHANGELOG - kubelet
 
+## 3.3.4 / 2019-10-30
+
+* [Fixed] Fix container collection for k8s 1.16. See [#4925](https://github.com/DataDog/integrations-core/pull/4925).
+
+## 3.3.3 / 2019-10-11
+
+* [Fixed] Send kubelet metrics with tags only. See [#4659](https://github.com/DataDog/integrations-core/pull/4659).
+
 ## 3.3.2 / 2019-08-14
 
 * [Fixed] Enforce unicode output in requests.iter_lines call. See [#4360](https://github.com/DataDog/integrations-core/pull/4360).

@@ -59,9 +59,7 @@ class Limiter(object):
         if self.count > self.limit:
             if self.warning:
                 self.warning(
-                    "Check {} exceeded limit of {} {}, ignoring next ones".format(
-                        self.check_name, self.limit, self.name
-                    )
+                    "Check %s exceeded limit of %s %s, ignoring next ones", self.check_name, self.limit, self.name
                 )
             self.reached_limit = True
             return True

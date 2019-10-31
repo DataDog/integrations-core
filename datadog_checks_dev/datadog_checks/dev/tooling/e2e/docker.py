@@ -5,8 +5,8 @@ import re
 from contextlib import contextmanager
 
 from ...subprocess import run_command
-from ...utils import path_join
-from ..constants import get_root
+from ...utils import file_exists, path_join
+from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_PYTHON_VERSION,
@@ -35,6 +35,7 @@ class DockerInterface(object):
         agent_build=None,
         api_key=None,
         python_version=DEFAULT_PYTHON_VERSION,
+        default_agent=False,
     ):
         self.check = check
         self.env = env
@@ -52,7 +53,8 @@ class DockerInterface(object):
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
 
-        if self.agent_build and 'py' not in self.agent_build:
+        # If we use a default build, and it's missing the py suffix, adds it
+        if default_agent and self.agent_build and 'py' not in self.agent_build:
             self.agent_build = '{}-py{}'.format(self.agent_build, self.python_version)
 
         if self.agent_build and self.metadata.get('use_jmx', False):
@@ -98,10 +100,10 @@ class DockerInterface(object):
         log_level=None,
         as_json=False,
         break_point=None,
-        jmx_list='matching',
+        jmx_list=None,
     ):
         # JMX check
-        if self.metadata.get('use_jmx', False):
+        if jmx_list:
             command = '{} jmx list {}'.format(self.agent_command, jmx_list)
         # Classic check
         else:
@@ -176,16 +178,19 @@ class DockerInterface(object):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.check_mount_dir))
+        if file_exists(path_join(get_root(), self.check, REQUIREMENTS_IN)):
+            command.extend(('-r', '{}/{}'.format(self.check_mount_dir, REQUIREMENTS_IN)))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.base_mount_dir))
+        command.extend(('-r', '{}/{}'.format(self.base_mount_dir, REQUIREMENTS_IN)))
         run_command(command, capture=True, check=True)
 
     def update_agent(self):
-        if self.agent_build:
+        if self.agent_build and '/' in self.agent_build:
             run_command(['docker', 'pull', self.agent_build], capture=True, check=True)
 
     def start_agent(self):

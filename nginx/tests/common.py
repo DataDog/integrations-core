@@ -13,3 +13,4 @@ PORT = '8080'
 PORT_SSL = '8081'
 TAGS = ['foo', 'bar']
 USING_VTS = os.getenv('NGINX_IMAGE', '').endswith('nginx-vts')
+NGINX_VERSION = os.getenv('NGINX_VERSION', os.environ['NGINX_IMAGE'])

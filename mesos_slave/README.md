@@ -30,7 +30,7 @@ Follow the instructions in our [blog post][102] to install the Datadog Agent on 
 
 #### Marathon
 
-If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You will need to change `<YOUR_DATADOG_API_KEY>` with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub][103]
+If you are not using DC/OS, then use either the Marathon web UI or post to the API URL the following JSON to define the Datadog Agent application. You must change `<YOUR_DATADOG_API_KEY>` with your API Key and the number of instances with the number of slave nodes on your cluster. You may also need to update the docker image used to more recent tag. You can find the latest [on Docker Hub][103]
 
 ```json
 {
@@ -40,46 +40,57 @@ If you are not using DC/OS, then use either the Marathon web UI or post to the A
   "mem": 256,
   "disk": 0,
   "instances": 1,
-  "constraints": [["hostname","UNIQUE"],["hostname","GROUP_BY"]],
-  "acceptedResourceRoles": ["slave_public","*"],
+  "constraints": [["hostname", "UNIQUE"], ["hostname", "GROUP_BY"]],
+  "acceptedResourceRoles": ["slave_public", "*"],
   "container": {
     "type": "DOCKER",
     "volumes": [
-      {"containerPath": "/var/run/docker.sock","hostPath": "/var/run/docker.sock","mode": "RO"},
-      {"containerPath": "/host/proc","hostPath": "/proc","mode": "RO"},
-      {"containerPath": "/host/sys/fs/cgroup","hostPath": "/sys/fs/cgroup","mode": "RO"}
+      {
+        "containerPath": "/var/run/docker.sock",
+        "hostPath": "/var/run/docker.sock",
+        "mode": "RO"
+      },
+      {"containerPath": "/host/proc", "hostPath": "/proc", "mode": "RO"},
+      {
+        "containerPath": "/host/sys/fs/cgroup",
+        "hostPath": "/sys/fs/cgroup",
+        "mode": "RO"
+      }
     ],
     "docker": {
       "image": "datadog/agent:latest",
       "network": "BRIDGE",
       "portMappings": [
-        {"containerPort": 8125,"hostPort": 8125,"servicePort": 10000,"protocol": "udp","labels": {}},
-        {"containerPort": 9001,"hostPort": 9001,"servicePort": 10001,"protocol": "tcp","labels": {}}
+        {
+          "containerPort": 8125,
+          "hostPort": 8125,
+          "servicePort": 10000,
+          "protocol": "udp",
+          "labels": {}
+        }
       ],
       "privileged": false,
       "parameters": [
-        {"key": "name","value": "datadog-agent"},
-        {"key": "env","value": "DD_API_KEY=<YOUR_DATADOG_API_KEY>"},
-        {"key": "env","value": "MESOS_SLAVE=true"}
+        {"key": "name", "value": "datadog-agent"},
+        {"key": "env", "value": "DD_API_KEY=<YOUR_DATADOG_API_KEY>"},
+        {"key": "env", "value": "MESOS_SLAVE=true"}
       ],
       "forcePullImage": false
     }
   },
   "healthChecks": [
     {
+      "protocol": "COMMAND",
+      "command": {"value": "/probe.sh"},
       "gracePeriodSeconds": 300,
       "intervalSeconds": 60,
       "timeoutSeconds": 20,
-      "maxConsecutiveFailures": 3,
-      "portIndex": 1,
-      "path": "/",
-      "protocol": "HTTP",
-      "ignoreHttp1xx": false
+      "maxConsecutiveFailures": 3
     }
   ],
   "portDefinitions": [
-    {"port": 10000,"protocol": "tcp","name": "default","labels": {}},
-    {"port": 10001,"protocol": "tcp","labels": {}}
+    {"port": 10000, "protocol": "tcp", "name": "default", "labels": {}},
+    {"port": 10001, "protocol": "tcp", "labels": {}}
   ]
 }
 ```

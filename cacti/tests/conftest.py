@@ -36,7 +36,11 @@ def setup_db():
 
 def check_data_available():
     conn = pymysql.connect(
-        host=common.HOST, user=common.MYSQL_USERNAME, passwd=common.MYSQL_PASSWORD, db=common.DATABASE
+        host=common.HOST,
+        user=common.MYSQL_USERNAME,
+        passwd=common.MYSQL_PASSWORD,
+        db=common.DATABASE,
+        port=common.MYSQL_PORT,
     )
     c = conn.cursor()
 
@@ -72,7 +76,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return CactiCheck('cacti', {}, {})
+    return CactiCheck('cacti', {}, [{}])
 
 
 @pytest.fixture

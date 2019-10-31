@@ -7,6 +7,7 @@ import time
 from copy import deepcopy
 
 import mock
+import pymysql
 import pytest
 
 from datadog_checks.cacti import CactiCheck
@@ -108,7 +109,7 @@ CACTI_CONFIG = {'mysql_host': 'nohost', 'mysql_user': 'mocked', 'rrd_path': '/rr
 
 @pytest.fixture
 def check():
-    return CactiCheck(CHECK_NAME, {}, {})
+    return CactiCheck(CHECK_NAME, {}, [CACTI_CONFIG])
 
 
 pytestmark = pytest.mark.unit
@@ -134,9 +135,10 @@ def test_check(aggregator, check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_whitelist(aggregator, check):
+def test_whitelist(aggregator):
     config = deepcopy(CACTI_CONFIG)
     config['rrd_whitelist'] = os.path.join(HERE, 'whitelist.txt')
+    check = CactiCheck('cacti', {}, [config])
 
     mocks = _setup_mocks()
 
@@ -155,6 +157,27 @@ def test_whitelist(aggregator, check):
     aggregator.assert_metric('cacti.rrd.count', value=1, tags=CUSTOM_TAGS)
     aggregator.assert_metric('cacti.hosts.count', value=1, tags=CUSTOM_TAGS)
     aggregator.assert_all_metrics_covered()
+
+
+@mock.patch.object(pymysql.connections.Connection, 'connect')
+def test_default_port_config(mock_connect):
+    config = deepcopy(CACTI_CONFIG)
+
+    cacti = CactiCheck('cacti', {}, [config])
+    connection = cacti._get_connection()
+
+    assert connection.port == 3306
+
+
+@mock.patch.object(pymysql.connections.Connection, 'connect')
+def test_port_config_custom(mock_connect):
+    config = deepcopy(CACTI_CONFIG)
+    config['mysql_port'] = 3308
+
+    cacti = CactiCheck('cacti', {}, [config])
+    connection = cacti._get_connection()
+
+    assert connection.port == 3308
 
 
 def _setup_mocks():

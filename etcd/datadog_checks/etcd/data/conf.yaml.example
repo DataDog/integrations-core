@@ -22,10 +22,11 @@ init_config:
 
 instances:
 
-    ## @param use_preview - boolean - required - default: false
+  -  
+    ## @param use_preview - boolean - optional - default: true
     ## Whether or not to preview the new version of the check supporting only ETCD 3+
     #
-  - use_preview: false
+    # use_preview: true
 
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
@@ -57,6 +58,12 @@ instances:
     ## API endpoint of your etcd instance.
     #
     # url: "https://server:port"
+
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
 
     ## @param username - string - optional
     ## The username to use if services are behind basic auth.

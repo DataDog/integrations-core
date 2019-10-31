@@ -1,5 +1,18 @@
 # CHANGELOG - Vault
 
+## 1.7.1 / 2019-10-21
+
+* [Fixed] Fix is_leader when vault sealed. See [#4838](https://github.com/DataDog/integrations-core/pull/4838).
+
+## 1.7.0 / 2019-10-18
+
+* [Added] Allows certain expected HTTP error status_codes for the `/sys/health` endpoint. See [#4745](https://github.com/DataDog/integrations-core/pull/4745).
+
+## 1.6.0 / 2019-10-07
+
+* [Fixed] Fix crash in HA mode. See [#4698](https://github.com/DataDog/integrations-core/pull/4698).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.5.0 / 2019-08-24
 
 * [Added] Add requests wrapper to vault. See [#4259](https://github.com/DataDog/integrations-core/pull/4259).

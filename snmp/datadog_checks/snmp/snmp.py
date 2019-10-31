@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import ipaddress
+import json
+import os
 import threading
 import time
 from collections import defaultdict
@@ -18,6 +21,20 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
 from .config import InstanceConfig
+
+try:
+    from datadog_agent import get_config, read_persistent_cache, write_persistent_cache
+except ImportError:
+
+    def get_config(value):
+        return ''
+
+    def write_persistent_cache(value, key):
+        pass
+
+    def read_persistent_cache(value):
+        return ''
+
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -48,6 +65,7 @@ class SnmpCheck(AgentCheck):
 
     SC_STATUS = 'snmp.can_check'
     _running = True
+    _thread = None
     _NON_REPEATERS = 0
     _MAX_REPETITIONS = 25
 
@@ -62,9 +80,12 @@ class SnmpCheck(AgentCheck):
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
         self.profiles = init_config.get('profiles', {})
         self.profiles_by_oid = {}
+        confd = get_config('confd_path')
         for profile, profile_data in self.profiles.items():
             filename = profile_data.get('definition_file')
             if filename:
+                if not os.path.isabs(filename):
+                    filename = os.path.join(confd, 'snmp.d', 'profiles', filename)
                 try:
                     with open(filename) as f:
                         data = yaml.safe_load(f)
@@ -78,18 +99,18 @@ class SnmpCheck(AgentCheck):
                 self.profiles_by_oid[sys_object_oid] = profile
 
         self.instance['name'] = self._get_instance_key(self.instance)
-        self._config = InstanceConfig(
-            self.instance,
+        self._config = self._build_config(self.instance)
+
+    def _build_config(self, instance):
+        return InstanceConfig(
+            instance,
             self.warning,
+            self.log,
             self.init_config.get('global_metrics', []),
             self.mibs_path,
             self.profiles,
             self.profiles_by_oid,
         )
-        if self._config.ip_network:
-            self._thread = threading.Thread(target=self.discover_instances, name=self.name)
-            self._thread.daemon = True
-            self._thread.start()
 
     def _get_instance_key(self, instance):
         key = instance.get('name')
@@ -118,14 +139,7 @@ class SnmpCheck(AgentCheck):
                 instance.pop('network_address')
                 instance['ip_address'] = host
 
-                host_config = InstanceConfig(
-                    instance,
-                    self.warning,
-                    self.init_config.get('global_metrics', []),
-                    self.mibs_path,
-                    self.profiles,
-                    self.profiles_by_oid,
-                )
+                host_config = self._build_config(instance)
                 try:
                     sys_object_oid = self.fetch_sysobject_oid(host_config)
                 except Exception as e:
@@ -137,8 +151,11 @@ class SnmpCheck(AgentCheck):
                         continue
                 else:
                     profile = self.profiles_by_oid[sys_object_oid]
-                    host_config.refresh_with_profile(self.profiles[profile], self.warning)
+                    host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
                 config.discovered_instances[host] = host_config
+
+            write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
+
             time_elapsed = time.time() - start_time
             if discovery_interval - time_elapsed > 0:
                 time.sleep(discovery_interval - time_elapsed)
@@ -176,7 +193,7 @@ class SnmpCheck(AgentCheck):
 
         for oid in bulk_oids:
             try:
-                self.log.debug('Running SNMP command getBulk on OID %s', oid)
+                self.log.debug('Running SNMP command getBulk on OID %r', oid)
                 binds_iterator = config.call_cmd(
                     hlapi.bulkCmd,
                     self._NON_REPEATERS,
@@ -288,7 +305,7 @@ class SnmpCheck(AgentCheck):
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
-        self.log.debug('Running SNMP command on OID %s', oid)
+        self.log.debug('Running SNMP command on OID %r', oid)
         error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
         self.raise_on_error_indication(error_indication, config.ip_address)
         self.log.debug('Returned vars: %s', var_binds)
@@ -315,17 +332,40 @@ class SnmpCheck(AgentCheck):
             all_binds.extend(var_binds_table)
         return all_binds, error
 
+    def _start_discovery(self):
+        cache = read_persistent_cache(self.check_id)
+        if cache:
+            hosts = json.loads(cache)
+            for host in hosts:
+                try:
+                    ipaddress.ip_address(host)
+                except ValueError:
+                    write_persistent_cache(self.check_id, json.dumps([]))
+                    break
+                instance = self.instance.copy()
+                instance.pop('network_address')
+                instance['ip_address'] = host
+
+                host_config = self._build_config(instance)
+                self._config.discovered_instances[host] = host_config
+
+        self._thread = threading.Thread(target=self.discover_instances, name=self.name)
+        self._thread.daemon = True
+        self._thread.start()
+
     def check(self, instance):
         """
         Perform two series of SNMP requests, one for all that have MIB associated
         and should be looked up and one for those specified by oids.
         """
         config = self._config
-        if instance.get('network_address'):
+        if self._config.ip_network:
+            if self._thread is None:
+                self._start_discovery()
             for host, discovered in list(config.discovered_instances.items()):
                 if self._check_with_config(discovered):
                     config.failing_instances[host] += 1
-                    if config.failing_instances[host] > config.allowed_failures:
+                    if config.failing_instances[host] >= config.allowed_failures:
                         # Remove it from discovered instances, we'll re-discover it later if it reappears
                         config.discovered_instances.pop(host)
                         # Reset the failure counter as well
@@ -346,7 +386,7 @@ class SnmpCheck(AgentCheck):
                 if sys_object_oid not in self.profiles_by_oid:
                     raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
                 profile = self.profiles_by_oid[sys_object_oid]
-                config.refresh_with_profile(self.profiles[profile], self.warning)
+                config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
 
             if config.table_oids:
                 self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.table_oids))

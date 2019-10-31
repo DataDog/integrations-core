@@ -238,6 +238,10 @@ class Redis(AgentCheck):
         Compute the length of the configured keys across all the databases
         """
         key_list = instance.get('keys')
+
+        if key_list is None:
+            return
+
         instance_db = instance.get('db')
 
         if not isinstance(key_list, list) or not key_list:
@@ -466,4 +470,4 @@ class Redis(AgentCheck):
 
     def _collect_metadata(self, info):
         if info and 'redis_version' in info:
-            self.service_metadata('version', info['redis_version'])
+            self.set_metadata('version', info['redis_version'])

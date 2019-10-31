@@ -23,6 +23,7 @@
   "integration_id": "{check_name_kebab}",
   "assets": {{
     "dashboards": {{}},
+    "saved_views": {{}},
     "monitors": {{}},
     "service_checks": "assets/service_checks.json"
   }}

@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 2.1.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+
 ## 2.0.1 / 2019-08-24
 
 * [Fixed] Remove check for user filter. See [#4342](https://github.com/DataDog/integrations-core/pull/4342).

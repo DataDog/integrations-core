@@ -1,39 +1,19 @@
-schedules:
-- cron: "0 5 * * *"
-  displayName: Nightly (EDT/EST)
-  always: true
-  branches:
-    include:
-    - master
-
-trigger: none
-# Re-enable when we have enough runners
-# trigger:
-#   branches:
-#     include:
-#     - master
-
-pr:
-  branches:
-    include:
-    - master
-  paths:
-    include:
-    - datadog_checks_base/datadog_checks/*
-
-variables:
-  DDEV_COLOR: 1
-
 jobs:
-- template: './templates/test-all.yml'
+- template: './test-all.yml'
   parameters:
     checks:
     - checkName: datadog_checks_base
-      displayName: Datadog Checks Base
+      displayName: Datadog Checks Base (Linux)
+      os: linux
+    - checkName: datadog_checks_base
+      displayName: Datadog Checks Base (Windows)
+      os: windows
+    - checkName: datadog_checks_dev
+      displayName: Datadog Checks Dev (Linux)
       os: linux
     - checkName: datadog_checks_dev
-      displayName: Datadog Checks Dev
-      os: linux
+      displayName: Datadog Checks Dev (Windows)
+      os: windows
     - checkName: datadog_checks_downloader
       displayName: Datadog Checks Downloader
       os: linux
@@ -103,6 +83,9 @@ jobs:
     - checkName: dotnetclr
       displayName: .NET CLR
       os: windows
+    - checkName: druid
+      displayName: Druid
+      os: linux
     - checkName: ecs_fargate
       displayName: Amazon ECS Fargate
       os: linux
@@ -148,6 +131,9 @@ jobs:
     - checkName: hdfs_namenode
       displayName: HDFS Namenode
       os: linux
+    - checkName: hive
+      displayName: Hive
+      os: linux
     - checkName: http_check
       displayName: HTTP
       os: linux
@@ -165,6 +151,9 @@ jobs:
       os: windows
     - checkName: istio
       displayName: Istio
+      os: linux
+    - checkName: jboss_wildfly
+      displayName: JBoss/WildFly
       os: linux
     - checkName: kafka_consumer
       displayName: Kafka Consumer
@@ -207,6 +196,9 @@ jobs:
       os: linux
     - checkName: linux_proc_extras
       displayName: Linux proc extras
+      os: linux
+    - checkName: mapr
+      displayName: MapR
       os: linux
     - checkName: mapreduce
       displayName: MapReduce
@@ -276,6 +268,9 @@ jobs:
       os: linux
     - checkName: powerdns_recursor
       displayName: PowerDNS Recursor
+      os: linux
+    - checkName: presto
+      displayName: Presto
       os: linux
     - checkName: process
       displayName: Process
@@ -370,4 +365,3 @@ jobs:
     - checkName: zk
       displayName: ZooKeeper
       os: linux
-

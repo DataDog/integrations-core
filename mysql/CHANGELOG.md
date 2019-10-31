@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 1.9.1 / 2019-10-11
+
+* [Fixed] Fix typo in logs (Instace -> Instance). See [#4715](https://github.com/DataDog/integrations-core/pull/4715). Thanks [ajacoutot](https://github.com/ajacoutot).
+
 ## 1.9.0 / 2019-07-04
 
 * [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).

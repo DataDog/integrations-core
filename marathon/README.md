@@ -13,10 +13,10 @@ The Agent's Marathon check lets you:
 The Marathon check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Marathon master.
 
 ### Configuration
-#### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
+#### Host
 ##### Metrics collection
 
 1. Edit the `marathon.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2].
@@ -26,13 +26,13 @@ Follow the instructions below to configure this check for an Agent running on a 
         init_config:
 
         instances:
-          ## @param url - string - required
-          ## The API endpoint of your Marathon master.
-          #
-          - url: "https://<SERVER>:<PORT>"
+          - url: https://<server>:<port> # the API endpoint of your Marathon master; required
+        #   acs_url: https://<server>:<port> # if your Marathon master requires ACS auth
+            username: <username> # the username for Marathon API or ACS token authentication
+            password: <password> # the password for Marathon API or ACS token authentication
     ```
 
-    Replace `<SERVER>` and `<PORT>` with the parameters of the Marathon instance your want to monitor.
+    The function of `username` and `password` depends on whether or not you configure `acs_url`; If you do, the Agent uses them to request an authentication token from ACS, which it then uses to authenticate to the Marathon API. Otherwise, the Agent uses `username` and `password` to directly authenticate to the Marathon API.
 
 2. [Restart the Agent][4].
 
@@ -110,9 +110,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][6].
 
-| Parameter      | Value                                               |
-|----------------|------------------------------------------------------|
-| `<LOG_CONFIG>` | `{"source": "marathon", "service": "<SERVICE_NAME>"}`|
+| Parameter      | Value                                                 |
+|----------------|-------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "marathon", "service": "<SERVICE_NAME>"}` |
 
 
 ### Validation

@@ -1,5 +1,49 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 0.39.0 / 2019-10-25
+
+* [Added] Add junit option to `ddev env e2e` command. See [#4879](https://github.com/DataDog/integrations-core/pull/4879).
+* [Fixed] Change the team label map for Trello card creation. See [#4852](https://github.com/DataDog/integrations-core/pull/4852).
+* [Fixed] Update metadata link in template. See [#4869](https://github.com/DataDog/integrations-core/pull/4869).
+
+## 0.38.3 / 2019-10-17
+
+* [Fixed] Fix CHANGELOG.md template to make it work with `ddev release changelog`. See [#4808](https://github.com/DataDog/integrations-core/pull/4808).
+
+## 0.38.2 / 2019-10-17
+
+* [Fixed] Handle the case of pylint returning empty output. See [#4801](https://github.com/DataDog/integrations-core/pull/4801).
+
+## 0.38.1 / 2019-10-15
+
+* [Fixed] Fix ddev testable command to properly use the tag, fallback on the branch if absent. See [#4775](https://github.com/DataDog/integrations-core/pull/4775).
+
+## 0.38.0 / 2019-10-11
+
+* [Added] Add option for device testing in e2e. See [#4693](https://github.com/DataDog/integrations-core/pull/4693).
+* [Fixed] Fix lint flake8-logging-format command. See [#4728](https://github.com/DataDog/integrations-core/pull/4728).
+* [Added] Add flake8-logging-format. See [#4711](https://github.com/DataDog/integrations-core/pull/4711).
+
+## 0.37.0 / 2019-10-09
+
+* [Added] Increase default Agent flush timeout. See [#4714](https://github.com/DataDog/integrations-core/pull/4714).
+* [Fixed] Remove default version from env test. See [#4718](https://github.com/DataDog/integrations-core/pull/4718).
+* [Fixed] Handle other Agent images in E2E. See [#4710](https://github.com/DataDog/integrations-core/pull/4710).
+
+## 0.36.0 / 2019-10-07
+
+* [Added] Update teams in ddev trello tool. See [#4702](https://github.com/DataDog/integrations-core/pull/4702).
+* [Added] Add dashboard validation. See [#4694](https://github.com/DataDog/integrations-core/pull/4694).
+* [Fixed] Don't use a7. See [#4680](https://github.com/DataDog/integrations-core/pull/4680).
+
+## 0.35.1 / 2019-09-30
+
+* [Fixed] Auto detect changes and run tests when yaml files change. See [#4657](https://github.com/DataDog/integrations-core/pull/4657).
+
+## 0.35.0 / 2019-09-30
+
+* [Added] Support submitting memory profiling metrics during E2E. See [#4635](https://github.com/DataDog/integrations-core/pull/4635).
+
 ## 0.34.0 / 2019-09-24
 
 * [Added] Improve RetryError message. See [#4619](https://github.com/DataDog/integrations-core/pull/4619).

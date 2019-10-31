@@ -28,7 +28,7 @@ class CouchDb(AgentCheck):
 
     def get(self, url, service_check_tags, run_check=False):
         """Hit a given URL and return the parsed json"""
-        self.log.debug('Fetching CouchDB stats at url: %s' % url)
+        self.log.debug('Fetching CouchDB stats at url: %s', url)
 
         # Override Accept request header so that failures are not redirected to the Futon web-ui
         request_headers = headers(self.agentConfig)
@@ -158,7 +158,7 @@ class CouchDB1:
 
         max_dbs_per_check = instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
         if len(databases) > max_dbs_per_check:
-            self.agent_check.warning('Too many databases, only the first %s will be checked.' % max_dbs_per_check)
+            self.agent_check.warning('Too many databases, only the first %s will be checked.', max_dbs_per_check)
             databases = list(databases)[:max_dbs_per_check]
 
         for dbName in databases:
@@ -171,7 +171,8 @@ class CouchDB1:
                     self.db_blacklist[server].append(dbName)
                     self.warning(
                         'Database %s is not readable by the configured user. '
-                        'It will be added to the blacklist. Please restart the agent to clear.' % dbName
+                        'It will be added to the blacklist. Please restart the agent to clear.',
+                        dbName,
                     )
                     del couchdb['databases'][dbName]
                     continue

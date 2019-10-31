@@ -57,7 +57,16 @@ PRIMARY_SHARD_METRICS = {
     'elasticsearch.indices.count': ('gauge', 'indices', lambda indices: len(indices)),
 }
 
-PRIMARY_SHARD_METRICS_POST_1_0 = {
+PRIMARY_SHARD_METRICS_POST_7_2_0 = {
+    'elasticsearch.primaries.refresh.external.total': ('gauge', '_all.primaries.refresh.external_total'),
+    'elasticsearch.primaries.refresh.external.total.time': (
+        'gauge',
+        '_all.primaries.refresh.external_total_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
+}
+
+PRIMARY_SHARD_METRICS_POST_1_0_0 = {
     'elasticsearch.primaries.merges.current': ('gauge', '_all.primaries.merges.current'),
     'elasticsearch.primaries.merges.current.docs': ('gauge', '_all.primaries.merges.current_docs'),
     'elasticsearch.primaries.merges.current.size': ('gauge', '_all.primaries.merges.current_size_in_bytes'),
@@ -149,11 +158,6 @@ STATS_METRICS = {
     'elasticsearch.thread_pool.get.queue': ('gauge', 'thread_pool.get.queue'),
     'elasticsearch.thread_pool.get.rejected': ('rate', 'thread_pool.get.rejected'),
     'elasticsearch.thread_pool.get.completed': ('gauge', 'thread_pool.get.completed'),
-    'elasticsearch.thread_pool.index.active': ('gauge', 'thread_pool.index.active'),
-    'elasticsearch.thread_pool.index.threads': ('gauge', 'thread_pool.index.threads'),
-    'elasticsearch.thread_pool.index.queue': ('gauge', 'thread_pool.index.queue'),
-    'elasticsearch.thread_pool.index.rejected': ('rate', 'thread_pool.index.rejected'),
-    'elasticsearch.thread_pool.index.completed': ('gauge', 'thread_pool.index.completed'),
     'elasticsearch.thread_pool.management.active': ('gauge', 'thread_pool.management.active'),
     'elasticsearch.thread_pool.management.threads': ('gauge', 'thread_pool.management.threads'),
     'elasticsearch.thread_pool.management.queue': ('gauge', 'thread_pool.management.queue'),
@@ -198,6 +202,23 @@ STATS_METRICS = {
     'elasticsearch.fs.total.total_in_bytes': ('gauge', 'fs.total.total_in_bytes'),
     'elasticsearch.fs.total.free_in_bytes': ('gauge', 'fs.total.free_in_bytes'),
     'elasticsearch.fs.total.available_in_bytes': ('gauge', 'fs.total.available_in_bytes'),
+}
+
+ADDITIONAL_METRICS_POST_7_2_0 = {
+    'elasticsearch.refresh.external.total': ('gauge', 'indices.refresh.external_total'),
+    'elasticsearch.refresh.external.total.time': (
+        'gauge',
+        'indices.refresh.external_total_time_in_millis',
+        lambda ms: ms_to_second(ms),
+    ),
+}
+
+ADDITIONAL_METRICS_PRE_7_0_0 = {
+    'elasticsearch.thread_pool.index.active': ('gauge', 'thread_pool.index.active'),
+    'elasticsearch.thread_pool.index.queue': ('gauge', 'thread_pool.index.queue'),
+    'elasticsearch.thread_pool.index.threads': ('gauge', 'thread_pool.index.threads'),
+    'elasticsearch.thread_pool.index.rejected': ('rate', 'thread_pool.index.rejected'),
+    'elasticsearch.thread_pool.index.completed': ('gauge', 'thread_pool.index.completed'),
 }
 
 ADDITIONAL_METRICS_PRE_5_0_0 = {
@@ -506,6 +527,12 @@ def stats_for_version(version):
     else:
         metrics.update(ADDITIONAL_METRICS_PRE_6_3)
 
+    if version < [7, 0, 0]:
+        metrics.update(ADDITIONAL_METRICS_PRE_7_0_0)
+
+    if version >= [7, 2, 0]:
+        metrics.update(ADDITIONAL_METRICS_POST_7_2_0)
+
     return metrics
 
 
@@ -515,7 +542,10 @@ def pshard_stats_for_version(version):
     """
     pshard_stats_metrics = dict(PRIMARY_SHARD_METRICS)
     if version >= [1, 0, 0]:
-        pshard_stats_metrics.update(PRIMARY_SHARD_METRICS_POST_1_0)
+        pshard_stats_metrics.update(PRIMARY_SHARD_METRICS_POST_1_0_0)
+
+    if version >= [7, 2, 0]:
+        pshard_stats_metrics.update(PRIMARY_SHARD_METRICS_POST_7_2_0)
 
     return pshard_stats_metrics
 

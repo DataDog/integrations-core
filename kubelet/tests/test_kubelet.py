@@ -20,6 +20,10 @@ pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux
 HERE = os.path.abspath(os.path.dirname(__file__))
 QUANTITIES = {'12k': 12 * 1000, '12M': 12 * (1000 * 1000), '12Ki': 12.0 * 1024, '12K': 12.0, '12test': 12.0}
 
+# Kubernetes versions, used to differentiate cadvisor payloads after the label change
+KUBE_POST_1_16 = '1.16'
+KUBE_PRE_1_16 = '1.14'
+
 NODE_SPEC = {
     u'cloud_provider': u'GCE',
     u'instance_type': u'n1-standard-1',
@@ -118,6 +122,13 @@ COMMON_TAGS = {
     "container_id://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": ['pod_name:pi-kff76'],
     "kubernetes_pod_uid://12ceeaa9-33ca-11e6-ac8f-42010af00003": ['pod_name:dd-agent-ntepl'],
     "container_id://32fc50ecfe24df055f6d56037acb966337eef7282ad5c203a1be58f2dd2fe743": ['pod_name:dd-agent-ntepl'],
+    "container_id://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479": [
+        'kube_container_name:datadog-agent'
+    ],
+    "container_id://326b384481ca95204018e3e837c61e522b64a3b86c3804142a22b2d1db9dbd7b": [
+        'kube_container_name:datadog-agent'
+    ],
+    "container_id://6d8c6a05731b52195998c438fdca271b967b171f6c894f11ba59aa2f4deff10c": ['pod_name:cassandra-0'],
 }
 
 METRICS_WITH_DEVICE_TAG = {
@@ -168,7 +179,7 @@ def tagger():
     return tagger
 
 
-def mock_kubelet_check(monkeypatch, instances):
+def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16):
     """
     Returns a check that uses mocked data for responses from prometheus endpoints, pod list,
     and node spec.
@@ -179,13 +190,13 @@ def mock_kubelet_check(monkeypatch, instances):
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
-    def mocked_poll(*args, **kwargs):
+    def mocked_poll_pre_1_16(*args, **kwargs):
         scraper_config = args[0]
         prometheus_url = scraper_config['prometheus_url']
 
         if prometheus_url.endswith('/metrics/cadvisor'):
             # Mock response for "/metrics/cadvisor"
-            content = mock_from_file('cadvisor_metrics.txt')
+            content = mock_from_file('cadvisor_metrics_pre_1_16.txt')
         elif prometheus_url.endswith('/metrics'):
             # Mock response for "/metrics"
             content = mock_from_file('kubelet_metrics.txt')
@@ -195,7 +206,26 @@ def mock_kubelet_check(monkeypatch, instances):
         attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
         return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
 
-    monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll))
+    def mocked_poll_post_1_16(*args, **kwargs):
+        scraper_config = args[0]
+        prometheus_url = scraper_config['prometheus_url']
+
+        if prometheus_url.endswith('/metrics/cadvisor'):
+            # Mock response for "/metrics/cadvisor"
+            content = mock_from_file('cadvisor_metrics_post_1_16.txt')
+        elif prometheus_url.endswith('/metrics'):
+            # Mock response for "/metrics"
+            content = mock_from_file('kubelet_metrics.txt')
+        else:
+            raise Exception("Must be a valid endpoint")
+
+        attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
+        return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+
+    if kube_version == KUBE_POST_1_16:
+        monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll_post_1_16))
+    else:
+        monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll_pre_1_16))
 
     return check
 
@@ -337,11 +367,25 @@ def test_prometheus_net_summed(monkeypatch, aggregator, tagger):
 
 def test_prometheus_filtering(monkeypatch, aggregator):
     # Let's intercept the container_cpu_usage_seconds_total
-    # metric to make sure no sample with an empty pod_name
-    # goes through input filtering
-    # 12 out of the 45 samples should pass through the filter
+    # metric to make sure no sample with an empty pod (k8s >= 1.16)
+    # or pod_name (k8s < 1.16) label goes through input filtering
+    # 12 out of the 45 samples should pass through the filter for k8s < 1.16
+    # 27 out of 31 for k8s >= 1.16
     method_name = "datadog_checks.kubelet.prometheus.CadvisorPrometheusScraperMixin.container_cpu_usage_seconds_total"
     with mock.patch(method_name) as mock_method:
+        # k8s >= 1.16
+        check = mock_kubelet_check(monkeypatch, [{}], kube_version=KUBE_POST_1_16)
+        check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+        mock_method.assert_called_once()
+        metric = mock_method.call_args[0][0]
+        assert len(metric.samples) == 27
+        for name, labels, _ in metric.samples:
+            assert name == "container_cpu_usage_seconds_total"
+            assert labels["pod"] != ""
+
+    with mock.patch(method_name) as mock_method:
+        # k8s < 1.16
         check = mock_kubelet_check(monkeypatch, [{}])
         check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
@@ -449,24 +493,24 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
         mock.call(
             'kubernetes.cpu.requests',
             0.1,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.memory.requests',
             209715200.0,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.memory.limits',
             314572800.0,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
-        mock.call('kubernetes.memory.requests', 134217728.0, instance_tags),
-        mock.call('kubernetes.cpu.limits', 0.25, instance_tags),
-        mock.call('kubernetes.memory.limits', 536870912.0, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags + ["pod_name:demo-app-success-c485bc67b-klj45"]),
+        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.memory.requests', 134217728.0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.limits', 0.25, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.memory.limits', 536870912.0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
     if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
@@ -492,27 +536,29 @@ def test_report_container_state_metrics(monkeypatch, tagger):
         mock.call(
             'kubernetes.containers.last_state.terminated',
             1,
-            instance_tags
-            + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
+            + instance_tags
             + ['reason:OOMKilled'],
         ),
         mock.call(
             'kubernetes.containers.state.waiting',
             1,
-            instance_tags
-            + ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
+            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
+            + instance_tags
             + ['reason:CrashLoopBackOff'],
         ),
         mock.call(
             'kubernetes.containers.restarts',
             1,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.containers.restarts',
             0,
-            instance_tags + ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
+        mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
@@ -523,6 +569,20 @@ def test_report_container_state_metrics(monkeypatch, tagger):
         raise AssertionError('kubernetes.containers.state.* was submitted with a transient reason')
     if any(map(lambda e: not any(x for x in e if x.startswith('reason:')), container_state_gauges)):
         raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
+
+
+def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
+    # Reset tagger without tags
+    tagger.reset()
+    tagger.set_tags({})
+
+    check = mock_kubelet_check(monkeypatch, [{}])
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+    # Test that we get only the node related metrics (no calls to the tagger for these ones)
+    aggregator.assert_metric('kubernetes.memory.capacity')
+    aggregator.assert_metric('kubernetes.cpu.capacity')
+    aggregator.assert_all_metrics_covered()
 
 
 def test_pod_expiration(monkeypatch, aggregator, tagger):
@@ -660,3 +720,28 @@ def test_add_labels_to_tags(monkeypatch, aggregator):
     for metric in METRICS_WITH_INTERFACE_TAG:
         tag = 'interface:%s' % METRICS_WITH_INTERFACE_TAG[metric]
         aggregator.assert_metric_has_tag(metric, tag)
+
+
+def test_report_container_requests_limits(monkeypatch, tagger):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(
+        check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_requests_limits.json')))
+    )
+    monkeypatch.setattr(check, 'gauge', mock.Mock())
+
+    attrs = {'is_excluded.return_value': False}
+    check.pod_list_utils = mock.Mock(**attrs)
+
+    pod_list = check.retrieve_pod_list()
+    tags = ['kube_container_name:cassandra']
+    check._report_container_spec_metrics(pod_list, tags)
+
+    calls = [
+        mock.call('kubernetes.cpu.requests', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.memory.requests', 1073741824.0, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.ephemeral-storage.requests', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.cpu.limits', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.memory.limits', 1073741824.0, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.ephemeral-storage.limits', 2147483648.0, ['pod_name:cassandra-0'] + tags),
+    ]
+    check.gauge.assert_has_calls(calls, any_order=True)

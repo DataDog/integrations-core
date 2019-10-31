@@ -9,7 +9,7 @@ from shutil import copyfile, move
 from ...structures import EnvVars
 from ...subprocess import run_command
 from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS, file_exists, path_join
-from ..constants import get_root
+from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_PYTHON_VERSION,
@@ -40,6 +40,7 @@ class LocalAgentInterface(object):
         agent_build=None,
         api_key=None,
         python_version=DEFAULT_PYTHON_VERSION,
+        default_agent=False,
     ):
         self.check = check
         self.env = env
@@ -134,10 +135,10 @@ class LocalAgentInterface(object):
         log_level=None,
         as_json=False,
         break_point=None,
-        jmx_list='matching',
+        jmx_list=None,
     ):
         # JMX check
-        if self.metadata.get('use_jmx', False):
+        if jmx_list:
             command = '{} jmx list {}'.format(self.agent_command, jmx_list)
         # Classic check
         else:
@@ -169,12 +170,16 @@ class LocalAgentInterface(object):
 
     def update_check(self):
         command = get_pip_exe(self.python_version, self.platform)
-        command.extend(('install', '-e', path_join(get_root(), self.check)))
+        path = path_join(get_root(), self.check)
+        command.extend(('install', '-e', path))
+        if file_exists(path_join(path, REQUIREMENTS_IN)):
+            command.extend(('-r', path_join(path, REQUIREMENTS_IN)))
         return run_command(command, capture=True, check=True)
 
     def update_base_package(self):
         command = get_pip_exe(self.python_version, self.platform)
         command.extend(('install', '-e', self.base_package))
+        command.extend(('-r', path_join(self.base_package, REQUIREMENTS_IN)))
         return run_command(command, capture=True, check=True)
 
     def update_agent(self):

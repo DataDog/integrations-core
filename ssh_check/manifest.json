@@ -3,7 +3,8 @@
     "/integrations/ssh"
   ],
   "categories": [
-    "network"
+    "network",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "SSH",
