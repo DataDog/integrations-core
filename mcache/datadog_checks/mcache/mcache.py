@@ -108,8 +108,7 @@ class Memcache(AgentCheck):
     def get_library_versions(cls):
         return {"memcache": pkg_resources.get_distribution("python-binary-memcached").version}
 
-    @classmethod
-    def _process_response(cls, response):
+    def _process_response(self, response):
         """
         Examine the response and raise an error is something is off
         """
@@ -120,6 +119,10 @@ class Memcache(AgentCheck):
         if not len(stats):
             raise BadResponseError("Malformed response for host: {}".format(stats))
 
+        if 'version' in stats:
+            self.set_metadata('version', self.normalize(stats['version']))
+        else:
+            self.log.debug('Cannot determine Memcached version')
         return stats
 
     def _get_metrics(self, client, tags, service_check_tags=None):
