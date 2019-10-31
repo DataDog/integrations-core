@@ -22,6 +22,7 @@ from .common import (
     CONFIG_TCPSOCKET,
     CONFIG_UNIXSOCKET,
     FRONTEND_CHECK,
+    HAPROXY_VERSION,
     SERVICE_CHECK_NAME,
     STATS_SOCKET,
     STATS_URL,
@@ -206,35 +207,41 @@ def test_unixsocket_config(aggregator, check, dd_environment):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_version_metadata_http(check, version_metadata):
+def test_version_metadata_http(check, datadog_agent, version_metadata):
     config = copy.deepcopy(CHECK_CONFIG_OPEN)
     check = check(config)
     check.check_id = 'test:123'
+    check.check(config)
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        check.check(config)
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
-        # some version contains release information which is not in the test env var
-        assert m.call_count == len(version_metadata) or m.call_count == len(version_metadata) + 1
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    # some version contains release information which is not in the test env var
+    metadata_count = (
+        len(version_metadata) + 1
+        if ('test:123', 'version.release') in datadog_agent._metadata
+        else len(version_metadata)
+    )
+    datadog_agent.assert_metadata_count(metadata_count)
 
 
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_version_metadata_unix_socket(check, version_metadata, dd_environment):
+def test_version_metadata_unix_socket(check, version_metadata, dd_environment, datadog_agent):
     config = copy.deepcopy(CONFIG_UNIXSOCKET)
     unixsocket_url = dd_environment["unixsocket_url"]
     config['url'] = unixsocket_url
     check = check(config)
     check.check_id = 'test:123'
+    check.check(config)
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        check.check(config)
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
-        # some version contains release information which is not in the test env var
-        assert m.call_count == len(version_metadata) or m.call_count == len(version_metadata) + 1
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    # some version contains release information which is not in the test env var
+    metadata_count = (
+        len(version_metadata) + 1
+        if ('test:123', 'version.release') in datadog_agent._metadata
+        else len(version_metadata)
+    )
+    datadog_agent.assert_metadata_count(metadata_count)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -243,17 +250,20 @@ def test_version_metadata_unix_socket(check, version_metadata, dd_environment):
     os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'] or not platform_supports_sockets,
     reason='Sockets with operator level are only available with haproxy 1.7',
 )
-def test_version_metadata_tcp_socket(check, version_metadata):
+def test_version_metadata_tcp_socket(check, version_metadata, datadog_agent):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
     check = check(config)
     check.check_id = 'test:123'
+    check.check(config)
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        check.check(config)
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
-        # some version contains release information which is not in the test env var
-        assert m.call_count == len(version_metadata) or m.call_count == len(version_metadata) + 1
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    # some version contains release information which is not in the test env var
+    metadata_count = (
+        len(version_metadata) + 1
+        if ('test:123', 'version.release') in datadog_agent._metadata
+        else len(version_metadata)
+    )
+    datadog_agent.assert_metadata_count(metadata_count)
 
 
 @pytest.mark.e2e
