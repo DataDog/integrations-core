@@ -23,6 +23,7 @@ from .._env import (
 )
 
 __aggregator = None
+__datadog_agent = None
 
 
 @pytest.fixture
@@ -40,6 +41,20 @@ def aggregator():
 
     __aggregator.reset()
     return __aggregator
+
+
+@pytest.fixture
+def datadog_agent():
+    global __datadog_agent
+
+    if __datadog_agent is None:
+        try:
+            from datadog_checks.base.stubs import datadog_agent as __datadog_agent
+        except ImportError:
+            raise ImportError('datadog-checks-base is not installed!')
+
+    __datadog_agent.reset()
+    return __datadog_agent
 
 
 @pytest.fixture(scope='session', autouse=True)
