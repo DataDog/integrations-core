@@ -139,6 +139,25 @@ def test_wrong_version(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_version_metadata(integration_check, pg_instance, datadog_agent):
+    check = integration_check(pg_instance)
+    check.check_id = 'test:123'
+    # Enforce to cache wrong version
+    check.check(pg_instance)
+    version = POSTGRES_VERSION.split('.')
+    while len(version) < 2:
+        version.append('0')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': int(version[0]),
+        'version.minor': int(version[1]),
+    }
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata) + 2)  # for raw and patch
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_state_clears_on_connection_error(integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
