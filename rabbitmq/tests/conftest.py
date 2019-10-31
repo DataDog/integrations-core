@@ -5,6 +5,7 @@
 import os
 import subprocess
 
+import mock
 import pytest
 import requests
 
@@ -163,3 +164,17 @@ def check():
 @pytest.fixture
 def instance():
     return CONFIG
+
+
+@pytest.fixture(scope='session')
+def version_metadata():
+    version = os.environ['RABBITMQ_VERSION']
+    major, minor = version.split('.')
+
+    return {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': mock.ANY,
+    }

@@ -50,6 +50,14 @@ def parse_regex(version, options):
     return exclude_undefined_keys(parts)
 
 
+def parse_raw(version, options):
+    part_map = options.get('part_map')
+    if not part_map:
+        raise ValueError('Version scheme `parts` requires a `part_map` option')
+
+    return exclude_undefined_keys(part_map)
+
+
 def parse_version(version, options):
     scheme = options.get('scheme')
 
@@ -61,4 +69,4 @@ def parse_version(version, options):
     return scheme, SCHEMES[scheme](version, options)
 
 
-SCHEMES = {'semver': parse_semver, 'regex': parse_regex}
+SCHEMES = {'semver': parse_semver, 'regex': parse_regex, 'parts': parse_raw}

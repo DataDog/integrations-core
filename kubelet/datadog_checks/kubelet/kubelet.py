@@ -132,7 +132,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         self.cadvisor_scraper_config = self.get_scraper_config(cadvisor_instance)
         # Filter out system slices (empty pod name) to reduce memory footprint
-        self.cadvisor_scraper_config['_text_filter_blacklist'] = ['pod_name=""']
+        self.cadvisor_scraper_config['_text_filter_blacklist'] = ['pod_name=""', 'pod=""']
 
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 

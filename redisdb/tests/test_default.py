@@ -6,13 +6,12 @@ from __future__ import unicode_literals
 from copy import deepcopy
 from distutils.version import StrictVersion
 
-import mock
 import pytest
 import redis
 
 from datadog_checks.redisdb import Redis
 
-from .common import HOST, PASSWORD, PORT
+from .common import HOST, PASSWORD, PORT, REDIS_VERSION
 from .utils import requires_static_version
 
 # Following metrics are tagged by db
@@ -72,19 +71,19 @@ def test_service_check(aggregator, redis_auth, redis_instance):
 
 @requires_static_version
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata(master_instance, version_metadata):
+def test_metadata(master_instance, datadog_agent):
     redis_check = Redis('redisdb', {}, {})
     redis_check.check_id = 'test:123'
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        redis_check.check(master_instance)
+    redis_check.check(master_instance)
 
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
+    major, minor = REDIS_VERSION.split('.')
+    version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
 
-        # We parse the version set in tox which is X.Y so we don't
-        # know `version.patch`, and therefore also `version.raw`.
-        assert m.call_count == len(version_metadata) + 2
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    # We parse the version set in tox which is X.Y so we don't
+    # know `version.patch`, and therefore also `version.raw`.
+    datadog_agent.assert_metadata_count(len(version_metadata) + 2)
 
 
 @pytest.mark.integration

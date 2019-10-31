@@ -1,0 +1,133 @@
+# Generic profile for routers
+#
+# Youn can define it this way in your SNMP configuration:
+# init_config:
+#   profiles:
+#     router:
+#       definition_file: generic-router.yaml
+# instances:
+#   - ip_address: <IP_ADDRESS>
+#     profile: router
+#
+- MIB: IF-MIB
+  table: ifTable
+  symbols:
+    - ifInErrors
+    - ifInDiscards
+    - ifOutErrors
+    - ifOutDiscards
+  metric_tags:
+    - tag: interface
+      column: ifDescr
+- MIB: IF-MIB
+  table: ifXTable
+  symbols:
+    - ifHCInOctets
+    - ifHCInUcastPkts
+    - ifHCInMulticastPkts
+    - ifHCInBroadcastPkts
+    - ifHCOutOctets
+    - ifHCOutUcastPkts
+    - ifHCOutMulticastPkts
+    - ifHCOutBroadcastPkts
+  metric_tags:
+    - tag: interface
+      column: ifName
+- MIB: IP-MIB
+  table: ipSystemStatsTable
+  symbols:
+    - ipSystemStatsHCInReceives
+    - ipSystemStatsHCInOctets
+    - ipSystemStatsInHdrErrors
+    - ipSystemStatsInNoRoutes
+    - ipSystemStatsInAddrErrors
+    - ipSystemStatsInUnknownProtos
+    - ipSystemStatsInTruncatedPkts
+    - ipSystemStatsHCInForwDatagrams
+    - ipSystemStatsReasmReqds
+    - ipSystemStatsReasmOKs
+    - ipSystemStatsReasmFails
+    - ipSystemStatsInDiscards
+    - ipSystemStatsHCInDelivers
+    - ipSystemStatsHCOutRequests
+    - ipSystemStatsOutNoRoutes
+    - ipSystemStatsHCOutForwDatagrams
+    - ipSystemStatsOutDiscards
+    - ipSystemStatsOutFragReqds
+    - ipSystemStatsOutFragOKs
+    - ipSystemStatsOutFragFails
+    - ipSystemStatsOutFragCreates
+    - ipSystemStatsHCOutTransmits
+    - ipSystemStatsHCOutOctets
+    - ipSystemStatsHCInMcastPkts
+    - ipSystemStatsHCInMcastOctets
+    - ipSystemStatsHCOutMcastPkts
+    - ipSystemStatsHCOutMcastOctets
+    - ipSystemStatsHCInBcastPkts
+    - ipSystemStatsHCOutBcastPkts
+  metric_tags:
+    - tag: ipversion
+      index: 1
+- MIB: IP-MIB
+  table: ipIfStatsTable
+  symbols:
+    - ipIfStatsHCInOctets
+    - ipIfStatsInHdrErrors
+    - ipIfStatsInNoRoutes
+    - ipIfStatsInAddrErrors
+    - ipIfStatsInUnknownProtos
+    - ipIfStatsInTruncatedPkts
+    - ipIfStatsHCInForwDatagrams
+    - ipIfStatsReasmReqds
+    - ipIfStatsReasmOKs
+    - ipIfStatsReasmFails
+    - ipIfStatsInDiscards
+    - ipIfStatsHCInDelivers
+    - ipIfStatsHCOutRequests
+    - ipIfStatsHCOutForwDatagrams
+    - ipIfStatsOutDiscards
+    - ipIfStatsOutFragReqds
+    - ipIfStatsOutFragOKs
+    - ipIfStatsOutFragFails
+    - ipIfStatsOutFragCreates
+    - ipIfStatsHCOutTransmits
+    - ipIfStatsHCOutOctets
+    - ipIfStatsHCInMcastPkts
+    - ipIfStatsHCInMcastOctets
+    - ipIfStatsHCOutMcastPkts
+    - ipIfStatsHCOutMcastOctets
+    - ipIfStatsHCInBcastPkts
+    - ipIfStatsHCOutBcastPkts
+  metric_tags:
+    - tag: ipversion
+      index: 1
+    - tag: interface
+      index: 2
+- MIB: TCP-MIB
+  symbol: tcpActiveOpens
+- MIB: TCP-MIB
+  symbol: tcpPassiveOpens
+- MIB: TCP-MIB
+  symbol: tcpAttemptFails
+- MIB: TCP-MIB
+  symbol: tcpEstabResets
+- MIB: TCP-MIB
+  symbol: tcpCurrEstab
+- MIB: TCP-MIB
+  symbol: tcpHCInSegs
+- MIB: TCP-MIB
+  symbol: tcpHCOutSegs
+- MIB: TCP-MIB
+  symbol: tcpRetransSegs
+- MIB: TCP-MIB
+  symbol: tcpInErrs
+- MIB: TCP-MIB
+  symbol: tcpOutRsts
+- MIB: UDP-MIB
+  symbol: udpHCInDatagrams
+- MIB: UDP-MIB
+  symbol: udpNoPorts
+- MIB: UDP-MIB
+  symbol: udpInErrors
+- MIB: UDP-MIB
+  symbol: udpHCOutDatagrams

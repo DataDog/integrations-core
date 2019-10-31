@@ -17,7 +17,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return Network(common.SERVICE_CHECK_NAME, {}, {})
+    return Network(common.SERVICE_CHECK_NAME, {}, [deepcopy(common.INSTANCE)])
 
 
 @pytest.fixture
