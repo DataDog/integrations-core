@@ -3,9 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-import mock
 import psycopg2
 import pytest
+from semver import VersionInfo
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.postgres import PostgreSql
@@ -31,7 +31,7 @@ def dd_environment(e2e_instance):
 @pytest.fixture
 def check():
     c = PostgreSql('postgres', {}, [{'dbname': 'dbname', 'host': 'localhost', 'port': '5432'}])
-    c._is_9_2_or_above = mock.MagicMock()
+    c._version = VersionInfo(9, 2, 0)
     return c
 
 
@@ -39,7 +39,6 @@ def check():
 def integration_check():
     def _check(instance):
         c = PostgreSql('postgres', {}, [instance])
-        c._is_9_2_or_above = mock.MagicMock()
         return c
 
     return _check
