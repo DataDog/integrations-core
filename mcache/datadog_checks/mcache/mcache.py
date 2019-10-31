@@ -120,7 +120,7 @@ class Memcache(AgentCheck):
             raise BadResponseError("Malformed response for host: {}".format(stats))
 
         if 'version' in stats:
-            self.set_metadata('version', self.normalize(stats['version']))
+            self.set_metadata('version', stats['version'].decode('utf-8'))
         else:
             self.log.debug('Cannot determine Memcached version')
         return stats
