@@ -137,7 +137,7 @@ class ConsulCheck(AgentCheck):
         ).get('Server')
 
         agent_url = "{}:{}".format(agent_addr, agent_port)
-        self.log.debug("Agent url is %s" % agent_url)
+        self.log.debug("Agent url is %s", agent_url)
         return agent_url
 
     def _get_agent_datacenter(self, instance, instance_state):
@@ -150,7 +150,7 @@ class ConsulCheck(AgentCheck):
         try:
             agent_url = self._get_agent_url(instance, instance_state)
             leader = instance_state.last_known_leader or self._get_cluster_leader(instance)
-            self.log.debug("Consul agent lives at %s . Consul Leader lives at %s" % (agent_url, leader))
+            self.log.debug("Consul agent lives at %s . Consul Leader lives at %s", agent_url, leader)
             return agent_url == leader
 
         except Exception:
@@ -196,9 +196,7 @@ class ConsulCheck(AgentCheck):
             if perform_new_leader_checks or (perform_self_leader_check and agent == leader):
                 # We either emit all leadership changes or emit when we become the leader and that just happened
                 self.log.info(
-                    'Leader change from {} to {}. Sending new leader event'.format(
-                        instance_state.last_known_leader, leader
-                    )
+                    'Leader change from %s to %s. Sending new leader event', instance_state.last_known_leader, leader
                 )
 
                 self.event(
@@ -237,7 +235,7 @@ class ConsulCheck(AgentCheck):
 
         if service_whitelist:
             if len(service_whitelist) > max_services:
-                self.warning('More than %d services in whitelist. Service list will be truncated.' % max_services)
+                self.warning('More than %d services in whitelist. Service list will be truncated.', max_services)
 
             whitelisted_services = [s for s in services if s in service_whitelist]
             services = {s: services[s] for s in whitelisted_services[:max_services]}

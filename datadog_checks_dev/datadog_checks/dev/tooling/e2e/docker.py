@@ -5,8 +5,8 @@ import re
 from contextlib import contextmanager
 
 from ...subprocess import run_command
-from ...utils import path_join
-from ..constants import get_root
+from ...utils import file_exists, path_join
+from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
     DEFAULT_PYTHON_VERSION,
@@ -100,10 +100,10 @@ class DockerInterface(object):
         log_level=None,
         as_json=False,
         break_point=None,
-        jmx_list='matching',
+        jmx_list=None,
     ):
         # JMX check
-        if self.metadata.get('use_jmx', False):
+        if jmx_list:
             command = '{} jmx list {}'.format(self.agent_command, jmx_list)
         # Classic check
         else:
@@ -178,12 +178,15 @@ class DockerInterface(object):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.check_mount_dir))
+        if file_exists(path_join(get_root(), self.check, REQUIREMENTS_IN)):
+            command.extend(('-r', '{}/{}'.format(self.check_mount_dir, REQUIREMENTS_IN)))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.base_mount_dir))
+        command.extend(('-r', '{}/{}'.format(self.base_mount_dir, REQUIREMENTS_IN)))
         run_command(command, capture=True, check=True)
 
     def update_agent(self):

@@ -59,9 +59,9 @@ class Couchbase(AgentCheck):
 
         # Get bucket metrics
         for bucket_name, bucket_stats in data['buckets'].items():
-            metric_tags = [] if tags is None else tags[:]
-            metric_tags.append('bucket:{}'.format(bucket_name))
-            metric_tags.append('device:{}'.format(bucket_name))
+            metric_tags = ['bucket:{}'.format(bucket_name), 'device:{}'.format(bucket_name)]
+            if tags:
+                metric_tags.extend(tags)
             for metric_name, val in bucket_stats.items():
                 if val is not None:
                     norm_metric_name = self.camel_case_to_joined_lower(metric_name)
@@ -71,9 +71,9 @@ class Couchbase(AgentCheck):
 
         # Get node metrics
         for node_name, node_stats in data['nodes'].items():
-            metric_tags = [] if tags is None else tags[:]
-            metric_tags.append('node:{}'.format(node_name))
-            metric_tags.append('device:{}'.format(node_name))
+            metric_tags = ['node:{}'.format(node_name), 'device:{}'.format(node_name)]
+            if tags:
+                metric_tags.extend(tags)
             for metric_name, val in node_stats['interestingStats'].items():
                 if val is not None:
                     metric_name = 'couchbase.by_node.{}'.format(self.camel_case_to_joined_lower(metric_name))
@@ -285,7 +285,7 @@ class Couchbase(AgentCheck):
                 break
 
         except requests.exceptions.HTTPError:
-            self.log.error("Error accessing the endpoint {}".format(url))
+            self.log.error("Error accessing the endpoint %s", url)
 
         return couchbase
 
@@ -298,8 +298,9 @@ class Couchbase(AgentCheck):
                 query_data = self._get_stats(url)
             except requests.exceptions.RequestException:
                 self.log.error(
-                    "Error accessing the endpoint {}, make sure you're running at least "
-                    "couchbase 4.5 to collect the query monitoring metrics".format(url)
+                    "Error accessing the endpoint %s, make sure you're running at least "
+                    "couchbase 4.5 to collect the query monitoring metrics",
+                    url,
                 )
 
         return query_data

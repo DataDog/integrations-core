@@ -52,6 +52,7 @@ init_config:
   ##  - which columns / indexes to use as tags with the 'metric_tags' parameter.
   ##  - which column to read the tag value from with the 'column' parameter.
   ##  - which index you want to read the tag value from with the 'index' parameter.
+  ##  - which table and MIB are required if the tag is in a different table.
   ##
   ## Example:
   ##
@@ -67,9 +68,18 @@ init_config:
   ##    table: ipSystemStatsTable
   ##    symbols:
   ##      - ipSystemStatsInReceives
-  ##         metric_tags:
-  ##           - tag: ipversion
-  ##             index: 1
+  ##    metric_tags:
+  ##      - tag: ipversion
+  ##        index: 1
+  ##  - MIB: ENTITY-SENSOR-MIB
+  ##    table: entitySensorObjects
+  ##    symbols:
+  ##      - entPhySensorValue
+  ##    metric_tags:
+  ##      - tag: description
+  ##        column: entLogicalDescr
+  ##        table: entLogicalTable
+  ##        MIB: ENTITY-MIB
   #
   # global_metrics:
   #   - MIB: UDP-MIB

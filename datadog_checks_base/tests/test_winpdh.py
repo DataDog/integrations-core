@@ -2,11 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 from collections import defaultdict
 
 import pytest
-
-import datadog_checks.stubs.datadog_agent as logger
 
 from .utils import requires_windows
 
@@ -22,6 +21,8 @@ except ImportError:
 
     if platform.system() != 'Windows':
         pass
+
+logger = logging.getLogger(__file__)
 
 
 '''

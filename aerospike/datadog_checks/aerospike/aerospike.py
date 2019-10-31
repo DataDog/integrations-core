@@ -140,9 +140,7 @@ class AerospikeCheck(AgentCheck):
         if metric_type in AEROSPIKE_CAP_MAP:
             cap = self.instance.get(AEROSPIKE_CAP_CONFIG_KEY_MAP[metric_type], AEROSPIKE_CAP_MAP[metric_type])
             if len(required_data) > cap:
-                self.log.warn(
-                    'Exceeded cap `{}` for metric type `{}` - please contact support'.format(cap, metric_type)
-                )
+                self.log.warning('Exceeded cap `%s` for metric type `%s` - please contact support', cap, metric_type)
                 return
 
         for key, value in iteritems(required_data):
@@ -160,7 +158,7 @@ class AerospikeCheck(AgentCheck):
         try:
             client = aerospike.client({'hosts': [self._host]}).connect(self._username, self._password)
         except Exception as e:
-            self.log.error('Unable to connect to database: {}'.format(e))
+            self.log.error('Unable to connect to database: %s', e)
             self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
         else:
             self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)

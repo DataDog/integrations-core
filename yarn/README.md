@@ -55,6 +55,10 @@ The Yarn check does not include any events.
 
 Returns `CRITICAL` if the Agent cannot connect to the ResourceManager URI to collect metrics, otherwise `OK`.
 
+**yarn.application.status**:
+
+Returns per application status according to the mapping specified in the [`conf.yaml`][5] file.
+
 ## Troubleshooting
 Need help? Contact [Datadog support][9].
 
