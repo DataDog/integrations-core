@@ -5,7 +5,6 @@
 import copy
 import os
 
-import mock
 import pytest
 
 from datadog_checks.haproxy import HAProxy
@@ -22,7 +21,6 @@ from .common import (
     CONFIG_TCPSOCKET,
     CONFIG_UNIXSOCKET,
     FRONTEND_CHECK,
-    HAPROXY_VERSION,
     SERVICE_CHECK_NAME,
     STATS_SOCKET,
     STATS_URL,
