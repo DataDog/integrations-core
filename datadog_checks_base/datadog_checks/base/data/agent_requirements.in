@@ -14,7 +14,7 @@ gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 httplib2==0.10.3
 in-toto==0.3.0
 ipaddress==1.0.22; python_version < '3.0'
--e git+https://github.com/baztian/jaydebeapi.git#egg=jaydebeapi==1.1.2
+git+https://github.com/baztian/jaydebeapi.git@a1b87626abc863edcedba365599fd385ef00cf57#egg=jaydebeapi
 jpype1==0.7.0
 kafka-python==1.4.7; sys_platform != 'win32'
 kazoo==2.6.1; sys_platform != 'win32'
