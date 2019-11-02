@@ -82,7 +82,7 @@ instances:
     #
     # keys:
     #   - <KEY_1>
-    #   - <KEY_REGEX>
+    #   - <KEY_PATTERN>
 
     ## @param warn_on_missing_keys - boolean - optional - default: true
     ## If you provide a list of 'keys', set this to true to have the Agent log a warning
