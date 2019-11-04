@@ -125,7 +125,6 @@ class KubernetesState(OpenMetricsBaseCheck):
         for job_tags, job_count in iteritems(self.job_failed_count):
             self.monotonic_count(scraper_config['namespace'] + '.job.failed', job_count, list(job_tags))
 
-
     def _filter_metric(self, metric, scraper_config):
         if scraper_config['telemetry']:
             # name is like "kube_pod_execution_duration"
@@ -576,8 +575,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            if job_ts != None: # if there is a timestamp, this is a Cron Job
-                self.failed_cron_job_counts[frozenset(tags)].update_current_ts_and_add_count(job_ts, sample[self.SAMPLE_VALUE])
+            if job_ts is not None:  # if there is a timestamp, this is a Cron Job
+                self.failed_cron_job_counts[frozenset(tags)].update_current_ts_and_add_count(
+                    job_ts, sample[self.SAMPLE_VALUE]
+                )
             else:
                 self.job_failed_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
 
@@ -592,7 +593,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            if job_ts != None: # if there is a timestamp, this is a Cron Job
+            if job_ts is not None:  # if there is a timestamp, this is a Cron Job
                 self.succeeded_cron_job_counts[frozenset(tags)].update_current_ts_and_add_count(
                     job_ts, sample[self.SAMPLE_VALUE]
                 )
