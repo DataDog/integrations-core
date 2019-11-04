@@ -567,7 +567,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def kube_job_status_failed(self, metric, scraper_config):
         for sample in metric.samples:
-            job_ts = 0
+            job_ts = None
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
@@ -583,7 +583,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def kube_job_status_succeeded(self, metric, scraper_config):
         for sample in metric.samples:
-            job_ts = 0
+            job_ts = None
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
