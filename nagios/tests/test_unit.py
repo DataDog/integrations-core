@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from mock import patch
+from mock import MagicMock, patch
 
 from datadog_checks.nagios import NagiosCheck
+from datadog_checks.nagios.nagios import NagiosEventLogTailer
 
-from .common import CHECK_NAME, CUSTOM_TAGS
+from .common import CHECK_NAME, CUSTOM_TAGS, NAGIOS_TEST_LOG
 
 # Random test values
 METRIC_NAME = 'nagios.metric_name'
@@ -58,3 +59,17 @@ class TestGaugeWrapper:
         with patch('datadog_checks.checks.AgentCheck.gauge', new=gauge_v5):
             nagios = NagiosCheck(CHECK_NAME, {}, {})
             nagios.gauge(METRIC_NAME, METRIC_VALUE, tags=METRIC_TAGS, timestamp=METRIC_TIMESTAMP)
+
+
+def test_centreon_event_logs():
+    log = (
+        "[1571848012] [53365] SERVICE ALERT: SOMEHOST;Current Anonymous Users;CRITICAL;SOFT;1;"
+        "CHECK_NRPE: Socket timeout after 60 seconds."
+    )
+    events = []
+    mock_log = MagicMock()
+    tailer = NagiosEventLogTailer(NAGIOS_TEST_LOG, None, mock_log, "host", [], events.append, None, 5)
+    tailer._parse_line(log)
+    assert len(events) == 1
+    assert events[0]['event_type'] == 'SERVICE ALERT'
+    assert events[0]['host'] == 'SOMEHOST'
