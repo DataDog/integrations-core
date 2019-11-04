@@ -84,13 +84,14 @@ def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
     consul_check.check_id = 'test:123'
     consul_check.check(instance)
 
-    major, minor, patch = common.CONSUL_VERSION.split('.')
+    raw_version = common.CONSUL_VERSION.lstrip('v')
+    major, minor, patch = raw_version.split('.')
     version_metadata = {
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,
-        'version.raw': common.CONSUL_VERSION,
+        'version.raw': raw_version,
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
