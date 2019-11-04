@@ -14,3 +14,5 @@ URL = 'http://{}:{}'.format(HOST, PORT)
 CHECK_NAME = 'consul'
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+CONSUL_VERSION = os.getenv('CONSUL_VERSION')

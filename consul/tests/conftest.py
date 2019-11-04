@@ -7,6 +7,7 @@ import pytest
 import requests
 
 from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev.conditions import CheckEndpoints
 
 from . import common
 
@@ -38,7 +39,9 @@ def dd_environment(instance_single_node_install):
     env_vars = {'CONSUL_CONFIG_PATH': _consul_config_path(), 'CONSUL_PORT': common.PORT}
 
     with docker_run(
-        os.path.join(common.HERE, 'compose', 'compose.yaml'), conditions=[WaitFor(ping_cluster)], env_vars=env_vars
+        os.path.join(common.HERE, 'compose', 'compose.yaml'),
+        conditions=[WaitFor(ping_cluster), CheckEndpoints('{}/v1/agent/self'.format(common.URL), attempts=180)],
+        env_vars=env_vars,
     ):
         yield instance_single_node_install
 

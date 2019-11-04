@@ -76,3 +76,22 @@ def test_acl_forbidden(instance_bad_token, dd_environment):
             got_error_403 = True
 
     assert got_error_403
+
+
+@pytest.mark.integration
+def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [instance])
+    consul_check.check_id = 'test:123'
+    consul_check.check(instance)
+
+    major, minor, patch = common.CONSUL_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': common.CONSUL_VERSION,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
