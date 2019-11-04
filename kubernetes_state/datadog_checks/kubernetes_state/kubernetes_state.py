@@ -47,7 +47,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 self.current_run_max_ts = 0
 
         def update_current_ts_and_add_count(self, job_ts, count):
-            if job_ts != 0 and job_ts > self.previous_run_max_ts:
+            if job_ts != 0 and job_ts > self.previous_run_max_ts and count > 0:
                 self.count += count
                 self.current_run_max_ts = max(self.current_run_max_ts, job_ts)
 

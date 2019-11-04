@@ -453,6 +453,27 @@ def test_job_counts(aggregator, instance):
         NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=4
     )
 
+    # Edit the payload to mimick a job running and rerun the check
+    payload = payload.replace(
+        b'kube_job_status_succeeded{job="hello-1509998500",namespace="default"} 1',
+        b'kube_job_status_succeeded{job="hello-1509998600",namespace="default"} 0',
+    )
+
+    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.check(instance)
+
+
+    # Edit the payload to mimick a job that stopped running and rerun the check
+    payload = payload.replace(
+        b'kube_job_status_succeeded{job="hello-1509998600",namespace="default"} 0',
+        b'kube_job_status_succeeded{job="hello-1509998600",namespace="default"} 1',
+    )
+
+    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=5
+    )
 
 def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
