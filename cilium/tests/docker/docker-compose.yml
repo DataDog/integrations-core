@@ -1,0 +1,7 @@
+version: "3.2"
+
+services:
+  cilium-agent:
+    image: cilium/cilium:${CILIUM_VERSION}
+    ports:
+      - "9090:9090"
