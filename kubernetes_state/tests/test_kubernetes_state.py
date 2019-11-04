@@ -408,7 +408,7 @@ def test_extract_timestamp(check):
     result = check._extract_job_timestamp(job_name2)
     assert result == 1509998340
     result = check._extract_job_timestamp(job_name3)
-    assert result == 0
+    assert result == None
 
 
 def test_job_counts(aggregator, instance):
@@ -418,6 +418,8 @@ def test_job_counts(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
+
+    # Test cron jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=0
     )
@@ -425,13 +427,31 @@ def test_job_counts(aggregator, instance):
         NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=3
     )
 
+    # Test jobs
+    aggregator.assert_metric(
+        NAMESPACE + '.job.failed', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=0
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=1
+    )
+
     # Re-run check to make sure we don't count the same jobs
     check.check(instance)
+
+    # Test cron jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=0
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=3
+    )
+
+     # Test jobs
+    aggregator.assert_metric(
+        NAMESPACE + '.job.failed', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=0
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=1
     )
 
     # Edit the payload and rerun the check
@@ -487,9 +507,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90270.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=908.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1282.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90397.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=912.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1286.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
     aggregator.assert_metric(
