@@ -463,6 +463,10 @@ def test_job_counts(aggregator, instance):
         b'kube_job_status_failed{job="hello-1509998340",namespace="default"} 0',
         b'kube_job_status_failed{job="hello-1509998510",namespace="default"} 1',
     )
+    payload = payload.replace(
+        b'kube_job_status_succeeded{job_name="test",namespace="default"} 1',
+        b'kube_job_status_succeeded{job_name="test",namespace="default"} 0',
+    )
 
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
     check.check(instance)
@@ -478,9 +482,18 @@ def test_job_counts(aggregator, instance):
         b'kube_job_status_succeeded{job="hello-1509998500",namespace="default"} 1',
         b'kube_job_status_succeeded{job="hello-1509998600",namespace="default"} 0',
     )
+    # Edit the payload to mimick a job re-creation
+    payload = payload.replace(
+        b'kube_job_status_succeeded{job_name="test",namespace="default"} 0',
+        b'kube_job_status_succeeded{job_name="test",namespace="default"} 1',
+    )
 
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
     check.check(instance)
+    # Test if we now have two as the value for the same job
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=2
+    )
 
     # Edit the payload to mimick a job that stopped running and rerun the check
     payload = payload.replace(

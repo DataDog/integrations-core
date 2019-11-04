@@ -100,12 +100,12 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.failed_cron_job_counts = defaultdict(KubernetesState.CronJobCount)
         self.succeeded_cron_job_counts = defaultdict(KubernetesState.CronJobCount)
 
-    def check(self, instance):
-        endpoint = instance.get('kube_state_url')
-
         # Logic for Jobs
         self.job_succeeded_count = defaultdict(int)
         self.job_failed_count = defaultdict(int)
+
+    def check(self, instance):
+        endpoint = instance.get('kube_state_url')
 
         scraper_config = self.config_map[endpoint]
         self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
