@@ -76,6 +76,8 @@ FIXTURE_DIR = os.path.join(HERE, "fixtures")
 
 CHECK_NAME = "varnish"
 
+VARNISH_VERSION = os.getenv('VARNISH_VERSION')
+
 
 def get_config_by_version(name=None):
     config = {"varnishstat": get_varnish_stat_path(), "tags": ["cluster:webs"]}
