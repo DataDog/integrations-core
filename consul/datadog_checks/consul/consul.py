@@ -267,6 +267,7 @@ class ConsulCheck(AgentCheck):
         instance_state = self._instance_states[hash_mutable(instance)]
 
         self._check_for_leader_change(instance, instance_state)
+        self._collect_metadata(instance, instance_state)
 
         peers = self.get_peers_in_cluster(instance)
         main_tags = []
@@ -524,3 +525,10 @@ class ConsulCheck(AgentCheck):
     def count_all_nodes(self, instance, main_tags):
         nodes = self._get_all_nodes(instance)
         self.gauge('consul.catalog.total_nodes', len(nodes), tags=main_tags)
+
+    def _collect_metadata(self, instance, instance_state):
+        local_config = self._get_local_config(instance, instance_state)
+        agent_version = local_config.get('Config', {}).get('Version')
+        self.log.debug("Agent version is `%s`", agent_version)
+        if agent_version:
+            self.set_metadata('version', agent_version)
