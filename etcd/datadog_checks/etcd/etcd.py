@@ -158,9 +158,7 @@ class Etcd(OpenMetricsBaseCheck):
 
         scraper_config['_metric_tags'][:] = tags
 
-        self.process(scraper_config, metric_transformers={
-            self.SERVER_VERSION_METRIC: self.version_metric_transformer
-        })
+        self.process(scraper_config, metric_transformers={self.SERVER_VERSION_METRIC: self.version_metric_transformer})
 
     def version_metric_transformer(self, metric, scraper_config):
         # If the version is in openmetrics' `metrics` scrapper config, it won't be sent as metadata.
