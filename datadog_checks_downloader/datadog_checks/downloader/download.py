@@ -39,6 +39,9 @@ REPOSITORIES_DIR = os.path.join(here, 'data')
 # abspath = os.path.join(REPOSITORIES_DIR, REPOSITORY_DIR)
 REPOSITORY_DIR = 'repo'
 REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
+# Where to find our in-toto root layout.
+IN_TOTO_METADATA_DIR = 'in-toto-metadata'
+IN_TOTO_ROOT_LAYOUT = '2.root.layout'
 
 
 # Global variables.
@@ -88,9 +91,39 @@ class TUFDownloader:
         # we use the same consistent snapshot to download targets.
         self.__updater.refresh()
 
-    def __download_in_toto_metadata(self, target):
-        # A list to collect where in-toto metadata targets live.
-        target_relpaths = []
+    def __download_with_tuf(self, target_relpath):
+        target = self.__updater.get_one_valid_targetinfo(target_relpath)
+        updated_targets = self.__updater.updated_targets((target,), self.__targets_dir)
+
+        # Either the target has not been updated...
+        if not len(updated_targets):
+            logger.debug('{} has not been updated'.format(target_relpath))
+        # or, it has been updated, in which case...
+        else:
+            # First, we use TUF to download and verify the target.
+            assert len(updated_targets) == 1
+            updated_target = updated_targets[0]
+            assert updated_target == target
+            self.__updater.download_target(updated_target, self.__targets_dir)
+
+        logger.info('TUF verified {}'.format(target_relpath))
+
+        target_abspath = os.path.join(self.__targets_dir, target_relpath)
+        return target_abspath, target
+
+    def __download_in_toto_root_layout(self):
+        # NOTE: We expect the root layout to be signed with *offline* keys.
+        # NOTE: We effectively tie every version of this downloader to its
+        # expected version of the root layout. This is so that, for example, we
+        # can introduce new parameters w/o breaking old downloaders that don't
+        # know how to substitute them.
+        root_layout_relpath = os.path.join(IN_TOTO_METADATA_DIR, IN_TOTO_ROOT_LAYOUT)
+        _, root_layout_target = self.__download_with_tuf(root_layout_relpath)
+        return root_layout_relpath, root_layout_target
+
+    def __download_custom(self, target, extension):
+        # A set to collect where in-toto pubkeys / links live.
+        target_relpaths = set()
 
         fileinfo = target.get('fileinfo')
 
@@ -105,24 +138,25 @@ class TUFDownloader:
                 if in_toto_metadata:
 
                     for target_relpath in in_toto_metadata:
-                        # Download the in-toto layout / link metadata file
-                        # using TUF, which, among other things, prevents
-                        # mix-and-match attacks by MitM attackers, and rollback
-                        # attacks even by attackers who control the repository:
+                        # Download in-toto *link* metadata files using TUF,
+                        # which, among other things, prevents mix-and-match
+                        # attacks by MitM attackers, and rollback attacks even
+                        # by attackers who control the repository:
                         # https://www.usenix.org/conference/atc17/technical-sessions/presentation/kuppusamy
                         # NOTE: Avoid recursively downloading in-toto metadata
                         # for in-toto metadata themselves, and so on ad
                         # infinitum.
-                        self.__get_target(target_relpath, download_in_toto_metadata=False)
+                        if target_relpath.endswith(extension):
+                            self.__download_with_tuf(target_relpath)
 
-                        # Add this file to the growing collection of where
-                        # in-toto metadata live.
-                        target_relpaths.append(target_relpath)
+                            # Add this file to the growing collection of where
+                            # in-toto pubkeys / links live.
+                            target_relpaths.add(target_relpath)
 
         # Return list of where in-toto metadata files live.
         return target_relpaths
 
-    def __update_in_toto_layout_pubkeys(self):
+    def __download_in_toto_layout_pubkeys(self, target, target_relpath):
         '''
         NOTE: We assume that all the public keys needed to verify any in-toto
         root layout, or sublayout, metadata file has been directly signed by
@@ -131,23 +165,20 @@ class TUFDownloader:
         guarantees if _ALL_ targets were signed using _online_ keys.
         '''
 
-        target_relpaths = []
-        targets = self.__updater.targets_of_role('targets')
+        pubkey_relpaths = self.__download_custom(target, '.pub')
+        if not len(pubkey_relpaths):
+            raise NoInTotoRootLayoutPublicKeysFound(target_relpath)
+        else:
+            return pubkey_relpaths
 
-        for target in targets:
-            target_relpath = target['filepath']
+    def __download_in_toto_links(self, target, target_relpath):
+        link_relpaths = self.__download_custom(target, '.link')
+        if not len(link_relpaths):
+            raise NoInTotoLinkMetadataFound(target_relpath)
+        else:
+            return link_relpaths
 
-            # Download this target only if it _looks_ like a public key.
-            if target_relpath.endswith('.pub'):
-                # NOTE: Avoid recursively downloading in-toto metadata for
-                # in-toto root layout pubkeys themselves, and so on ad
-                # infinitum.
-                self.__get_target(target_relpath, download_in_toto_metadata=False)
-                target_relpaths.append(target_relpath)
-
-        return target_relpaths
-
-    def __verify_in_toto_metadata(self, target_relpath, in_toto_inspection_packet):
+    def __in_toto_verify(self, target_relpath, in_toto_inspection_packet):
         # Make a temporary directory in a parent directory we control.
         tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
 
@@ -162,7 +193,7 @@ class TUFDownloader:
         os.chdir(tempdir)
 
         # Load the root layout and public keys.
-        layout = Metablock.load('root.layout')
+        layout = Metablock.load(IN_TOTO_ROOT_LAYOUT)
         pubkeys = glob.glob('*.pub')
         layout_key_dict = import_public_keys_from_files_as_dict(pubkeys)
         # Parameter substitution.
@@ -183,61 +214,44 @@ class TUFDownloader:
             shutil.rmtree(tempdir)
 
     def __download_and_verify_in_toto_metadata(self, target, target_relpath):
-        in_toto_metadata_relpaths = self.__download_in_toto_metadata(target)
+        # First, get our in-toto root layout.
+        root_layout_relpath, root_layout_target = self.__download_in_toto_root_layout()
 
-        if not len(in_toto_metadata_relpaths):
-            raise NoInTotoLinkMetadataFound(target_relpath)
+        # Second, get the public keys for the root layout.
+        pubkey_relpaths = self.__download_in_toto_layout_pubkeys(root_layout_target, target_relpath)
 
-        else:
-            pubkey_relpaths = self.__update_in_toto_layout_pubkeys()
+        # Third, get the in-toto links for the target of interest.
+        link_relpaths = self.__download_in_toto_links(target, target_relpath)
 
-            if not len(pubkey_relpaths):
-                raise NoInTotoRootLayoutPublicKeysFound(target_relpath)
+        # Everything we need for in-toto inspection to work: the wheel,
+        # the in-toto root layout, in-toto links, and public keys to
+        # verify the in-toto layout.
+        in_toto_inspection_packet = {target_relpath, root_layout_relpath} | pubkey_relpaths | link_relpaths
+        self.__in_toto_verify(target_relpath, in_toto_inspection_packet)
 
-            else:
-                # Everything we need for in-toto inspection to work: the wheel,
-                # the in-toto root layout, in-toto links, and public keys to
-                # verify the in-toto layout.
-                in_toto_inspection_packet = [target_relpath] + in_toto_metadata_relpaths + pubkey_relpaths
-                self.__verify_in_toto_metadata(target_relpath, in_toto_inspection_packet)
-
-    def __get_target(self, target_relpath, download_in_toto_metadata=True):
-        target = self.__updater.get_one_valid_targetinfo(target_relpath)
-        updated_targets = self.__updater.updated_targets((target,), self.__targets_dir)
-
-        # Either the target has not been updated...
-        if not len(updated_targets):
-            logger.debug('{} has not been updated'.format(target_relpath))
-        # or, it has been updated, in which case...
-        else:
-            # First, we use TUF to download and verify the target.
-            assert len(updated_targets) == 1
-            updated_target = updated_targets[0]
-            assert updated_target == target
-            self.__updater.download_target(updated_target, self.__targets_dir)
-
-        logger.info('TUF verified {}'.format(target_relpath))
+    def __download_with_tuf_in_toto(self, target_relpath):
+        target_abspath, target = self.__download_with_tuf(target_relpath)
 
         # Next, we use in-toto to verify the supply chain of the target.
         # NOTE: We use a flag to avoid recursively downloading in-toto
         # metadata for in-toto metadata themselves, and so on ad infinitum.
         # All other files, presumably packages, should also be
         # inspected.
-        if download_in_toto_metadata:
+        try:
             self.__download_and_verify_in_toto_metadata(target, target_relpath)
+        except:
+            os.remove(target_abspath)
+            raise
         else:
-            logger.debug('Switched off in-toto verification for {}'.format(target_relpath))
+            return target_abspath
 
-        target_path = os.path.join(self.__targets_dir, target_relpath)
-        return target_path
-
-    def download(self, target_relpath, download_in_toto_metadata=True):
+    def download(self, target_relpath):
         '''
         Returns:
             If download over TUF and in-toto is successful, this function will
             return the complete filepath to the desired target.
         '''
-        return self.__get_target(target_relpath, download_in_toto_metadata=download_in_toto_metadata)
+        return self.__download_with_tuf_in_toto(target_relpath)
 
     def get_latest_version(self, standard_distribution_name, wheel_distribution_name):
         '''
@@ -249,7 +263,7 @@ class TUFDownloader:
 
         try:
             # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
-            target_abspath = self.download(target_relpath, download_in_toto_metadata=False)
+            target_abspath, _ = self.__download_with_tuf(target_relpath)
         except UnknownTargetError:
             raise NoSuchDatadogPackage(standard_distribution_name)
 
