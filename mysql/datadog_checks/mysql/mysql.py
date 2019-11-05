@@ -282,7 +282,7 @@ class MySql(AgentCheck):
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
 
-    def __init__(self, name, init_config, instances=None):
+    def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
         self.metadata = None
