@@ -10,7 +10,7 @@ import requests
 from datadog_checks.dev import run_command
 from datadog_checks.etcd import Etcd
 
-from .common import COMPOSE_FILE, HOST, STORE_METRICS, URL
+from .common import COMPOSE_FILE, ETCD_VERSION, HOST, STORE_METRICS, URL
 from .utils import is_leader, legacy, preview
 
 CHECK_NAME = 'etcd'
@@ -156,7 +156,7 @@ def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_k
             auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
         )
         http_kwargs.update(expected_http_kwargs)
-        r.get.assert_called_with(URL + '/v2/stats/store', **http_kwargs)
+        r.get.assert_has_calls([mock.call(URL + '/v2/stats/store', **http_kwargs)])
 
 
 @preview
@@ -190,3 +190,22 @@ def test_config(instance, test_case, extra_config, expected_http_kwargs):
         )
         http_kwargs.update(expected_http_kwargs)
         r.post.assert_called_with(URL + '/v3alpha/maintenance/status', **http_kwargs)
+
+
+@pytest.mark.integration
+def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
+    check_instance = Etcd(CHECK_NAME, {}, [instance])
+    check_instance.check_id = 'test:123'
+    check_instance.check(instance)
+
+    raw_version = ETCD_VERSION.lstrip('v')  # version contain `v` prefix
+    major, minor, patch = raw_version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

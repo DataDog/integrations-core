@@ -93,6 +93,8 @@ class Etcd(OpenMetricsBaseCheck):
                     'namespace': 'etcd',
                     'metrics': [METRIC_MAP],
                     'send_histograms_buckets': True,
+                    'metadata_metric_name': 'etcd_server_version',
+                    'metadata_label_map': {'version': 'server_version'},
                 }
             },
             default_namespace='etcd',
@@ -155,6 +157,12 @@ class Etcd(OpenMetricsBaseCheck):
         scraper_config['_metric_tags'][:] = tags
 
         self.process(scraper_config)
+
+    def transform_metadata(self, metric, scraper_config):
+        super(Etcd, self).transform_metadata(metric, scraper_config)
+
+        # Needed for backward compatibility, we continue to submit `etcd.server.version` metric
+        self.submit_openmetric('server.version', metric, scraper_config)
 
     def check_pre_v3(self, instance):
         if 'url' not in instance:
@@ -244,6 +252,8 @@ class Etcd(OpenMetricsBaseCheck):
         if self_response is not None and store_response is not None:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=instance_tags)
 
+        self._collect_metadata(url, critical_tags)
+
     def _get_health_status(self, url, timeout):
         """
         Don't send the "can connect" service check if we have troubles getting
@@ -314,3 +324,10 @@ class Etcd(OpenMetricsBaseCheck):
             return status
 
         return status == "true"
+
+    def _collect_metadata(self, url, tags):
+        resp = self._get_json(url, "/version", tags)
+        server_version = resp.get('etcdserver')
+        self.log.debug("Agent version is `%s`", server_version)
+        if server_version:
+            self.set_metadata('version', server_version)
