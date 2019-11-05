@@ -761,6 +761,30 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'redis.command.success': {
+        'tags': (
+            ('stat_prefix', ),
+            ('command', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'redis.command.error': {
+        'tags': (
+            ('stat_prefix', ),
+            ('command', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'redis.command.latency': {
+        'tags': (
+            ('stat_prefix', ),
+            ('command', ),
+            (),
+        ),
+        'method': 'histogram',
+    },
     'mongo.decoding_error': {
         'tags': (
             ('stat_prefix', ),
