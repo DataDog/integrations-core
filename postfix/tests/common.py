@@ -26,5 +26,28 @@ def get_e2e_instance():
     return {'directory': '/home/postfix_data', 'queues': get_queues(), 'postfix_user': 'dd-agent'}
 
 
+def get_e2e_instance_postqueue():
+    return {
+        'init_config': {'postqueue': True,},
+        'instances': [
+            {
+                'directory': '/home/postfix_data',
+                'queues': get_queues(),
+                'postfix_user': 'dd-agent',
+                'config_directory': '/etc/postfix',
+            },
+        ],
+    }
+
+
 def get_e2e_metadata():
-    return {'docker_volumes': ['{}:/home/postfix_data'.format(get_data_dir())]}
+    return {
+        'docker_volumes': ['{}:/home/postfix_data'.format(get_data_dir())],
+        'start_commands': [
+            # install postfix
+            # needed for testing `postqueue: true`
+            'apt-get update',
+            'apt-get install --reinstall libdb5.3',  # needed because libdb-5.3.so is missing
+            'bash -c "yes | DEBIAN_FRONTEND=noninteractive apt install -y postfix"',
+        ],
+    }
