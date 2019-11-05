@@ -8,11 +8,15 @@ class DatadogAgentStub(object):
         self._metadata = {}
 
     def reset(self):
-        self._metadata = {}
+        self._metadata.clear()
 
     def assert_metadata(self, check_id, data):
-        for name, value in data.items():
-            assert self._metadata[(check_id, name)] == value
+        actual = {}
+        for name in data:
+            key = (check_id, name)
+            if key in self._metadata:
+                actual[name] = self._metadata[key]
+        assert data == actual
 
     def assert_metadata_count(self, count):
         assert len(self._metadata) == count
