@@ -529,5 +529,6 @@ class ConsulCheck(AgentCheck):
     def _collect_metadata(self, instance, instance_state):
         local_config = self._get_local_config(instance, instance_state)
         agent_version = local_config.get('Config', {}).get('Version')
+        self.log.debug("Agent version is `%s`", agent_version)
         if agent_version:
             self.set_metadata('version', agent_version)
