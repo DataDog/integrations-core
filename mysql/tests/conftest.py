@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import mock
 import pymysql
 import pytest
 
@@ -76,6 +77,26 @@ def instance_complex():
 @pytest.fixture(scope='session')
 def instance_error():
     return {'server': common.HOST, 'user': 'unknown', 'pass': common.PASS}
+
+
+@pytest.fixture(scope='session')
+def version_metadata():
+    parts = MYSQL_VERSION.split('-')
+    version = parts[0].split('.')
+    major, minor = version[:2]
+    patch = version[2] if len(version) > 2 else mock.ANY
+
+    flavor = "MariaDB" if MYSQL_FLAVOR == "mariadb" else "MySQL"
+
+    return {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': mock.ANY,
+        'version.build': mock.ANY,
+        'flavor': flavor,
+    }
 
 
 def init_master():
