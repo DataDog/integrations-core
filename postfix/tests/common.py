@@ -28,7 +28,7 @@ def get_e2e_instance():
 
 def get_e2e_instance_postqueue():
     return {
-        'init_config': {'postqueue': True,},
+        'init_config': {'postqueue': True},
         'instances': [
             {
                 'directory': '/home/postfix_data',
