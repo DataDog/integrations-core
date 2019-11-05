@@ -95,7 +95,7 @@ class Etcd(OpenMetricsBaseCheck):
                     'namespace': 'etcd',
                     'metrics': [METRIC_MAP],
                     'send_histograms_buckets': True,
-                    # Only `metadata_label_map` is needed, we are calling `self.transform_metadata` manually later.
+                    'metadata_metric_name': self.SERVER_VERSION_METRIC,
                     'metadata_label_map': {'version': 'server_version'},
                 }
             },
@@ -158,13 +158,14 @@ class Etcd(OpenMetricsBaseCheck):
 
         scraper_config['_metric_tags'][:] = tags
 
-        self.process(scraper_config, metric_transformers={self.SERVER_VERSION_METRIC: self.version_metric_transformer})
+        self.process(scraper_config)
 
-    def version_metric_transformer(self, metric, scraper_config):
-        # If the version is in openmetrics' `metrics` scrapper config, it won't be sent as metadata.
-        # Hence, we need a custom transformer to do both: send metric and metadata.
-        self.transform_metadata(metric, scraper_config)
-        self.submit_openmetric('server.version', metric, scraper_config)
+    def transform_metadata(self, metric, scraper_config):
+        super(Etcd, self).transform_metadata(metric, scraper_config)
+
+        # Needed for backward compatibility, we continue to submit `etcd.server.version` metric
+        if metric.name == self.SERVER_VERSION_METRIC:
+            self.submit_openmetric('server.version', metric, scraper_config)
 
     def check_pre_v3(self, instance):
         if 'url' not in instance:
