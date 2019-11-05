@@ -17,6 +17,8 @@ class Etcd(OpenMetricsBaseCheck):
     HEALTH_SERVICE_CHECK_NAME = 'etcd.healthy'
     HEALTH_KEY = 'health'
 
+    SERVER_VERSION_METRIC = 'etcd_server_version'
+
     STORE_RATES = {
         'getsSuccess': 'etcd.store.gets.success',
         'getsFail': 'etcd.store.gets.fail',
@@ -93,6 +95,8 @@ class Etcd(OpenMetricsBaseCheck):
                     'namespace': 'etcd',
                     'metrics': [METRIC_MAP],
                     'send_histograms_buckets': True,
+                    # Only `metadata_label_map` is needed, we are calling `self.transform_metadata` manually later.
+                    'metadata_label_map': {'version': 'server_version'},
                 }
             },
             default_namespace='etcd',
@@ -154,7 +158,15 @@ class Etcd(OpenMetricsBaseCheck):
 
         scraper_config['_metric_tags'][:] = tags
 
-        self.process(scraper_config)
+        self.process(scraper_config, metric_transformers={
+            self.SERVER_VERSION_METRIC: self.version_metric_transformer
+        })
+
+    def version_metric_transformer(self, metric, scraper_config):
+        # If the version is in openmetrics' `metrics` scrapper config, it won't be sent as metadata.
+        # Hence, we need a custom transformer to do both: send metric and metadata.
+        self.transform_metadata(metric, scraper_config)
+        self.submit_openmetric('server.version', metric, scraper_config)
 
     def check_pre_v3(self, instance):
         if 'url' not in instance:
@@ -244,6 +256,8 @@ class Etcd(OpenMetricsBaseCheck):
         if self_response is not None and store_response is not None:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=instance_tags)
 
+        self._collect_metadata(url, critical_tags)
+
     def _get_health_status(self, url, timeout):
         """
         Don't send the "can connect" service check if we have troubles getting
@@ -314,3 +328,10 @@ class Etcd(OpenMetricsBaseCheck):
             return status
 
         return status == "true"
+
+    def _collect_metadata(self, url, tags):
+        resp = self._get_json(url, "/version", tags)
+        server_version = resp.get('etcdserver')
+        self.log.debug("Agent version is `%s`", server_version)
+        if server_version:
+            self.set_metadata('version', server_version)

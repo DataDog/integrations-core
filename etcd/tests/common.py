@@ -14,6 +14,8 @@ URL = 'http://{}:{}'.format(HOST, PORT)
 
 LEGACY_INSTANCE = {'url': URL, 'use_preview': False}
 
+ETCD_VERSION = os.getenv('ETCD_VERSION')
+
 STORE_METRICS = [
     'compareanddelete.fail',
     'compareanddelete.success',

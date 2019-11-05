@@ -51,7 +51,6 @@ METRIC_MAP = {
     'etcd_server_proposals_committed_total': 'server.proposals.committed.total',
     'etcd_server_proposals_failed_total': 'server.proposals.failed.total',
     'etcd_server_proposals_pending': 'server.proposals.pending',
-    'etcd_server_version': 'server.version',
     'go_gc_duration_seconds': 'go.gc.duration.seconds',
     'go_goroutines': 'go.goroutines',
     'go_info': 'go.info',
