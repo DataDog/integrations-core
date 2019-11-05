@@ -156,27 +156,24 @@ class NagiosCheck(AgentCheck):
     def parse_nagios_config(self, filename):
         output = {}
 
-        f = None
         try:
-            f = open(filename)
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                for key in self.NAGIOS_CONF_KEYS:
-                    m = key.match(line)
-                    if m:
-                        output[m.group('key')] = m.group('value')
-                        break
-            return output
+            with open(filename) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    for key in self.NAGIOS_CONF_KEYS:
+                        m = key.match(line)
+                        if m:
+                            output[m.group('key')] = m.group('value')
+                            break
         except Exception as e:
             # Can't parse, assume it's just not working
             # Don't return an incomplete config
             self.log.exception(e)
             raise Exception("Could not parse Nagios config file")
-        finally:
-            if f is not None:
-                f.close()
+
+        return output
 
     def check(self, instance):
         """
@@ -203,10 +200,15 @@ class NagiosTailer(object):
         """
         self.log_path = log_path
         self.log = logger
+        self._nested_parse_line = parse_line
 
-        tail = TailFile(self.log, self.log_path, parse_line)
+        tail = TailFile(self.log, self.log_path, self.parse_line)
         self.gen = tail.tail(line_by_line=False, move_end=True)
         next(self.gen)
+
+    def parse_line(self, line):
+        self._line_parsed += 1
+        return self._nested_parse_line(line)
 
     def check(self):
         self._line_parsed = 0
@@ -214,7 +216,6 @@ class NagiosTailer(object):
         try:
             self.log.debug("Start nagios check for file %s", self.log_path)
             next(self.gen)
-            self._line_parsed += 1
             self.log.debug("Done nagios check for file %s (parsed %s line(s))", self.log_path, self._line_parsed)
         except StopIteration as e:
             self.log.exception(e)
@@ -261,7 +262,7 @@ class NagiosEventLogTailer(object):
             if fields is None:
                 self.log.warning("Ignoring unknown nagios event for line: %s", (line[:-1]))
                 return False
-            elif not fields:
+            if not fields:
                 # Ignore and skip
                 self.log.debug("Ignoring Nagios event for line: %s", (line[:-1]))
                 return False
