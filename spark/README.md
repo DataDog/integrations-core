@@ -58,7 +58,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ### Validation
 
-[un the Agent's [status subcommand][7] and look for `spark` under the Checks section.
+Run the Agent's [status subcommand][7] and look for `spark` under the Checks section.
 
 ## Data Collected
 ### Metrics
