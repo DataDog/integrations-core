@@ -164,8 +164,7 @@ class Etcd(OpenMetricsBaseCheck):
         super(Etcd, self).transform_metadata(metric, scraper_config)
 
         # Needed for backward compatibility, we continue to submit `etcd.server.version` metric
-        if metric.name == self.SERVER_VERSION_METRIC:
-            self.submit_openmetric('server.version', metric, scraper_config)
+        self.submit_openmetric('server.version', metric, scraper_config)
 
     def check_pre_v3(self, instance):
         if 'url' not in instance:
