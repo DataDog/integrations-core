@@ -17,8 +17,6 @@ class Etcd(OpenMetricsBaseCheck):
     HEALTH_SERVICE_CHECK_NAME = 'etcd.healthy'
     HEALTH_KEY = 'health'
 
-    SERVER_VERSION_METRIC = 'etcd_server_version'
-
     STORE_RATES = {
         'getsSuccess': 'etcd.store.gets.success',
         'getsFail': 'etcd.store.gets.fail',
@@ -95,7 +93,7 @@ class Etcd(OpenMetricsBaseCheck):
                     'namespace': 'etcd',
                     'metrics': [METRIC_MAP],
                     'send_histograms_buckets': True,
-                    'metadata_metric_name': self.SERVER_VERSION_METRIC,
+                    'metadata_metric_name': 'etcd_server_version',
                     'metadata_label_map': {'version': 'server_version'},
                 }
             },
