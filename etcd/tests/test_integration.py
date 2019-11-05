@@ -156,7 +156,7 @@ def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_k
             auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
         )
         http_kwargs.update(expected_http_kwargs)
-        r.get.assert_called_with(URL + '/version', **http_kwargs)
+        r.get.assert_has_calls([mock.call(URL + '/v2/stats/store', **http_kwargs)])
 
 
 @preview
