@@ -95,4 +95,3 @@ def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
-    datadog_agent.assert_metadata_count(len(version_metadata))
