@@ -1,11 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import logging
-
 import pytest
-
-LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.e2e
