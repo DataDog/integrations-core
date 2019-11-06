@@ -329,7 +329,7 @@ class KafkaCheck(AgentCheck):
         else:
             raise ConfigurationError(
                 "Cannot fetch consumer offsets because no consumer_groups are specified and "
-                "monitor_unlisted_consumer_groups is %s." % self.instance._monitor_unlisted_consumer_groups
+                "monitor_unlisted_consumer_groups is %s." % self._monitor_unlisted_consumer_groups
             )
 
         # Loop until all futures resolved.
