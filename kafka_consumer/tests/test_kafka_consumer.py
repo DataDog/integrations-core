@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
 
-from .common import is_supported
+from .common import KAFKA_CONNECT_STR, is_supported
 
 pytestmark = pytest.mark.skipif(
     not is_supported('kafka'), reason='kafka consumer offsets not supported in current environment'
@@ -46,3 +46,11 @@ def assert_check_kafka(aggregator, kafka_instance):
                     aggregator.assert_metric(mname, tags=tags + ["consumer_group:{}".format(name)], at_least=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_consumer_config_error(caplog):
+    instance = {'kafka_connect_str': KAFKA_CONNECT_STR, 'kafka_consumer_offsets': True, 'tags': ['optional:tag1']}
+    kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
+    kafka_consumer_check.check(instance)
+    assert 'monitor_unlisted_consumer_groups is False' in caplog.text
