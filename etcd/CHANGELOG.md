@@ -1,5 +1,11 @@
 # CHANGELOG - etcd
 
+## 2.1.0 / 2019-11-06
+
+* [Fixed] Add ssl config options necessary for Openmetrics base. See [#4951](https://github.com/DataDog/integrations-core/pull/4951).
+* [Added] Add version metadata. See [#4950](https://github.com/DataDog/integrations-core/pull/4950).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
 ## 2.0.1 / 2019-10-16
 
 * [Fixed] Set use_preview to True in init as well. See [#4792](https://github.com/DataDog/integrations-core/pull/4792).
