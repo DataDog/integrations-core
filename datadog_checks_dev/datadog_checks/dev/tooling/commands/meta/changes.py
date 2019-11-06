@@ -88,7 +88,6 @@ def changes(since, out_file, eager):
 
             for patch in patches:
                 integration = patch[0].split('/')[-2].strip()
-                history_data[integration]['releasers'].add(author_name)
 
                 additions = deque()
                 for line in reversed(patch):
@@ -106,13 +105,15 @@ def changes(since, out_file, eager):
                     additions.pop()
 
                 # Get rid of blank lines to ensure consistency
-                while not additions[0].strip():
+                while additions and not additions[0].strip():
                     additions.popleft()
-                while not additions[-1].strip():
+                while additions and not additions[-1].strip():
                     additions.pop()
 
-                history_data[integration]['lines'].appendleft('')
-                history_data[integration]['lines'].extendleft(additions)
+                if additions:
+                    history_data[integration]['releasers'].add(author_name)
+                    history_data[integration]['lines'].appendleft('')
+                    history_data[integration]['lines'].extendleft(additions)
 
     output_lines = ['# Changes since {}'.format(since), '']
 
