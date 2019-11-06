@@ -171,7 +171,7 @@ class Varnish(AgentCheck):
 
         # Assumptions regarding varnish's version
         varnishstat_format = "json"
-        version = LooseVersion('3.0.0')
+        raw_version = None
 
         m1 = self.version_pattern.search(output, re.MULTILINE)
         # v2 prints the version on stderr, v3 on stdout
@@ -182,11 +182,19 @@ class Varnish(AgentCheck):
             self.warning("Cannot determine the version of varnishstat, assuming 3 or greater")
         else:
             if m1 is not None:
-                version = LooseVersion(m1.group())
+                raw_version = m1.group()
             elif m2 is not None:
-                version = LooseVersion(m2.group())
+                raw_version = m2.group()
 
-        self.log.debug("Varnish version: %s", version)
+        self.log.debug("Varnish version: %s", raw_version)
+
+        if raw_version:
+            self.set_metadata('version', raw_version)
+
+        if raw_version is None:
+            raw_version = '3.0.0'
+
+        version = LooseVersion(raw_version)
 
         # Location of varnishstat
         if version < LooseVersion('3.0.0'):
