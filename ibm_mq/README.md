@@ -131,7 +131,7 @@ There are a number of options to configure IBM MQ, depending on how you're using
 - `host`: The host where IBM MQ is running
 - `port`: The port that IBM MQ has exposed
 
-If you're using a username and password setup, you can set the `username` and `password`. If no username is set, the process owner of the agent is used (e.g. `dd-agent`).
+If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner is used (e.g. `dd-agent`).
 
 If you're using SSL Authentication, you can setup SSL Authentication.
 
