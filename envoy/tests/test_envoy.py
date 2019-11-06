@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import INSTANCES, response
+from .common import HOST, INSTANCES, response
 
 CHECK_NAME = 'envoy'
 
@@ -119,4 +119,4 @@ def test_config(test_case, extra_config, expected_http_kwargs):
             auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
         )
         http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://localhost:8001/stats', **http_wargs)
+        r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
