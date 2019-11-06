@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Cilium][1] through the Datadog Agent.
+This check monitors [Cilium][1] through the Datadog Agent. The integration can either collect metrics from the `cilium-agent` or `cilium-operator`.
 
 ## Setup
 
@@ -29,6 +29,8 @@ The Cilium check is included in the [Datadog Agent][2] package but requires addi
 ### Configuration
 
 1. Edit the `cilium.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your cilium performance data. See the [sample cilium.d/conf.yaml][3] for all available configuration options.
+    * To collect `cilium-agent` metrics, enable the `agent_url` option.
+    * To collect `cilium-operator` metrics, enable the `operator_url` option.
 
 2. [Restart the Agent][4].
 
@@ -44,9 +46,7 @@ See [metadata.csv][6] for a list of all metrics provided by this integration.
 
 ### Service Checks
 
-`cilium.prometheus.health`:
-
-Returns `CRITICAL` if the Agent cannot reach the metrics endpoints.
+`cilium.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ### Events
 
