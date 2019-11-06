@@ -33,6 +33,40 @@ instances:
     #
     # prometheus_url: http://localhost:2379/metrics
 
+    ## @param ssl_cert - string - optional
+    ## The certificate to use when connecting to the `prometheus_url`.
+    ## It may also contain an unencrypted private key to use.
+    ##
+    ## NOTE: Use only if `use_preview` is set to `true`.
+    ##       This option is used in place of `tls_cert`
+    #
+    # ssl_cert: <CERT_PATH>
+
+    ## @param ssl_private_key - string - optional
+    ## The unencrypted private key to use when connecting to the `prometheus_url`.
+    ## This is required if `ssl_cert` is set and it does not already contain a private key.
+    ##
+    ## NOTE: Use only if `use_preview` is set to `true`.
+    ##       This option is used in place of `tls_private_key`.
+    #
+    # ssl_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param ssl_ca_cert - string - optional
+    ## The path to a CA_BUNDLE file or a directory with certificates of trusted CAs.
+    ##
+    ## NOTE: Use only if `use_preview` is set to `true`.
+    ##       This option is used in place of `tls_ca_cert`.
+    #
+    # ssl_ca_cert: <CA_CERT_PATH>
+
+    ## @param ssl_verify - boolean - optional - default: true
+    ## Instruct the check to validate SSL certificates when connecting to `prometheus_url` and GPRC gateway.
+    ##
+    ## NOTE: Use only if `use_preview` is set to `true`.
+    ##       This option is used in place of `tls_verify`.
+    #
+    # ssl_verify: true
+
     ## @param leader_tag - boolean - optional - default: true
     ## Whether or not to tag with `is_leader:true` or `is_leader:false`.
     #
