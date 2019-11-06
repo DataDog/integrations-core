@@ -97,6 +97,9 @@ class VerticaCheck(AgentCheck):
 
             self._connection = connection
 
+        if self._connection.closed():
+            self._connection.reset_connection()
+
         # The order of queries is important as some results are cached for later re-use
         try:
             self.query_licenses()
