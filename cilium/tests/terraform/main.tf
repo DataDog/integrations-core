@@ -35,7 +35,7 @@ resource "local_file" "kubeconfig" {
 }
 
 resource "google_container_cluster" "gke_cluster" {
-  name = replace("istio-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
+  name = replace("cilium-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
   location = random_shuffle.az.result[0]
   node_version = "1.13.7-gke.8"
   min_master_version = "1.13.7-gke.8"
@@ -83,7 +83,7 @@ resource "null_resource" "startup" {
     command = "python ./script.py"
     environment = {
       KUBECONFIG = "${local_file.kubeconfig.filename}"
-      ISTIO_VERSION = "1.2.3"
+      CILIUM_VERSION = "1.6"
     }
   }
 }
