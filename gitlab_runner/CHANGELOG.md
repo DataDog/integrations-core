@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab_runner
 
+## 2.6.0 / 2019-11-06
+
+* [Added] update gitlab_runner metrics. See [#4799](https://github.com/DataDog/integrations-core/pull/4799).
+
 ## 2.5.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
