@@ -33,7 +33,7 @@ docker.mem.swap.avg,gauge,,byte,,Average value of docker.mem.swap,0,docker,mem s
 docker.mem.swap.count,rate,,sample,second,The rate that the value of docker.mem.swap was sampled,0,docker,mem swap count
 docker.mem.swap.max,gauge,,byte,,Max value of docker.mem.swap,0,docker,mem swap max
 docker.mem.swap.median,gauge,,byte,,Median value of docker.mem.swap,0,docker,mem swap median
-docker.container.open_fds,gauge,,,,The number of open file descriptors,0,docker,open_fds
+docker.container.open_fds,gauge,,file,,The number of open file descriptors,0,docker,open_fds
 docker.container.size_rw,gauge,,byte,,Total size of all the files in the container which have been created or changed by processes running in the container,0,docker,changed files size
 docker.container.size_rw.95percentile,gauge,,byte,,95th percentile of docker.container.size_rw,0,docker,changed files size 95%
 docker.container.size_rw.avg,gauge,,byte,,Average value of docker.container.size_rw,0,docker,changed files size avg
