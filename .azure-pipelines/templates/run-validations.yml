@@ -16,10 +16,6 @@ steps:
   - script: ddev validate dep
     displayName: 'Validate dependencies'
 
-- ${{ if eq(parameters.repo, 'core') }}:
-  - script: ddev validate logos
-    displayName: 'Validate logos'
-
 - script: ddev validate manifest -i
   displayName: 'Validate manifest files'
 
