@@ -1,5 +1,9 @@
 # CHANGELOG - Vertica
 
+## 1.1.1 / 2019-11-06
+
+* [Fixed] Recreate connection when closed. See [#4958](https://github.com/DataDog/integrations-core/pull/4958).
+
 ## 1.1.0 / 2019-10-11
 
 * [Added] Add more Vertica metrics. See [#4649](https://github.com/DataDog/integrations-core/pull/4649).
