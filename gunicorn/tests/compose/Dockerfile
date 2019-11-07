@@ -1,8 +1,14 @@
 FROM python:alpine
 ARG PROC_NAME
+ARG GUNICORN_VERSION
 ENV proc_name_env=${PROC_NAME}
+ENV gunicorn_version_env=${GUNICORN_VERSION}
 RUN apk add --no-cache g++
-RUN pip install gunicorn setproctitle
+RUN pip install setproctitle
+RUN if [ -z "$gunicorn_version_env" ]; \
+    then pip install gunicorn; \
+    else pip install gunicorn==${gunicorn_version_env}; \
+    fi
 COPY app.py /dummy_app.py
 
 EXPOSE 18000

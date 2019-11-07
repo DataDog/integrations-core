@@ -18,3 +18,5 @@ PORT = 18000
 PROC_NAME = 'dd-test-gunicorn'
 
 INSTANCE = {'proc_name': PROC_NAME}
+
+GUNICORN_VERSION = os.getenv('GUNICORN_VERSION')

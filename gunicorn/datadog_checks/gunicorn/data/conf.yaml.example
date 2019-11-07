@@ -14,6 +14,11 @@ instances:
     #
   - proc_name: <WEB_APP_NAME>
 
+    ## @param gunicorn_bin_path - string - optional
+    ## gunicorn_bin_path used for retrieving metadata e.g. version
+    #
+    # gunicorn_bin_path: <GUNICORN_BIN_PATH>
+
     ## @param tags - list of key:value string - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
     ##
