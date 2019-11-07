@@ -62,6 +62,17 @@ def test_collect_metadata_docker(aggregator, datadog_agent, setup_gunicorn):
     _assert_metadata(datadog_agent)
 
 
+def test_collect_metadata_count(aggregator, datadog_agent, setup_gunicorn):
+    instance = INSTANCE.copy()
+    instance['gunicorn'] = setup_gunicorn['gunicorn_bin_path']
+
+    check = GUnicornCheck(CHECK_NAME, {}, [instance])
+    check.check_id = 'test:123'
+    check.check(instance)
+
+    datadog_agent.assert_metadata_count(5)
+
+
 def test_collect_metadata_invalid_binary(aggregator, datadog_agent, setup_gunicorn):
     instance = INSTANCE.copy()
     instance['gunicorn'] = '/bin/not_exist'
