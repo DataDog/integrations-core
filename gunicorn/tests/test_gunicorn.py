@@ -22,7 +22,7 @@ def _assert_metrics(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_gunicorn(aggregator, setup_gunicorn):
+def test_gunicorn(aggregator):
     check = GUnicornCheck(CHECK_NAME, {}, {})
     check.check(INSTANCE)
     _assert_metrics(aggregator)
