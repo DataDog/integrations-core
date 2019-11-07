@@ -1,5 +1,9 @@
 # CHANGELOG - Squid
 
+## 1.4.1 / 2019-11-07
+
+* [Fixed] Adding log section. See [#4824](https://github.com/DataDog/integrations-core/pull/4824).
+
 ## 1.4.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
