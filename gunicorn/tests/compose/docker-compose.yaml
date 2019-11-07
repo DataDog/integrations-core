@@ -8,5 +8,3 @@ services:
         PROC_NAME: ${PROC_NAME}
         GUNICORN_VERSION: ${GUNICORN_VERSION}
     container_name: dd-test-gunicorn
-    ports:
-      - 18000:18000

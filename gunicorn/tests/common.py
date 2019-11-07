@@ -16,6 +16,7 @@ HOST = get_docker_hostname()
 PORT = 18000
 
 PROC_NAME = 'dd-test-gunicorn'
+CONTAINER_NAME = 'dd-test-gunicorn'
 
 INSTANCE = {'proc_name': PROC_NAME}
 

@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.gunicorn import GUnicornCheck
 
-from .common import CHECK_NAME, GUNICORN_VERSION, INSTANCE
+from .common import CHECK_NAME, GUNICORN_VERSION, INSTANCE, CONTAINER_NAME
 
 # TODO: Test metadata in e2e when we can collect metadata from the agent
 
@@ -50,9 +50,10 @@ def test_collect_metadata_init_config(aggregator, datadog_agent, setup_gunicorn)
 
 
 @pytest.mark.skipif(not GUNICORN_VERSION, reason='Require GUNICORN_VERSION')
+@pytest.mark.usefixtures('dd_environment')
 def test_collect_metadata_docker(aggregator, datadog_agent, setup_gunicorn):
     instance = INSTANCE.copy()
-    instance['gunicorn'] = 'docker exec dd-test-gunicorn gunicorn'
+    instance['gunicorn'] = 'docker exec {} gunicorn'.format(CONTAINER_NAME)
 
     check = GUnicornCheck(CHECK_NAME, {}, [instance])
     check.check_id = CHECK_ID
