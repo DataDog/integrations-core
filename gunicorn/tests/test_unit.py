@@ -13,7 +13,7 @@ from .common import CHECK_NAME, INSTANCE
     'stdout, stderr, expect_metadata_count',
     [('gunicorn (version 19.9.0)', '', 5), ('', 'gunicorn (version 19.9.0)', 5), ('foo bar', '', 0), ('', '', 0)],
 )
-def test_collect_metadata(aggregator, datadog_agent, stdout, stderr, expect_metadata_count):
+def test_collect_metadata_parsing_matching(aggregator, datadog_agent, stdout, stderr, expect_metadata_count):
     """ Test all metadata collection code paths """
     check = GUnicornCheck(CHECK_NAME, {}, [INSTANCE])
     check.check_id = 'test:123'
