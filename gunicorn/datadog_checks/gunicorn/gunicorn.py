@@ -161,11 +161,7 @@ class GUnicornCheck(AgentCheck):
             self.set_metadata('version', raw_version)
 
     def _get_version(self):
-        """ Get version from `gunicorn --version` with this format:
-
-                gunicorn (version 19.9.0)
-
-        """
+        """ Get version from `gunicorn --version` """
         cmd = self.gunicorn_cmd + ['--version']
         try:
             pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
