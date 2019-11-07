@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.gunicorn import GUnicornCheck
 
-from .common import CHECK_NAME, GUNICORN_VERSION, INSTANCE, CONTAINER_NAME
+from .common import CHECK_NAME, CONTAINER_NAME, GUNICORN_VERSION, INSTANCE
 
 # TODO: Test metadata in e2e when we can collect metadata from the agent
 
