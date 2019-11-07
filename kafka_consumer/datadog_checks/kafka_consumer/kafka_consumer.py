@@ -365,7 +365,7 @@ class KafkaCheck(AgentCheck):
         """
         coordinator_id = self._kafka_client._find_coordinator_id_process_response(response)
         topics = self._consumer_groups[consumer_group]
-        if topics is None:
+        if not topics:
             topic_partitions = None  # None signals to fetch all known offsets for the consumer group
         else:
             # transform [("t1", [1, 2])] into [TopicPartition("t1", 1), TopicPartition("t1", 2)]
