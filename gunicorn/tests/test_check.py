@@ -18,9 +18,9 @@ def _assert_metrics(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_gunicorn(aggregator, setup_gunicorn):
+def test_gunicorn_instance(aggregator, setup_gunicorn):
     instance = INSTANCE.copy()
-    instance['gunicorn_bin_path'] = setup_gunicorn['gunicorn_bin_path']
+    instance['gunicorn'] = setup_gunicorn['gunicorn_bin_path']
 
     check = GUnicornCheck(CHECK_NAME, {}, [instance])
     check.check(instance)

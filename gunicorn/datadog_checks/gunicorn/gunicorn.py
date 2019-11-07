@@ -9,6 +9,7 @@ http://gunicorn.org/
 """
 # stdlib
 import re
+import shlex
 import time
 
 # 3rd party
@@ -38,7 +39,7 @@ class GUnicornCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         AgentCheck.__init__(self, name, init_config, instances)
 
-        self.gunicorn_bin_path = self.instance.get('gunicorn_bin_path', 'gunicorn')
+        self.gunicorn_cmd = shlex.split(self.instance.get('gunicorn', init_config.get('gunicorn', 'gunicorn')))
 
     def get_library_versions(self):
         return {"psutil": psutil.__version__}
@@ -165,8 +166,9 @@ class GUnicornCheck(AgentCheck):
                 gunicorn (version 19.9.0)
 
         """
+        cmd = self.gunicorn_cmd + ['--version']
         try:
-            pc_out, pc_err, _ = get_subprocess_output([self.gunicorn_bin_path, '--version'], self.log, False)
+            pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
         except OSError:
             self.log.warning("Error collecting gunicorn version.")
             return None
