@@ -81,7 +81,7 @@ class CouchDb(AgentCheck):
         self.checker.check(instance)
 
     def get_server(self, instance):
-        server = instance.get('server', None)
+        server = instance.get('server')
         if server is None:
             raise errors.BadConfigError("A server must be specified")
         return server
@@ -203,7 +203,7 @@ class CouchDB2:
                             self.gauge("{0}.{1}.{2}".format(prefix, key, metric), value, tags=tags)
                 else:
                     self.gauge("{0}.{1}".format(prefix, key), value["value"], tags=tags)
-            elif type(value) is dict:
+            elif isinstance(value, dict):
                 self._build_metrics(value, tags, "{0}.{1}".format(prefix, key))
 
     def _build_db_metrics(self, data, tags):
@@ -233,7 +233,7 @@ class CouchDB2:
                 for queue, val in iteritems(value):
                     queue_tags = list(tags)
                     queue_tags.append("queue:{0}".format(queue))
-                    if type(val) is dict:
+                    if isinstance(val, dict):
                         if 'count' in val:
                             self.gauge("{0}.{1}.size".format(prefix, key), val['count'], queue_tags)
                         else:
@@ -247,7 +247,7 @@ class CouchDB2:
                     dist_tags = list(tags)
                     dist_tags.append("node:{0}".format(node))
                     self._build_system_metrics(metrics, dist_tags, "{0}.{1}".format(prefix, key))
-            elif type(value) is dict:
+            elif isinstance(value, dict):
                 self._build_system_metrics(value, tags, "{0}.{1}".format(prefix, key))
             else:
                 self.gauge("{0}.{1}".format(prefix, key), value, tags)
@@ -285,10 +285,10 @@ class CouchDB2:
             elif task['type'] == 'view_compaction':
                 rtags.append("database:{0}".format(task['database'].split('/')[-1].split('.')[0]))
                 rtags.append("design_document:{0}".format(task['design_document'].split('/')[-1]))
-                if task.get('phase', None) is not None:
+                if task.get('phase') is not None:
                     rtags.append("phase:{0}".format(task['phase']))
                 for metric in ['changes_done', 'progress', 'total_changes']:
-                    if task.get(metric, None) is not None:
+                    if task.get(metric) is not None:
                         self.gauge("{0}.view_compaction.{1}".format(prefix, metric), task[metric], rtags)
 
         for metric, count in iteritems(counts):
@@ -297,7 +297,7 @@ class CouchDB2:
             self.gauge("{0}.{1}.count".format(prefix, metric), count, tags)
 
     def _get_instance_names(self, server, instance):
-        name = instance.get('name', None)
+        name = instance.get('name')
         if name is None:
             url = urljoin(server, "/_membership")
             names = self.agent_check.get(url, [])['cluster_nodes']
@@ -312,7 +312,12 @@ class CouchDB2:
         except KeyError:
             return []
 
-        idx = nodes.index(name)
+        try:
+            idx = nodes.index(name)
+        except ValueError:
+            self.agent_check.log.error("Could not find node %r in %r", name, nodes)
+            raise
+
         size = int(math.ceil(len(dbs) / float(len(nodes))))
         return dbs[(idx * size) : ((idx + 1) * size)]
 
@@ -327,7 +332,7 @@ class CouchDB2:
             self._build_system_metrics(self._get_system_stats(server, name, tags), tags)
             self._build_active_tasks_metrics(self._get_active_tasks(server, name, tags), tags)
 
-            db_whitelist = instance.get('db_whitelist', None)
+            db_whitelist = instance.get('db_whitelist')
             db_blacklist = instance.get('db_blacklist', [])
             scanned_dbs = 0
             for db in self._get_dbs_to_scan(server, name, tags):
