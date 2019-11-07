@@ -201,6 +201,7 @@ class NagiosTailer(object):
         self.log_path = log_path
         self.log = logger
         self._nested_parse_line = parse_line
+        self._line_parsed = 0
 
         tail = TailFile(self.log, self.log_path, self.parse_line)
         self.gen = tail.tail(line_by_line=False, move_end=True)
@@ -301,7 +302,7 @@ class NagiosEventLogTailer(object):
         }
 
         msg_text = json.dumps(msg_text)
-        self.log.info("Nagios Event pack: {}", msg_text)
+        self.log.info("Nagios Event pack: %s", msg_text)
 
         event_payload.update(
             {
