@@ -1,5 +1,9 @@
 # CHANGELOG - nagios
 
+## 1.5.1 / 2019-11-07
+
+* [Fixed] Fix use of format in logging. See [#4973](https://github.com/DataDog/integrations-core/pull/4973).
+
 ## 1.5.0 / 2019-11-06
 
 * [Fixed] Refactor tailers logic. See [#4942](https://github.com/DataDog/integrations-core/pull/4942).
