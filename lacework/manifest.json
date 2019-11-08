@@ -1,0 +1,29 @@
+{
+  "display_name": "Lacework",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "lacework",
+  "metric_prefix": "lacework.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "545f8c45-038b-41e5-ae13-8550c0ee563f",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Lacework Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "lacework",
+  "assets": {
+    "dashboards": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
