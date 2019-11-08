@@ -33,11 +33,11 @@ class VerticaCheck(AgentCheck):
 
         self._db = self.instance.get('db', '')
         self._server = self.instance.get('server', '')
-        self._port = self.instance.get('port', 5433)
+        self._port = int(self.instance.get('port', 5433))
         self._username = self.instance.get('username', '')
         self._password = self.instance.get('password', '')
         self._backup_servers = [
-            '{}:{}'.format(bs.get('server', self._server), bs.get('port', self._port))
+            (bs.get('server', self._server), int(bs.get('port', self._port)))
             for bs in self.instance.get('backup_servers', [])
         ]
         self._connection_load_balance = is_affirmative(self.instance.get('connection_load_balance', False))
@@ -96,8 +96,7 @@ class VerticaCheck(AgentCheck):
                 return
 
             self._connection = connection
-
-        if self._connection.closed():
+        elif self._connection_load_balance or self._connection.closed():
             self._connection.reset_connection()
 
         # The order of queries is important as some results are cached for later re-use
