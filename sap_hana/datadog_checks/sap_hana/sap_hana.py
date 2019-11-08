@@ -57,7 +57,7 @@ class SapHanaCheck(AgentCheck):
         self._conn = None
 
         # Whether or not the connection was lost
-        self._need_reconnect = False
+        self._connection_lost = False
 
         # Whether or not to use the hostnames contained in the queried views
         self._use_hana_hostnames = is_affirmative(self.instance.get('use_hana_hostnames', False))
@@ -97,10 +97,10 @@ class SapHanaCheck(AgentCheck):
                     self.log.error('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                     continue
         finally:
-            if self._need_reconnect:
+            if self._connection_lost:
                 self._conn.close()
                 self._conn = None
-                self._need_reconnect = False
+                self._connection_lost = False
 
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html
@@ -440,12 +440,12 @@ class SapHanaCheck(AgentCheck):
     def query_custom(self):
         for custom_query in self._custom_queries:
             query = custom_query.get('query')
-            if not query:  # no cov
+            if not query:
                 self.log.error('Custom query field `query` is required')
                 continue
 
             columns = custom_query.get('columns')
-            if not columns:  # no cov
+            if not columns:
                 self.log.error('Custom query field `columns` is required')
                 continue
 
@@ -464,7 +464,7 @@ class SapHanaCheck(AgentCheck):
                     self.log.debug('Custom query returned an empty result')
                     continue
 
-                if len(columns) != len(row):  # no cov
+                if len(columns) != len(row):
                     self.log.error('Custom query result expected {} column(s), got {}'.format(len(columns), len(row)))
                     continue
 
@@ -478,12 +478,12 @@ class SapHanaCheck(AgentCheck):
                         continue
 
                     name = column.get('name')
-                    if not name:  # no cov
+                    if not name:
                         self.log.error('Column field `name` is required')
                         break
 
                     column_type = column.get('type')
-                    if not column_type:  # no cov
+                    if not column_type:
                         self.log.error('Column field `type` is required for column `{}`'.format(name))
                         break
 
@@ -497,7 +497,7 @@ class SapHanaCheck(AgentCheck):
                             break
                         try:
                             metric_info.append((name, float(value), column_type))
-                        except (ValueError, TypeError):  # no cov
+                        except (ValueError, TypeError):
                             self.log.error('Non-numeric value `{}` for metric column `{}`'.format(value, name))
                             break
 
@@ -563,7 +563,7 @@ class SapHanaCheck(AgentCheck):
         except Exception as e:
             error = str(e)
             if 'Lost connection to HANA server' in error:
-                self._need_reconnect = True
+                self._connection_lost = True
 
             raise QueryExecutionError(error, source)
 
