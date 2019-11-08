@@ -37,8 +37,6 @@ resource "local_file" "kubeconfig" {
 resource "google_container_cluster" "gke_cluster" {
   name = replace("cilium-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
   location = random_shuffle.az.result[0]
-  node_version = "1.13.7-gke.8"
-  min_master_version = "1.13.7-gke.8"
 
   lifecycle {
     ignore_changes = ["node_pool"]
@@ -78,15 +76,7 @@ data "template_file" "kubeconfig" {
   }
 }
 
-resource "null_resource" "startup" {
-  provisioner "local-exec" {
-    command = "python ./script.py"
-    environment = {
-      KUBECONFIG = "${local_file.kubeconfig.filename}"
-      CILIUM_VERSION = "1.6"
-    }
-  }
-}
+# This is where the script goes
 
 output "kubeconfig" {
   value = abspath("${local_file.kubeconfig.filename}")
