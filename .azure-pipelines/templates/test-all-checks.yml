@@ -290,6 +290,9 @@ jobs:
     - checkName: riakcs
       displayName: Riak CS
       os: linux
+    - checkName: sap_hana
+      displayName: SAP HANA
+      os: linux
     - checkName: snmp
       displayName: SNMP
       os: linux
