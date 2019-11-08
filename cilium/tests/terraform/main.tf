@@ -42,7 +42,7 @@ resource "google_container_cluster" "gke_cluster" {
     ignore_changes = ["node_pool"]
   }
 
-  initial_node_count = 4
+  initial_node_count = 2
 
   master_auth {
     username = "user"
