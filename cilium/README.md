@@ -10,10 +10,10 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Cilium check is included in the [Datadog Agent][2] package but requires additional setup steps to export Prometheus metrics.
+The Cilium check is included in the [Datadog Agent][2] package, but it requires additional setup steps to export Prometheus metrics.
 
-1. In order to collect `cilium-agent` metrics, the Prometheus metrics must be enabled by either:
-    * Deploy Cilium with the `global.prometheus.enabled=true` Helm value set.
+1. In order to collect `cilium-agent` metrics, you must enable Prometheus metrics. There are two ways to do this. Either:
+    * Deploy Cilium with the `global.prometheus.enabled=true` Helm value set, or:
     * Add `--prometheus-serve-addr=:9090` to the `args` section of the Cilium DaemonSet config.
         ```
         [...]
@@ -23,7 +23,8 @@ The Cilium check is included in the [Datadog Agent][2] package but requires addi
                     - --prometheus-serve-addr=:9090
 
         ```
-2. In order to collect `cilium-operator` metrics, the Prometheus metrics must be enabled by adding `- --enable-metrics` to the args section of the Cilium DaemonSet config.
+2. In order to collect `cilium-operator` metrics, the Prometheus metrics must be enabled by adding `- --enable-metrics` to the args section of the Cilium deployment config.
+    * The operator metrics are enabled if Cilium is deployed with the `global.prometheus.enabled=true` Helm value set.
 
 
 ### Configuration
