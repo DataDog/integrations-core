@@ -19,10 +19,10 @@ OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(HERE, 'docker', 'docker-compose.yml')
+    pass
+    # compose_file = os.path.join(HERE, 'docker', 'docker-compose.yml')
     # TODO: get endpoints
-    with docker_run(compose_file):
-        yield {'instances': [agent_instance, operator_instance]}
+    # yield {'instances': [agent_instance, operator_instance]}
 
 
 @pytest.fixture(scope="session")
