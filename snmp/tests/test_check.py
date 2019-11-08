@@ -574,15 +574,18 @@ def test_discovery(aggregator):
     try:
         for _ in range(30):
             check.check(instance)
-            if aggregator.metric_names:
+            if len(aggregator.metric_names) > 1:
                 break
             time.sleep(1)
+            aggregator.reset()
     finally:
         check._running = False
 
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=check_tags, count=1)
+
+    aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)], count=1, value=1)
     aggregator.assert_all_metrics_covered()
 
 
