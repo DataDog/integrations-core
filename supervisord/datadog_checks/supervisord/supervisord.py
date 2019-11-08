@@ -138,6 +138,8 @@ class SupervisordCheck(AgentCheck):
                 tags=instance_tags + ['status:{}'.format(PROCESS_STATUS[status])],
             )
 
+        self._collect_metadata(supe)
+
     @staticmethod
     def _connect(instance):
         sock = instance.get('socket')
@@ -182,3 +184,13 @@ Stop time: %(stop_str)s
 Exit Status: %(exitstatus)s"""
             % proc
         )
+
+    def _collect_metadata(self, supe):
+        try:
+            version = supe.getSupervisorVersion()
+        except Exception as e:
+            self.log.warning("Error collecting version: %s", e)
+            return
+
+        self.log.debug('Version collected: %s', version)
+        self.set_metadata('version', version)
