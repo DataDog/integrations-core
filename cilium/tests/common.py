@@ -78,5 +78,5 @@ OPERATOR_METRICS = [
     'cilium.operator.process.resident_memory.bytes',
     'cilium.operator.process.start_time.seconds',
     'cilium.operator.process.virtual_memory.bytes',
-    'cilium.operator.process.virtual_memory_max.bytes'
+    'cilium.operator.process.virtual_memory_max.bytes',
 ]

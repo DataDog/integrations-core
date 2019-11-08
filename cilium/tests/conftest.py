@@ -8,7 +8,6 @@ import pytest
 
 from datadog_checks.utils.common import get_docker_hostname
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 AGENT_PORT = '9090'

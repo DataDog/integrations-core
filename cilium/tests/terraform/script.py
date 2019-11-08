@@ -4,8 +4,8 @@
 import os
 from subprocess import check_call
 
-version = os.environ['CILIUM_VERSION']
-# version = "1.6.1"
+# version = os.environ['CILIUM_VERSION']
+version = "1.6.1"
 opj = os.path.join
 
 cilium = "cilium-{}".format(version)
@@ -23,9 +23,10 @@ check_call(
         "--clusterrole",
         "cluster-admin",
         "--user",
-        "ddtest@google.email"
+        "ddtest@google.email",
     ]
 )
+
 
 # We don't care about the platform as we only use yaml files
 check_call(
@@ -34,12 +35,11 @@ check_call(
         "-o",
         "cilium.tar.gz",  # Need to update with versions where possible
         "-L",
-        "https://github.com/cilium/cilium/archive/{version}.tar.gz".format(
-            version=version
-        ),
+        "https://github.com/cilium/cilium/archive/{version}.tar.gz".format(version=version),
     ]
 )
 check_call(["tar", "xf", "{version}.tar.gz".format(version=version)])
+
 
 check_call(["kubectl", "create", "ns", "cilium"])
 
