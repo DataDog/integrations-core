@@ -96,18 +96,20 @@ init_config:
   ## @param profiles - dictionary - optional
   ## Specify profiles to be able to reference a set of metrics by name.
   ## One of definition_file or definition needs to be defined.
-  ## definition_file points to a file with the same structure as
-  ## global_metrics, whereas definition inlines it directly here.
+  ## definition_file points to a file with a prfile, whereas definition inlines
+  ## it directly here.
   ## When using a profile present on the profiles directory of the
   ## configuration, you can directly pass the filename.
-  ## sysObjectID can be set to match the devices that are going to
-  ## automatically use this profile.
   #
   # profiles:
   #   profile1:
   #   	definition_file: <PROFILE_FILE>
   #   	definition: <PROFILE>
-  #   	sysobjectid: <OID>
+  profiles:
+    f5-big-ip:
+      definition_file: f5-big-ip.yaml
+    router:
+      definition_file: generic-router.yaml
 
 instances:
   -

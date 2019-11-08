@@ -37,7 +37,7 @@ class InstanceConfig:
         if profile:
             if profile not in profiles:
                 raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.metrics.extend(profiles[profile]['definition'])
+            self.metrics.extend(profiles[profile]['definition']['metrics'])
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self.snmp_engine, self.mib_view_controller = self.create_snmp_engine(mibs_path)
         self.ip_address = None
@@ -79,7 +79,7 @@ class InstanceConfig:
         self.context_data = hlapi.ContextData(*self.get_context_data(instance))
 
     def refresh_with_profile(self, profile, warning, log):
-        self.metrics.extend(profile['definition'])
+        self.metrics.extend(profile['definition']['metrics'])
         self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(self.metrics, warning, log)
 
     def call_cmd(self, cmd, *args, **kwargs):
