@@ -539,6 +539,23 @@ def test_profile_sys_object(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+def test_profile_sys_object_prefix(aggregator):
+    instance = common.generate_instance_config([])
+    init_config = {
+        'profiles': {
+            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'},
+            'profile2': {'definition': common.CAST_METRICS, 'sysobjectid': '1.3.6.1.4.*'},
+        }
+    }
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_all_metrics_covered()
+
+
 def test_profile_sys_object_unknown(aggregator):
     """If the fetched sysObjectID is not referenced by any profiles, check fails."""
     instance = common.generate_instance_config([])
@@ -570,9 +587,7 @@ def test_discovery(aggregator):
         'community_string': 'public',
     }
     init_config = {
-        'profiles': {
-            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
-        }
+        'profiles': {'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.*'}}
     }
     check = SnmpCheck('snmp', init_config, [instance])
     try:

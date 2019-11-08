@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import fnmatch
 import ipaddress
 import json
 import os
@@ -145,12 +146,13 @@ class SnmpCheck(AgentCheck):
                 except Exception as e:
                     self.log.debug("Error scanning host %s: %s", host, e)
                     continue
-                if sys_object_oid not in self.profiles_by_oid:
+                try:
+                    profile = self._profile_for_sysobject_oid(sys_object_oid)
+                except ConfigurationError:
                     if not (host_config.table_oids or host_config.raw_oids):
                         self.log.warn("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
-                    profile = self.profiles_by_oid[sys_object_oid]
                     host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
                 config.discovered_instances[host] = host_config
 
@@ -311,6 +313,18 @@ class SnmpCheck(AgentCheck):
         self.log.debug('Returned vars: %s', var_binds)
         return var_binds[0][1].prettyPrint()
 
+    def _profile_for_sysobject_oid(self, sys_object_oid):
+        """Return, if any, a matching profile for sys_object_oid.
+
+        If several profiles match, it will return the longer match, ie the
+        closest one to the sys_object_oid.
+        """
+        oids = [oid for oid in self.profiles_by_oid if fnmatch.fnmatch(sys_object_oid, oid)]
+        oids.sort()
+        if not oids:
+            raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
+        return self.profiles_by_oid[oids[-1]]
+
     def _consume_binds_iterator(self, binds_iterator, config):
         all_binds = []
         error = None
@@ -386,9 +400,7 @@ class SnmpCheck(AgentCheck):
         try:
             if not (config.table_oids or config.raw_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
-                if sys_object_oid not in self.profiles_by_oid:
-                    raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
-                profile = self.profiles_by_oid[sys_object_oid]
+                profile = self._profile_for_sysobject_oid(sys_object_oid)
                 config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
 
             if config.table_oids:
