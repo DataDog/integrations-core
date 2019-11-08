@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+snmp.discovered_devices_count,gauge,,host,,The total number of devices discovered.,0,snmp,DevicesCount
