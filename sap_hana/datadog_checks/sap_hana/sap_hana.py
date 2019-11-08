@@ -12,12 +12,13 @@ from six import iteritems
 from six.moves import zip
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.common import total_time_to_temporal_percent
+from datadog_checks.base.utils.constants import MICROSECOND
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
-from .constants import MICROSECOND
 from .exceptions import QueryExecutionError
-from .utils import compute_percent, positive, total_time_to_temporal_percent
+from .utils import compute_percent, positive
 
 
 class SapHanaCheck(AgentCheck):

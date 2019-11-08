@@ -1,6 +1,6 @@
 [
     {
-        "agent_version": "6.15.0",
+        "agent_version": "6.16.0",
         "integration": "SAP HANA",
         "groups": ["host", "server", "port"],
         "check": "sap_hana.can_connect",
@@ -9,7 +9,7 @@
         "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored SAP HANA system, or `OK` otherwise."
     },
     {
-        "agent_version": "6.15.0",
+        "agent_version": "6.16.0",
         "integration": "SAP HANA",
         "groups": ["host", "server", "port", "db"],
         "check": "sap_hana.status",

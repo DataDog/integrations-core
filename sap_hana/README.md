@@ -48,7 +48,7 @@ To query certain views, specific privileges must be granted to the chosen HANA m
     GRANT CATALOG READ TO DD_MONITOR
     ```
 
-3. Then run the following commands:
+3. Then run the following commands to grant select privileges on each system view:
 
     ```
     GRANT SELECT ON SYS.M_DATABASE TO DD_MONITOR
@@ -61,8 +61,8 @@ To query certain views, specific privileges must be granted to the chosen HANA m
     GRANT SELECT ON SYS_DATABASES.M_SERVICE_COMPONENT_MEMORY TO DD_MONITOR
     GRANT SELECT ON SYS_DATABASES.M_SERVICE_MEMORY TO DD_MONITOR
     GRANT SELECT ON SYS_DATABASES.M_SERVICE_STATISTICS TO DD_MONITOR
-        GRANT SELECT ON SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS TO DD_MONITOR
-```
+    GRANT SELECT ON SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS TO DD_MONITOR
+    ```
 
 4. Finally, run the following command to assign the monitoring role to the desired user:
 

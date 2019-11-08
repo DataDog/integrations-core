@@ -1,1 +1,2 @@
 # CHANGELOG - SAP HANA
+

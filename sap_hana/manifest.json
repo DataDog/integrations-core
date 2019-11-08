@@ -16,8 +16,7 @@
   ],
   "public_title": "Datadog-SAP HANA Integration",
   "categories": [
-    "data store",
-    "log collection"
+    "data store"
   ],
   "type": "check",
   "is_public": false,
