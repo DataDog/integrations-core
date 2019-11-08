@@ -6,6 +6,9 @@ import os
 import mock
 import pytest
 
+from .common import AGENT_METRICS, OPERATOR_METRICS
+from datadog_checks.dev.kube_port_forward import port_forward
+from datadog_checks.dev.terraform import terraform_run
 from datadog_checks.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -18,9 +21,15 @@ OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    pass
-    # compose_file = os.path.join(HERE, 'docker', 'docker-compose.yml')
-    # TODO: get endpoints
+    with terraform_run(os.path.join(HERE, 'terraform')) as outputs:
+        kubeconfig = outputs['kubeconfig']['value']
+
+        with port_forward(kubeconfig, 'cilium', 'cilium', 9090) as (ip, port):
+            instance = {
+                'prometheus_url': 'http://{}:{}/metrics'.format(ip, port),
+                'metrics': [AGENT_METRICS],
+            }
+            yield instance
     # yield {'instances': [agent_instance, operator_instance]}
 
 
