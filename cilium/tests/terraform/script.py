@@ -4,8 +4,8 @@
 import os
 from subprocess import check_call
 
-# version = os.environ['CILIUM_VERSION']
-version = "1.6.1"
+version = os.environ['CILIUM_VERSION']
+
 opj = os.path.join
 
 cilium = "cilium-{}".format(version)

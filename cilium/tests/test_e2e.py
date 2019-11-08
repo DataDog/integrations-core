@@ -9,7 +9,6 @@ from .common import AGENT_METRICS
 
 @pytest.mark.e2e
 def test_check_ok(dd_agent_check):
-    agent_instance = {'agent_endpoint': 'localhost:9090/metrics', 'tags': ['pod_test']}
-    aggregator = dd_agent_check(agent_instance, rate=True)
+    aggregator = dd_agent_check(rate=True)
     for metric in AGENT_METRICS:
         aggregator.assert_metric(metric)
