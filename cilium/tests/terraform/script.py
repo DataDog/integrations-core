@@ -1,12 +1,11 @@
 #!/usr/bin/python
 
 # Write it as a python script for portability
-import glob
 import os
 from subprocess import check_call
 
-#version = os.environ['CILIUM_VERSION']
-version = "1.6.1"
+version = os.environ['CILIUM_VERSION']
+# version = "1.6.1"
 opj = os.path.join
 
 cilium = "cilium-{}".format(version)

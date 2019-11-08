@@ -76,7 +76,15 @@ data "template_file" "kubeconfig" {
   }
 }
 
-# This is where the script goes
+resource "null_resource" "startup" {
+  provisioner "local-exec" {
+    command = "python ./script.py"
+    environment = {
+      KUBECONFIG = "${local_file.kubeconfig.filename}"
+      CILIUM_VERSION = "1.6.1"
+    }
+  }
+}
 
 output "kubeconfig" {
   value = abspath("${local_file.kubeconfig.filename}")
