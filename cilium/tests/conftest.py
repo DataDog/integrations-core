@@ -26,8 +26,8 @@ def dd_environment():
 
         with port_forward(kubeconfig, 'cilium', 'cilium', 9090) as (ip, port):
             instance = {
-                'prometheus_url': 'http://{}:{}/metrics'.format(ip, port),
-                'metrics': [AGENT_METRICS],
+                'agent_endpoint': 'http://{}:{}/metrics'.format(ip, port),
+                'metrics': AGENT_METRICS,
             }
             yield instance
     # yield {'instances': [agent_instance, operator_instance]}
