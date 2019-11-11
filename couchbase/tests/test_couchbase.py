@@ -4,6 +4,7 @@
 
 # stdlib
 import pytest
+import time
 
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.couchbase.couchbase_consts import (
@@ -125,6 +126,43 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
 
 
+def test_metadata(aggregator, instance_query, datadog_agent):
+    check = Couchbase('couchbase', {}, instances=[instance_query])
+    for _ in range(10):
+        check.check(instance_query)
+        time.sleep(1)
+    check.check_id = 'test:123'
+    server = instance_query['server']
+    @mock.patch(
+        'datadog_checks.couchbase.check.get_data',
+        return_value={'stats':{'nodes':{'version': "5.5.3-4039-enterprise"}}}
+    )
+
+    data = check.get_data(instance_query['server'], instance_query)
+    
+    check.collect_version(data)
+    nodes = data['stats']['nodes']
+
+    raw_version = ""
+        
+    # Next, get all the nodes
+    if nodes is not None:
+        for node in nodes:
+            raw_version = node['version']
+
+    major, minor, patch = raw_version.split("-")[0].split(".")
+
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+
+
 def _assert_bucket_metrics(aggregator, tags, device=None):
     # Assert 'couchbase.by_bucket.' metrics
     #  Because some metrics are deprecated, we can just see if we get an arbitrary number
@@ -146,3 +184,4 @@ def _assert_stats(aggregator, node_tags, device=None):
     # Assert 'couchbase.' metrics
     for mname in TOTAL_STATS:
         aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)
+
