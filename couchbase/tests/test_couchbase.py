@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import time
+
 # stdlib
 import mock
 import pytest
-import time
 
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.couchbase.couchbase_consts import (
@@ -127,20 +128,20 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
 def test_metadata(aggregator, instance_query, datadog_agent):
     check = Couchbase('couchbase', {}, instances=[instance_query])
-    for _ in range(10):
-        check.check(instance_query)
-        time.sleep(1)
     check.check_id = 'test:123'
+    check.check(instance_query)
     server = instance_query['server']
 
     data = check.get_data(server, instance_query)
 
     nodes = data['stats']['nodes']
-    
+
     raw_version = ""
-        
+
     # Next, get all the nodes
     if nodes is not None:
         for node in nodes:
@@ -154,9 +155,9 @@ def test_metadata(aggregator, instance_query, datadog_agent):
         'version.minor': minor,
         'version.patch': patch,
         'version.release': mock.ANY,
-        'version.raw': raw_version
+        'version.raw': raw_version,
     }
-    
+
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
@@ -181,4 +182,3 @@ def _assert_stats(aggregator, node_tags, device=None):
     # Assert 'couchbase.' metrics
     for mname in TOTAL_STATS:
         aggregator.assert_metric('couchbase.{}'.format(mname), tags=CHECK_TAGS, count=1)
-
