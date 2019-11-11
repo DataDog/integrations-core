@@ -6,6 +6,7 @@ from copy import deepcopy
 import aerospike
 import pytest
 
+from datadog_checks.dev import run_command
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 
@@ -32,6 +33,10 @@ def init_db():
         'quote_cnt': 47,
     }
     client.put(key, bins)
+
+    for _ in range(10):
+        client.get(key)
+
     client.close()
 
 
