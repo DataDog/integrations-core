@@ -6,7 +6,6 @@ from copy import deepcopy
 import aerospike
 import pytest
 
-from datadog_checks.dev import run_command
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 
