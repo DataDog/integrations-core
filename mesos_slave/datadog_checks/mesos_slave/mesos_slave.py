@@ -99,7 +99,6 @@ class MesosSlave(AgentCheck):
         super(MesosSlave, self).__init__(name, init_config, instances)
         self.cluster_name = None
         self.version = []
-        self.tags = []
 
         url = self.instance.get('url', '')
         parsed_url = urlparse(url)
@@ -192,9 +191,10 @@ class MesosSlave(AgentCheck):
         try:
             resp = self.http.get(url)
             resp.raise_for_status()
+        except Timeout:
+            self.warning("Timeout for %s seconds when connecting to URL: %s", self.http.options['timeout'], url)
+            raise CheckException
         except Exception as e:
-            if e.__class__ == Timeout:
-                self.warning("Timeout for %s seconds when connecting to URL: %s", self.http.options['timeout'], url)
             self.warning("Couldn't connect to URL: %s with exception: %s", url, e)
             # bubble up the exception
             raise CheckException

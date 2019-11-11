@@ -11,7 +11,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_slave import MesosSlave
 
-from .common import MESOS_SLAVE_VERSION
+from .common import MESOS_SLAVE_VERSION, PARAMETERS
 
 
 def test_fixtures(check, instance, aggregator):
@@ -165,10 +165,8 @@ stats_test_data = [
     ),
 ]
 
-parameters = 'test_case_name, request_mock_effects, expected_tags, expect_exception, expected_status'
 
-
-@pytest.mark.parametrize(parameters, state_test_data)
+@pytest.mark.parametrize(PARAMETERS, state_test_data)
 @pytest.mark.integration
 def test_can_connect_service_check_state(
     instance, aggregator, test_case_name, request_mock_effects, expected_tags, expect_exception, expected_status
@@ -185,7 +183,7 @@ def test_can_connect_service_check_state(
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
 
 
-@pytest.mark.parametrize(parameters, stats_test_data)
+@pytest.mark.parametrize(PARAMETERS, stats_test_data)
 @pytest.mark.integration
 def test_can_connect_service_check_stats(
     instance, aggregator, test_case_name, request_mock_effects, expected_tags, expect_exception, expected_status
