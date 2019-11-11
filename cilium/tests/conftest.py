@@ -25,11 +25,16 @@ def dd_environment():
         kubeconfig = outputs['kubeconfig']['value']
 
         with port_forward(kubeconfig, 'cilium', 'cilium', 9090) as (ip, port):
-            instance = {
+            agent_instance = {
                 'agent_endpoint': 'http://{}:{}/metrics'.format(ip, port),
                 'metrics': AGENT_METRICS,
             }
-            yield instance
+        with port_forward(kubeconfig, 'cilium', 'cilium', 6942) as (ip, port):
+            operator_instance = {
+                'operator_endpoint': 'http://{}:{}/metrics'.format(ip, port),
+                'metrics': OPERATOR_METRICS,
+            }
+            yield {'instances': [agent_instance, operator_instance]}
     # yield {'instances': [agent_instance, operator_instance]}
 
 
