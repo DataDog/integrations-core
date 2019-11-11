@@ -212,6 +212,7 @@ class YarnCheck(AgentCheck):
             self._yarn_app_metrics(rm_address, app_tags, tags)
         self._yarn_node_metrics(rm_address, tags)
         self._yarn_scheduler_metrics(rm_address, tags, queue_blacklist)
+        self.collect_version(rm_address)
 
     def _yarn_cluster_metrics(self, rm_address, addl_tags):
         """
@@ -256,6 +257,16 @@ class YarnCheck(AgentCheck):
             except KeyError:
                 self.log.error("Invalid value {} for application_tag".format(yarn_key))
         return tags
+    
+    def collect_version(self, rm_address):
+        data = self._rest_request_to_json(rm_address, YARN_NODES_PATH, [])
+        node_info = data['nodes']['node']
+        for metrics in node_info:
+            try:
+                version = metrics['version']
+                self.set_metadata('version', version)
+            except Exception:
+                continue
 
     def _yarn_node_metrics(self, rm_address, addl_tags):
         """

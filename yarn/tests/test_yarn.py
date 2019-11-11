@@ -9,9 +9,11 @@ from six import iteritems
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import (
     APPLICATION_STATUS_SERVICE_CHECK,
+    DEFAULT_RM_URI,
     SERVICE_CHECK_NAME,
     YARN_APP_METRICS,
     YARN_QUEUE_METRICS,
+    YARN_NODES_PATH
 )
 
 from .common import (
@@ -197,3 +199,33 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
         tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
         count=4,
     )
+
+def test_metadata(aggregator, instance, datadog_agent):
+    check = YarnCheck('yarn', {}, [instance])
+    check.check_id = 'test:123'
+
+    check.check(instance)
+    
+    data = check._rest_request_to_json(DEFAULT_RM_URI, YARN_NODES_PATH, [])
+
+    node_info = data['nodes']['node']
+
+    raw_version = ""
+
+    for metrics in node_info:
+        try:
+            raw_version = metrics['version']
+        except Exception:
+            continue
+
+    major, minor, patch = raw_version.split(".")
+
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
