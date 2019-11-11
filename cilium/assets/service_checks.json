@@ -4,7 +4,7 @@
         "integration":"cilium",
         "check": "cilium.prometheus.health",
         "statuses": ["ok", "critical"],
-        "groups": ["endpoint"],
+        "groups": ["host", "endpoint"],
         "name": "Cilium prometheus health",
         "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
     }
