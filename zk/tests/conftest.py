@@ -5,6 +5,7 @@ import os
 import sys
 import time
 
+import mock
 import pytest
 
 from datadog_checks.dev import RetryError, docker_run
@@ -35,12 +36,14 @@ STAT_METRICS = [
     'zookeeper.packets.sent',
 ]
 
+VALID_CONFIG = {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
+
 STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']
 
 
 @pytest.fixture(scope="session")
 def get_instance():
-    return {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
+    return VALID_CONFIG
 
 
 @pytest.fixture
@@ -87,3 +90,23 @@ def dd_environment(get_instance):
 
     with docker_run(compose_file, conditions=[condition]):
         yield get_instance
+
+
+@pytest.fixture
+def check():
+    return ZookeeperCheck(CHECK_NAME, {}, [VALID_CONFIG])
+
+
+@pytest.fixture(scope='session')
+def version_metadata():
+    version = os.environ['ZK_VERSION']
+    tokens = version.split('.')
+    major, minor = tokens[0:2]
+    return {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': mock.ANY,
+        'version.release': mock.ANY,
+    }
