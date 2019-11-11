@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
+import mock
 import pytest
 import time
 
@@ -133,16 +134,11 @@ def test_metadata(aggregator, instance_query, datadog_agent):
         time.sleep(1)
     check.check_id = 'test:123'
     server = instance_query['server']
-    @mock.patch(
-        'datadog_checks.couchbase.check.get_data',
-        return_value={'stats':{'nodes':{'version': "5.5.3-4039-enterprise"}}}
-    )
 
-    data = check.get_data(instance_query['server'], instance_query)
-    
-    check.collect_version(data)
+    data = check.get_data(server, instance_query)
+
     nodes = data['stats']['nodes']
-
+    
     raw_version = ""
         
     # Next, get all the nodes
@@ -157,10 +153,11 @@ def test_metadata(aggregator, instance_query, datadog_agent):
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,
+        'version.release': mock.ANY,
         'version.raw': raw_version
     }
-
-    datadog_agent.assert_metadata('test:123', version_metadata)
+    
+    datadog_agent.assert_metadata(check.check_id, version_metadata)
 
 
 def _assert_bucket_metrics(aggregator, tags, device=None):

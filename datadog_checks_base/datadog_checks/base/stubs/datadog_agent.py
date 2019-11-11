@@ -13,6 +13,7 @@ class DatadogAgentStub(object):
     def assert_metadata(self, check_id, data):
         actual = {}
         for name in data:
+            import pdb; pdb.set_trace()
             key = (check_id, name)
             if key in self._metadata:
                 actual[name] = self._metadata[key]
