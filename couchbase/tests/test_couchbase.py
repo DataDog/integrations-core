@@ -157,7 +157,7 @@ def test_metadata(aggregator, instance_query, datadog_agent):
         'version.raw': raw_version
     }
     
-    datadog_agent.assert_metadata(check.check_id, version_metadata)
+    datadog_agent.assert_metadata('test:123', version_metadata)
 
 
 def _assert_bucket_metrics(aggregator, tags, device=None):
