@@ -58,6 +58,8 @@ AGENT_METRICS = {
     'cilium_unreachable_health_endpoints': 'unreachable.health_endpoints',
     'cilium_unreachable_nodes': 'unreachable.nodes',
     'cilium_event_ts': 'event_timestamp',
+    'cilium_kvstore_operations_duration_seconds': 'kvstore.operations_duration.seconds',
+    'cilium_kvstore_events_queue_seconds': 'kvstore.events_queue.seconds',
 }
 
 OPERATOR_METRICS = {
