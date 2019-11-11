@@ -69,3 +69,7 @@ cilium.operator.process.resident_memory.bytes,gauge,,byte,,"Resident memory size
 cilium.operator.process.start_time.second,gauge,,second,,"Start time of the process since unix epoch in seconds",0,cilium,proc start time operator
 cilium.operator.process.virtual_memory.bytes,gauge,,byte,,"Virtual memory size in bytes",0,cilium,virtual mem size operator
 cilium.operator.process.virtual_memory_max.bytes,gauge,,byte,,"Maximum amount of virtual memory available in bytes",0,cilium,virtual mem size max operator
+cilium.kvstore.operations_duration.seconds.count,count,,second,,"Duration of kvstore operation count",0,cilium,kvstore op time count
+cilium.kvstore.operations_duration.seconds.sum,gauge,,second,,"Duration of kvstore operation sum",0,cilium,kvstore op time sum
+cilium.kvstore.events_queue.seconds.count,count,,second,,"Count of duration in seconds of received event was blocked before it could be queued",0,cilium,kvstore event block time count
+cilium.kvstore.events_queue.seconds.sum,sum,,second,,"Sum of duration in seconds received event was blocked before it could be queued",0,cilium,kvstore event block time count
