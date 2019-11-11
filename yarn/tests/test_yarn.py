@@ -12,8 +12,8 @@ from datadog_checks.yarn.yarn import (
     DEFAULT_RM_URI,
     SERVICE_CHECK_NAME,
     YARN_APP_METRICS,
+    YARN_NODES_PATH,
     YARN_QUEUE_METRICS,
-    YARN_NODES_PATH
 )
 
 from .common import (
@@ -200,12 +200,13 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
         count=4,
     )
 
+
 def test_metadata(aggregator, instance, datadog_agent):
     check = YarnCheck('yarn', {}, [instance])
     check.check_id = 'test:123'
 
     check.check(instance)
-    
+
     data = check._rest_request_to_json(DEFAULT_RM_URI, YARN_NODES_PATH, [])
 
     node_info = data['nodes']['node']
@@ -225,7 +226,7 @@ def test_metadata(aggregator, instance, datadog_agent):
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,
-        'version.raw': raw_version
+        'version.raw': raw_version,
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
