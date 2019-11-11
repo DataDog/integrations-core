@@ -52,6 +52,8 @@ instances:
     ## the overhead caused by client connections across clusters by having hosts redirect
     ## client connections to other hosts. If the server disables connection load balancing,
     ## load balancing requests is ignored.
+    ##
+    ## Setting this to `true` will force the creation of a new connection at every check run.
     #
     # connection_load_balance: false
 

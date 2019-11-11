@@ -40,7 +40,7 @@ def dd_environment():
     with docker_run(
         common.COMPOSE_FILE, log_patterns=['Vertica is now running'], conditions=[InitializeDB(common.CONFIG)]
     ):
-        yield common.CONFIG, common.E2E_METADATA
+        yield common.CONFIG
 
 
 @pytest.fixture

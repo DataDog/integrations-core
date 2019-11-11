@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
 
 from datadog_checks.vertica import VerticaCheck
@@ -29,6 +30,21 @@ def test_check(aggregator, instance):
         aggregator.assert_metric_has_tag(metric, 'foo:bar')
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_check_connection_load_balance(instance):
+    instance['connection_load_balance'] = True
+    check = VerticaCheck('vertica', {}, [instance])
+
+    def mock_reset_connection():
+        raise Exception('reset_connection was called')
+
+    with mock.patch('vertica_python.vertica.connection.Connection.reset_connection', side_effect=mock_reset_connection):
+        check.check(instance)
+
+        with pytest.raises(Exception, match='reset_connection was called'):
+            check.check(instance)
 
 
 @pytest.mark.usefixtures('dd_environment')
