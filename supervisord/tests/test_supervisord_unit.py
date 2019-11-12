@@ -245,9 +245,20 @@ class MockSupervisor:
 
 
 @pytest.mark.parametrize(
-    'raw_version,expected_metadata',
+    'raw_version, expected_metadata, expected_count',
     [
-        ('3.0', {'version.scheme': 'supervisord', 'version.major': '3', 'version.minor': '0', 'version.raw': '3.0'}),
+        ('3.0', {'version.scheme': 'supervisord', 'version.major': '3', 'version.minor': '0', 'version.raw': '3.0'}, 4),
+        (
+            '3.0b2',
+            {
+                'version.scheme': 'supervisord',
+                'version.major': '3',
+                'version.minor': '0',
+                'version.release': 'b2',
+                'version.raw': '3.0b2',
+            },
+            5,
+        ),
         (
             '4.0.0',
             {
@@ -257,13 +268,15 @@ class MockSupervisor:
                 'version.patch': '0',
                 'version.raw': '4.0.0',
             },
+            5,
         ),
     ],
 )
-def test_version_metadata_pattern(check, datadog_agent, raw_version, expected_metadata):
+def test_version_metadata_pattern(check, datadog_agent, raw_version, expected_metadata, expected_count):
     check.check_id = 'test:123'
     supe = mock.MagicMock()
     supe.getSupervisorVersion.return_value = raw_version
     check._collect_metadata(supe)
 
     datadog_agent.assert_metadata('test:123', expected_metadata)
+    datadog_agent.assert_metadata_count(expected_count)
