@@ -7,6 +7,13 @@ instances:
     #
   - prometheus_url: https://localhost:443/metrics
     
+    ## @param scheme - string - optional - deprecated
+    ## Used to specify the scheme to reach the APIServer endpoints. Default to https.
+    ## This option is deprecated, declare the scheme in the prometheus_url
+    ## parameter instead.
+    #
+    # scheme: "https"
+
     ## @param bearer_token_auth - string - optional
     ## Used if you are using RBACs and need the agent to authenticate
     ## against the APIServer to retrieve metrics. Default to true.
