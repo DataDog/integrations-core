@@ -201,8 +201,7 @@ class Couchbase(AgentCheck):
 
         # Next, get all the nodes
         if nodes is not None:
-            for node in nodes:
-                version = node['version']
+            version = nodes[0]['version']
 
         self.set_metadata('version', version)
 

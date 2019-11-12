@@ -142,8 +142,7 @@ def test_metadata(aggregator, instance_query, datadog_agent):
 
     # Next, get all the nodes
     if nodes is not None:
-        for node in nodes:
-            raw_version = node['version']
+       raw_version = nodes[0]['version']
 
     major, minor, patch = raw_version.split("-")[0].split(".")
 
