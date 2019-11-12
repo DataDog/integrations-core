@@ -1,0 +1,30 @@
+{
+  "display_name": "Scylla",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "scylla",
+  "metric_prefix": "scylla.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "a3fb87fc-5f27-4b12-ab6b-eb74e276bb2d",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Scylla Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "scylla",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
