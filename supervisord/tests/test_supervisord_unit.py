@@ -271,13 +271,13 @@ class MockSupervisor:
             5,
         ),
         (
-            '4.0.0',
+            '4.1.2',
             {
                 'version.scheme': 'supervisord',
                 'version.major': '4',
-                'version.minor': '0',
-                'version.patch': '0',
-                'version.raw': '4.0.0',
+                'version.minor': '1',
+                'version.patch': '2',
+                'version.raw': '4.1.2',
             },
             5,
         ),
