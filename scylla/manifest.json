@@ -6,7 +6,7 @@
   "metric_prefix": "scylla.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Track metrics related to coordinator, replica, seastar framework and more.",
   "guid": "a3fb87fc-5f27-4b12-ab6b-eb74e276bb2d",
   "support": "core",
   "supported_os": [
