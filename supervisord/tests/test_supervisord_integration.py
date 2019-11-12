@@ -62,7 +62,7 @@ def test_version_metadata(aggregator, check, instance, datadog_agent):
     raw_version = SUPERVISOR_VERSION.replace('_', '.')
     major, minor, patch = raw_version.split('.')
     version_metadata = {
-        'version.scheme': 'semver',
+        'version.scheme': 'supervisord',
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,

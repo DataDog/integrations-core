@@ -213,5 +213,4 @@ Exit Status: %(exitstatus)s"""
             return
 
         self.log.debug('Version collected: %s', version)
-        # self.set_metadata('version', version)
         self.set_metadata('version', version, scheme='regex', pattern=SUPERVISORD_VERSION_PATTERN)
