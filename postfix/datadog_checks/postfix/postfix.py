@@ -115,10 +115,6 @@ class PostfixCheck(AgentCheck):
         return instance_config
 
     def _get_postqueue_stats(self, postfix_config_dir, tags):
-
-        # get some intersting configuratin values from postconf
-        pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
-        postfix_version = pc_output.strip('\n').split('=')[1].strip()
         pc_output, _, _ = get_subprocess_output(['postconf', 'authorized_mailq_users'], self.log, False)
         authorized_mailq_users = pc_output.strip('\n').split('=')[1].strip()
 
@@ -155,8 +151,6 @@ class PostfixCheck(AgentCheck):
             if line[0:1].isdigit():
                 deferred_count += 1
 
-        self.log.debug('Postfix Version: %s' % postfix_version)
-
         self.gauge(
             'postfix.queue.size', active_count, tags=tags + ['queue:active', 'instance:{}'.format(postfix_config_dir)]
         )
@@ -168,6 +162,8 @@ class PostfixCheck(AgentCheck):
             deferred_count,
             tags=tags + ['queue:deferred', 'instance:{}'.format(postfix_config_dir)],
         )
+
+        self._collect_metadata()
 
     def _get_queue_count(self, directory, queues, tags):
         for queue in queues:
@@ -201,3 +197,12 @@ class PostfixCheck(AgentCheck):
             # these can be retrieved in a single graph statement
             # for example:
             #     sum:postfix.queue.size{instance:postfix-2,queue:incoming,host:hostname.domain.tld}
+
+    def _collect_metadata(self):
+        pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
+        self.log.debug('postconf mail_version output: %s', pc_output)
+
+        postfix_version = pc_output.strip('\n').split('=')[1].strip()
+        self.log.debug('Postfix Version: %s', postfix_version)
+
+        self.set_metadata('version', postfix_version)
