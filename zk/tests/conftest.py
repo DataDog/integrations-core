@@ -5,7 +5,6 @@ import os
 import sys
 import time
 
-import mock
 import pytest
 
 from datadog_checks.dev import RetryError, docker_run
