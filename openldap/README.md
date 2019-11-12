@@ -5,9 +5,6 @@
 Use the OpenLDAP integration to get metrics from the `cn=Monitor` backend of your OpenLDAP servers.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying these instructions.
-
 ### Installation
 
 The OpenLDAP integration is packaged with the Agent. To start gathering your OpenLDAP metrics, you need to:
@@ -68,23 +65,39 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
 
 #### Configure the OpenLDAP integration
 
-Add this configuration block to your `openldap.yaml` file to start gathering your [metrics](#metrics):
+##### Host
 
-```
-  init_config:
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-  instances:
-      - url: ldaps://localhost
-        port: 686
-        username: <USER_DISTINGUISHED_NAME>
-        password: <PASSWORD>
-```
+###### Metric collection
 
-See the [sample openldap.yaml][2] for all available configuration options.
+1. Add this configuration block to your `openldap.yaml` file to start gathering your [metrics](#metrics). See the [sample openldap.yaml][2] for all available configuration options.
 
-[Restart the Agent][3] to begin sending OpenLDAP metrics to Datadog.
+    ```yaml
 
-#### Log collection
+      init_config:
+
+      instances:
+          ## @param url - string - required
+          ## Full URL of your ldap server. Use `ldaps` or `ldap` as the scheme to
+          ## use TLS or not, or `ldapi` to connect to a UNIX socket.
+          #
+        - url: ldaps://localhost:636
+
+          ## @param username - string - optional
+          ## The DN of the user that can read the monitor database.
+          #
+          username: "<USER_DISTINGUISHED_NAME>"
+
+          ## @param password - string - optional
+          ## Password associated with `username`
+          #
+          password: "<PASSWORD>"
+    ```
+
+2. [Restart the Agent][3] to begin sending OpenLDAP metrics to Datadog.
+
+###### Log collection
 
 **Available for Agent >6.0**
 
@@ -108,9 +121,31 @@ See the [sample openldap.yaml][2] for all available configuration options.
 
 3. [Restart the Agent][3].
 
+##### Containerized
+###### Metric collection
+
+For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                         |
+|----------------------|-----------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `openldap`                                                                                    |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                 |
+| `<INSTANCE_CONFIG>`  | `"url":"ldaps://%%host%%:636","username":"<USER_DISTINGUISHED_NAME>","password":"<PASSWORD>"` |
+
+
+###### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][5].
+
+| Parameter      | Value                                                 |
+|----------------|-------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "openldap", "service": "<SERVICE_NAME>"}` |
+
 ### Validation
 
-[Run the Agent's status subcommand][4] and look for `openldap` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `openldap` under the Checks section.
 
 ## Compatibility
 
@@ -120,7 +155,7 @@ The check is compatible with all major platforms.
 
 ### Metrics
 
-See [metadata.csv][5] for a list of metrics provided by this integration.
+See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -133,13 +168,14 @@ Returns `CRITICAL` if the integration cannot bind to the monitored OpenLDAP serv
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][8].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/openldap/datadog_checks/openldap/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
-[6]: https://docs.datadoghq.com/help
-[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[4]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
+[5]: https://docs.datadoghq.com/agent/docker/log/
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[7]: https://github.com/DataDog/integrations-core/blob/master/openldap/metadata.csv
+[8]: https://docs.datadoghq.com/help
