@@ -72,4 +72,4 @@ cilium.operator.process.virtual_memory_max.bytes,gauge,,byte,,"Maximum amount of
 cilium.kvstore.operations_duration.seconds.count,count,,second,,"Duration of kvstore operation count",0,cilium,kvstore op time count
 cilium.kvstore.operations_duration.seconds.sum,gauge,,second,,"Duration of kvstore operation sum",0,cilium,kvstore op time sum
 cilium.kvstore.events_queue.seconds.count,count,,second,,"Count of duration in seconds of received event was blocked before it could be queued",0,cilium,kvstore event block time count
-cilium.kvstore.events_queue.seconds.sum,sum,,second,,"Sum of duration in seconds received event was blocked before it could be queued",0,cilium,kvstore event block time count
+cilium.kvstore.events_queue.seconds.sum,gauge,,second,,"Sum of duration in seconds received event was blocked before it could be queued",0,cilium,kvstore event block time count
