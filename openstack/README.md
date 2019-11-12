@@ -14,6 +14,8 @@ Get metrics from OpenStack service in real time to:
 
 To start capturing your OpenStack metrics, you need to [install the Agent][2] on your hosts running hypervisors.
 
+### Configuration
+#### Prepare OpenStack
 Then configure a Datadog role and user with your identity server:
 
 ```
@@ -69,8 +71,8 @@ You may need to restart your Keystone, Neutron and Nova API services to ensure t
 
 **Note**: Installing the OpenStack Integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit our Billing FAQ.
 
-### Configuration
-#### Host
+#### Metric collection
+##### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
@@ -111,7 +113,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5].
 
-#### Containerized
+##### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
