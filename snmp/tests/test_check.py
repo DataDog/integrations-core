@@ -585,7 +585,7 @@ def test_discovery(aggregator):
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=check_tags, count=1)
 
-    aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)], count=1, value=1)
+    aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network.decode('utf-8'))])
     aggregator.assert_all_metrics_covered()
 
 
