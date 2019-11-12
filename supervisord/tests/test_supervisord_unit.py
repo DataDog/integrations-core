@@ -260,6 +260,17 @@ class MockSupervisor:
             5,
         ),
         (
+            '3.0a12',
+            {
+                'version.scheme': 'supervisord',
+                'version.major': '3',
+                'version.minor': '0',
+                'version.release': 'a12',
+                'version.raw': '3.0a12',
+            },
+            5,
+        ),
+        (
             '4.0.0',
             {
                 'version.scheme': 'supervisord',

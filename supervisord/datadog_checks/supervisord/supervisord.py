@@ -39,6 +39,26 @@ FORMAT_TIME = lambda x: time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(x))  #
 SERVER_SERVICE_CHECK = 'supervisord.can_connect'
 PROCESS_SERVICE_CHECK = 'supervisord.process.status'
 
+# Example supervisord versions: http://supervisord.org/changes.html
+#   - 4.0.0
+#   - 3.0
+#   - 3.0b2
+#   - 3.0a12
+SUPERVISORD_VERSION_PATTERN = re.compile(
+    r"""
+    (?P<major>0|[1-9]\d*)
+    \.
+    (?P<minor>0|[1-9]\d*)
+    (\.
+        (?P<patch>0|[1-9]\d*)
+    )?
+    (?:(?P<release>
+        [a-zA-Z][0-9]*
+    ))?
+    """,
+    re.VERBOSE,
+)
+
 
 class SupervisordCheck(AgentCheck):
     def check(self, instance):
@@ -187,10 +207,6 @@ Exit Status: %(exitstatus)s"""
 
     def _collect_metadata(self, supe):
         try:
-            # Example versions:
-            # - 4.0.0
-            # - 3.0
-            # - 3.0b2
             version = supe.getSupervisorVersion()
         except Exception as e:
             self.log.warning("Error collecting version: %s", e)
@@ -199,20 +215,3 @@ Exit Status: %(exitstatus)s"""
         self.log.debug('Version collected: %s', version)
         # self.set_metadata('version', version)
         self.set_metadata('version', version, scheme='regex', pattern=SUPERVISORD_VERSION_PATTERN)
-
-
-# http://supervisord.org/changes.html
-SUPERVISORD_VERSION_PATTERN = re.compile(
-    r"""
-    (?P<major>0|[1-9]\d*)
-    \.
-    (?P<minor>0|[1-9]\d*)
-    (\.
-        (?P<patch>0|[1-9]\d*)
-    )?
-    (?:(?P<release>
-        [a-zA-Z][0-9]*
-    ))?
-    """,
-    re.VERBOSE,
-)
