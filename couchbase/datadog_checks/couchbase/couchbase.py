@@ -203,8 +203,8 @@ class Couchbase(AgentCheck):
             try:
                 version = nodes[0]['version']
                 self.set_metadata('version', version)
-            except Exception:
-                version = ""
+            except KeyError:
+                self.log.debug("Unable to find version information")
 
     def get_data(self, server, instance):
         # The dictionary to be returned.

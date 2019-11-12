@@ -153,8 +153,8 @@ def test_metadata(aggregator, instance_query, datadog_agent):
                 'version.release': mock.ANY,
                 'version.raw': raw_version,
             }
-        except Exception:
-            version_metadata = ""
+        except KeyError:
+            version_metadata = {}
 
     datadog_agent.assert_metadata('test:123', version_metadata)
 
