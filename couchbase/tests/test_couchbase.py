@@ -142,18 +142,19 @@ def test_metadata(aggregator, instance_query, datadog_agent):
 
     # Next, get all the nodes
     if nodes is not None:
-       raw_version = nodes[0]['version']
-
-    major, minor, patch = raw_version.split("-")[0].split(".")
-
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.release': mock.ANY,
-        'version.raw': raw_version,
-    }
+        try:
+            raw_version = nodes[0]['version']
+            major, minor, patch = raw_version.split("-")[0].split(".")
+            version_metadata = {
+                'version.scheme': 'semver',
+                'version.major': major,
+                'version.minor': minor,
+                'version.patch': patch,
+                'version.release': mock.ANY,
+                'version.raw': raw_version,
+            }
+        except Exception:
+            version_metadata = ""
 
     datadog_agent.assert_metadata('test:123', version_metadata)
 

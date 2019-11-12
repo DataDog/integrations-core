@@ -195,15 +195,16 @@ class Couchbase(AgentCheck):
         self._create_metrics(data, instance_state, server, tags=list(set(tags)))
 
     def collect_version(self, data):
-        version = ""
 
         nodes = data['stats']['nodes']
 
         # Next, get all the nodes
         if nodes is not None:
-            version = nodes[0]['version']
-
-        self.set_metadata('version', version)
+            try:
+                version = nodes[0]['version']
+                self.set_metadata('version', version)
+            except Exception:
+                version = ""
 
     def get_data(self, server, instance):
         # The dictionary to be returned.
