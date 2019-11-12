@@ -1,6 +1,7 @@
 {
   "categories": [
-    "cloud"
+    "cloud",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "OpenStack",
