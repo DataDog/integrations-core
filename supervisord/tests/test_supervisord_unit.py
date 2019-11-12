@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from socket import socket
+import mock
 
 import pytest
 from mock import patch
@@ -241,3 +242,27 @@ class MockSupervisor:
         elif proc is not None and 'invalid' in proc:
             # Simulate xmlrpc exception for process not found
             raise xmlrpclib.Fault(10, 'BAD_NAME')
+
+
+@pytest.mark.parametrize('raw_version,expected_metadata', [
+    ('3.0', {
+        'version.scheme': 'supervisord',
+        'version.major': '3',
+        'version.minor': '0',
+        'version.raw': '3.0',
+    }),
+    ('4.0.0', {
+        'version.scheme': 'supervisord',
+        'version.major': '4',
+        'version.minor': '0',
+        'version.patch': '0',
+        'version.raw': '4.0.0',
+    }),
+])
+def test_version_metadata_pattern(check, datadog_agent, raw_version, expected_metadata):
+    check.check_id = 'test:123'
+    supe = mock.MagicMock()
+    supe.getSupervisorVersion.return_value = raw_version
+    check._collect_metadata(supe)
+
+    datadog_agent.assert_metadata('test:123', expected_metadata)

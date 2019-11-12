@@ -187,10 +187,32 @@ Exit Status: %(exitstatus)s"""
 
     def _collect_metadata(self, supe):
         try:
+            # Example versions:
+            # - 4.0.0
+            # - 3.0
+            # - 3.0b2
             version = supe.getSupervisorVersion()
         except Exception as e:
             self.log.warning("Error collecting version: %s", e)
             return
 
         self.log.debug('Version collected: %s', version)
-        self.set_metadata('version', version)
+        # self.set_metadata('version', version)
+        self.set_metadata('version', version, scheme='regex', pattern=SUPERVISORD_VERSION_PATTERN)
+
+
+# http://supervisord.org/changes.html
+SUPERVISORD_VERSION_PATTERN = re.compile(
+    r"""
+    (?P<major>0|[1-9]\d*)
+    \.
+    (?P<minor>0|[1-9]\d*)
+    (\.
+        (?P<patch>0|[1-9]\d*)
+    )?
+    (?:(?P<release>
+        [a-zA-Z][0-9]*
+    ))?
+    """,
+    re.VERBOSE,
+)
