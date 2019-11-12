@@ -373,6 +373,9 @@ class SnmpCheck(AgentCheck):
                 else:
                     # Reset the counter if not's failing
                     config.failing_instances.pop(host, None)
+            tags = ['network:{}'.format(self._config.ip_network)]
+            tags.extend(config.tags)
+            self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
             self._check_with_config(config)
 
