@@ -29,13 +29,12 @@ def dd_environment():
                 'agent_endpoint': 'http://{}:{}/metrics'.format(ip, port),
                 'metrics': AGENT_METRICS,
             }
-        with port_forward(kubeconfig, 'cilium', 'cilium', 6942) as (ip, port):
-            operator_instance = {
-                'operator_endpoint': 'http://{}:{}/metrics'.format(ip, port),
-                'metrics': OPERATOR_METRICS,
-            }
-            yield {'instances': [agent_instance, operator_instance]}
-    # yield {'instances': [agent_instance, operator_instance]}
+            with port_forward(kubeconfig, 'cilium', 'cilium', 6942) as (ip, port):
+                operator_instance = {
+                    'operator_endpoint': 'http://{}:{}/metrics'.format(ip, port),
+                    'metrics': OPERATOR_METRICS,
+                }
+                yield {'instances': [agent_instance, operator_instance]}
 
 
 @pytest.fixture(scope="session")
