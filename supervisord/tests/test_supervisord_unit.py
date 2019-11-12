@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from socket import socket
-import mock
 
+import mock
 import pytest
 from mock import patch
 from six.moves import xmlrpc_client as xmlrpclib
@@ -244,21 +244,22 @@ class MockSupervisor:
             raise xmlrpclib.Fault(10, 'BAD_NAME')
 
 
-@pytest.mark.parametrize('raw_version,expected_metadata', [
-    ('3.0', {
-        'version.scheme': 'supervisord',
-        'version.major': '3',
-        'version.minor': '0',
-        'version.raw': '3.0',
-    }),
-    ('4.0.0', {
-        'version.scheme': 'supervisord',
-        'version.major': '4',
-        'version.minor': '0',
-        'version.patch': '0',
-        'version.raw': '4.0.0',
-    }),
-])
+@pytest.mark.parametrize(
+    'raw_version,expected_metadata',
+    [
+        ('3.0', {'version.scheme': 'supervisord', 'version.major': '3', 'version.minor': '0', 'version.raw': '3.0'}),
+        (
+            '4.0.0',
+            {
+                'version.scheme': 'supervisord',
+                'version.major': '4',
+                'version.minor': '0',
+                'version.patch': '0',
+                'version.raw': '4.0.0',
+            },
+        ),
+    ],
+)
 def test_version_metadata_pattern(check, datadog_agent, raw_version, expected_metadata):
     check.check_id = 'test:123'
     supe = mock.MagicMock()
