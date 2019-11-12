@@ -70,10 +70,12 @@ def test_error_state(aggregator, dd_environment, get_conn_failure_config):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata(check, get_instance, version_metadata, datadog_agent):
+def test_metadata(datadog_agent):
+    check = ZookeeperCheck(conftest.CHECK_NAME, {}, [conftest.VALID_CONFIG])
+
     check.check_id = 'test:123'
 
-    check.check(get_instance)
+    check.check(conftest.VALID_CONFIG)
 
     raw_version = common.ZK_VERSION
     major, minor = raw_version.split('.')[:2]

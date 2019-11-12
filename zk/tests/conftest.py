@@ -90,23 +90,3 @@ def dd_environment(get_instance):
 
     with docker_run(compose_file, conditions=[condition]):
         yield get_instance
-
-
-@pytest.fixture
-def check():
-    return ZookeeperCheck(CHECK_NAME, {}, [VALID_CONFIG])
-
-
-@pytest.fixture(scope='session')
-def version_metadata():
-    version = os.environ['ZK_VERSION']
-    tokens = version.split('.')
-    major, minor = tokens[0:2]
-    return {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': mock.ANY,
-        'version.raw': mock.ANY,
-        'version.release': mock.ANY,
-    }
