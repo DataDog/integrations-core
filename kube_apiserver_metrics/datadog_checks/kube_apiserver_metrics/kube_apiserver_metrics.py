@@ -77,7 +77,8 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         endpoint = instance.get('prometheus_url')
         prometheus_url = endpoint
 
-        # Allow using a proper URL without introducing a breaking change.
+        # Allow using a proper URL without introducing a breaking change since
+        # the scheme option is deprecated.
         if not match('^https?://.*$', endpoint):
             scheme = instance.get('scheme', self.DEFAULT_SCHEME)
             prometheus_url = "{0}://{1}".format(scheme, endpoint)
