@@ -93,7 +93,7 @@ init_config:
   #     metric_tags:
   #       - TCP
 
-  ## @param profiles - dictionary - optional
+  ## @param profiles - object - optional
   ## Specify profiles to be able to reference a set of metrics by name.
   ## One of definition_file or definition needs to be defined.
   ## definition_file points to a file with a prfile, whereas definition inlines
@@ -101,10 +101,6 @@ init_config:
   ## When using a profile present on the profiles directory of the
   ## configuration, you can directly pass the filename.
   #
-  # profiles:
-  #   profile1:
-  #   	definition_file: <PROFILE_FILE>
-  #   	definition: <PROFILE>
   profiles:
     f5-big-ip:
       definition_file: f5-big-ip.yaml
