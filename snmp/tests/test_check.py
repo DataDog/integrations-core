@@ -860,3 +860,57 @@ def test_router(aggregator):
             for interface in ['17', '21']:
                 tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + common.CHECK_TAGS
                 aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+
+
+def test_f5_router(aggregator):
+    instance = common.generate_instance_config([])
+    # We need the full path as we're not in installed mode
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'generic-router.yaml')
+
+    # Use the generic profile against the f5 device
+    instance['community_string'] = 'f5'
+    instance['profile'] = 'router'
+    instance['enforce_mib_constraints'] = False
+
+    init_config = {'profiles': {'router': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    if_rates = [
+        'ifInErrors',
+        'ifInDiscards',
+        'ifOutErrors',
+        'ifOutDiscards',
+        'ifHCInOctets',
+        'ifHCInUcastPkts',
+        'ifHCInMulticastPkts',
+        'ifHCInBroadcastPkts',
+        'ifHCOutOctets',
+        'ifHCOutUcastPkts',
+        'ifHCOutMulticastPkts',
+        'ifHCOutBroadcastPkts',
+    ]
+    # We only get a subset of metrics
+    ip_rates = [
+        'ipSystemStatsHCInReceives',
+        'ipSystemStatsInHdrErrors',
+        'ipSystemStatsOutFragReqds',
+        'ipSystemStatsOutFragFails',
+        'ipSystemStatsHCOutTransmits',
+        'ipSystemStatsReasmReqds',
+        'ipSystemStatsHCInMcastPkts',
+        'ipSystemStatsReasmFails',
+        'ipSystemStatsHCOutMcastPkts',
+    ]
+    interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        for metric in if_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+    for version in ['ipv4', 'ipv6']:
+        tags = ['ipversion:{}'.format(version)] + common.CHECK_TAGS
+        for metric in ip_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()

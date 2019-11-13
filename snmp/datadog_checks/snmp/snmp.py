@@ -481,20 +481,24 @@ class SnmpCheck(AgentCheck):
                         self.log.warning('No indication on what value to use for this tag')
 
                 for value_to_collect in metric.get('symbols', []):
+                    if value_to_collect not in results:
+                        self.log.debug('Ignoring metric %s from table %s', value_to_collect, metric['table'])
+                        continue
                     for index, val in iteritems(results[value_to_collect]):
                         metric_tags = tags + self.get_index_tags(index, results, index_based_tags, column_based_tags)
                         self.submit_metric(value_to_collect, val, forced_type, metric_tags)
 
             elif 'symbol' in metric:
                 name = metric['symbol']
+                if name not in results:
+                    self.log.debug('Ignoring metric %s', name)
+                    continue
                 result = list(results[name].items())
                 if len(result) > 1:
                     self.log.warning('Several rows corresponding while the metric is supposed to be a scalar')
                     continue
                 val = result[0][1]
-                metric_tags = tags
-                if metric.get('metric_tags'):
-                    metric_tags = metric_tags + metric.get('metric_tags')
+                metric_tags = tags + metric.get('metric_tags', [])
                 self.submit_metric(name, val, forced_type, metric_tags)
             elif 'OID' in metric:
                 pass  # This one is already handled by the other batch of requests
