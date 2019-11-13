@@ -27,6 +27,7 @@ class VerticaCheck(AgentCheck):
     __NAMESPACE__ = 'vertica'
     SERVICE_CHECK_CONNECT = 'can_connect'
     SERVICE_CHECK_NODE_STATE = 'node_state'
+    DEFAULT_CLIENT_LIB_LOG_PATH = '/var/log/datadog/vertica_client_lib.log'
 
     def __init__(self, name, init_config, instances):
         super(VerticaCheck, self).__init__(name, init_config, instances)
@@ -44,8 +45,8 @@ class VerticaCheck(AgentCheck):
         self._timeout = float(self.instance.get('timeout', 10))
         self._tags = self.instance.get('tags', [])
 
-        self._vertica_lib_log_level = self.instance.get('vertica_lib_log_level')
-        self._vertica_lib_log_path = self.instance.get('vertica_lib_log_path', '/var/log/datadog/vertica_lib.log')
+        self._client_lib_log_level = self.instance.get('client_lib_log_level')
+        self._client_lib_log_path = self.instance.get('client_lib_log_path')
 
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
@@ -561,9 +562,10 @@ class VerticaCheck(AgentCheck):
             'backup_server_node': self._backup_servers,
             'connection_load_balance': self._connection_load_balance,
             'connection_timeout': self._timeout,
-            'log_level': self._vertica_lib_log_level,
-            'log_path': self._vertica_lib_log_path,
         }
+        if self._client_lib_log_level:
+            connection_options['log_level'] = self._client_lib_log_level
+            connection_options['log_path'] = self._client_lib_log_path or self.DEFAULT_CLIENT_LIB_LOG_PATH
 
         if self._tls_verify:  # no cov
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext

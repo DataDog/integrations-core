@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import mock
 import pytest
 
+from datadog_checks.dev import TempDir
 from datadog_checks.vertica import VerticaCheck
 
 from .metrics import ALL_METRICS
@@ -30,6 +33,20 @@ def test_check(aggregator, instance):
         aggregator.assert_metric_has_tag(metric, 'foo:bar')
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_check_client_log(aggregator, instance):
+    with TempDir() as temp_dir:
+        log_file = os.path.join(temp_dir, 'vertica_client_lib.log')
+        instance['client_lib_log_level'] = 'DEBUG'
+        instance['client_lib_log_path'] = log_file
+
+        check = VerticaCheck('vertica', {}, [instance])
+        check.check(instance)
+
+        with open(log_file) as f:
+            assert "Establishing connection to host" in f.read()
 
 
 @pytest.mark.usefixtures('dd_environment')
