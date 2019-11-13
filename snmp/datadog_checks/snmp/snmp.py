@@ -95,7 +95,7 @@ class SnmpCheck(AgentCheck):
             else:
                 data = profile_data['definition']
             self.profiles[profile] = {'definition': data}
-            sys_object_oid = profile_data.get('sysobjectid')
+            sys_object_oid = data.get('sysobjectid')
             if sys_object_oid:
                 self.profiles_by_oid[sys_object_oid] = profile
 

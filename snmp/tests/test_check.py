@@ -496,7 +496,7 @@ def test_cast_metrics(aggregator):
 def test_profile(aggregator):
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'
-    init_config = {'profiles': {'profile1': {'definition': common.SUPPORTED_METRIC_TYPES}}}
+    init_config = {'profiles': {'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES}}}}
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
@@ -512,7 +512,7 @@ def test_profile_by_file(aggregator):
     with temp_dir() as tmp:
         profile_file = os.path.join(tmp, 'profile1.yaml')
         with open(profile_file, 'w') as f:
-            f.write(yaml.safe_dump(common.SUPPORTED_METRIC_TYPES))
+            f.write(yaml.safe_dump({'metrics': common.SUPPORTED_METRIC_TYPES}))
         init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         check = SnmpCheck('snmp', init_config, [instance])
         check.check(instance)
@@ -527,7 +527,9 @@ def test_profile_sys_object(aggregator):
     instance = common.generate_instance_config([])
     init_config = {
         'profiles': {
-            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
+            'profile1': {
+                'definition': {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
+            }
         }
     }
     check = SnmpCheck('snmp', init_config, [instance])
@@ -543,8 +545,10 @@ def test_profile_sys_object_prefix(aggregator):
     instance = common.generate_instance_config([])
     init_config = {
         'profiles': {
-            'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'},
-            'profile2': {'definition': common.CAST_METRICS, 'sysobjectid': '1.3.6.1.4.*'},
+            'profile1': {
+                'definition': {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
+            },
+            'profile2': {'definition': {'metrics': common.CAST_METRICS, 'sysobjectid': '1.3.6.1.4.*'}},
         }
     }
     check = SnmpCheck('snmp', init_config, [instance])
@@ -559,7 +563,9 @@ def test_profile_sys_object_prefix(aggregator):
 def test_profile_sys_object_unknown(aggregator):
     """If the fetched sysObjectID is not referenced by any profiles, check fails."""
     instance = common.generate_instance_config([])
-    init_config = {'profiles': {'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.2.3.4.5'}}}
+    init_config = {
+        'profiles': {'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.2.3.4.5'}}}
+    }
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
@@ -587,7 +593,9 @@ def test_discovery(aggregator):
         'community_string': 'public',
     }
     init_config = {
-        'profiles': {'profile1': {'definition': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.*'}}
+        'profiles': {
+            'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.*'}}
+        }
     }
     check = SnmpCheck('snmp', init_config, [instance])
     try:
@@ -674,7 +682,7 @@ def test_f5(aggregator):
     instance['community_string'] = 'f5'
     instance['enforce_mib_constraints'] = False
 
-    init_config = {'profiles': {'f5-big-ip': {'definition_file': path, 'sysobjectid': '1.3.6.1.4.1.3375.2.1.3.4.43'}}}
+    init_config = {'profiles': {'f5-big-ip': {'definition_file': path}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
