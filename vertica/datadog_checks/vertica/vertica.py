@@ -44,6 +44,9 @@ class VerticaCheck(AgentCheck):
         self._timeout = float(self.instance.get('timeout', 10))
         self._tags = self.instance.get('tags', [])
 
+        self._vertica_lib_log_level = self.instance.get('vertica_lib_log_level')
+        self._vertica_lib_log_path = self.instance.get('vertica_lib_log_path', '/var/log/datadog/vertica_lib.log')
+
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
 
@@ -558,6 +561,8 @@ class VerticaCheck(AgentCheck):
             'backup_server_node': self._backup_servers,
             'connection_load_balance': self._connection_load_balance,
             'connection_timeout': self._timeout,
+            'log_level': self._vertica_lib_log_level,
+            'log_path': self._vertica_lib_log_path,
         }
 
         if self._tls_verify:  # no cov
