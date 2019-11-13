@@ -53,6 +53,8 @@ metrics:
       - ifInErrors
       - ifOutOctets
       - ifOutErrors
+      - ifAdminStatus
+      - ifOperStatus
     metric_tags:
       - tag: interface
         column: ifDescr

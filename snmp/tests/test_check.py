@@ -725,7 +725,7 @@ def test_f5(aggregator):
         'sysMultiHostCpuSoftirq',
         'sysMultiHostCpuIowait',
     ]
-    if_gauges = ['ifInOctets', 'ifInErrors', 'ifOutOctets', 'ifOutErrors']
+    if_gauges = ['ifInOctets', 'ifInErrors', 'ifOutOctets', 'ifOutErrors', 'ifAdminStatus', 'ifOperStatus']
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     for metric in gauges:
         aggregator.assert_metric('snmp.{}'.format(metric), tags=common.CHECK_TAGS, count=1)
@@ -780,6 +780,7 @@ def test_router(aggregator):
         'ifHCOutMulticastPkts',
         'ifHCOutBroadcastPkts',
     ]
+    if_gauges = ['ifAdminStatus', 'ifOperStatus']
     ip_rates = [
         'ipSystemStatsHCInReceives',
         'ipSystemStatsHCInOctets',
@@ -844,6 +845,8 @@ def test_router(aggregator):
         tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
         for metric in if_rates:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+        for metric in if_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     for metric in tcp_rates:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=common.CHECK_TAGS, count=1)
     for metric in tcp_gauges:
@@ -860,6 +863,8 @@ def test_router(aggregator):
             for interface in ['17', '21']:
                 tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + common.CHECK_TAGS
                 aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
 
 
 def test_f5_router(aggregator):
@@ -891,6 +896,7 @@ def test_f5_router(aggregator):
         'ifHCOutMulticastPkts',
         'ifHCOutBroadcastPkts',
     ]
+    if_gauges = ['ifAdminStatus', 'ifOperStatus']
     # We only get a subset of metrics
     ip_rates = [
         'ipSystemStatsHCInReceives',
@@ -908,6 +914,8 @@ def test_f5_router(aggregator):
         tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
         for metric in if_rates:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+        for metric in if_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     for version in ['ipv4', 'ipv6']:
         tags = ['ipversion:{}'.format(version)] + common.CHECK_TAGS
         for metric in ip_rates:

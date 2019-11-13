@@ -9,6 +9,8 @@ metrics:
       - ifInDiscards
       - ifOutErrors
       - ifOutDiscards
+      - ifAdminStatus
+      - ifOperStatus
     metric_tags:
       - tag: interface
         column: ifDescr
