@@ -150,17 +150,10 @@ instances:
 
     ## @param client_lib_log_level - string - optional
     ## Vertica library log level.
-    ## If not defined, the vertica library logging is disabled.
+    ## By default the vertica library logging is disabled.
     ## Valid values: CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG
     #
-    # client_lib_log_level: null
-
-    ## @param client_lib_log_path - string - optional
-    ## Vertica library log path.
-    ## This config has no effect if `client_lib_log_level` is not set.
-    ## Default to `/var/log/datadog/vertica_client_lib.log`
-    #
-    # client_lib_log_path: /var/log/datadog/vertica_client_lib.log
+    # client_lib_log_level: DEBUG
 
 ## Log Section (Available for Agent >=6.0)
 ##
