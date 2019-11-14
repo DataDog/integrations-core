@@ -12,7 +12,7 @@ Get metrics from OpenStack service in real time to:
 ## Setup
 ### Installation
 
-To start capturing your OpenStack metrics, you need to [install the Agent][2] on your hosts running hypervisors.
+To capture your OpenStack metrics, [install the Agent][2] on your hosts running hypervisors.
 
 ### Configuration
 #### Prepare OpenStack
@@ -69,7 +69,7 @@ Finally, update your `policy.json` files to grant the needed permissions. `role:
 
 You may need to restart your Keystone, Neutron and Nova API services to ensure that the policy changes take.
 
-**Note**: Installing the OpenStack Integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit our Billing FAQ.
+**Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit our Billing FAQ.
 
 #### Host
 
@@ -119,8 +119,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | Parameter            | Value                                                                                                                |
 |----------------------|----------------------------------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `openstack`                                                                                                          |
-| `<INIT_CONFIG>`      | `"keystone_server_url": "https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/"`                                                |
-| `<INSTANCE_CONFIG>`  | `"name": "<INSTANCE_NAME>", "user":{"password": "<PASSWORD>", "name": "datadog", "domain": {"id": "<DOMAINE_ID>"}}"` |
+| `<INIT_CONFIG>`      | `{"keystone_server_url": "https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/"}`                                                |
+| `<INSTANCE_CONFIG>`  | `{"name": "<INSTANCE_NAME>", "user": {"password": "<PASSWORD>", "name": "<USERNAME>", "domain": {"id": "<DOMAINE_ID>"}}}` |
 
 
 ### Validation
