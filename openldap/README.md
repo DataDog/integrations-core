@@ -71,7 +71,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ###### Metric collection
 
-1. Add this configuration block to your `openldap.yaml` file to start gathering your [metrics](#metrics). See the [sample openldap.yaml][2] for all available configuration options.
+1. Edit your `openldap.d/conf.yaml` in the `conf.d` folder at the root of your Agent's configuration directory. See the [sample openldap.d/conf.yaml][2] for all available configuration options.
 
     ```yaml
 
@@ -95,7 +95,7 @@ Follow the instructions below to configure this check for an Agent running on a 
           password: "<PASSWORD>"
     ```
 
-2. [Restart the Agent][3] to begin sending OpenLDAP metrics to Datadog.
+2. [Restart the Agent][3].
 
 ###### Log collection
 
@@ -130,7 +130,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][4]
 |----------------------|-----------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `openldap`                                                                                    |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                 |
-| `<INSTANCE_CONFIG>`  | `"url":"ldaps://%%host%%:636","username":"<USER_DISTINGUISHED_NAME>","password":"<PASSWORD>"` |
+| `<INSTANCE_CONFIG>`  | `{"url":"ldaps://%%host%%:636","username":"<USER_DISTINGUISHED_NAME>","password":"<PASSWORD>"}` |
 
 
 ###### Log collection
