@@ -10,33 +10,46 @@ from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.terraform import terraform_run
 from datadog_checks.utils.common import get_docker_hostname
 
-from .common import AGENT_METRICS, OPERATOR_METRICS
+from .common import ADDL_AGENT_METRICS, AGENT_DEFAULT_METRICS, OPERATOR_AWS_METRICS, OPERATOR_METRICS
+
+try:
+    from contextlib import ExitStack
+except ImportError:
+    from contextlib2 import ExitStack
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
-AGENT_PORT = '9090'
-OPERATOR_PORT = '6942'
+AGENT_PORT = 9090
+OPERATOR_PORT = 6942
 AGENT_URL = "http://{}:{}/metrics".format(HOST, AGENT_PORT)
 OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
+
+PORTS = [AGENT_PORT, OPERATOR_PORT]
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
     with terraform_run(os.path.join(HERE, 'terraform')) as outputs:
         kubeconfig = outputs['kubeconfig']['value']
-        agent_instance = {}
-        operator_instance = {}
+        with ExitStack() as stack:
+            ip_ports = [
+                stack.enter_context(port_forward(kubeconfig, 'cilium', 'cilium-operator', port)) for port in PORTS
+            ]
 
-        with port_forward(kubeconfig, 'cilium', 'cilium-operator', 9090) as (ip, port):
-            agent_instance = {'agent_endpoint': 'http://{}:{}/metrics'.format(ip, port), 'metrics': AGENT_METRICS}
+            instances = {
+                'instances': [
+                    {
+                        'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
+                        'metrics': ADDL_AGENT_METRICS + AGENT_DEFAULT_METRICS,
+                    },
+                    {
+                        'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
+                        'metrics': OPERATOR_METRICS + OPERATOR_AWS_METRICS,
+                    },
+                ]
+            }
 
-            with port_forward(kubeconfig, 'cilium', 'cilium-operator', 6942) as (operator_ip, operator_port):
-                operator_instance = {
-                    'operator_endpoint': 'http://{}:{}/metrics'.format(operator_ip, operator_port),
-                    'metrics': OPERATOR_METRICS,
-                }
-
-                yield {'instances': [agent_instance, operator_instance]}
+            yield instances
 
 
 @pytest.fixture(scope="session")

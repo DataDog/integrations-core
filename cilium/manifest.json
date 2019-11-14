@@ -16,7 +16,9 @@
   ],
   "public_title": "Datadog-Cilium Integration",
   "categories": [
-    ""
+    "containers",
+    "network",
+    "security"
   ],
   "type": "check",
   "is_public": false,

@@ -8,8 +8,6 @@ version = os.environ['CILIUM_VERSION']
 
 opj = os.path.join
 
-cilium = "cilium-{}".format(version)
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 config = os.path.join(HERE, 'cilium.yaml')
 

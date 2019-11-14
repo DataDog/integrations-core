@@ -24,6 +24,7 @@ instances:
     #
     tags:
       - "cilium-pod:%%host%%"
+
     ## @param timeout - integer - optional - default: 10
     ## Overrides the default timeout value in second
     #
