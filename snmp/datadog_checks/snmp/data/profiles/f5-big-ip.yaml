@@ -45,19 +45,26 @@ metrics:
     metric_tags:
       - tag: cpu
         column: sysMultiHostCpuId
+    forced_type: monotonic_count
   # Basic interface stats
   - MIB: IF-MIB
     table: ifTable
     symbols:
-      - ifInOctets
       - ifInErrors
-      - ifOutOctets
       - ifOutErrors
       - ifAdminStatus
       - ifOperStatus
     metric_tags:
       - tag: interface
         column: ifDescr
+  - MIB: IF-MIB
+    table: ifXTable
+    symbols:
+      - ifHCInOctets
+      - ifHCOutOctets
+    metric_tags:
+      - tag: interface
+        column: ifName
   # TCP stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysTcpStatOpen

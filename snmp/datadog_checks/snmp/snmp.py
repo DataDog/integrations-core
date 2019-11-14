@@ -560,6 +560,9 @@ class SnmpCheck(AgentCheck):
             elif forced_type.lower() == 'counter':
                 value = int(snmp_value)
                 self.rate(metric_name, value, tags)
+            elif forced_type.lower() == 'monotonic_count':
+                value = int(snmp_value)
+                self.monotonic_count(metric_name, value, tags)
             else:
                 self.warning('Invalid forced-type specified: {} in {}'.format(forced_type, name))
                 raise ConfigurationError('Invalid forced-type in config file: {}'.format(name))

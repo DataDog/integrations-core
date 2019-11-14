@@ -700,23 +700,25 @@ def test_f5(aggregator):
         'sysTcpStatCloseWait',
         'sysTcpStatFinWait',
         'sysTcpStatTimeWait',
+        'sysUdpStatOpen',
+        'sysClientsslStatCurConns',
+    ]
+    rates = [
         'sysTcpStatAccepts',
         'sysTcpStatAcceptfails',
         'sysTcpStatConnects',
         'sysTcpStatConnfails',
-        'sysUdpStatOpen',
         'sysUdpStatAccepts',
         'sysUdpStatAcceptfails',
         'sysUdpStatConnects',
         'sysUdpStatConnfails',
-        'sysClientsslStatCurConns',
         'sysClientsslStatEncryptedBytesIn',
         'sysClientsslStatEncryptedBytesOut',
         'sysClientsslStatDecryptedBytesIn',
         'sysClientsslStatDecryptedBytesOut',
         'sysClientsslStatHandshakeFailures',
     ]
-    cpu_gauges = [
+    cpu_count = [
         'sysMultiHostCpuUser',
         'sysMultiHostCpuNice',
         'sysMultiHostCpuSystem',
@@ -725,17 +727,43 @@ def test_f5(aggregator):
         'sysMultiHostCpuSoftirq',
         'sysMultiHostCpuIowait',
     ]
-    if_gauges = ['ifInOctets', 'ifInErrors', 'ifOutOctets', 'ifOutErrors', 'ifAdminStatus', 'ifOperStatus']
+    if_gauges = ['ifAdminStatus', 'ifOperStatus']
+    if_rates = ['ifHCInOctets', 'ifInErrors', 'ifHCOutOctets', 'ifOutErrors']
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     for metric in gauges:
-        aggregator.assert_metric('snmp.{}'.format(metric), tags=common.CHECK_TAGS, count=1)
-    for metric in cpu_gauges:
-        aggregator.assert_metric('snmp.{}'.format(metric), tags=['cpu:0'] + common.CHECK_TAGS, count=1)
-        aggregator.assert_metric('snmp.{}'.format(metric), tags=['cpu:1'] + common.CHECK_TAGS, count=1)
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+    for metric in rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=common.CHECK_TAGS, count=1)
+    for metric in cpu_count:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric),
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=['cpu:0'] + common.CHECK_TAGS,
+            count=1,
+        )
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric),
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=['cpu:1'] + common.CHECK_TAGS,
+            count=1,
+        )
+    for metric in if_rates:
+        for interface in interfaces:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.RATE,
+                tags=['interface:{}'.format(interface)] + common.CHECK_TAGS,
+                count=1,
+            )
     for metric in if_gauges:
         for interface in interfaces:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), tags=['interface:{}'.format(interface)] + common.CHECK_TAGS, count=1
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.GAUGE,
+                tags=['interface:{}'.format(interface)] + common.CHECK_TAGS,
+                count=1,
             )
     aggregator.assert_all_metrics_covered()
 
