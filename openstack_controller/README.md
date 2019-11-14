@@ -11,7 +11,7 @@ The Openstack_controller check is included in the [Datadog Agent][2] package, so
 
 ### Configuration
 
-The openstack_controller integration is designed to collect information from all compute nodes and the servers running on them. This integration is designed to be run from a single Agent to monitor your openstack environment. This can be deployed on your controller node or an adjacent server that has access to the Keystone and Nova endpoints.
+The openstack_controller integration is designed to collect information from all compute nodes and the servers running it. The integration should be run from a single Agent to monitor your openstack environment, and can be deployed on your controller node or an adjacent server that has access to the Keystone and Nova endpoints.
 
 #### Prepare OpenStack
 
@@ -34,7 +34,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][4]
 |----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `openstack_controller`                                                                                                                                                                      |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                               |
-| `<INSTANCE_CONFIG>`  | `"name": "<INSTANCE_NAME>", "keystone_server_url": "https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/" "user":{"password": "<PASSWORD>", "name": "<USER_NAME>", "domain": {"id": "<DOMAINE_ID>"}}` |
+| `<INSTANCE_CONFIG>`  | `{"name": "<INSTANCE_NAME>", "keystone_server_url": "https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/","user": {"password": "<PASSWORD>", "name": "<USER_NAME>", "domain": {"id": "<DOMAINE_ID>"}}}` |
 
 ### Validation
 
