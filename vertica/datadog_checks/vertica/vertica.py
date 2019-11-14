@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import os
 import ssl
 from collections import defaultdict
 from datetime import datetime
@@ -563,7 +564,9 @@ class VerticaCheck(AgentCheck):
         }
         if self._client_lib_log_level:
             connection_options['log_level'] = self._client_lib_log_level
-            connection_options['log_path'] = None  # will make vertica client log to stdout
+            # log_path is required by vertica client for using logging
+            # we still get vertica client logs in the agent log even if `log_path` is set to os.devnull
+            connection_options['log_path'] = os.devnull
 
         if self._tls_verify:  # no cov
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
