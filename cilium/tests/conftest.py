@@ -6,10 +6,11 @@ import os
 import mock
 import pytest
 
-from .common import AGENT_METRICS, OPERATOR_METRICS
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.terraform import terraform_run
 from datadog_checks.utils.common import get_docker_hostname
+
+from .common import AGENT_METRICS, OPERATOR_METRICS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -23,17 +24,18 @@ OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 def dd_environment():
     with terraform_run(os.path.join(HERE, 'terraform')) as outputs:
         kubeconfig = outputs['kubeconfig']['value']
+        agent_instance = {}
+        operator_instance = {}
 
-        with port_forward(kubeconfig, 'cilium', 'cilium', 9090) as (ip, port):
-            agent_instance = {
-                'agent_endpoint': 'http://{}:{}/metrics'.format(ip, port),
-                'metrics': AGENT_METRICS,
-            }
-            with port_forward(kubeconfig, 'cilium', 'cilium', 6942) as (ip, port):
+        with port_forward(kubeconfig, 'cilium', 'cilium-operator', 9090) as (ip, port):
+            agent_instance = {'agent_endpoint': 'http://{}:{}/metrics'.format(ip, port), 'metrics': AGENT_METRICS}
+
+            with port_forward(kubeconfig, 'cilium', 'cilium-operator', 6942) as (operator_ip, operator_port):
                 operator_instance = {
-                    'operator_endpoint': 'http://{}:{}/metrics'.format(ip, port),
+                    'operator_endpoint': 'http://{}:{}/metrics'.format(operator_ip, operator_port),
                     'metrics': OPERATOR_METRICS,
                 }
+
                 yield {'instances': [agent_instance, operator_instance]}
 
 
