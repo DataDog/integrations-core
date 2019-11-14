@@ -35,14 +35,14 @@ resource "local_file" "kubeconfig" {
 }
 
 resource "google_container_cluster" "gke_cluster" {
-  name = replace("cilium-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
+  name = replace("istio-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
   location = random_shuffle.az.result[0]
 
   lifecycle {
     ignore_changes = ["node_pool"]
   }
 
-  initial_node_count = 2
+  initial_node_count = 1
 
   master_auth {
     username = "user"
@@ -81,7 +81,7 @@ resource "null_resource" "startup" {
     command = "python ./script.py"
     environment = {
       KUBECONFIG = "${local_file.kubeconfig.filename}"
-      CILIUM_VERSION = "1.6.1"
+      CILIUM_VERSION = "1.6"
     }
   }
 }
