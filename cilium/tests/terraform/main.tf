@@ -35,7 +35,7 @@ resource "local_file" "kubeconfig" {
 }
 
 resource "google_container_cluster" "gke_cluster" {
-  name = replace("istio-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
+  name = replace("cilium-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
   location = random_shuffle.az.result[0]
 
   lifecycle {
