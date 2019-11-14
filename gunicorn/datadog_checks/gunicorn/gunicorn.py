@@ -8,12 +8,15 @@ Collects metrics from the gunicorn web server.
 http://gunicorn.org/
 """
 # stdlib
+import re
+import shlex
 import time
 
 # 3rd party
 import psutil
 
 # project
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.checks import AgentCheck
 
 
@@ -22,6 +25,9 @@ class GUnicornCheck(AgentCheck):
     # Config
     PROC_NAME = 'proc_name'
 
+    # Constants
+    VERSION_PATTERN = r'.*\(version (.*)\)'
+
     # Number of seconds to sleep between cpu time checks.
     CPU_SLEEP_SECS = 0.1
 
@@ -29,6 +35,11 @@ class GUnicornCheck(AgentCheck):
     IDLE_TAGS = ["state:idle"]
     WORKING_TAGS = ["state:working"]
     SVC_NAME = "gunicorn.is_running"
+
+    def __init__(self, name, init_config, instances):
+        AgentCheck.__init__(self, name, init_config, instances)
+
+        self.gunicorn_cmd = shlex.split(self.instance.get('gunicorn', init_config.get('gunicorn', 'gunicorn')))
 
     def get_library_versions(self):
         return {"psutil": psutil.__version__}
@@ -61,6 +72,8 @@ class GUnicornCheck(AgentCheck):
         self.log.debug("instance %s procs - working:%s idle:%s" % (proc_name, working, idle))
         self.gauge("gunicorn.workers", working, tags + self.WORKING_TAGS)
         self.gauge("gunicorn.workers", idle, tags + self.IDLE_TAGS)
+
+        self._collect_metadata()
 
     def _get_workers_from_procs(self, master_procs):
         workers_procs = []
@@ -139,6 +152,32 @@ class GUnicornCheck(AgentCheck):
         # web      22984 20.7  2.3 521924 176136 ?       Sl   19:30   1:58 gunicorn: worker [web1]
         # web      22985 26.4  6.1 795288 449596 ?       Sl   19:30   2:32 gunicorn: worker [web1]
         return "gunicorn: master [%s]" % name
+
+    def _collect_metadata(self):
+        raw_version = self._get_version()
+        self.log.debug('gunicorn version: %s', raw_version)
+
+        if raw_version:
+            self.set_metadata('version', raw_version)
+
+    def _get_version(self):
+        """ Get version from `gunicorn --version` """
+        cmd = self.gunicorn_cmd + ['--version']
+        try:
+            pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
+        except OSError:
+            self.log.warning("Error collecting gunicorn version.")
+            return None
+
+        match = re.match(self.VERSION_PATTERN, pc_out)
+        if not match:
+            match = re.match(self.VERSION_PATTERN, pc_err)
+
+        if match:
+            return match.groups()[0]
+        else:
+            self.log.warning("Version not found in stdout `%s` and stderr `%s`", pc_out, pc_err)
+        return None
 
 
 class GUnicornCheckError(Exception):

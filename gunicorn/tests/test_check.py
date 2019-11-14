@@ -2,15 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import logging
-
 import pytest
 
 from datadog_checks.gunicorn import GUnicornCheck
 
 from .common import CHECK_NAME, INSTANCE
-
-log = logging.getLogger('test_gunicorn')
 
 
 def _assert_metrics(aggregator):
@@ -22,9 +18,12 @@ def _assert_metrics(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_gunicorn(aggregator, setup_gunicorn):
-    check = GUnicornCheck(CHECK_NAME, {}, {})
-    check.check(INSTANCE)
+def test_gunicorn_instance(aggregator, setup_gunicorn):
+    instance = INSTANCE.copy()
+    instance['gunicorn'] = setup_gunicorn['gunicorn_bin_path']
+
+    check = GUnicornCheck(CHECK_NAME, {}, [instance])
+    check.check(instance)
     _assert_metrics(aggregator)
 
 
