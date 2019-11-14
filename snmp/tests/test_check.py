@@ -703,7 +703,7 @@ def test_f5(aggregator):
         'sysUdpStatOpen',
         'sysClientsslStatCurConns',
     ]
-    rates = [
+    counts = [
         'sysTcpStatAccepts',
         'sysTcpStatAcceptfails',
         'sysTcpStatConnects',
@@ -718,7 +718,7 @@ def test_f5(aggregator):
         'sysClientsslStatDecryptedBytesOut',
         'sysClientsslStatHandshakeFailures',
     ]
-    cpu_count = [
+    cpu_rates = [
         'sysMultiHostCpuUser',
         'sysMultiHostCpuNice',
         'sysMultiHostCpuSystem',
@@ -728,32 +728,28 @@ def test_f5(aggregator):
         'sysMultiHostCpuIowait',
     ]
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
-    if_rates = ['ifHCInOctets', 'ifInErrors', 'ifHCOutOctets', 'ifOutErrors']
+    if_counts = ['ifHCInOctets', 'ifInErrors', 'ifHCOutOctets', 'ifOutErrors']
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     for metric in gauges:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
         )
-    for metric in rates:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=common.CHECK_TAGS, count=1)
-    for metric in cpu_count:
+    for metric in counts:
         aggregator.assert_metric(
-            'snmp.{}'.format(metric),
-            metric_type=aggregator.MONOTONIC_COUNT,
-            tags=['cpu:0'] + common.CHECK_TAGS,
-            count=1,
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
+        )
+    for metric in cpu_rates:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + common.CHECK_TAGS, count=1
         )
         aggregator.assert_metric(
-            'snmp.{}'.format(metric),
-            metric_type=aggregator.MONOTONIC_COUNT,
-            tags=['cpu:1'] + common.CHECK_TAGS,
-            count=1,
+            'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + common.CHECK_TAGS, count=1
         )
-    for metric in if_rates:
+    for metric in if_counts:
         for interface in interfaces:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric),
-                metric_type=aggregator.RATE,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=['interface:{}'.format(interface)] + common.CHECK_TAGS,
                 count=1,
             )
@@ -781,7 +777,7 @@ def test_router(aggregator):
 
     check.check(instance)
 
-    tcp_rates = [
+    tcp_counts = [
         'tcpActiveOpens',
         'tcpPassiveOpens',
         'tcpAttemptFails',
@@ -793,8 +789,8 @@ def test_router(aggregator):
         'tcpOutRsts',
     ]
     tcp_gauges = ['tcpCurrEstab']
-    udp_rates = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
-    if_rates = [
+    udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
+    if_counts = [
         'ifInErrors',
         'ifInDiscards',
         'ifOutErrors',
@@ -809,7 +805,7 @@ def test_router(aggregator):
         'ifHCOutBroadcastPkts',
     ]
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
-    ip_rates = [
+    ip_counts = [
         'ipSystemStatsHCInReceives',
         'ipSystemStatsHCInOctets',
         'ipSystemStatsInHdrErrors',
@@ -840,7 +836,7 @@ def test_router(aggregator):
         'ipSystemStatsHCInBcastPkts',
         'ipSystemStatsHCOutBcastPkts',
     ]
-    ip_if_rates = [
+    ip_if_counts = [
         'ipIfStatsHCInOctets',
         'ipIfStatsInHdrErrors',
         'ipIfStatsInNoRoutes',
@@ -871,26 +867,36 @@ def test_router(aggregator):
     ]
     for interface in ['eth0', 'eth1']:
         tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
-        for metric in if_rates:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+        for metric in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
         for metric in if_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
-    for metric in tcp_rates:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=common.CHECK_TAGS, count=1)
+    for metric in tcp_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
+        )
     for metric in tcp_gauges:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
         )
-    for metric in udp_rates:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=common.CHECK_TAGS, count=1)
+    for metric in udp_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
+        )
     for version in ['ipv4', 'ipv6']:
         tags = ['ipversion:{}'.format(version)] + common.CHECK_TAGS
-        for metric in ip_rates:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
-        for metric in ip_if_rates:
+        for metric in ip_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in ip_if_counts:
             for interface in ['17', '21']:
                 tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + common.CHECK_TAGS
-                aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+                aggregator.assert_metric(
+                    'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+                )
 
     aggregator.assert_all_metrics_covered()
 
@@ -910,7 +916,7 @@ def test_f5_router(aggregator):
 
     check.check(instance)
 
-    if_rates = [
+    if_counts = [
         'ifInErrors',
         'ifInDiscards',
         'ifOutErrors',
@@ -926,7 +932,7 @@ def test_f5_router(aggregator):
     ]
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
     # We only get a subset of metrics
-    ip_rates = [
+    ip_counts = [
         'ipSystemStatsHCInReceives',
         'ipSystemStatsInHdrErrors',
         'ipSystemStatsOutFragReqds',
@@ -940,13 +946,17 @@ def test_f5_router(aggregator):
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
-        for metric in if_rates:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+        for metric in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
         for metric in if_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     for version in ['ipv4', 'ipv6']:
         tags = ['ipversion:{}'.format(version)] + common.CHECK_TAGS
-        for metric in ip_rates:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+        for metric in ip_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
 
     aggregator.assert_all_metrics_covered()
