@@ -82,13 +82,13 @@ cilium.operator.eni.deficit_resolver.duration.seconds.sum,gauge,,second,,"Sum of
 cilium.operator.eni.deficit_resolver.folds,gauge,,unit,,"Current level of deficit resolver folding",0,cilium,fold level
 cilium.operator.eni.deficit_resolver.latency.seconds.count,count,,second,,"Count of latency between deficit resolver queue and trigger run",0,cilium,latency run count
 cilium.operator.eni.deficit_resolver.latency.seconds.sum,gauge,,second,,"Sum of latency between deficit resolver queue and trigger run",0,cilium,latency run sum
-cilium.operator.eni.deficit_resolver.queued.total,count,,event,,"Number of queued deficit resolver triggers",0,cilium,queued deficit triggers
+cilium.operator.eni.deficit_resolver.queued.total,gauge,,event,,"Number of queued deficit resolver triggers",0,cilium,queued deficit triggers
 cilium.operator.eni.ec2_resync.duration.seconds.count,count,,second,,"Count of duration of ec2 resync trigger runs",0,cilium,resync trigger run count
 cilium.operator.eni.ec2_resync.duration.seconds.sum,gauge,,second,,"Sum of duration of ec2 resync trigger runs",0,cilium,resync trigger run sum
 cilium.operator.eni.ec2_resync.folds,gauge,,unit,,"Current level of ec2 resync folding",0,cilium,resync folds
 cilium.operator.eni.ec2_resync.latency.seconds.count,count,,second,,"Count of latency between ec2 resync queue and trigger run",0,cilium,resync latency count
 cilium.operator.eni.ec2_resync.latency.seconds.sum,gauge,,second,,"Sum of latency between ec2 resync queue and trigger run",0,cilium,resync latency sum
-cilium.operator.eni.ec2_resync.queued.total,count,,unit,,"Number of queued ec2 resync triggers",0,cilium,queued resync trigger
+cilium.operator.eni.ec2_resync.queued.total,gauge,,unit,,"Number of queued ec2 resync triggers",0,cilium,queued resync trigger
 cilium.operator.eni.interface_creation_ops,count,,operation,,"Number of ENIs allocated",0,cilium,eni allocated
 cilium.operator.eni.ips.total,gauge,,unit,,"Number of IPs allocated",0,cilium,ip allocated
 cilium.operator.eni.k8s_sync.duration.seconds.count,count,,second,,"Count of duration of k8s sync trigger run",0,cilium,k8s sync trigger count
@@ -96,6 +96,6 @@ cilium.operator.eni.k8s_sync.duration.seconds.sum,gauge,,second,,"Sum of duratio
 cilium.operator.eni.k8s_sync.folds,gauge,,second,,"Current level of k8s sync folding",0,cilium,k8s sync folds
 cilium.operator.eni.k8s_sync.latency.seconds.count,count,,second,,"Count of duration of k8s sync latency between queue and trigger run",0,cilium,k8s sync latency count
 cilium.operator.eni.k8s_sync.latency.seconds.sum,gauge,,second,,"Sum of duration of k8s sync latency between queue and trigger run",0,cilium,k8s sync latency sum
-cilium.operator.eni.k8s_sync.queued.total,count,,unit,,"Number of queued k8s sync triggers",0,cilium,k8s queue trigger
+cilium.operator.eni.k8s_sync.queued.total,gauge,,unit,,"Number of queued k8s sync triggers",0,cilium,k8s queue trigger
 cilium.operator.eni.nodes.total,gauge,,node,,"Number of nodes by category",0,cilium,eni node
 cilium.operator.eni.resync.total,count,,unit,,"Number of resync operations to synchronize AWS EC2 metadata",0,cilium,eni resync total
