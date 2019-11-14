@@ -113,7 +113,7 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to point to your `server` and `port`, set the masters to monitor. See the [sample oracle.d/conf.yaml][3] for all available configuration options:
+1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. Update the `server` and `port` to set the masters to monitor. See the [sample oracle.d/conf.yaml][3] for all available configuration options.
 
     ```yaml
       init_config:
@@ -143,7 +143,7 @@ Follow the instructions below to configure this check for an Agent running on a 
           password: "<PASSWORD>"
     ```
 
-2. [Restart the Agent][8]
+2. [Restart the Agent][8].
 
 #### Containerized
 
