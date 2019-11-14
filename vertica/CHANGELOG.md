@@ -1,5 +1,9 @@
 # CHANGELOG - Vertica
 
+## 1.3.0 / 2019-11-14
+
+* [Added] Add vertica lib log config. See [#5005](https://github.com/DataDog/integrations-core/pull/5005).
+
 ## 1.2.0 / 2019-11-11
 
 * [Added] Create a new connection at every check run when necessary. See [#4983](https://github.com/DataDog/integrations-core/pull/4983).
