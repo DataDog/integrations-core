@@ -3,10 +3,9 @@
 
 init_config:
 
-  ## @param gunicorn - string - optional
+  ## @param gunicorn - string - optional - default: gunicorn
   ## Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
   ## can be overwritten on an instance
-  ## default: gunicorn
   #
   # gunicorn: gunicorn
 
@@ -21,9 +20,8 @@ instances:
     #
   - proc_name: <WEB_APP_NAME>
 
-    ## @param gunicorn - string - optional
+    ## @param gunicorn - string - optional - default: gunicorn
     ## command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
-    ## default: gunicorn
     #
     # gunicorn: gunicorn
 
