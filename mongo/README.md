@@ -117,7 +117,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 | Parameter            | Value                                                                                                                                                                           |
 |----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `mongodb`                                                                                                                                                                       |
+| `<INTEGRATION_NAME>` | `mongo`                                                                                                                                                                       |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                   |
 | `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}` |
 
