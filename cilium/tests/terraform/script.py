@@ -30,3 +30,5 @@ check_call(
 check_call(["kubectl", "create", "ns", "cilium"])
 
 check_call(["kubectl", "create", "-f", config])
+
+check_call(["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "cilium", "--timeout=300s"])

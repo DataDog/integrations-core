@@ -785,4 +785,3 @@ spec:
 
 ---
 # Source: cilium/charts/operator/templates/svc.yaml
-
