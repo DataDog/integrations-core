@@ -67,7 +67,7 @@ def test_client_logging_enabled(aggregator, instance):
             connection_load_balance=mock.ANY,
             connection_timeout=mock.ANY,
             log_level='DEBUG',
-            log_path=None,
+            log_path=os.devnull,
         )
 
 
