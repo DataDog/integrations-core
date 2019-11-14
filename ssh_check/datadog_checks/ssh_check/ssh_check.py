@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 import time
 from collections import namedtuple
 
@@ -52,6 +53,17 @@ class CheckSSH(AgentCheck):
             params.append(value)
         return self.Config._make(params)
 
+    def collect_version(self, version):
+
+        version_info = version.read().decode("utf-8")
+
+        try:
+            version = re.search(r'(\d+\.\d+.*),', version_info).group(1)
+            version_semver = version.replace('p', '.')
+            self.set_metadata('version', version_semver)
+        except Exception:
+            self.log.debug("There was no version information found.")
+
     def check(self, instance):
         conf = self._load_conf(instance)
         tags = instance.get('tags', [])
@@ -85,7 +97,6 @@ class CheckSSH(AgentCheck):
                     conf.host, port=conf.port, username=conf.username, password=conf.password, pkey=private_key
                 )
                 self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags, message=exception_message)
-
             except Exception as e:
                 exception_message = str(e)
                 status = AgentCheck.CRITICAL
@@ -93,6 +104,9 @@ class CheckSSH(AgentCheck):
                 if conf.sftp_check:
                     self.service_check(self.SFTP_SERVICE_CHECK_NAME, status, tags=tags, message=exception_message)
                 raise
+
+            _, _, stderr = client.exec_command('ssh -V')
+            self.collect_version(stderr)
 
             # Open sftp session on the existing connection to check status of SFTP
             if conf.sftp_check:
