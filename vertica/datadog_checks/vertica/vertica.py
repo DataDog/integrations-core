@@ -44,6 +44,8 @@ class VerticaCheck(AgentCheck):
         self._timeout = float(self.instance.get('timeout', 10))
         self._tags = self.instance.get('tags', [])
 
+        self._client_lib_log_level = self.instance.get('client_lib_log_level')
+
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
 
@@ -559,6 +561,9 @@ class VerticaCheck(AgentCheck):
             'connection_load_balance': self._connection_load_balance,
             'connection_timeout': self._timeout,
         }
+        if self._client_lib_log_level:
+            connection_options['log_level'] = self._client_lib_log_level
+            connection_options['log_path'] = None  # will make vertica client log to stdout
 
         if self._tls_verify:  # no cov
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
