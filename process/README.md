@@ -9,43 +9,42 @@ The process check lets you:
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The process check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server.
 
 ### Configuration
 
-Unlike many checks, the process check doesn't monitor anything useful by default; you must configure which processes you want to monitor, and how. While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors ssh/sshd processes. See the [sample process.d/conf.yaml][3] for all available configuration options:
+Unlike many checks, the process check doesn't monitor anything useful by default; you must configure which processes you want to monitor, and how.
 
+1. While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors ssh/sshd processes. See the [sample process.d/conf.yaml][3] for all available configuration options:
+
+    ```yaml
+      init_config:
+
+      instances:
+
+          ## @param name - string - required
+          ## Used to uniquely identify your metrics
+          ## as they are tagged with this name in Datadog.
+          #
+        - name: ssh
+
+          ## @param search_string - list of strings - required
+          ## If one of the elements in the list matches, it return the count of
+          ## all the processes that match the string exactly by default.
+          ## Change this behavior with the parameter `exact_match: false`.
+          #
+          search_string: ['ssh', 'sshd']
     ```
-    init_config:
 
-    instances:
-
-        ## @param name - string - required
-        ## Used to uniquely identify your metrics as they are tagged with this name in Datadog.
-        #
-      - name: ssh
-        search_string: ['ssh', 'sshd']
-    ```
-
-  Datadog process check uses the psutil python package to [check processes on your machine][4]. By default this process check works on exact match and looks at the process names only. By setting    `exact_match` to **False** in your yaml file, the agent looks at the command used to launch your process and recognizes every process that contains your keywords.
-
-  **Note** For agent v6.11+ on windows, the Agent runs as an unprivileged `ddagentuser`, and does not have access to the full command line of processes running under a different users, so the     `exact_match: false` option cannot be used in such cases. The same goes for the `user` option that allows you to select only processes belonging to a specific user.
-
-  You can also configure the check to find any process by exact PID (`pid`) or pidfile (`pid_file`). If you provide more than one of `search_string`, `pid`, and `pid_file`, the check uses the first     option it finds in that order (e.g. it uses `search_string` over `pid_file` if you configure both).
-
-  To have the check search for processes in a path other than `/proc`, set `procfs_path: <PROC_PATH>` in `datadog.conf`, NOT in `process.yaml` (its use has been deprecated there). Set this to `/   host/proc` if you're running the Agent from a Docker container (i.e. [docker-dd-agent][5]) and want to monitor processes running on the server hosting your containers. You DON'T need to set this to   monitor processes running _in_ your containers; the [Docker check][6] monitors those.
-
-  Some process metrics require either running the datadog collector as the same user as the monitored process or privileged access to be retrieved. Where the former option is not desired, and to avoid running the datadog collector as `root`, the `try_sudo` option lets the process check try using `sudo` to collect this metric. As of now, only the `open_file_descriptors` metric on Unix platforms is taking advantage of this setting. Note: the appropriate sudoers rules have to be configured for this to work
+    Some process metrics require either running the datadog collector as the same user as the monitored process or privileged access to be retrieved. Where the former option is not desired, and to avoid running the datadog collector as `root`, the `try_sudo` option lets the process check try using `sudo` to collect this metric. As of now, only the `open_file_descriptors` metric on Unix platforms is taking advantage of this setting. Note: the appropriate sudoers rules have to be configured for this to work:
 
     ```
     dd-agent ALL=NOPASSWD: /bin/ls /proc/*/fd/
     ```
 
-Finally, [restart the Agent][7] to enable your process check.
+2. [Restart the Agent][7].
 
 ### Validation
 
