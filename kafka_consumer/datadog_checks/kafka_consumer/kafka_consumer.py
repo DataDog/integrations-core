@@ -440,9 +440,9 @@ class KafkaCheck(AgentCheck):
     @classmethod
     def _determine_kafka_version(cls, init_config, instance):
         """Return the Kafka cluster version as a tuple."""
-        kafka_client_api_version = instance.get('kafka_client_api_version')
-        if isinstance(kafka_client_api_version, str):
-            kafka_version = tuple(map(int, kafka_client_api_version.split(".")))
+        kafka_version = instance.get('kafka_client_api_version')
+        if isinstance(kafka_version, str):
+            kafka_version = tuple(map(int, kafka_version.split(".")))
         if kafka_version is None:  # if unspecified by the user, we have to probe the cluster
             kafka_connect_str = instance.get('kafka_connect_str')  # TODO call validation method
             kafka_client = KafkaClient(
