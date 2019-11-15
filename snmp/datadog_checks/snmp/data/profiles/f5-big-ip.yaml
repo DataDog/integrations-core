@@ -34,6 +34,7 @@ metrics:
   # CPU stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     table: sysMultiHostCpuTable
+    forced_type: percent
     symbols:
       - sysMultiHostCpuUser
       - sysMultiHostCpuNice
@@ -48,14 +49,30 @@ metrics:
   # Basic interface stats
   - MIB: IF-MIB
     table: ifTable
+    forced_type: monotonic_count
     symbols:
-      - ifInOctets
       - ifInErrors
-      - ifOutOctets
       - ifOutErrors
     metric_tags:
       - tag: interface
         column: ifDescr
+  - MIB: IF-MIB
+    table: ifTable
+    symbols:
+      - ifAdminStatus
+      - ifOperStatus
+    metric_tags:
+      - tag: interface
+        column: ifDescr
+  - MIB: IF-MIB
+    table: ifXTable
+    forced_type: monotonic_count
+    symbols:
+      - ifHCInOctets
+      - ifHCOutOctets
+    metric_tags:
+      - tag: interface
+        column: ifName
   # TCP stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysTcpStatOpen
@@ -67,33 +84,46 @@ metrics:
     symbol: sysTcpStatTimeWait
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysTcpStatAccepts
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysTcpStatAcceptfails
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysTcpStatConnects
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysTcpStatConnfails
+    forced_type: monotonic_count
   # UDP stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysUdpStatOpen
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysUdpStatAccepts
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysUdpStatAcceptfails
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysUdpStatConnects
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysUdpStatConnfails
+    forced_type: monotonic_count
   # SSL stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysClientsslStatCurConns
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysClientsslStatEncryptedBytesIn
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysClientsslStatEncryptedBytesOut
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysClientsslStatDecryptedBytesIn
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysClientsslStatDecryptedBytesOut
+    forced_type: monotonic_count
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol: sysClientsslStatHandshakeFailures
+    forced_type: monotonic_count
