@@ -1,0 +1,22 @@
+{
+  "categories": [
+    "os & system"
+  ],
+  "creates_events": false,
+  "display_name": "Cgroup",
+  "guid": "8c2abda6-71e6-4cbc-9796-52a48a039cf8",
+  "is_public": true,
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "metric_prefix": "system.cgroups.",
+  "metric_to_check": "system.cgroups.cpu.shares",
+  "name": "cgroup",
+  "public_title": "Datadog-Cgroup Integration",
+  "short_description": "Capture metrics and monitor the status of running processes running inside linux control groups (cgroups).",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "type": "check",
+  "integration_id": "system"
+}
