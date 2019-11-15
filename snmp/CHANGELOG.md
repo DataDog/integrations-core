@@ -8,7 +8,7 @@
 * [Added] Match profile with sysobject_id prefix. See [#4990](https://github.com/DataDog/integrations-core/pull/4990).
 * [Added] Count the number of discovered devices. See [#4978](https://github.com/DataDog/integrations-core/pull/4978).
 * [Added] Generic network router profile. See [#4937](https://github.com/DataDog/integrations-core/pull/4937).
-* [Added] Allow tagging though different MIBs. See [#4853](https://github.com/DataDog/integrations-core/pull/4853).
+* [Added] Allow tagging through different MIBs. See [#4853](https://github.com/DataDog/integrations-core/pull/4853).
 
 ## 1.14.1 / 2019-10-16
 
