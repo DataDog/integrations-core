@@ -2,9 +2,9 @@
 
 ## 4.4.0 / 2019-11-15
 
-* [Fixed] Update http check response_time metric source. See [#5025](https://github.com/DataDog/integrations-core/pull/5025).
+* [Fixed] Update response_time metric source. See [#5025](https://github.com/DataDog/integrations-core/pull/5025).
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
-* [Fixed] Improve config for http_check. See [#4841](https://github.com/DataDog/integrations-core/pull/4841).
+* [Fixed] Improve config constructor syntax. See [#4841](https://github.com/DataDog/integrations-core/pull/4841).
 
 ## 4.3.1 / 2019-10-18
 
