@@ -19,11 +19,8 @@ Optionally, you can configure the Agent to use a built in `postqueue -p` command
 
 **WARNING**: Using `postqueue` to monitor the mail queues doesn't report a count of messages for the `incoming` queue.
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-#### Host
-##### Metric collection
-###### Using sudo
+#### Metric collection
+##### Using sudo
 
 1. Edit the file `postfix.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample postfix.d/conf.yaml][4] for all available configuration options:
 
@@ -66,7 +63,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 3. [Restart the Agent][5]
 
-###### Using postqueue
+##### Using postqueue
 
 1. Edit the `postfix.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]:
 
@@ -125,7 +122,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 3. [Restart the Agent][5].
 
-##### Log collection
+#### Log collection
 
 **Available for Agent >6.0**
 
@@ -155,47 +152,13 @@ Postfix sends logs to the syslog daemon, which then writes logs to the file syst
 
 3. [Restart the Agent][5].
 
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
-
-**Note**: Refer to the [Host section](#host) to get more information on how to manage the Agent user access to your Postfix instance.
-
-##### Metric collection
-
-###### Using sudo
-
-| Parameter            | Value                                                                            |
-|----------------------|----------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `postfix`                                                                        |
-| `<INIT_CONFIG>`      | `{"postfix_user": "postfix"}`                                                    |
-| `<INSTANCE_CONFIG>`  | `{"directory": "/var/spool/postfix", "queues":["incoming","active","deferred"]}` |
-
-###### Using postqueue
-
-| Parameter            | Value                                                                              |
-|----------------------|------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `postfix`                                                                          |
-| `<INIT_CONFIG>`      | `{"postqueue": true}`                                                              |
-| `<INSTANCE_CONFIG>`  | `{"config_directory": "/etc/postfix", "queues":["incoming","active","deferred"] }` |
-
-##### Log collection
-
-**Available for Agent v6.5+**
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][8].
-
-| Parameter      | Value                                       |
-|----------------|---------------------------------------------|
-| `<LOG_CONFIG>` | {"source": "postfix", "service": "postfix"} |
-
 ### Validation
 
-[Run the Agent's status subcommand][9] and look for `postfix` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `postfix` under the Checks section.
 
 ## Data Collected
 ### Metrics
-See [metadata.csv][10] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Events
 The Postfix check does not include any events.
@@ -204,13 +167,13 @@ The Postfix check does not include any events.
 The Postfix check does not include any service checks.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-* [Monitor Postfix queue performance][12]
+* [Monitor Postfix queue performance][10]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postfix/images/postfixgraph.png
@@ -219,9 +182,7 @@ Additional helpful documentation, links, and articles:
 [4]: https://github.com/DataDog/integrations-core/blob/master/postfix/datadog_checks/postfix/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: http://www.postfix.org/postqueue.1.html
-[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
-[8]: https://docs.datadoghq.com/agent/docker/log/
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
-[11]: https://docs.datadoghq.com/help
-[12]: https://www.datadoghq.com/blog/monitor-postfix-queues
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
+[9]: https://docs.datadoghq.com/help
+[10]: https://www.datadoghq.com/blog/monitor-postfix-queues
