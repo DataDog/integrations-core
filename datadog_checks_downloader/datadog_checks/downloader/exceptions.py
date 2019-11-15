@@ -74,3 +74,10 @@ class NoInTotoLinkMetadataFound(TUFInTotoError):
 class NoInTotoRootLayoutPublicKeysFound(TUFInTotoError):
     def __str__(self):
         return 'in-toto root layout public keys expected, but not found for {}!'.format(self.target_relpath)
+
+
+class RevokedDeveloper(TUFInTotoError):
+    MSG = "Step 'tag' requires '1' link metadata file(s), found '0'."
+
+    def __str__(self):
+        return 'Developer has most likely been revoked for {}!'.format(self.target_relpath)

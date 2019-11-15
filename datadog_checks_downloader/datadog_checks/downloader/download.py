@@ -10,6 +10,7 @@ import shutil
 import tempfile
 
 from in_toto import verifylib
+from in_toto.exceptions import LinkNotFoundError
 from in_toto.models.metadata import Metablock
 from in_toto.util import import_public_keys_from_files_as_dict
 from pkg_resources import parse_version
@@ -23,6 +24,7 @@ from .exceptions import (
     NoInTotoLinkMetadataFound,
     NoInTotoRootLayoutPublicKeysFound,
     NoSuchDatadogPackage,
+    RevokedDeveloper,
 )
 from .parameters import substitute
 
@@ -177,6 +179,14 @@ class TUFDownloader:
         root_layout_params = substitute(target_relpath)
         return root_layout, root_layout_pubkeys, root_layout_params
 
+    def __handle_in_toto_verification_exception(self, target_relpath, e):
+            logger.exception('in-toto failed to verify {}'.format(target_relpath))
+
+            if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloper.MSG:
+                raise RevokedDeveloper(target_relpath)
+            else:
+                raise
+
     def __in_toto_verify(self, inspection_packet, target_relpath):
         # Make a temporary directory in a parent directory we control.
         tempdir = tempfile.mkdtemp(dir=REPOSITORIES_DIR)
@@ -193,9 +203,8 @@ class TUFDownloader:
 
         try:
             verifylib.in_toto_verify(root_layout, root_layout_pubkeys, substitution_parameters=root_layout_params)
-        except Exception:
-            logger.exception('in-toto failed to verify {}'.format(target_relpath))
-            raise
+        except Exception as e:
+            self.__handle_in_toto_verification_exception(target_relpath, e)
         else:
             logger.info('in-toto verified {}'.format(target_relpath))
         finally:
