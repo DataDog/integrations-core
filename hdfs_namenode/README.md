@@ -53,7 +53,7 @@ instances:
       logs_enabled: true
     ```
 
-2. Add this configuration block to your `hdfs_namenode.d/conf.yaml` file to start collecting your Druid logs:
+2. Add this configuration block to your `hdfs_namenode.d/conf.yaml` file to start collecting your NameNode logs:
 
     ```yaml
       logs:
