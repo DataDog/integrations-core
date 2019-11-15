@@ -7,92 +7,134 @@
 This check monitors the size of all your Postfix queues.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
-The Postfix check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Postfix servers.
+The Postfix check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Postfix servers.
 
-## Configuration
-This check can be configured to use the `find` command which requires granting the dd-agent user sudo access to get a count of messages in the `incoming`, `active`, and `deferred` mail queues.
+### Configuration
 
-Optionally, you can configure the agent to use a built in `postqueue -p` command to get a count of messages in the `active`, `hold`, and `deferred` mail queues. `postqueue` is exectued with set-group ID privileges without the need for sudo.
+This check can be configured to use the `find` command which requires granting the `dd-agent` user sudo access to get a count of messages in the `incoming`, `active`, and `deferred` mail queues.
 
-**WARNING**: Using `postqueue` to monitor the mail queues will not report a count of messages for the `incoming` queue.
+Optionally, you can configure the Agent to use a built in `postqueue -p` command to get a count of messages in the `active`, `hold`, and `deferred` mail queues. `postqueue` is exectued with set-group ID privileges without the need for sudo.
 
-### Using sudo
-Edit the file `postfix.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample postfix.d/conf.yaml][5] for all available configuration options:
+**WARNING**: Using `postqueue` to monitor the mail queues doesn't report a count of messages for the `incoming` queue.
 
-```
-init_config:
-  postfix_user: postfix
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-instances:
-  # add one instance for each postfix service you want to track
-  - directory: /var/spool/postfix
-    queues:
-      - incoming
-      - active
-      - deferred
-#   tags:
-#     - optional_tag1
-#     - optional_tag2
-```
+#### Host
+##### Metric collection
+###### Using sudo
 
-For each mail queue in `queues`, the Agent forks a `find` on its directory.
-It uses `sudo` to do this with the privileges of the Postfix user, so you must
-add the following lines to `/etc/sudoers` for the Agent's user, `dd-agent`,
-assuming Postfix runs as `postfix`:
-```
-dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
-dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
-dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
-```
+1. Edit the file `postfix.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample postfix.d/conf.yaml][4] for all available configuration options:
 
-### Using postqueue
-Edit the `postfix.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]:
+    ```yaml
+      init_config:
+        ## @param postfix_user - string - required
+        ## The user running dd-agent must have passwordless sudo access for the find
+        ## command to run the postfix check.  Here's an example:
+        ## example /etc/sudoers entry:
+        ##   dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
+        ##
+        ## Redhat/CentOS/Amazon Linux flavours need to add:
+        ##          Defaults:dd-agent !requiretty
+        #
+        postfix_user: postfix
 
-```
-init_config:
-  postqueue: true
+      instances:
 
-instances:
-  # The config_directory option only applies when `postqueue: true`.
-  # The config_directory is the location of the Postfix configuration directory
-  # where main.cf lives.
-  - config_directory: /etc/postfix
-#   tags:
-#     - optional_tag
-#     - optional_tag0
-```
-For each `config_directory` in `instances`, the Agent forks a `postqueue -c` for the Postfix configuration directory.
+          ## @param directory - string - required
+          ## Path to the postfix directory.
+          #
+        - directory: /var/spool/postfix
 
-Postfix has internal access controls that limit activities on the mail queue. By default, Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be configured with stricter access controls, you may need to grant the dd-agent user access to view the mail queue.
+          ## @param queues - list of string - required
+          ## List of queues to monitor.
+          #
+          queues:
+            - incoming
+            - active
+            - deferred
+    ```
 
-```
-postconf -e "authorized_mailq_users = dd-agent"
-```
-http://www.postfix.org/postqueue.1.html
-```
-authorized_mailq_users (static:anyone)
-```
-List of users who are authorized to view the queue.
+2. For each mail queue in `queues`, the Agent forks a `find` on its directory. It uses `sudo` to do this with the privileges of the Postfix user, so you must add the following lines to `/etc/sudoers` for the Agent's user, `dd-agent`, assuming Postfix runs as `postfix`:
 
-[Restart the Agent][6] to start sending Postfix metrics to Datadog.
+    ```
+    dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/incoming -type f
+    dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/active -type f
+    dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find /var/spool/postfix/deferred -type f
+    ```
 
-#### Log collection
+3. [Restart the Agent][5]
+
+###### Using postqueue
+
+1. Edit the `postfix.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]:
+
+    ```yaml
+      init_config:
+
+        ## @param postqueue - boolean - optional - default: false
+        ## Set `postqueue: true` to gather mail queue counts using `postqueue -p`
+        ## without the use of sudo. Postqueue binary is ran with set-group ID privileges,
+        ## so that it can connect to Postfix daemon processes.
+        ## Only `tags` keys are used from `instances` definition.
+        ## Postfix has internal access controls that limit activities on the mail queue.
+        ## By default, Postfix allows `anyone` to view the queue. On production systems
+        ## where the Postfix installation may be configured with stricter access controls,
+        ## you may need to grant the dd-agent user access to view the mail queue.
+        ##
+        ## postconf -e "authorized_mailq_users = dd-agent"
+        ##
+        ## http://www.postfix.org/postqueue.1.html
+        ##
+        ## authorized_mailq_users (static:anyone)
+        ## List of users who are authorized to view the queue.
+        #
+        postqueue: true
+
+      instances:
+
+          ## @param config_directory - string - optional
+          ## The config_directory option only applies when `postqueue: true`.
+          ## The config_directory is the location of the Postfix configuration directory
+          ## where main.cf lives.
+          #
+        - config_directory: /etc/postfix
+
+          ## @param queues - list of string - required
+          ## List of queues to monitor.
+          #
+          queues:
+            - incoming
+            - active
+            - deferred
+    ```
+
+2. For each `config_directory` in `instances`, the Agent forks a `postqueue -c` for the Postfix configuration directory. Postfix has internal access controls that limit activities on the mail queue. By default, Postfix allows `anyone` to view the queue. On production systems where the Postfix installation may be configured with stricter access controls, you may need to grant the `dd-agent` user access to view the mail queue ([postqueue Postfix documentation][6]):
+
+    ```
+    postconf -e "authorized_mailq_users = dd-agent"
+    ```
+
+    List of users who are authorized to view the queue:
+
+    ```
+    authorized_mailq_users (static:anyone)
+    ```
+
+
+3. [Restart the Agent][5].
+
+##### Log collection
 
 **Available for Agent >6.0**
 
-Postfix sends logs to the syslog daemon, which then writes logs to the file system.
-
-The naming convention and log file destinations are configurable:
+Postfix sends logs to the syslog daemon, which then writes logs to the file system. The naming convention and log file destinations are configurable:
 
 ```
 /etc/syslog.conf:
     mail.err                                    /dev/console
-    mail.debug                                  /var/log/maillog
+    mail.debug                                  /var/log/mail.log
 ```
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -101,7 +143,7 @@ The naming convention and log file destinations are configurable:
       logs_enabled: true
     ```
 
-2. Add the following configuration block to your `postfix.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample postfix.d/conf.yaml][6] for all available configuration options.
+2. Add the following configuration block to your `postfix.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample postfix.d/conf.yaml][5] for all available configuration options.
 
     ```yaml
       logs:
@@ -111,7 +153,41 @@ The naming convention and log file destinations are configurable:
           service: myapp
     ```
 
-3. [Restart the Agent][7].
+3. [Restart the Agent][5].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
+
+**Note**: Refer to the [Host section](#host) to get more information on how to manage the Agent user access to your Postfix instance.
+
+##### Metric collection
+
+###### Using sudo
+
+| Parameter            | Value                                                                            |
+|----------------------|----------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `postfix`                                                                        |
+| `<INIT_CONFIG>`      | `{"postfix_user": "postfix"}`                                                    |
+| `<INSTANCE_CONFIG>`  | `{"directory": "/var/spool/postfix", "queues":["incoming","active","deferred"]}` |
+
+###### Using postqueue
+
+| Parameter            | Value                                                                              |
+|----------------------|------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `postfix`                                                                          |
+| `<INIT_CONFIG>`      | `{"postqueue": true}`                                                              |
+| `<INSTANCE_CONFIG>`  | `{"config_directory": "/etc/postfix", "queues":["incoming","active","deferred"] }` |
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][8].
+
+| Parameter      | Value                                       |
+|----------------|---------------------------------------------|
+| `<LOG_CONFIG>` | {"source": "postfix", "service": "postfix"} |
 
 ### Validation
 
@@ -134,16 +210,18 @@ Need help? Contact [Datadog support][11].
 
 Additional helpful documentation, links, and articles:
 
-* [Monitor Postfix queue performance][7]
+* [Monitor Postfix queue performance][12]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postfix/images/postfixgraph.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/postfix/datadog_checks/postfix/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://www.datadoghq.com/blog/monitor-postfix-queues
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/postfix/datadog_checks/postfix/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: http://www.postfix.org/postqueue.1.html
+[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
+[8]: https://docs.datadoghq.com/agent/docker/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
 [11]: https://docs.datadoghq.com/help
+[12]: https://www.datadoghq.com/blog/monitor-postfix-queues

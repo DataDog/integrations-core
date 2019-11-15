@@ -1,7 +1,8 @@
 {
   "categories": [
     "Collaboration",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Postfix",
