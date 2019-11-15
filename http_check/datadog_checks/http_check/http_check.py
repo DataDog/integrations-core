@@ -156,9 +156,7 @@ class HTTPCheck(AgentCheck):
 
             # Only report this metric if the site is not down
             if response_time and not service_checks:
-                # Stop the timer as early as possible
-                running_time = time.time() - start
-                self.gauge('network.http.response_time', running_time, tags=tags_list)
+                self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
             content = r.text
 
