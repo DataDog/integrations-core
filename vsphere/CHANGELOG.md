@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 4.2.1 / 2019-11-15
+
+* [Fixed] Collect the latest non-negative value for historical metrics. See [#5026](https://github.com/DataDog/integrations-core/pull/5026).
+
 ## 4.2.0 / 2019-10-28
 
 * [Added] Adds the ability to collect realtime and historical metrics in two different instances for better performance. See [#4337](https://github.com/DataDog/integrations-core/pull/4337).
