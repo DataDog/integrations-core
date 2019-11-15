@@ -20,6 +20,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.common import total_time_to_temporal_percent
 
 from .config import InstanceConfig
 
@@ -557,6 +558,9 @@ class SnmpCheck(AgentCheck):
             if forced_type.lower() == 'gauge':
                 value = int(snmp_value)
                 self.gauge(metric_name, value, tags)
+            elif forced_type.lower() == 'percent':
+                value = total_time_to_temporal_percent(int(snmp_value), scale=1)
+                self.rate(metric_name, value, tags)
             elif forced_type.lower() == 'counter':
                 value = int(snmp_value)
                 self.rate(metric_name, value, tags)

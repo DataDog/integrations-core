@@ -34,7 +34,7 @@ metrics:
   # CPU stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     table: sysMultiHostCpuTable
-    forced_type: counter
+    forced_type: percent
     symbols:
       - sysMultiHostCpuUser
       - sysMultiHostCpuNice
