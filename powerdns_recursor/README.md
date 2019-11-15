@@ -45,7 +45,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 1. Edit the `powerdns_recursor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample powerdns_recursor.d/conf.yaml][3] for all available configuration options:
 
     ```yaml
-	    init_config:
+        init_config:
 
         instances:
 
