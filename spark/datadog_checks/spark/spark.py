@@ -194,6 +194,17 @@ class SparkCheck(AgentCheck):
                 message='Connection to ApplicationMaster "%s" was successful' % am_address,
             )
 
+    def collect_version(self, base_url):
+        try:
+            version_endpoint = base_url + '/api/v1/version'
+            response = self.http.get(version_endpoint)
+            response.raise_for_status()
+            version_json = response.json()
+            version = version_json['spark']
+            self.set_metadata('version', version)
+        except Exception:
+            self.log.debug("Version information was no found.")
+
     def _get_master_address(self, instance):
         """
         Get the master address from the instance configuration
@@ -313,6 +324,8 @@ class SparkCheck(AgentCheck):
                     app_url = self._get_standalone_app_url(app_id, spark_master_address, tags)
 
                     if app_id and app_name and app_url:
+                        # Using standalone to get version info since Mesos gives Mesos version
+                        self.collect_version(app_url)
                         if pre_20_mode:
                             self.log.debug('Getting application list in pre-20 mode')
                             applist = self._rest_request_to_json(
