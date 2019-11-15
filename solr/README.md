@@ -234,17 +234,17 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 The `datadog-agent jmx` command was added in version 4.1.0.
 
   * List attributes that match at least one of your instances configuration:
-`sudo /etc/init.d/datadog-agent jmx list_matching_attributes`
+`sudo datadog-agent jmx list matching`
   * List attributes that do match one of your instances configuration but that are not being collected because it would exceed the number of metrics that can be collected:
-`sudo /etc/init.d/datadog-agent jmx list_limited_attributes`
+`sudo datadog-agent jmx list limited`
   * List attributes that will actually be collected by your current instances configuration:
-`sudo /etc/init.d/datadog-agent jmx list_collected_attributes`
+`sudo datadog-agent jmx list collected`
   * List attributes that don't match any of your instances configuration:
-`sudo /etc/init.d/datadog-agent jmx list_not_matching_attributes`
+`sudo datadog-agent jmx list not-matching`
   * List every attributes available that has a type supported by JMXFetch:
-`sudo /etc/init.d/datadog-agent jmx list_everything`
+`sudo datadog-agent jmx list everything`
   * Start the collection of metrics based on your current configuration and display them in the console:
-`sudo /etc/init.d/datadog-agent jmx collect`
+`sudo datadog-agent jmx collect`
 
 ## Further Reading
 ### Parsing a string value into a number
