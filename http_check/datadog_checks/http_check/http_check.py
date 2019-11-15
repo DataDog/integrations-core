@@ -214,6 +214,7 @@ class HTTPCheck(AgentCheck):
             if r is not None:
                 r.close()
             # resets the wrapper Session object
+            self.http._session.close()
             self.http._session = None
 
         # Report status metrics as well
