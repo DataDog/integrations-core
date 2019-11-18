@@ -38,8 +38,8 @@ To collect the cluster-wide `cilium-operator` metrics, see the [Cluster Agent][9
 ### Configuration
 
 1. Edit the `cilium.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cilium performance data. See the [sample cilium.d/conf.yaml][4] for all available configuration options.
-    * To collect `cilium-agent` metrics, enable the `agent_url` option.
-    * To collect `cilium-operator` metrics, enable the `operator_url` option.
+    * To collect `cilium-agent` metrics, enable the `agent_endpoint` option.
+    * To collect `cilium-operator` metrics, enable the `operator_endpoint` option.
 
 2. [Restart the Agent][5].
 
