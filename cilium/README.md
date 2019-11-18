@@ -33,6 +33,8 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
                     - --enable-metrics
         ```
 
+To collect the cluster-wide `cilium-operator` metrics, see the [Cluster Agent][9].
+
 ### Configuration
 
 1. Edit the `cilium.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cilium performance data. See the [sample cilium.d/conf.yaml][4] for all available configuration options.
@@ -63,11 +65,12 @@ Cilium does not include any events.
 
 Need help? Contact [Datadog support][8].
 
-[1]: https://cilium.io/
+[1]: https://cilium.io
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[3]: https://docs.datadoghq.com/agent/
+[3]: https://docs.datadoghq.com/agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/cilium/datadog_checks/cilium/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
 [8]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/agent/cluster_agent
