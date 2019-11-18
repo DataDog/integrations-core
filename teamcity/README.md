@@ -7,9 +7,6 @@ This check watches for successful build-related events and sends them to Datadog
 Unlike most Agent checks, this one doesn't collect any metrics-just events.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
-
 ### Installation
 
 The Teamcity check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Teamcity servers.
@@ -18,6 +15,10 @@ The Teamcity check is included in the [Datadog Agent][2] package, so you don't n
 #### Prepare Teamcity
 
 Follow [Teamcity's documentation][3] to enable Guest Login.
+
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 Edit the `teamcity.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample teamcity.d/conf.yaml][5] for all available configuration options:
 
@@ -40,6 +41,15 @@ instances:
 Add an item like the above to `instances` for each build configuration you want to track.
 
 [Restart the Agent][6] to start collecting and sending Teamcity events to Datadog.
+
+#### Containerized
+For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                                                                         |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `teamcity`                                                                                                                                    |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                 |
+| `<INSTANCE_CONFIG>`  | `{"name": "<BUILD_NAME>", "server":"http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com", "build_configuration":"<BUILD_CONFIGURATION_ID>"}` |
 
 ### Validation
 
