@@ -649,7 +649,7 @@
         "tile_def": {
           "requests": [
             {
-              "q": "sum:cilium.cilium_kvstore_operations_duration_seconds.sum{*} by {action}",
+              "q": "sum:cilium.kvstore.operations_duration.seconds.sum{*} by {action}",
               "style": {
                 "palette": "dog_classic",
                 "type": "solid",
@@ -684,7 +684,7 @@
         "tile_def": {
           "requests": [
             {
-              "q": "avg:cilium.cilium_kvstore_events_queue_seconds.sum{*} by {action}",
+              "q": "avg:cilium.kvstore.events_queue.seconds.sum{*} by {action}",
               "style": {
                 "palette": "warm",
                 "type": "solid",
