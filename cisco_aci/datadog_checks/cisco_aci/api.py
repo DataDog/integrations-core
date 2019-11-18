@@ -12,6 +12,7 @@ from requests import Request, Session
 from six.moves.urllib.parse import unquote
 
 from datadog_checks.base import ConfigurationError
+
 from .exceptions import APIAuthException, APIConnectionException, APIParsingException
 
 

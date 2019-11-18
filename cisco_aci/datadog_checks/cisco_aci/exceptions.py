@@ -17,4 +17,3 @@ class APIConnectionException(APIException):
 
 class APIParsingException(APIException):
     pass
-
