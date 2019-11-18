@@ -18,6 +18,3 @@ class APIConnectionException(APIException):
 class APIParsingException(APIException):
     pass
 
-
-class ConfigurationException(Exception):
-    pass

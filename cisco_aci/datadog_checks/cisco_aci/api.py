@@ -11,7 +11,8 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from requests import Request, Session
 from six.moves.urllib.parse import unquote
 
-from .exceptions import APIAuthException, APIConnectionException, APIParsingException, ConfigurationException
+from datadog_checks.base import ConfigurationError
+from .exceptions import APIAuthException, APIConnectionException, APIParsingException
 
 
 class SessionWrapper:
@@ -78,9 +79,11 @@ class SessionWrapper:
             prepped_request.headers['Cookie'] = cookie
         else:
             self.log.warning("The Cisco ACI Integration requires either a cert or a username and password")
-            raise APIAuthException("The Cisco ACI Integration requires either a cert or a username and password")
+            raise ConfigurationError("The Cisco ACI Integration requires either a cert or a username and password")
 
         response = self.session.send(prepped_request, verify=self.verify, timeout=self.timeout)
+        if response.status_code == 403:
+            raise APIAuthException("Received 403 when making request: %s", response.text)
         try:
             response.raise_for_status()
         except Exception as e:
@@ -137,7 +140,7 @@ class Api:
             self.cert_key = cert_key
         elif not password:
             msg = "You need to have either a password or a cert"
-            raise ConfigurationException(msg)
+            raise ConfigurationError(msg)
 
     def close(self):
         for session in self.sessions:
@@ -210,7 +213,14 @@ class Api:
         # allow for multiple APICs in a cluster to be included in one check so that the check
         # does not bombard a single APIC with dozens of requests and cause it to slow down
         session = random.choice(self.sessions)
-        return session.make_request(path)
+        try:
+            return session.make_request(path)
+        except APIAuthException:
+            # If we get a 403 answer this may mean that the token expired. Let's refresh the token
+            # by login again and retry the request. If it fails again, the integration should exit.
+            self.login()
+            session = random.choice(self.sessions)
+            return session.make_request(path)
 
     def get_apps(self, tenant):
         path = "/api/mo/uni/tn-{}.json?query-target=subtree&target-subtree-class=fvAp".format(tenant)
