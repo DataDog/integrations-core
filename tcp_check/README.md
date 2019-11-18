@@ -47,7 +47,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 |----------------------|--------------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `tcp_check`                                                                                      |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                    |
-| `<INSTANCE_CONFIG>`  | `{"name": "<TCP_CHECK_INSTANCE_NAME>", "host":"<TCP_HOST_TO_CONNECT_TO>", "port":"<HOST_PORT>"}` |
+| `<INSTANCE_CONFIG>`  | `{"name": "<TCP_CHECK_INSTANCE_NAME>", "host":"%%host%%", "port":"<CONTAINER_PORT>"}` |
 
 ### Validation
 
