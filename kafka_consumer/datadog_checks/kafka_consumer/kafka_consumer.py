@@ -371,7 +371,7 @@ class KafkaCheck(AgentCheck):
             # transform [("t1", [1, 2])] into [TopicPartition("t1", 1), TopicPartition("t1", 2)]
             topic_partitions = []
             for topic, partitions in topics.items():
-                if partitions is None:  # If partitions aren't specified, fetch all partitions in the topic
+                if not partitions:  # If partitions aren't specified, fetch all partitions in the topic
                     partitions = self._kafka_client._client.cluster.partitions_for_topic(topic)
                 topic_partitions.extend([TopicPartition(topic, p) for p in partitions])
         single_group_offsets_future = self._kafka_client._list_consumer_group_offsets_send_request(
