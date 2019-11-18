@@ -38,6 +38,7 @@ Follow the instructions below to configure this check for an Agent running on a 
             spark_cluster_mode: spark_standalone_mode # default
         #   spark_cluster_mode: spark_mesos_mode
         #   spark_cluster_mode: spark_yarn_mode
+        #   spark_cluster_mode: spark_driver_mode
 
             cluster_name: <CLUSTER_NAME> # required; adds a tag 'cluster_name:<CLUSTER_NAME>' to all metrics
         #   spark_pre_20_mode: true   # if you use Standalone Spark < v2.0
@@ -80,6 +81,9 @@ Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's Mes
 Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ApplicationMaster. Returns `OK` otherwise.
 
 **spark.resource_manager.can_connect**<br>
+Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ResourceManager. Returns `OK` otherwise.
+
+**spark.driver.can_connect**<br>
 Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ResourceManager. Returns `OK` otherwise.
 
 ## Troubleshooting
