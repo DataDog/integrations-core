@@ -2,7 +2,7 @@ init_config:
 
 instances:
 
-    ## @param agent_endpoint - string - required
+    ## @param agent_endpoint - string - optional
     ## The URL where your application metrics are exposed by Prometheus.
     ## By default, the Cilium integration collects `cilium-agent` metrics.
     ## One of agent_endpoint or operator_endpoint must be provided.
