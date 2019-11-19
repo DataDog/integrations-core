@@ -24,7 +24,7 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
                     - --prometheus-serve-addr=:9090
         ```
     or in the `cilium-operator`:
-    * Add `- --enable-metrics` to the `args` section of the Cilium deployment config.
+    * Add `--enable-metrics` to the `args` section of the Cilium deployment config.
         ```
         [...]
             spec:
