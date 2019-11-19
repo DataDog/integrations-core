@@ -97,7 +97,7 @@ class __AgentCheck(object):
 
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
-    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
+    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)|__+')
     DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
     DEFAULT_METRIC_LIMIT = 0
 
@@ -617,15 +617,8 @@ class __AgentCheck(object):
             if prefix is not None:
                 prefix = self.convert_to_underscore_separated(prefix)
         else:
-            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric)
-        # Eliminate multiple _
-        name = re.sub(br"__+", b"_", name)
-        # Don't start/end with _
-        name = re.sub(br"^_", b"", name)
-        name = re.sub(br"_$", b"", name)
-        # Drop ._ and _.
-        name = re.sub(br"\._", b".", name)
-        name = re.sub(br"_\.", b".", name)
+            name = self.METRIC_REPLACEMENT.sub(br'_', metric)
+            name = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', name).strip(b'_')
 
         if prefix is not None:
             name = ensure_bytes(prefix) + b"." + name
