@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import collections
 import glob
 import logging
 import logging.config
 import os
 import re
 import shutil
+import sys
 import tempfile
 
 from in_toto import verifylib
@@ -19,11 +21,14 @@ from tuf.client.updater import Updater
 from tuf.exceptions import UnknownTargetError
 
 from .exceptions import (
+    DuplicatePackage,
     InconsistentSimpleIndex,
     MissingVersions,
     NoInTotoLinkMetadataFound,
     NoInTotoRootLayoutPublicKeysFound,
     NoSuchDatadogPackage,
+    NoSuchDatadogPackageVersion,
+    PythonVersionMismatch,
     RevokedDeveloper,
 )
 from .parameters import substitute
@@ -183,7 +188,7 @@ class TUFDownloader:
             logger.exception('in-toto failed to verify {}'.format(target_relpath))
 
             if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloper.MSG:
-                raise RevokedDeveloper(target_relpath)
+                raise RevokedDeveloper(target_relpath, IN_TOTO_ROOT_LAYOUT)
             else:
                 raise
 
@@ -255,40 +260,67 @@ class TUFDownloader:
         '''
         return self.__download_with_tuf_in_toto(target_relpath)
 
-    def __max_version(self, wheel_distribution_name, target_abspath):
-        pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-py2\\.py3-none-any\\.whl)'>(.*?)</a><br />"
-        versions = []
+    def __get_versions(self, standard_distribution_name):
+        index_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
+        # https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
+        wheel_distribution_name = re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)
+        pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-(.*?)-none-any\\.whl)'>(.*?)</a><br />"
+        # version: {python_tag: href}
+        wheels = collections.defaultdict(dict)
 
-        with open(target_abspath) as simple_index:
+        try:
+            # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
+            index_abspath, _ = self.__download_with_tuf(index_relpath)
+        except UnknownTargetError:
+            raise NoSuchDatadogPackage(standard_distribution_name)
+
+        with open(index_abspath) as simple_index:
             for line in simple_index:
                 match = re.match(pattern, line)
+
                 if match:
-                    href = match.group(1)
-                    version = match.group(2)
-                    text = match.group(3)
+                    href, version, python_tag, text = match.groups()
+
                     if href != text:
                         raise InconsistentSimpleIndex(href, text)
                     else:
-                        # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
-                        versions.append(parse_version(version))
+                        python_tags = wheels[version]
+                        if python_tag in python_tags:
+                            raise DuplicatePackage(standard_distribution_name, version, python_tag)
+                        python_tags[python_tag] = href
 
-        if not len(versions):
-            raise MissingVersions(standard_distribution_name)
-        else:
-            return max(versions)
+        return wheels
 
-    def get_latest_version(self, standard_distribution_name, wheel_distribution_name):
+
+    def get_wheel_relpath(self, standard_distribution_name, version=None):
         '''
         Returns:
             If download over TUF is successful, this function will return the
             latest known version of the Datadog integration.
         '''
-        target_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
+        wheels = self.__get_versions(standard_distribution_name)
 
-        try:
-            # NOTE: We do not perform in-toto inspection for simple indices; only for wheels.
-            target_abspath, _ = self.__download_with_tuf(target_relpath)
-        except UnknownTargetError:
-            raise NoSuchDatadogPackage(standard_distribution_name)
+        if not wheels:
+            raise MissingVersions(standard_distribution_name)
 
-        return self.__max_version(wheel_distribution_name, target_abspath)
+        if not version:
+            # https://setuptools.readthedocs.io/en/latest/pkg_resources.html#parsing-utilities
+            version = str(max(parse_version(v) for v in wheels.keys()))
+
+        python_tags = wheels[version]
+        if not python_tags:
+            raise NoSuchDatadogPackageVersion(standard_distribution_name, version)
+
+        # First, try finding the pure Python wheel for this version.
+        this_python = 'py{}'.format(sys.version_info[0])
+        href = python_tags.get(this_python)
+
+        # Otherwise, try finding the universal Python wheel for this version.
+        if not href:
+            href = python_tags.get('py2.py3')
+
+        # Otherwise, fuhgedaboutit.
+        if not href:
+            raise PythonVersionMismatch(standard_distribution_name, version, this_python, python_tags)
+
+        return 'simple/{}/{}'.format(standard_distribution_name, href)

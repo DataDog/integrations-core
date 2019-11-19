@@ -13,7 +13,7 @@ from tuf.exceptions import UnknownTargetError
 # 2nd party.
 # 2nd party.
 from .download import REPOSITORY_URL_PREFIX, TUFDownloader
-from .exceptions import NonCanonicalVersion, NonDatadogPackage, NoSuchDatadogPackageOrVersion
+from .exceptions import NonCanonicalVersion, NonDatadogPackage
 
 # Private module functions.
 
@@ -25,11 +25,6 @@ def __is_canonical(version):
 
     P = r'^([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$'
     return re.match(P, version) is not None
-
-
-def __get_wheel_distribution_name(standard_distribution_name):
-    # https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
-    return re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)
 
 
 # Public module functions.
@@ -49,10 +44,6 @@ def download():
     parser.add_argument('--version', type=str, default=None, help='The version number of the desired Datadog check.')
 
     parser.add_argument(
-        '--python-tag', type=str, default='py2.py3', help='The Python tag for the wheel of the desired Datadog check.'
-    )
-
-    parser.add_argument(
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
     )
 
@@ -60,28 +51,15 @@ def download():
     repository_url_prefix = args.repository
     standard_distribution_name = args.standard_distribution_name
     version = args.version
-    python_tag = args.python_tag
     verbose = args.verbose
 
     if not standard_distribution_name.startswith('datadog-'):
         raise NonDatadogPackage(standard_distribution_name)
-    else:
-        wheel_distribution_name = __get_wheel_distribution_name(standard_distribution_name)
-        tuf_downloader = TUFDownloader(repository_url_prefix=repository_url_prefix, verbose=verbose)
 
-        if not version:
-            version = tuf_downloader.get_latest_version(standard_distribution_name, wheel_distribution_name)
-        else:
-            if not __is_canonical(version):
-                raise NonCanonicalVersion(version)
+    if version and not __is_canonical(version):
+        raise NonCanonicalVersion(version)
 
-        target_relpath = 'simple/{}/{}-{}-{}-none-any.whl'.format(
-            standard_distribution_name, wheel_distribution_name, version, python_tag
-        )
-
-        try:
-            target_abspath = tuf_downloader.download(target_relpath)
-        except UnknownTargetError:
-            raise NoSuchDatadogPackageOrVersion(standard_distribution_name, version)
-
-        print(target_abspath)  # pylint: disable=print-statement
+    tuf_downloader = TUFDownloader(repository_url_prefix=repository_url_prefix, verbose=verbose)
+    wheel_relpath = tuf_downloader.get_wheel_relpath(standard_distribution_name, version=version)
+    wheel_abspath = tuf_downloader.download(wheel_relpath)
+    print(wheel_abspath)  # pylint: disable=print-statement

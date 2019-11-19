@@ -6,26 +6,7 @@
 # Exceptions for the CLI module.
 
 
-class CLIError(Exception):
-    def __init__(self, standard_distribution_name):
-        self.standard_distribution_name = standard_distribution_name
-
-    def __str__(self):
-        return 'Unexpected CLI error for {}!'.format(self.standard_distribution_name)
-
-
-class InconsistentSimpleIndex(CLIError):
-    def __init__(self, href, text):
-        self.href = href
-        self.text = text
-
-    def __str__(self):
-        return '{} != {}'.format(self.href, self.text)
-
-
-class MissingVersions(CLIError):
-    def __str__(self):
-        return 'No version found for {} !'.format(self.standard_distribution_name)
+class CLIError(Exception): pass
 
 
 class NonCanonicalVersion(CLIError):
@@ -33,29 +14,70 @@ class NonCanonicalVersion(CLIError):
         self.version = version
 
     def __str__(self):
-        return '{} is not a valid PEP 440 version!'.format(self.version)
+        return '{}'.format(self.version)
 
 
 class NonDatadogPackage(CLIError):
-    def __str__(self):
-        return '{} is not a Datadog package!'.format(self.standard_distribution_name)
-
-
-class NoSuchDatadogPackage(CLIError):
-    def __str__(self):
-        return 'Could not find the {} package!'.format(self.standard_distribution_name)
-
-
-class NoSuchDatadogPackageOrVersion(CLIError):
-    def __init__(self, standard_distribution_name, version):
-        super(NoSuchDatadogPackageOrVersion, self).__init__(standard_distribution_name)
-        self.version = version
+    def __init__(self, standard_distribution_name):
+        self.standard_distribution_name = standard_distribution_name
 
     def __str__(self):
-        return 'Either no {} package, or {} version!'.format(self.standard_distribution_name, self.version)
+        return '{}'.format(self.standard_distribution_name)
 
 
 # Exceptions for the download module.
+
+
+class SimpleIndexError(Exception):
+    def __init__(self, standard_distribution_name):
+        self.standard_distribution_name = standard_distribution_name
+
+    def __str__(self):
+        return '{}'.format(self.standard_distribution_name)
+
+
+class MissingVersions(SimpleIndexError): pass
+
+class NoSuchDatadogPackage(SimpleIndexError): pass
+
+
+class InconsistentSimpleIndex(SimpleIndexError):
+    def __init__(self, href, text):
+        self.href = href
+        self.text = text
+
+    def __str__(self):
+        return '{}: {}!={}'.format(self.standard_distribution_name, self.href, self.text)
+
+
+class NoSuchDatadogPackageVersion(SimpleIndexError):
+    def __init__(self, standard_distribution_name, version):
+        super(NoSuchDatadogPackageVersion, self).__init__(standard_distribution_name)
+        self.version = version
+
+    def __str__(self):
+        return '{}-{}'.format(self.standard_distribution_name, self.version)
+
+
+class DuplicatePackage(SimpleIndexError):
+    def __init__(self, standard_distribution_name, version, python_tag):
+        super(DuplicatePackage, self).__init__(standard_distribution_name)
+        self.version = version
+        self.python_tag = python_tag
+
+    def __str__(self):
+        return '{}-{}-{}'.format(self.standard_distribution_name, self.version, self.python_tag)
+
+
+class PythonVersionMismatch(SimpleIndexError):
+    def __init__(self, standard_distribution_name, version, this_python, python_tags):
+        super(PythonVersionMismatch, self).__init__(standard_distribution_name)
+        self.version = version
+        self.this_python = this_python
+        self.python_tags = python_tags
+
+    def __str__(self):
+        return '{}-{}: {} not in {}'.format(self.standard_distribution_name, self.version, self.this_python, self.python_tags)
 
 
 class TUFInTotoError(Exception):
@@ -63,21 +85,21 @@ class TUFInTotoError(Exception):
         self.target_relpath = target_relpath
 
     def __str__(self):
-        return 'Unexpected tuf-in-toto error for {}!'.format(self.target_relpath)
+        return '{}'.format(self.target_relpath)
 
 
-class NoInTotoLinkMetadataFound(TUFInTotoError):
-    def __str__(self):
-        return 'in-toto link metadata expected, but not found for {}!'.format(self.target_relpath)
+class NoInTotoLinkMetadataFound(TUFInTotoError): pass
 
 
-class NoInTotoRootLayoutPublicKeysFound(TUFInTotoError):
-    def __str__(self):
-        return 'in-toto root layout public keys expected, but not found for {}!'.format(self.target_relpath)
+class NoInTotoRootLayoutPublicKeysFound(TUFInTotoError): pass
 
 
 class RevokedDeveloper(TUFInTotoError):
     MSG = "Step 'tag' requires '1' link metadata file(s), found '0'."
 
+    def __init__(self, target_relpath, in_toto_root_layout):
+        super(RevokedDeveloper, self).__init__(target_relpath)
+        self.in_toto_root_layout = in_toto_root_layout
+
     def __str__(self):
-        return 'Developer has most likely been revoked for {}!'.format(self.target_relpath)
+        return '{} ({})'.format(self.target_relpath, self.in_toto_root_layout)
