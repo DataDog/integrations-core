@@ -47,6 +47,9 @@ jobs:
     - checkName: ceph
       displayName: Ceph
       os: linux
+    - checkName: cilium
+      displayName: Cilium
+      os: linux
     - checkName: cisco_aci
       displayName: Cisco ACI
       os: linux
