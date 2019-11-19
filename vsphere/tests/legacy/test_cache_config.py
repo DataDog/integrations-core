@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.vsphere.cache_config import CacheConfig
+from datadog_checks.vsphere.legacy.cache_config import CacheConfig
 
 
 def test___init__():
