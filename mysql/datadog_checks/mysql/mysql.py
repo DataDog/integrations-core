@@ -1347,7 +1347,7 @@ class MySql(AgentCheck):
 
         sql_query_schema_size = """
         SELECT   table_schema,
-                 SUM(data_length+index_length)/1024/1024 AS total_mb
+                 IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
                  FROM     information_schema.tables
                  GROUP BY table_schema;
         """
