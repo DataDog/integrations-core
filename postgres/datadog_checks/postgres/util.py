@@ -72,10 +72,17 @@ COMMON_ARCHIVER_METRICS = {
 }
 
 LOCK_METRICS = {
-    'descriptors': [('mode', 'lock_mode'), ('nspname', 'schema'), ('datname', 'db'), ('relname', 'table')],
+    'descriptors': [
+        ('mode', 'lock_mode'),
+        ('locktype', 'lock_type'),
+        ('nspname', 'schema'),
+        ('datname', 'db'),
+        ('relname', 'table'),
+    ],
     'metrics': {'lock_count': ('postgresql.locks', AgentCheck.gauge)},
     'query': """
 SELECT mode,
+       locktype,
        pn.nspname,
        pd.datname,
        pc.relname,
@@ -86,7 +93,7 @@ SELECT mode,
   LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
  WHERE l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg_%%'
- GROUP BY pd.datname, pc.relname, pn.nspname, mode""",
+ GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode""",
     'relation': False,
 }
 
