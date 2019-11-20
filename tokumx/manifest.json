@@ -1,6 +1,7 @@
 {
   "categories": [
-    "data store"
+    "data store",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "TokuMX",
