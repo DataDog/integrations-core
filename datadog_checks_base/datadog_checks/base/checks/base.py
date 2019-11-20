@@ -625,6 +625,16 @@ class __AgentCheck(object):
 
         return to_string(name)
 
+    def normalize_tag(self, tag):
+        """Normalize tag values.
+
+        It doesn't entirely duplicate backend logic, as the cleanup will happen
+        here. It just removes leading underscores for consistency, and replaces
+        spaces for testing.
+        """
+        tag = tag.replace(' ', '_').strip('_')
+        return to_string(tag)
+
     def check(self, instance):
         raise NotImplementedError
 

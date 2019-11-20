@@ -20,7 +20,7 @@ class TCPCheck(AgentCheck):
         super(TCPCheck, self).__init__(name, init_config, instances)
         instance = self.instances[0]
 
-        self.instance_name = self.normalize(instance['name'])
+        self.instance_name = self.normalize_tag(instance['name'])
         port = instance.get('port', None)
         self.timeout = float(instance.get('timeout', 10))
         self.response_time = instance.get('collect_response_time', False)
