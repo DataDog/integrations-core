@@ -96,14 +96,16 @@ class QueryManager(object):
 
                     row_values[column_name] = value
 
-                    if callable(transformer):
-                        submission_queue.append((transformer, value))
-                    elif transformer is None:
+                    column_type, transformer = transformer
+
+                    # The transformer can be None for `source` types. Those such columns do not submit
+                    # anything but are collected into the row values for other columns to reference.
+                    if transformer is None:
                         continue
-                    else:
-                        # For now there is only special logic for tags
-                        _column_type, transformer = transformer
+                    elif column_type == 'tag':
                         tags.append(transformer(value, None))
+                    else:
+                        submission_queue.append((transformer, value))
 
                 for transformer, value in submission_queue:
                     transformer(value, row_values, tags=tags)

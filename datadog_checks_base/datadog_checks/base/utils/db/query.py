@@ -62,7 +62,7 @@ class Query(object):
             elif not isinstance(column_type, str):
                 raise ValueError('field `type` for column {} of {} must be a string'.format(column_name, query_name))
             elif column_type == 'source':
-                column_data.append((column_name, None))
+                column_data.append((column_name, (None, None)))
                 continue
             elif column_type not in transformers:
                 raise ValueError('unknown type `{}` for column {} of {}'.format(column_type, column_name, query_name))
@@ -75,12 +75,19 @@ class Query(object):
                 error = 'error compiling type `{}` for column {} of {}: {}'.format(
                     column_type, column_name, query_name, e
                 )
+
+                # Prepend helpful error text.
+                #
+                # When an exception is raised in the context of another one, both will be printed. To avoid
+                # this we set the context to None. https://www.python.org/dev/peps/pep-0409/
                 raise_from(type(e)(error), None)
             else:
                 if column_type == 'tag':
                     column_data.append((column_name, (column_type, transformer)))
                 else:
-                    column_data.append((column_name, transformer))
+                    # All these would actually submit data. As that is the default case, we represent it as
+                    # a reference to None since if we use e.g. `value` it would never be checked anyway.
+                    column_data.append((column_name, (None, transformer)))
 
         self.name = query_name
         self.query = query
