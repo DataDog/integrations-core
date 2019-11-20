@@ -4,7 +4,7 @@ beautifulsoup4==4.5.1
 binary==1.0.0
 boto==2.46.1
 contextlib2==0.5.5
-cryptography==2.7
+cryptography==2.8
 cx-oracle==7.2.0
 ddtrace==0.13.0
 dnspython==1.16.0
