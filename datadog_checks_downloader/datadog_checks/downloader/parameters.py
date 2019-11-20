@@ -15,6 +15,8 @@ import os.path
 
 from pkg_resources import safe_name
 
+from .exceptions import NonDatadogPackage
+
 EXCEPTIONS = {'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'}
 
 
@@ -22,7 +24,10 @@ def substitute(target_relpath):
     filename = os.path.basename(target_relpath)
     name, ext = os.path.splitext(filename)
     wheel_distribution_name, package_version, python_tag, _, _ = name.split('-')
-    assert wheel_distribution_name.startswith('datadog_'), wheel_distribution_name
+
+    if not wheel_distribution_name.startswith('datadog_'):
+        raise NonDatadogPackage(wheel_distribution_name)
+
     standard_distribution_name = safe_name(wheel_distribution_name)
 
     # These names are the exceptions. In this case, the wheel distribution name
