@@ -7,6 +7,7 @@ import os
 
 import pytest
 import simplejson as json
+from mock import MagicMock
 from requests import Session
 
 from datadog_checks.cisco_aci import CiscoACICheck
@@ -71,3 +72,32 @@ def test_cisco(aggregator, session_mock):
     cisco_aci_check._api_cache[hash_mutable(common.CONFIG)] = api
 
     cisco_aci_check.check(common.CONFIG)
+
+
+def test_recover_from_expired_token(aggregator):
+    # First api answers with 403 to force the check to re-authenticate
+    unauthentified_response = MagicMock(status_code=403)
+    # Api answer when a request is being made to the login endpoint
+    login_response = MagicMock()
+    # Third api answer, when the check retries the initial endpoint but is now authenticated
+    valid_response = MagicMock()
+    valid_response.json = MagicMock(return_value={"foo": "bar"})
+    session = MagicMock()
+    session.send = MagicMock(side_effect=[unauthentified_response, login_response, valid_response])
+
+    session_wrapper = SessionWrapper(aci_url=common.ACI_URL, log=MagicMock(), session=session, apic_cookie="cookie")
+
+    api = Api(common.ACI_URLS, common.USERNAME, password=common.PASSWORD, sessions=[session_wrapper])
+    api._refresh_sessions = False
+
+    data = api.make_request("")
+    # Assert that we retrieved the value from `valid_response.json()`
+    assert data == {"foo": "bar"}
+
+    session_calls = session.send._mock_call_args_list
+    # Assert that the first call was to the ACI_URL
+    assert session_calls[0].args[0].url == common.ACI_URL + "/"
+    # Assert that the second call was to the login endpoint
+    assert 'aaaLogin.xml' in session_calls[1].args[0].url
+    # Assert that the last call was to the ACI_URL again
+    assert session_calls[2].args[0].url == common.ACI_URL + "/"
