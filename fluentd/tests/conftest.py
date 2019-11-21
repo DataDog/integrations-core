@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.dev import docker_run
 
-from .common import DEFAULT_INSTANCE, HERE, URL
+from .common import DEFAULT_INSTANCE, FLUENTD_VERSION, HERE, URL
 
 
 @pytest.fixture(scope="session")
@@ -19,10 +19,12 @@ def dd_environment():
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
+    if not FLUENTD_VERSION:
+        pytest.skip(reason='FLUENTD_VERSION is required')
 
     env = {
         'TD_AGENT_CONF_PATH': os.path.join(HERE, 'compose', 'td-agent.conf'),
-        'FLUENTD_VERSION': os.environ.get('FLUENTD_VERSION') or 'v0.12.23',
+        'FLUENTD_VERSION': FLUENTD_VERSION,
     }
 
     with docker_run(
