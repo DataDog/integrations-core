@@ -15,13 +15,13 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `clickhouse.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ClickHouse performance data. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
+1. To start collecting your ClickHouse performance data, edit the `clickhouse.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `clickhouse` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `clickhouse` under the **Checks** section.
 
 ## Data Collected
 
@@ -32,7 +32,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 ### Service Checks
 
 **clickhouse.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored ClickHouse database, otherwise returns `OK`.
+Returns `CRITICAL` if the Agent is unable to connect to the monitored ClickHouse database. Otherwise, returns `OK`.
 
 ### Events
 
