@@ -15,7 +15,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `clickhouse.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your clickhouse performance data. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
+1. Edit the `clickhouse.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ClickHouse performance data. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
