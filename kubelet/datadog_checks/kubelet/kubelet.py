@@ -503,7 +503,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         for pod in stats.get('pods', []):
             pod_uid = pod.get('podRef', {}).get('uid')
             pod_ephemeral_usage = pod.get('ephemeral-storage', {}).get('usedBytes')
-            if pod_uid is not None and pod_ephemeral_usage is not None:
+            if pod_uid and pod_ephemeral_usage:
                 ephemeral_storage_usage[pod_uid] = pod_ephemeral_usage
 
         for pod in pod_list['items']:
