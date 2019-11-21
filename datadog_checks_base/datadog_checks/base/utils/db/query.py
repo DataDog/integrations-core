@@ -37,7 +37,7 @@ class Query(object):
         elif not isinstance(columns, list):
             raise ValueError('field `columns` for {} must be a list'.format(query_name))
 
-        tags = self.query_data.get('tags')
+        tags = self.query_data.get('tags', [])
         if tags is not None and not isinstance(tags, list):
             raise ValueError('field `tags` for {} must be a list'.format(query_name))
 
