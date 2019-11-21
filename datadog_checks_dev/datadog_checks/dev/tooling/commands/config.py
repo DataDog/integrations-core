@@ -26,6 +26,12 @@ def config():
     pass
 
 
+@config.command(context_settings=CONTEXT_SETTINGS, short_help='Open the config location in your file manager')
+def explore():
+    """Open the config location in your file manager."""
+    click.launch(CONFIG_FILE, locate=True)
+
+
 @config.command(context_settings=CONTEXT_SETTINGS, short_help='Show the location of the config file')
 def find():
     """Show the location of the config file."""
