@@ -3,12 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+from six import PY3
 
 from datadog_checks.clickhouse import ClickhouseCheck, queries
 
 from .utils import ensure_csv_safe, parse_described_metrics
 
 pytestmark = pytest.mark.unit
+
 
 def error(*args, **kwargs):
     raise Exception('test')
@@ -45,7 +47,8 @@ def test_error_query(instance):
 )
 def test_current_support(metrics, ignored_columns, metric_source_url):
     # While we're here, also check key order
-    assert list(metrics) == sorted(metrics)
+    if PY3:
+        assert list(metrics) == sorted(metrics)
 
     described_metrics = parse_described_metrics(metric_source_url)
 
