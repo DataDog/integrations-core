@@ -21,17 +21,17 @@ instances:
     ## @param port - integer - optional - default: 9000
     ## The port used to connect to the system.
     #
-    port: 9000
+    # port: 9000
 
     ## @param username - string - optional - default: default
     ## The database user to authenticate as.
     #
-    username: default
+    # username: default
 
-    ## @param password - string - required
+    ## @param password - string - optional
     ## The password of `username`.
     #
-    password: <PASSWORD>
+    # password: <PASSWORD>
 
     ## @param db - string - optional - default: default
     ## The database to connect to.

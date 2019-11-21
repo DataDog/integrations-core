@@ -17,3 +17,7 @@ def parse_described_metrics(url):
 
 def ensure_csv_safe(s):  # no cov
     return '"{}"'.format(s) if ',' in s else s
+
+
+def raise_error(*args, **kwargs):
+    raise Exception('test')

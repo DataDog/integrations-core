@@ -4,7 +4,7 @@
 import clickhouse_driver
 from six import raise_from
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -35,6 +35,7 @@ class ClickhouseCheck(AgentCheck):
         self._tags.append('db:{}'.format(self._db))
 
         self._error_sanitizer = ErrorSanitizer(self._password)
+        self.check_initializations.append(self.validate_config)
 
         # We'll connect on the first check run
         self._client = None
@@ -70,6 +71,10 @@ class ClickhouseCheck(AgentCheck):
 
     def execute_query_raw(self, query):
         return self._client.execute_iter(query)
+
+    def validate_config(self):
+        if not self._server:
+            raise ConfigurationError('the `server` setting is required')
 
     def create_connection(self):
         try:
