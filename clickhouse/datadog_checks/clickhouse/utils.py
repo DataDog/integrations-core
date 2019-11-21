@@ -12,8 +12,8 @@ class ErrorSanitizer(object):
     def __init__(self, password):
         self.password = password
 
-    @classmethod
-    def clean(cls, error):
+    @staticmethod
+    def clean(error):
         return STACK_TRACE_LEFTOVER.sub('', error)
 
     def scrub(self, error):

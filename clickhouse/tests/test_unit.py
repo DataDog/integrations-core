@@ -45,7 +45,7 @@ def test_error_query(instance):
     ],
     ids=['SystemMetrics', 'SystemEvents'],
 )
-def test_current_support(metrics, ignored_columns, metric_source_url):
+def test_latest_metrics_supported(metrics, ignored_columns, metric_source_url):
     # While we're here, also check key order
     if PY3:
         assert list(metrics) == sorted(metrics)

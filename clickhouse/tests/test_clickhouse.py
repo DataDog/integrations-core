@@ -12,6 +12,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 
 def test_check(aggregator, instance):
+    # We do not do aggregator.assert_all_metrics_covered() because depending on timing, some other metrics may appear
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.run()
 
@@ -55,7 +56,7 @@ def test_custom_queries(aggregator, instance):
 
 
 @pytest.mark.skipif(CLICKHOUSE_VERSION == 'latest', reason='Version `latest` is ever-changing, skipping')
-def test_version_metadata(aggregator, instance, datadog_agent):
+def test_version_metadata(instance, datadog_agent):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.check_id = 'test:123'
     check.run()
