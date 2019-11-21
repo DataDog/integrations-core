@@ -38,6 +38,7 @@ NODE_SPEC_PATH = '/spec'
 POD_LIST_PATH = '/pods'
 CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
+STATS_PATH= '/stats/summary/'
 
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
@@ -181,6 +182,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
         self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
+        self.stats_url = urljoin(endpoint, STATS_PATH)
         self.instance_tags = instance.get('tags', [])
         self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
 
@@ -220,6 +222,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self._report_pods_running(self.pod_list, self.instance_tags)
         self._report_container_spec_metrics(self.pod_list, self.instance_tags)
         self._report_container_state_metrics(self.pod_list, self.instance_tags)
+        self._report_ephemeral_storage_usage(self.pod_list, self.instance_tags)
 
         if self.cadvisor_legacy_url:  # Legacy cAdvisor
             self.log.debug('processing legacy cadvisor metrics')
@@ -295,6 +298,12 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         # TODO: report allocatable for cpu, mem, and pod capacity
         # if we can get it locally or thru the DCA instead of the /nodes endpoint directly
         return node_spec
+
+    def _retrieve_stats(self):
+        """
+        Retrieve stats from kubelet.
+        """
+        return self.perform_kubelet_query(self.stats_url).json()
 
     def _report_node_metrics(self, instance_tags):
         node_spec = self._retrieve_node_spec()
@@ -486,6 +495,32 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
             gauge_name = '{}.containers.{}.{}'.format(self.NAMESPACE, metric_name, state_name)
             self.gauge(gauge_name, 1, tags + reason_tags)
+
+    def _report_ephemeral_storage_usage(self, pod_list, instance_tags):
+        stats = self._retrieve_stats()
+
+        ephemeral_storage_usage = {}
+        for pod in stats['pods']:
+            pod_uid = pod.get('podRef', {}).get('uid')
+            pod_ephemeral_usage = pod.get('ephemeral-storage', {}).get('usedBytes')
+            if pod_uid is not None and pod_ephemeral_usage is not None:
+                ephemeral_storage_usage[pod_uid] = pod_ephemeral_usage
+
+        for pod in pod_list['items']:
+            pod_uid = pod.get('metadata', {}).get('uid')
+            if pod_uid is None:
+                continue
+
+            pod_usage = ephemeral_storage_usage.get(pod_uid)
+            if pod_usage is None:
+                continue
+
+            tags = tagger.tag('kubernetes_pod_uid://{}'.format(pod_uid), tagger.ORCHESTRATOR)
+            if not tags:
+                continue
+            tags += instance_tags
+
+            self.gauge(self.NAMESPACE + '.ephemeral_storage.usage', pod_usage, tags)
 
     @staticmethod
     def parse_quantity(string):
