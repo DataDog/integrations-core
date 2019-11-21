@@ -165,6 +165,8 @@ services:
     networks:
       - clickhouse-network
 
+  # The client is useful for debugging or running arbitrary commands.
+  #
   # clickhouse-client:
   #   image: yandex/clickhouse-client:${CLICKHOUSE_VERSION}
   #   entrypoint:

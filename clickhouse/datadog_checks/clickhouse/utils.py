@@ -24,4 +24,4 @@ class ErrorSanitizer(object):
 
 
 def compact_query(query):
-    return re.sub(r'\s+', ' ', query.strip())
+    return re.sub(r'\n\s+', ' ', query.strip())
