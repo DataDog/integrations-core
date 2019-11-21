@@ -96,7 +96,7 @@ class HTTPCheck(AgentCheck):
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
         tags_list.append('url:{}'.format(addr))
-        instance_name = self.normalize(instance['name'])
+        instance_name = self.normalize_tag(instance['name'])
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
         service_checks_tags = self._get_service_checks_tags(instance)
@@ -243,7 +243,7 @@ class HTTPCheck(AgentCheck):
             self.report_as_service_check(sc_name, status, service_checks_tags, msg)
 
     def _get_service_checks_tags(self, instance):
-        instance_name = self.normalize(instance['name'])
+        instance_name = self.normalize_tag(instance['name'])
         url = instance.get('url', None)
         if url is not None:
             url = ensure_unicode(url)
