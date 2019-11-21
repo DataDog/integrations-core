@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 2.0.1 / 2019-11-21
+
+* [Fixed] Handle total_time_to_temporal_percent missing. See [#5055](https://github.com/DataDog/integrations-core/pull/5055).
+
 ## 2.0.0 / 2019-11-15
 
 * [Added] Add interface statuses to profiles. See [#5004](https://github.com/DataDog/integrations-core/pull/5004).
