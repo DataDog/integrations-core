@@ -3,6 +3,8 @@ aerospike==3.6.0; sys_platform != 'win32'
 beautifulsoup4==4.5.1
 binary==1.0.0
 boto==2.46.1
+clickhouse-cityhash==1.0.2.3
+clickhouse-driver==0.1.2
 contextlib2==0.5.5
 cryptography==2.8
 cx-oracle==7.2.0
@@ -21,6 +23,7 @@ kazoo==2.6.1; sys_platform != 'win32'
 kubernetes==8.0.1
 ldap3==2.5
 lxml==4.4.1
+lz4==2.2.1
 meld3==1.0.2
 openstacksdk==0.24.0
 paramiko==2.6.0
