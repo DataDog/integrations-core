@@ -55,4 +55,4 @@ kubernetes.kubelet.volume.stats.inodes_free,gauge,,inode,,The number of free ino
 kubernetes.kubelet.volume.stats.inodes_used,gauge,,inode,,The number of used inodes in the volume,-1,kubelet,k8s.vol.inodes_used
 kubernetes.ephemeral_storage.limits,gauge,,byte,,Ephemeral storage limit of the container (requires kubernetes v1.8+),0,kubelet,k8s.eph_storage.limits
 kubernetes.ephemeral_storage.requests,gauge,,byte,,Ephemeral storage request of the container (requires kubernetes v1.8+),0,kubelet,k8s.eph_storage.requests
-kubernetes.ephemeral_storage.usage,gauge,,byte,Ephemeral storage user of the POD,0,kubelet,k8s.eph_storage.usage
+kubernetes.ephemeral_storage.usage,gauge,,byte,Ephemeral storage usage of the POD,0,kubelet,k8s.eph_storage.usage
