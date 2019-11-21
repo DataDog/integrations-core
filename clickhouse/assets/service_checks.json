@@ -6,6 +6,6 @@
         "check": "clickhouse.can_connect",
         "statuses": ["ok", "critical"],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored ClickHouse database, or `OK` otherwise."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the monitored ClickHouse database, otherwise returns `OK`."
     }
 ]

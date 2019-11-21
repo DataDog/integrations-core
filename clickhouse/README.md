@@ -32,11 +32,11 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 ### Service Checks
 
 **clickhouse.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored ClickHouse database, or `OK` otherwise.
+Returns `CRITICAL` if the Agent is unable to connect to the monitored ClickHouse database, otherwise returns `OK`.
 
 ### Events
 
-ClickHouse does not include any events.
+The ClickHouse check does not include any events.
 
 ## Troubleshooting
 
