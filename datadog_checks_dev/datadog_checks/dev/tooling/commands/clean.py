@@ -44,11 +44,14 @@ def clean(ctx, check, compiled_only, all_matches, force, verbose):
     If `check` is not specified, the current working directory will be used.
 
     All `*.pyc`/`*.pyd`/`*.pyo`/`*.whl` files and `__pycache__` directories will be
-    removed. Additionally, the following patterns will be removed from the root of
+    removed.
+
+    Additionally, the following patterns will be removed from the root of
     the path: `.cache`, `.coverage`, `.eggs`, `.pytest_cache`, `.tox`, `build`,
     `dist`, and `*.egg-info`.
     """
-    force_clean_root = False
+    force_clean_root = None
+    target_description = 'compiled artifacts' if compiled_only else 'artifacts'
 
     if check:
         path = resolve_path(os.path.join(get_root(), check))
@@ -62,16 +65,21 @@ def clean(ctx, check, compiled_only, all_matches, force, verbose):
         if basepath(path) in ('integrations-core', 'integrations-extras'):
             if force:
                 force_clean_root = True
-            else:
+            elif not compiled_only:
                 echo_warning(
-                    'You are running this from the root of the integrations project. '
-                    'Should we remove everything, including: '
-                    '.cache, .coverage, .eggs, .pytest_cache, .tox, build, dist, and *.egg-info? '
-                    'You can also use --force or -f to bypass this input.'
+                    'You are running this from the root of the integrations project.\n'
+                    'By default, the following artifacts in the root directory will *not* be cleaned:'
                 )
-                force_clean_root = click.confirm('Do you want to continue?')
+                echo_info('.cache, .coverage, .eggs, .pytest_cache, .tox, build, dist, and *.egg-info')
+                force_clean_root = click.confirm(
+                    'Should we clean the above artifacts too? (Use --force of -f to bypass this prompt)'
+                )
+                if force_clean_root:
+                    target_description = 'all artifacts'
+                else:
+                    target_description = 'artifacts (excluding those listed above)'
 
-    echo_waiting('Cleaning `{}`...'.format(path))
+    echo_waiting('Cleaning {} in `{}`...'.format(target_description, path))
     if compiled_only:
         removed_paths = remove_compiled_scripts(path, detect_project=not all_matches)
     else:
