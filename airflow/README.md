@@ -48,3 +48,100 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/airflow/metadata.csv
 [7]: https://docs.datadoghq.com/help
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# NOTES
+
+```
+docker run -v /home/vagrant/airflow.cfg:/usr/local/airflow/airflow.cfg -p 8080:8080 my-airflow webserver
+
+
+Airflow.cfg
+# Statsd (https://github.com/etsy/statsd) integration settings
+statsd_on = True
+statsd_host = localhost
+statsd_port = 8125
+statsd_prefix = airflow
+
+```
+
+```yaml
+dogstatsd_mappings:
+  - match: airflow.*_start
+   name: "airflow_job_start"
+   tags:
+     job_name: "$1"
+  - match: airflow.*_end
+   name: "airflow_job_end"
+   tags:
+     job_name: "$1"
+  - match: airflow.operator_failures_*
+   name: "airflow_operator_failures"
+   tags:
+     operator_name: "$1"
+  - match: airflow.operator_successes_*
+   name: "airflow_operator_successes"
+   tags:
+     operator_name: "$1"
+  - match: airflow.dag_processing.last_runtime.*
+    name: "airflow_dag_processing_last_runtime"
+    tags:
+      dag_file: "$1"
+  - match: airflow.dag_processing.last_run.seconds_ago.*
+    name: "airflow_dag_processing_last_run_seconds_ago"
+    tags:
+      dag_file: "$1"
+  - match: airflow.pool.open_slots.*
+    name: "airflow_pool_open_slots"
+    tags:
+      pool_name: "$1"
+  - match: airflow.pool.used_slots.*
+    name: "airflow_pool_used_slots"
+    tags:
+      pool_name: "$1"
+  - match: airflow.pool.starving_tasks.*
+    name: "airflow_pool_starving_tasks"
+    tags:
+      pool_name: "$1"
+  - match: airflow.dagrun.dependency-check.*
+    name: "airflow_dagrun_dependency_check"
+    tags:
+      dag_id: "$1"
+  - match: airflow.dag.*.*.duration
+    name: "airflow_dag_duration"
+    tags:
+      dag_id: "$1"
+      task_id: "$2"
+  - match: airflow.dag_processing.last_duration.*
+    name: "airflow_dag_processing_last_duration"
+    tags:
+      dag_file: "$1"
+  - match: airflow.dagrun.duration.success.*
+    name: "airflow_dagrun_duration_success"
+    tags:
+      dag_id: "$1"
+  - match: airflow.dagrun.duration.failed.*
+    name: "airflow_dagrun_duration_failed"
+    tags:
+      dag_id: "$1"
+  - match: airflow.dagrun.schedule_delay.*
+    name: "airflow_dagrun_schedule_delay"
+    tags:
+      dag_id: "$1"
+```
