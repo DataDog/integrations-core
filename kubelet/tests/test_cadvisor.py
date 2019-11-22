@@ -63,7 +63,8 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
     )
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(
-        check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json'))))
+        check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
+    )
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(
         check, '_retrieve_cadvisor_metrics', mock.Mock(return_value=json.loads(mock_from_file('cadvisor_1.2.json')))

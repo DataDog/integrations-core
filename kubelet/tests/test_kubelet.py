@@ -189,7 +189,8 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16):
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     monkeypatch.setattr(
-        check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json'))))
+        check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
+    )
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
