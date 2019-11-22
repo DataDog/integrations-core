@@ -9,7 +9,6 @@ http://gunicorn.org/
 """
 # stdlib
 import re
-import shlex
 import time
 
 # 3rd party
@@ -39,7 +38,7 @@ class GUnicornCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         AgentCheck.__init__(self, name, init_config, instances)
 
-        self.gunicorn_cmd = shlex.split(self.instance.get('gunicorn', init_config.get('gunicorn', 'gunicorn')))
+        self.gunicorn_cmd = self.instance.get('gunicorn', init_config.get('gunicorn', 'gunicorn'))
 
     def get_library_versions(self):
         return {"psutil": psutil.__version__}
@@ -162,7 +161,7 @@ class GUnicornCheck(AgentCheck):
 
     def _get_version(self):
         """ Get version from `gunicorn --version` """
-        cmd = self.gunicorn_cmd + ['--version']
+        cmd = '{} --version'.format(self.gunicorn_cmd)
         try:
             pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
         except OSError:
