@@ -1,0 +1,30 @@
+{
+  "display_name": "Airflow",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "airflow",
+  "metric_prefix": "airflow.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "f55d88b1-1c0a-4a23-a2df-9516b50050dd",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Airflow Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "airflow",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
