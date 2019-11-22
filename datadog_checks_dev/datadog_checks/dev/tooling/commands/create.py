@@ -96,7 +96,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     """Create scaffolding for a new integration."""
 
     if name.islower():
-        echo_warning('Make sure to use use display name. e.g. MapR, Ambari, IBM MQ, vSphere, ...')
+        echo_warning('Make sure to use the display name. e.g. MapR, Ambari, IBM MQ, vSphere, ...')
 
     repo_choice = ctx.obj['repo_choice']
     root = resolve_path(location) if location else get_root()
