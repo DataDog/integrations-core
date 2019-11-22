@@ -107,7 +107,7 @@ dogstatsd_mappings:
        dag_file: '$1'
   - match: 'airflow\.dag_processing\.last_run\.seconds_ago\.(.*)'
     match_type: 'regex'
-    name: 'airflow.dag_processing.last_run'
+    name: 'airflow.dag_processing.last_run.seconds_ago'
     tags:
        dag_file: '$1'
   - match: 'airflow\.dag\.loading-duration\.(.*)'
