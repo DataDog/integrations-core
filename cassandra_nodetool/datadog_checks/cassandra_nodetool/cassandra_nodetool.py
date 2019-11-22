@@ -5,6 +5,7 @@
 from __future__ import division
 
 import re
+import shlex
 from collections import defaultdict
 
 from datadog_checks.checks import AgentCheck
@@ -51,6 +52,7 @@ class CassandraNodetoolCheck(AgentCheck):
     def check(self, instance):
         # Allow to specify a complete command for nodetool such as `docker exec container nodetool`
         nodetool_cmd = instance.get("nodetool", self.nodetool_cmd).split()
+        print(shlex)
         host = instance.get("host", DEFAULT_HOST)
         port = instance.get("port", DEFAULT_PORT)
         keyspaces = instance.get("keyspaces", [])
