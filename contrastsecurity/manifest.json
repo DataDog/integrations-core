@@ -1,0 +1,31 @@
+{
+  "display_name": "contrastsecurity",
+  "maintainer": "kristiana.mitchell@contrastsecurity.com",
+  "manifest_version": "1.0.0",
+  "name": "contrastsecurity",
+  "metric_prefix": "contrastsecurity.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "See attacks and vulnerabilities on Datadog from Contrast Security",
+  "guid": "8483bcdc-3d45-48ee-8a73-75511a67ad5f",
+  "support": "contrib",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-contrastsecurity Integration",
+  "categories": [
+    "log collection"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "contrastsecurity",
+  "assets": {
+    "dashboards": {
+    "Contrast Security Overview": "assets/dashboards/contrast_security_protect.json"
+    },
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}

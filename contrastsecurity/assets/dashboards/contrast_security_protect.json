@@ -1,0 +1,285 @@
+{
+  "title": "Contrast Security - Protect",
+  "widgets": [
+    {
+      "definition": {
+        "logset": "17533",
+        "title_size": "16",
+        "title": "Attack logs",
+        "title_align": "left",
+        "time": {
+          "live_span": "1w"
+        },
+        "query": "",
+        "type": "log_stream",
+        "columns": [
+          "core_host",
+          "core_service",
+          "log_app",
+          "log_src",
+          "log_rule",
+          "log_result"
+        ]
+      },
+      "layout": {
+        "y": 18,
+        "x": 46,
+        "width": 91,
+        "height": 47
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "Attacks by Rule",
+        "title_align": "left",
+        "time": {
+          "live_span": "1mo"
+        },
+        "requests": [
+          {
+            "conditional_formats": [],
+            "style": {
+              "palette": "dog_classic"
+            },
+            "log_query": {
+              "index": "main",
+              "search": {
+                "query": ""
+              },
+              "group_by": [
+                {
+                  "facet": "@pri",
+                  "limit": 10
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ],
+        "type": "toplist"
+      },
+      "layout": {
+        "y": 2,
+        "x": 46,
+        "width": 45,
+        "height": 15
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "Attacks by Application",
+        "title_align": "left",
+        "time": {
+          "live_span": "1mo"
+        },
+        "requests": [
+          {
+            "conditional_formats": [],
+            "style": {
+              "palette": "dog_classic"
+            },
+            "log_query": {
+              "index": "main",
+              "search": {
+                "query": ""
+              },
+              "group_by": [
+                {
+                  "facet": "@app",
+                  "limit": 10
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ],
+        "type": "toplist"
+      },
+      "layout": {
+        "y": 2,
+        "x": 92,
+        "width": 45,
+        "height": 15
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "Attacks by Result",
+        "title_align": "left",
+        "time": {
+          "live_span": "1mo"
+        },
+        "requests": [
+          {
+            "conditional_formats": [],
+            "style": {
+              "palette": "dog_classic"
+            },
+            "log_query": {
+              "index": "main",
+              "search": {
+                "query": ""
+              },
+              "group_by": [
+                {
+                  "facet": "@outcome",
+                  "limit": 10
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ],
+        "type": "toplist"
+      },
+      "layout": {
+        "y": 2,
+        "x": 0,
+        "width": 45,
+        "height": 15
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "Rules",
+        "title_align": "left",
+        "show_legend": false,
+        "time": {
+          "live_span": "1mo"
+        },
+        "requests": [
+          {
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "bars",
+            "log_query": {
+              "index": "main",
+              "search": {
+                "query": ""
+              },
+              "group_by": [
+                {
+                  "facet": "@pri",
+                  "limit": 10
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ],
+        "type": "timeseries",
+        "legend_size": "0"
+      },
+      "layout": {
+        "y": 18,
+        "x": 0,
+        "width": 45,
+        "height": 15
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "Applications",
+        "title_align": "left",
+        "show_legend": false,
+        "time": {
+          "live_span": "1mo"
+        },
+        "requests": [
+          {
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "bars",
+            "log_query": {
+              "index": "main",
+              "search": {
+                "query": ""
+              },
+              "group_by": [
+                {
+                  "facet": "@app",
+                  "limit": 10
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ],
+        "type": "timeseries",
+        "legend_size": "0"
+      },
+      "layout": {
+        "y": 34,
+        "x": 0,
+        "width": 45,
+        "height": 15
+      }
+    },
+    {
+      "definition": {
+        "title_size": "16",
+        "title": "Results",
+        "title_align": "left",
+        "show_legend": false,
+        "time": {
+          "live_span": "1mo"
+        },
+        "requests": [
+          {
+            "style": {
+              "line_width": "normal",
+              "palette": "dog_classic",
+              "line_type": "solid"
+            },
+            "display_type": "bars",
+            "log_query": {
+              "index": "main",
+              "search": {
+                "query": ""
+              },
+              "group_by": [
+                {
+                  "facet": "@outcome",
+                  "limit": 10
+                }
+              ],
+              "compute": {
+                "aggregation": "count"
+              }
+            }
+          }
+        ],
+        "type": "timeseries",
+        "legend_size": "0"
+      },
+      "layout": {
+        "y": 50,
+        "x": 0,
+        "width": 45,
+        "height": 15
+      }
+    }
+  ],
+  "layout_type": "free"
+}
