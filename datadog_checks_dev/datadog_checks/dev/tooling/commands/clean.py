@@ -50,9 +50,6 @@ def clean(ctx, check, compiled_only, all_matches, force, verbose):
     the path: `.cache`, `.coverage`, `.eggs`, `.pytest_cache`, `.tox`, `build`,
     `dist`, and `*.egg-info`.
     """
-    force_clean_root = None
-    target_description = 'compiled artifacts' if compiled_only else 'artifacts'
-
     if check:
         path = resolve_path(os.path.join(get_root(), check))
         if not dir_exists(path):
@@ -62,27 +59,33 @@ def clean(ctx, check, compiled_only, all_matches, force, verbose):
             )
     else:
         path = os.getcwd()
-        if basepath(path) in ('integrations-core', 'integrations-extras'):
-            if force:
-                force_clean_root = True
-            elif not compiled_only:
-                echo_warning(
-                    'You are running this from the root of the integrations project.\n'
-                    'By default, the following artifacts in the root directory will *not* be cleaned:'
-                )
-                echo_info('.cache, .coverage, .eggs, .pytest_cache, .tox, build, dist, and *.egg-info')
-                force_clean_root = click.confirm(
-                    'Should we clean the above artifacts too? (Use --force of -f to bypass this prompt)'
-                )
-                if force_clean_root:
-                    target_description = 'all artifacts'
-                else:
-                    target_description = 'artifacts (excluding those listed above)'
 
-    echo_waiting('Cleaning {} in `{}`...'.format(target_description, path))
     if compiled_only:
+        echo_waiting('Cleaning compiled artifacts in `{}`...'.format(path))
         removed_paths = remove_compiled_scripts(path, detect_project=not all_matches)
     else:
+        force_clean_root = False
+        target_description = 'artifacts'
+
+        if force:
+            force_clean_root = True
+            target_description = 'all artifacts'
+        elif basepath(path) in ('integrations-core', 'integrations-extras'):
+            echo_warning(
+                'You are running this from the root of the integrations project.\n'
+                'By default, the following artifacts in the root directory will *not* be cleaned:'
+            )
+            echo_info('.cache, .coverage, .eggs, .pytest_cache, .tox, build, dist, and *.egg-info')
+            force_clean_root = click.confirm(
+                'Should we clean the above artifacts too? (Use --force of -f to bypass this prompt)'
+            )
+
+            if force_clean_root:
+                target_description = 'all artifacts'
+            else:
+                target_description = 'artifacts (excluding those listed above)'
+
+        echo_waiting('Cleaning {} in `{}`...'.format(target_description, path))
         removed_paths = clean_package(path, detect_project=not all_matches, force_clean_root=force_clean_root)
 
     if verbose:
