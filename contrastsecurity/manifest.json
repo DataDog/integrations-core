@@ -23,7 +23,7 @@
   "integration_id": "contrastsecurity",
   "assets": {
     "dashboards": {
-    "Contrast Security Overview": "assets/screen/contrast_security_protect.json"
+    "Contrast Security Overview": "assets/dashboards/contrast_security_protect.json"
     },
     "monitors": {},
     "service_checks": "assets/service_checks.json"
