@@ -13,9 +13,9 @@ The Postfix check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
-This check can be configured to use the `find` command which requires granting the `dd-agent` user sudo access to get a count of messages in the `incoming`, `active`, and `deferred` mail queues.
+This check can be configured to use the `find` command. This requires granting `sudo` access to the `dd-agent` to get a count of messages in the `incoming`, `active`, and `deferred` mail queues.
 
-Optionally, you can configure the Agent to use a built in `postqueue -p` command to get a count of messages in the `active`, `hold`, and `deferred` mail queues. `postqueue` is exectued with set-group ID privileges without the need for sudo.
+Optionally, you can configure the Agent to use a built in `postqueue -p` command to get a count of messages in the `active`, `hold`, and `deferred` mail queues. `postqueue` is executed with set group ID privileges without the need for `sudo`.
 
 **WARNING**: Using `postqueue` to monitor the mail queues doesn't report a count of messages for the `incoming` queue.
 
