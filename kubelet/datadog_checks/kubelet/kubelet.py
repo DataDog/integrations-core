@@ -38,7 +38,7 @@ NODE_SPEC_PATH = '/spec'
 POD_LIST_PATH = '/pods'
 CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
-STATS_PATH= '/stats/summary/'
+STATS_PATH = '/stats/summary/'
 
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
