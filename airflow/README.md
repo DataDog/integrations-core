@@ -82,66 +82,71 @@ statsd_prefix = airflow
 ```
 
 ```yaml
+dogstatsd_mapper_cache_size: 500
 dogstatsd_mappings:
   - match: airflow.*_start
-   name: "airflow_job_start"
-   tags:
-     job_name: "$1"
+    name: "airflow.job.start"
+    tags:
+      job_name: "$1"
   - match: airflow.*_end
-   name: "airflow_job_end"
-   tags:
-     job_name: "$1"
+    name: "airflow.job.end"
+    tags:
+      job_name: "$1"
   - match: airflow.operator_failures_*
-   name: "airflow_operator_failures"
-   tags:
-     operator_name: "$1"
+    name: "airflow.operator_failures"
+    tags:
+      operator_name: "$1"
   - match: airflow.operator_successes_*
-   name: "airflow_operator_successes"
-   tags:
-     operator_name: "$1"
+    name: "airflow.operator_successes"
+    tags:
+      operator_name: "$1"
   - match: airflow.dag_processing.last_runtime.*
-    name: "airflow_dag_processing_last_runtime"
+    name: "airflow.dag_processing.last_runtime"
     tags:
-      dag_file: "$1"
+       dag_file: "$1"
   - match: airflow.dag_processing.last_run.seconds_ago.*
-    name: "airflow_dag_processing_last_run_seconds_ago"
+    name: "airflow.dag_processing.last_run"
     tags:
-      dag_file: "$1"
+       dag_file: "$1"
+  - match: airflow.dag.loading-duration.*
+    name: "airflow.dag.loading_duration"
+    tags:
+       dag_file: "$1"
   - match: airflow.pool.open_slots.*
-    name: "airflow_pool_open_slots"
+    name: "airflow.pool.open_slots"
     tags:
-      pool_name: "$1"
+       pool_name: "$1"
   - match: airflow.pool.used_slots.*
-    name: "airflow_pool_used_slots"
+    name: "airflow.pool.used_slots"
     tags:
-      pool_name: "$1"
+       pool_name: "$1"
   - match: airflow.pool.starving_tasks.*
-    name: "airflow_pool_starving_tasks"
+    name: "airflow.pool.starving_tasks"
     tags:
-      pool_name: "$1"
+       pool_name: "$1"
   - match: airflow.dagrun.dependency-check.*
-    name: "airflow_dagrun_dependency_check"
+    name: "airflow.dagrun.dependency_check"
     tags:
-      dag_id: "$1"
+       dag_id: "$1"
   - match: airflow.dag.*.*.duration
-    name: "airflow_dag_duration"
+    name: "airflow.dag.duration"
     tags:
-      dag_id: "$1"
-      task_id: "$2"
+       dag_id: "$1"
+       task_id: "$2"
   - match: airflow.dag_processing.last_duration.*
-    name: "airflow_dag_processing_last_duration"
+    name: "airflow.dag_processing.last_duration"
     tags:
-      dag_file: "$1"
+       dag_file: "$1"
   - match: airflow.dagrun.duration.success.*
-    name: "airflow_dagrun_duration_success"
+    name: "airflow.dagrun.duration.success"
     tags:
-      dag_id: "$1"
+       dag_id: "$1"
   - match: airflow.dagrun.duration.failed.*
-    name: "airflow_dagrun_duration_failed"
+    name: "airflow.dagrun.duration.failed"
     tags:
-      dag_id: "$1"
+       dag_id: "$1"
   - match: airflow.dagrun.schedule_delay.*
-    name: "airflow_dagrun_schedule_delay"
+    name: "airflow.dagrun.schedule_delay"
     tags:
-      dag_id: "$1"
+       dag_id: "$1"
 ```
