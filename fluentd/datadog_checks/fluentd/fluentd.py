@@ -19,7 +19,7 @@ class Fluentd(AgentCheck):
     SERVICE_CHECK_NAME = 'fluentd.is_ok'
     GAUGES = ['retry_count', 'buffer_total_queued_size', 'buffer_queue_length']
     _AVAILABLE_TAGS = frozenset(['plugin_id', 'type'])
-    VERSION_PATTERN = r'.* (?P<version>[0-9\.]+)$'
+    VERSION_PATTERN = r'.* (?P<version>[0-9\.]+)'
 
     def __init__(self, name, init_config, instances):
         super(Fluentd, self).__init__(name, init_config, instances)
