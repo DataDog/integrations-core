@@ -4,7 +4,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import re
-import shlex
 
 # 3rd party
 from six.moves.urllib.parse import urlparse
@@ -34,7 +33,7 @@ class Fluentd(AgentCheck):
             )
             self.http.options['timeout'] = (timeout, timeout)
 
-        self._fluentd_command = shlex.split(self.instance.get('fluentd', init_config.get('fluentd', 'fluentd')))
+        self._fluentd_command = self.instance.get('fluentd', init_config.get('fluentd', 'fluentd'))
 
     """Tracks basic fluentd metrics via the monitor_agent plugin
     * number of retry_count
@@ -104,10 +103,10 @@ class Fluentd(AgentCheck):
             self.set_metadata('version', raw_version)
 
     def _get_raw_version(self):
-        command = self._fluentd_command + ['--version']
+        version_command = '{} --version'.format(self._fluentd_command)
 
         try:
-            out, _, _ = get_subprocess_output(command, self.log, False)
+            out, _, _ = get_subprocess_output(version_command, self.log, raise_on_empty_output=False)
         except OSError as exc:
             self.log.warning("Error collecting fluentd version: %s", exc)
             return None
