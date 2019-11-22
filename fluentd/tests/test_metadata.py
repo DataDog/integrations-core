@@ -13,7 +13,6 @@ CHECK_ID = 'test:123'
 VERSION_MOCK_SCRIPT = os.path.join(HERE, 'mock', 'fluentd_version.py')
 
 
-@pytest.mark.skipif(not FLUENTD_VERSION, reason="FLUENTD_VERSION is required")
 @pytest.mark.usefixtures("dd_environment")
 def test_collect_metadata_instance(aggregator, datadog_agent, instance):
     instance['fluentd'] = 'docker exec {} fluentd'.format(FLUENTD_CONTAINER_NAME)
