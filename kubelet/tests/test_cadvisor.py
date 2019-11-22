@@ -62,6 +62,7 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
         check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_list_1.2.json')))
     )
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    monkeypatch.setattr(check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json'))))
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(
         check, '_retrieve_cadvisor_metrics', mock.Mock(return_value=json.loads(mock_from_file('cadvisor_1.2.json')))
@@ -73,6 +74,7 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
     assert check.cadvisor_legacy_url == cadvisor_url
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
+    check._retrieve_stats.assert_called_once()
     check._retrieve_cadvisor_metrics.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
 
