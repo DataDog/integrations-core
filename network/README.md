@@ -50,7 +50,7 @@ Linux: Configure the following sudoers rule for this to work:
 dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ```
 
-Kubernetes: Conntrack metrics are available by default in Kubernetes <= v1.11 or when using the `host` networking mode in Kubernetes v1.11+. 
+Kubernetes: Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+. 
 
 ### Validation
 
