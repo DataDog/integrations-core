@@ -17,9 +17,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def dd_environment(instance):
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-        conditions=[
-            CheckEndpoints(URL + '/api/experimental/test', attempts=100),
-        ],
+        conditions=[CheckEndpoints(URL + '/api/experimental/test', attempts=100)],
     ):
         yield instance
 

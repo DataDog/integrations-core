@@ -2,10 +2,10 @@
 Code that goes along with the Airflow located at:
 http://airflow.readthedocs.org/en/latest/tutorial.html
 """
-from airflow import DAG
-from airflow.operators.bash_operator import BashOperator
 from datetime import datetime, timedelta
 
+from airflow import DAG
+from airflow.operators.bash_operator import BashOperator
 
 default_args = {
     "owner": "airflow",
@@ -38,10 +38,7 @@ templated_command = """
 """
 
 t3 = BashOperator(
-    task_id="templated",
-    bash_command=templated_command,
-    params={"my_param": "Parameter I passed in"},
-    dag=dag,
+    task_id="templated", bash_command=templated_command, params={"my_param": "Parameter I passed in"}, dag=dag,
 )
 
 t2.set_upstream(t1)

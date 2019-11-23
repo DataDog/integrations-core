@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.airflow import AirflowCheck
 from datadog_checks.base import AgentCheck
+
 from .common import URL
 
 INSTANCE = {'url': URL, 'tags': ['key:my-tag']}
@@ -26,7 +27,7 @@ def test_service_checks_integration(aggregator):
 
 @pytest.mark.e2e
 def test_service_checks_e2e(dd_agent_check):
-    aggregator = dd_agent_check(CONFIG, times=3)
+    aggregator = dd_agent_check(CONFIG)
 
     assert_service_checks(aggregator)
 
