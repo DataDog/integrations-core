@@ -8,6 +8,8 @@ This Agent check only collects metrics for message offsets. If you want to colle
 
 This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in kafka or zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
 
+**Note:** This integration ensures that consumer offsets are checked before broker offsets because worst case is that consumer lag is a little overstated. Doing it the other way around can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][112] for guidance on applying these instructions.

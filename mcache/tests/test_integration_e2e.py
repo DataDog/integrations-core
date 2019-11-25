@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
 
 from .common import HOST, PORT, SERVICE_CHECK, requires_socket_support, requires_unix_utils
@@ -68,6 +69,25 @@ def test_metrics(client, check, instance, aggregator):
     check.check(instance)
 
     assert_check_coverage(aggregator)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata(client, check, instance, aggregator):
+    check.check_id = 'test:123'
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.check(instance)
+        version_metadata = {
+            'version.major': '1',
+            'version.minor': '5',
+            'version.patch': '7',
+            'version.scheme': 'semver',
+            'version.raw': '1.5.7',
+        }
+
+        for name, value in version_metadata.items():
+            m.assert_any_call('test:123', name, value)
+        assert m.call_count == 5
 
 
 @requires_socket_support

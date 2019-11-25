@@ -329,7 +329,7 @@ class KafkaCheck(AgentCheck):
         else:
             raise ConfigurationError(
                 "Cannot fetch consumer offsets because no consumer_groups are specified and "
-                "monitor_unlisted_consumer_groups is %s." % self.instance._monitor_unlisted_consumer_groups
+                "monitor_unlisted_consumer_groups is %s." % self._monitor_unlisted_consumer_groups
             )
 
         # Loop until all futures resolved.
@@ -365,13 +365,13 @@ class KafkaCheck(AgentCheck):
         """
         coordinator_id = self._kafka_client._find_coordinator_id_process_response(response)
         topics = self._consumer_groups[consumer_group]
-        if topics is None:
+        if not topics:
             topic_partitions = None  # None signals to fetch all known offsets for the consumer group
         else:
             # transform [("t1", [1, 2])] into [TopicPartition("t1", 1), TopicPartition("t1", 2)]
             topic_partitions = []
             for topic, partitions in topics.items():
-                if partitions is None:  # If partitions aren't specified, fetch all partitions in the topic
+                if not partitions:  # If partitions aren't specified, fetch all partitions in the topic
                     partitions = self._kafka_client._client.cluster.partitions_for_topic(topic)
                 topic_partitions.extend([TopicPartition(topic, p) for p in partitions])
         single_group_offsets_future = self._kafka_client._list_consumer_group_offsets_send_request(

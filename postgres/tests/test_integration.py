@@ -103,6 +103,7 @@ def test_locks_metrics(aggregator, integration_check, pg_instance):
         'port:{}'.format(PORT),
         'db:datadog_test',
         'lock_mode:AccessExclusiveLock',
+        'lock_type:relation',
         'table:persons',
         'schema:public',
     ]

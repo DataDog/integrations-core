@@ -1,5 +1,19 @@
 # CHANGELOG - snmp
 
+## 2.0.1 / 2019-11-21
+
+* [Fixed] Handle total_time_to_temporal_percent missing. See [#5055](https://github.com/DataDog/integrations-core/pull/5055).
+
+## 2.0.0 / 2019-11-15
+
+* [Added] Add interface statuses to profiles. See [#5004](https://github.com/DataDog/integrations-core/pull/5004).
+* [Added] Ignore metrics that are not retrieved. See [#5003](https://github.com/DataDog/integrations-core/pull/5003).
+* [Changed] Modify profile layout. See [#4997](https://github.com/DataDog/integrations-core/pull/4997).
+* [Added] Match profile with sysobject_id prefix. See [#4990](https://github.com/DataDog/integrations-core/pull/4990).
+* [Added] Count the number of discovered devices. See [#4978](https://github.com/DataDog/integrations-core/pull/4978).
+* [Added] Generic network router profile. See [#4937](https://github.com/DataDog/integrations-core/pull/4937).
+* [Added] Allow tagging through different MIBs. See [#4853](https://github.com/DataDog/integrations-core/pull/4853).
+
 ## 1.14.1 / 2019-10-16
 
 * [Fixed] Fix allowed host failure retry logic. See [#4782](https://github.com/DataDog/integrations-core/pull/4782).

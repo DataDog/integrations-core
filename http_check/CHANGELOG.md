@@ -1,5 +1,11 @@
 # CHANGELOG - http_check
 
+## 4.4.0 / 2019-11-15
+
+* [Fixed] Update response_time metric source. See [#5025](https://github.com/DataDog/integrations-core/pull/5025).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+* [Fixed] Improve config constructor syntax. See [#4841](https://github.com/DataDog/integrations-core/pull/4841).
+
 ## 4.3.1 / 2019-10-18
 
 * [Fixed] Ensure the correct tls_ca_cert value is used. See [#4819](https://github.com/DataDog/integrations-core/pull/4819).

@@ -3,6 +3,12 @@
 
 init_config:
 
+  ## @param gunicorn - string - optional - default: gunicorn
+  ## Command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
+  ## can be overwritten on an instance
+  #
+  # gunicorn: gunicorn
+
 instances:
 
     ## @param proc_name - string - required
@@ -13,6 +19,11 @@ instances:
     ## the name is `<WEB_APP_NAME>`
     #
   - proc_name: <WEB_APP_NAME>
+
+    ## @param gunicorn - string - optional - default: gunicorn
+    ## command or path to gunicorn (e.g. `/usr/local/bin/gunicorn` or `docker exec container gunicorn`)
+    #
+    # gunicorn: gunicorn
 
     ## @param tags - list of key:value string - optional
     ## List of tags to attach to every metric and service check emitted by this integration.

@@ -204,6 +204,66 @@ def test_unixsocket_config(aggregator, check, dd_environment):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('dd_environment')
+def test_version_metadata_http(check, datadog_agent, version_metadata):
+    config = copy.deepcopy(CHECK_CONFIG_OPEN)
+    check = check(config)
+    check.check_id = 'test:123'
+    check.check(config)
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    # some version contains release information which is not in the test env var
+    metadata_count = (
+        len(version_metadata) + 1
+        if ('test:123', 'version.release') in datadog_agent._metadata
+        else len(version_metadata)
+    )
+    datadog_agent.assert_metadata_count(metadata_count)
+
+
+@requires_socket_support
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_version_metadata_unix_socket(check, version_metadata, dd_environment, datadog_agent):
+    config = copy.deepcopy(CONFIG_UNIXSOCKET)
+    unixsocket_url = dd_environment["unixsocket_url"]
+    config['url'] = unixsocket_url
+    check = check(config)
+    check.check_id = 'test:123'
+    check.check(config)
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    # some version contains release information which is not in the test env var
+    metadata_count = (
+        len(version_metadata) + 1
+        if ('test:123', 'version.release') in datadog_agent._metadata
+        else len(version_metadata)
+    )
+    datadog_agent.assert_metadata_count(metadata_count)
+
+
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+@pytest.mark.skipif(
+    os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7'] or not platform_supports_sockets,
+    reason='Sockets with operator level are only available with haproxy 1.7',
+)
+def test_version_metadata_tcp_socket(check, version_metadata, datadog_agent):
+    config = copy.deepcopy(CONFIG_TCPSOCKET)
+    check = check(config)
+    check.check_id = 'test:123'
+    check.check(config)
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    # some version contains release information which is not in the test env var
+    metadata_count = (
+        len(version_metadata) + 1
+        if ('test:123', 'version.release') in datadog_agent._metadata
+        else len(version_metadata)
+    )
+    datadog_agent.assert_metadata_count(metadata_count)
+
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(CHECK_CONFIG_OPEN, rate=True)

@@ -35,7 +35,7 @@ class KubernetesState(OpenMetricsBaseCheck):
     See https://github.com/kubernetes/kube-state-metrics
     """
 
-    class JobCount:
+    class CronJobCount:
         def __init__(self):
             self.count = 0
             self.previous_run_max_ts = 0
@@ -47,7 +47,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 self.current_run_max_ts = 0
 
         def update_current_ts_and_add_count(self, job_ts, count):
-            if job_ts != 0 and job_ts > self.previous_run_max_ts:
+            if job_ts > self.previous_run_max_ts and count > 0:
                 self.count += count
                 self.current_run_max_ts = max(self.current_run_max_ts, job_ts)
 
@@ -96,9 +96,13 @@ class KubernetesState(OpenMetricsBaseCheck):
             'kube_service_spec_type': self.count_objects_by_tags,
         }
 
-        # Handling jobs succeeded/failed counts
-        self.failed_job_counts = defaultdict(KubernetesState.JobCount)
-        self.succeeded_job_counts = defaultdict(KubernetesState.JobCount)
+        # Handling cron jobs succeeded/failed counts
+        self.failed_cron_job_counts = defaultdict(KubernetesState.CronJobCount)
+        self.succeeded_cron_job_counts = defaultdict(KubernetesState.CronJobCount)
+
+        # Logic for Jobs
+        self.job_succeeded_count = defaultdict(int)
+        self.job_failed_count = defaultdict(int)
 
     def check(self, instance):
         endpoint = instance.get('kube_state_url')
@@ -106,13 +110,20 @@ class KubernetesState(OpenMetricsBaseCheck):
         scraper_config = self.config_map[endpoint]
         self.process(scraper_config, metric_transformers=self.METRIC_TRANSFORMERS)
 
-        for job_tags, job in iteritems(self.failed_job_counts):
+        # Logic for Cron Jobs
+        for job_tags, job in iteritems(self.failed_cron_job_counts):
             self.monotonic_count(scraper_config['namespace'] + '.job.failed', job.count, list(job_tags))
             job.set_previous_and_reset_current_ts()
 
-        for job_tags, job in iteritems(self.succeeded_job_counts):
+        for job_tags, job in iteritems(self.succeeded_cron_job_counts):
             self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job.count, list(job_tags))
             job.set_previous_and_reset_current_ts()
+
+        # Logic for Jobs
+        for job_tags, job_count in iteritems(self.job_succeeded_count):
+            self.monotonic_count(scraper_config['namespace'] + '.job.succeeded', job_count, list(job_tags))
+        for job_tags, job_count in iteritems(self.job_failed_count):
+            self.monotonic_count(scraper_config['namespace'] + '.job.failed', job_count, list(job_tags))
 
     def _filter_metric(self, metric, scraper_config):
         if scraper_config['telemetry']:
@@ -441,7 +452,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         else:
             msg = 'Cannot extract ts from job name {}'
             self.log.debug(msg, name)
-            return 0
+            return None
 
     # Labels attached: namespace, pod
     # As a message the phase=Pending|Running|Succeeded|Failed|Unknown
@@ -555,7 +566,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     def kube_job_status_failed(self, metric, scraper_config):
         for sample in metric.samples:
-            job_ts = 0
+            job_ts = None
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
@@ -564,11 +575,16 @@ class KubernetesState(OpenMetricsBaseCheck):
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            self.failed_job_counts[frozenset(tags)].update_current_ts_and_add_count(job_ts, sample[self.SAMPLE_VALUE])
+            if job_ts is not None:  # if there is a timestamp, this is a Cron Job
+                self.failed_cron_job_counts[frozenset(tags)].update_current_ts_and_add_count(
+                    job_ts, sample[self.SAMPLE_VALUE]
+                )
+            else:
+                self.job_failed_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
 
     def kube_job_status_succeeded(self, metric, scraper_config):
         for sample in metric.samples:
-            job_ts = 0
+            job_ts = None
             tags = [] + scraper_config['custom_tags']
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 if label_name == 'job' or label_name == 'job_name':
@@ -577,9 +593,12 @@ class KubernetesState(OpenMetricsBaseCheck):
                     tags.append(self._format_tag(label_name, trimmed_job, scraper_config))
                 else:
                     tags.append(self._format_tag(label_name, label_value, scraper_config))
-            self.succeeded_job_counts[frozenset(tags)].update_current_ts_and_add_count(
-                job_ts, sample[self.SAMPLE_VALUE]
-            )
+            if job_ts is not None:  # if there is a timestamp, this is a Cron Job
+                self.succeeded_cron_job_counts[frozenset(tags)].update_current_ts_and_add_count(
+                    job_ts, sample[self.SAMPLE_VALUE]
+                )
+            else:
+                self.job_succeeded_count[frozenset(tags)] += sample[self.SAMPLE_VALUE]
 
     def kube_node_status_condition(self, metric, scraper_config):
         """ The ready status of a cluster node. v1.0+"""

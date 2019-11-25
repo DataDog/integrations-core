@@ -21,6 +21,3 @@ CONFIG = {
     'timeout': 10,
     'tags': ['foo:bar'],
 }
-
-# TODO: Remove
-E2E_METADATA = {'start_commands': ['pip install vertica-python==0.9.2']}

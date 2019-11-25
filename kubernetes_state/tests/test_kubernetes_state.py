@@ -408,7 +408,7 @@ def test_extract_timestamp(check):
     result = check._extract_job_timestamp(job_name2)
     assert result == 1509998340
     result = check._extract_job_timestamp(job_name3)
-    assert result == 0
+    assert result is None
 
 
 def test_job_counts(aggregator, instance):
@@ -418,6 +418,8 @@ def test_job_counts(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
+
+    # Test cron jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=0
     )
@@ -425,13 +427,31 @@ def test_job_counts(aggregator, instance):
         NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=3
     )
 
+    # Test jobs
+    aggregator.assert_metric(
+        NAMESPACE + '.job.failed', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=0
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=1
+    )
+
     # Re-run check to make sure we don't count the same jobs
     check.check(instance)
+
+    # Test cron jobs
     aggregator.assert_metric(
         NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=0
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=3
+    )
+
+    # Test jobs
+    aggregator.assert_metric(
+        NAMESPACE + '.job.failed', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=0
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=1
     )
 
     # Edit the payload and rerun the check
@@ -443,6 +463,10 @@ def test_job_counts(aggregator, instance):
         b'kube_job_status_failed{job="hello-1509998340",namespace="default"} 0',
         b'kube_job_status_failed{job="hello-1509998510",namespace="default"} 1',
     )
+    payload = payload.replace(
+        b'kube_job_status_succeeded{job_name="test",namespace="default"} 1',
+        b'kube_job_status_succeeded{job_name="test",namespace="default"} 0',
+    )
 
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
     check.check(instance)
@@ -451,6 +475,36 @@ def test_job_counts(aggregator, instance):
     )
     aggregator.assert_metric(
         NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=4
+    )
+
+    # Edit the payload to mimick a job running and rerun the check
+    payload = payload.replace(
+        b'kube_job_status_succeeded{job="hello-1509998500",namespace="default"} 1',
+        b'kube_job_status_succeeded{job="hello-1509998600",namespace="default"} 0',
+    )
+    # Edit the payload to mimick a job re-creation
+    payload = payload.replace(
+        b'kube_job_status_succeeded{job_name="test",namespace="default"} 0',
+        b'kube_job_status_succeeded{job_name="test",namespace="default"} 1',
+    )
+
+    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.check(instance)
+    # Test if we now have two as the value for the same job
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=2
+    )
+
+    # Edit the payload to mimick a job that stopped running and rerun the check
+    payload = payload.replace(
+        b'kube_job_status_succeeded{job="hello-1509998600",namespace="default"} 0',
+        b'kube_job_status_succeeded{job="hello-1509998600",namespace="default"} 1',
+    )
+
+    check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
+    check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=5
     )
 
 
@@ -466,9 +520,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90270.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=908.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1282.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90397.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=912.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1286.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
     aggregator.assert_metric(

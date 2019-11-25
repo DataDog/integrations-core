@@ -46,6 +46,7 @@ def instance():
 @pytest.fixture(scope='session')
 def openmetrics_metrics():
     metrics = list(METRIC_MAP.values())
+    metrics.append('server.version')
 
     histograms = ['network.peer.round_trip_time.seconds']
 

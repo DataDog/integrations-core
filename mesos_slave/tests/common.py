@@ -15,6 +15,11 @@ FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 CHECK_NAME = 'mesos_slave'
 URL = 'http://{}:5051'.format(get_docker_hostname())
 
+# TODO: tests uses mock data which hard codes version '0.22.0'
+MESOS_SLAVE_VERSION = '0.22.0'
+
 INSTANCE = {'url': URL, 'tasks': ['hello'], 'tags': ['instance:mytag1']}
 
 BAD_INSTANCE = {'url': 'http://localhost:9999', 'tasks': ['hello']}
+
+PARAMETERS = 'test_case_name, request_mock_effects, expected_tags, expect_exception, expected_status'

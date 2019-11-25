@@ -9,7 +9,7 @@ import threading
 import time
 import traceback
 from collections import defaultdict
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
@@ -845,7 +845,11 @@ class VSphereCheck(AgentCheck):
                         continue
 
                     instance_name = result.id.instance or "none"
-                    value = self._transform_value(instance, result.id.counterId, result.value[0])
+                    # Get the most recent value that isn't negative
+                    valid_values = [v for v in result.value if v >= 0]
+                    if not valid_values:
+                        continue
+                    value = self._transform_value(instance, result.id.counterId, valid_values[-1])
 
                     hostname = mor['hostname']
 
@@ -926,11 +930,14 @@ class VSphereCheck(AgentCheck):
                 query_spec = vim.PerformanceManager.QuerySpec()
                 query_spec.entity = mor["mor"]
                 query_spec.intervalId = mor.get("interval")
-                query_spec.maxSample = 1
                 if mor['mor_type'] in REALTIME_RESOURCES:
                     query_spec.metricId = self.metadata_cache.get_metric_ids(i_key)
+                    query_spec.maxSample = 1  # Request a single datapoint
                 else:
                     query_spec.metricId = mor["metrics"]
+                    # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
+                    # contain at least one element
+                    query_spec.startTime = datetime.now() - timedelta(hours=2)
                 query_specs.append(query_spec)
 
             if query_specs:

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # stdlib
+import mock
 import pytest
 
 from datadog_checks.couchbase import Couchbase
@@ -123,6 +124,39 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
 
     for mname in QUERY_STATS:
         aggregator.assert_metric('couchbase.query.{}'.format(mname), tags=CHECK_TAGS, count=1)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_metadata(aggregator, instance_query, datadog_agent):
+    check = Couchbase('couchbase', {}, instances=[instance_query])
+    check.check_id = 'test:123'
+    check.check(instance_query)
+    server = instance_query['server']
+
+    data = check.get_data(server, instance_query)
+
+    nodes = data['stats']['nodes']
+
+    raw_version = ""
+
+    # Next, get all the nodes
+    if nodes is not None:
+        for node in nodes:
+            raw_version = node['version']
+
+    major, minor, patch = raw_version.split("-")[0].split(".")
+
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.release': mock.ANY,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
 
 
 def _assert_bucket_metrics(aggregator, tags, device=None):

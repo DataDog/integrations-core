@@ -104,7 +104,7 @@ class MaprCheck(AgentCheck):
                 raise CheckException(msg.error())
 
         if not submitted_metrics_count and not self.is_first_check_run:
-            self.log.error("No metric to fetch in topic {}. Double-check the topic name and path", self.topic_path)
+            self.log.error("No metric to fetch in topic %s. Double-check the topic name and path", self.topic_path)
 
         self.gauge(METRICS_SUBMITTED_METRIC_NAME, submitted_metrics_count, self.base_tags)
         self.is_first_check_run = False
