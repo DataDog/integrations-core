@@ -16,7 +16,7 @@ from ...constants import get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 METRIC_SEPARATORS = ('.', '_')
-TYPE_MAP = {'gauge': 'gauge', 'counter': 'count', 'histogram': 'gauge'}
+TYPE_MAP = {'gauge': 'gauge', 'counter': 'count', 'rate': 'gauge', 'histogram': 'gauge', 'summary': 'gauge'}
 METADATA_CSV_HEADER = (
     'metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name'
 )
@@ -45,9 +45,9 @@ def parse_metrics(endpoint):
                 continue
 
             if info_type == 'HELP':
-                metrics[metric]['description'] = info_value
+                metrics[metric]['description'] = info_value.strip()
             elif info_type == 'TYPE':
-                metrics[metric]['type'] = info_value
+                metrics[metric]['type'] = info_value.strip()
 
     return metrics
 
