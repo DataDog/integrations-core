@@ -314,17 +314,25 @@ class RequestsWrapper(object):
                     break
 
         persist = options.pop('persist', None)
+        no_context = options.pop('no_context', None)
         if persist is None:
             persist = self.persist_connections
 
-        with ExitStack() as stack:
-            for hook in self.request_hooks:
-                stack.enter_context(hook())
-
+        if no_context:
             if persist:
                 return getattr(self.session, method)(url, **self.populate_options(options))
             else:
                 return getattr(requests, method)(url, **self.populate_options(options))
+        else:
+
+            with ExitStack() as stack:
+                for hook in self.request_hooks:
+                    stack.enter_context(hook())
+
+                if persist:
+                    return getattr(self.session, method)(url, **self.populate_options(options))
+                else:
+                    return getattr(requests, method)(url, **self.populate_options(options))
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options

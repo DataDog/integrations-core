@@ -56,6 +56,13 @@ class HTTPCheck(AgentCheck):
             self.http.options['verify'] = False
 
     def check(self, instance):
+
+        self.check_request_wrapper(instance)
+        self.check_request_wrapper_no_persist(instance)
+        self.check_request_wrapper_no_persist_no_context(instance)
+        self.check_requests(instance)
+
+    def check_request_wrapper(self, instance):
         (
             addr,
             client_cert,
@@ -96,6 +103,7 @@ class HTTPCheck(AgentCheck):
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
         tags_list.append('url:{}'.format(addr))
+        tags_list.append('type:{}'.format("wrapper"))
         instance_name = self.normalize_tag(instance['name'])
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
@@ -156,6 +164,409 @@ class HTTPCheck(AgentCheck):
 
             # Only report this metric if the site is not down
             if response_time and not service_checks:
+                # Stop the timer as early as possible
+                running_time = time.time() - start
+                self.gauge('network.http.response_time_legacy', running_time, tags=tags_list)
+                msg = "http_check_duration: running_time: {}".format(running_time)
+                self.log.warning(msg)
+                print(msg)
+                msg = "http_check_duration: elapsed.total_seconds: {}".format(r.elapsed.total_seconds())
+                self.log.warning(msg)
+                print(msg)
+                self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
+
+            content = r.text
+
+            # Check HTTP response status code
+            if not (service_checks or re.match(http_response_status_code, str(r.status_code))):
+                if http_response_status_code == DEFAULT_EXPECTED_CODE:
+                    expected_code = "1xx or 2xx or 3xx"
+                else:
+                    expected_code = http_response_status_code
+
+                message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
+                    addr, expected_code, str(r.status_code)
+                )
+
+                if include_content:
+                    message += '\nContent: {}'.format(content[:CONTENT_LENGTH])
+
+                self.log.info(message)
+
+                service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, message))
+
+            if not service_checks:
+                # Host is UP
+                # Check content matching is set
+                if content_match:
+                    if re.search(content_match, content, re.UNICODE):
+                        if reverse_content_match:
+                            send_status_down(
+                                '{} is found in return content with the reverse_content_match option'.format(
+                                    ensure_unicode(content_match)
+                                ),
+                                'Content "{}" found in response with the reverse_content_match'.format(
+                                    ensure_unicode(content_match)
+                                ),
+                            )
+                        else:
+                            send_status_up("{} is found in return content".format(ensure_unicode(content_match)))
+
+                    else:
+                        if reverse_content_match:
+                            send_status_up(
+                                "{} is not found in return content with the reverse_content_match option".format(
+                                    ensure_unicode(content_match)
+                                )
+                            )
+                        else:
+                            send_status_down(
+                                "{} is not found in return content".format(ensure_unicode(content_match)),
+                                'Content "{}" not found in response.'.format(ensure_unicode(content_match)),
+                            )
+
+                else:
+                    send_status_up("{} is UP".format(addr))
+        finally:
+            if r is not None:
+                r.close()
+            # resets the wrapper Session object
+            self.http._session.close()
+            self.http._session = None
+
+        # Report status metrics as well
+        if service_checks:
+            can_status = 1 if service_checks[0][1] == AgentCheck.OK else 0
+            self.gauge('network.http.can_connect', can_status, tags=tags_list)
+
+            # cant_connect is useful for top lists
+            cant_status = 0 if service_checks[0][1] == AgentCheck.OK else 1
+            self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
+
+        if ssl_expire and parsed_uri.scheme == "https":
+            status, days_left, seconds_left, msg = self.check_cert_expiration(
+                instance, timeout, instance_ca_certs, check_hostname, client_cert, client_key
+            )
+            tags_list = list(tags)
+            tags_list.append('url:{}'.format(addr))
+            tags_list.append("instance:{}".format(instance_name))
+            self.gauge('http.ssl.days_left', days_left, tags=tags_list)
+            self.gauge('http.ssl.seconds_left', seconds_left, tags=tags_list)
+
+            service_checks.append((self.SC_SSL_CERT, status, msg))
+
+        for status in service_checks:
+            sc_name, status, msg = status
+            self.report_as_service_check(sc_name, status, service_checks_tags, msg)
+
+    def check_request_wrapper_no_persist(self, instance):
+        (
+            addr,
+            client_cert,
+            client_key,
+            method,
+            data,
+            http_response_status_code,
+            include_content,
+            headers,
+            response_time,
+            content_match,
+            reverse_content_match,
+            tags,
+            ssl_expire,
+            instance_ca_certs,
+            weakcipher,
+            check_hostname,
+            allow_redirects,
+            stream,
+        ) = from_instance(instance, self.ca_certs)
+        timeout = self.http.options['timeout'][0]
+        start = time.time()
+        # allows default headers to be included based on `include_default_headers` flag
+        self.http.options['headers'] = headers
+
+        def send_status_up(logMsg):
+            # TODO: A6 log needs bytes and cannot handle unicode
+            self.log.debug(logMsg)
+            service_checks.append((self.SC_STATUS, AgentCheck.OK, "UP"))
+
+        def send_status_down(loginfo, down_msg):
+            # TODO: A6 log needs bytes and cannot handle unicode
+            self.log.info(loginfo)
+            if include_content:
+                down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
+            service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
+
+        # Store tags in a temporary list so that we don't modify the global tags data structure
+        tags_list = list(tags)
+        tags_list.append('url:{}'.format(addr))
+        tags_list.append('type:{}'.format("wrapper_no_persist"))
+        instance_name = self.normalize_tag(instance['name'])
+        tags_list.append("instance:{}".format(instance_name))
+        service_checks = []
+        service_checks_tags = self._get_service_checks_tags(instance)
+        r = None
+        try:
+            parsed_uri = urlparse(addr)
+            self.log.debug("Connecting to {}".format(addr))
+            self.http.session.trust_env = False
+            if weakcipher:
+                base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+                self.http.session.mount(base_addr, WeakCiphersAdapter())
+                self.log.debug(
+                    "Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
+                        base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS
+                    )
+                )
+
+            # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
+            if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
+                self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
+
+            r = getattr(self.http, method.lower())(
+                addr,
+                persist=False,
+                allow_redirects=allow_redirects,
+                stream=stream,
+                json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
+                data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
+            )
+        except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            length = int((time.time() - start) * 1000)
+            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
+            service_checks.append(
+                (self.SC_STATUS, AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length))
+            )
+
+        except socket.error as e:
+            length = int((time.time() - start) * 1000)
+            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
+            service_checks.append(
+                (
+                    self.SC_STATUS,
+                    AgentCheck.CRITICAL,
+                    "Socket error: {}. Connection failed after {} ms".format(repr(e), length),
+                )
+            )
+
+        except Exception as e:
+            length = int((time.time() - start) * 1000)
+            self.log.error("Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
+            raise
+
+        else:
+            # Only add the URL tag if it's not already present
+            if not any(filter(re.compile('^url:').match, tags_list)):
+                tags_list.append('url:{}'.format(addr))
+
+            # Only report this metric if the site is not down
+            if response_time and not service_checks:
+                # Stop the timer as early as possible
+                running_time = time.time() - start
+                self.gauge('network.http.response_time_legacy', running_time, tags=tags_list)
+                msg = "http_check_duration: running_time: {}".format(running_time)
+                self.log.warning(msg)
+                print(msg)
+                msg = "http_check_duration: elapsed.total_seconds: {}".format(r.elapsed.total_seconds())
+                self.log.warning(msg)
+                print(msg)
+                self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
+
+            content = r.text
+
+            # Check HTTP response status code
+            if not (service_checks or re.match(http_response_status_code, str(r.status_code))):
+                if http_response_status_code == DEFAULT_EXPECTED_CODE:
+                    expected_code = "1xx or 2xx or 3xx"
+                else:
+                    expected_code = http_response_status_code
+
+                message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
+                    addr, expected_code, str(r.status_code)
+                )
+
+                if include_content:
+                    message += '\nContent: {}'.format(content[:CONTENT_LENGTH])
+
+                self.log.info(message)
+
+                service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, message))
+
+            if not service_checks:
+                # Host is UP
+                # Check content matching is set
+                if content_match:
+                    if re.search(content_match, content, re.UNICODE):
+                        if reverse_content_match:
+                            send_status_down(
+                                '{} is found in return content with the reverse_content_match option'.format(
+                                    ensure_unicode(content_match)
+                                ),
+                                'Content "{}" found in response with the reverse_content_match'.format(
+                                    ensure_unicode(content_match)
+                                ),
+                            )
+                        else:
+                            send_status_up("{} is found in return content".format(ensure_unicode(content_match)))
+
+                    else:
+                        if reverse_content_match:
+                            send_status_up(
+                                "{} is not found in return content with the reverse_content_match option".format(
+                                    ensure_unicode(content_match)
+                                )
+                            )
+                        else:
+                            send_status_down(
+                                "{} is not found in return content".format(ensure_unicode(content_match)),
+                                'Content "{}" not found in response.'.format(ensure_unicode(content_match)),
+                            )
+
+                else:
+                    send_status_up("{} is UP".format(addr))
+        finally:
+            if r is not None:
+                r.close()
+            # resets the wrapper Session object
+            self.http._session.close()
+            self.http._session = None
+
+        # Report status metrics as well
+        if service_checks:
+            can_status = 1 if service_checks[0][1] == AgentCheck.OK else 0
+            self.gauge('network.http.can_connect', can_status, tags=tags_list)
+
+            # cant_connect is useful for top lists
+            cant_status = 0 if service_checks[0][1] == AgentCheck.OK else 1
+            self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
+
+        if ssl_expire and parsed_uri.scheme == "https":
+            status, days_left, seconds_left, msg = self.check_cert_expiration(
+                instance, timeout, instance_ca_certs, check_hostname, client_cert, client_key
+            )
+            tags_list = list(tags)
+            tags_list.append('url:{}'.format(addr))
+            tags_list.append("instance:{}".format(instance_name))
+            self.gauge('http.ssl.days_left', days_left, tags=tags_list)
+            self.gauge('http.ssl.seconds_left', seconds_left, tags=tags_list)
+
+            service_checks.append((self.SC_SSL_CERT, status, msg))
+
+        for status in service_checks:
+            sc_name, status, msg = status
+            self.report_as_service_check(sc_name, status, service_checks_tags, msg)
+
+    def check_requests(self, instance):
+        (
+            addr,
+            client_cert,
+            client_key,
+            method,
+            data,
+            http_response_status_code,
+            include_content,
+            headers,
+            response_time,
+            content_match,
+            reverse_content_match,
+            tags,
+            ssl_expire,
+            instance_ca_certs,
+            weakcipher,
+            check_hostname,
+            allow_redirects,
+            stream,
+        ) = from_instance(instance, self.ca_certs)
+        timeout = self.http.options['timeout'][0]
+        start = time.time()
+        # allows default headers to be included based on `include_default_headers` flag
+        self.http.options['headers'] = headers
+
+        def send_status_up(logMsg):
+            # TODO: A6 log needs bytes and cannot handle unicode
+            self.log.debug(logMsg)
+            service_checks.append((self.SC_STATUS, AgentCheck.OK, "UP"))
+
+        def send_status_down(loginfo, down_msg):
+            # TODO: A6 log needs bytes and cannot handle unicode
+            self.log.info(loginfo)
+            if include_content:
+                down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
+            service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
+
+        # Store tags in a temporary list so that we don't modify the global tags data structure
+        tags_list = list(tags)
+        tags_list.append('url:{}'.format(addr))
+        tags_list.append('type:{}'.format("requests"))
+        instance_name = self.normalize_tag(instance['name'])
+        tags_list.append("instance:{}".format(instance_name))
+        service_checks = []
+        service_checks_tags = self._get_service_checks_tags(instance)
+        r = None
+        try:
+            parsed_uri = urlparse(addr)
+            self.log.debug("Connecting to {}".format(addr))
+            self.http.session.trust_env = False
+            if weakcipher:
+                base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+                self.http.session.mount(base_addr, WeakCiphersAdapter())
+                self.log.debug(
+                    "Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
+                        base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS
+                    )
+                )
+
+            # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
+            if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
+                self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
+
+            r = getattr(requests, method.lower())(
+                addr,
+                # persist=True,
+                allow_redirects=allow_redirects,
+                stream=stream,
+                json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
+                data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
+            )
+        except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            length = int((time.time() - start) * 1000)
+            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
+            service_checks.append(
+                (self.SC_STATUS, AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length))
+            )
+
+        except socket.error as e:
+            length = int((time.time() - start) * 1000)
+            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
+            service_checks.append(
+                (
+                    self.SC_STATUS,
+                    AgentCheck.CRITICAL,
+                    "Socket error: {}. Connection failed after {} ms".format(repr(e), length),
+                )
+            )
+
+        except Exception as e:
+            length = int((time.time() - start) * 1000)
+            self.log.error("Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
+            raise
+
+        else:
+            # Only add the URL tag if it's not already present
+            if not any(filter(re.compile('^url:').match, tags_list)):
+                tags_list.append('url:{}'.format(addr))
+
+            # Only report this metric if the site is not down
+            if response_time and not service_checks:
+                # Stop the timer as early as possible
+                running_time = time.time() - start
+                self.gauge('network.http.response_time_legacy', running_time, tags=tags_list)
+                msg = "http_check_duration: running_time: {}".format(running_time)
+                self.log.warning(msg)
+                print(msg)
+                msg = "http_check_duration: elapsed.total_seconds: {}".format(r.elapsed.total_seconds())
+                self.log.warning(msg)
+                print(msg)
                 self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
             content = r.text
@@ -344,3 +755,201 @@ class HTTPCheck(AgentCheck):
 
         else:
             return AgentCheck.OK, days_left, seconds_left, "Days left: {}".format(days_left)
+
+    def check_request_wrapper_no_persist_no_context(self, instance):
+        (
+            addr,
+            client_cert,
+            client_key,
+            method,
+            data,
+            http_response_status_code,
+            include_content,
+            headers,
+            response_time,
+            content_match,
+            reverse_content_match,
+            tags,
+            ssl_expire,
+            instance_ca_certs,
+            weakcipher,
+            check_hostname,
+            allow_redirects,
+            stream,
+        ) = from_instance(instance, self.ca_certs)
+        timeout = self.http.options['timeout'][0]
+        start = time.time()
+        # allows default headers to be included based on `include_default_headers` flag
+        self.http.options['headers'] = headers
+
+        def send_status_up(logMsg):
+            # TODO: A6 log needs bytes and cannot handle unicode
+            self.log.debug(logMsg)
+            service_checks.append((self.SC_STATUS, AgentCheck.OK, "UP"))
+
+        def send_status_down(loginfo, down_msg):
+            # TODO: A6 log needs bytes and cannot handle unicode
+            self.log.info(loginfo)
+            if include_content:
+                down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
+            service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
+
+        # Store tags in a temporary list so that we don't modify the global tags data structure
+        tags_list = list(tags)
+        tags_list.append('url:{}'.format(addr))
+        tags_list.append('type:{}'.format("wrapper_no_context"))
+        instance_name = self.normalize_tag(instance['name'])
+        tags_list.append("instance:{}".format(instance_name))
+        service_checks = []
+        service_checks_tags = self._get_service_checks_tags(instance)
+        r = None
+        try:
+            parsed_uri = urlparse(addr)
+            self.log.debug("Connecting to {}".format(addr))
+            self.http.session.trust_env = False
+            if weakcipher:
+                base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+                self.http.session.mount(base_addr, WeakCiphersAdapter())
+                self.log.debug(
+                    "Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
+                        base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS
+                    )
+                )
+
+            # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
+            if method.upper() in DATA_METHODS and not headers.get('Content-Type'):
+                self.http.options['headers']['Content-Type'] = 'application/x-www-form-urlencoded'
+
+            r = getattr(self.http, method.lower())(
+                addr,
+                persist=False,
+                no_context=True,
+                allow_redirects=allow_redirects,
+                stream=stream,
+                json=data if method.upper() in DATA_METHODS and isinstance(data, dict) else None,
+                data=data if method.upper() in DATA_METHODS and isinstance(data, string_types) else None,
+            )
+        except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            length = int((time.time() - start) * 1000)
+            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
+            service_checks.append(
+                (self.SC_STATUS, AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length))
+            )
+
+        except socket.error as e:
+            length = int((time.time() - start) * 1000)
+            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
+            service_checks.append(
+                (
+                    self.SC_STATUS,
+                    AgentCheck.CRITICAL,
+                    "Socket error: {}. Connection failed after {} ms".format(repr(e), length),
+                )
+            )
+
+        except Exception as e:
+            length = int((time.time() - start) * 1000)
+            self.log.error("Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
+            raise
+
+        else:
+            # Only add the URL tag if it's not already present
+            if not any(filter(re.compile('^url:').match, tags_list)):
+                tags_list.append('url:{}'.format(addr))
+
+            # Only report this metric if the site is not down
+            if response_time and not service_checks:
+                # Stop the timer as early as possible
+                running_time = time.time() - start
+                self.gauge('network.http.response_time_legacy', running_time, tags=tags_list)
+                msg = "http_check_duration: running_time: {}".format(running_time)
+                self.log.warning(msg)
+                print(msg)
+                msg = "http_check_duration: elapsed.total_seconds: {}".format(r.elapsed.total_seconds())
+                self.log.warning(msg)
+                print(msg)
+                self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
+
+            content = r.text
+
+            # Check HTTP response status code
+            if not (service_checks or re.match(http_response_status_code, str(r.status_code))):
+                if http_response_status_code == DEFAULT_EXPECTED_CODE:
+                    expected_code = "1xx or 2xx or 3xx"
+                else:
+                    expected_code = http_response_status_code
+
+                message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
+                    addr, expected_code, str(r.status_code)
+                )
+
+                if include_content:
+                    message += '\nContent: {}'.format(content[:CONTENT_LENGTH])
+
+                self.log.info(message)
+
+                service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, message))
+
+            if not service_checks:
+                # Host is UP
+                # Check content matching is set
+                if content_match:
+                    if re.search(content_match, content, re.UNICODE):
+                        if reverse_content_match:
+                            send_status_down(
+                                '{} is found in return content with the reverse_content_match option'.format(
+                                    ensure_unicode(content_match)
+                                ),
+                                'Content "{}" found in response with the reverse_content_match'.format(
+                                    ensure_unicode(content_match)
+                                ),
+                            )
+                        else:
+                            send_status_up("{} is found in return content".format(ensure_unicode(content_match)))
+
+                    else:
+                        if reverse_content_match:
+                            send_status_up(
+                                "{} is not found in return content with the reverse_content_match option".format(
+                                    ensure_unicode(content_match)
+                                )
+                            )
+                        else:
+                            send_status_down(
+                                "{} is not found in return content".format(ensure_unicode(content_match)),
+                                'Content "{}" not found in response.'.format(ensure_unicode(content_match)),
+                            )
+
+                else:
+                    send_status_up("{} is UP".format(addr))
+        finally:
+            if r is not None:
+                r.close()
+            # resets the wrapper Session object
+            self.http._session.close()
+            self.http._session = None
+
+        # Report status metrics as well
+        if service_checks:
+            can_status = 1 if service_checks[0][1] == AgentCheck.OK else 0
+            self.gauge('network.http.can_connect', can_status, tags=tags_list)
+
+            # cant_connect is useful for top lists
+            cant_status = 0 if service_checks[0][1] == AgentCheck.OK else 1
+            self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
+
+        if ssl_expire and parsed_uri.scheme == "https":
+            status, days_left, seconds_left, msg = self.check_cert_expiration(
+                instance, timeout, instance_ca_certs, check_hostname, client_cert, client_key
+            )
+            tags_list = list(tags)
+            tags_list.append('url:{}'.format(addr))
+            tags_list.append("instance:{}".format(instance_name))
+            self.gauge('http.ssl.days_left', days_left, tags=tags_list)
+            self.gauge('http.ssl.seconds_left', seconds_left, tags=tags_list)
+
+            service_checks.append((self.SC_SSL_CERT, status, msg))
+
+        for status in service_checks:
+            sc_name, status, msg = status
+            self.report_as_service_check(sc_name, status, service_checks_tags, msg)
