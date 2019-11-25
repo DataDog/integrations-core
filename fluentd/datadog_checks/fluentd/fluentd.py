@@ -3,10 +3,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import re
+
 # 3rd party
 from six.moves.urllib.parse import urlparse
 
 # project
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.checks import AgentCheck
 
 
@@ -15,6 +18,7 @@ class Fluentd(AgentCheck):
     SERVICE_CHECK_NAME = 'fluentd.is_ok'
     GAUGES = ['retry_count', 'buffer_total_queued_size', 'buffer_queue_length']
     _AVAILABLE_TAGS = frozenset(['plugin_id', 'type'])
+    VERSION_PATTERN = r'.* (?P<version>[0-9\.]+)'
 
     def __init__(self, name, init_config, instances):
         super(Fluentd, self).__init__(name, init_config, instances)
@@ -28,6 +32,8 @@ class Fluentd(AgentCheck):
                 or self.DEFAULT_TIMEOUT
             )
             self.http.options['timeout'] = (timeout, timeout)
+
+        self._fluentd_command = self.instance.get('fluentd', init_config.get('fluentd', 'fluentd'))
 
     """Tracks basic fluentd metrics via the monitor_agent plugin
     * number of retry_count
@@ -81,9 +87,34 @@ class Fluentd(AgentCheck):
                     # Filter unspecified plugins to keep backward compatibility.
                     if len(plugin_ids) == 0 or p.get('plugin_id') in plugin_ids:
                         self.gauge('fluentd.%s' % (m), metric, [tag] + custom_tags)
+
+            self._collect_metadata()
         except Exception as e:
             msg = "No stats could be retrieved from %s : %s" % (url, str(e))
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=msg)
             raise
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+
+    def _collect_metadata(self):
+        raw_version = self._get_raw_version()
+
+        if raw_version:
+            self.set_metadata('version', raw_version)
+
+    def _get_raw_version(self):
+        version_command = '{} --version'.format(self._fluentd_command)
+
+        try:
+            out, _, _ = get_subprocess_output(version_command, self.log, raise_on_empty_output=False)
+        except OSError as exc:
+            self.log.warning("Error collecting fluentd version: %s", exc)
+            return None
+
+        match = re.match(self.VERSION_PATTERN, out)
+
+        if match is None:
+            self.log.warning("fluentd version not found in stdout: `%s`", out)
+            return None
+
+        return match.group('version')
