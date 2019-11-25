@@ -17,7 +17,7 @@ FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixture
 CAPACITY_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'capacity')
 FABRIC_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'fabric')
 TENANT_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'tenant')
-ALL_FICTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TENANT_FIXTURES_DIR]
+ALL_FIXTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TENANT_FIXTURES_DIR]
 
 USERNAME = 'datadog'
 PASSWORD = 'datadog'
@@ -646,7 +646,7 @@ class FakeSessionWrapper(SessionWrapper):
     3. Returns the corresponding file content
     """
 
-    fixture_dirs = ALL_FICTURE_DIR
+    fixture_dirs = ALL_FIXTURE_DIR
 
     def login(self, password):
         self.apic_cookie = 'cookie'
