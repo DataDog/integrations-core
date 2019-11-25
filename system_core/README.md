@@ -1,4 +1,4 @@
-# Agent Check: system cores
+# Agent Check: System Core
 
 ![System Core][1]
 
@@ -7,16 +7,13 @@
 This check collects the number of CPU cores on a host and CPU times (i.e. system, user, idle, etc).
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying these instructions.
-
 ### Installation
 
-The system_core check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your server.
+The system core check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `system_core.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample system_core.d/conf.yaml][4] for all available configuration options:
+1. Edit the `system_core.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample system_core.d/conf.yaml][4] for all available configuration options. **Note**: At least one entry is required under `instances` to enable the check, for example:
 
     ```
     init_config:
@@ -25,13 +22,11 @@ The system_core check is included in the [Datadog Agent][2] package, so you don'
       - foo: bar
     ```
 
-    The Agent just needs one item in `instances` in order to enable the check. The content of the item doesn't matter.
-
-2. [Restart the Agent][5] to enable the check.
+2. [Restart the Agent][5].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `system_core` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `system_core` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -57,4 +52,3 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/system_core/metadata.csv
 [8]: https://docs.datadoghq.com/help
-[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations
