@@ -11,6 +11,7 @@ import requests
 from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
+from ipaddress import ip_address, ip_network
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
@@ -306,14 +307,24 @@ class RequestsWrapper(object):
             self.logger.debug(u'Sending %s request to %s', method.upper(), url)
 
         if self.no_proxy_uris:
-            parsed_uri = urlparse(url)
+            parsed_uri = urlparse(url).hostname
 
             for no_proxy_uri in self.no_proxy_uris:
-                dot_no_proxy_uri = no_proxy_uri if no_proxy_uri.startswith(".") else ".{}".format(no_proxy_uri)
-                if no_proxy_uri == parsed_uri.netloc or parsed_uri.netloc.endswith(dot_no_proxy_uri):
-                    # By convention, no_proxy should only match the domain.
-                    options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
-                    break
+                try:
+                    # If no_proxy_uri is an IP or IP CIDR,
+                    # check if parsed_uri is an IP and within the CIDR range
+                    ipnetwork = ip_network(no_proxy_uri)
+                    ipaddress = ip_address(parsed_uri)
+                    if ipaddress in ipnetwork:
+                        options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
+                        break
+                except ValueError:
+                    # Either no_proxy_uri or parsed_uri is a string
+                    dot_no_proxy_uri = no_proxy_uri if no_proxy_uri.startswith(".") else ".{}".format(no_proxy_uri)
+                    if no_proxy_uri == parsed_uri or parsed_uri.endswith(dot_no_proxy_uri):
+                        # By convention, no_proxy should only match the domain if not the full url
+                        options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
+                        break
 
         persist = options.pop('persist', None)
         if persist is None:
