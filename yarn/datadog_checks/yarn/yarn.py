@@ -212,7 +212,6 @@ class YarnCheck(AgentCheck):
             self._yarn_app_metrics(rm_address, app_tags, tags)
         self._yarn_node_metrics(rm_address, tags)
         self._yarn_scheduler_metrics(rm_address, tags, queue_blacklist)
-        self.collect_version(rm_address)
 
     def _yarn_cluster_metrics(self, rm_address, addl_tags):
         """
@@ -258,21 +257,12 @@ class YarnCheck(AgentCheck):
                 self.log.error("Invalid value {} for application_tag".format(yarn_key))
         return tags
 
-    def collect_version(self, rm_address):
-        data = self._rest_request_to_json(rm_address, YARN_NODES_PATH, [])
-        node_info = data['nodes']['node']
-        for metrics in node_info:
-            try:
-                version = metrics['version']
-                self.set_metadata('version', version)
-            except Exception:
-                continue
-
     def _yarn_node_metrics(self, rm_address, addl_tags):
         """
         Get metrics related to YARN nodes
         """
         metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH, addl_tags)
+        version_set = False
 
         if metrics_json and metrics_json['nodes'] is not None and metrics_json['nodes']['node'] is not None:
 
@@ -283,6 +273,10 @@ class YarnCheck(AgentCheck):
                 tags.extend(addl_tags)
 
                 self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
+                version = node_json.get('version')
+                if not version_set and version:
+                    self.set_metadata('version', version)
+                    version_set = True
 
     def _yarn_scheduler_metrics(self, rm_address, addl_tags, queue_blacklist):
         """

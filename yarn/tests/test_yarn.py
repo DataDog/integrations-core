@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import os
 
 from requests.exceptions import SSLError
 from six import iteritems
@@ -9,10 +10,8 @@ from six import iteritems
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import (
     APPLICATION_STATUS_SERVICE_CHECK,
-    DEFAULT_RM_URI,
     SERVICE_CHECK_NAME,
     YARN_APP_METRICS,
-    YARN_NODES_PATH,
     YARN_QUEUE_METRICS,
 )
 
@@ -202,31 +201,21 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
 
 
 def test_metadata(aggregator, instance, datadog_agent):
-    check = YarnCheck('yarn', {}, [instance])
-    check.check_id = 'test:123'
+    check = YarnCheck("yarn", {}, [instance])
+    check.check_id = "test:123"
 
     check.check(instance)
 
-    data = check._rest_request_to_json(DEFAULT_RM_URI, YARN_NODES_PATH, [])
-
-    node_info = data['nodes']['node']
-
-    raw_version = ""
-
-    for metrics in node_info:
-        try:
-            raw_version = metrics['version']
-        except Exception:
-            continue
+    raw_version = os.getenv("YARN_VERSION")
 
     major, minor, patch = raw_version.split(".")
 
     version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': raw_version,
+        "version.scheme": "semver",
+        "version.major": major,
+        "version.minor": minor,
+        "version.patch": patch,
+        "version.raw": raw_version,
     }
 
-    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata("test:123", version_metadata)
