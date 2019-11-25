@@ -131,6 +131,7 @@ class KafkaCheck(AgentCheck):
             request_timeout_ms=self.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
             # There is a bug with kafka-python where pinning api_version for KafkaAdminClient raises an
             # `IncompatibleBrokerVersion`. Change to `api_version=self._kafka_version` once fixed upstream.
+            # See linked issues in PR: https://github.com/dpkp/kafka-python/pull/1953
             api_version=None,
             # While we check for SASL/SSL params, if not present they will default to the kafka-python values for
             # plaintext connections
