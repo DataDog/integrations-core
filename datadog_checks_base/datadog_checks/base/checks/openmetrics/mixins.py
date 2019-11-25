@@ -582,7 +582,7 @@ class OpenMetricsScraperMixin(object):
         if isinstance(scraper_config['ssl_ca_cert'], string_types):
             verify = scraper_config['ssl_ca_cert']
         elif verify is False:
-            disable_warnings(InsecureRequestWarning)
+            disable_warnings(InsecureRequestWarning)  # NOTE: disables InsecureRequestWarning *globally*
 
         # Determine the authentication settings
         username = scraper_config['username']

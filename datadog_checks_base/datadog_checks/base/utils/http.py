@@ -3,13 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
-import threading
-import warnings
 from contextlib import contextmanager
 
 import requests
 from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
+from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
 from ..config import is_affirmative
@@ -93,10 +92,6 @@ class RequestsWrapper(object):
         'persist_connections',
         'request_hooks',
     )
-
-    # For modifying the warnings filter since the context
-    # manager that is provided changes module constants
-    warning_lock = threading.Lock()
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
         self.logger = logger or LOGGER
@@ -275,8 +270,11 @@ class RequestsWrapper(object):
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
+        if self.ignore_tls_warning:
+            disable_warnings(InsecureRequestWarning)  # NOTE: disables InsecureRequestWarning *globally*
+
         # Context managers that should wrap all requests
-        self.request_hooks = [self.handle_tls_warning]
+        self.request_hooks = []
 
         if config['kerberos_keytab']:
             self.request_hooks.append(lambda: handle_kerberos_keytab(config['kerberos_keytab']))
@@ -336,16 +334,6 @@ class RequestsWrapper(object):
             options.setdefault(option, value)
 
         return options
-
-    @contextmanager
-    def handle_tls_warning(self):
-        with self.warning_lock:
-
-            with warnings.catch_warnings():
-                if self.ignore_tls_warning:
-                    warnings.simplefilter('ignore', InsecureRequestWarning)
-
-                yield
 
     @property
     def session(self):
