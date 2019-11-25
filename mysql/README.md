@@ -105,7 +105,7 @@ Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
       pass: '<YOUR_CHOSEN_PASSWORD>' # from the CREATE USER step earlier
       port: <YOUR_MYSQL_PORT> # e.g. 3306
       options:
-          replication: 0
+          replication: false
           galera_cluster: true
           extra_status_metrics: true
           extra_innodb_metrics: true
