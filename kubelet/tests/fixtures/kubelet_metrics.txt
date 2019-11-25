@@ -976,3 +976,48 @@ storage_operation_duration_seconds_bucket{operation_name="volume_unmount",volume
 storage_operation_duration_seconds_bucket{operation_name="volume_unmount",volume_plugin="kubernetes.io/secret",le="+Inf"} 9
 storage_operation_duration_seconds_sum{operation_name="volume_unmount",volume_plugin="kubernetes.io/secret"} 0.331589254
 storage_operation_duration_seconds_count{operation_name="volume_unmount",volume_plugin="kubernetes.io/secret"} 9
+# HELP kubelet_eviction_stats_age_microseconds [ALPHA] (Deprecated) Time between when stats are collected, and when pod is evicted based on those stats by eviction signal
+# TYPE kubelet_eviction_stats_age_microseconds summary
+kubelet_eviction_stats_age_microseconds{eviction_signal="allocatableMemory.available",quantile="0.5"} 1535
+kubelet_eviction_stats_age_microseconds{eviction_signal="allocatableMemory.available",quantile="0.9"} 1535
+kubelet_eviction_stats_age_microseconds{eviction_signal="allocatableMemory.available",quantile="0.99"} 1535
+kubelet_eviction_stats_age_microseconds_sum{eviction_signal="allocatableMemory.available"} 15557
+kubelet_eviction_stats_age_microseconds_count{eviction_signal="allocatableMemory.available"} 3
+kubelet_eviction_stats_age_microseconds{eviction_signal="memory.available",quantile="0.5"} 52668
+kubelet_eviction_stats_age_microseconds{eviction_signal="memory.available",quantile="0.9"} 52668
+kubelet_eviction_stats_age_microseconds{eviction_signal="memory.available",quantile="0.99"} 52668
+kubelet_eviction_stats_age_microseconds_sum{eviction_signal="memory.available"} 5.912456e+06
+kubelet_eviction_stats_age_microseconds_count{eviction_signal="memory.available"} 3
+# HELP kubelet_eviction_stats_age_seconds [ALPHA] Time between when stats are collected, and when pod is evicted based on those stats by eviction signal
+# TYPE kubelet_eviction_stats_age_seconds histogram
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="0.005"} 2
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="0.01"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="0.025"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="0.05"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="0.1"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="0.25"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="0.5"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="1"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="2.5"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="5"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="10"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="allocatableMemory.available",le="+Inf"} 3
+kubelet_eviction_stats_age_seconds_sum{eviction_signal="allocatableMemory.available"} 0.015040582
+kubelet_eviction_stats_age_seconds_count{eviction_signal="allocatableMemory.available"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="0.005"} 0
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="0.01"} 0
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="0.025"} 0
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="0.05"} 0
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="0.1"} 1
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="0.25"} 1
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="0.5"} 1
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="1"} 1
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="2.5"} 1
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="5"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="10"} 3
+kubelet_eviction_stats_age_seconds_bucket{eviction_signal="memory.available",le="+Inf"} 3
+kubelet_eviction_stats_age_seconds_sum{eviction_signal="memory.available"} 5.912262458000001
+kubelet_eviction_stats_age_seconds_count{eviction_signal="memory.available"} 3
+# HELP kubelet_evictions [ALPHA] Cumulative number of pod evictions by eviction signal
+# TYPE kubelet_evictions counter
+kubelet_evictions{eviction_signal="allocatableMemory.available"} 3

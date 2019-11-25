@@ -164,6 +164,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                         'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
                         'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
                         'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
+                        'kubelet_evictions': 'kubelet.evictions',
                     }
                 ],
                 # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
