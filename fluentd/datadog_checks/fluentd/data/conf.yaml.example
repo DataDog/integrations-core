@@ -1,6 +1,6 @@
 init_config:
     ## @param fluentd - string - optional - default: fluentd
-    ## Command or path to fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
+    ## Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
     ## Can be overwritten on an instance.
     #
     # fluentd: fluentd
@@ -40,7 +40,7 @@ instances:
   - monitor_agent_url: http://example.com:24220/api/plugins.json
 
     ## @param fluentd - string - optional - default: fluentd
-    ## Command or path to fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
+    ## Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
     #
     # fluentd: fluentd
 
