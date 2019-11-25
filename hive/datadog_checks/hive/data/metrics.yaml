@@ -507,7 +507,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
-      bean: directsql_errors
+      bean: metrics:name=directsql_error
       attribute:
         Count:
           alias: hive.metastore.directsql_errors
