@@ -43,7 +43,7 @@ def parse_version(raw_version):
     raise Exception("Cannot determine which version is {}".format(raw_version))
 
 
-def transform_version(raw_version, options=None):
+def transform_version(raw_version):
     version = parse_version(raw_version)
     return {
         'version.major': version.major,
