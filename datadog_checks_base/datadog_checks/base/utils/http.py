@@ -309,7 +309,9 @@ class RequestsWrapper(object):
             parsed_uri = urlparse(url)
 
             for no_proxy_uri in self.no_proxy_uris:
-                if no_proxy_uri in parsed_uri.netloc:
+                dot_no_proxy_uri = no_proxy_uri if no_proxy_uri.startswith(".") else ".{}".format(no_proxy_uri)
+                if no_proxy_uri == parsed_uri.netloc or parsed_uri.netloc.endswith(dot_no_proxy_uri):
+                    # By convention, no_proxy should only match the domain.
                     options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
                     break
 
