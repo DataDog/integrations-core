@@ -106,6 +106,8 @@ init_config:
       definition_file: f5-big-ip.yaml
     router:
       definition_file: generic-router.yaml
+    cisco-3850:
+      definition_file: cisco-3850.yaml
 
 instances:
   -
