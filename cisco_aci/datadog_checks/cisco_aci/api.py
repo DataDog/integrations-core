@@ -8,8 +8,6 @@ import random
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
-from requests import Request, Session
-from six.moves.urllib.parse import unquote
 
 from datadog_checks.base import ConfigurationError
 
@@ -20,23 +18,19 @@ class SessionWrapper:
     def __init__(
         self,
         aci_url,
-        session,
-        apic_cookie=None,
+        http,
         username=None,
         cert_name=None,
         cert_key=None,
-        verify=None,
-        timeout=None,
         log=None,
         appcenter=False,
         cert_key_password=None,
     ):
-        self.session = session
         self.aci_url = aci_url
-        self.verify = verify
-        self.timeout = timeout
+        self.http = http
         self.log = log
-        self.apic_cookie = apic_cookie
+        self.apic_cookie = None
+        self.username = username
         self.appcenter = appcenter
 
         if self.appcenter:
@@ -50,24 +44,20 @@ class SessionWrapper:
                 cert_key, password=cert_key_password, backend=default_backend()
             )
 
-    def send(self, req):
-        req.headers['Cookie'] = self.apic_cookie
-        return self.session.send(req, verify=self.verify, timeout=self.timeout)
-
-    def close(self):
-        self.session.close()
+    def login(self, password):
+        data = '<aaaUser name="{}" pwd="{}"/>\n'.format(self.username, password)
+        url = '{}/api/aaaLogin.xml'.format(self.aci_url)
+        response = self.http.post(url, data=data, persist=True)
+        response.raise_for_status()
+        self.apic_cookie = 'APIC-Cookie={}'.format(response.cookies.get('APIC-cookie'))
 
     def make_request(self, path):
         url = "{}{}".format(self.aci_url, path)
-        req = Request('GET', url)
 
-        payload = '{}{}'.format(req.method, req.url.replace(self.aci_url, ''))
-        payload = unquote(payload)
-
-        prepped_request = req.prepare()
         if self.apic_cookie:
-            prepped_request.headers['Cookie'] = self.apic_cookie
+            cookie = self.apic_cookie
         elif self.cert_key:
+            payload = 'GET{}'.format(path)
             signature = self.cert_key.sign(payload, padding.PKCS1v15(), hashes.SHA256())
 
             signature = base64.b64encode(signature)
@@ -77,12 +67,12 @@ class SessionWrapper:
                 'APIC-Certificate-Fingerprint=fingerprint; '
                 'APIC-Certificate-DN={}'
             ).format(signature, self.certDn)
-            prepped_request.headers['Cookie'] = cookie
+            cookie = cookie
         else:
             self.log.warning("The Cisco ACI Integration requires either a cert or a username and password")
             raise ConfigurationError("The Cisco ACI Integration requires either a cert or a username and password")
 
-        response = self.session.send(prepped_request, verify=self.verify, timeout=self.timeout)
+        response = self.http.get(url, headers={'Cookie': cookie}, persist=True)
         if response.status_code == 403:
             raise APIAuthException("Received 403 when making request: %s", response.text)
         try:
@@ -98,37 +88,32 @@ class SessionWrapper:
 
 
 class Api:
+
+    wrapper_factory = SessionWrapper
+
     def __init__(
         self,
         aci_urls,
+        http,
         username,
         cert_name=None,
         cert_key=None,
         password=None,
-        verify=False,
-        timeout=10,
         log=None,
-        sessions=None,
         cert_key_password=None,
         appcenter=False,
     ):
         self.aci_urls = aci_urls
+        self.http = http
         self.username = username
-        self.timeout = timeout
-        self.verify = verify
-        self.sessions = sessions
         self.cert_key_password = cert_key_password
-        self.appcenter = False
-        if sessions is None:
-            self.sessions = []
+        self.appcenter = appcenter
         if log:
             self.log = log
         else:
             import logging
 
             self.log = logging.getLogger('cisco_api')
-        # This is used in testing
-        self._refresh_sessions = True
 
         self.password = password
 
@@ -143,66 +128,30 @@ class Api:
             msg = "You need to have either a password or a cert"
             raise ConfigurationError(msg)
 
+        self.sessions = []
+
     def close(self):
-        for session in self.sessions:
-            session.close()
+        self.http.session.close()
 
     def setup_cert_login(self):
-        if self._refresh_sessions:
-            # ensure sessions are an empty array
-            self.sessions = []
         for aci_url in self.aci_urls:
-            if not self._refresh_sessions:
-                for session_wrapper in self.sessions:
-                    if session_wrapper.aci_url == aci_url:
-                        session = session_wrapper.session
-                        break
-            else:
-                session = Session()
-
-            if self._refresh_sessions:
-                session_wrapper = SessionWrapper(
-                    aci_url,
-                    session,
-                    cert_name=self.cert_name,
-                    cert_key=self.cert_key,
-                    verify=self.verify,
-                    timeout=self.timeout,
-                    appcenter=self.appcenter,
-                    username=self.username,
-                    cert_key_password=self.cert_key_password,
-                    log=self.log,
-                )
-                self.sessions.append(session_wrapper)
+            session_wrapper = self.wrapper_factory(
+                aci_url,
+                self.http,
+                cert_name=self.cert_name,
+                cert_key=self.cert_key,
+                appcenter=self.appcenter,
+                username=self.username,
+                cert_key_password=self.cert_key_password,
+                log=self.log,
+            )
+            self.sessions.append(session_wrapper)
 
     def password_login(self):
-        # this is a path for testing, allowing the object to be patched with fake request responses
-        if self._refresh_sessions:
-            # ensure sessions are an empty array
-            self.sessions = []
         for aci_url in self.aci_urls:
-            if not self._refresh_sessions:
-                for session_wrapper in self.sessions:
-                    if session_wrapper.aci_url == aci_url:
-                        session = session_wrapper.session
-                        break
-            else:
-                session = Session()
-
-            data = '<aaaUser name="{}" pwd="{}"/>\n'.format(self.username, self.password)
-            url = "{}{}".format(aci_url, '/api/aaaLogin.xml')
-            req = Request('post', url, data=data)
-            prepped_request = req.prepare()
-            response = session.send(prepped_request, verify=self.verify, timeout=self.timeout)
-            response.raise_for_status()
-            apic_cookie = 'APIC-Cookie={}'.format(response.cookies.get('APIC-cookie'))
-            if self._refresh_sessions:
-                session_wrapper = SessionWrapper(
-                    aci_url, session, apic_cookie=apic_cookie, verify=self.verify, timeout=self.timeout, log=self.log
-                )
-                self.sessions.append(session_wrapper)
-            else:
-                session_wrapper.apic_cookie = apic_cookie
+            session_wrapper = self.wrapper_factory(aci_url, self.http, username=self.username, log=self.log)
+            session_wrapper.login(self.password)
+            self.sessions.append(session_wrapper)
 
     def login(self):
         if self.password:
