@@ -2,30 +2,26 @@
 
 ## Overview
 
-Collect 
+Collect Lacework Logs or Events.
 
 ## Setup
 
-Requires no setup on Datadog.
+All configuration happens on Lacework Dashboard. Find details on how to set it up in [documentation][1]
 
 ### Installation
 
-No additional installation is needed on your server.
-
-### Configuration
-
-All configuration takes place on Lacework dashboard.
+No installation is needed on your server.
 
 
 ## Data Collected
 
 ### Metrics
 
-Lacework does not not collect metrics 
+This Lacework integration does not not collect metrics 
 
 ### Service Checks
 
-Lacework does not include any service checks.
+This Lacework intgeration does not include any service checks.
 
 ### Logs
 
@@ -39,5 +35,5 @@ Lacework can be configured to send Events.
 
 Need help? Contact [Datadog support][7].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://docs.datadoghq.com/integrations/lacework/
 [7]: https://docs.datadoghq.com/help
