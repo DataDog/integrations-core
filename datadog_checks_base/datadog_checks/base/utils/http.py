@@ -271,7 +271,9 @@ class RequestsWrapper(object):
         self.log_requests = is_affirmative(config['log_requests'])
 
         # Context managers that should wrap all requests
-        self.request_hooks = [self.handle_tls_warning]
+        self.request_hooks = []
+        if self.ignore_tls_warning:
+            self.request_hooks.append(self.handle_tls_warning)
 
         if config['kerberos_keytab']:
             self.request_hooks.append(lambda: handle_kerberos_keytab(config['kerberos_keytab']))
@@ -335,8 +337,7 @@ class RequestsWrapper(object):
     @contextmanager
     def handle_tls_warning(self):
         with warnings.catch_warnings():
-            if self.ignore_tls_warning:
-                warnings.simplefilter('ignore', InsecureRequestWarning)
+            warnings.simplefilter('ignore', InsecureRequestWarning)
 
             yield
 
