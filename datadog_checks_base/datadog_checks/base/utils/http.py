@@ -325,14 +325,19 @@ class RequestsWrapper(object):
                 return getattr(requests, method)(url, **self.populate_options(options))
         else:
 
+            self.logger.info(">>> ExitStack {} Before".format(url))
             with ExitStack() as stack:
                 for hook in self.request_hooks:
                     stack.enter_context(hook())
 
+                self.logger.info(">>> Request {} Before".format(url))
                 if persist:
-                    return getattr(self.session, method)(url, **self.populate_options(options))
+                    resp = getattr(self.session, method)(url, **self.populate_options(options))
                 else:
-                    return getattr(requests, method)(url, **self.populate_options(options))
+                    resp = getattr(requests, method)(url, **self.populate_options(options))
+                self.logger.info(">>> Request {} After".format(url))
+            self.logger.info(">>> ExitStack After {}".format(url))
+            return resp
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options

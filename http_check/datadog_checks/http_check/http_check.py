@@ -168,11 +168,11 @@ class HTTPCheck(AgentCheck):
                 # Stop the timer as early as possible
                 running_time = time.time() - start
                 self.gauge('network.http.response_time_legacy', running_time, tags=tags_list)
-                msg = "http_check_duration: running_time: {}".format(running_time)
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : running_time: {}".format(addr, running_time)
+                self.log.info(msg)
                 print(msg)
-                msg = "http_check_duration: elapsed.total_seconds: {}".format(r.elapsed.total_seconds())
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : elapsed.total_seconds: {}".format(addr, r.elapsed.total_seconds())
+                self.log.info(msg)
                 print(msg)
                 self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
@@ -367,11 +367,11 @@ class HTTPCheck(AgentCheck):
                 # Stop the timer as early as possible
                 running_time = time.time() - start
                 self.gauge('network.http.response_time_legacy', running_time, tags=tags_list)
-                msg = "http_check_duration: running_time: {}".format(running_time)
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : running_time: {}".format(addr, running_time)
+                self.log.info(msg)
                 print(msg)
-                msg = "http_check_duration: elapsed.total_seconds: {}".format(r.elapsed.total_seconds())
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : elapsed.total_seconds: {}".format(addr, r.elapsed.total_seconds())
+                self.log.info(msg)
                 print(msg)
                 self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
@@ -565,11 +565,11 @@ class HTTPCheck(AgentCheck):
                 # Stop the timer as early as possible
                 running_time = time.time() - start
                 self.gauge('network.http.response_time_legacy', running_time, tags=tags_list)
-                msg = "http_check_duration: running_time: {}".format(running_time)
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : running_time: {}".format(addr, running_time)
+                self.log.info(msg)
                 print(msg)
-                msg = "http_check_duration: elapsed.total_seconds: {}".format(r.elapsed.total_seconds())
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : elapsed.total_seconds: {}".format(addr, r.elapsed.total_seconds())
+                self.log.info(msg)
                 print(msg)
                 self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
@@ -762,11 +762,11 @@ class HTTPCheck(AgentCheck):
                 # Stop the timer as early as possible
                 running_time = time.time() - start
                 self.gauge('network.http.response_time_legacy', running_time, tags=tags_list)
-                msg = "http_check_duration: running_time: {}".format(running_time)
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : running_time: {}".format(addr, running_time)
+                self.log.info(msg)
                 print(msg)
-                msg = "http_check_duration: elapsed.total_seconds: {}".format(r.elapsed.total_seconds())
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : elapsed.total_seconds: {}".format(addr, r.elapsed.total_seconds())
+                self.log.info(msg)
                 print(msg)
                 self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
@@ -1063,11 +1063,11 @@ class HTTPCheck(AgentCheck):
                 # Stop the timer as early as possible
                 running_time = time.time() - start
                 self.gauge('network.http.response_time_legacy', running_time, tags=tags_list)
-                msg = "http_check_duration: running_time: {}".format(running_time)
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : running_time: {}".format(addr, running_time)
+                self.log.info(msg)
                 print(msg)
-                msg = "http_check_duration: elapsed.total_seconds: {}".format(r.elapsed.total_seconds())
-                self.log.warning(msg)
+                msg = "http_check_duration for {} : elapsed.total_seconds: {}".format(addr, r.elapsed.total_seconds())
+                self.log.info(msg)
                 print(msg)
                 self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
