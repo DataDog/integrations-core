@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
-import warnings
 from contextlib import contextmanager
 
 import requests
@@ -11,6 +10,7 @@ from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
+from datadog_checks.base.utils.warnings_util import simplefilter, disable_warnings_ctx
 from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .headers import get_default_headers, update_headers
@@ -336,9 +336,7 @@ class RequestsWrapper(object):
 
     @contextmanager
     def handle_tls_warning(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', InsecureRequestWarning)
-
+        with disable_warnings_ctx(InsecureRequestWarning, disable=True):
             yield
 
     @property

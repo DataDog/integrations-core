@@ -9,9 +9,9 @@ from os.path import isfile
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, itervalues, string_types
-from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
+from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_string
@@ -579,25 +579,27 @@ class OpenMetricsScraperMixin(object):
         if scraper_config['ssl_ca_cert'] is False:
             verify = False
 
+        disable_insecure_warnings = False
         if isinstance(scraper_config['ssl_ca_cert'], string_types):
             verify = scraper_config['ssl_ca_cert']
         elif verify is False:
-            disable_warnings(InsecureRequestWarning)
+            disable_insecure_warnings = True
 
         # Determine the authentication settings
         username = scraper_config['username']
         password = scraper_config['password']
         auth = (username, password) if username is not None and password is not None else None
 
-        return requests.get(
-            endpoint,
-            headers=headers,
-            stream=True,
-            timeout=scraper_config['prometheus_timeout'],
-            cert=cert,
-            verify=verify,
-            auth=auth,
-        )
+        with disable_warnings_ctx(InsecureRequestWarning, disable=disable_insecure_warnings):
+            return requests.get(
+                endpoint,
+                headers=headers,
+                stream=True,
+                timeout=scraper_config['prometheus_timeout'],
+                cert=cert,
+                verify=verify,
+                auth=auth,
+            )
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """

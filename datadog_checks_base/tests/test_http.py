@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
+import warnings
 from collections import OrderedDict
 
 import mock
@@ -12,6 +13,7 @@ import requests_kerberos
 import requests_ntlm
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
+from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base import AgentCheck, ConfigurationError
