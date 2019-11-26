@@ -526,7 +526,7 @@ class PrometheusScraperMixin(object):
         if isinstance(self.ssl_ca_cert, string_types):
             verify = self.ssl_ca_cert
         elif self.ssl_ca_cert is False:
-            disable_warnings(InsecureRequestWarning)
+            disable_warnings(InsecureRequestWarning)  # NOTE: disables InsecureRequestWarning *globally*
             verify = False
         try:
             response = requests.get(
