@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-Lacework Integration",
   "categories": [
-    ""
+    "security", 
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
