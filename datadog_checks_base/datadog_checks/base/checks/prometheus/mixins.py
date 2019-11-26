@@ -11,10 +11,10 @@ import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, itervalues, string_types
-from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
+
 from ...utils.prometheus import metrics_pb2
 from .. import AgentCheck
 

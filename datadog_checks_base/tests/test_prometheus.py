@@ -1957,3 +1957,11 @@ def test_text_filter_input():
 
     filtered = [x for x in check._text_filter_input(lines_in)]
     assert filtered == expected_out
+
+
+def test_ssl_verify_not_raise_warning(mocked_prometheus_check, text_data):
+    check = mocked_prometheus_check
+
+    with pytest.warns(None):
+        resp = check.poll('https://httpbin.org/get')
+        assert "httpbin.org" in resp.content
