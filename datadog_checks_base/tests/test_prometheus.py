@@ -1964,4 +1964,11 @@ def test_ssl_verify_not_raise_warning(mocked_prometheus_check, text_data):
 
     with pytest.warns(None):
         resp = check.poll('https://httpbin.org/get')
-        assert "httpbin.org" in resp.content
+        assert "httpbin.org" in resp.content.decode('utf-8')
+
+    check = mocked_prometheus_check
+    check.ssl_ca_cert = False
+
+    with pytest.warns(None):
+        resp = check.poll('https://httpbin.org/get')
+        assert "httpbin.org" in resp.content.decode('utf-8')

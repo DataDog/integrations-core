@@ -2111,4 +2111,4 @@ def test_ssl_verify_not_raise_warning(mocked_openmetrics_check_factory, text_dat
 
     with pytest.warns(None):
         resp = check.send_request('https://httpbin.org/get', scraper_config)
-        assert "httpbin.org" in resp.content
+        assert "httpbin.org" in resp.content.decode('utf-8')
