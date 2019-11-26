@@ -4,7 +4,6 @@
 import logging
 import os
 from collections import OrderedDict
-from contextlib import contextmanager
 
 import mock
 import pytest
@@ -595,12 +594,12 @@ class TestIgnoreTLSWarning:
     def test_ignore(self):
         instance = {'tls_ignore_warning': True}
         init_config = {}
+        http = RequestsWrapper(instance, init_config)
 
         with pytest.warns(None) as record:
-            http = RequestsWrapper(instance, init_config)
             http.get('https://www.google.com', verify=False)
 
-            assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
 
     def test_default_no_ignore_session(self):
         instance = {'persist_connections': True}
@@ -613,32 +612,12 @@ class TestIgnoreTLSWarning:
     def test_ignore_session(self):
         instance = {'tls_ignore_warning': True, 'persist_connections': True}
         init_config = {}
+        http = RequestsWrapper(instance, init_config)
 
         with pytest.warns(None) as record:
-            http = RequestsWrapper(instance, init_config)
             http.get('https://www.google.com', verify=False)
 
-            assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
-
-    def test_warning_raised_only_once(self, caplog):
-        """ This test is here to prove that InsecureRequestWarning is only raised once """
-        instance = {}
-        init_config = {}
-
-        @contextmanager
-        def capture_warnings_as_log():
-            logging.captureWarnings(True)
-            yield
-            logging.captureWarnings(False)
-
-        with capture_warnings_as_log():
-            http = RequestsWrapper(instance, init_config)
-            http.get('https://www.example.com', verify=False)
-
-            http = RequestsWrapper(instance, init_config)
-            http.get('https://www.example.com', verify=False)
-
-        assert 1 == caplog.text.count("Unverified HTTPS request is being made.")
+        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
 
 
 class TestSession:
