@@ -285,15 +285,24 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         echo_success(current_agent_version)
 
     current_release_branch = '{}.x'.format(current_agent_version)
-    echo_info('Branch `{}` will be compared to `master`.'.format(current_release_branch))
+    diff_target_branch = 'master'
+    echo_info('Branch `{}` will be compared to `{}`.'.format(current_release_branch, diff_target_branch))
 
     echo_waiting('Getting diff... ', nl=False)
-    diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..master'
+    diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..{}'
 
     with chdir(root):
+        fetch_command = 'git fetch --dry'
+        result = run_command(fetch_command, capture=True)
+        if result.code:
+            abort('Unable to run {}.'.format(fetch_command))
+
+        if current_release_branch in result.stderr or diff_target_branch in result.stderr:
+            abort('Your repository is not sync with the remote repository. Please run git fetch in {} folder.'.format(root))
+
         # compare with the local tag first
         reftag = '{}{}'.format('refs/tags/', current_release_branch)
-        result = run_command(diff_command.format(reftag), capture=True)
+        result = run_command(diff_command.format(reftag, diff_target_branch), capture=True)
         if result.code:
             # if it didn't work, compare with a branch.
             origin_release_branch = 'origin/{}'.format(current_release_branch)
@@ -305,7 +314,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 nl=False,
             )
 
-            result = run_command(diff_command.format(origin_release_branch), capture=True)
+            result = run_command(diff_command.format(origin_release_branch, diff_target_branch), capture=True)
             if result.code:
                 abort('Unable to get the diff.')
             else:
