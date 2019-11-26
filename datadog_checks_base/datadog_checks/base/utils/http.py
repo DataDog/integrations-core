@@ -6,16 +6,17 @@ import os
 import threading
 import warnings
 from contextlib import contextmanager
+from ipaddress import ip_address, ip_network
 
 import requests
 from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
-from ipaddress import ip_address, ip_network
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .headers import get_default_headers, update_headers
+from .common import ensure_unicode
 
 try:
     from contextlib import ExitStack
@@ -313,8 +314,8 @@ class RequestsWrapper(object):
                 try:
                     # If no_proxy_uri is an IP or IP CIDR,
                     # check if parsed_uri is an IP and within the CIDR range
-                    ipnetwork = ip_network(no_proxy_uri)
-                    ipaddress = ip_address(parsed_uri)
+                    ipnetwork = ip_network(ensure_unicode(no_proxy_uri))
+                    ipaddress = ip_address(ensure_unicode(parsed_uri))
                     if ipaddress in ipnetwork:
                         options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
                         break
