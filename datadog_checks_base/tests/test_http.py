@@ -567,6 +567,29 @@ class TestProxies:
         http.get('http://www.google.com')
         http.get('http://nginx')
 
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_ip(self, socks5_proxy):
+        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': 'unused,127.0.0.1,9,127.1.0.0/24'}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        # no_proxy match: 127.0.0.1
+        http.get('http://127.0.0.1', timeout=1)
+
+        # no_proxy match: 9
+        http.get('http://127.0.0.9', timeout=1)
+
+        # no_proxy not match: 127.0.0.1 or .9
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.0.0.99', timeout=1)
+
+        # no_proxy match: IP within 127.1.0.0/24 subnet
+        http.get('http://127.1.0.1', timeout=1)
+
+        # no_proxy not match: IP not within 127.1.0.0/24 subnet
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.1.1.1', timeout=1)
+
 
 class TestIgnoreTLSWarning:
     def test_config_default(self):
