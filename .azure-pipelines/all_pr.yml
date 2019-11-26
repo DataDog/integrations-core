@@ -1,10 +1,10 @@
-pr: none
-  # branches:
-  #   include:
-  #   - master
-  # paths:
-  #   include:
-  #   - datadog_checks_base/datadog_checks/*
+pr:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - datadog_checks_base/datadog_checks/*
 
 trigger: none
 
