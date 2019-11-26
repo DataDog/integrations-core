@@ -6,7 +6,7 @@
   "metric_prefix": "lacework.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "This is an integration for Lacework",
+  "short_description": "Lacework is security platform for your DevOps, workloads, containers, and cloud environments",
   "guid": "545f8c45-038b-41e5-ae13-8550c0ee563f",
   "support": "core",
   "supported_os": [
