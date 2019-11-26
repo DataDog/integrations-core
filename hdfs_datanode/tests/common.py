@@ -42,6 +42,8 @@ HDFS_DATANODE_AUTH_CONFIG = {
     ]
 }
 
+HDFS_DATANODE_RAW_VERSION = '2.7.1'
+
 HDFS_DATANODE_METRICS_VALUES = {
     'hdfs.datanode.dfs_remaining': 27914526720,
     'hdfs.datanode.dfs_capacity': 41167421440,

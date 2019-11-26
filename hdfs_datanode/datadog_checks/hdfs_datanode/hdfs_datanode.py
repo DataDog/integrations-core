@@ -23,6 +23,7 @@ class HDFSDataNode(AgentCheck):
 
     # HDFS bean name
     HDFS_DATANODE_BEAN_NAME = 'Hadoop:service=DataNode,name=FSDatasetState*'
+    HDFS_DATANODE_VERSION_NAME = 'Hadoop:service=DataNode,name=DataNodeInfo'
 
     # HDFS metrics
     HDFS_METRICS = {
@@ -50,20 +51,23 @@ class HDFSDataNode(AgentCheck):
         tags.append("datanode_url:{}".format(jmx_address))
         tags = list(set(tags))
 
+        # Get version info from JMX
+        datanode_info = self._get_jmx_data(jmx_address, self.HDFS_DATANODE_VERSION_NAME, tags)
+        if datanode_info:
+            self._collect_metadata(datanode_info)
+
         # Get data from JMX
-        hdfs_datanode_beans = self._get_jmx_data(jmx_address, tags)
+        hdfs_datanode_beans = self._get_jmx_data(jmx_address, self.HDFS_DATANODE_BEAN_NAME, tags)
 
         # Process the JMX data and send out metrics
         if hdfs_datanode_beans:
             self._hdfs_datanode_metrics(hdfs_datanode_beans, tags)
 
-    def _get_jmx_data(self, jmx_address, tags):
+    def _get_jmx_data(self, jmx_address, bean_name, tags):
         """
-        Get namenode beans data from JMX endpoint
+        Get datanode beans data from JMX endpoint
         """
-        response = self._rest_request_to_json(
-            jmx_address, self.JMX_PATH, {'qry': self.HDFS_DATANODE_BEAN_NAME}, tags=tags
-        )
+        response = self._rest_request_to_json(jmx_address, self.JMX_PATH, {'qry': bean_name}, tags=tags)
         beans = response.get('beans', [])
         return beans
 
@@ -153,3 +157,16 @@ class HDFSDataNode(AgentCheck):
             url = urljoin(url, path.lstrip('/'))
 
         return url
+
+    def _collect_metadata(self, value):
+        # only get first info block
+        data = next(iter(value))
+
+        version = data.get('Version', None)
+
+        if version is not None:
+            self.set_metadata('version', version)
+            self.log.debug("found hadoop version %s", version)
+        else:
+            self.log.warning(u"could not retrieve hadoop version information")
+            self.log.warning('this was data retreived: {}'.format(data))
