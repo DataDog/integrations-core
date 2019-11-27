@@ -81,8 +81,9 @@ class PythonVersionMismatch(SimpleIndexError):
         self.python_tags = python_tags
 
     def __str__(self):
-        return '{}-{}: {} not in {}'.format(self.standard_distribution_name, self.version, self.this_python,
-                                            self.python_tags)
+        return '{}-{}: {} not in {}'.format(
+            self.standard_distribution_name, self.version, self.this_python, self.python_tags
+        )
 
 
 class TUFInTotoError(Exception):
