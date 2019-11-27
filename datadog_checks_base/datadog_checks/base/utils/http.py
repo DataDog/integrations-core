@@ -10,11 +10,10 @@ from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
-from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
-
 from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .headers import get_default_headers, update_headers
+from .warnings_util import disable_warnings_ctx
 
 try:
     from contextlib import ExitStack

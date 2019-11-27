@@ -13,9 +13,8 @@ from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, itervalues, string_types
 from urllib3.exceptions import InsecureRequestWarning
 
-from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
-
 from ...utils.prometheus import metrics_pb2
+from ...utils.warnings_util import disable_warnings_ctx
 from .. import AgentCheck
 
 if PY3:
