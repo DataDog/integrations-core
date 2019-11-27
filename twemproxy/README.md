@@ -33,7 +33,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 |----------------------|----------------------------------------|
 | `<INTEGRATION_NAME>` | `twemproxy`                            |
 | `<INIT_CONFIG>`      | blank or `{}`                          |
-| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"22222"}` |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"2222"}` |
 
 ### Validation
 
