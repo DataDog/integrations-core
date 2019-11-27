@@ -109,6 +109,8 @@ db.createUser({
 
 3. [Restart the Agent][5].
 
+This check supports slow query logs: you can identify slow queries by filtering logs by duration.
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
