@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+
 from datadog_checks.dev import get_here
 from datadog_checks.dev.docker import get_docker_hostname
 
@@ -30,9 +32,10 @@ TEST_PASSWORD = 'NCC-1701'
 
 HDFS_NAMENODE_CONFIG = {'instances': [{'hdfs_namenode_jmx_uri': NAMENODE_URI, 'tags': list(CUSTOM_TAGS)}]}
 
-HDFS_NAMENODE_RAW_VERSION = '2.7.1'
-
 INSTANCE_INTEGRATION = {'hdfs_namenode_jmx_uri': NAMENODE_URI}
+
+HDFS_RAW_VERSION = os.environ.get('HDFS_RAW_VERSION')
+HDFS_IMAGE_TAG = os.environ.get('HDFS_IMAGE_TAG')
 
 EXPECTED_METRICS = [
     'hdfs.namenode.capacity_total',

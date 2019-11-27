@@ -28,10 +28,10 @@ def test_metadata(aggregator, check, instance, datadog_agent):
     check.check_id = CHECK_ID
     check.check(instance)
 
-    major, minor, patch = common.HDFS_NAMENODE_RAW_VERSION.split('.')
+    major, minor, patch = common.HDFS_RAW_VERSION.split('.')
 
     version_metadata = {
-        'version.raw': common.HDFS_NAMENODE_RAW_VERSION,
+        'version.raw': common.HDFS_RAW_VERSION,
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,

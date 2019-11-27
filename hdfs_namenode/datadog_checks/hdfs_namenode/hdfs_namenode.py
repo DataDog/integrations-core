@@ -205,5 +205,5 @@ class HDFSNameNode(AgentCheck):
             self.set_metadata('version', version)
             self.log.debug("found hadoop version %s", version)
         else:
-            self.log.warning(u"could not retrieve hadoop version information")
-            self.log.warning('this was data retrieved: {}'.format(data))
+            self.log.warning("could not retrieve hadoop version information")
+            self.log.warning('this was data retrieved: %s', data)
