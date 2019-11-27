@@ -216,7 +216,7 @@ relensConfiguration": {
 },
 ```
 
-This will convert serialized JSON from the `log:` field into top-level fields. See the AWS sample [Parsing container stdout logs that are serialized JSON][34] for more details.
+This converts serialized JSON from the `log:` field into top-level fields. See the AWS sample [Parsing container stdout logs that are serialized JSON][34] for more details.
 
 #### AWS logDriver
 
