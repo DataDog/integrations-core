@@ -108,6 +108,8 @@ If your PHP-FPM installation uses unix sockets, you have to use the below syntax
 | `ping_reply`  | `pong`                            |
 | `use_fastcgi` | `true`                            |
 
+**Note**: With Autodiscovery, if the Agent runs in a separate container/task/pod, it doesn't have access to the unix sockets  file of your FPM pool. It order to address this, run the Agent as a sidecar.
+
 ### Validation
 
 [Run the Agent's `status` subcommand][7] and look for `php_fpm` under the Checks section.
