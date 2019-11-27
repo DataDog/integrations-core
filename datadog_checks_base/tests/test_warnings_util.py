@@ -5,6 +5,7 @@ import warnings
 
 import pytest
 import requests
+from six import PY2
 from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base import ConfigurationError
@@ -30,7 +31,10 @@ def test_filters_count_append():
 
     final_count = len(warnings.filters)
 
-    assert final_count in (initial_count + 100, initial_count + 101)
+    if PY2:
+        assert final_count in (initial_count + 100, initial_count + 101)
+    else:
+        assert final_count in (initial_count, initial_count + 1)
 
 
 def test_disable_warnings_ctx_disabled():
