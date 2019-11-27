@@ -9,10 +9,10 @@ from datadog_checks.hdfs_datanode import HDFSDataNode
 from .common import (
     CUSTOM_TAGS,
     HDFS_DATANODE_AUTH_CONFIG,
-    HDFS_DATANODE_RAW_VERSION,
     HDFS_DATANODE_CONFIG,
     HDFS_DATANODE_METRIC_TAGS,
     HDFS_DATANODE_METRICS_VALUES,
+    HDFS_RAW_VERSION,
 )
 
 pytestmark = pytest.mark.unit
@@ -56,10 +56,10 @@ def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_a
         HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.OK, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=2
     )
 
-    major, minor, patch = HDFS_DATANODE_RAW_VERSION.split('.')
+    major, minor, patch = HDFS_RAW_VERSION.split('.')
 
     version_metadata = {
-        'version.raw': HDFS_DATANODE_RAW_VERSION,
+        'version.raw': HDFS_RAW_VERSION,
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,
