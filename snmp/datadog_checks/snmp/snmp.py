@@ -228,7 +228,7 @@ class SnmpCheck(AgentCheck):
                 # if enforce_constraints is false, then MIB resolution has not been done yet
                 # so we need to do it manually. We have to specify the mibs that we will need
                 # to resolve the name.
-                oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple()).loadMibs(*config.mibs_to_load)
+                oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple())
                 result_oid = oid_to_resolve.resolveWithMib(config.mib_view_controller)
             _, metric, indexes = result_oid.getMibSymbol()
             results[metric][indexes] = value

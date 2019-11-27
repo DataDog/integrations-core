@@ -73,14 +73,14 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
-        self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(self.metrics, warning, log)
+        self.table_oids, self.raw_oids = self.parse_metrics(self.metrics, warning, log)
 
         self.auth_data = self.get_auth_data(instance)
         self.context_data = hlapi.ContextData(*self.get_context_data(instance))
 
     def refresh_with_profile(self, profile, warning, log):
         self.metrics.extend(profile['definition']['metrics'])
-        self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(self.metrics, warning, log)
+        self.table_oids, self.raw_oids = self.parse_metrics(self.metrics, warning, log)
 
     def call_cmd(self, cmd, *args, **kwargs):
         return cmd(self.snmp_engine, self.auth_data, self.transport, self.context_data, *args, **kwargs)
@@ -171,7 +171,6 @@ class InstanceConfig:
 
         `raw_oids` is a list of SNMP numerical OIDs to query.
         `table_oids` is a dictionnary of SNMP tables to symbols to query.
-        `mibs_to_load` contains the relevant MIBs used for querying.
         """
         raw_oids = []
         table_oids = {}
@@ -244,7 +243,7 @@ class InstanceConfig:
                 log.debug("Couldn't found mib %s, trying to fetch it", mib)
                 self.fetch_mib(mib)
 
-        return dict(table_oids.values()), raw_oids, mibs_to_load
+        return dict(table_oids.values()), raw_oids
 
     @staticmethod
     def fetch_mib(mib):
