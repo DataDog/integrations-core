@@ -1,5 +1,10 @@
 # CHANGELOG - snmp
 
+## 2.1.0 / 2019-11-27
+
+* [Fixed] Disable MIB autofetch. See [#5094](https://github.com/DataDog/integrations-core/pull/5094).
+* [Added] Add Cisco 3850 profile. See [#5090](https://github.com/DataDog/integrations-core/pull/5090).
+
 ## 2.0.1 / 2019-11-21
 
 * [Fixed] Handle total_time_to_temporal_percent missing. See [#5055](https://github.com/DataDog/integrations-core/pull/5055).
