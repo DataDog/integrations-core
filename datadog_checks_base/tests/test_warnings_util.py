@@ -7,9 +7,8 @@ import pytest
 import requests
 from urllib3.exceptions import InsecureRequestWarning
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.warnings_util import disable_warnings_ctx, simplefilter
-
-pytestmark = pytest.mark.warnings
 
 
 def test_filters_count():
@@ -24,20 +23,25 @@ def test_filters_count():
 
 
 def test_disable_warnings_ctx_disabled():
+    with pytest.warns(None) as record:
+        with disable_warnings_ctx(InsecureRequestWarning):
+            requests.get('https://www.example.com', verify=False)
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
 
-    with disable_warnings_ctx(InsecureRequestWarning):
-        with pytest.warns(None):
-            requests.get('https://www.example.com')
-
-    with disable_warnings_ctx(InsecureRequestWarning, disable=True):
-        with pytest.warns(None):
-            requests.get('https://www.example.com')
+    with pytest.warns(None) as record:
+        with disable_warnings_ctx(InsecureRequestWarning, disable=True):
+            requests.get('https://www.example.com', verify=False)
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
 
 
 def test_disable_warnings_ctx_not_disabled():
     with pytest.warns(InsecureRequestWarning):
         requests.get('https://www.example.com', verify=False)
 
-    with disable_warnings_ctx(InsecureRequestWarning, disable=False):
-        with pytest.warns(InsecureRequestWarning):
+    with pytest.warns(InsecureRequestWarning):
+        with disable_warnings_ctx(InsecureRequestWarning, disable=False):
+            requests.get('https://www.example.com', verify=False)
+
+    with pytest.warns(InsecureRequestWarning):
+        with disable_warnings_ctx(ConfigurationError):
             requests.get('https://www.example.com', verify=False)

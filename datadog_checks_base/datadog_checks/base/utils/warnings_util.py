@@ -8,8 +8,10 @@ from six import PY2
 
 
 def _simplefilter_py2(action, category=Warning, lineno=0, append=0):
-    """ Add remove logic for py2 to avoid warnings.filters to growth
-        indefinitely if simplefilter is called multiple times """
+    """
+    Add remove logic for py2 to avoid warnings.filters to growth
+    indefinitely if simplefilter is called multiple times
+    """
     item = (action, None, category, None, int(lineno))
     if not append:
         try:
