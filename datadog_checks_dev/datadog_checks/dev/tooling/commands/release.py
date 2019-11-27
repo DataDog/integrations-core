@@ -75,8 +75,7 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
 
     for team in teams:
         if dry_run:
-            echo_success(
-                'Will create a card for team {}: '.format(team), nl=False)
+            echo_success('Will create a card for team {}: '.format(team), nl=False)
             echo_info(pr_title)
             continue
         creation_attempts = 3
@@ -298,8 +297,11 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             abort('Unable to run {}.'.format(fetch_command))
 
         if current_release_branch in result.stderr or diff_target_branch in result.stderr:
-            abort('Your repository is not sync with the remote repository. Please run git fetch in {} folder.'
-                  .format(root))
+            abort(
+                'Your repository is not sync with the remote repository. Please run git fetch in {} folder.'.format(
+                    root
+                )
+            )
 
         # compare with the local tag first
         reftag = '{}{}'.format('refs/tags/', current_release_branch)
