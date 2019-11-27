@@ -35,6 +35,7 @@ MESOS_SERVICE_CHECK = 'spark.mesos_master.can_connect'
 # URL Paths
 YARN_APPS_PATH = 'ws/v1/cluster/apps'
 SPARK_APPS_PATH = 'api/v1/applications'
+SPARK_VERSION_PATH = 'api/v1/version'
 SPARK_MASTER_STATE_PATH = '/json/'
 SPARK_MASTER_APP_PATH = '/app/'
 MESOS_MASTER_APP_PATH = '/frameworks'
@@ -183,7 +184,7 @@ class SparkCheck(AgentCheck):
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
-            app_id, (app_name, tracking_url) = next(iteritems(spark_apps))
+            _, (_, tracking_url) = next(iteritems(spark_apps))
             base_url = self._get_request_url(instance, tracking_url)
             am_address = self._get_url_base(base_url)
 
@@ -193,17 +194,6 @@ class SparkCheck(AgentCheck):
                 tags=['url:%s' % am_address] + tags,
                 message='Connection to ApplicationMaster "%s" was successful' % am_address,
             )
-
-    def collect_version(self, base_url):
-        try:
-            version_endpoint = base_url + '/api/v1/version'
-            response = self.http.get(version_endpoint)
-            response.raise_for_status()
-            version_json = response.json()
-            version = version_json['spark']
-            self.set_metadata('version', version)
-        except Exception:
-            self.log.debug("Version information was no found.")
 
     def _get_master_address(self, instance):
         """
@@ -280,10 +270,24 @@ class SparkCheck(AgentCheck):
         else:
             raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, cluster_mode))
 
+    def _collect_version(self, base_url):
+        response = self.http.get(self._join_url_dir(base_url, SPARK_VERSION_PATH))
+        try:
+            response.raise_for_status()
+            version_json = response.json()
+            version = version_json['spark']
+        except Exception as e:
+            self.log.debug("Failed to collect version information: %s", e)
+            return False
+        else:
+            self.set_metadata('version', version)
+            return True
+
     def _driver_init(self, spark_driver_address, tags):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         """
+        self._collect_version(spark_driver_address)
         running_apps = {}
         metrics_json = self._rest_request_to_json(
             spark_driver_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
@@ -313,6 +317,7 @@ class SparkCheck(AgentCheck):
         )
 
         running_apps = {}
+        version_set = False
 
         if metrics_json.get('activeapps'):
             for app in metrics_json['activeapps']:
@@ -324,8 +329,8 @@ class SparkCheck(AgentCheck):
                     app_url = self._get_standalone_app_url(app_id, spark_master_address, tags)
 
                     if app_id and app_name and app_url:
-                        # Using standalone to get version info since Mesos gives Mesos version
-                        self.collect_version(app_url)
+                        if not version_set:
+                            version_set = self._collect_version(app_url)
                         if pre_20_mode:
                             self.log.debug('Getting application list in pre-20 mode')
                             applist = self._rest_request_to_json(
@@ -457,7 +462,10 @@ class SparkCheck(AgentCheck):
         Return a dictionary of {app_id: (app_name, tracking_url)} for Spark applications
         """
         spark_apps = {}
+        version_set = False
         for app_id, (app_name, tracking_url) in iteritems(running_apps):
+            if not version_set:
+                version_set = self._collect_version(tracking_url)
             response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
 
             for app in response:
