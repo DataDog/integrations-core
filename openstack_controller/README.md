@@ -19,7 +19,32 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 
 #### Agent Configuration
 
-1. Edit the `openstack_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your openstack_controller performance data. See the [sample openstack_controller.d/conf.yaml][2] for all available configuration options.
+1. Edit the `openstack_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your openstack_controller performance data. See the [sample openstack_controller.d/conf.yaml][2] for all available configuration options:
+
+    ```yaml
+        init_config:
+
+        instances:
+
+            ## @param name - string - required
+            ## Unique identifier for this instance.
+            #
+          - name: "<INSTANCE_NAME>"
+
+            ## @param user - object - required
+            ## Password authentication is the only auth method supported
+            ## User expects username, password, and user domain id
+            ## `user` should resolve to a structure like
+            ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
+            ## The check uses the Unscoped token method to collect information about
+            ## all available projects to the user.
+            #
+            user:
+                password: "<PASSWORD>"
+                name: "<USER_NAME>"
+                domain:
+                    id: "<DOMAIN_ID>"
+    ```
 
 2. [Restart the Agent][3]
 
