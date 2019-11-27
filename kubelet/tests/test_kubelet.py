@@ -58,6 +58,7 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.memory.swap',
     'kubernetes.network.rx_bytes',
     'kubernetes.network.tx_bytes',
+    'kubernetes.ephemeral_storage.usage',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
@@ -187,6 +188,9 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16):
     check = KubeletCheck('kubelet', None, {}, instances)
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    monkeypatch.setattr(
+        check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
+    )
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
@@ -274,6 +278,7 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, instance_tag
     assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
+    check._retrieve_stats.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
     check.process_cadvisor.assert_not_called()
 
