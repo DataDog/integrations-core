@@ -19,6 +19,9 @@ NAME_SYSTEM_STATE_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FS
 # Namesystem url
 NAME_SYSTEM_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FSNamesystem'
 
+# Namesystem metadata url
+NAME_SYSTEM_METADATA_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=NameNodeInfo'
+
 CUSTOM_TAGS = ["cluster_name:hdfs_dev", "instance:level_tags"]
 
 # Authentication Parameters
@@ -26,6 +29,8 @@ TEST_USERNAME = 'Picard'
 TEST_PASSWORD = 'NCC-1701'
 
 HDFS_NAMENODE_CONFIG = {'instances': [{'hdfs_namenode_jmx_uri': NAMENODE_URI, 'tags': list(CUSTOM_TAGS)}]}
+
+HDFS_NAMENODE_RAW_VERSION = '2.7.1'
 
 INSTANCE_INTEGRATION = {'hdfs_namenode_jmx_uri': NAMENODE_URI}
 

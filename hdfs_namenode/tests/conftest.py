@@ -10,7 +10,15 @@ from mock import patch
 from datadog_checks.dev import docker_run
 from datadog_checks.hdfs_namenode import HDFSNameNode
 
-from .common import HERE, INSTANCE_INTEGRATION, NAME_SYSTEM_STATE_URL, NAME_SYSTEM_URL, TEST_PASSWORD, TEST_USERNAME
+from .common import (
+    HERE,
+    INSTANCE_INTEGRATION,
+    NAME_SYSTEM_METADATA_URL,
+    NAME_SYSTEM_STATE_URL,
+    NAME_SYSTEM_URL,
+    TEST_PASSWORD,
+    TEST_USERNAME,
+)
 
 
 @pytest.fixture(scope="session")
@@ -64,6 +72,12 @@ def requests_get_mock(*args, **kwargs):
 
     elif args[0] == NAME_SYSTEM_URL:
         system_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem')
+        with open(system_file_path, 'r') as f:
+            body = f.read()
+            return MockResponse(body, 200)
+
+    elif args[0] == NAME_SYSTEM_METADATA_URL:
+        system_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem_info')
         with open(system_file_path, 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
