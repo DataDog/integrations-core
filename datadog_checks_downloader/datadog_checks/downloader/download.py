@@ -185,12 +185,12 @@ class TUFDownloader:
         return root_layout, root_layout_pubkeys, root_layout_params
 
     def __handle_in_toto_verification_exception(self, target_relpath, e):
-            logger.exception('in-toto failed to verify {}'.format(target_relpath))
+        logger.exception('in-toto failed to verify {}'.format(target_relpath))
 
-            if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloper.MSG:
-                raise RevokedDeveloper(target_relpath, IN_TOTO_ROOT_LAYOUT)
-            else:
-                raise
+        if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloper.MSG:
+            raise RevokedDeveloper(target_relpath, IN_TOTO_ROOT_LAYOUT)
+        else:
+            raise
 
     def __in_toto_verify(self, inspection_packet, target_relpath):
         # Make a temporary directory in a parent directory we control.
@@ -246,7 +246,7 @@ class TUFDownloader:
         # inspected.
         try:
             self.__download_and_verify_in_toto_metadata(target_relpath, target_abspath, target)
-        except:
+        except Exception:
             os.remove(target_abspath)
             raise
         else:
@@ -290,7 +290,6 @@ class TUFDownloader:
                         python_tags[python_tag] = href
 
         return wheels
-
 
     def get_wheel_relpath(self, standard_distribution_name, version=None):
         '''

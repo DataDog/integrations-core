@@ -7,10 +7,6 @@
 import argparse
 import re
 
-# 3rd party.
-from tuf.exceptions import UnknownTargetError
-
-# 2nd party.
 # 2nd party.
 from .download import REPOSITORY_URL_PREFIX, TUFDownloader
 from .exceptions import NonCanonicalVersion, NonDatadogPackage

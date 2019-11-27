@@ -6,7 +6,8 @@
 # Exceptions for the CLI module.
 
 
-class CLIError(Exception): pass
+class CLIError(Exception):
+    pass
 
 
 class NonCanonicalVersion(CLIError):
@@ -36,9 +37,12 @@ class SimpleIndexError(Exception):
         return '{}'.format(self.standard_distribution_name)
 
 
-class MissingVersions(SimpleIndexError): pass
+class MissingVersions(SimpleIndexError):
+    pass
 
-class NoSuchDatadogPackage(SimpleIndexError): pass
+
+class NoSuchDatadogPackage(SimpleIndexError):
+    pass
 
 
 class InconsistentSimpleIndex(SimpleIndexError):
@@ -77,7 +81,8 @@ class PythonVersionMismatch(SimpleIndexError):
         self.python_tags = python_tags
 
     def __str__(self):
-        return '{}-{}: {} not in {}'.format(self.standard_distribution_name, self.version, self.this_python, self.python_tags)
+        return '{}-{}: {} not in {}'.format(self.standard_distribution_name, self.version, self.this_python,
+                                            self.python_tags)
 
 
 class TUFInTotoError(Exception):
@@ -88,10 +93,12 @@ class TUFInTotoError(Exception):
         return '{}'.format(self.target_relpath)
 
 
-class NoInTotoLinkMetadataFound(TUFInTotoError): pass
+class NoInTotoLinkMetadataFound(TUFInTotoError):
+    pass
 
 
-class NoInTotoRootLayoutPublicKeysFound(TUFInTotoError): pass
+class NoInTotoRootLayoutPublicKeysFound(TUFInTotoError):
+    pass
 
 
 class RevokedDeveloper(TUFInTotoError):
