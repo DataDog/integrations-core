@@ -299,7 +299,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
 
         if current_release_branch in result.stderr or diff_target_branch in result.stderr:
             abort('Your repository is not sync with the remote repository. Please run git fetch in {} folder.'
-                .format(root))
+                  .format(root))
 
         # compare with the local tag first
         reftag = '{}{}'.format('refs/tags/', current_release_branch)
