@@ -22,6 +22,17 @@ def test_filters_count():
     assert final_count in (initial_count, initial_count + 1)
 
 
+def test_filters_count_append():
+    initial_count = len(warnings.filters)
+
+    for _ in range(100):
+        simplefilter('default', InsecureRequestWarning, append=1)
+
+    final_count = len(warnings.filters)
+
+    assert final_count in (initial_count + 100, initial_count + 101)
+
+
 def test_disable_warnings_ctx_disabled():
     with pytest.warns(None) as record:
         with disable_warnings_ctx(InsecureRequestWarning):
