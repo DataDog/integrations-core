@@ -21,7 +21,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
     instances:
         - host: localhost
-          port: 2222 # change if your twemproxy doesn't use the default stats monitoring port
+          port: 22222 # change if your twemproxy doesn't use the default stats monitoring port
     ```
 
 2. [Restart the Agent][5] to begin sending twemproxy metrics to Datadog.
@@ -33,7 +33,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 |----------------------|----------------------------------------|
 | `<INTEGRATION_NAME>` | `twemproxy`                            |
 | `<INIT_CONFIG>`      | blank or `{}`                          |
-| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"2222"}` |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"22222"}` |
 
 ### Validation
 
