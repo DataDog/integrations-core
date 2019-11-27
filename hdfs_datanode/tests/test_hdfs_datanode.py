@@ -17,6 +17,8 @@ from .common import (
 
 pytestmark = pytest.mark.unit
 
+CHECK_ID = 'test:123'
+
 
 def test_check(aggregator, mocked_request):
     """
@@ -49,6 +51,7 @@ def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_a
     hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
 
     # Run the check once
+    hdfs_datanode.check_id = CHECK_ID
     hdfs_datanode.check(instance)
 
     # Make sure the service is up
@@ -66,7 +69,7 @@ def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_a
         'version.patch': patch,
     }
 
-    datadog_agent.assert_metadata('', version_metadata)
+    datadog_agent.assert_metadata(CHECK_ID, version_metadata)
     datadog_agent.assert_metadata_count(5)
 
 
