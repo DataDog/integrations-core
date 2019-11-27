@@ -49,7 +49,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 |----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `teamcity`                                                                                                                                    |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                 |
-| `<INSTANCE_CONFIG>`  | `{"name": "<BUILD_NAME>", "server":"http://<USER>:<PASSWORD>@teamcity.<ACCOUNT_NAME>.com", "build_configuration":"<BUILD_CONFIGURATION_ID>"}` |
+| `<INSTANCE_CONFIG>`  | `{"name": "<BUILD_NAME>", "server":"teamcity.<MY_COMPANY>.com", "build_configuration":"<BUILD_CONFIGURATION_ID>"}` |
 
 ### Validation
 
