@@ -7,19 +7,28 @@ This check monitors [TLS][1] protocol versions, certificate expiration & validit
 **Note**: Currently, only TCP is supported.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying these instructions.
-
 ### Installation
 
 The TLS check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `tls.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your TLS data. See the [sample tls.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
+
+#### Containerized
+For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
+
+| Parameter            | Value                                  |
+|----------------------|----------------------------------------|
+| `<INTEGRATION_NAME>` | `tls`                                  |
+| `<INIT_CONFIG>`      | blank or `{}`                          |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "port":"443"}` |
 
 ### Validation
 
