@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
-import mock
 import pytest
 import requests
 from six import iteritems
