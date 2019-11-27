@@ -19,7 +19,8 @@ TAGS = "tags"
 
 GAUGE = "gauge"
 RATE = "rate"
-COUNTER = "counter"
+COUNT = "count"
+COUNTER = "counter"  # Deprecated
 MONOTONIC_COUNTER = "monotonic_counter"
 DEFAULT_TYPE = GAUGE
 
@@ -27,7 +28,8 @@ DEFAULT_TYPE = GAUGE
 SUPPORTED_TYPES = {
     GAUGE: AgentCheck.gauge,
     RATE: AgentCheck.rate,
-    COUNTER: AgentCheck.increment,
+    COUNT: AgentCheck.count,
+    COUNTER: AgentCheck.increment,  # Deprecated
     MONOTONIC_COUNTER: AgentCheck.monotonic_count,
 }
 
