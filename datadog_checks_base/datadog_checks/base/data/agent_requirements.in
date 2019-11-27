@@ -3,6 +3,7 @@ aerospike==3.6.0; sys_platform != 'win32'
 beautifulsoup4==4.5.1
 binary==1.0.0
 boto==2.46.1
+boto3==1.10.27
 clickhouse-cityhash==1.0.2.3
 clickhouse-driver==0.1.2
 contextlib2==0.5.5
