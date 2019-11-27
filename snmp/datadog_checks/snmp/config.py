@@ -46,6 +46,8 @@ class InstanceConfig:
         self.failing_instances = defaultdict(int)
         self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
+        # Temporary flag until we secure the content
+        self.autofetch = is_affirmative(instance.get('autofetch', False))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
@@ -240,8 +242,9 @@ class InstanceConfig:
             try:
                 self.mib_view_controller.mibBuilder.loadModule(mib)
             except MibNotFoundError:
-                log.debug("Couldn't found mib %s, trying to fetch it", mib)
-                self.fetch_mib(mib)
+                if self.autofetch:
+                    log.debug("Couldn't found mib %s, trying to fetch it", mib)
+                    self.fetch_mib(mib)
 
         return dict(table_oids.values()), raw_oids
 
