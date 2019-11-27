@@ -13,6 +13,7 @@ import pytest
 import requests
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from six import iteritems
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
@@ -2095,3 +2096,22 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data):
         m.assert_any_call('test:123', 'version.raw', 'v1.6.0-alpha.0.680+3872cb93abf948-dirty')
         m.assert_any_call('test:123', 'version.scheme', 'semver')
         assert m.call_count == 7
+
+
+def test_ssl_verify_not_raise_warning(mocked_openmetrics_check_factory, text_data):
+    instance = dict(
+        {
+            'prometheus_url': 'https://www.example.com',
+            'metrics': [{'foo': 'bar'}],
+            'namespace': 'openmetrics',
+            'ssl_verify': False,
+        }
+    )
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    with pytest.warns(None) as record:
+        resp = check.send_request('https://httpbin.org/get', scraper_config)
+
+    assert "httpbin.org" in resp.content.decode('utf-8')
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
