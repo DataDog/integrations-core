@@ -13,7 +13,7 @@
 * [Added] Add SAP HANA integration. See [#4502](https://github.com/DataDog/integrations-core/pull/4502).
 * [Added] Better metadata assertion output. See [#4953](https://github.com/DataDog/integrations-core/pull/4953).
 * [Added] Use a stub class for metadata testing. See [#4919](https://github.com/DataDog/integrations-core/pull/4919).
-* [Added] extract version utils and use semver for version comparison. See [#4844](https://github.com/DataDog/integrations-core/pull/4844).
+* [Added] Extract version utils and use semver for version comparison. See [#4844](https://github.com/DataDog/integrations-core/pull/4844).
 * [Added] Add new version metadata scheme. See [#4929](https://github.com/DataDog/integrations-core/pull/4929).
 * [Added] Add total_time_to_temporal_percent utility. See [#4924](https://github.com/DataDog/integrations-core/pull/4924).
 * [Added] Standardize logging format. See [#4906](https://github.com/DataDog/integrations-core/pull/4906).
