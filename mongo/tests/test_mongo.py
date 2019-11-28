@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
 
 from datadog_checks.mongo import MongoDb
@@ -141,12 +140,11 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries):
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
 
 
-def test_metadata(aggregator, check, instance, version_metadata):
+def test_metadata(check, instance, datadog_agent):
     check.check_id = 'test:123'
+    major, minor = common.MONGODB_VERSION.split('.')[:2]
+    version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        check.check(instance)
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
-
-        assert m.call_count == len(version_metadata)
+    check.check(instance)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata) + 2)
