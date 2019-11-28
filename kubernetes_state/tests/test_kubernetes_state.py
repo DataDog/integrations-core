@@ -279,19 +279,29 @@ def test_update_kube_state_metrics(aggregator, instance, check):
 
     # Make sure we send counts for all phases to avoid no-data graphing issues
     aggregator.assert_metric(
-        NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Pending', 'optional:tag1'], value=1
+        NAMESPACE + '.pod.status_phase',
+        tags=['kube_namespace:default', 'namespace:default', 'phase:Pending', 'pod_phase:Pending', 'optional:tag1'],
+        value=1,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Running', 'optional:tag1'], value=3
+        NAMESPACE + '.pod.status_phase',
+        tags=['kube_namespace:default', 'namespace:default', 'phase:Running', 'pod_phase:Running', 'optional:tag1'],
+        value=3,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Succeeded', 'optional:tag1'], value=2
+        NAMESPACE + '.pod.status_phase',
+        tags=['kube_namespace:default', 'namespace:default', 'phase:Succeeded', 'pod_phase:Succeeded', 'optional:tag1'],
+        value=2,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=2
+        NAMESPACE + '.pod.status_phase',
+        tags=['kube_namespace:default', 'namespace:default', 'phase:Failed', 'pod_phase:Failed', 'optional:tag1'],
+        value=2,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Unknown', 'optional:tag1'], value=1
+        NAMESPACE + '.pod.status_phase',
+        tags=['kube_namespace:default', 'namespace:default', 'phase:Unknown', 'pod_phase:Unknown', 'optional:tag1'],
+        value=1,
     )
 
     # Persistentvolume counts
@@ -392,10 +402,14 @@ def test_pod_phase_gauges(aggregator, instance, check):
     for _ in range(2):
         check.check(instance)
     aggregator.assert_metric(
-        NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Running', 'optional:tag1'], value=3
+        NAMESPACE + '.pod.status_phase',
+        tags=['kube_namespace:default', 'namespace:default', 'phase:Running', 'pod_phase:Running', 'optional:tag1'],
+        value=3,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.pod.status_phase', tags=['namespace:default', 'phase:Failed', 'optional:tag1'], value=2
+        NAMESPACE + '.pod.status_phase',
+        tags=['kube_namespace:default', 'namespace:default', 'phase:Failed', 'pod_phase:Failed', 'optional:tag1'],
+        value=2,
     )
 
 
@@ -421,18 +435,26 @@ def test_job_counts(aggregator, instance):
 
     # Test cron jobs
     aggregator.assert_metric(
-        NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=0
+        NAMESPACE + '.job.failed',
+        tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello', 'optional:tag1'],
+        value=0,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=3
+        NAMESPACE + '.job.succeeded',
+        tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello', 'optional:tag1'],
+        value=3,
     )
 
     # Test jobs
     aggregator.assert_metric(
-        NAMESPACE + '.job.failed', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=0
+        NAMESPACE + '.job.failed',
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        value=0,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=1
+        NAMESPACE + '.job.succeeded',
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        value=1,
     )
 
     # Re-run check to make sure we don't count the same jobs
@@ -440,18 +462,26 @@ def test_job_counts(aggregator, instance):
 
     # Test cron jobs
     aggregator.assert_metric(
-        NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=0
+        NAMESPACE + '.job.failed',
+        tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello', 'optional:tag1'],
+        value=0,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=3
+        NAMESPACE + '.job.succeeded',
+        tags=['namespace:default', 'kube_namespace:default', 'kube_job:hello', 'job:hello', 'optional:tag1'],
+        value=3,
     )
 
     # Test jobs
     aggregator.assert_metric(
-        NAMESPACE + '.job.failed', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=0
+        NAMESPACE + '.job.failed',
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        value=0,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=1
+        NAMESPACE + '.job.succeeded',
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        value=1,
     )
 
     # Edit the payload and rerun the check
@@ -471,10 +501,14 @@ def test_job_counts(aggregator, instance):
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
     check.check(instance)
     aggregator.assert_metric(
-        NAMESPACE + '.job.failed', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=1
+        NAMESPACE + '.job.failed',
+        tags=['namespace:default', 'kube_namespace:default', 'job:hello', 'kube_job:hello', 'optional:tag1'],
+        value=1,
     )
     aggregator.assert_metric(
-        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=4
+        NAMESPACE + '.job.succeeded',
+        tags=['namespace:default', 'kube_namespace:default', 'job:hello', 'kube_job:hello', 'optional:tag1'],
+        value=4,
     )
 
     # Edit the payload to mimick a job running and rerun the check
@@ -492,7 +526,9 @@ def test_job_counts(aggregator, instance):
     check.check(instance)
     # Test if we now have two as the value for the same job
     aggregator.assert_metric(
-        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job_name:test', 'optional:tag1'], value=2
+        NAMESPACE + '.job.succeeded',
+        tags=['namespace:default', 'kube_namespace:default', 'job_name:test', 'optional:tag1'],
+        value=2,
     )
 
     # Edit the payload to mimick a job that stopped running and rerun the check
@@ -504,7 +540,9 @@ def test_job_counts(aggregator, instance):
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
     check.check(instance)
     aggregator.assert_metric(
-        NAMESPACE + '.job.succeeded', tags=['namespace:default', 'job:hello', 'optional:tag1'], value=5
+        NAMESPACE + '.job.succeeded',
+        tags=['namespace:default', 'kube_namespace:default', 'job:hello', 'kube_job:hello', 'optional:tag1'],
+        value=5,
     )
 
 
@@ -534,4 +572,16 @@ def test_telemetry(aggregator, instance):
         NAMESPACE + '.telemetry.collector.metrics.count',
         tags=['resource_name:hpa', 'resource_namespace:ns1', 'optional:tag1'],
         value=8.0,
+    )
+
+
+def test_keep_ksm_labels_desactivated(aggregator, instance):
+    instance['keep_ksm_labels'] = False
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    check.check(instance)
+    for _ in range(2):
+        check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.pod.status_phase', tags=['kube_namespace:default', 'pod_phase:Running', 'optional:tag1'], value=3
     )
