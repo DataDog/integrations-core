@@ -118,37 +118,37 @@ TAGS = {
         'kernel_version:4.9.13',
         'kubelet_version:v1.8.0',
         'kubeproxy_version:v1.8.0',
-        'os_image:Buildroot 2017.02',
+        'os_image:buildroot 2017.02',
     ],
     NAMESPACE + '.pod.ready': ['node:minikube'],
     NAMESPACE + '.pod.scheduled': ['node:minikube'],
     NAMESPACE
     + '.nodes.by_condition': [
-        'condition:MemoryPressure',
-        'condition:DiskPressure',
-        'condition:OutOfDisk',
-        'condition:Ready',
+        'condition:memorypressure',
+        'condition:diskpressure',
+        'condition:outofdisk',
+        'condition:ready',
         'status:true',
         'status:false',
         'status:unknown',
     ],
     NAMESPACE
     + '.pod.status_phase': [
-        'phase:Pending',
-        'phase:Running',
-        'phase:Failed',
-        'phase:Succeeded',
-        'phase:Unknown',
+        'phase:pending',
+        'phase:running',
+        'phase:failed',
+        'phase:succeeded',
+        'phase:unknown',
         'namespace:default',
         'namespace:kube-system',
     ],
     NAMESPACE
     + '.container.status_report.count.waiting': [
-        'reason:ContainerCreating',
-        'reason:CrashLoopBackoff',  # Lowercase "off"
-        'reason:CrashLoopBackOff',  # Uppercase "Off"
-        'reason:ErrImagePull',
-        'reason:ImagePullBackoff',
+        'reason:containercreating',
+        'reason:crashloopbackoff',  # Lowercase "off"
+        'reason:crashloopbackoff',  # Uppercase "Off"
+        'reason:errimagepull',
+        'reason:imagepullbackoff',
         'pod:kube-dns-1326421443-hj4hx',
         'pod:hello-1509998340-k4f8q',
     ],
@@ -158,29 +158,29 @@ TAGS = {
     + '.service.count': [
         'namespace:kube-system',
         'namespace:default',
-        'type:ClusterIP',
-        'type:NodePort',
-        'type:LoadBalancer',
+        'type:clusterip',
+        'type:nodeport',
+        'type:loadbalancer',
     ],
     NAMESPACE + '.job.failed': ['job:hello', 'job_name:hello2'],
     NAMESPACE + '.job.succeeded': ['job:hello', 'job_name:hello2'],
-    NAMESPACE + '.hpa.condition': ['namespace:default', 'hpa:myhpa', 'condition:true', 'status:AbleToScale'],
+    NAMESPACE + '.hpa.condition': ['namespace:default', 'hpa:myhpa', 'condition:true', 'status:abletoscale'],
 }
 
 JOINED_METRICS = {
-    NAMESPACE + '.deployment.replicas': ['label_addonmanager_kubernetes_io_mode:Reconcile', 'deployment:kube-dns'],
+    NAMESPACE + '.deployment.replicas': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
     NAMESPACE
-    + '.deployment.replicas_available': ['label_addonmanager_kubernetes_io_mode:Reconcile', 'deployment:kube-dns'],
+    + '.deployment.replicas_available': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
     NAMESPACE
-    + '.deployment.replicas_unavailable': ['label_addonmanager_kubernetes_io_mode:Reconcile', 'deployment:kube-dns'],
+    + '.deployment.replicas_unavailable': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
     NAMESPACE
-    + '.deployment.replicas_updated': ['label_addonmanager_kubernetes_io_mode:Reconcile', 'deployment:kube-dns'],
+    + '.deployment.replicas_updated': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
     NAMESPACE
-    + '.deployment.replicas_desired': ['label_addonmanager_kubernetes_io_mode:Reconcile', 'deployment:kube-dns'],
-    NAMESPACE + '.deployment.paused': ['label_addonmanager_kubernetes_io_mode:Reconcile', 'deployment:kube-dns'],
+    + '.deployment.replicas_desired': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
+    NAMESPACE + '.deployment.paused': ['label_addonmanager_kubernetes_io_mode:reconcile', 'deployment:kube-dns'],
     NAMESPACE
     + '.deployment.rollingupdate.max_unavailable': [
-        'label_addonmanager_kubernetes_io_mode:Reconcile',
+        'label_addonmanager_kubernetes_io_mode:reconcile',
         'deployment:kube-dns',
     ],
 }
@@ -268,66 +268,66 @@ def test_update_kube_state_metrics(aggregator, instance, check):
 
     # Make sure we send counts for all statuses to avoid no-data graphing issues
     aggregator.assert_metric(
-        NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:true', 'optional:tag1'], value=1
+        NAMESPACE + '.nodes.by_condition', tags=['condition:ready', 'status:true', 'optional:tag1'], value=1
     )
     aggregator.assert_metric(
-        NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:false', 'optional:tag1'], value=0
+        NAMESPACE + '.nodes.by_condition', tags=['condition:ready', 'status:false', 'optional:tag1'], value=0
     )
     aggregator.assert_metric(
-        NAMESPACE + '.nodes.by_condition', tags=['condition:Ready', 'status:unknown', 'optional:tag1'], value=0
+        NAMESPACE + '.nodes.by_condition', tags=['condition:ready', 'status:unknown', 'optional:tag1'], value=0
     )
 
     # Make sure we send counts for all phases to avoid no-data graphing issues
     aggregator.assert_metric(
         NAMESPACE + '.pod.status_phase',
-        tags=['kube_namespace:default', 'namespace:default', 'phase:Pending', 'pod_phase:Pending', 'optional:tag1'],
+        tags=['kube_namespace:default', 'namespace:default', 'phase:pending', 'pod_phase:pending', 'optional:tag1'],
         value=1,
     )
     aggregator.assert_metric(
         NAMESPACE + '.pod.status_phase',
-        tags=['kube_namespace:default', 'namespace:default', 'phase:Running', 'pod_phase:Running', 'optional:tag1'],
+        tags=['kube_namespace:default', 'namespace:default', 'phase:running', 'pod_phase:running', 'optional:tag1'],
         value=3,
     )
     aggregator.assert_metric(
         NAMESPACE + '.pod.status_phase',
-        tags=['kube_namespace:default', 'namespace:default', 'phase:Succeeded', 'pod_phase:Succeeded', 'optional:tag1'],
+        tags=['kube_namespace:default', 'namespace:default', 'phase:succeeded', 'pod_phase:succeeded', 'optional:tag1'],
         value=2,
     )
     aggregator.assert_metric(
         NAMESPACE + '.pod.status_phase',
-        tags=['kube_namespace:default', 'namespace:default', 'phase:Failed', 'pod_phase:Failed', 'optional:tag1'],
+        tags=['kube_namespace:default', 'namespace:default', 'phase:failed', 'pod_phase:failed', 'optional:tag1'],
         value=2,
     )
     aggregator.assert_metric(
         NAMESPACE + '.pod.status_phase',
-        tags=['kube_namespace:default', 'namespace:default', 'phase:Unknown', 'pod_phase:Unknown', 'optional:tag1'],
+        tags=['kube_namespace:default', 'namespace:default', 'phase:unknown', 'pod_phase:unknown', 'optional:tag1'],
         value=1,
     )
 
     # Persistentvolume counts
     aggregator.assert_metric(
         NAMESPACE + '.persistentvolumes.by_phase',
-        tags=['storageclass:local-data', 'phase:Available', 'optional:tag1'],
+        tags=['storageclass:local-data', 'phase:available', 'optional:tag1'],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.persistentvolumes.by_phase',
-        tags=['storageclass:local-data', 'phase:Bound', 'optional:tag1'],
+        tags=['storageclass:local-data', 'phase:bound', 'optional:tag1'],
         value=2,
     )
     aggregator.assert_metric(
         NAMESPACE + '.persistentvolumes.by_phase',
-        tags=['storageclass:local-data', 'phase:Failed', 'optional:tag1'],
+        tags=['storageclass:local-data', 'phase:failed', 'optional:tag1'],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.persistentvolumes.by_phase',
-        tags=['storageclass:local-data', 'phase:Pending', 'optional:tag1'],
+        tags=['storageclass:local-data', 'phase:pending', 'optional:tag1'],
         value=0,
     )
     aggregator.assert_metric(
         NAMESPACE + '.persistentvolumes.by_phase',
-        tags=['storageclass:local-data', 'phase:Released', 'optional:tag1'],
+        tags=['storageclass:local-data', 'phase:released', 'optional:tag1'],
         value=0,
     )
 
@@ -403,12 +403,12 @@ def test_pod_phase_gauges(aggregator, instance, check):
         check.check(instance)
     aggregator.assert_metric(
         NAMESPACE + '.pod.status_phase',
-        tags=['kube_namespace:default', 'namespace:default', 'phase:Running', 'pod_phase:Running', 'optional:tag1'],
+        tags=['kube_namespace:default', 'namespace:default', 'phase:running', 'pod_phase:running', 'optional:tag1'],
         value=3,
     )
     aggregator.assert_metric(
         NAMESPACE + '.pod.status_phase',
-        tags=['kube_namespace:default', 'namespace:default', 'phase:Failed', 'pod_phase:Failed', 'optional:tag1'],
+        tags=['kube_namespace:default', 'namespace:default', 'phase:failed', 'pod_phase:failed', 'optional:tag1'],
         value=2,
     )
 
@@ -583,5 +583,5 @@ def test_keep_ksm_labels_desactivated(aggregator, instance):
     for _ in range(2):
         check.check(instance)
     aggregator.assert_metric(
-        NAMESPACE + '.pod.status_phase', tags=['kube_namespace:default', 'pod_phase:Running', 'optional:tag1'], value=3
+        NAMESPACE + '.pod.status_phase', tags=['kube_namespace:default', 'pod_phase:running', 'optional:tag1'], value=3
     )
