@@ -89,7 +89,8 @@ class IbmMqCheck(AgentCheck):
                     # some system queues don't have PCF metrics
                     # so we don't collect those metrics from those queues
                     if queue_name not in config.DISALLOWED_QUEUES:
-                        self.get_pcf_queue_metrics(queue_manager, queue_name, queue_tags)
+                        self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
+                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
                 except Exception as e:
                     self.warning('Cannot connect to queue {}: {}'.format(queue_name, e))
@@ -180,7 +181,7 @@ class IbmMqCheck(AgentCheck):
                 else:
                     self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
-    def get_pcf_queue_metrics(self, queue_manager, queue_name, tags):
+    def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags):
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name),
@@ -207,6 +208,27 @@ class IbmMqCheck(AgentCheck):
                         msg = msg.format(mname, queue_name)
                         log.debug(msg)
 
+    def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags):
+        try:
+            args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name)}
+            pcf = pymqi.PCFExecute(queue_manager)
+            response = pcf.MQCMD_RESET_Q_STATS(args)
+        except pymqi.MQMIError as e:
+            self.warning("Error getting pcf queue stats for {}: {}".format(queue_name, e))
+        else:
+            # Response is a list. It likely has only one member in it.
+            for queue_info in response:
+                for metric_name, (pymqi_type, metric_type) in iteritems(metrics.pcf_status_reset_metrics()):
+                    metric_full_name = '{}.queue.{}'.format(self.METRIC_PREFIX, metric_name)
+                    metric_value = int(queue_info[pymqi_type])
+                    self._send_metric(metric_type, metric_full_name, metric_value, tags)
+
+    def _send_metric(self, metric_type, metric_name, metric_value, tags):
+        if metric_type in ['gauge', 'rate']:
+            getattr(self, metric_type)(metric_name, metric_value, tags=tags)
+        else:
+            self.log.warning("Unknown metric type `{}` for metric `{}`".format(metric_type, metric_name))
+
     def get_pcf_channel_metrics(self, queue_manager, tags, config):
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')}
 
@@ -219,6 +241,12 @@ class IbmMqCheck(AgentCheck):
             channels = len(response)
             mname = '{}.channel.channels'.format(self.METRIC_PREFIX)
             self.gauge(mname, channels, tags=tags)
+
+            for channel_info in response:
+                channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                channel_tags = tags + ["channel:{}".format(channel_name)]
+
+                self._submit_metrics_from_properties(channel_info, metrics.channel_metrics(), channel_tags)
 
         # Check specific channels
         # If a channel is not discoverable, a user may want to check it specifically.
@@ -258,10 +286,20 @@ class IbmMqCheck(AgentCheck):
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
 
-                channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
+                self._submit_metrics_from_properties(channel_info, metrics.channel_status_metrics(), channel_tags)
 
+                channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
                 self._submit_channel_count(channel_name, channel_status, channel_tags)
                 self._submit_status_check(channel_name, channel_status, channel_tags, config)
+
+    def _submit_metrics_from_properties(self, channel_info, metrics_map, tags):
+        for metric_name, pymqi_type in iteritems(metrics_map):
+            metric_full_name = '{}.channel.{}'.format(self.METRIC_PREFIX, metric_name)
+            if pymqi_type not in channel_info:
+                self.log.debug("metric not found: %s", metric_name)
+                continue
+            metric_value = int(channel_info[pymqi_type])
+            self.gauge(metric_full_name, metric_value, tags=tags)
 
     def _submit_status_check(self, channel_name, channel_status, channel_tags, config):
         if channel_status in config.channel_status_mapping:
