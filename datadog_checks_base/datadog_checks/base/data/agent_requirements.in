@@ -3,6 +3,7 @@ aerospike==3.6.0; sys_platform != 'win32'
 beautifulsoup4==4.5.1
 binary==1.0.0
 boto==2.46.1
+boto3==1.10.27
 clickhouse-cityhash==1.0.2.3
 clickhouse-driver==0.1.2
 contextlib2==0.5.5
@@ -14,7 +15,7 @@ flup==1.0.3.dev-20110405; python_version < '3.0'
 flup-py3==1.0.3; python_version > '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 httplib2==0.10.3
-in-toto==0.3.0
+in-toto==0.4.1
 ipaddress==1.0.22; python_version < '3.0'
 jaydebeapi==1.1.1
 jpype1==0.7.0
@@ -55,7 +56,7 @@ requests==2.22.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
 scandir==1.8
-securesystemslib[crypto,pynacl]==0.11.3
+securesystemslib[crypto,pynacl]==0.12.2
 selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
 semver==2.9.0
 serpent==1.27; sys_platform == 'win32'
@@ -63,7 +64,7 @@ service_identity[idna]==18.1.0
 simplejson==3.6.5
 six==1.12.0
 supervisor==4.0.1
-tuf==0.11.2.dev3
+tuf==0.12.1
 uptime==3.0.1
 vertica-python==0.9.4
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'

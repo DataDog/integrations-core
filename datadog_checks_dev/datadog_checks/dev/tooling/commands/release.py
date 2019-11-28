@@ -70,10 +70,14 @@ def validate_version(ctx, param, value):
         raise click.BadParameter('needs to be in semver format x.y[.z]')
 
 
-def create_trello_card(client, teams, pr_title, pr_url, pr_body):
+def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
     body = u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
 
     for team in teams:
+        if dry_run:
+            echo_success('Will create a card for team {}: '.format(team), nl=False)
+            echo_info(pr_title)
+            continue
         creation_attempts = 3
         for attempt in range(3):
             rate_limited, error, response = client.create_card(team, pr_title, body)
@@ -280,15 +284,28 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         echo_success(current_agent_version)
 
     current_release_branch = '{}.x'.format(current_agent_version)
-    echo_info('Branch `{}` will be compared to `master`.'.format(current_release_branch))
+    diff_target_branch = 'master'
+    echo_info('Branch `{}` will be compared to `{}`.'.format(current_release_branch, diff_target_branch))
 
     echo_waiting('Getting diff... ', nl=False)
-    diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..master'
+    diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..{}'
 
     with chdir(root):
+        fetch_command = 'git fetch --dry'
+        result = run_command(fetch_command, capture=True)
+        if result.code:
+            abort('Unable to run {}.'.format(fetch_command))
+
+        if current_release_branch in result.stderr or diff_target_branch in result.stderr:
+            abort(
+                'Your repository is not sync with the remote repository. Please run git fetch in {} folder.'.format(
+                    root
+                )
+            )
+
         # compare with the local tag first
         reftag = '{}{}'.format('refs/tags/', current_release_branch)
-        result = run_command(diff_command.format(reftag), capture=True)
+        result = run_command(diff_command.format(reftag, diff_target_branch), capture=True)
         if result.code:
             # if it didn't work, compare with a branch.
             origin_release_branch = 'origin/{}'.format(current_release_branch)
@@ -300,7 +317,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 nl=False,
             )
 
-            result = run_command(diff_command.format(origin_release_branch), capture=True)
+            result = run_command(diff_command.format(origin_release_branch, diff_target_branch), capture=True)
             if result.code:
                 abort('Unable to get the diff.')
             else:
@@ -311,11 +328,6 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
     # [(commit_hash, commit_subject), ...]
     diff_data = [tuple(line.split(None, 1)) for line in reversed(result.stdout.splitlines())]
     num_changes = len(diff_data)
-
-    if dry_run:
-        for _, commit_subject in diff_data:
-            echo_info(commit_subject)
-        return
 
     if repo == 'integrations-core':
         options = OrderedDict(
@@ -425,7 +437,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
 
         teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
         if teams:
-            create_trello_card(trello, teams, pr_title, pr_url, pr_body)
+            create_trello_card(trello, teams, pr_title, pr_url, pr_body, dry_run)
             continue
 
         finished = False
@@ -488,7 +500,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 echo_warning('Exited at {}'.format(format_commit_id(commit_id)))
                 return
             else:
-                create_trello_card(trello, [value], pr_title, pr_url, pr_body)
+                create_trello_card(trello, [value], pr_title, pr_url, pr_body, dry_run)
 
             finished = True
 
