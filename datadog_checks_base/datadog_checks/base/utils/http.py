@@ -15,8 +15,8 @@ from urllib3.exceptions import InsecureRequestWarning
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
-from .common import ensure_unicode
 from .headers import get_default_headers, update_headers
+from .common import ensure_unicode
 
 try:
     from contextlib import ExitStack

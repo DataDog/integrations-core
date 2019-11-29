@@ -126,7 +126,7 @@ class TestQueryCompilation:
 
     def test_column_no_name(self):
         query_manager = create_query_manager(
-            {'name': 'test query', 'query': 'foo', 'columns': [{}, {'foo': 'bar'}], 'tags': ['test:bar']}
+            {'name': 'test query', 'query': 'foo', 'columns': [{}, {'foo': 'bar'}], 'tags': ['test:bar']},
         )
 
         with pytest.raises(ValueError, match='^field `name` for column #2 of test query is required$'):
@@ -142,7 +142,7 @@ class TestQueryCompilation:
 
     def test_column_no_type(self):
         query_manager = create_query_manager(
-            {'name': 'test query', 'query': 'foo', 'columns': [{'name': 'test.foo'}], 'tags': ['test:bar']}
+            {'name': 'test query', 'query': 'foo', 'columns': [{'name': 'test.foo'}], 'tags': ['test:bar']},
         )
 
         with pytest.raises(ValueError, match='^field `type` for column test.foo of test query is required$'):
@@ -828,9 +828,9 @@ class TestCustomQueries:
                 [
                     {
                         'custom_queries': [
-                            {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']}
-                        ]
-                    }
+                            {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
+                        ],
+                    },
                 ],
             ),
             executor=mock_executor([[1]]),
@@ -848,8 +848,8 @@ class TestCustomQueries:
                 'test',
                 {
                     'global_custom_queries': [
-                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']}
-                    ]
+                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
+                    ],
                 },
                 [{}],
             ),
@@ -868,15 +868,15 @@ class TestCustomQueries:
                 'test',
                 {
                     'global_custom_queries': [
-                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']}
-                    ]
+                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
+                    ],
                 },
                 [
                     {
                         'custom_queries': [
-                            {'query': 'foo', 'columns': [{'name': 'test.bar', 'type': 'gauge'}], 'tags': ['test:bar']}
-                        ]
-                    }
+                            {'query': 'foo', 'columns': [{'name': 'test.bar', 'type': 'gauge'}], 'tags': ['test:bar']},
+                        ],
+                    },
                 ],
             ),
             executor=mock_executor([[1]]),
@@ -894,16 +894,16 @@ class TestCustomQueries:
                 'test',
                 {
                     'global_custom_queries': [
-                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']}
-                    ]
+                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
+                    ],
                 },
                 [
                     {
                         'use_global_custom_queries': 'extend',
                         'custom_queries': [
-                            {'query': 'foo', 'columns': [{'name': 'test.bar', 'type': 'gauge'}], 'tags': ['test:bar']}
+                            {'query': 'foo', 'columns': [{'name': 'test.bar', 'type': 'gauge'}], 'tags': ['test:bar']},
                         ],
-                    }
+                    },
                 ],
             ),
             executor=mock_executor([[1]]),
@@ -922,16 +922,16 @@ class TestCustomQueries:
                 'test',
                 {
                     'global_custom_queries': [
-                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']}
-                    ]
+                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
+                    ],
                 },
                 [
                     {
                         'use_global_custom_queries': False,
                         'custom_queries': [
-                            {'query': 'foo', 'columns': [{'name': 'test.bar', 'type': 'gauge'}], 'tags': ['test:bar']}
+                            {'query': 'foo', 'columns': [{'name': 'test.bar', 'type': 'gauge'}], 'tags': ['test:bar']},
                         ],
-                    }
+                    },
                 ],
             ),
             executor=mock_executor([[1]]),
@@ -949,16 +949,16 @@ class TestCustomQueries:
                 'test',
                 {
                     'global_custom_queries': [
-                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']}
-                    ]
+                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
+                    ],
                 },
                 [
                     {
                         'use_global_custom_queries': 'extend',
                         'custom_queries': [
-                            {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']}
+                            {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
                         ],
-                    }
+                    },
                 ],
             ),
             executor=mock_executor([[1]]),
@@ -976,14 +976,14 @@ class TestCustomQueries:
                 'test',
                 {
                     'global_custom_queries': [
-                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']}
-                    ]
+                        {'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
+                    ],
                 },
                 [
                     {
                         'use_global_custom_queries': 'extend',
                         'custom_queries': [{'columns': [{'name': 'test.bar', 'type': 'gauge'}], 'tags': ['test:bar']}],
-                    }
+                    },
                 ],
             ),
             executor=mock_executor([[1]]),
