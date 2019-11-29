@@ -78,7 +78,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         # First deprecation phase: we keep ksm labels by default
         # Next iteration: remove ksm labels by default
         # Last iteration: remove this option
-        self.keep_ksm_labels = kubernetes_state_instance.get('keep_ksm_labels', True)
+        self.keep_ksm_labels = is_affirmative(kubernetes_state_instance.get('keep_ksm_labels', True))
 
         generic_instances = [kubernetes_state_instance]
         super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
@@ -464,10 +464,10 @@ class KubernetesState(OpenMetricsBaseCheck):
         Returns an empty list if name was not found.
         """
         value = labels.get(name)
-        _tags = list()
+        tags = []
         if value:
-            _tags += self._build_tags(tag_name or name, value, scraper_config)
-        return _tags
+            tags += self._build_tags(tag_name or name, value, scraper_config)
+        return tags
 
     def _trim_job_tag(self, name):
         """
@@ -560,7 +560,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         curr_time = int(time.time())
         for sample in metric.samples:
             on_schedule = int(sample[self.SAMPLE_VALUE]) - curr_time
-            tags = list()
+            tags = []
             for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                 tags += self._build_tags(label_name, label_value, scraper_config)
 
@@ -727,7 +727,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         statuses = ('schedulable', 'unschedulable')
         if metric.type in METRIC_TYPES:
             for sample in metric.samples:
-                tags = list()
+                tags = []
                 for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                     tags += self._build_tags(label_name, label_value, scraper_config)
                 tags += scraper_config['custom_tags']
@@ -808,16 +808,16 @@ class KubernetesState(OpenMetricsBaseCheck):
         Build a list of formated tags from `label_name` parameter. It also depend of the
         check configuration ('keep_ksm_labels' parameter)
         """
-        _tags = list()
+        tags = []
         # first use the labels_mapper
         tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
         # then try to use the kube_labels_mapper
         kube_tag_name = kube_labels_mapper.get(tag_name, tag_name)
         label_value = to_string(label_value).lower()
-        _tags.append('{}:{}'.format(to_string(kube_tag_name), label_value))
+        tags.append('{}:{}'.format(to_string(kube_tag_name), label_value))
         if self.keep_ksm_labels and (kube_tag_name != tag_name):
-            _tags.append('{}:{}'.format(to_string(tag_name), label_value))
-        return _tags
+            tags.append('{}:{}'.format(to_string(tag_name), label_value))
+        return tags
 
     def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None):
         """
@@ -825,7 +825,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         """
         custom_tags = scraper_config['custom_tags']
         _tags = list(custom_tags)
-        _tags.extend(scraper_config['_metric_tags'])
+        _tags += scraper_config['_metric_tags']
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
             if label_name not in scraper_config['exclude_labels']:
                 _tags += self._build_tags(label_name, label_value, scraper_config)
