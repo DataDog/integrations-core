@@ -117,6 +117,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     DEFAULT_METRIC_LIMIT = 0
 
+    COUNTER_METRICS = {'kubelet_evictions': 'kubelet.evictions'}
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         self.NAMESPACE = 'kubernetes'
         if instances is not None and len(instances) > 1:
@@ -136,6 +138,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.cadvisor_scraper_config['_text_filter_blacklist'] = ['pod_name=""', 'pod=""']
 
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
+
+        self.COUNTER_TRANSFORMERS = {k: self.send_always_counter for k in self.COUNTER_METRICS}
 
     def _create_kubelet_prometheus_instance(self, instance):
         """
@@ -229,11 +233,13 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             self.process_cadvisor(instance, self.cadvisor_legacy_url, self.pod_list, self.pod_list_utils)
         elif self.cadvisor_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing cadvisor metrics')
-            self.process(self.cadvisor_scraper_config, metric_transformers=self.CADVISOR_METRIC_TRANSFORMERS)
+            transformers = self.CADVISOR_METRIC_TRANSFORMERS
+            transformers.update(self.COUNTER_TRANSFORMERS)
+            self.process(self.cadvisor_scraper_config, metric_transformers=transformers)
 
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
-            self.process(self.kubelet_scraper_config)
+            self.process(self.kubelet_scraper_config, metric_transformers=self.COUNTER_TRANSFORMERS)
 
         # Free up memory
         self.pod_list = None
@@ -552,3 +558,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         if not name or phase not in ["Running", "Pending"]:
             return True
         return False
+
+    def send_always_counter(self, metric, scraper_config, hostname=None):
+        metric_name_with_namespace = '{}.{}'.format(scraper_config['namespace'], self.COUNTER_METRICS[metric.name])
+        for sample in metric.samples:
+            val = sample[self.SAMPLE_VALUE]
+            if not self._is_value_valid(val):
+                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                continue
+            custom_hostname = self._get_hostname(hostname, sample, scraper_config)
+            # Determine the tags to send
+            tags = self._metric_tags(metric.name, val, sample, scraper_config, hostname=custom_hostname)
+            self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
