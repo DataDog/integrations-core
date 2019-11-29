@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 from re import match
+
 from six import iteritems
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
