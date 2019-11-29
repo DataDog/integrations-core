@@ -3,7 +3,7 @@ ad_identifiers:
 
 init_config:
 
-# Ignore tags coming from the listener
+# Ignore tags coming from autodiscovery
 ignore_autodiscovery_tags: true
 
 instances:
