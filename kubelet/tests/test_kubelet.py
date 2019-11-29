@@ -181,7 +181,7 @@ def tagger():
     return tagger
 
 
-def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16):
+def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16, stats_summary_fail=False):
     """
     Returns a check that uses mocked data for responses from prometheus endpoints, pod list,
     and node spec.
@@ -189,9 +189,14 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16):
     check = KubeletCheck('kubelet', None, {}, instances)
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
-    monkeypatch.setattr(
-        check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
-    )
+    if stats_summary_fail:
+        monkeypatch.setattr(
+            check, '_retrieve_stats', mock.Mock(return_value={})
+        )
+    else:
+        monkeypatch.setattr(
+            check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
+        )
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
@@ -751,3 +756,12 @@ def test_report_container_requests_limits(monkeypatch, tagger):
         mock.call('kubernetes.ephemeral-storage.limits', 2147483648.0, ['pod_name:cassandra-0'] + tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
+
+
+def test_kubelet_stats_summary_not_available(monkeypatch, aggregator, tagger):
+    instance = {"tags": ["instance:tag"]}
+
+    check = mock_kubelet_check(monkeypatch, [instance], stats_summary_fail=True)
+
+    check.check(instance)
+    check._retrieve_stats.assert_called_once()

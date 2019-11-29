@@ -309,7 +309,17 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """
         Retrieve stats from kubelet.
         """
-        return self.perform_kubelet_query(self.stats_url).json()
+        try:
+            stats_response = self.perform_kubelet_query(self.stats_url)
+            if stats_response.status_code >= 200 and stats_response.status_code < 300:
+                return stats_response.json()
+            else:
+                self.log.warning('GET on kubelet s `/stats/summary` returned a non-OK status code: {}'.format(
+                                 stats_response.status_code))
+                return {}
+        except Exception as e:
+            self.log.warning('GET on kubelet s `/stats/summary` failed: {}'.format(str(e)))
+            return {}
 
     def _report_node_metrics(self, instance_tags):
         node_spec = self._retrieve_node_spec()
