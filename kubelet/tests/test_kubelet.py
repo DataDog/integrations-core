@@ -190,9 +190,7 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16, stats
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     if stats_summary_fail:
-        monkeypatch.setattr(
-            check, '_retrieve_stats', mock.Mock(return_value={})
-        )
+        monkeypatch.setattr(check, '_retrieve_stats', mock.Mock(return_value={}))
     else:
         monkeypatch.setattr(
             check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
