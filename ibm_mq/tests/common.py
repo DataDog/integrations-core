@@ -136,7 +136,7 @@ CHANNEL_METRICS = [
     'ibm_mq.channel.batch_size',
     'ibm_mq.channel.batch_interval',
     'ibm_mq.channel.long_retry',
-    'ibm_mq.channel.timer',
+    'ibm_mq.channel.long_timer',
     'ibm_mq.channel.max_message_length',
     'ibm_mq.channel.short_retry',
     'ibm_mq.channel.disc_interval',
