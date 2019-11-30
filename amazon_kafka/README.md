@@ -1,0 +1,92 @@
+# Agent Check: Amazon Kafka
+
+## Overview
+
+This check monitors [Amazon MSK][1] through the Datadog Agent.
+
+## Setup
+
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
+
+### Installation
+
+1. [Create a client machine][3] if one does not already exist
+2. Ensure the client machine has been [granted][4] the permission policy [arn:aws:iam::aws:policy/AmazonMSKReadOnlyAccess][5] or equivalent [credentials][6] are available
+3. Install the [Datadog Agent][7]
+
+#### Beta
+
+**Note**: This step will not be necessary in Agent versions 6.17.0+.
+
+[Install][13] the beta release (`datadog-amazon-kafka==0.1.0-rc.1`).
+
+#### Dependencies
+
+**Note**: This step will not be necessary in Agent versions 6.17.0+.
+
+The [boto3][14] client library is required. To install it, run:
+
+##### Unix:
+
+```
+/opt/datadog-agent/embedded/bin/pip install boto3==1.10.27
+```
+
+##### Windows:
+
+For Agent versions <= 6.11:
+```
+"C:\Program Files\Datadog\Datadog Agent\embedded\Scripts\python.exe" -m pip install boto3==1.10.27
+```
+
+For Agent versions >= 6.12:
+```
+"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\Scripts\python.exe" -m pip install boto3==1.10.27
+```
+
+### Configuration
+
+1. Edit the `amazon_kafka.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. See the [sample amazon_kafka.d/conf.yaml][8] for all available configuration options.
+
+2. [Restart the Agent][9].
+
+### Validation
+
+[Run the Agent's status subcommand][10] and look for `amazon_kafka` under the Checks section.
+
+## Data Collected
+
+### Metrics
+
+See [metadata.csv][11] for a list of metrics provided by this check.
+
+### Service Checks
+
+**amazon_kafka.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to discover nodes of the MSK cluster. Otherwise, returns `OK`.
+
+**amazon_kafka.prometheus.health**:<br>
+Returns `CRITICAL` if the check cannot access a metrics endpoint. Otherwise, returns `OK`.
+
+### Events
+
+The Amazon Kafka check does not include any events.
+
+## Troubleshooting
+
+Need help? Contact [Datadog support][12].
+
+[1]: https://aws.amazon.com/msk
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://docs.aws.amazon.com/msk/latest/developerguide/create-client-machine.html
+[4]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html#attach-iam-role
+[5]: https://console.aws.amazon.com/iam/home?#/policies/arn:aws:iam::aws:policy/AmazonMSKReadOnlyAccess
+[6]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+[7]: https://docs.datadoghq.com/agent
+[8]: https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/datadog_checks/amazon_kafka/data/conf.yaml.example
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/metadata.csv
+[12]: https://docs.datadoghq.com/help
+[13]: https://docs.datadoghq.com/agent/guide/integration-management/#install
+[14]: https://aws.amazon.com/sdk-for-python/
