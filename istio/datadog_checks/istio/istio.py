@@ -4,6 +4,7 @@
 
 from copy import deepcopy
 
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
@@ -26,11 +27,15 @@ class Istio(OpenMetricsBaseCheck):
         # Set up OpenMetricsBaseCheck with our generic instances
         super(Istio, self).__init__(name, init_config, agentConfig, instances=generic_instances)
 
+        self._istioctl = self.instance.get('istioctl', init_config.get('istioctl', 'istioctl'))
+
     def check(self, instance):
         """
         Process all the endpoints associated with this instance.
         All the endpoints themselves are optional, but at least one must be passed.
         """
+        self._collect_metadata()
+
         processed = False
         # Get the config for the istio_mesh instance
         istio_mesh_endpoint = instance.get('istio_mesh_endpoint')
@@ -373,3 +378,24 @@ class Istio(OpenMetricsBaseCheck):
         )
         process_citadel_instance['metrics'][0].update(self._get_generic_metrics())
         return process_citadel_instance
+
+    def _collect_metadata(self):
+        version_command = '{} version --short --remote=false'.format(self._istioctl)
+
+        try:
+            out, err, _ = get_subprocess_output(version_command, self.log, raise_on_empty_output=False)
+        except OSError as exc:
+            self.log.warning('Error collecting istio version: %s', exc)
+            return
+
+        raw_version = out.strip()
+
+        if raw_version:
+            self.log.debug('Istio version: `%s`', raw_version)
+            self.set_metadata('version', raw_version)
+        else:
+            self.log.warning(
+                'No output from Istio version command: `%s` (it may have crashed). Contents of stderr:\n%s',
+                version_command,
+                err,
+            )

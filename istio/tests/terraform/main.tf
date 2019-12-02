@@ -6,6 +6,10 @@ variable "user" {
   type = string
 }
 
+variable "istio_version" {
+  type = string
+}
+
 resource "random_id" "password" {
   byte_length = 16
 }
@@ -82,7 +86,7 @@ resource "null_resource" "startup" {
     command = "python ./script.py"
     environment = {
       KUBECONFIG = "${local_file.kubeconfig.filename}"
-      ISTIO_VERSION = "1.2.3"
+      ISTIO_VERSION = "${var.istio_version}"
     }
   }
 }

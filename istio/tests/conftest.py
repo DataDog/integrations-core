@@ -11,6 +11,8 @@ from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.terraform import terraform_run
 from datadog_checks.dev.utils import get_here
 
+from .common import ISTIO_VERSION
+
 try:
     from contextlib import ExitStack
 except ImportError:
@@ -28,7 +30,10 @@ DEPLOYMENTS = [
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
+    directory = os.path.join(get_here(), 'terraform')
+    env_vars = {'TF_VAR_istio_version': ISTIO_VERSION}
+
+    with terraform_run(directory, env_vars=env_vars) as outputs:
         kubeconfig = outputs['kubeconfig']['value']
         with ExitStack() as stack:
             ip_ports = [

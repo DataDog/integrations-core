@@ -1,7 +1,11 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+ISTIO_VERSION = '1.2.3'
 
 MESH_METRICS = [
     'istio.mesh.request.count',

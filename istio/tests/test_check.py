@@ -11,7 +11,16 @@ from requests.exceptions import HTTPError
 from datadog_checks.istio import Istio
 from datadog_checks.utils.common import ensure_unicode
 
-from .common import CITADEL_METRICS, GALLEY_METRICS, MESH_METRICS, MIXER_METRICS, NEW_MIXER_METRICS, PILOT_METRICS
+from .common import (
+    CITADEL_METRICS,
+    GALLEY_METRICS,
+    HERE,
+    ISTIO_VERSION,
+    MESH_METRICS,
+    MIXER_METRICS,
+    NEW_MIXER_METRICS,
+    PILOT_METRICS,
+)
 
 MESH_METRICS_MAPPER = {
     'istio_request_count': 'request.count',
@@ -91,9 +100,12 @@ MESH_MIXER_MAPPER = {
     'mixer_runtime_dispatches_total': 'runtime.dispatches_total',
 }
 
+MOCK_VERSION_SCRIPT = os.path.join(HERE, 'mock', 'istioctl_version.py')
+
 MOCK_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:42422/metrics',
     'mixer_endpoint': 'http://localhost:9093/metrics',
+    'istioctl': 'python {} {}'.format(MOCK_VERSION_SCRIPT, ISTIO_VERSION),
 }
 
 
@@ -239,3 +251,25 @@ def test_scraper_creator():
 
     assert istio_mesh_config['metrics_mapper'] == MESH_METRICS_MAPPER
     assert mixer_scraper_dict['metrics_mapper'] == MESH_MIXER_MAPPER
+
+
+@pytest.mark.usefixtures('mesh_mixture_fixture')
+def test_version_metadata(datadog_agent):
+    instance = MOCK_INSTANCE
+    raw_version = ISTIO_VERSION
+
+    check = Istio('istio', {}, {}, [instance])
+    check.check_id = 'test:123'
+    check.check(instance)
+
+    major, minor, patch = raw_version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(5)

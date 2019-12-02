@@ -1,4 +1,9 @@
 init_config:
+    ## @param istioctl - string - optional - default: istioctl
+    ## Command or path to istioctl (e.g. `/usr/local/bin/istioctl` or `docker exec <container> istioctl`).
+    ## Can be overwritten on an instance.
+    #
+    # istioctl: istioctl
 
 instances:
 
@@ -41,6 +46,11 @@ instances:
     ## Only available for Istio >= v1.1.
     #
     # citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
+
+    ## @param istioctl - string - optional - default: istioctl
+    ## Command or path to istioctl (e.g. `/usr/local/bin/istioctl` or `docker exec <container> istioctl`).
+    #
+    # istioctl: istioctl
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
