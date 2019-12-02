@@ -42,6 +42,9 @@ Returns CRITICAL if Vault is sealed, otherwise OK.
 `vault.initialized`:
 Returns CRITICAL if Vault is not yet initialized, otherwise OK.
 
+`vault.prometheus.health`:
+Returns CRITICAL if the check cannot access the metrics endpoint. Otherwise, returns OK.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
