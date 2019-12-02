@@ -63,6 +63,13 @@ class HDFSDataNode(AgentCheck):
         if hdfs_datanode_beans:
             self._hdfs_datanode_metrics(hdfs_datanode_beans, tags)
 
+        self.service_check(
+            self.JMX_SERVICE_CHECK,
+            AgentCheck.OK,
+            tags=tags,
+            message="Connection to {} was successful".format(jmx_address),
+        )
+
     def _get_jmx_data(self, jmx_address, bean_name, tags):
         """
         Get datanode beans data from JMX endpoint
@@ -140,10 +147,6 @@ class HDFSDataNode(AgentCheck):
             raise
 
         else:
-            self.service_check(
-                self.JMX_SERVICE_CHECK, AgentCheck.OK, tags=tags, message="Connection to {} was successful".format(url)
-            )
-
             return response_json
 
     @classmethod
@@ -160,13 +163,12 @@ class HDFSDataNode(AgentCheck):
 
     def _collect_metadata(self, value):
         # only get first info block
-        data = next(iter(value))
+        data = next(iter(value), {})
 
         version = data.get('Version', None)
 
         if version is not None:
             self.set_metadata('version', version)
-            self.log.debug("found hadoop version %s", version)
+            self.log.debug('found hadoop version %s', version)
         else:
-            self.log.warning("could not retrieve hadoop version information")
-            self.log.warning('this was data retrieved: %s', data)
+            self.log.warning('could not retrieve hadoop version information, this was data retrieved: %s', data)

@@ -33,7 +33,7 @@ def test_check(aggregator, mocked_request):
 
     # Make sure the service is up
     aggregator.assert_service_check(
-        HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.OK, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=2
+        HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.OK, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=1
     )
 
     for metric, value in iteritems(HDFS_DATANODE_METRICS_VALUES):
@@ -56,7 +56,7 @@ def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_a
 
     # Make sure the service is up
     aggregator.assert_service_check(
-        HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.OK, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=2
+        HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.OK, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=1
     )
 
     major, minor, patch = HDFS_RAW_VERSION.split('.')
@@ -85,5 +85,5 @@ def test_auth(aggregator, mocked_auth_request):
 
     # Make sure the service is up
     aggregator.assert_service_check(
-        HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.OK, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=2
+        HDFSDataNode.JMX_SERVICE_CHECK, status=HDFSDataNode.OK, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=1
     )
