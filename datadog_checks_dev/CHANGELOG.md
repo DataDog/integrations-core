@@ -1,6 +1,6 @@
 # CHANGELOG - Datadog Checks Dev
 
-## 0.40.0 / 2019-12-02
+## 1.0.0 / 2019-12-02
 
 * [Added] Support downloading universal and pure Python wheels. See [#4981](https://github.com/DataDog/integrations-core/pull/4981).
 * [Added] Support more metric types for `ddev meta prom`. See [#5071](https://github.com/DataDog/integrations-core/pull/5071).
