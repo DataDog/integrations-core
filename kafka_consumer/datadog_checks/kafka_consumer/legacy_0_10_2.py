@@ -65,7 +65,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def check(self, instance):
         """The main entrypoint of the check."""
-        self.log.debug("Found `zk_connect_str`. Running legacy Kafka Consumer check.")
+        self.log.debug("Running legacy Kafka Consumer check.")
         self._zk_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._kafka_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._highwater_offsets = {}  # Expected format: {(topic, partition): offset}
