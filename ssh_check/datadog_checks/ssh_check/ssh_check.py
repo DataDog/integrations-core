@@ -9,7 +9,6 @@ import paramiko
 
 from datadog_checks.checks import AgentCheck
 
-
 # Example ssh remote version: http://supervisord.org/changes.html
 #   - SSH-2.0-OpenSSH_8.1
 SSH_REMOTE_VERSION_PATTERN = re.compile(
