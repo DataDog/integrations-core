@@ -72,7 +72,7 @@ datadog-mesos-slave==2.0.0; sys_platform != 'win32'
 datadog-mongo==1.12.0
 datadog-mysql==1.10.0
 datadog-nagios==1.5.1
-datadog-network==1.12.0
+datadog-network==1.12.1
 datadog-nfsstat==1.4.1; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==1.1.0
 datadog-nginx==3.4.0
