@@ -2,7 +2,7 @@
 
 ## 1.2.0 / 2019-12-02
 
-* [Added] Handle scheme in prometheus_url instead of separate option. See [#4913](https://github.com/DataDog/integrations-core/pull/4913).
+* [Added] Handle scheme in `prometheus_url` instead of the separate `scheme` option, which is now deprecated. See [#4913](https://github.com/DataDog/integrations-core/pull/4913).
 
 ## 1.1.1 / 2019-10-16
 

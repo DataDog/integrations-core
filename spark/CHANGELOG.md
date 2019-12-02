@@ -2,7 +2,7 @@
 
 ## 1.10.0 / 2019-12-02
 
-* [Added] Add spark driver support. See [#4631](https://github.com/DataDog/integrations-core/pull/4631). Thanks [mrmuggymuggy](https://github.com/mrmuggymuggy).
+* [Added] Add Spark driver support. See [#4631](https://github.com/DataDog/integrations-core/pull/4631). Thanks [mrmuggymuggy](https://github.com/mrmuggymuggy).
 
 ## 1.9.0 / 2019-10-11
 
