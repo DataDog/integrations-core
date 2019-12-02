@@ -1,5 +1,11 @@
 # CHANGELOG - couchbase
 
+## 1.12.0 / 2019-12-02
+
+* [Added] add version metadata. See [#4985](https://github.com/DataDog/integrations-core/pull/4985).
+* [Added] Standardize logging format. See [#4905](https://github.com/DataDog/integrations-core/pull/4905).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
 ## 1.11.0 / 2019-09-23
 
 * [Fixed] Fix typo for couchbase.by_node.cluster_membership service check. See [#4565](https://github.com/DataDog/integrations-core/pull/4565).
