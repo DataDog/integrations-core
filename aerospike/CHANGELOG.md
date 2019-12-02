@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.4.0 / 2019-12-02
+
+* [Added] Standardize logging format. See [#4897](https://github.com/DataDog/integrations-core/pull/4897).
+
 ## 1.3.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3484](https://github.com/DataDog/integrations-core/pull/3484).

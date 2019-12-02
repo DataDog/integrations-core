@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 1.15.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
 ## 1.14.0 / 2019-10-11
 
 * [Added] Submit version metadata. See [#4724](https://github.com/DataDog/integrations-core/pull/4724).
