@@ -14,11 +14,11 @@ Follow the instructions below to install and configure this check for an Agent r
 2. Ensure the client machine has been [granted][4] the permission policy [arn:aws:iam::aws:policy/AmazonMSKReadOnlyAccess][5] or equivalent [credentials][6] are available
 3. Install the [Datadog Agent][7]
 
-#### Beta
+#### Manual Installation Steps
 
 **Note**: This step will not be necessary in Agent versions 6.17.0+.
 
-[Install][13] the beta release (`datadog-amazon-kafka==1.0.0`).
+[Install][13] the 1.0 release (`datadog-amazon-kafka==1.0.0`).
 
 #### Dependencies
 
