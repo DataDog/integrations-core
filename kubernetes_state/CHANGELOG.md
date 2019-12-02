@@ -1,5 +1,10 @@
 # CHANGELOG - kubernetes_state
 
+## 5.0.0 / 2019-12-02
+
+* [Changed] [kubernetes_state] improves tagging compliancy. See [#5105](https://github.com/DataDog/integrations-core/pull/5105). Thanks [clamoriniere](https://github.com/clamoriniere).
+* [Fixed] Fix job metrics. See [#4943](https://github.com/DataDog/integrations-core/pull/4943).
+
 ## 4.7.1 / 2019-08-26
 
 * [Fixed] Properly ignore `kube_pod_created` and `kube_pod_container_info`. See [#4435](https://github.com/DataDog/integrations-core/pull/4435).
