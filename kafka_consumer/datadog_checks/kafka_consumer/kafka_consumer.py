@@ -68,14 +68,13 @@ class KafkaCheck(AgentCheck):
             self.instance.get('monitor_all_broker_highwatermarks', False)
         )
         self._consumer_groups = self.instance.get('consumer_groups', {})
+        self._kafka_client = self._create_kafka_admin_client()
         self._kafka_version = self.instance.get('kafka_client_api_version')
         if isinstance(self._kafka_version, str):
             self._kafka_version = tuple(map(int, self._kafka_version.split(".")))
 
     def check(self, instance):
         """The main entrypoint of the check."""
-
-        self._kafka_client = self._create_kafka_admin_client()
         self._consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._highwater_offsets = {}  # Expected format: {(topic, partition): offset}
 
@@ -113,8 +112,6 @@ class KafkaCheck(AgentCheck):
         # Report the metics
         self._report_highwater_offsets()
         self._report_consumer_offsets_and_lag()
-
-        self._kafka_client.close()
 
     def _create_kafka_admin_client(self):
         """Return a KafkaAdminClient."""
