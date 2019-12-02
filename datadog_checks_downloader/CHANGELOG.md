@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 0.7.0 / 2019-12-02
+
+* [Added] Support downloading universal and pure Python wheels. See [#4981](https://github.com/DataDog/integrations-core/pull/4981).
+
 ## 0.6.0 / 2019-06-01
 
 * [Added] Update downloader to new TUF root v4. See [#3811](https://github.com/DataDog/integrations-core/pull/3811).
