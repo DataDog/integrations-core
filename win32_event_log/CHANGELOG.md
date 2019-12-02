@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 2.2.0 / 2019-12-02
+
+* [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+
 ## 2.1.0 / 2019-10-11
 
 * [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
