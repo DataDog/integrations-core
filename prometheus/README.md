@@ -72,5 +72,5 @@ Need help? Contact [Datadog support][4].
 [6]: https://docs.datadoghq.com/agent/prometheus
 [7]: https://docs.datadoghq.com/developers/prometheus
 [8]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
-[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[9]: https://docs.datadoghq.com/getting_started/integrations/prometheus?tab=docker#configuration
 [10]: https://docs.datadoghq.com/integrations/openmetrics
