@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Amazon MSK][1] through the Datadog Agent.
+This check monitors Amazon Managed Streaming for Apache Kafka ([Amazon MSK][1]) through the Datadog Agent.
 
 ## Setup
 
