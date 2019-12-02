@@ -1,5 +1,11 @@
 # CHANGELOG - redisdb
 
+## 1.14.0 / 2019-12-02
+
+* [Added] add active defragmentation gauges for redis. See [#5022](https://github.com/DataDog/integrations-core/pull/5022).
+* [Fixed] Fix example keys config. See [#4939](https://github.com/DataDog/integrations-core/pull/4939). Thanks [sileht](https://github.com/sileht).
+* [Added] Use a stub class for metadata testing. See [#4919](https://github.com/DataDog/integrations-core/pull/4919).
+
 ## 1.13.0 / 2019-10-11
 
 * [Added] Submit version metadata. See [#4705](https://github.com/DataDog/integrations-core/pull/4705).
