@@ -197,13 +197,12 @@ class HDFSNameNode(AgentCheck):
 
     def _collect_metadata(self, value):
         # only get first info block
-        data = next(iter(value))
+        data = next(iter(value), {})
 
         version = data.get('SoftwareVersion', None)
 
         if version is not None:
             self.set_metadata('version', version)
-            self.log.debug("found hadoop version %s", version)
+            self.log.debug('found hadoop version %s', version)
         else:
-            self.log.warning("could not retrieve hadoop version information")
-            self.log.warning('this was data retrieved: %s', data)
+            self.log.warning('could not retrieve hadoop version information, this was data retrieved: %s', data)

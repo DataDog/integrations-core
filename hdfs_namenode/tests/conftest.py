@@ -52,7 +52,7 @@ def mocked_auth_request():
         yield
 
 
-def requests_get_mock(*args, **kwargs):
+def requests_get_mock(url, *args, **kwargs):
     class MockResponse:
         def __init__(self, json_data, status_code):
             self.json_data = json_data
@@ -64,19 +64,19 @@ def requests_get_mock(*args, **kwargs):
         def raise_for_status(self):
             return True
 
-    if args[0] == NAME_SYSTEM_STATE_URL:
+    if url == NAME_SYSTEM_STATE_URL:
         system_state_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem_state')
         with open(system_state_file_path, 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
-    elif args[0] == NAME_SYSTEM_URL:
+    elif url == NAME_SYSTEM_URL:
         system_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem')
         with open(system_file_path, 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
-    elif args[0] == NAME_SYSTEM_METADATA_URL:
+    elif url == NAME_SYSTEM_METADATA_URL:
         system_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem_info')
         with open(system_file_path, 'r') as f:
             body = f.read()
