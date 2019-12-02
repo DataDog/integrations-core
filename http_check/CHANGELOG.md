@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 4.5.0 / 2019-12-02
+
+* [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
+
 ## 4.4.0 / 2019-11-15
 
 * [Fixed] Update response_time metric source. See [#5025](https://github.com/DataDog/integrations-core/pull/5025).
