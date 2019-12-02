@@ -1,2 +1,2 @@
-# CHANGELOG - Amazon Kafka
+# CHANGELOG - Amazon MSK
 

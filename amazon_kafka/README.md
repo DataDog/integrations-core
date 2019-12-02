@@ -1,4 +1,4 @@
-# Agent Check: Amazon Kafka
+# Agent Check: Amazon MSK
 
 ## Overview
 
@@ -70,7 +70,7 @@ Returns `CRITICAL` if the check cannot access a metrics endpoint. Otherwise, ret
 
 ### Events
 
-The Amazon Kafka check does not include any events.
+The Amazon MSK check does not include any events.
 
 ## Troubleshooting
 
