@@ -118,5 +118,5 @@ datadog-vsphere==4.2.1
 datadog-win32-event-log==2.2.0; sys_platform == 'win32'
 datadog-windows-service==2.3.0; sys_platform == 'win32'
 datadog-wmi-check==1.6.0; sys_platform == 'win32'
-datadog-yarn==1.10.0
+datadog-yarn==1.11.0
 datadog-zk==2.2.0; sys_platform != 'win32'
