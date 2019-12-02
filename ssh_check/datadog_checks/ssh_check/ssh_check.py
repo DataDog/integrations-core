@@ -129,6 +129,7 @@ class CheckSSH(AgentCheck):
 
                 if exception_message is None:
                     exception_message = "No errors occured"
+
                 self.service_check(self.SFTP_SERVICE_CHECK_NAME, status, tags=tags, message=exception_message)
         finally:
             # Always close the client, failure to do so leaks one thread per connection left open
