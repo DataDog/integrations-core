@@ -18,7 +18,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 **Note**: This step will not be necessary in Agent versions 6.17.0+.
 
-[Install][13] the beta release (`datadog-amazon-kafka==0.1.0-rc.1`).
+[Install][13] the beta release (`datadog-amazon-kafka==1.0.0`).
 
 #### Dependencies
 
