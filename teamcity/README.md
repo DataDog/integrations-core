@@ -45,11 +45,11 @@ Add an item like the above to `instances` for each build configuration you want 
 #### Containerized
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
 
-| Parameter            | Value                                                                                                                                         |
-|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `teamcity`                                                                                                                                    |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                 |
-| `<INSTANCE_CONFIG>`  | `{"name": "<BUILD_NAME>", "server":"teamcity.<MY_COMPANY>.com", "build_configuration":"<BUILD_CONFIGURATION_ID>"}` |
+| Parameter            | Value                                                                                             |
+|----------------------|---------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `teamcity`                                                                                        |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                     |
+| `<INSTANCE_CONFIG>`  | `{"name": "<BUILD_NAME>", "server":"%%host%%", "build_configuration":"<BUILD_CONFIGURATION_ID>"}` |
 
 ### Validation
 
