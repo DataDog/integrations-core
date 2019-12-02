@@ -1,12 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
-## 1.0.0 / 2019-12-02
+## 0.40.0 / 2019-12-02
 
 * [Added] Support downloading universal and pure Python wheels. See [#4981](https://github.com/DataDog/integrations-core/pull/4981).
 * [Added] Support more metric types for `ddev meta prom`. See [#5071](https://github.com/DataDog/integrations-core/pull/5071).
 * [Added] Improve prompts in `ddev clean`. See [#5061](https://github.com/DataDog/integrations-core/pull/5061).
 * [Added] Add command to navigate to config directory. See [#5054](https://github.com/DataDog/integrations-core/pull/5054).
-* [Removed] Remove logos folder from template. See [#4988](https://github.com/DataDog/integrations-core/pull/4988).
+* [Changed] Remove logos folder from template. See [#4988](https://github.com/DataDog/integrations-core/pull/4988).
 * [Fixed] Handle formatting edge cases for `meta changes`. See [#4970](https://github.com/DataDog/integrations-core/pull/4970).
 * [Changed] Remove logo validation. See [#4964](https://github.com/DataDog/integrations-core/pull/4964).
 * [Added] Use a stub class for metadata testing. See [#4919](https://github.com/DataDog/integrations-core/pull/4919).
