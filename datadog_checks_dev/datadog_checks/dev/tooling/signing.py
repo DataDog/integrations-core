@@ -17,7 +17,9 @@ from in_toto import runlib
 from in_toto.gpg.constants import GPG_COMMAND
 
 from .constants import get_root
-from .git import git_ls_files
+from .git import (
+    git_check_ignore, git_ls_files
+)
 from ..subprocess import run_command
 from ..utils import (
     chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
@@ -31,13 +33,22 @@ class YubikeyException(Exception):
     pass
 
 
-class UntrackedFileException(Exception):
+class NeitherTrackedNorIgnoredFileException(Exception):
     def __init__(self, filename):
         self.filename = filename
 
 
     def __str__(self):
-        return '{} has not been tracked by git!'.format(self.filename)
+        return '{} has neither been tracked or ignored by git!'.format(self.filename)
+
+
+class UntrackedButIgnoredFileException(Exception):
+    def __init__(self, filename):
+        self.filename = filename
+
+
+    def __str__(self):
+        return '{} has not been tracked, but it should be ignored by git!'.format(self.filename)
 
 
 def read_gitignore_patterns():
@@ -110,7 +121,7 @@ def update_link_metadata(checks):
     with chdir(root):
         run_in_toto(key_id, products)
 
-        # Check whether each signed product is being tracked by git.
+        # Check whether each signed product is being tracked AND ignored by git.
         # NOTE: We have to check now *AFTER* signing the tag link file, so that
         # we can check against the actual complete list of products.
         with open(tag_link) as tag_json:
@@ -118,9 +129,20 @@ def update_link_metadata(checks):
             products = tag['signed']['products']
 
         for product in products:
+            # If NOT tracked...
             if not git_ls_files(product):
+                # First, delete the tag link off disk so as not to pollute.
                 os.remove(tag_link)
-                raise UntrackedFileException(product)
+
+                # AND NOT ignored, then it most likely means the developer
+                # forgot to add the file to git.
+                if not git_check_ignore(product):
+                    raise NeitherTrackedNorIgnoredFileException(product)
+                # AND ignored, then it most likely means that we did not
+                # correctly ignore files in read_gitignore_patterns() in
+                # run_in_toto() above.
+                else:
+                    raise UntrackedButIgnoredFileException(product)
 
         # Tell pipeline which tag link metadata to use.
         write_file(metadata_file_tracker, tag_link)

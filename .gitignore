@@ -106,3 +106,13 @@ wheelhouse/
 # by default, ignore in-toto metadata from the command line
 .links/
 *.link
+
+# and most TUF metadata and all targets
+datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/current/*.json
+!datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/current/.gitignore
+!datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/current/root.json
+datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/previous/*.json
+!datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/previous/.gitignore
+datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/simple/
+datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/in-toto-*/
+!datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/.gitignore

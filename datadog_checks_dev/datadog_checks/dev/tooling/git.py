@@ -110,3 +110,12 @@ def git_ls_files(filename):
         # https://stackoverflow.com/a/2406813
         result = run_command('git ls-files --error-unmatch {}'.format(filename), capture=True)
         return result.code == 0
+
+
+def git_check_ignore(filename):
+    """
+    Return a boolean value for whether the given file is ignored by git.
+    """
+    with chdir(get_root()):
+        result = run_command('git check-ignore -q {}'.format(filename), capture=True)
+        return result.code == 0
