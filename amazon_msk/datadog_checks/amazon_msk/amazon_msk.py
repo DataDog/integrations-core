@@ -8,17 +8,17 @@ from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 from .metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 
 
-class AmazonKafkaCheck(OpenMetricsBaseCheck):
-    SERVICE_CHECK_CONNECT = 'amazon_kafka.can_connect'
+class AmazonMskCheck(OpenMetricsBaseCheck):
+    SERVICE_CHECK_CONNECT = 'aws.msk.can_connect'
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
-        super(AmazonKafkaCheck, self).__init__(
+        super(AmazonMskCheck, self).__init__(
             name,
             init_config,
             instances,
-            default_instances={'amazon_kafka': {'ssl_verify': False}},
-            default_namespace='amazon_kafka',
+            default_instances={'aws.msk': {'ssl_verify': False}},
+            default_namespace='aws.msk',
         )
         self._region_name = None
         self._cluster_arn = None

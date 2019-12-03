@@ -10,7 +10,7 @@ HERE = path.dirname(path.abspath(__file__))
 
 # Get version info
 ABOUT = {}
-with open(path.join(HERE, 'datadog_checks', 'amazon_kafka', '__about__.py')) as f:
+with open(path.join(HERE, 'datadog_checks', 'amazon_msk', '__about__.py')) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
@@ -22,12 +22,12 @@ CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 
 
 setup(
-    name='datadog-amazon-kafka',
+    name='datadog-amazon-msk',
     version=ABOUT['__version__'],
-    description='The Amazon Kafka check',
+    description='The Amazon MSK check',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords='datadog agent amazon_kafka check',
+    keywords='datadog agent amazon_msk check',
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
     # Author details
@@ -46,7 +46,7 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     # The package we're going to ship
-    packages=['datadog_checks.amazon_kafka'],
+    packages=['datadog_checks.amazon_msk'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
     # Extra files to ship with the wheel package

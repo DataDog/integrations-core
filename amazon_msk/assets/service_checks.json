@@ -2,7 +2,7 @@
     {
         "agent_version": "6.17.0",
         "integration": "Amazon Kafka",
-        "check": "amazon_kafka.can_connect",
+        "check": "amazon_msk.can_connect",
         "statuses": ["ok", "critical"],
         "groups": ["host", "cluster_arn", "region_name"],
         "name": "Can Connect",
@@ -11,7 +11,7 @@
     {
         "agent_version": "6.17.0",
         "integration": "Amazon Kafka",
-        "check": "amazon_kafka.prometheus.health",
+        "check": "amazon_msk.prometheus.health",
         "statuses": ["ok", "critical"],
         "groups": ["host", "endpoint", "cluster_arn", "region_name", "broker_id"],
         "name": "Amazon Kafka prometheus health",

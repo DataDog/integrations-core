@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.amazon_kafka import AmazonKafkaCheck
-from datadog_checks.amazon_kafka.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP
+from datadog_checks.amazon_msk import AmazonMskCheck
+from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP
 
 
 @pytest.mark.usefixtures('mock_data')
 def test_node_check(aggregator, instance, mock_client):
-    c = AmazonKafkaCheck('amazon_kafka', {}, [instance])
+    c = AmazonMskCheck('amazon_msk', {}, [instance])
     assert not c.run()
 
     caller, client = mock_client
@@ -36,7 +36,7 @@ def test_node_check(aggregator, instance, mock_client):
                 service_check_tags = ['endpoint:http://{}:{}/metrics'.format(endpoint, port)]
                 service_check_tags.extend(global_tags)
 
-                aggregator.assert_service_check('amazon_kafka.prometheus.health', c.OK, tags=service_check_tags)
+                aggregator.assert_service_check('aws.msk.prometheus.health', c.OK, tags=service_check_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -50,13 +50,13 @@ def assert_node_metrics(aggregator, tags):
         metrics.update({'{}.count'.format(metric), '{}.quantile'.format(metric), '{}.sum'.format(metric)})
 
     for metric in sorted(metrics):
-        metric = 'amazon_kafka.{}'.format(metric)
+        metric = 'aws.msk.{}'.format(metric)
         for tag in tags:
             aggregator.assert_metric_has_tag(metric, tag)
 
 
 def assert_jmx_metrics(aggregator, tags):
     for metric in sorted(JMX_METRICS_MAP.values()):
-        metric = 'amazon_kafka.{}'.format(metric)
+        metric = 'aws.msk.{}'.format(metric)
         for tag in tags:
             aggregator.assert_metric_has_tag(metric, tag)

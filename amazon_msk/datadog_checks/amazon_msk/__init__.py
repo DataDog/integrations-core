@@ -2,6 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .amazon_kafka import AmazonKafkaCheck
+from .amazon_msk import AmazonMskCheck
 
-__all__ = ['__version__', 'AmazonKafkaCheck']
+__all__ = ['__version__', 'AmazonMskCheck']
