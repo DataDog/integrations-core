@@ -25,7 +25,7 @@ from ..utils import (
     chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
 )
 
-LINK_DIR = '.links'
+LINK_DIR = '.in-toto'
 STEP_NAME = 'tag'
 
 
