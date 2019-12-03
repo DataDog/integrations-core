@@ -21,7 +21,7 @@
     "processing"
   ],
   "type": "check",
-  "is_public": true,
+  "is_public": false,
   "integration_id": "amazon-kafka",
   "assets": {
     "dashboards": {},
