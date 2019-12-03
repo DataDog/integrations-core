@@ -18,7 +18,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 **Note**: This step will not be necessary in Agent versions 6.17.0+.
 
-[Install][13] the 1.0 release (`datadog-amazon-kafka==1.0.0`).
+[Install][13] the 1.0 release (`datadog-amazon-msk==1.0.0`).
 
 #### Dependencies
 
@@ -46,13 +46,13 @@ For Agent versions >= 6.12:
 
 ### Configuration
 
-1. Edit the `amazon_kafka.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. See the [sample amazon_kafka.d/conf.yaml][8] for all available configuration options.
+1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. See the [sample amazon_msk.d/conf.yaml][8] for all available configuration options.
 
 2. [Restart the Agent][9].
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `amazon_kafka` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `amazon_msk` under the Checks section.
 
 ## Data Collected
 
@@ -62,10 +62,10 @@ See [metadata.csv][11] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**amazon_kafka.can_connect**:<br>
+**aws.msk.can_connect**:<br>
 Returns `CRITICAL` if the Agent is unable to discover nodes of the MSK cluster. Otherwise, returns `OK`.
 
-**amazon_kafka.prometheus.health**:<br>
+**aws.msk.prometheus.health**:<br>
 Returns `CRITICAL` if the check cannot access a metrics endpoint. Otherwise, returns `OK`.
 
 ### Events
@@ -83,10 +83,10 @@ Need help? Contact [Datadog support][12].
 [5]: https://console.aws.amazon.com/iam/home?#/policies/arn:aws:iam::aws:policy/AmazonMSKReadOnlyAccess
 [6]: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
 [7]: https://docs.datadoghq.com/agent
-[8]: https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/datadog_checks/amazon_kafka/data/conf.yaml.example
+[8]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/datadog_checks/amazon_msk/data/conf.yaml.example
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[11]: https://github.com/DataDog/integrations-core/blob/master/amazon_kafka/metadata.csv
+[11]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/metadata.csv
 [12]: https://docs.datadoghq.com/help
 [13]: https://docs.datadoghq.com/agent/guide/integration-management/#install
 [14]: https://aws.amazon.com/sdk-for-python/
