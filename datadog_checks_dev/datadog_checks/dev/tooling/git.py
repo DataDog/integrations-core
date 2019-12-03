@@ -102,7 +102,7 @@ def git_tag_list(pattern=None):
     return list(filter(regex.search, result))
 
 
-def git_ls_files(filename):
+def tracked_by_git(filename):
     """
     Return a boolean value for whether the given file is tracked by git.
     """
@@ -112,7 +112,7 @@ def git_ls_files(filename):
         return result.code == 0
 
 
-def git_check_ignore(filename):
+def ignored_by_git(filename):
     """
     Return a boolean value for whether the given file is ignored by git.
     """
