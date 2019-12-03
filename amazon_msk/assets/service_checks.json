@@ -1,17 +1,17 @@
 [
     {
-        "agent_version": "6.17.0",
+        "agent_version": "6.16.0",
         "integration": "Amazon Kafka",
-        "check": "amazon_msk.can_connect",
+        "check": "aws.msk.can_connect",
         "statuses": ["ok", "critical"],
         "groups": ["host", "cluster_arn", "region_name"],
         "name": "Can Connect",
         "description": "Returns `CRITICAL` if the Agent is unable to discover nodes of the MSK cluster. Otherwise, returns `OK`."
     },
     {
-        "agent_version": "6.17.0",
+        "agent_version": "6.16.0",
         "integration": "Amazon Kafka",
-        "check": "amazon_msk.prometheus.health",
+        "check": "aws.msk.prometheus.health",
         "statuses": ["ok", "critical"],
         "groups": ["host", "endpoint", "cluster_arn", "region_name", "broker_id"],
         "name": "Amazon Kafka prometheus health",
