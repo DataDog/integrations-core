@@ -16,13 +16,13 @@ Follow the instructions below to install and configure this check for an Agent r
 
 #### Manual Installation Steps
 
-**Note**: This step will not be necessary in Agent versions 6.17.0+.
+**Note**: This step will not be necessary in Agent versions 6.16.0+.
 
 [Install][13] the 1.0 release (`datadog-amazon-msk==1.0.0`).
 
 #### Dependencies
 
-**Note**: This step will not be necessary in Agent versions 6.17.0+.
+**Note**: This step will not be necessary in Agent versions 6.16.0+.
 
 The [boto3][14] client library is required. To install it, run:
 
