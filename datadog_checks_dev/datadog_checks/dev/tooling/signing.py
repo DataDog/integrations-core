@@ -39,7 +39,7 @@ class NeitherTrackedNorIgnoredFileException(Exception):
 
 
     def __str__(self):
-        return '{} has neither been tracked or ignored by git!'.format(self.filename)
+        return '{} has neither been tracked nor ignored by git and in-toto!'.format(self.filename)
 
 
 class UntrackedButIgnoredFileException(Exception):
@@ -48,7 +48,7 @@ class UntrackedButIgnoredFileException(Exception):
 
 
     def __str__(self):
-        return '{} has not been tracked, but it should be ignored by git!'.format(self.filename)
+        return '{} has not been tracked, but it should be ignored by git and in-toto!'.format(self.filename)
 
 
 def read_gitignore_patterns():
