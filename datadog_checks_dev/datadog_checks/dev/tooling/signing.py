@@ -115,9 +115,6 @@ def update_link_metadata(checks):
     # Final location of metadata file.
     metadata_file = path_join(LINK_DIR, tag_link)
 
-    # File used to tell the pipeline where to find the latest metadata file.
-    metadata_file_tracker = path_join(LINK_DIR, 'LATEST')
-
     with chdir(root):
         # We should ignore products untracked and ignored by git.
         run_in_toto(key_id, products)
@@ -145,10 +142,7 @@ def update_link_metadata(checks):
                 else:
                     raise UntrackedButIgnoredFileException(product)
 
-        # Tell pipeline which tag link metadata to use.
-        write_file(metadata_file_tracker, tag_link)
-
         # Move it to the expected location.
         shutil.move(tag_link, metadata_file)
 
-    return metadata_file, metadata_file_tracker
+    return (metadata_file,)
