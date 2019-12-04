@@ -153,6 +153,7 @@ def test_metadata(aggregator, instance_query, datadog_agent):
         'version.minor': minor,
         'version.patch': patch,
         'version.release': mock.ANY,
+        'version.build': 'enterprise',
         'version.raw': raw_version,
     }
 
