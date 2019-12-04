@@ -8,8 +8,9 @@ from collections import OrderedDict
 
 import mock
 import pytest
+from six import PY3
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
 pytestmark = pytest.mark.metadata
 
@@ -54,6 +55,24 @@ class TestRaw:
             check.set_metadata('foo', 'bar')
 
             m.assert_called_once_with('test:123', 'foo', 'rab')
+
+    def test_encoding(self):
+        check = AgentCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+        if PY3:
+            constructor = ensure_bytes
+            finalizer = ensure_unicode
+        else:
+            constructor = ensure_unicode
+            finalizer = ensure_bytes
+
+        name = constructor(u'nam\u00E9')
+        value = constructor(u'valu\u00E9')
+
+        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.set_metadata(name, value)
+
+            m.assert_called_once_with('test:123', finalizer(name), finalizer(value))
 
 
 class TestVersion:
