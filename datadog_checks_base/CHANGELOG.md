@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 10.0.1 / 2019-12-04
+
+* [Fixed] Ensure metadata is submitted as strings. See [#5139](https://github.com/DataDog/integrations-core/pull/5139).
+
 ## 10.0.0 / 2019-12-02
 
 * [Changed] Aligns `no_proxy` behavior to general convention. See [#5081](https://github.com/DataDog/integrations-core/pull/5081).
