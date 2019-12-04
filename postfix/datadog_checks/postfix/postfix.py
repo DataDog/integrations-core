@@ -198,6 +198,8 @@ class PostfixCheck(AgentCheck):
             # for example:
             #     sum:postfix.queue.size{instance:postfix-2,queue:incoming,host:hostname.domain.tld}
 
+        self._collect_metadata()
+
     def _collect_metadata(self):
         pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
         self.log.debug('postconf mail_version output: %s', pc_output)
