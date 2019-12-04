@@ -199,7 +199,12 @@ class PostfixCheck(AgentCheck):
             #     sum:postfix.queue.size{instance:postfix-2,queue:incoming,host:hostname.domain.tld}
 
     def _collect_metadata(self):
-        pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
+        try:
+            pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
+        except Exception as e:
+            self.log.error('unable to call `postconf mail_version`: %s', e)
+            return
+
         self.log.debug('postconf mail_version output: %s', pc_output)
 
         postfix_version = pc_output.strip('\n').split('=')[1].strip()
