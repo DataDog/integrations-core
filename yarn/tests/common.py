@@ -26,7 +26,10 @@ CUSTOM_TAGS = ['optional:tag1']
 TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
 
-INSTANCE_INTEGRATION = {"resourcemanager_uri": RM_ADDRESS, "cluster_name": CLUSTER_NAME}
+INSTANCE_INTEGRATION = {
+    "resourcemanager_uri": RM_ADDRESS,
+    "cluster_name": CLUSTER_NAME,
+}
 
 CLUSTER_TAG = "cluster_name:{}".format(CLUSTER_NAME)
 
@@ -97,6 +100,28 @@ YARN_CONFIG = {
             'tags': list(CUSTOM_TAGS),
             'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
             'queue_blacklist': ['nofollowqueue'],
+        }
+    ]
+}
+YARN_CONFIG_STATUS_MAPPING = {
+    'instances': [
+        {
+            'resourcemanager_uri': RM_ADDRESS,
+            'cluster_name': CLUSTER_NAME,
+            'tags': list(CUSTOM_TAGS),
+            'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
+            'queue_blacklist': ['nofollowqueue'],
+            "application_status_mapping": {
+                'ALL': 'unknown',
+                'NEW': 'ok',
+                'NEW_SAVING': 'ok',
+                'SUBMITTED': 'ok',
+                'ACCEPTED': 'ok',
+                'RUNNING': 'ok',
+                'FINISHED': 'ok',
+                'FAILED': 'warning',
+                'KILLED': 'warning',
+            },
         }
     ]
 }
