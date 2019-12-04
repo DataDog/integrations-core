@@ -126,7 +126,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][13
 |----------------------|---------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `activemq`                                                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                               |
-| `<INSTANCE_CONFIG>`  | <pre>{"host": "%%host%%",<br> "port":"7199",<br>"username":"%%env_ACTIVEMQ_USERNAME%%",<br> "password":"%%env_REDIS_PASSWORD%%",<br> "name": "<ACTIVEMQ_INSTANCE_NAME>"}</pre> |
+| `<INSTANCE_CONFIG>`  | <pre>{"host": "%%host%%",<br> "port":"7199",<br>"username":"%%env_ACTIVEMQ_USERNAME%%",<br> "password":"%%env_ACTIVEMQ_PASSWORD%%",<br> "name": "<ACTIVEMQ_INSTANCE_NAME>"}</pre> |
 
 ##### Log collection
 
