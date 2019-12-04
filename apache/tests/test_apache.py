@@ -66,7 +66,7 @@ def test_e2e(dd_agent_check):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_metadata(check, datadog_agent):
-    check = check(STATUS_CONFIG)
+    check = check(AUTO_CONFIG)
     check.check_id = 'test:123'
     major, minor, patch = APACHE_VERSION.split('.')
     version_metadata = {
@@ -77,6 +77,6 @@ def test_metadata(check, datadog_agent):
         'version.raw': APACHE_VERSION,
     }
 
-    check.check(STATUS_CONFIG)
+    check.check(AUTO_CONFIG)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
