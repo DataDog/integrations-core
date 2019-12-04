@@ -202,7 +202,7 @@ class PostfixCheck(AgentCheck):
         try:
             pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
         except Exception as e:
-            self.log.error('unable to call `postconf mail_version`: %s', e)
+            self.log.warning('unable to call `postconf mail_version`: %s', e)
             return
 
         self.log.debug('postconf mail_version output: %s', pc_output)
