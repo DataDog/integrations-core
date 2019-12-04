@@ -5,7 +5,7 @@ instances:
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_url: http://external-dns:7979/metrics
+  - prometheus_url: http://localhost:7979/metrics
 
     ## @param send_histograms_buckets - boolean - optional
     ## The histogram buckets can be noisy and generate a lot of tags.
