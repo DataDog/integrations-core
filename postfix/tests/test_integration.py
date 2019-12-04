@@ -13,6 +13,7 @@ from .common import get_instance, get_queue_counts
 def test_check(aggregator):
     instance = get_instance()
     check = PostfixCheck('postfix', {}, [instance])
+    check._collect_metadata = lambda: None
     check.check(instance)
 
     for queue, count in iteritems(get_queue_counts()):
