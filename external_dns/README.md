@@ -24,13 +24,13 @@ apiVersion: v1
 kind: Pod
 metadata:
   annotations:
-    service-discovery.datadoghq.com/external_dns.check_names: '["external_dns"]'
-    service-discovery.datadoghq.com/external_dns.init_configs: '[{}]'
-    service-discovery.datadoghq.com/external_dns.instances: '[[{"prometheus_url":"http://%%host%%:7979/metrics", "tags":["dns-pod:%%host%%"]}]]'
+    ad.datadoghq.com/external-dns.check_names: '["external_dns"]'
+    ad.datadoghq.com/external-dns.init_configs: '[{}]'
+    ad.datadoghq.com/external-dns.instances: '[{"prometheus_url":"http://%%host%%:7979/metrics", "tags":["externaldns-pod:%%host%%"]}]'
 ```
 
-- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
-- The service discovery annotations are done on the pod. To deploy, add the annotations to the metadata of the template's specification.
+- The `externaldns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the autodiscovery.
+- The autodiscovery annotations are done on the pod. To deploy, add the annotations to the metadata of the template's specification.
 
 ### Validation
 
