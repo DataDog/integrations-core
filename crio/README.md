@@ -6,19 +6,31 @@ This check monitors [CRI-O][1].
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The integration relies on the `--enable-metrics` option of CRI-O that is disabled by default, when enabled metrics are exposed at `127.0.0.1:9090/metrics`.
 
 ### Configuration
 
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
 1. Edit the `crio.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    Agent's configuration directory to start collecting your CRI-O performance data.
    See the [sample crio.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4]
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                             |
+|----------------------|---------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `crio`                                                                                        |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                     |
+| `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:9090/metrics"}` |
 
 ### Validation
 
