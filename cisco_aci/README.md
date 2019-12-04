@@ -10,13 +10,15 @@ The Cisco ACI Integration lets you:
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
-
 ### Installation
 
 The Cisco ACI check is packaged with the Agent, so simply [install the Agent][2] on a server within your network.
 
 ### Configuration
+
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `cisco_aci.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
     See the [sample cisco_aci.d/conf.yaml][4] for all available configuration options:
@@ -40,6 +42,16 @@ The Cisco ACI check is packaged with the Agent, so simply [install the Agent][2]
     ```
 
 2. [Restart the Agent][5] to begin sending Cisco ACI metrics to Datadog.
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                             |
+|----------------------|---------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `teamcity`                                                                                        |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                     |
+| `<INSTANCE_CONFIG>`  | `{"aci_url":"%%host%%", "username":"<USERNAME>", "pwd": "<PASSWORD>"}` |
 
 ### Validation
 
