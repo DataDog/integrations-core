@@ -198,11 +198,15 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
             "dd_source": "redis",
             "dd_tags": "project:fluentbit",
             "TLS": "on",
+	    "Host": "http-intake.logs.datadoghq.com",
             "provider": "ecs"
 	    }
     }
 
     ```
+
+The full list of available parameters is described in the [Datadog Fluentbit documentation][34].
+
 3. Now, whenever a Fargate task runs, Fluent Bit sends the container logs to your Datadog monitoring with information about all of the containers managed by your Fargate tasks. You can see the raw logs on the [Log Explorer page][30], [build monitors][31] for the logs, and use the [Live Container view][29].
 
 #### AWS logDriver
@@ -296,3 +300,4 @@ Need help? Contact [Datadog support][19].
 [31]: https://docs.datadoghq.com/monitors/monitor_types/
 [32]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
 [33]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/ 
+[34]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
