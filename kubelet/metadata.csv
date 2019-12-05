@@ -56,4 +56,4 @@ kubernetes.kubelet.volume.stats.inodes_used,gauge,,inode,,The number of used ino
 kubernetes.ephemeral_storage.limits,gauge,,byte,,Ephemeral storage limit of the container (requires kubernetes v1.8+),0,kubelet,k8s.eph_storage.limits
 kubernetes.ephemeral_storage.requests,gauge,,byte,,Ephemeral storage request of the container (requires kubernetes v1.8+),0,kubelet,k8s.eph_storage.requests
 kubernetes.ephemeral_storage.usage,gauge,,byte,,Ephemeral storage usage of the POD,0,kubelet,k8s.eph_storage.usage
-kubernetes.kubelet.evictions,count,,,,The number of PODs that have been evicted from the kubelet (ALPHA in kubernetes v1.16),-1,kubelet,k8s.evict
+kubernetes.kubelet.evictions,count,,,,The number of pods that have been evicted from the kubelet (ALPHA in kubernetes v1.16),-1,kubelet,k8s.evict
