@@ -83,8 +83,8 @@ Need help? Contact [Datadog support][].
 [audit command]: https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/Functions/VerticaFunctions/LicenseManagement/AUDIT_LICENSE_SIZE.htm
 [license guide]: https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/AdministratorsGuide/Licensing/MonitoringDatabaseSizeForLicenseCompliance.htm
 [vertica.d/conf.yaml]: https://github.com/DataDog/integrations-core/blob/master/vertica/datadog_checks/vertica/data/conf.yaml.example
-[agent restart]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[agent status]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[agent restart]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[agent status]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [metrics csv]: https://github.com/DataDog/integrations-core/blob/master/vertica/metadata.csv
 [Datadog support]: https://docs.datadoghq.com/help
 [vsql]: https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/Glossary/vsql.htm

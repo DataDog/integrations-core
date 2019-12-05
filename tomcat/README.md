@@ -283,7 +283,7 @@ init_config:
       %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
       %d [%t] %-5p %c - %m%n
     ```
-    
+
     Clone and edit the [integration pipeline][10] if you have a different format. Check Tomcat [logging documentation][9] for more information about Tomcat logging capabilities.
 
 3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -356,13 +356,13 @@ Additional helpful documentation, links, and articles:
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
-[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [6]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/integrations/java
 [9]: https://tomcat.apache.org/tomcat-7.0-doc/logging.html
 [10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
 [13]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
 [14]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance

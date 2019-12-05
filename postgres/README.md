@@ -204,10 +204,10 @@ Additional helpful documentation, links, and articles:
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
 [6]: https://docs.datadoghq.com/agent/docker/log/
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [9]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
 [10]: https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line
