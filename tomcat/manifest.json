@@ -1,7 +1,8 @@
 {
   "categories": [
     "web",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Tomcat",
