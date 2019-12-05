@@ -125,7 +125,7 @@ class AerospikeCheck(AgentCheck):
                 set_tags.extend(namespace_tags)
                 self.collect_info('sets/{}/{}'.format(ns, s), SET_METRIC_TYPE, separator=':', tags=set_tags)
 
-            # https://www.aerospike.com/docs/reference/info/#dcs
+        # https://www.aerospike.com/docs/reference/info/#dcs
         try:
             datacenters = self.get_datacenters()
 
