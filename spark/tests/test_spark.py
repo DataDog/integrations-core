@@ -17,6 +17,8 @@ from six.moves.urllib.parse import parse_qsl, unquote_plus, urljoin, urlparse
 
 from datadog_checks.spark import SparkCheck
 
+from .common import HOST, INSTANCE_DRIVER, INSTANCE_STANDALONE
+
 # IDs
 YARN_APP_ID = 'application_1459362484344_0011'
 SPARK_APP_ID = 'app_001'
@@ -773,7 +775,7 @@ def test_mesos_filter(aggregator):
 
 
 @pytest.mark.unit
-def test_driver(aggregator):
+def test_driver_unit(aggregator):
     with mock.patch('requests.get', driver_requests_get_mock):
         c = SparkCheck('spark', {}, [DRIVER_CONFIG])
         c.check(DRIVER_CONFIG)
@@ -988,10 +990,25 @@ def run_ssl_server():
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'instance, service_check, cluster_name, spark_url',
+    [
+        pytest.param(
+            INSTANCE_STANDALONE,
+            'spark.standalone_master.can_connect',
+            'SparkCluster',
+            'http://{}:8080'.format(HOST),
+            id='standalone',
+        ),
+        pytest.param(
+            INSTANCE_DRIVER, 'spark.driver.can_connect', 'SparkDriver', 'http://{}:4040'.format(HOST), id='driver',
+        ),
+    ],
+)
 @pytest.mark.integration
-def test_standalone(aggregator, instance_standalone):
-    c = SparkCheck('spark', {}, [instance_standalone])
-    c.check(instance_standalone)
+def test_integration(aggregator, instance, service_check, cluster_name, spark_url):
+    c = SparkCheck('spark', {}, [instance])
+    c.check(instance)
 
     # Check the running job metrics
     for metric in SPARK_JOB_RUNNING_METRIC_VALUES:
@@ -1031,3 +1048,7 @@ def test_standalone(aggregator, instance_standalone):
     # # Check the RDD metrics
     # for metric in SPARK_RDD_METRIC_VALUES:
     #     aggregator.assert_metric(metric)
+
+    aggregator.assert_service_check(
+        service_check, status=SparkCheck.OK, tags=['cluster_name:{}'.format(cluster_name), 'url:{}'.format(spark_url)],
+    )
