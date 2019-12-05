@@ -136,9 +136,8 @@ def update_link_metadata(checks):
                 # forgot to add the file to git.
                 if not ignored_by_git(product):
                     raise NeitherTrackedNorIgnoredFileException(product)
-                # AND ignored, then it most likely means that we did not
-                # correctly ignore files in read_gitignore_patterns() in
-                # run_in_toto() above.
+                # AND ignored, then it most likely means that incorrectly
+                # recorded with in-toto files ignored by git.
                 else:
                     raise UntrackedButIgnoredFileException(product)
 
