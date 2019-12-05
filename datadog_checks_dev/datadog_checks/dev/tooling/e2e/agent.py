@@ -26,7 +26,7 @@ MANIFEST_VERSION_PATTERN = r'agent (\d)'
 
 def get_rate_flag(agent_version):
     if agent_version >= 6:
-        return '--check-rate'
+        return '--rate'
     else:
         return 'check_rate'
 
