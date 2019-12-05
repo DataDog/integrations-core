@@ -48,8 +48,8 @@ and [knowledge base][12]. You can also visit our
 ## GPG public keys
 
 For those whom it may concern, the following is a list of GPG public key
-fingerprints known to correspond to developers who, at the time of writing (May
-28 2019), can trigger a build by signing [metadata](.links/):
+fingerprints known to correspond to developers who, at the time of writing (Dec
+2 2019), can trigger a build by signing [metadata](.in-toto/):
 
 * [Christine Chen](https://api.github.com/users/ChristineTChen/gpg_keys)
   * `57CE 2495 EA48 D456 B9C4  BA4F 66E8 2239 9141 D9D3`
@@ -57,21 +57,18 @@ fingerprints known to correspond to developers who, at the time of writing (May
 * [Dave Coleman](https://api.github.com/users/dcoleman17/gpg_keys)
   * `8278 C406 C1BB F1F2 DFBB  5AD6 0AE7 E246 4F8F D375`
   * `98A5 37CD CCA2 8DFF B35B  0551 5D50 0742 90F6 422F`
-* [Hippolyte Henry](https://api.github.com/users/zippolyte/gpg_keys)
-  * `87D5 2666 ECBF 2459 9D5A  594F F7AC E411 B85D 518C`
-  * `31EE F81D 7F71 6E35 83F2  4095 55D1 30B4 49D2 BD26`
+* [Mike Garabedian](https://api.github.com/users/mgarabed/gpg_keys)
+  * `F90C 0097 67F2 4B27 9DC2  C83D A227 6601 6CB4 CF1D`
+  * `2669 6E67 28D2 0CB0 C1E0  D2BE 6643 5756 8398 9306`
 * [Thomas Hervé](https://api.github.com/users/therve/gpg_keys)
   * `59DB 2532 75A5 BD4E 55C7  C5AA 0678 55A2 8E90 3B3B`
   * `E2BD 994F 95C0 BC0B B923  1D21 F752 1EC8 F485 90D0`
-* [Slavek Kabrda](https://api.github.com/users/bkabrda/gpg_keys)
-  * `9DC4 CA38 900B 533E 3BC0  22A7 001F 609E 8B8F 2ED7`
-  * `CDBE 0233 B8A1 095E D6CD  A197 F8DA AD10 7BBE 268B`
 * [Ofek Lev](https://api.github.com/users/ofek/gpg_keys)
   * `C295 CF63 B355 DFEB 3316  02F7 F426 A944 35BE 6F99`
   * `D009 8861 8057 D2F4 D855  5A62 B472 442C B7D3 AF42`
-* [Nicholas Muesch](https://api.github.com/users/nmuesch/gpg_keys)
-  * `6E09 1A53 0468 B148 54BB  6CCE 831C 23C4 9BBE 61F8`
-  * `BACE F480 6D0B 4FBE D227  DC3B C0E2 8E5E 241E D25A`
+* [Florimond Manca](https://api.github.com/users/florimondmanca/gpg_keys)
+  * `B023 B02A 0331 9CD8 D19A  4328 83ED 89A4 5548 48FC`
+  * `0992 11D9 AA67 D21E 7098  7B59 7C7D CB06 C9F2 0C13`
 * [Julia Simon](https://api.github.com/users/hithwen/gpg_keys)
   * `4A54 09A2 3361 109C 047C  C76A DC8A 42C2 8B95 0123`
   * `129A 26CF A726 3C85 98A6  94B0 8659 1366 CBA1 BF3C`
@@ -81,9 +78,6 @@ fingerprints known to correspond to developers who, at the time of writing (May
 * [Alexandre Yang](https://api.github.com/users/AlexandreYang/gpg_keys)
   * `FBC6 3AE0 9D0C A9B4 584C  9D7F 4291 A11A 36EA 52CD`
   * `F8D9 181D 9309 F8A4 957D  636A 27F8 F48B 18AE 91AA`
-* [Greg Zussa](https://api.github.com/users/gzussa/gpg_keys)
-  * `D24D 57CE 96BD F8C2 9BB0  BEAB C783 0ECB 08F8 8C74`
-  * `3936 7937 7466 5878 C67A  50E9 3C67 09D5 583F B57C`
 
 [1]: https://dev.azure.com/datadoghq/integrations-core/_apis/build/status/Master%20All?branchName=master
 [2]: https://dev.azure.com/datadoghq/integrations-core/_build/latest?definitionId=29&branchName=master

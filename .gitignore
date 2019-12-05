@@ -103,6 +103,6 @@ wheelhouse/
 
 .pytest_cache
 
-# by default, ignore in-toto metadata from the command line
-.links/
+# By default, ignore in-toto metadata from the command line:
+.in-toto/
 *.link
