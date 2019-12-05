@@ -283,12 +283,11 @@ class SparkCheck(AgentCheck):
             app_name = app_json.get('name')
             running_apps[app_id] = (app_name, spark_driver_address)
 
-        # Report success after gathering metrics from k8s spark driver
         self.service_check(
             SPARK_DRIVER_SERVICE_CHECK,
             AgentCheck.OK,
             tags=['url:%s' % spark_driver_address] + tags,
-            message='Connection to k8s spark driver "%s" was successful' % spark_driver_address,
+            message='Connection to Spark driver "%s" was successful' % spark_driver_address,
         )
         self.log.info("Returning running apps %s" % running_apps)
         return running_apps
