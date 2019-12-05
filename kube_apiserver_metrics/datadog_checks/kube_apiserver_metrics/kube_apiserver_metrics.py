@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from os.path import isfile
 from re import match
 
 from six import iteritems
@@ -20,7 +21,8 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     # Set up metrics_transformers
     metric_transformers = {}
     DEFAULT_SCHEME = 'https'
-    DEFAULT_SSL_VERIFY = False
+    DEFAULT_SSL_VERIFY = True
+    DEFAULT_SSL_CACERT = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
     DEFAULT_BEARER_TOKEN_AUTH = True
 
     def __init__(self, name, init_config, agentConfig, instances=None):
@@ -89,6 +91,11 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         # Most set ups are using self signed certificates as the APIServer can be used as a CA.
         ssl_verify = instance.get('ssl_verify', self.DEFAULT_SSL_VERIFY)
         kube_apiserver_metrics_instance['ssl_verify'] = ssl_verify
+
+        ssl_ca_cert = instance.get('ssl_ca_cert', None)
+        if ssl_ca_cert is None and isfile(self.DEFAULT_SSL_CACERT):
+            ssl_ca_cert = self.DEFAULT_SSL_CACERT
+        kube_apiserver_metrics_instance['ssl_ca_cert'] = ssl_ca_cert
 
         # We should default to supporting environments using RBAC to access the APIServer.
         bearer_token_auth = instance.get('bearer_token_auth', self.DEFAULT_BEARER_TOKEN_AUTH)

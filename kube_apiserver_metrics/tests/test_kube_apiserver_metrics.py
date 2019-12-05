@@ -15,8 +15,9 @@ from .common import APISERVER_INSTANCE_BEARER_TOKEN
 
 customtag = "custom:tag"
 
-minimal_instance = {'prometheus_url': 'https://localhost:443/metrics'}
-minimal_instance_legacy = {'prometheus_url': 'localhost:443/metrics'}
+# ssl_verify True is default from openmetrics/mixins.py:231
+minimal_instance = {'prometheus_url': 'https://localhost:443/metrics', 'ssl_verify': True}
+minimal_instance_legacy = {'prometheus_url': 'localhost:443/metrics', 'ssl_verify': True}
 
 instance = {
     'prometheus_url': 'https://localhost:443/metrics',
@@ -113,9 +114,14 @@ class TestKubeAPIServerMetrics:
         Testing the default configuration.
         """
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance])
-        apiserver_instance = check._create_kube_apiserver_metrics_instance(minimal_instance)
 
-        assert not apiserver_instance["ssl_verify"]
+        with mock.patch('datadog_checks.kube_apiserver_metrics.kube_apiserver_metrics.isfile') as mockisfile:
+            mockisfile.return_value = True
+
+            apiserver_instance = check._create_kube_apiserver_metrics_instance(minimal_instance)
+
+        assert apiserver_instance["ssl_verify"]
+        assert apiserver_instance["ssl_ca_cert"] == KubeAPIServerMetricsCheck.DEFAULT_SSL_CACERT
         assert apiserver_instance["bearer_token_auth"]
         assert apiserver_instance["prometheus_url"] == "https://localhost:443/metrics"
 
@@ -126,6 +132,6 @@ class TestKubeAPIServerMetrics:
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance_legacy])
         apiserver_instance = check._create_kube_apiserver_metrics_instance(minimal_instance_legacy)
 
-        assert not apiserver_instance["ssl_verify"]
+        assert apiserver_instance["ssl_verify"]
         assert apiserver_instance["bearer_token_auth"]
         assert apiserver_instance["prometheus_url"] == "https://localhost:443/metrics"

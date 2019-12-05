@@ -27,9 +27,16 @@ instances:
     # bearer_token_path: "/var/run/secrets/kubernetes.io/serviceaccount/token"
     
     ## @param ssl_verify - string - optional
-    ## Used to verify self signed certificates. Default to false
+    ## Used to verify self signed certificates. Default to true
     # 
-    # ssl_verify: false    
+    # ssl_verify: true
+
+    ## @param ssl_ca_cert - string - optional
+    ## CA Cert to be used with ssl_verify = true when calling APIServer
+    ## Default to "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt" is file exists.
+    ## Default to None otherwise
+    # 
+    # ssl_ca_cert: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
