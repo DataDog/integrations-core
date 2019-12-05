@@ -147,10 +147,10 @@ def test_version_metadata(integration_check, pg_instance, datadog_agent):
     version = POSTGRES_VERSION.split('.')
     version_metadata = {
         'version.scheme': 'semver',
-        'version.major': int(version[0]),
+        'version.major': version[0],
     }
     if len(version) == 2:
-        version_metadata['version.minor'] = int(version[1])
+        version_metadata['version.minor'] = version[1]
 
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(6)  # for raw and patch

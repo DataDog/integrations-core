@@ -49,11 +49,13 @@ def transform_version(raw_version, options=None):
     :param options: keyword arguments to pass to any defined transformer
     """
     version = parse_version(raw_version)
-    return {
-        'version.major': version.major,
-        'version.minor': version.minor,
-        'version.patch': version.patch,
-        'version.release': version.prerelease,
+    transformed = {
+        'version.major': str(version.major),
+        'version.minor': str(version.minor),
+        'version.patch': str(version.patch),
         'version.raw': raw_version,
         'version.scheme': 'semver',
     }
+    if version.prerelease:
+        transformed['version.release'] = version.prerelease
+    return transformed
