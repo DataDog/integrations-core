@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 2.0.0 / 2019-12-05
+
+* [Fixed] Clean up test artifacts. See [#5129](https://github.com/DataDog/integrations-core/pull/5129).
+
 ## 0.7.0 / 2019-12-02
 
 * [Added] Support downloading universal and pure Python wheels. See [#4981](https://github.com/DataDog/integrations-core/pull/4981).
