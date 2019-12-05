@@ -2,7 +2,7 @@
 
 ## 2.0.0 / 2019-12-05
 
-* [Fixed] A few changes to datadog-checks-downloader and datadog-checks-dev. See [#5129](https://github.com/DataDog/integrations-core/pull/5129).
+* [Fixed] Clean up test artifacts. See [#5129](https://github.com/DataDog/integrations-core/pull/5129).
 
 ## 0.7.0 / 2019-12-02
 
