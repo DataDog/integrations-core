@@ -23,11 +23,11 @@ class CiliumCheck(OpenMetricsBaseCheck):
 
         # Cannot have both cilium-agent and cilium-operator metrics enabled
         if agent_endpoint and operator_endpoint:
-            ConfigurationError("Only one endpoint needs to be specified")
+            raise ConfigurationError("Only one endpoint needs to be specified")
 
         # Must have at least one endpoint enabled
         if not agent_endpoint and not operator_endpoint:
-            ConfigurationError("Must provide at least one endpoint")
+            raise ConfigurationError("Must provide at least one endpoint")
 
         if operator_endpoint:
             endpoint = operator_endpoint
