@@ -106,15 +106,3 @@ wheelhouse/
 # By default, ignore in-toto metadata from the command line:
 .in-toto/
 *.link
-
-# As well as most TUF metadata and all targets. We list them here so that ddev
-# will correctly ignore them when recording products in developer-signed links:
-# https://www.atlassian.com/git/tutorials/saving-changes/gitignore#git-ignore-patterns
-datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/current/*.json
-!datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/current/.gitignore
-!datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/current/root.json
-datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/previous/*.json
-!datadog_checks_downloader/datadog_checks/downloader/data/repo/metadata/previous/.gitignore
-datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/simple/
-datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/in-toto-*/
-!datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/.gitignore
