@@ -102,11 +102,20 @@ def git_tag_list(pattern=None):
     return list(filter(regex.search, result))
 
 
-def git_ls_files(filename):
+def tracked_by_git(filename):
     """
     Return a boolean value for whether the given file is tracked by git.
     """
     with chdir(get_root()):
         # https://stackoverflow.com/a/2406813
         result = run_command('git ls-files --error-unmatch {}'.format(filename), capture=True)
+        return result.code == 0
+
+
+def ignored_by_git(filename):
+    """
+    Return a boolean value for whether the given file is ignored by git.
+    """
+    with chdir(get_root()):
+        result = run_command('git check-ignore -q {}'.format(filename), capture=True)
         return result.code == 0
