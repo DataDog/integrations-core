@@ -21,7 +21,7 @@ Annotations:       ad.datadoghq.com/endpoint.check_names: ["kube_apiserver_metri
                    ad.datadoghq.com/endpoint.instances:
                      [
                        {
-                         "prometheus_url": "%%host%%:%%port%%/metrics",
+                         "prometheus_url": "https://%%host%%:%%port%%/metrics",
                          "bearer_token_auth": "true"
                        }
                      ]

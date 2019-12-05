@@ -11,6 +11,7 @@ import pytest
 import requests
 from six import iteritems, iterkeys
 from six.moves import range
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
@@ -1957,3 +1958,24 @@ def test_text_filter_input():
 
     filtered = [x for x in check._text_filter_input(lines_in)]
     assert filtered == expected_out
+
+
+def test_ssl_verify_not_raise_warning(mocked_prometheus_check, text_data):
+    check = mocked_prometheus_check
+
+    with pytest.warns(None) as record:
+        resp = check.poll('https://httpbin.org/get')
+
+    assert "httpbin.org" in resp.content.decode('utf-8')
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+
+def test_ssl_verify_not_raise_warning_cert_false(mocked_prometheus_check, text_data):
+    check = mocked_prometheus_check
+    check.ssl_ca_cert = False
+
+    with pytest.warns(None) as record:
+        resp = check.poll('https://httpbin.org/get')
+
+    assert "httpbin.org" in resp.content.decode('utf-8')
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)

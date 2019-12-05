@@ -11,9 +11,6 @@ This check collects TokuMX metrics like:
 And more.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
-
 ### Installation
 
 The TokuMX check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your TokuMX servers.
@@ -51,7 +48,9 @@ The TokuMX check is included in the [Datadog Agent][2] package, so you don't nee
 
 For more details about creating and managing users in MongoDB, see [the MongoDB documentation][3].
 
-#### Connect the Agent
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
     See the [sample tokumx.d/conf.yaml][5] for all available configuration options:
@@ -60,10 +59,20 @@ For more details about creating and managing users in MongoDB, see [the MongoDB 
         init_config:
 
         instances:
-            - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017
+            - server: mongodb://<USER>:<PASSWORD>@localhost:27017
     ```
 
 2. [Restart the Agent][6] to start sending TokuMX metrics to Datadog.
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                      |
+|----------------------|------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `tokumx`                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                              |
+| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://<USER>:<PASSWORD>@%%host%%:27017"}` |
 
 ### Validation
 

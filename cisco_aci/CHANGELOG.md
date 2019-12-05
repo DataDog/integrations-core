@@ -1,5 +1,9 @@
 # CHANGELOG - cisco_aci
 
+## 1.8.1 / 2019-12-02
+
+* [Fixed] Use RequestsWrapper. See [#5037](https://github.com/DataDog/integrations-core/pull/5037).
+
 ## 1.8.0 / 2019-11-20
 
 * [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).

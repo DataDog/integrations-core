@@ -40,7 +40,7 @@ If your service doesn't already listen for HTTP requests (with the http package)
               - path: my_func_counter
                 # if you don't want it named my_go_app.my_func_counter
                 #alias: my_go_app.preferred_counter_name
-                type: counter # other valid options: rate, gauge
+                type: count # other valid options: rate, gauge
                 #tags:
                 #  - "tag_name1:tag_value1"
     ```

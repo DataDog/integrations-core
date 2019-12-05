@@ -1,4 +1,10 @@
 init_config:
+    ## @param fluentd - string - optional - default: fluentd
+    ## Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
+    ## Can be overwritten on an instance.
+    #
+    # fluentd: fluentd
+
     ## @param proxy - object - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
@@ -32,6 +38,11 @@ instances:
     ## Monitor Agent URL to connect to.
     #
   - monitor_agent_url: http://example.com:24220/api/plugins.json
+
+    ## @param fluentd - string - optional - default: fluentd
+    ## Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
+    #
+    # fluentd: fluentd
 
     ## @param plugin_ids - list of strings - optional
     ## Enter your Plugin IDs to monitor a specific scope of plugins.

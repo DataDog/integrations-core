@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 2.5.2 / 2019-12-02
+
+* [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
+
 ## 2.5.1 / 2019-10-11
 
 * [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).

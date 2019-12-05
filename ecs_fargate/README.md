@@ -197,7 +197,8 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
             "dd_service": "firelens-test",
             "dd_source": "redis",
             "dd_tags": "project:fluentbit",
-		    "provider": "ecs"
+            "TLS": "on",
+            "provider": "ecs"
 	    }
     }
 

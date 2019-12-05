@@ -39,9 +39,8 @@ def test_parse_metrics(hlapi_mock):
 
     # Simple OID
     metrics = [{"OID": "1.2.3"}]
-    table, raw, mibs = config.parse_metrics(metrics, check.warning, check.log)
+    table, raw = config.parse_metrics(metrics, check.warning, check.log)
     assert table == {}
-    assert mibs == set()
     assert len(raw) == 1
     hlapi_mock.ObjectIdentity.assert_called_once_with("1.2.3")
     hlapi_mock.reset_mock()
@@ -53,9 +52,8 @@ def test_parse_metrics(hlapi_mock):
 
     # MIB with symbol
     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
-    table, raw, mibs = config.parse_metrics(metrics, check.warning, check.log)
+    table, raw = config.parse_metrics(metrics, check.warning, check.log)
     assert raw == []
-    assert mibs == {"foo_mib"}
     assert len(table) == 1
     hlapi_mock.ObjectIdentity.assert_called_once_with("foo_mib", "foo")
     hlapi_mock.reset_mock()
@@ -67,9 +65,8 @@ def test_parse_metrics(hlapi_mock):
 
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
-    table, raw, mibs = config.parse_metrics(metrics, check.warning, check.log)
+    table, raw = config.parse_metrics(metrics, check.warning, check.log)
     assert raw == []
-    assert mibs == {"foo_mib"}
     assert len(table) == 1
     assert len(list(table.values())[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
@@ -90,9 +87,8 @@ def test_parse_metrics(hlapi_mock):
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
     ]
-    table, raw, mibs = config.parse_metrics(metrics, check.warning, check.log)
+    table, raw = config.parse_metrics(metrics, check.warning, check.log)
     assert raw == []
-    assert mibs == {"foo_mib"}
     assert len(table) == 1
     assert len(list(table.values())[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
@@ -103,9 +99,8 @@ def test_parse_metrics(hlapi_mock):
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
     ]
-    table, raw, mibs = config.parse_metrics(metrics, check.warning, check.log)
+    table, raw = config.parse_metrics(metrics, check.warning, check.log)
     assert raw == []
-    assert mibs == {"foo_mib"}
     assert len(table) == 1
     assert len(list(table.values())[0]) == 3
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")

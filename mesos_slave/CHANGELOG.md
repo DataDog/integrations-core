@@ -1,5 +1,14 @@
 # CHANGELOG - mesos_slave
 
+## 2.0.1 / 2019-12-04
+
+* [Fixed] Propagate tags properly to stats metrics. See [#5140](https://github.com/DataDog/integrations-core/pull/5140).
+
+## 2.0.0 / 2019-12-02
+
+* [Changed] Refactor code and properly send a service check for each endpoint. See [#4891](https://github.com/DataDog/integrations-core/pull/4891).
+* [Fixed] Fix service check message. See [#4771](https://github.com/DataDog/integrations-core/pull/4771).
+
 ## 1.6.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).

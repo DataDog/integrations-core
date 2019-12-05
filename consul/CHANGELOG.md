@@ -1,5 +1,11 @@
 # CHANGELOG - consul
 
+## 1.11.0 / 2019-12-02
+
+* [Added] Add version metadata. See [#4944](https://github.com/DataDog/integrations-core/pull/4944).
+* [Added] Standardize logging format. See [#4903](https://github.com/DataDog/integrations-core/pull/4903).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
 ## 1.10.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).

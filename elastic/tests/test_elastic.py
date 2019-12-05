@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 
-import mock
 import pytest
 import requests
 from six import iteritems
@@ -165,14 +164,11 @@ def test_health_event(dd_environment, aggregator, elastic_check):
         aggregator.assert_service_check('elasticsearch.cluster_health')
 
 
-def test_metadata(dd_environment, aggregator, elastic_check, instance, version_metadata):
+def test_metadata(dd_environment, aggregator, elastic_check, instance, version_metadata, datadog_agent):
     elastic_check.check_id = 'test:123'
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        elastic_check.check(instance)
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
-
-        assert m.call_count == len(version_metadata)
+    elastic_check.check(instance)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
 
 
 @pytest.mark.e2e

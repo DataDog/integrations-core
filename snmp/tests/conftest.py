@@ -12,7 +12,10 @@ from datadog_checks.dev import TempDir, docker_run
 
 from .common import COMPOSE_DIR, SCALAR_OBJECTS, SCALAR_OBJECTS_WITH_TAGS, TABULAR_OBJECTS, generate_instance_config
 
-FILES = ["https://ddintegrations.blob.core.windows.net/snmp/f5.snmprec"]
+FILES = [
+    "https://ddintegrations.blob.core.windows.net/snmp/f5.snmprec",
+    "https://ddintegrations.blob.core.windows.net/snmp/3850.snmprec",
+]
 
 
 @pytest.fixture(scope='session')
