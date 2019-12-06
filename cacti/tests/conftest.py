@@ -12,7 +12,8 @@ from datadog_checks.cacti import CactiCheck
 from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 
 from . import common
-from .common import CONTAINER_NAME, E2E_METADATA, HERE, INSTANCE_INTEGRATION, MYSQL_PASSWORD, MYSQL_USERNAME, RRD_PATH
+from .common import CONTAINER_NAME, E2E_METADATA, HERE, INSTANCE_INTEGRATION, MYSQL_PASSWORD, MYSQL_USERNAME, RRD_PATH, \
+    ORACLE_DATABASE_VERSION
 
 SQL_SETUP = '''
 DROP USER IF EXISTS '{user}'@'localhost';
