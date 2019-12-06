@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
 from .checks import AgentCheck
+from .checks.cgroup import CgroupMetricsScraper
 from .checks.openmetrics import OpenMetricsBaseCheck
 from .config import is_affirmative
 from .errors import ConfigurationError
@@ -24,6 +25,7 @@ __all__ = [
     '__version__',
     'AgentCheck',
     'KubeLeaderElectionBaseCheck',
+    'CgroupMetricsScraper',
     'OpenMetricsBaseCheck',
     'PDHBaseCheck',
     'ConfigurationError',

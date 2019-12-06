@@ -24,6 +24,7 @@ from utils.kubernetes import KubeUtil
 from utils.platform import Platform
 from utils.service_discovery.sd_backend import get_sd_backend
 from utils.orchestrator import MetadataCollector
+from datadog_checks.base.checks.cgroup import CgroupMetricsScraper
 
 
 EVENT_TYPE = 'docker'
@@ -235,6 +236,14 @@ class DockerDaemon(AgentCheck):
             self._latest_size_query = 0
             self._filtered_containers = set()
             self._disable_net_metrics = False
+
+            self._procfs_path = init_config.get('procfs_path', '') or self.agentConfig.get('procfs_path', '/proc')
+            self._root_path = init_config.get('root_path', '') or self.agentConfig.get('root_path', '/') or '/'
+            self.cgroup_scraper = CgroupMetricsScraper(
+                mountpoints=self._mountpoints,
+                procfs_path=self._procfs_path,
+                root_path=self._root_path
+                )
 
             # Set tagging options
             # The collect_labels_as_tags is legacy, only tagging docker metrics.
@@ -692,39 +701,10 @@ class DockerDaemon(AgentCheck):
                 self.log.debug(message)
 
     def _report_cgroup_metrics(self, container, tags):
-        cgroup_stat_file_failures = 0
         if not container.get('_pid'):
             raise BogusPIDException('Cannot report on bogus pid(0)')
 
-        for cgroup in CGROUP_METRICS:
-            try:
-                stat_file = self._get_cgroup_from_proc(cgroup["cgroup"], container['_pid'], cgroup['file'])
-            except MountException as e:
-                # We can't find a stat file
-                self.warning(str(e))
-                cgroup_stat_file_failures += 1
-                if cgroup_stat_file_failures >= len(CGROUP_METRICS):
-                    self.warning("Couldn't find the cgroup files. Skipping the CGROUP_METRICS for now.")
-            except IOError as e:
-                self.log.debug("Cannot read cgroup file, container likely raced to finish : %s", e)
-            else:
-                stats = self._parse_cgroup_file(stat_file)
-                if stats:
-                    for key, (dd_key, metric_func) in cgroup['metrics'].iteritems():
-                        metric_func = FUNC_MAP[metric_func][self.use_histogram]
-                        if key in stats:
-                            metric_func(self, dd_key, int(stats[key]), tags=tags)
-
-                    # Computed metrics
-                    for mname, (key_list, fct, metric_func) in cgroup.get('to_compute', {}).iteritems():
-                        values = [stats[key] for key in key_list if key in stats]
-                        if len(values) != len(key_list):
-                            self.log.debug("Couldn't compute {0}, some keys were missing.".format(mname))
-                            continue
-                        value = fct(*values)
-                        metric_func = FUNC_MAP[metric_func][self.use_histogram]
-                        if value is not None:
-                            metric_func(self, mname, value, tags=tags)
+        self.cgroup_scraper.report_cgroup_metrics(container['_pid'], tags)
 
     def _report_net_metrics(self, container, tags):
         """Find container network metrics by looking at /proc/$PID/net/dev of the container process."""
@@ -1023,49 +1003,6 @@ class DockerDaemon(AgentCheck):
             "file": filename,
         }
         return DockerUtil.find_cgroup_from_proc(self._mountpoints, pid, cgroup, self.docker_util._docker_root) % (params)
-
-    def _parse_cgroup_file(self, stat_file):
-        """Parse a cgroup pseudo file for key/values."""
-        self.log.debug("Opening cgroup file: %s" % stat_file)
-        try:
-            with open(stat_file, 'r') as fp:
-                if 'blkio' in stat_file:
-                    return self._parse_blkio_metrics(fp.read().splitlines())
-                elif 'cpuacct.usage' in stat_file:
-                    return dict({'usage': str(int(fp.read())/10000000)})
-                elif 'memory.soft_limit_in_bytes' in stat_file:
-                    value = int(fp.read())
-                    # do not report kernel max default value (uint64 * 4096)
-                    # see https://github.com/torvalds/linux/blob/5b36577109be007a6ecf4b65b54cbc9118463c2b/mm/memcontrol.c#L2844-L2845
-                    # 2 ** 60 is kept for consistency of other cgroups metrics
-                    if value < 2 ** 60:
-                        return dict({'softlimit': value})
-                elif 'memory.kmem.usage_in_bytes' in stat_file:
-                    value = int(fp.read())
-                    if value < 2 ** 60:
-                        return dict({'kmemusage': value})
-                elif 'cpu.shares' in stat_file:
-                    value = int(fp.read())
-                    return {'shares': value}
-                else:
-                    return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
-        except IOError:
-            # It is possible that the container got stopped between the API call and now.
-            # Some files can also be missing (like cpu.stat) and that's fine.
-            self.log.debug("Can't open %s. Its metrics will be missing." % stat_file)
-
-    def _parse_blkio_metrics(self, stats):
-        """Parse the blkio metrics."""
-        metrics = {
-            'io_read': 0,
-            'io_write': 0,
-        }
-        for line in stats:
-            if 'Read' in line:
-                metrics['io_read'] += int(line.split()[2])
-            if 'Write' in line:
-                metrics['io_write'] += int(line.split()[2])
-        return metrics
 
     def _is_container_cgroup(self, line, selinux_policy):
         if line[1] not in ('cpu,cpuacct', 'cpuacct,cpu', 'cpuacct') or line[2] == '/docker-daemon':

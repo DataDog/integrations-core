@@ -16,6 +16,13 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.platform import Platform
 
+class MountException(Exception):
+    pass
+
+
+class CGroupException(Exception):
+    pass
+
 DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
 
@@ -53,6 +60,86 @@ ATTR_TO_METRIC_RATE = {
 }
 
 
+GAUGE = AgentCheck.gauge
+RATE = AgentCheck.rate
+HISTORATE = AgentCheck.generate_historate_func([])
+HISTO = AgentCheck.generate_histogram_func([])
+FUNC_MAP = {
+    GAUGE: {True: HISTO, False: GAUGE},
+    RATE: {True: HISTORATE, False: RATE}
+}
+
+CGROUP_METRICS = [
+    {
+        "cgroup": "memory",
+        "file": "memory.stat",
+        "metrics": {
+            "cache": ("cgroup.mem.cache", GAUGE),
+            "rss": ("cgroup.mem.rss", GAUGE),
+            "swap": ("cgroup.mem.swap", GAUGE),
+        },
+        "to_compute": {
+            # We only get these metrics if they are properly set, i.e. they are a "reasonable" value
+            "cgroup.mem.limit": (["hierarchical_memory_limit"], lambda x: float(x) if float(x) < 2 ** 60 else None, GAUGE),
+            "cgroup.mem.sw_limit": (["hierarchical_memsw_limit"], lambda x: float(x) if float(x) < 2 ** 60 else None, GAUGE),
+            "cgroup.mem.in_use": (["rss", "hierarchical_memory_limit"], lambda x, y: float(x)/float(y) if float(y) < 2 ** 60 else None, GAUGE),
+            "cgroup.mem.sw_in_use": (["swap", "rss", "hierarchical_memsw_limit"], lambda x, y, z: float(x + y)/float(z) if float(z) < 2 ** 60 else None, GAUGE)
+        }
+    },
+    {
+        "cgroup": "memory",
+        "file": "memory.soft_limit_in_bytes",
+        "metrics": {
+            "softlimit": ("cgroup.mem.soft_limit", GAUGE),
+        },
+    },
+    {
+        "cgroup": "memory",
+        "file": "memory.kmem.usage_in_bytes",
+        "metrics": {
+            "kmemusage": ("cgroup.kmem.usage", GAUGE),
+        },
+    },
+    {
+        "cgroup": "cpuacct",
+        "file": "cpuacct.stat",
+        "metrics": {
+            "user": ("cgroup.cpu.user", RATE),
+            "system": ("cgroup.cpu.system", RATE),
+        },
+    },
+    {
+        "cgroup": "cpuacct",
+        "file": "cpuacct.usage",
+        "metrics": {
+            "usage": ("cgroup.cpu.usage", RATE),
+        }
+    },
+    {
+        "cgroup": "cpu",
+        "file": "cpu.stat",
+        "metrics": {
+            "nr_throttled": ("cgroup.cpu.throttled", RATE)
+        },
+    },
+    {
+        "cgroup": "cpu",
+        "file": "cpu.shares",
+        "metrics": {
+            "shares": ("cgroup.cpu.shares", GAUGE)
+        },
+    },
+    {
+        "cgroup": "blkio",
+        "file": 'blkio.throttle.io_service_bytes',
+        "metrics": {
+            "io_read": ("cgroup.io.read_bytes", RATE),
+            "io_write": ("cgroup.io.write_bytes", RATE),
+        },
+    },
+]
+
+
 class ProcessCheck(AgentCheck):
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
@@ -83,6 +170,12 @@ class ProcessCheck(AgentCheck):
                 else:
                     self._deprecated_init_procfs = True
                     psutil.PROCFS_PATH = procfs_path
+
+            docker_root = procfs_path.rstrip('/proc') or '/'
+            if docker_root == procfs_path:
+                self.warning('procfs_path not ending in /proc not supported for cgroup checks')
+            self.docker_util = DockerUtil(init_config = {"docker_root": docker_root}, instance={})
+            self._mountpoints = self.docker_util.get_mountpoints(CGROUP_METRICS)
 
         # Process cache, indexed by instance
         self.process_cache = defaultdict(dict)
@@ -216,7 +309,7 @@ class ProcessCheck(AgentCheck):
 
         return result
 
-    def get_process_state(self, name, pids, try_sudo):
+    def get_process_state(self, name, pids, try_sudo, collect_cgroups):
         st = defaultdict(list)
 
         # Remove from cache the processes that are not in `pids`
@@ -308,6 +401,24 @@ class ProcessCheck(AgentCheck):
 
         return st
 
+    def get_cgroup_stats(self, pid):
+        if not Platform.is_linux():
+            return None
+
+        for cgroup in CGROUP_METRICS:
+            try:
+                stat_file = self._get_cgroup_from_proc(cgroup["cgroup"], pid, cgroup['file'])
+            except MountException as e:
+                # We can't find a stat file
+                self.warning(str(e))
+                cgroup_stat_file_failures += 1
+                if cgroup_stat_file_failures >= len(CGROUP_METRICS):
+                    self.warning("Couldn't find the cgroup files. Skipping the CGROUP_METRICS for now.")
+            except IOError as e:
+                self.log.debug("Cannot read cgroup file, container likely raced to finish : %s", e)
+            else:
+                return self._parse_cgroup_file(stat_file)
+
     def get_pagefault_stats(self, pid):
         if not Platform.is_linux():
             return None
@@ -349,7 +460,9 @@ class ProcessCheck(AgentCheck):
         pid = instance.get('pid')
         pid_file = instance.get('pid_file')
         collect_children = _is_affirmative(instance.get('collect_children', False))
+        collect_cgroups = _is_affirmative(instance.get('collect_cgroups', False))
         user = instance.get('user', False)
+        thresholds = instance.get('thresholds', None)
         try_sudo = instance.get('try_sudo', False)
 
         if self._conflicting_procfs:
@@ -434,7 +547,28 @@ class ProcessCheck(AgentCheck):
             if vals:
                 self.rate('system.processes.{}'.format(mname), sum(vals), tags=tags)
 
-        self._process_service_check(name, len(pids), instance.get('thresholds', None), tags)
+        if collect_cgroups:
+            for pid in pids:
+                stats = self.get_cgroup_stats(pid)
+                if stats:
+                    for key, (dd_key, metric_func) in cgroup['metrics'].iteritems():
+                        metric_func = FUNC_MAP[metric_func][self.use_histogram]
+                        if key in stats:
+                            metric_func(self, dd_key, int(stats[key]), tags=tags)
+
+                    # Computed metrics
+                    for mname, (key_list, fct, metric_func) in cgroup.get('to_compute', {}).iteritems():
+                        values = [stats[key] for key in key_list if key in stats]
+                        if len(values) != len(key_list):
+                            self.log.debug("Couldn't compute {0}, some keys were missing.".format(mname))
+                            continue
+                        value = fct(*values)
+                        metric_func = FUNC_MAP[metric_func][self.use_histogram]
+                        if value is not None:
+                            metric_func(self, mname, value, tags=tags)
+
+
+        self._process_service_check(name, len(pids), thresholds, tags)
 
     def _get_pid_set(self, pid):
         try:
@@ -492,3 +626,54 @@ class ProcessCheck(AgentCheck):
                 pass
 
         return filtered_pids
+
+    # Cgroups
+    def _get_cgroup_from_proc(self, cgroup, pid, filename):
+        """Find a specific cgroup file, containing metrics to extract."""
+        params = {
+            "file": filename,
+        }
+        return DockerUtil.find_cgroup_from_proc(self._mountpoints, pid, cgroup, self.docker_util._docker_root) % (params)
+
+    def _parse_cgroup_file(self, stat_file):
+        """Parse a cgroup pseudo file for key/values."""
+        self.log.debug("Opening cgroup file: %s" % stat_file)
+        try:
+            with open(stat_file, 'r') as fp:
+                if 'blkio' in stat_file:
+                    return self._parse_blkio_metrics(fp.read().splitlines())
+                elif 'cpuacct.usage' in stat_file:
+                    return dict({'usage': str(int(fp.read())/10000000)})
+                elif 'memory.soft_limit_in_bytes' in stat_file:
+                    value = int(fp.read())
+                    # do not report kernel max default value (uint64 * 4096)
+                    # see https://github.com/torvalds/linux/blob/5b36577109be007a6ecf4b65b54cbc9118463c2b/mm/memcontrol.c#L2844-L2845
+                    # 2 ** 60 is kept for consistency of other cgroups metrics
+                    if value < 2 ** 60:
+                        return dict({'softlimit': value})
+                elif 'memory.kmem.usage_in_bytes' in stat_file:
+                    value = int(fp.read())
+                    if value < 2 ** 60:
+                        return dict({'kmemusage': value})
+                elif 'cpu.shares' in stat_file:
+                    value = int(fp.read())
+                    return {'shares': value}
+                else:
+                    return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
+        except IOError:
+            # It is possible that the container got stopped between the API call and now.
+            # Some files can also be missing (like cpu.stat) and that's fine.
+            self.log.debug("Can't open %s. Its metrics will be missing." % stat_file)
+
+    def _parse_blkio_metrics(self, stats):
+        """Parse the blkio metrics."""
+        metrics = {
+            'io_read': 0,
+            'io_write': 0,
+        }
+        for line in stats:
+            if 'Read' in line:
+                metrics['io_read'] += int(line.split()[2])
+            if 'Write' in line:
+                metrics['io_write'] += int(line.split()[2])
+        return metrics
