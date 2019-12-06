@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 1.0.1 / 2019-12-06
+
+* [Fixed] Fix a bug where we accidentally recorded git-ignored files in in-toto. See [#5129](https://github.com/DataDog/integrations-core/pull/5129).
+
 ## 1.0.0 / 2019-12-02
 
 * [Added] Support downloading universal and pure Python wheels. See [#4981](https://github.com/DataDog/integrations-core/pull/4981).
