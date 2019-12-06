@@ -1,5 +1,9 @@
 # CHANGELOG - couchbase
 
+## 1.12.1 / 2019-12-06
+
+* [Fixed] Fix version metadata parsing. See [#5148](https://github.com/DataDog/integrations-core/pull/5148).
+
 ## 1.12.0 / 2019-12-02
 
 * [Added] add version metadata. See [#4985](https://github.com/DataDog/integrations-core/pull/4985).
