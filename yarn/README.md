@@ -14,14 +14,14 @@ This check collects metrics from your YARN ResourceManager, including (but not l
 `yarn.apps.<METRIC>` metrics have been deprecated in favor of `yarn.apps.<METRIC>_gauge` metrics, because `yarn.apps` metrics are incorrectly reported as a `RATE` instead of a `GAUGE`.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The YARN check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your YARN ResourceManager.
 
 ### Configuration
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
 
@@ -37,6 +37,16 @@ The YARN check is included in the [Datadog Agent][3] package, so you don't need 
     See the [example check configuration][5] for a comprehensive list and description of all check options.
 
 2. [Restart the Agent][6] to start sending YARN metrics to Datadog.
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                    |
+|----------------------|------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `yarn`                                                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                            |
+| `<INSTANCE_CONFIG>`  | `{"resourcemanager_uri": "http://%%host%%:%%port%%", "cluster_name": "default_cluster"}` |
 
 ### Validation
 
