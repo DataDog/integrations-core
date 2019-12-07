@@ -704,7 +704,9 @@ class DockerDaemon(AgentCheck):
         if not container.get('_pid'):
             raise BogusPIDException('Cannot report on bogus pid(0)')
 
-        self.cgroup_scraper.report_cgroup_metrics(container['_pid'], tags)
+        metrics = self.cgroup_scraper.fetch_cgroup_metrics(container['_pid'], tags)
+        for mname, metric_type, value, tags in metrics:
+            self[metric_type](mname, value, tags=tags)
 
     def _report_net_metrics(self, container, tags):
         """Find container network metrics by looking at /proc/$PID/net/dev of the container process."""

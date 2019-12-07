@@ -1,0 +1,12 @@
+12:rdma:/
+11:cpuset:/
+10:hugetlb:/
+9:pids:/system.slice/docker.service
+8:perf_event:/
+7:blkio:/system.slice/docker.service
+6:memory:/system.slice/docker.service
+5:freezer:/
+4:devices:/system.slice/docker.service
+3:cpu,cpuacct:/system.slice/docker.service
+2:net_cls,net_prio:/
+1:name=systemd:/system.slice/docker.service

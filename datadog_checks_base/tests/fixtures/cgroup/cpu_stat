@@ -1,0 +1,3 @@
+nr_periods 100
+nr_throttled 10
+throttled_time 123456

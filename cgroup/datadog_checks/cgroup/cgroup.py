@@ -8,8 +8,7 @@ import time
 import psutil
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
+from datadog_checks.base import AgentCheck, _is_affirmative
 from datadog_checks.base.checks.cgroup import CgroupMetricsScraper
 
 DEFAULT_AD_CACHE_DURATION = 120
@@ -76,7 +75,10 @@ class CgroupCheck(AgentCheck):
 
         self.log.info("Found matching pids for %s: %s" % (name, repr(pids)))
         for pid in pids:
-            self.scraper.report_cgroup_metrics(pid, tags)
+            metrics = self.scraper.fetch_cgroup_metrics(pid, tags)
+
+            for mname, metric_type, value, tags in metrics:
+                self[metric_type](mname, value, tags=tags)
 
     def should_refresh_ad_cache(self, name):
         now = time.time()

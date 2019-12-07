@@ -4,12 +4,11 @@
 
 import os
 import logging
-from six import iteritems
 
-from datadog_checks.checks import AgentCheck
+from .. import AgentCheck
 
-GAUGE = AgentCheck.gauge
-RATE = AgentCheck.rate
+GAUGE = "gauge"
+RATE = "rate"
 
 class MountException(Exception):
     pass
@@ -113,11 +112,12 @@ class CgroupMetricsScraper(object):
         self._root_path = kwargs['root_path'].rstrip('/')
         self._mountpoints = kwargs.get('mountpoints') or self._get_mountpoints(self.metrics_mapper)
 
-    def report_cgroup_metrics(self, pid, tags):
+    def fetch_cgroup_metrics(self, pid, tags):
+        cgroup_stat_file_failures = 0
+        metrics = []
         for cgroup in self.metrics_mapper:
             try:
-                cgroup_path = self._find_cgroup_from_proc(pid, cgroup['cgroup'])
-                stat_file = self._find_cgroup_stat_file_path(cgroup['cgroup'], cgroup_path, cgroup['file'])
+                cgroup_path, stat_file = self._find_cgroup_from_proc(pid, cgroup['cgroup'], cgroup['file'])
             except MountException as e:
                 # We can't find a stat file
                 self.log.warning(str(e))
@@ -134,19 +134,21 @@ class CgroupMetricsScraper(object):
                         'cgroup_path:{}'.format(cgroup_path)
                     ]
 
-                    for key, (dd_key, metric_func) in cgroup['metrics'].iteritems():
+                    for key, (dd_key, metric_type) in cgroup['metrics'].items():
                         if key in stats:
-                            metric_func(self, dd_key, int(stats[key]), tags=cgroup_tags)
+                            metrics.append((dd_key, metric_type, int(stats[key]), cgroup_tags))
 
                     # Computed metrics
-                    for mname, (key_list, fct, metric_func) in cgroup.get('to_compute', {}).iteritems():
-                        values = [stats[key] for key in key_list if key in stats]
+                    for mname, (key_list, fct, metric_type) in cgroup.get('to_compute', {}).items():
+                        values = [int(stats[key]) for key in key_list if key in stats]
                         if len(values) != len(key_list):
                             self.log.debug("Couldn't compute {0}, some keys were missing. Required keys: {1}, found keys: {2}".format(mname, key_list, stats.keys()))
                             continue
                         value = fct(*values)
+                        print("{} = {}".format(','.join(map(lambda x: str(x), values)), value))
                         if value is not None:
-                            metric_func(self, mname, value, tags=cgroup_tags)
+                            metrics.append((mname, metric_type, value, cgroup_tags))
+        return metrics
 
     def _get_mountpoints(self, cgroup_metrics):
         mountpoints = {}
@@ -154,7 +156,7 @@ class CgroupMetricsScraper(object):
             try:
                 mountpoints[metric["cgroup"]] = self._find_cgroup(metric["cgroup"])
             except CGroupException as e:
-                log.exception("Unable to find cgroup: %s", e)
+                self.log.exception("Unable to find cgroup: %s", e)
 
         if not len(mountpoints):
             raise CGroupException("No cgroups were found!")
@@ -177,11 +179,11 @@ class CgroupMetricsScraper(object):
         """
         with open(os.path.join(self._procfs_path, "mounts"), 'r') as fp:
             mounts = map(lambda x: x.split(), fp.read().splitlines())
-        cgroup_mounts = filter(lambda x: x[2] == "cgroup", mounts)
+        cgroup_mounts = list(filter(lambda x: x[2] == "cgroup", mounts))
         if len(cgroup_mounts) == 0:
             raise Exception(
-                "Can't find mounted cgroups. If you run the Agent inside a container,"
-                " please refer to the documentation.")
+                "Can't find mounted cgroups (%s). If you run the Agent inside a container,"
+                " please refer to the documentation." % hierarchy)
         # Old cgroup style
         if len(cgroup_mounts) == 1:
             return os.path.join(self._root_path, cgroup_mounts[0][1])
@@ -195,33 +197,16 @@ class CgroupMetricsScraper(object):
 
         if candidate is not None:
             return os.path.join(self._root_path, candidate)
+
         raise CGroupException("Can't find mounted %s cgroups." % hierarchy)
 
-    def _find_cgroup_stat_file_path(self, subsys, cgroup_path, file_path):
-        """Find the path to the passed in cgroup file by walking the possible
-        cgroupfs mountpoints
-        """
-        for mountpoint in self._mountpoints.itervalues():
-            stat_file_path = os.path.join(mountpoint, cgroup_path)
-            if subsys == mountpoint.split('/')[-1] and os.path.exists(stat_file_path):
-                return os.path.join(stat_file_path, file_path)
-
-            # CentOS7 will report `cpu,cpuacct` and then have the path on
-            # `cpuacct,cpu`
-            if 'cpuacct' in mountpoint and ('cpuacct' in subsys or 'cpu' in subsys):
-                flipkey = subsys.split(',')
-                flipkey = "{},{}".format(flipkey[1], flipkey[0]) if len(flipkey) > 1 else flipkey[0]
-                mountpoint = os.path.join(os.path.split(mountpoint)[0], flipkey)
-                stat_file_path = os.path.join(mountpoint, cgroup_path)
-                if os.path.exists(stat_file_path):
-                    return os.path.join(stat_file_path, file_path)
-
-    def _find_cgroup_from_proc(self, pid, subsys):
-        """Find the cgroup path of the specified pid for the specified subsystem (cgroup controller)
+    def _find_cgroup_from_proc(self, pid, subsys, file_path):
+        """Find the cgroup path of the specified pid for the specified subsystem (cgroup controller) by
+        walking the possible cgroupfs mountpoints
         """
         proc_path = os.path.join(self._procfs_path, str(pid), 'cgroup')
         with open(proc_path, 'r') as fp:
-            lines = map(lambda x: x.split(':'), fp.read().splitlines())
+            lines = list(map(lambda x: x.split(':'), fp.read().splitlines()))
             subsystems = dict(zip(map(lambda x: x[1], lines), map(self._parse_subsystem, lines)))
 
         if subsys not in subsystems and subsys == 'cpuacct':
@@ -234,15 +219,34 @@ class CgroupMetricsScraper(object):
         # In Ubuntu Xenial, we've encountered containers with no `cpu`
         # cgroup in /proc/<pid>/cgroup
         if subsys == 'cpu' and subsys not in subsystems:
-            for sub, mountpoint in subsystems.iteritems():
+            for sub, mountpoint in subsystems.items():
                 if 'cpuacct' in sub:
-                    subsystems['cpu'] = mountpoint
+                    subsys = sub
                     break
 
         if subsys in subsystems:
-            return subsystems[subsys]
+            cgroup_path = subsystems[subsys]
 
-        raise MountException("Cannot find Docker '%s' cgroup directory. Be sure your system is supported." % subsys)
+            for mountpoint in self._mountpoints.values():
+                stat_file_path = os.path.join(mountpoint, cgroup_path)
+
+                if subsys == mountpoint.split('/')[-1] and os.path.exists(stat_file_path):
+                    return (cgroup_path, os.path.join(stat_file_path, file_path))
+
+                # CentOS7 will report `cpu,cpuacct` and then have the path on
+                # `cpuacct,cpu`
+                if 'cpuacct' in mountpoint and ('cpuacct' in subsys or 'cpu' in subsys):
+
+                    flipkey = subsys.split(',')
+                    print("testing mountpoint: {} - flipkey: {}".format(mountpoint, repr(flipkey)))
+                    flipkey = "{},{}".format(flipkey[1], flipkey[0]) if len(flipkey) > 1 else flipkey[0]
+                    mountpoint = os.path.join(os.path.split(mountpoint)[0], flipkey)
+                    stat_file_path = os.path.join(mountpoint, cgroup_path)
+                    print("%s: %s" % (stat_file_path, os.path.exists(stat_file_path)))
+                    if os.path.exists(stat_file_path):
+                        return (cgroup_path, os.path.join(stat_file_path, file_path))
+
+        raise MountException("Cannot find '{}' for '{}' cgroup subsystem.".format(file_path, subsys))
 
     def _parse_blkio_metrics(self, stats):
         """Parse the blkio metrics."""
