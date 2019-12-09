@@ -49,9 +49,9 @@ def test_transform_version():
     version = transform_version('11beta4')
     expected = {
         'version.raw': '11beta4',
-        'version.major': 11,
-        'version.minor': 0,
-        'version.patch': 0,
+        'version.major': '11',
+        'version.minor': '0',
+        'version.patch': '0',
         'version.release': 'beta.4',
         'version.scheme': 'semver',
     }
@@ -60,10 +60,9 @@ def test_transform_version():
     version = transform_version('10.0')
     expected = {
         'version.raw': '10.0',
-        'version.major': 10,
-        'version.minor': 0,
-        'version.patch': 0,
-        'version.release': None,
+        'version.major': '10',
+        'version.minor': '0',
+        'version.patch': '0',
         'version.scheme': 'semver',
     }
     assert expected == version
@@ -71,10 +70,9 @@ def test_transform_version():
     version = transform_version('10.5.4')
     expected = {
         'version.raw': '10.5.4',
-        'version.major': 10,
-        'version.minor': 5,
-        'version.patch': 4,
-        'version.release': None,
+        'version.major': '10',
+        'version.minor': '5',
+        'version.patch': '4',
         'version.scheme': 'semver',
     }
     assert expected == version

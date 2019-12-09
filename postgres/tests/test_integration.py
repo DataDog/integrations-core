@@ -153,7 +153,7 @@ def test_version_metadata(integration_check, pg_instance, datadog_agent):
         version_metadata['version.minor'] = version[1]
 
     datadog_agent.assert_metadata('test:123', version_metadata)
-    datadog_agent.assert_metadata_count(6)  # for raw and patch
+    datadog_agent.assert_metadata_count(5)  # for raw and patch
 
 
 @pytest.mark.integration
