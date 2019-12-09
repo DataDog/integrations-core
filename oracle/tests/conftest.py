@@ -125,7 +125,8 @@ E2E_METADATA_JDBC_CLIENT = {
     'start_commands': [
         'mkdir /opt/oracle',
         'apt-get update',
-        'apt-get install libaio1 unzip',
+        'apt-get install unzip',
+        # JDBC client needs Oracle driver `ojdbc8.jar` from Instant Client
         'curl -o /opt/oracle/instantclient.zip '
         'https://storage.googleapis.com/datadog-integrations-lab/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip',
         'unzip /opt/oracle/instantclient.zip -d /opt/oracle',
