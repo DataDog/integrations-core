@@ -1,6 +1,7 @@
 {
   "categories": [
-    "data store"
+    "data store",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Solr",
