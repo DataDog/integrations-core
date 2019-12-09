@@ -119,6 +119,8 @@ E2E_METADATA_ORACLE_CLIENT = {
 }
 
 E2E_METADATA_JDBC_CLIENT = {
+    # Since we don't include Oracle instantclient to `LD_LIBRARY_PATH` env var,
+    # the integration will fallback to JDBC client
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
     'start_commands': [
         'mkdir /opt/oracle',
