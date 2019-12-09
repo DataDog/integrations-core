@@ -894,7 +894,13 @@ class VSphereCheck(AgentCheck):
                 if max_historical_metrics < 0:
                     max_historical_metrics = float('inf')
             except Exception as e:
-                self.log.warning("Error getting maxQueryMetrics setting: %s", e)
+                self.log.debug(
+                    "Error getting maxQueryMetrics setting "
+                    "(max_historical_metrics=%s, DEFAULT_MAX_HIST_METRICS=%s): %s",
+                    max_historical_metrics,
+                    DEFAULT_MAX_HIST_METRICS,
+                    e,
+                )
 
         # TODO: Remove me once the fix for `max_query_metrics` is here by default
         mors_batch_method = (
