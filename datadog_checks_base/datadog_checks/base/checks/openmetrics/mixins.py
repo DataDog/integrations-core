@@ -239,6 +239,9 @@ class OpenMetricsScraperMixin(object):
             'prometheus_timeout', default_instance.get('prometheus_timeout', 10)
         )
 
+        # A pattern to replace by dots in the metrics name.
+        config['pattern_to_dot'] = instance.get('pattern_to_dot', default_instance.get('pattern_to_dot', None))
+
         # Authentication used when polling endpoint
         config['username'] = instance.get('username', default_instance.get('username', None))
         config['password'] = instance.get('password', default_instance.get('password', None))
@@ -456,6 +459,7 @@ class OpenMetricsScraperMixin(object):
     def process_metric(self, metric, scraper_config, metric_transformers=None):
         """
         Handle a prometheus metric according to the following flow:
+            - apply a patterns replacer if any has been configured
             - search scraper_config['metrics_mapper'] for a prometheus.metric <--> datadog.metric mapping
             - call check method with the same name as the metric
             - log some info if none of the above worked
@@ -465,7 +469,13 @@ class OpenMetricsScraperMixin(object):
         # If targeted metric, store labels
         self._store_labels(metric, scraper_config)
 
-        if metric.name in scraper_config['ignore_metrics']:
+        metric_name = metric.name
+
+        # A configured pattern could be transformed into dot
+        if scraper_config['pattern_to_dot'] is not None:
+            metric_name.replace(scraper_config['pattern_to_dot'], '.')
+
+        if metric_name in scraper_config['ignore_metrics']:
             self._send_telemetry_counter(
                 self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
             )
@@ -483,15 +493,15 @@ class OpenMetricsScraperMixin(object):
             return
 
         try:
-            self.submit_openmetric(scraper_config['metrics_mapper'][metric.name], metric, scraper_config)
+            self.submit_openmetric(scraper_config['metrics_mapper'][metric_name], metric, scraper_config)
         except KeyError:
-            if metric_transformers is not None and metric.name in metric_transformers:
+            if metric_transformers is not None and metric_name in metric_transformers:
                 try:
                     # Get the transformer function for this specific metric
-                    transformer = metric_transformers[metric.name]
+                    transformer = metric_transformers[metric_name]
                     transformer(metric, scraper_config)
                 except Exception as err:
-                    self.log.warning('Error handling metric: %s - error: %s', metric.name, err)
+                    self.log.warning('Error handling metric: %s - error: %s', metric_name, err)
 
                 return
 
@@ -501,14 +511,14 @@ class OpenMetricsScraperMixin(object):
 
             # try matching wildcard
             for wildcard in scraper_config['_metrics_wildcards']:
-                if fnmatchcase(metric.name, wildcard):
-                    self.submit_openmetric(metric.name, metric, scraper_config)
+                if fnmatchcase(metric_name, wildcard):
+                    self.submit_openmetric(metric_name, metric, scraper_config)
                     return
 
             self.log.debug(
                 'Skipping metric `%s` as it is not defined in the metrics mapper, '
                 'has no transformer function, nor does it match any wildcards.',
-                metric.name,
+                metric_name,
             )
 
     def poll(self, scraper_config, headers=None):
