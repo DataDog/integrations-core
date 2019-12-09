@@ -34,8 +34,8 @@ See the [JMX Check documentation][8] for a list of configuration options usable 
 
 The `conf` parameter is a list of metrics to be collected by the integration. Only two keys are allowed:
 
-* `include` (**mandatory**): A dictionary of filters, any attribute that matches these filters are collected unless it also matches the `exclude` filters (see below).
-* `exclude` (**optional**): A dictionary of filters, attributes that match these filters are not collected.
+* `include` (**mandatory**): A dictionary of filters. Any attribute that matches these filters is collected unless it also matches the `exclude` filters (see below).
+* `exclude` (**optional**): A dictionary of filters. Attributes that match these filters are not collected.
 
 For a given bean, metrics get tagged in the following manner:
 
