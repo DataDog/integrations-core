@@ -9,6 +9,7 @@ import threading
 import time
 import traceback
 from collections import defaultdict
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 
 from pyVim import connect
@@ -390,58 +391,68 @@ class VSphereCheck(AgentCheck):
             return parent_tags
         return []
 
+    @staticmethod
+    @contextmanager
+    def create_container_view(server_instance, resources):
+        content = server_instance.content
+        view_ref = content.viewManager.CreateContainerView(content.rootFolder, resources, True)
+        try:
+            yield view_ref
+        finally:
+            view_ref.Destroy()
+
     def _collect_mors_and_attributes(self, server_instance):
         resources = list(RESOURCE_TYPE_METRICS)
         resources.extend(RESOURCE_TYPE_NO_METRIC)
-
         content = server_instance.content
-        view_ref = content.viewManager.CreateContainerView(content.rootFolder, resources, True)
 
-        # Object used to query MORs as well as the attributes we require in one API call
-        # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
-        collector = content.propertyCollector
+        with VSphereCheck.create_container_view(server_instance, resources) as view_ref:
 
-        # Specify the root object from where we collect the rest of the objects
-        obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
-        obj_spec.obj = view_ref
-        obj_spec.skip = True
+            # Object used to query MORs as well as the attributes we require in one API call
+            # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
+            collector = content.propertyCollector
 
-        # Specify the attribute of the root object to traverse to obtain all the attributes
-        traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
-        traversal_spec.path = "view"
-        traversal_spec.skip = False
-        traversal_spec.type = view_ref.__class__
-        obj_spec.selectSet = [traversal_spec]
+            # Specify the root object from where we collect the rest of the objects
+            obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
+            obj_spec.obj = view_ref
+            obj_spec.skip = True
 
-        property_specs = []
-        # Specify which attributes we want to retrieve per object
-        for resource in resources:
-            property_spec = vmodl.query.PropertyCollector.PropertySpec()
-            property_spec.type = resource
-            property_spec.pathSet = ["name", "parent", "customValue"]
-            if resource == vim.VirtualMachine:
-                property_spec.pathSet.append("runtime.powerState")
-                property_spec.pathSet.append("runtime.host")
-                property_spec.pathSet.append("guest.hostName")
-            property_specs.append(property_spec)
+            # Specify the attribute of the root object to traverse to obtain all the attributes
+            traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
+            traversal_spec.path = "view"
+            traversal_spec.skip = False
+            traversal_spec.type = view_ref.__class__
+            obj_spec.selectSet = [traversal_spec]
 
-        # Create our filter spec from the above specs
-        filter_spec = vmodl.query.PropertyCollector.FilterSpec()
-        filter_spec.objectSet = [obj_spec]
-        filter_spec.propSet = property_specs
+            property_specs = []
+            # Specify which attributes we want to retrieve per object
+            for resource in resources:
+                property_spec = vmodl.query.PropertyCollector.PropertySpec()
+                property_spec.type = resource
+                property_spec.pathSet = ["name", "parent", "customValue"]
+                if resource == vim.VirtualMachine:
+                    property_spec.pathSet.append("runtime.powerState")
+                    property_spec.pathSet.append("runtime.host")
+                    property_spec.pathSet.append("guest.hostName")
+                property_specs.append(property_spec)
 
-        retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
-        # To limit the number of objects retrieved per call.
-        # If batch_collector_size is 0, collect maximum number of objects.
-        retr_opts.maxObjects = self.batch_collector_size or None
+            # Create our filter spec from the above specs
+            filter_spec = vmodl.query.PropertyCollector.FilterSpec()
+            filter_spec.objectSet = [obj_spec]
+            filter_spec.propSet = property_specs
 
-        # Collect the objects and their properties
-        res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
-        objects = res.objects
-        # Results can be paginated
-        while res.token is not None:
-            res = collector.ContinueRetrievePropertiesEx(res.token)
-            objects.extend(res.objects)
+            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
+            # To limit the number of objects retrieved per call.
+            # If batch_collector_size is 0, collect maximum number of objects.
+            retr_opts.maxObjects = self.batch_collector_size or None
+
+            # Collect the objects and their properties
+            res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+            objects = res.objects
+            # Results can be paginated
+            while res.token is not None:
+                res = collector.ContinueRetrievePropertiesEx(res.token)
+                objects.extend(res.objects)
 
         mor_attrs = {}
         error_counter = 0
