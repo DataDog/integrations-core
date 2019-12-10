@@ -145,10 +145,12 @@ def _wait_for_it_script():
 
 
 def _mysql_conf_path():
-    filename = {
-        'mysql': 'mysql.conf',
-        'mariadb': 'mariadb.conf',
-    }[MYSQL_FLAVOR]
+    if MYSQL_FLAVOR == 'mysql':
+        filename = 'mysql.conf'
+    else:
+        assert MYSQL_FLAVOR == 'mariadb'
+        filename = 'mariadb.conf'
+
     conf = os.path.join(common.HERE, 'compose', filename)
     return os.path.abspath(conf)
 
