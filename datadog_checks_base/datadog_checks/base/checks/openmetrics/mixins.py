@@ -473,7 +473,7 @@ class OpenMetricsScraperMixin(object):
 
         # A configured pattern could be transformed into dot
         if scraper_config['pattern_to_dot'] is not None:
-            metric_name.replace(scraper_config['pattern_to_dot'], '.')
+            metric_name = metric_name.replace(scraper_config['pattern_to_dot'], '.')
 
         if metric_name in scraper_config['ignore_metrics']:
             self._send_telemetry_counter(
