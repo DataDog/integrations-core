@@ -14,7 +14,7 @@
         "role": null,
         "verified": true
     },
-    "description": null,
+    "description": "## SAP HANA Dashboard\n\nThis is an example SAP HANA dashboard demonstrating the metrics that the integration collects.",
     "disableCog": false,
     "disableEditing": false,
     "id": 872366,
