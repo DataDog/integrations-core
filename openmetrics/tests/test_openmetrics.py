@@ -13,7 +13,7 @@ pytestmark = pytest.mark.usefixtures("poll_mock")
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
     'namespace': 'openmetrics',
-    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1', 'counter2__with_pattern'],
     'send_histograms_buckets': True,
     'send_monotonic_counter': True,
 }
@@ -33,6 +33,9 @@ def test_openmetrics_check(aggregator):
         metric_type=aggregator.GAUGE,
     )
     aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(
+        CHECK_NAME + '.counter2__with_pattern', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT
+    )
     aggregator.assert_all_metrics_covered()
 
 
@@ -51,6 +54,37 @@ def test_openmetrics_check_counter_gauge(aggregator):
         metric_type=aggregator.GAUGE,
     )
     aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.counter2__with_pattern', tags=['node:host2'], metric_type=aggregator.GAUGE)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_openmetrics_pattern_to_dot(aggregator):
+    # nothing should be replaced without the config field
+    instance_pattern = {
+        'prometheus_url': 'http://localhost:10249/metrics',
+        'namespace': 'openmetrics',
+        'metrics': ['counter*'],
+    }
+    c = OpenMetricsCheck('openmetrics', None, {}, [instance_pattern])
+    c.check(instance_pattern)
+    aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(
+        CHECK_NAME + '.counter2__with_pattern', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_all_metrics_covered()
+    # one of the counters should be renamed with the config field
+    instance_pattern = {
+        'prometheus_url': 'http://localhost:10249/metrics',
+        'namespace': 'openmetrics',
+        'metrics': ['counter*'],
+        'pattern_to_dot': '__',
+    }
+    c = OpenMetricsCheck('openmetrics', None, {}, [instance_pattern])
+    c.check(instance_pattern)
+    aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(
+        CHECK_NAME + '.counter2.with_pattern', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT
+    )
     aggregator.assert_all_metrics_covered()
 
 
