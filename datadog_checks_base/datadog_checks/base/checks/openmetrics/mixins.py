@@ -459,7 +459,7 @@ class OpenMetricsScraperMixin(object):
     def process_metric(self, metric, scraper_config, metric_transformers=None):
         """
         Handle a prometheus metric according to the following flow:
-            - apply a patterns replacer if any has been configured
+            - replace a given pattern by a dot if any pattern has been provided
             - search scraper_config['metrics_mapper'] for a prometheus.metric <--> datadog.metric mapping
             - call check method with the same name as the metric
             - log some info if none of the above worked
