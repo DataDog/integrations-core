@@ -5,6 +5,8 @@ import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 
+AIRFLOW_STATUS_OK = "OK"
+
 
 class AirflowCheck(AgentCheck):
     def check(self, instance):
@@ -22,13 +24,22 @@ class AirflowCheck(AgentCheck):
 
         resp = self._get_json(url)
 
-        if resp is not None:
-            can_connect_status = AgentCheck.OK
-        else:
+        if resp is None:
             can_connect_status = AgentCheck.CRITICAL
+        else:
+            can_connect_status = AgentCheck.OK
 
         self.service_check('airflow.can_connect', can_connect_status, tags=tags)
         self.gauge('airflow.can_connect', int(can_connect_status == AgentCheck.OK), tags=tags)
+
+        if resp is not None:
+            if resp.get('status') == AIRFLOW_STATUS_OK:
+                health_status = AgentCheck.OK
+            else:
+                health_status = AgentCheck.CRITICAL
+
+            self.service_check('airflow.healthy', health_status, tags=tags)
+            self.gauge('airflow.healthy', int(health_status == AgentCheck.OK), tags=tags)
 
     def _get_json(self, url):
         try:
