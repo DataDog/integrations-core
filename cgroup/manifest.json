@@ -12,11 +12,16 @@
   "metric_to_check": "system.cgroups.cpu.shares",
   "name": "cgroup",
   "public_title": "Datadog-Cgroup Integration",
-  "short_description": "Capture metrics and monitor the status of running processes running inside linux control groups (cgroups).",
+  "short_description": "Capture metrics from processes running inside Linux control groups.",
   "support": "core",
   "supported_os": [
     "linux"
   ],
   "type": "check",
-  "integration_id": "system"
+  "integration_id": "system",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }
