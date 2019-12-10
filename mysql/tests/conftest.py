@@ -25,6 +25,7 @@ def dd_environment(instance_basic):
             'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
             'MYSQL_PORT': str(common.PORT),
             'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
+            'MYSQL_CONF_PATH': _mysql_conf_path(),
             'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
         },
         conditions=[
@@ -141,6 +142,15 @@ def _wait_for_it_script():
     """
     script = os.path.join(common.TESTS_HELPER_DIR, 'scripts', 'wait-for-it.sh')
     return os.path.abspath(script)
+
+
+def _mysql_conf_path():
+    filename = {
+        'mysql': 'mysql.conf',
+        'mariadb': 'mariadb.conf',
+    }[MYSQL_FLAVOR]
+    conf = os.path.join(common.HERE, 'compose', filename)
+    return os.path.abspath(conf)
 
 
 def _mysql_docker_repo():
