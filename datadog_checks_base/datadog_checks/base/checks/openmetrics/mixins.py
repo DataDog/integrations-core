@@ -240,7 +240,7 @@ class OpenMetricsScraperMixin(object):
         )
 
         # A pattern to replace by dots in the metrics name.
-        config['pattern_to_dot'] = instance.get('pattern_to_dot', default_instance.get('pattern_to_dot', None))
+        config['_pattern_to_dot'] = instance.get('_pattern_to_dot', default_instance.get('_pattern_to_dot', None))
 
         # Authentication used when polling endpoint
         config['username'] = instance.get('username', default_instance.get('username', None))
@@ -472,8 +472,8 @@ class OpenMetricsScraperMixin(object):
         metric_name = metric.name
 
         # A configured pattern could be transformed into dot
-        if scraper_config['pattern_to_dot'] is not None:
-            metric_name = metric_name.replace(scraper_config['pattern_to_dot'], '.')
+        if scraper_config['_pattern_to_dot'] is not None:
+            metric_name = metric_name.replace(scraper_config['_pattern_to_dot'], '.')
 
         if metric_name in scraper_config['ignore_metrics']:
             self._send_telemetry_counter(

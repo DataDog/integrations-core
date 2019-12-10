@@ -77,7 +77,7 @@ def test_openmetrics_pattern_to_dot(aggregator):
         'prometheus_url': 'http://localhost:10249/metrics',
         'namespace': 'openmetrics',
         'metrics': ['counter*'],
-        'pattern_to_dot': '__',
+        '_pattern_to_dot': '__',
     }
     c = OpenMetricsCheck('openmetrics', None, {}, [instance_pattern])
     c.check(instance_pattern)
