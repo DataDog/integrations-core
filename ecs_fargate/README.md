@@ -75,7 +75,7 @@ Add the following permissions to your [Datadog IAM policy][9] to collect ECS Far
 The only option in ECS Fargate is to run the task as a [Replica Service][11]. The Datadog Agent runs in the same task definition as your application and integration containers.
 
 ##### AWS CLI
-Run the following commands using the [AWS CLI tools][3]. 
+Run the following commands using the [AWS CLI tools][3].
 
 **Note**: Fargate version 1.1.0 or greater is required, so the command below specifies the platform version.
 
@@ -129,17 +129,17 @@ For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With th
 
 Format for the Agent container:
 ```shell
-{ 
-"name": "DD_DOCKER_LABELS_AS_TAGS", 
-"value": "{"<LABEL_NAME_TO_COLLECT>":"<TAG_KEY_FOR_DATADOG>"}" 
+{
+"name": "DD_DOCKER_LABELS_AS_TAGS",
+"value": "{"<LABEL_NAME_TO_COLLECT>":"<TAG_KEY_FOR_DATADOG>"}"
 }
 ```
 
 Example for the Agent container:
 ```shell
-{ 
-"name": "DD_DOCKER_LABELS_AS_TAGS", 
-"value": "{"com.docker.compose.service":"service_name"}" 
+{
+"name": "DD_DOCKER_LABELS_AS_TAGS",
+"value": "{"com.docker.compose.service":"service_name"}"
 }
 ```
 
@@ -164,19 +164,19 @@ You can monitor Fargate logs by using the AWS FireLens integration built on Data
 
 #### Fluent Bit and FireLens
 
-Configure the AWS FireLens integration built on Datadog's Fluent Bit output plugin to connect your FireLens monitored log data to Datadog Logs. 
+Configure the AWS FireLens integration built on Datadog's Fluent Bit output plugin to connect your FireLens monitored log data to Datadog Logs.
 
-1. Enable Fluent Bit in the FireLens log router container in your Fargate task. For more information about enabling FireLens, see the dedicated [AWS Firelens docs][28]. For more information about Fargate container definitons, see the [AWS docs on Container Definitions][26]. AWS reccomends that you use [the regional Docker image][32]. Here is an example snippet of a task definition where the Fluent Bit image is configured:
-    
+1. Enable Fluent Bit in the FireLens log router container in your Fargate task. For more information about enabling FireLens, see the dedicated [AWS Firelens docs][20]. For more information about Fargate container definitons, see the [AWS docs on Container Definitions][21]. AWS reccomends that you use [the regional Docker image][22]. Here is an example snippet of a task definition where the Fluent Bit image is configured:
+
     ```
-    [ 
-      { 
+    [
+      {
         "essential":true,
         "image":"amazon/aws-for-fluent-bit:latest",
         "name":"log_router",
-        "firelensConfiguration":{ 
+        "firelensConfiguration":{
             "type":"fluentbit",
-            "options":{ 
+            "options":{
                 "enable-ecs-log-metadata":"true"
             }
         }
@@ -184,16 +184,37 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
     ]
     ```
 
-    
+    If your containers are publishing serialized JSON logs over stdout, you should use this [extra firelens configuration][23] to get them correctly parsed within Datadog:
+
+    ```
+    [
+      {
+        "essential":true,
+        "image":"amazon/aws-for-fluent-bit:latest",
+        "name":"log_router",
+        "firelensConfiguration":{
+            "type":"fluentbit",
+            "options":{
+                "enable-ecs-log-metadata":"true"
+                "config-file-type": "file",
+                "config-file-value": "/fluent-bit/configs/parse-json.conf"
+            }
+        }
+      }
+    ]
+    ```
+
+
 2. Next, in the same Fargate task, define a log configuration with AWS FireLens as the log driver, and with data being output to Fluent Bit. Here is an example snippet of a task definition where the FireLens is the log driver, and it is outputting data to Fluent Bit:
 
-    
+
     ```
     "logConfiguration": {
 	    "logDriver": "awsfirelens",
 	    "options": {
 		    "Name": "datadog",
 		    "apikey": "<DATADOG_API_KEY>",
+            "host": "http-intake.logs.datadoghq.com",
             "dd_service": "firelens-test",
             "dd_source": "redis",
             "dd_tags": "project:fluentbit",
@@ -201,15 +222,17 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
             "provider": "ecs"
 	    }
     }
-
     ```
-3. Now, whenever a Fargate task runs, Fluent Bit sends the container logs to your Datadog monitoring with information about all of the containers managed by your Fargate tasks. You can see the raw logs on the [Log Explorer page][30], [build monitors][31] for the logs, and use the [Live Container view][29].
+
+    **Note**: if your organization is in Datadog EU site, use `http-intake.logs.datadoghq.eu` for the `host` option instead.
+
+3. Now, whenever a Fargate task runs, Fluent Bit sends the container logs to your Datadog monitoring with information about all of the containers managed by your Fargate tasks. You can see the raw logs on the [Log Explorer page][24], [build monitors][25] for the logs, and use the [Live Container view][26].
 
 #### AWS logDriver
 
 Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to route logs to Datadog.
 
-1. Define the Fargate AwsLogDriver in your task. [Consult the AWS Fargate developer guide][20] for instructions.
+1. Define the Fargate AwsLogDriver in your task. [Consult the AWS Fargate developer guide][27] for instructions.
 
 2. Fargate task definitions only support the awslogs log driver for the log configuration. This configures your Fargate tasks to send log information to Amazon CloudWatch Logs. The following shows a snippet of a task definition where the awslogs log driver is configured:
 
@@ -223,17 +246,17 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
     }
     ```
 
-    For more information about using the awslogs log driver in your task definitions to send container logs to CloudWatch Logs, see [Using the awslogs Log Driver][21].
+    For more information about using the awslogs log driver in your task definitions to send container logs to CloudWatch Logs, see [Using the awslogs Log Driver][28].
 
     This driver collects logs generated by the container and sends them to CloudWatch directly.
 
-3. Finally, use a [Lambda function][22] to collect logs from CloudWatch and send them to Datadog.
+3. Finally, use a [Lambda function][29] to collect logs from CloudWatch and send them to Datadog.
 
 ### Trace Collection
 
 1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true`.
 
-2. [Instrument your application][23] based on your setup.
+2. [Instrument your application][30] based on your setup.
 
 3. Ensure your application is running in the same task definition as the Datadog Agent container.
 
@@ -241,7 +264,7 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
 ### Metrics
 
-See [metadata.csv][24] for a list of metrics provided by this integration.
+See [metadata.csv][31] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -249,7 +272,7 @@ The ECS Fargate check does not include any events.
 
 ### Service Checks
 
-**fargate_check**  
+**fargate_check**
 Returns `CRITICAL` if the Agent is unable to connect to Fargate, otherwise returns `OK`.
 
 ## Troubleshooting
@@ -258,7 +281,7 @@ Need help? Contact [Datadog support][19].
 
 ## Further Reading
 
-* Blog post: [Monitor AWS Fargate applications with Datadog][25]
+* Blog post: [Monitor AWS Fargate applications with Datadog][32]
 * FAQ: [Integration Setup for ECS Fargate][7]
 * Blog post: [Monitor your Fargate container logs with Fluent Bit and Datadog][33]
 
@@ -282,17 +305,17 @@ Need help? Contact [Datadog support][19].
 [17]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html
 [18]: https://docs.datadoghq.com/integrations/amazon_ecs/#data-collected
 [19]: https://docs.datadoghq.com/help
-[20]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html
-[21]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html
-[22]: https://docs.datadoghq.com/integrations/amazon_lambda/#log-collection
-[23]: https://docs.datadoghq.com/tracing/setup
-[24]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
-[25]: https://www.datadoghq.com/blog/monitor-aws-fargate
-[26]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions
-[27]: https://docs.datadoghq.com/integrations/fluentbit/
-[28]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html
-[29]: https://docs.datadoghq.com/graphing/infrastructure/livecontainers/?tab=linuxwindows
-[30]: https://app.datadoghq.com/logs
-[31]: https://docs.datadoghq.com/monitors/monitor_types/
-[32]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
-[33]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/ 
+[20]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html
+[21]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions
+[22]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
+[23]: https://github.com/aws-samples/amazon-ecs-firelens-examples/tree/master/examples/fluent-bit/parse-json
+[24]: https://app.datadoghq.com/logs
+[25]: https://docs.datadoghq.com/monitors/monitor_types/
+[26]: https://docs.datadoghq.com/graphing/infrastructure/livecontainers/?tab=linuxwindows
+[27]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html
+[28]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html
+[29]: https://docs.datadoghq.com/integrations/amazon_lambda/#log-collection
+[30]: https://docs.datadoghq.com/tracing/setup
+[31]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
+[32]: https://www.datadoghq.com/blog/monitor-aws-fargate
+[33]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/
