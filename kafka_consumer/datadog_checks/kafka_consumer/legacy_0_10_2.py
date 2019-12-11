@@ -65,6 +65,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def check(self, instance):
         """The main entrypoint of the check."""
+        self.log.debug("Running legacy Kafka Consumer check.")
         self._zk_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._kafka_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._highwater_offsets = {}  # Expected format: {(topic, partition): offset}
@@ -126,6 +127,9 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         kafka_conn_str = self.instance.get('kafka_connect_str')
         if not isinstance(kafka_conn_str, (string_types, list)):
             raise ConfigurationError('kafka_connect_str should be string or list of strings')
+        kafka_version = self.instance.get('kafka_client_api_version')
+        if isinstance(kafka_version, str):
+            kafka_version = tuple(map(int, kafka_version.split(".")))
         kafka_client = KafkaClient(
             bootstrap_servers=kafka_conn_str,
             client_id='dd-agent',
@@ -133,7 +137,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for broker
             # version during the bootstrapping process. Note that probing randomly picks a broker to probe, so in a
             # mixed-version cluster probing returns a non-deterministic result.
-            api_version=self.instance.get('kafka_client_api_version'),
+            api_version=kafka_version,
             # While we check for SSL params, if not present they will default to the kafka-python values for plaintext
             # connections
             security_protocol=self.instance.get('security_protocol', 'PLAINTEXT'),
