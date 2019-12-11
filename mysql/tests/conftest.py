@@ -147,9 +147,10 @@ def _wait_for_it_script():
 def _mysql_conf_path():
     if MYSQL_FLAVOR == 'mysql':
         filename = 'mysql.conf'
-    else:
-        assert MYSQL_FLAVOR == 'mariadb'
+    elif MYSQL_FLAVOR == 'mariadb':
         filename = 'mariadb.conf'
+    else:
+        raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
 
     conf = os.path.join(common.HERE, 'compose', filename)
     return os.path.abspath(conf)
@@ -166,3 +167,5 @@ def _mysql_docker_repo():
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'
+    else:
+        raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
