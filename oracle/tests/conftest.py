@@ -11,13 +11,16 @@ from .common import CLIENT_LIB, COMPOSE_FILE, CONTAINER_NAME, HOST, ORACLE_DATAB
 
 CHECK_NAME = "oracle"
 
+INSTANT_CLIENT_URL = (
+    "https://ddintegrations.blob.core.windows.net/oracle/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip"
+)
+
 E2E_METADATA_ORACLE_CLIENT = {
     'start_commands': [
         'mkdir /opt/oracle',
         'apt-get update',
         'apt-get install libaio1 unzip',
-        'curl -o /opt/oracle/instantclient.zip '
-        'https://storage.googleapis.com/datadog-integrations-lab/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip',
+        'curl -o /opt/oracle/instantclient.zip {}'.format(INSTANT_CLIENT_URL),
         'unzip /opt/oracle/instantclient.zip -d /opt/oracle',
     ],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3'},
@@ -32,8 +35,7 @@ E2E_METADATA_JDBC_CLIENT = {
         'apt-get update',
         'apt-get install unzip',
         # JDBC client needs Oracle driver `ojdbc8.jar` from Instant Client
-        'curl -o /opt/oracle/instantclient.zip '
-        'https://storage.googleapis.com/datadog-integrations-lab/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip',
+        'curl -o /opt/oracle/instantclient.zip {}'.format(INSTANT_CLIENT_URL),
         'unzip /opt/oracle/instantclient.zip -d /opt/oracle',
     ],
 }
