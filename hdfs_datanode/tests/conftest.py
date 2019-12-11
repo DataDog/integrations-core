@@ -70,12 +70,12 @@ def _requests_mock(fixture, *args, **kwargs):
 
 
 def requests_get_mock(*args, **kwargs):
-    fixture = os.path.join(HERE, 'fixtures', 'hdfs_datanode_jmx')
+    fixture = os.path.join(HERE, 'fixtures', 'hdfs_datanode_jmx.json')
     return _requests_mock(fixture, *args, **kwargs)
 
 
 def requests_metadata_mock(*args, **kwargs):
-    fixture = os.path.join(HERE, 'fixtures', 'hdfs_datanode_info_jmx')
+    fixture = os.path.join(HERE, 'fixtures', 'hdfs_datanode_info_jmx.json')
     return _requests_mock(fixture, *args, **kwargs)
 
 
