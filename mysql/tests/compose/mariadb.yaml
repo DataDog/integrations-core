@@ -13,6 +13,8 @@ services:
       - MARIADB_DATABASE=my_database
     ports:
       - "${MYSQL_PORT}:3306"
+    volumes:
+      - ${MYSQL_CONF_PATH}:/bitnami/mariadb/conf/my_custom.cnf:ro
 
   mysql-slave:
     container_name: mysql-slave
