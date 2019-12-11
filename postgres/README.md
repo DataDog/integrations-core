@@ -103,9 +103,12 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 **Available for Agent >6.0**
 
-PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix.
+PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into 
+a file with additional details specified in the log line prefix.
 
-1. Edit your PostgreSQL configuration file `/etc/postgresql/<version>/main/postgresql.conf` and uncomment the following parameter in the log section:
+1. Logging is configured within the file `/etc/postgresql/<version>/main/postgresql.conf`,
+   for regular log results including statement outputs uncomment the following parameters in the log
+   section:
 
     ```conf
       logging_collector = on
@@ -119,6 +122,30 @@ PostgreSQL default logging is to `stderr` and logs do not include detailed infor
       #log_destination = 'eventlog'
     ```
 
+2. To gather detailed duration metrics and make them searchable in the Datadog interface, they will need to be 
+   configured inline with the statement themselves.  See below for the recommended config, note that counterintuitively 
+   both `log_statement` and `log_duration` options are commented out.
+   
+   This config will log all statements, but to optionally reduce the output to those which have a certain duration,
+   set the `log_min_duration_statement` value to the desired minimum ms:
+
+    ```conf
+      logging_collector = on
+      log_directory = 'pg_log'  # directory where log files are written,
+                                # can be absolute or relative to PGDATA
+      log_filename = 'pg.log'   #log file name, can include pattern
+      log_min_duration_statement = 0    # -1 is disabled, 0 logs all statements
+                                        # and their durations, > 0 logs only
+                                        # statements running at least this number
+                                        # of milliseconds
+      #log_statement = 'all'     #log all queries
+      log_line_prefix= '%m [%p] %d %a %u %h %c '
+      log_file_mode = 0644
+      ## For Windows
+      #log_destination = 'eventlog'
+    ```
+
+
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
     ```yaml
@@ -130,10 +157,10 @@ PostgreSQL default logging is to `stderr` and logs do not include detailed infor
     ```yaml
       logs:
           - type: file
-            path: /var/log/pg_log/pg.log
+            path: </path/to/logfile>
             source: postgresql
             sourcecategory: database
-            service: myapp
+            service: <myapp>
             #To handle multi line that starts with yyyy-mm-dd use the following pattern
             #log_processing_rules:
             #  - type: multi_line
@@ -204,10 +231,10 @@ Additional helpful documentation, links, and articles:
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
 [6]: https://docs.datadoghq.com/agent/docker/log/
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [9]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
 [10]: https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line
