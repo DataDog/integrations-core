@@ -56,9 +56,9 @@ Returns `CRITICAL` if the check cannot access the metrics endpoint, otherwise re
 Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/external_dns/datadog_checks/external_dns/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/external_dns/metadata.csv
 [6]: https://docs.datadoghq.com/help
 [7]: https://github.com/kubernetes-incubator/external-dns

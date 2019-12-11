@@ -46,8 +46,8 @@ Additional helpful documentation, links, and articles:
 [1]: https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server
 [3]: https://docs.datadoghq.com/agent/basic_agent_usage/windows
 [4]: https://github.com/DataDog/integrations-core/blob/master/hyperv/datadog_checks/hyperv/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/hyperv/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/monitor-microsoft-hyperv-with-datadog
