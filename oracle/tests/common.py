@@ -7,7 +7,6 @@ from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
 
-ENV_TYPE = os.environ.get('ENV_TYPE', 'docker')
 CLIENT_LIB = os.environ['CLIENT_LIB']
 ORACLE_DATABASE_VERSION = os.environ['ORACLE_DATABASE_VERSION']
 
