@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from datadog_checks.dev import get_docker_hostname
+from datadog_checks.dev import get_docker_hostname, get_here
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
 
 ENV_TYPE = os.environ.get('ENV_TYPE', 'docker')
 CLIENT_LIB = os.environ['CLIENT_LIB']
