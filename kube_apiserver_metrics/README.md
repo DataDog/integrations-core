@@ -28,8 +28,6 @@ Annotations:       ad.datadoghq.com/endpoints.check_names: ["kube_apiserver_metr
 ```
 Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s).
 
-Disclaimer: Your apiserver(s) need to run as pods, other methods (e.g. systemd unit) are not supported at the moment.
-
 You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent’s configuration directory][4].
 See the [sample kube_apiserver_metrics.d/conf.yaml][2] for all available configuration options.
 
