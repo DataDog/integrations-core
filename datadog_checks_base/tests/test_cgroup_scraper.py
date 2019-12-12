@@ -8,6 +8,7 @@ import os
 import pytest
 
 from datadog_checks.base.checks.cgroup import CgroupMetricsScraper
+from datadog_checks.dev.utils import running_on_windows_ci
 
 FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'cgroup')
 
@@ -33,6 +34,7 @@ def cgroup_fs(fs):
     return fs
 
 
+@pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
 class TestScraper:
     def test_default_mountpoint(self, cgroup_fs):
         scraper = CgroupMetricsScraper(procfs_path='/proc', root_path='/')
