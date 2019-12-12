@@ -119,6 +119,9 @@ class VSphereCheck(AgentCheck):
         # Event configuration
         self.event_config = {}
 
+        # Host tags exclusion
+        self.excluded_host_tags = instances[0].get("excluded_host_tags", init_config.get("excluded_host_tags", []))
+
         # Caching configuration
         self.cache_config = CacheConfig()
 
@@ -365,7 +368,16 @@ class VSphereCheck(AgentCheck):
                 # Note: some mors have a None hostname
                 hostname = mor.get('hostname')
                 if hostname:
-                    external_host_tags.append((hostname, {SOURCE_TYPE: mor.get('tags')}))
+                    external_host_tags.append(
+                        (
+                            hostname,
+                            {
+                                SOURCE_TYPE: [
+                                    t for t in mor.get('tags') if t.split(":", 1)[0] not in self.excluded_host_tags
+                                ]
+                            },
+                        )
+                    )
 
         return external_host_tags
 
