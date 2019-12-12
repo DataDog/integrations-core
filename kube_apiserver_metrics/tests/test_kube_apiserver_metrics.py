@@ -137,7 +137,7 @@ class TestKubeAPIServerMetrics:
         """
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance_legacy])
         check.process = mock.MagicMock()
-        check.check(minimal_instance)
+        check.check(minimal_instance_legacy)
 
         apiserver_instance = check.kube_apiserver_config
 
