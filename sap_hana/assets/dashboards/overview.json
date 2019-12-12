@@ -456,7 +456,7 @@
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "area"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries"
