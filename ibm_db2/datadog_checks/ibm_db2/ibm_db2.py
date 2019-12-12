@@ -11,7 +11,7 @@ import ibm_db
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
 
-from . import errors, queries
+from . import queries
 from .utils import scrub_connection_string, status_to_service_check
 
 
@@ -23,7 +23,11 @@ class IbmDb2Check(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
-        self._set_conn_config()
+        self._db = self.instance.get('db', '')
+        self._username = self.instance.get('username', '')
+        self._password = self.instance.get('password', '')
+        self._host = self.instance.get('host', '')
+        self._port = self.instance.get('port', 5000)
         self._tags = self.instance.get('tags', [])
 
         # Add global database tag
@@ -46,13 +50,6 @@ class IbmDb2Check(AgentCheck):
 
         # Deduplicate
         self._custom_queries = list(iter_unique(custom_queries))
-
-    def _set_conn_config(self):
-        self._db = self.instance.get('db', '')
-        self._username = self.instance.get('username', '')
-        self._password = self.instance.get('password', '')
-        self._host = self.instance.get('host', '')
-        self._port = self.instance.get('port', 5000)
 
     def check(self, instance):
         if self._conn is None:
@@ -537,14 +534,15 @@ class IbmDb2Check(AgentCheck):
         except Exception as e:
             error = str(e)
             if "Connection is closed" in error:
-                # reset the connection config values
-                self._set_conn_config()
                 connection = self.get_connection()
 
                 if connection is None:
-                    raise errors.ConnectionError("Unable to create new connection")
+                    raise ConnectionError("Unable to create new connection")
 
-            self._conn = connection
+                self._conn = connection
+                cursor = ibm_db.exec_immediate(self._conn, query)
+            else:
+                raise
 
         row = method(cursor)
         while row is not False:

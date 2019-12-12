@@ -5,10 +5,7 @@ import mock
 import pytest
 
 from datadog_checks.ibm_db2 import IbmDb2Check
-from datadog_checks.ibm_db2.errors import ConnectionError
 from datadog_checks.ibm_db2.utils import scrub_connection_string
-
-from .common import DB, HOST, PASSWORD, PORT, USERNAME
 
 pytestmark = pytest.mark.unit
 
@@ -32,11 +29,16 @@ class TestPasswordScrubber:
 
 def test_retry_connection(aggregator, instance):
     ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
+    conn1 = mock.MagicMock()
+    ibmdb2._conn = conn1
+    ibmdb2.get_connection = mock.MagicMock()
 
-    def mock_exception():
+    def mock_exception(*args, **kwargs):
         raise Exception("Connection is closed")
 
-    with mock.patch('datadog_checks.ibm_db2.IbmDb2Check.get_connection', side_effect=mock_exception):
+    with mock.patch('ibm_db.exec_immediate', side_effect=mock_exception):
 
         with pytest.raises(Exception, match='Connection is closed'):
             ibmdb2.check(instance)
+        # new connection made
+        assert ibmdb2._conn != conn1
