@@ -17,9 +17,10 @@ from tests.checks.common import load_check
 
 log = logging.getLogger('tests')
 
+
 @attr(requires='cgroup')
 class TestCheckCgroup(AgentCheckTest):
     """Basic Test for cgroup integration."""
     CHECK_NAME = 'cgroup'
 
-    ## TODO
+    # TODO

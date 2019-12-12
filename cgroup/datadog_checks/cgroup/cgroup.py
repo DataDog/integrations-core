@@ -14,8 +14,10 @@ from datadog_checks.base.checks.cgroup import CgroupMetricsScraper
 DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
 
+
 class CgroupCheck(AgentCheck):
     """Collect metrics from cgroups."""
+
     def __init__(self, name, init_config, instances):
         super(CgroupCheck, self).__init__(name, init_config, instances)
 
@@ -23,7 +25,7 @@ class CgroupCheck(AgentCheck):
         self._procfs_path = init_config.get('procfs_path', '') or self.agentConfig.get('procfs_path', '/proc')
         self._root_path = init_config.get('root_path', '') or self.agentConfig.get('root_path', '/') or '/'
 
-        self.scraper = CgroupMetricsScraper(procfs_path = self._procfs_path, root_path = self._root_path)
+        self.scraper = CgroupMetricsScraper(procfs_path=self._procfs_path, root_path=self._root_path)
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``

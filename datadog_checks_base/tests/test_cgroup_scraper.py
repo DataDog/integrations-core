@@ -2,18 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import mock
-import os
 import logging
+import os
+
 import pytest
-import pyfakefs
 
 from datadog_checks.base.checks.cgroup import CgroupMetricsScraper
 
 FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'cgroup')
 
+
 def metrics2dict(metrics):
     return dict(map(lambda x: [x[0], x[1:4]], metrics))
+
 
 @pytest.fixture
 def cgroup_fs(fs):
@@ -31,31 +32,34 @@ def cgroup_fs(fs):
 
     return fs
 
-class TestScraper():
+
+class TestScraper:
     def test_default_mountpoint(self, cgroup_fs):
-        scraper = CgroupMetricsScraper(procfs_path = '/proc', root_path = '/')
+        scraper = CgroupMetricsScraper(procfs_path='/proc', root_path='/')
         assert scraper._mountpoints == {
             'memory': '/sys/fs/cgroup/memory',
             'cpuacct': '/sys/fs/cgroup/cpu,cpuacct',
             'cpu': '/sys/fs/cgroup/cpu,cpuacct',
-            'blkio': '/sys/fs/cgroup/blkio'
+            'blkio': '/sys/fs/cgroup/blkio',
         }
 
     def test_no_metrics_errors(self, cgroup_fs, caplog):
-        scraper = CgroupMetricsScraper(procfs_path = '/proc', root_path = '/')
+        scraper = CgroupMetricsScraper(procfs_path='/proc', root_path='/')
         with caplog.at_level(logging.WARNING):
             metrics = scraper.fetch_cgroup_metrics(42, [])
 
         assert len(caplog.records) == 0
-        assert len(metrics) == 0 # none of the metric files are present
+        assert len(metrics) == 0  # none of the metric files are present
 
     def test_blkio_metrics(self, cgroup_fs):
         expected_tags = ['cgroup_subsystem:blkio', 'cgroup_path:system.slice/docker.service']
 
         with open(os.path.join(FIXTURE_PATH, "blkio")) as f:
-            cgroup_fs.create_file('/sys/fs/cgroup/blkio/system.slice/docker.service/blkio.throttle.io_service_bytes', contents=f.read())
+            cgroup_fs.create_file(
+                '/sys/fs/cgroup/blkio/system.slice/docker.service/blkio.throttle.io_service_bytes', contents=f.read()
+            )
 
-        scraper = CgroupMetricsScraper(procfs_path = '/proc', root_path = '/')
+        scraper = CgroupMetricsScraper(procfs_path='/proc', root_path='/')
         metrics = scraper.fetch_cgroup_metrics(42, [])
         d = metrics2dict(metrics)
         assert d['system.cgroups.io.read_bytes'] == ('rate', 602112, expected_tags)
@@ -65,9 +69,11 @@ class TestScraper():
         expected_tags = ['cgroup_subsystem:cpuacct', 'cgroup_path:system.slice/docker.service']
 
         with open(os.path.join(FIXTURE_PATH, "cpuacct_stat")) as f:
-            cgroup_fs.create_file('/sys/fs/cgroup/cpu,cpuacct/system.slice/docker.service/cpuacct.stat', contents=f.read())
+            cgroup_fs.create_file(
+                '/sys/fs/cgroup/cpu,cpuacct/system.slice/docker.service/cpuacct.stat', contents=f.read()
+            )
 
-        scraper = CgroupMetricsScraper(procfs_path = '/proc', root_path = '/')
+        scraper = CgroupMetricsScraper(procfs_path='/proc', root_path='/')
         metrics = scraper.fetch_cgroup_metrics(42, [])
         d = metrics2dict(metrics)
         assert d['system.cgroups.cpu.user'] == ('rate', 2160, expected_tags)
@@ -79,7 +85,7 @@ class TestScraper():
         with open(os.path.join(FIXTURE_PATH, "cpu_stat")) as f:
             cgroup_fs.create_file('/sys/fs/cgroup/cpu,cpuacct/system.slice/docker.service/cpu.stat', contents=f.read())
 
-        scraper = CgroupMetricsScraper(procfs_path = '/proc', root_path = '/')
+        scraper = CgroupMetricsScraper(procfs_path='/proc', root_path='/')
         metrics = scraper.fetch_cgroup_metrics(42, [])
         d = metrics2dict(metrics)
         assert d['system.cgroups.cpu.throttle_periods'] == ('rate', 100, expected_tags)
@@ -91,7 +97,7 @@ class TestScraper():
         with open(os.path.join(FIXTURE_PATH, "memory_stat")) as f:
             cgroup_fs.create_file('/sys/fs/cgroup/memory/system.slice/docker.service/memory.stat', contents=f.read())
 
-        scraper = CgroupMetricsScraper(procfs_path = '/proc', root_path = '/')
+        scraper = CgroupMetricsScraper(procfs_path='/proc', root_path='/')
         metrics = scraper.fetch_cgroup_metrics(42, [])
         d = metrics2dict(metrics)
         assert d['system.cgroups.mem.cache'] == ('gauge', 12288, expected_tags)
@@ -104,10 +110,10 @@ class TestScraper():
         with open(os.path.join(FIXTURE_PATH, "memory_stat")) as f:
             cgroup_fs.create_file('/sys/fs/cgroup/memory/system.slice/docker.service/memory.stat', contents=f.read())
 
-        scraper = CgroupMetricsScraper(procfs_path = '/proc', root_path = '/')
+        scraper = CgroupMetricsScraper(procfs_path='/proc', root_path='/')
         metrics = scraper.fetch_cgroup_metrics(42, [])
         d = metrics2dict(metrics)
         assert d['system.cgroups.mem.limit'] == ('gauge', 104857600.0, expected_tags)
         assert d['system.cgroups.mem.sw_limit'] == ('gauge', 209715200.0, expected_tags)
-        assert d['system.cgroups.mem.in_use'] == ('gauge', 11247616.0/104857600.0, expected_tags)
-        assert d['system.cgroups.mem.sw_in_use'] == ('gauge', float(11247616+66888)/float(209715200), expected_tags)
+        assert d['system.cgroups.mem.in_use'] == ('gauge', 11247616.0 / 104857600.0, expected_tags)
+        assert d['system.cgroups.mem.sw_in_use'] == ('gauge', float(11247616 + 66888) / float(209715200), expected_tags)

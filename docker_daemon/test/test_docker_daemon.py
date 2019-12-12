@@ -43,6 +43,7 @@ def reset_docker_settings():
     DockerUtil().set_docker_settings({}, {})
     DockerUtil()._client = Client(**DockerUtil().settings)
 
+
 @attr(requires='docker_daemon')
 class TestCheckDockerDaemonDown(AgentCheckTest):
     """Tests for docker_daemon integration when docker is down."""
@@ -57,6 +58,7 @@ class TestCheckDockerDaemonDown(AgentCheckTest):
         DockerUtil()._client = None
         self.run_check(MOCK_CONFIG, force_reload=True)
         self.assertServiceCheck("docker.service_up", status=AgentCheck.CRITICAL, tags=DEFAULT_CUSTOM_TAGS, count=1)
+
 
 @attr(requires='docker_daemon')
 class TestCheckDockerDaemonNoSetUp(AgentCheckTest):
@@ -98,6 +100,7 @@ class TestCheckDockerDaemonNoSetUp(AgentCheckTest):
         self.assertEqual(len(filtered_events), 1)
         self.assertIn("exitCode:1", filtered_events[0]["tags"])
         self.assertNotIn("name:test-exit-fail", filtered_events[0]["tags"])
+
 
 @attr(requires='docker_daemon')
 class TestCheckDockerDaemon(AgentCheckTest):
@@ -256,7 +259,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
         self.second_network = self.docker_client.create_network("second", driver="bridge")['Id']
 
         for c in CONTAINERS_TO_RUN:
-            images = [i["RepoTags"][0] for i in self.docker_client.images(c.split(":")[0]) if i["RepoTags"] and i["RepoTags"][0].startswith(c)]
+            images = [i["RepoTags"][0] for i in self.docker_client.images(
+                c.split(":")[0]) if i["RepoTags"] and i["RepoTags"][0].startswith(c)]
             if len(images) == 0:
                 for line in self.docker_client.pull(c, stream=True):
                     print line
@@ -289,10 +293,14 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_basic_config_single(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:nginx', 'image_tag:latest']),
@@ -301,10 +309,14 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.image.virtual_size', ['image_name:redis', 'image_tag:latest']),
             ('docker.images.available', None),
             ('docker.images.intermediate', None),
-            ('docker.mem.cache', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.rss', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest'])
+            ('docker.mem.cache', ['container_name:test-new-nginx-latest',
+                                  'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.mem.cache', ['container_name:test-new-redis-latest',
+                                  'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.rss', ['container_name:test-new-nginx-latest',
+                                'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.mem.rss', ['container_name:test-new-redis-latest',
+                                'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest'])
         ]
 
         config = {
@@ -324,31 +336,51 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_basic_config_twice(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.images.available', None),
             ('docker.images.intermediate', None),
-            ('docker.cpu.system', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.cpu.system', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.cpu.user', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.cpu.user', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.io.read_bytes', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.io.read_bytes', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.io.write_bytes', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.io.write_bytes', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.cache', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.rss', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.cpu.system', ['container_name:test-new-nginx-latest',
+                                   'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.cpu.system', ['container_name:test-new-redis-latest',
+                                   'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.cpu.user', ['container_name:test-new-nginx-latest',
+                                 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.cpu.user', ['container_name:test-new-redis-latest',
+                                 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.io.read_bytes', ['container_name:test-new-nginx-latest',
+                                      'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.io.read_bytes', ['container_name:test-new-redis-latest',
+                                      'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.io.write_bytes', ['container_name:test-new-nginx-latest',
+                                       'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.io.write_bytes', ['container_name:test-new-redis-latest',
+                                       'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.cache', ['container_name:test-new-nginx-latest',
+                                  'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.mem.cache', ['container_name:test-new-redis-latest',
+                                  'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.rss', ['container_name:test-new-nginx-latest',
+                                'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.mem.rss', ['container_name:test-new-redis-latest',
+                                'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
 
-            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
-            ('docker.net.bytes_rcvd', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'docker_network:bridge']),
-            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
-            ('docker.net.bytes_sent', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'docker_network:bridge'])
+            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest',
+                                       'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_rcvd', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest',
+                                       'image_name:nginx', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest',
+                                       'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ['container_name:test-new-nginx-latest',
+                                       'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'docker_network:bridge'])
         ]
 
         custom_tags = ["extra_tag", "env:testing"]
@@ -373,26 +405,38 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_exclude_filter(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
-            ('docker.cpu.system', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.cpu.user', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.cpu.system', ['container_name:test-new-redis-latest',
+                                   'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.cpu.user', ['container_name:test-new-redis-latest',
+                                 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
             ('docker.image.size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.image.virtual_size', ['image_name:redis', 'image_tag:latest']),
             ('docker.image.virtual_size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.images.available', None),
             ('docker.images.intermediate', None),
-            ('docker.io.read_bytes', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.io.write_bytes', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
-            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge'])
+            ('docker.io.read_bytes', ['container_name:test-new-redis-latest',
+                                      'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.io.write_bytes', ['container_name:test-new-redis-latest',
+                                       'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.cache', ['container_name:test-new-redis-latest',
+                                  'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.rss', ['container_name:test-new-redis-latest',
+                                'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest',
+                                       'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest',
+                                       'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge'])
         ]
         config = {
             "init_config": {},
@@ -430,26 +474,38 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_include_filter(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
-            ('docker.cpu.system', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.cpu.user', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.cpu.system', ['container_name:test-new-redis-latest',
+                                   'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.cpu.user', ['container_name:test-new-redis-latest',
+                                 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
             ('docker.image.size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.image.virtual_size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.image.virtual_size', ['image_name:redis', 'image_tag:latest']),
             ('docker.images.available', None),
             ('docker.images.intermediate', None),
-            ('docker.io.read_bytes', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.io.write_bytes', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
-            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge'])
+            ('docker.io.read_bytes', ['container_name:test-new-redis-latest',
+                                      'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.io.write_bytes', ['container_name:test-new-redis-latest',
+                                       'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.cache', ['container_name:test-new-redis-latest',
+                                  'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.rss', ['container_name:test-new-redis-latest',
+                                'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.net.bytes_rcvd', ['container_name:test-new-redis-latest', 'docker_image:redis:latest',
+                                       'image_name:redis', 'image_tag:latest', 'docker_network:bridge']),
+            ('docker.net.bytes_sent', ['container_name:test-new-redis-latest',
+                                       'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'docker_network:bridge'])
         ]
         config = {
             "init_config": {},
@@ -481,7 +537,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             "docker.net.bytes_sent"
         ]
 
-        nginx_tags = ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']
+        nginx_tags = ['container_name:test-new-nginx-latest',
+                      'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']
         for m in perf_metrics:
             self.assertMetric(mname, tags=nginx_tags, count=0)
 
@@ -559,10 +616,14 @@ class TestCheckDockerDaemon(AgentCheckTest):
 
     def test_labels_collection(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx', 'short_image:nginx:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx',
+                                           'image_tag:latest', 'label1:nginx', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx',
+                                           'image_tag:latest', 'label1:nginx', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
@@ -571,12 +632,18 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.image.virtual_size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.images.available', None),
             ('docker.images.intermediate', None),
-            ('docker.mem.cache', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
-            ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.rss', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
-            ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.limit', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
-            ('docker.mem.in_use', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.cache', ['container_name:test-new-nginx-latest',
+                                  'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.cache', ['container_name:test-new-redis-latest',
+                                  'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.rss', ['container_name:test-new-nginx-latest',
+                                'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.rss', ['container_name:test-new-redis-latest',
+                                'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.limit', ['container_name:test-new-nginx-latest',
+                                  'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.in_use', ['container_name:test-new-nginx-latest',
+                                   'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
         ]
 
         config = {
@@ -605,16 +672,26 @@ class TestCheckDockerDaemon(AgentCheckTest):
         expected_metrics = [
             ('docker.containers.stopped.total', None),
             ('docker.containers.running.total', None),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest', 'label1:nginx']),
-            ('docker.mem.rss', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest', 'label1:nginx']),
-            ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.limit', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
-            ('docker.mem.cache', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
-            ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.in_use', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.containers.running', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx',
+                                           'image_tag:latest', 'short_image:nginx:latest', 'label1:nginx']),
+            ('docker.mem.rss', ['container_name:test-new-nginx-latest',
+                                'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.containers.stopped', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx',
+                                           'image_tag:latest', 'short_image:nginx:latest', 'label1:nginx']),
+            ('docker.mem.rss', ['container_name:test-new-redis-latest',
+                                'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.limit', ['container_name:test-new-nginx-latest',
+                                  'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.cache', ['container_name:test-new-nginx-latest',
+                                  'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
+            ('docker.mem.cache', ['container_name:test-new-redis-latest',
+                                  'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.in_use', ['container_name:test-new-nginx-latest',
+                                   'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'label1:nginx']),
         ]
 
         config = {
@@ -642,10 +719,14 @@ class TestCheckDockerDaemon(AgentCheckTest):
         metric_suffix = ["count", "avg", "median", "max", "95percentile"]
 
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
@@ -732,13 +813,16 @@ class TestCheckDockerDaemon(AgentCheckTest):
         self.run_check(config, force_reload=True)
         self.assertServiceCheck('docker.container_health', count=0)
 
-
     def test_container_size(self):
         expected_metrics = [
-            ('docker.containers.running', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
-            ('docker.containers.running', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:redis:latest', 'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
-            ('docker.containers.stopped', ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
+            ('docker.containers.running', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:redis:latest',
+                                           'image_name:redis', 'image_tag:latest', 'short_image:redis:latest']),
+            ('docker.containers.stopped', ['docker_image:nginx:latest',
+                                           'image_name:nginx', 'image_tag:latest', 'short_image:nginx:latest']),
             ('docker.containers.running.total', None),
             ('docker.containers.stopped.total', None),
             ('docker.image.size', ['image_name:redis', 'image_tag:latest']),
@@ -747,16 +831,25 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ('docker.image.virtual_size', ['image_name:nginx', 'image_tag:latest']),
             ('docker.images.available', None),
             ('docker.images.intermediate', None),
-            ('docker.mem.cache', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.mem.cache', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.rss', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.mem.rss', ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ('docker.mem.limit', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ('docker.mem.in_use', ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.mem.cache', ['container_name:test-new-nginx-latest',
+                                  'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.mem.cache', ['container_name:test-new-redis-latest',
+                                  'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.rss', ['container_name:test-new-nginx-latest',
+                                'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.mem.rss', ['container_name:test-new-redis-latest',
+                                'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ('docker.mem.limit', ['container_name:test-new-nginx-latest',
+                                  'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ('docker.mem.in_use', ['container_name:test-new-nginx-latest',
+                                   'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
             # Container size metrics
-            ("docker.container.size_rootfs", ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
-            ("docker.container.size_rootfs", ['container_name:test-new-redis-latest', 'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
-            ("docker.container.size_rw", ['container_name:test-new-nginx-latest', 'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ("docker.container.size_rootfs", ['container_name:test-new-nginx-latest',
+                                              'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
+            ("docker.container.size_rootfs", ['container_name:test-new-redis-latest',
+                                              'docker_image:redis:latest', 'image_name:redis', 'image_tag:latest']),
+            ("docker.container.size_rw", ['container_name:test-new-nginx-latest',
+                                          'docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest']),
         ]
 
         config = {
@@ -784,7 +877,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
             ({'RepoTags': ['redis:latest']}, [['redis'], ['latest']]),
             ({'RepoTags': ['localhost/redis:latest']}, [['localhost/redis'], ['latest']]),
             ({'RepoTags': ['localhost:5000/redis:latest']}, [['localhost:5000/redis'], ['latest']]),
-            ({'RepoTags': ['localhost:5000/redis:latest', 'localhost:5000/redis:v1.1']}, [['localhost:5000/redis'], ['latest', 'v1.1']]),
+            ({'RepoTags': ['localhost:5000/redis:latest', 'localhost:5000/redis:v1.1']},
+             [['localhost:5000/redis'], ['latest', 'v1.1']]),
             ({'RepoTags': [], 'RepoDigests': [u'datadog/docker-dd-agent@sha256:47a59c2ea4f6d9555884aacc608b303f18bde113b1a3a6743844bfc364d73b44']},
                 [['datadog/docker-dd-agent'], None]),
         ]
@@ -817,8 +911,10 @@ class TestCheckDockerDaemon(AgentCheckTest):
         DockerUtil().set_docker_settings(config['init_config'], config['instances'][0])
 
         expected_service_checks = [
-            (AgentCheck.OK, ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-ok', 'short_image:nginx:latest']),
-            (AgentCheck.CRITICAL, ['docker_image:nginx:latest', 'image_name:nginx', 'image_tag:latest', 'container_name:test-exit-fail', 'short_image:nginx:latest']),
+            (AgentCheck.OK, ['docker_image:nginx:latest', 'image_name:nginx',
+                             'image_tag:latest', 'container_name:test-exit-ok', 'short_image:nginx:latest']),
+            (AgentCheck.CRITICAL, ['docker_image:nginx:latest', 'image_name:nginx',
+                                   'image_tag:latest', 'container_name:test-exit-fail', 'short_image:nginx:latest']),
         ]
 
         container_ok = self.docker_client.create_container(
@@ -884,15 +980,15 @@ class TestCheckDockerDaemon(AgentCheckTest):
             if 'blkio' in stat_file:
                 return {}
             elif 'cpuacct.usage' in stat_file:
-                return dict({'usage': str(int(fp.read())/10000000)})
+                return dict({'usage': str(int(fp.read()) / 10000000)})
             # mocked part
             elif 'cpu' in stat_file:
                 return {'user': 1000 * self.run, 'system': 1000 * self.run}
                 self.run += 1
             elif 'memory.soft_limit_in_bytes' in stat_file:
-                    value = int(fp.read())
-                    if value < 2 ** 60:
-                        return dict({'softlimit': value})
+                value = int(fp.read())
+                if value < 2 ** 60:
+                    return dict({'softlimit': value})
             else:
                 return dict(map(lambda x: x.split(' ', 1), fp.read().splitlines()))
 
@@ -916,11 +1012,14 @@ class TestCheckDockerDaemon(AgentCheckTest):
     def test_filter_event_type(self):
         """ Testing event type filtering"""
         event_list = [
-            {"status":"create","id":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","from":"redis","Type":"container","Action":"create","Actor":{"ID":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","Attributes":{"image":"redis","name":"brave_rosalind"}},"scope":"local","time":1505221851,"timeNano":1505221851874332240},
-            {"status":"pause","id":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","from":"redis","Type":"container","Action":"pause","Actor":{"ID":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","Attributes":{"image":"redis","name":"brave_rosalind"}},"scope":"local","time":1505221892,"timeNano":1505221892885900077},
-            {"status":"top","id":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","from":"redis","Type":"container","Action":"top","Actor":{"ID":"aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001","Attributes":{"image":"redis","name":"brave_rosalind"}},"scope":"local","time":1505221910,"timeNano":1505221910331861955},
+            {"status": "create", "id": "aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001", "from": "redis", "Type": "container", "Action": "create", "Actor": {
+                "ID": "aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001", "Attributes": {"image": "redis", "name": "brave_rosalind"}}, "scope": "local", "time": 1505221851, "timeNano": 1505221851874332240},
+            {"status": "pause", "id": "aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001", "from": "redis", "Type": "container", "Action": "pause", "Actor": {
+                "ID": "aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001", "Attributes": {"image": "redis", "name": "brave_rosalind"}}, "scope": "local", "time": 1505221892, "timeNano": 1505221892885900077},
+            {"status": "top", "id": "aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001", "from": "redis", "Type": "container", "Action": "top", "Actor": {
+                "ID": "aa717771661fb29ed0ca74274178dbc7114dee3d4adfde7760828ee3f6b52001", "Attributes": {"image": "redis", "name": "brave_rosalind"}}, "scope": "local", "time": 1505221910, "timeNano": 1505221910331861955},
         ]
-        dict_mock = {"redis":event_list}
+        dict_mock = {"redis": event_list}
 
         # Testing with the default config
         self.run_check(MOCK_CONFIG, force_reload=True)

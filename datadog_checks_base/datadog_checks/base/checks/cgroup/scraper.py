@@ -2,19 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
 import logging
-
-from .. import AgentCheck
+import os
 
 GAUGE = "gauge"
 RATE = "rate"
 
+
 class MountException(Exception):
     pass
 
+
 class CGroupException(Exception):
     pass
+
 
 class CgroupMetricsScraper(object):
     def __init__(self, *args, **kwargs):
@@ -33,70 +34,63 @@ class CgroupMetricsScraper(object):
                 },
                 "to_compute": {
                     # We only get these metrics if they are properly set, i.e. they are a "reasonable" value
-                    "system.cgroups.mem.limit": (["hierarchical_memory_limit"], lambda x: float(x) if float(x) < 2 ** 60 else None, GAUGE),
-                    "system.cgroups.mem.sw_limit": (["hierarchical_memsw_limit"], lambda x: float(x) if float(x) < 2 ** 60 else None, GAUGE),
-                    "system.cgroups.mem.in_use": (["rss", "hierarchical_memory_limit"], lambda x, y: float(x)/float(y) if float(y) < 2 ** 60 else None, GAUGE),
-                    "system.cgroups.mem.sw_in_use": (["swap", "rss", "hierarchical_memsw_limit"], lambda x, y, z: float(x + y)/float(z) if float(z) < 2 ** 60 else None, GAUGE)
-                }
+                    "system.cgroups.mem.limit": (
+                        ["hierarchical_memory_limit"],
+                        lambda x: float(x) if float(x) < 2 ** 60 else None,
+                        GAUGE,
+                    ),
+                    "system.cgroups.mem.sw_limit": (
+                        ["hierarchical_memsw_limit"],
+                        lambda x: float(x) if float(x) < 2 ** 60 else None,
+                        GAUGE,
+                    ),
+                    "system.cgroups.mem.in_use": (
+                        ["rss", "hierarchical_memory_limit"],
+                        lambda x, y: float(x) / float(y) if float(y) < 2 ** 60 else None,
+                        GAUGE,
+                    ),
+                    "system.cgroups.mem.sw_in_use": (
+                        ["swap", "rss", "hierarchical_memsw_limit"],
+                        lambda x, y, z: float(x + y) / float(z) if float(z) < 2 ** 60 else None,
+                        GAUGE,
+                    ),
+                },
             },
             {
                 "cgroup": "memory",
                 "file": "memory.soft_limit_in_bytes",
-                "metrics": {
-                    "softlimit": ("system.cgroups.mem.soft_limit", GAUGE),
-                },
+                "metrics": {"softlimit": ("system.cgroups.mem.soft_limit", GAUGE)},
             },
             {
                 "cgroup": "memory",
                 "file": "memory.kmem.usage_in_bytes",
-                "metrics": {
-                    "kmemusage": ("system.cgroups.kmem.usage", GAUGE),
-                },
+                "metrics": {"kmemusage": ("system.cgroups.kmem.usage", GAUGE)},
             },
             {
                 "cgroup": "cpuacct",
                 "file": "cpuacct.stat",
-                "metrics": {
-                    "user": ("system.cgroups.cpu.user", RATE),
-                    "system": ("system.cgroups.cpu.system", RATE),
-                },
+                "metrics": {"user": ("system.cgroups.cpu.user", RATE), "system": ("system.cgroups.cpu.system", RATE)},
             },
-            {
-                "cgroup": "cpuacct",
-                "file": "cpuacct.usage",
-                "metrics": {
-                    "usage": ("system.cgroups.cpu.usage", RATE),
-                }
-            },
+            {"cgroup": "cpuacct", "file": "cpuacct.usage", "metrics": {"usage": ("system.cgroups.cpu.usage", RATE)}},
             {
                 "cgroup": "cpu",
                 "file": "cpu.stat",
                 "metrics": {
                     "nr_periods": ("system.cgroups.cpu.throttle_periods", RATE),
-                    "nr_throttled": ("system.cgroups.cpu.throttled", RATE)
+                    "nr_throttled": ("system.cgroups.cpu.throttled", RATE),
                 },
             },
             {
                 "cgroup": "cpu",
                 "file": "cpu.cfs_period_us",
-                "metrics": {
-                    "value": ("system.cgroups.cpu.cfs_period", GAUGE),
-                },
+                "metrics": {"value": ("system.cgroups.cpu.cfs_period", GAUGE)},
             },
             {
                 "cgroup": "cpu",
                 "file": "cpu.cfs_quota_us",
-                "metrics": {
-                    "value": ("system.cgroups.cpu.cfs_quota", GAUGE),
-                },
+                "metrics": {"value": ("system.cgroups.cpu.cfs_quota", GAUGE)},
             },
-            {
-                "cgroup": "cpu",
-                "file": "cpu.shares",
-                "metrics": {
-                    "value": ("system.cgroups.cpu.shares", GAUGE)
-                },
-            },
+            {"cgroup": "cpu", "file": "cpu.shares", "metrics": {"value": ("system.cgroups.cpu.shares", GAUGE)}},
             {
                 "cgroup": "blkio",
                 "file": 'blkio.throttle.io_service_bytes',
@@ -131,7 +125,7 @@ class CgroupMetricsScraper(object):
                 if stats:
                     cgroup_tags = tags + [
                         'cgroup_subsystem:{}'.format(cgroup['cgroup']),
-                        'cgroup_path:{}'.format(cgroup_path)
+                        'cgroup_path:{}'.format(cgroup_path),
                     ]
 
                     for key, (dd_key, metric_type) in cgroup['metrics'].items():
@@ -142,7 +136,11 @@ class CgroupMetricsScraper(object):
                     for mname, (key_list, fct, metric_type) in cgroup.get('to_compute', {}).items():
                         values = [int(stats[key]) for key in key_list if key in stats]
                         if len(values) != len(key_list):
-                            self.log.debug("Couldn't compute {0}, some keys were missing. Required keys: {1}, found keys: {2}".format(mname, key_list, stats.keys()))
+                            self.log.debug(
+                                "Couldn't compute {mname}, some keys were missing."
+                                "Required keys: {key_list}, found keys: {found_keys}",
+                                extra={"mname": mname, "key_list": key_list, "found_keys": stats.keys()},
+                            )
                             continue
                         value = fct(*values)
                         print("{} = {}".format(','.join(map(lambda x: str(x), values)), value))
@@ -183,7 +181,8 @@ class CgroupMetricsScraper(object):
         if len(cgroup_mounts) == 0:
             raise Exception(
                 "Can't find mounted cgroups (%s). If you run the Agent inside a container,"
-                " please refer to the documentation." % hierarchy)
+                " please refer to the documentation." % hierarchy
+            )
         # Old cgroup style
         if len(cgroup_mounts) == 1:
             return os.path.join(self._root_path, cgroup_mounts[0][1])
@@ -219,7 +218,7 @@ class CgroupMetricsScraper(object):
         # In Ubuntu Xenial, we've encountered containers with no `cpu`
         # cgroup in /proc/<pid>/cgroup
         if subsys == 'cpu' and subsys not in subsystems:
-            for sub, mountpoint in subsystems.items():
+            for sub, _ in subsystems.items():
                 if 'cpuacct' in sub:
                     subsys = sub
                     break
@@ -263,18 +262,18 @@ class CgroupMetricsScraper(object):
 
     def _parse_cgroup_file(self, stat_file):
         """Parse a cgroup pseudo file for key/values."""
-        self.log.debug("Opening cgroup file: %s" % stat_file)
+        self.log.debug("Opening cgroup file: {file}", extra={"file": stat_file})
         try:
             with open(stat_file, 'r') as fp:
                 if 'blkio' in stat_file:
                     return self._parse_blkio_metrics(fp.read().splitlines())
                 elif 'cpuacct.usage' in stat_file:
-                    return dict({'usage': str(int(fp.read())/10000000)})
+                    return dict({'usage': str(int(fp.read()) / 10000000)})
                 elif 'memory.soft_limit_in_bytes' in stat_file:
                     value = int(fp.read())
-                    # do not report kernel max default value (uint64 * 4096)
-                    # see https://github.com/torvalds/linux/blob/5b36577109be007a6ecf4b65b54cbc9118463c2b/mm/memcontrol.c#L2844-L2845
-                    # 2 ** 60 is kept for consistency of other cgroups metrics
+                    # do not report kernel max default value (uint64 * 4096)                                                          # noqa: E501
+                    # see https://github.com/torvalds/linux/blob/5b36577109be007a6ecf4b65b54cbc9118463c2b/mm/memcontrol.c#L2844-L2845 # noqa: E501
+                    # 2 ** 60 is kept for consistency of other cgroups metrics                                                        # noqa: E501
                     if value < 2 ** 60:
                         return dict({'softlimit': value})
                 elif 'memory.kmem.usage_in_bytes' in stat_file:
@@ -289,9 +288,9 @@ class CgroupMetricsScraper(object):
         except IOError:
             # It is possible that the container got stopped between the API call and now.
             # Some files can also be missing (like cpu.stat) and that's fine.
-            self.log.debug("Can't open %s. Its metrics will be missing." % stat_file)
+            self.log.debug("Can't open {file}. Its metrics will be missing.", extra={"file": stat_file})
 
-    def _parse_subsystem(cls, line):
+    def _parse_subsystem(self, line):
         """
         Parse cgroup path.
         - If the path is a slice (see https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Resource_Management_Guide/sec-Default_Cgroup_Hierarchies.html)
@@ -302,7 +301,7 @@ class CgroupMetricsScraper(object):
           so we pick the last one.
         In /host/sys/fs/cgroup/$CGROUP_FOLDER/ cgroup/container IDs can be at the root
         or in a docker folder, so if we find 'docker/' in the path we don't strip it away.
-        """
+        """  # noqa: E501
         if '.slice' in line[2]:
             return line[2].lstrip('/')
         i = line[2].rfind('docker')

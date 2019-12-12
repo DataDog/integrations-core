@@ -65,8 +65,8 @@ CGROUP_METRICS = [
             # We only get these metrics if they are properly set, i.e. they are a "reasonable" value
             "docker.mem.limit": (["hierarchical_memory_limit"], lambda x: float(x) if float(x) < 2 ** 60 else None, GAUGE),
             "docker.mem.sw_limit": (["hierarchical_memsw_limit"], lambda x: float(x) if float(x) < 2 ** 60 else None, GAUGE),
-            "docker.mem.in_use": (["rss", "hierarchical_memory_limit"], lambda x, y: float(x)/float(y) if float(y) < 2 ** 60 else None, GAUGE),
-            "docker.mem.sw_in_use": (["swap", "rss", "hierarchical_memsw_limit"], lambda x, y, z: float(x + y)/float(z) if float(z) < 2 ** 60 else None, GAUGE)
+            "docker.mem.in_use": (["rss", "hierarchical_memory_limit"], lambda x, y: float(x) / float(y) if float(y) < 2 ** 60 else None, GAUGE),
+            "docker.mem.sw_in_use": (["swap", "rss", "hierarchical_memsw_limit"], lambda x, y, z: float(x + y) / float(z) if float(z) < 2 ** 60 else None, GAUGE)
         }
     },
     {
@@ -243,7 +243,7 @@ class DockerDaemon(AgentCheck):
                 mountpoints=self._mountpoints,
                 procfs_path=self._procfs_path,
                 root_path=self._root_path
-                )
+            )
 
             # Set tagging options
             # The collect_labels_as_tags is legacy, only tagging docker metrics.
@@ -642,7 +642,7 @@ class DockerDaemon(AgentCheck):
 
         per_state_count = defaultdict(int)
 
-        filterlambda = lambda ctr: not self._is_container_excluded(ctr)
+        def filterlambda(ctr): return not self._is_container_excluded(ctr)
         containers = list(filter(filterlambda, containers_by_id.values()))
 
         for ctr in containers:
@@ -650,7 +650,8 @@ class DockerDaemon(AgentCheck):
 
         for state in per_state_count:
             if state:
-                m_func(self, 'docker.container.count', per_state_count[state], tags=['container_state:%s' % state.lower()])
+                m_func(self, 'docker.container.count', per_state_count[state], tags=[
+                       'container_state:%s' % state.lower()])
 
     def _report_volume_count(self):
         """Report volume count per state (dangling or not)"""
@@ -742,7 +743,7 @@ class DockerDaemon(AgentCheck):
                     cols = l.split(':', 1)
                     interface_name = str(cols[0]).strip()
                     if interface_name in networks:
-                        net_tags = tags + ['docker_network:'+networks[interface_name]]
+                        net_tags = tags + ['docker_network:' + networks[interface_name]]
                         x = cols[1].split()
                         m_func = FUNC_MAP[RATE][self.use_histogram]
                         m_func(self, "docker.net.bytes_rcvd", long(x[0]), net_tags)
@@ -1015,7 +1016,7 @@ class DockerDaemon(AgentCheck):
             return True
         if line[2].startswith('/') and re.match(CONTAINER_ID_RE, line[2][1:]):  # kubernetes
             return True
-        if line[2].startswith('/') and re.match(CONTAINER_ID_RE, line[2].split('/')[-1]): # kube 1.6+ qos hierarchy
+        if line[2].startswith('/') and re.match(CONTAINER_ID_RE, line[2].split('/')[-1]):  # kube 1.6+ qos hierarchy
             return True
         return False
 
