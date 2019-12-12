@@ -135,6 +135,12 @@ instances:
     #
     # use_guest_hostname: false
 
+    ## @param excluded_host_tags - list of strings - optional - default: []
+    ## List of host tags keys to exclude from host metadata collection.
+    ## Overrides the same parameter specified in init_config.
+    #
+    # excluded_host_tags: []
+
     ## @param event_config - dictionary - optional
     ## Event config is a dictionary
     ## For now the only switch you can flip is collect_vcenter_alarms
