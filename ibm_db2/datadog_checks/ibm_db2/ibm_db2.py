@@ -533,7 +533,7 @@ class IbmDb2Check(AgentCheck):
             cursor = ibm_db.exec_immediate(self._conn, query)
         except Exception as e:
             error = str(e)
-            if "Connection is closed" in error:
+            if "Connection is closed" in error and 'CLI0106E' in error:
                 connection = self.get_connection()
 
                 if connection is None:
