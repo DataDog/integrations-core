@@ -66,7 +66,7 @@ def config(ctx, check, sync):
         if spec.errors:
             files_failed[spec_path] = True
             for error in spec.errors:
-                check_display_queue.append(lambda **kwargs: echo_failure(error, **kwargs))
+                check_display_queue.append(lambda error=error, **kwargs: echo_failure(error, **kwargs))
         else:
             if spec.data['name'] != display_name:
                 files_failed[spec_path] = True
@@ -84,7 +84,7 @@ def config(ctx, check, sync):
                 if errors:
                     files_failed[example_file_path] = True
                     for error in errors:
-                        check_display_queue.append(lambda **kwargs: echo_failure(error, **kwargs))
+                        check_display_queue.append(lambda error=error, **kwargs: echo_failure(error, **kwargs))
                 else:
                     if not file_exists(example_file_path) or read_file(example_file_path) != contents:
                         if sync:
@@ -92,7 +92,7 @@ def config(ctx, check, sync):
                         else:
                             files_failed[example_file_path] = True
                             check_display_queue.append(
-                                lambda **kwargs: echo_failure(
+                                lambda example_file=example_file, **kwargs: echo_failure(
                                     'File `{}` needs to be synced'.format(example_file), **kwargs
                                 )
                             )
