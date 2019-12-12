@@ -18,6 +18,7 @@ CONFIG_FILE = os.path.join(APP_DIR, 'config.toml')
 
 SECRET_KEYS = {
     'dd_api_key',
+    'dd_app_key',
     'orgs.*.api_key',
     'orgs.*.app_key',
     'github.token',
