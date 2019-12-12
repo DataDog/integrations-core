@@ -102,7 +102,7 @@ METRIC_MAP = {
     'vault_runtime_sys_bytes': 'vault.runtime.sys.bytes',
     'vault_runtime_total_gc_pause_ns': 'vault.runtime.total.gc.pause_ns',
     'vault_runtime_total_gc_runs': 'vault.runtime.total.gc.runs',
-    'vault_expire_fetch-lease-times': 'vault.expire.fetch-lease-times',
+    'vault_expire_fetch_lease_times': 'vault.expire.fetch.lease.times',
     'vault_merkle_flushdirty': 'vault.merkle.flushdirty',
     'vault_merkle_savecheckpoint': 'vault.merkle.savecheckpoint',
     'vault_wal_deletewals': 'vault.wal.deletewals',
