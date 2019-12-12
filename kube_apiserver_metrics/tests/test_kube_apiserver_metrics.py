@@ -133,7 +133,7 @@ class TestKubeAPIServerMetrics:
 
     def test_default_config_legacy(self, aggregator, mock_read_bearer_token):
         """
-        Testing the default configuration.
+         Testing the default legacy configuration.
         """
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance_legacy])
         check.process = mock.MagicMock()
