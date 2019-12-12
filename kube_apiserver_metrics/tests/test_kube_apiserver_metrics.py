@@ -121,7 +121,11 @@ class TestKubeAPIServerMetrics:
         Testing the default configuration.
         """
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance])
-        apiserver_instance = check.get_scraper_config(minimal_instance)
+
+        check.process = mock.MagicMock()
+        check.check(minimal_instance)
+
+        apiserver_instance = check.kube_apiserver_config
 
         assert not apiserver_instance["ssl_verify"]
         assert apiserver_instance["bearer_token_auth"]
@@ -132,7 +136,10 @@ class TestKubeAPIServerMetrics:
         Testing the default configuration.
         """
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance_legacy])
-        apiserver_instance = check.get_scraper_config(minimal_instance_legacy)
+        check.process = mock.MagicMock()
+        check.check(minimal_instance)
+
+        apiserver_instance = check.kube_apiserver_config
 
         assert not apiserver_instance["ssl_verify"]
         assert apiserver_instance["bearer_token_auth"]
