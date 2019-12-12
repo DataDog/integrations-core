@@ -16,18 +16,15 @@ The main use case to run the kube_apiserver_metrics check is as a Cluster Level 
 Refer to the dedicated documentation for [Cluster Level Checks][3].
 You can annotate the service of your apiserver with the following:
 ```
-Annotations:       ad.datadoghq.com/endpoint.check_names: ["kube_apiserver_metrics"]
-                   ad.datadoghq.com/endpoint.init_configs: [{}]
-                   ad.datadoghq.com/endpoint.instances:
+Annotations:       ad.datadoghq.com/endpoints.check_names: ["kube_apiserver_metrics"]
+                   ad.datadoghq.com/endpoints.init_configs: [{}]
+                   ad.datadoghq.com/endpoints.instances:
                      [
                        {
                          "prometheus_url": "https://%%host%%:%%port%%/metrics",
                          "bearer_token_auth": "true"
                        }
                      ]
-                   ad.datadoghq.com/service.check_names: [""]
-                   ad.datadoghq.com/service.init_configs: [{}]
-                   ad.datadoghq.com/service.instances: [{}]
 ```
 Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s).
 
