@@ -19,9 +19,6 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
     # Set up metrics_transformers
     metric_transformers = {}
-    DEFAULT_SCHEME = 'https'
-    DEFAULT_SSL_VERIFY = False
-    DEFAULT_BEARER_TOKEN_AUTH = True
 
     def __init__(self, name, init_config, agentConfig, instances=None):
         # Set up metrics_transformers
@@ -35,7 +32,6 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
             # metric added in kubernetes 1.15
             'apiserver_request_total': self.apiserver_request_total,
         }
-        self.kube_apiserver_config = None
 
         super(KubeAPIServerMetricsCheck, self).__init__(
             name,
@@ -60,41 +56,55 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
             default_namespace="kube_apiserver",
         )
 
+    # Overload parent class
+    def get_scraper_config(self, instance):
+        # Make sure we always store the instance config the same way
+        # even if the split scheme+endpoint form is used.
+        # TODO: remove this when the scheme parameter is fully deprecated.
+        conf = deepcopy(instance)
+        conf['prometheus_url'] = self._get_prometheus_url(instance)
+        return super(KubeAPIServerMetricsCheck, self).get_scraper_config(conf)
+
     def check(self, instance):
-        if self.kube_apiserver_config is None:
-            kube_apiserver_config = self._create_kube_apiserver_metrics_instance(instance)
-            self.kube_apiserver_config = self.get_scraper_config(kube_apiserver_config)
+        config = self.get_scraper_config(instance)
 
-        if not self.kube_apiserver_config['metrics_mapper']:
-            url = self.kube_apiserver_config['prometheus_url']
-            raise CheckException("You have to collect at least one metric from the endpoint: {}".format(url))
-        self.process(self.kube_apiserver_config, metric_transformers=self.metric_transformers)
+        if not config['metrics_mapper']:
+            raise CheckException(
+                "You have to collect at least one metric from the endpoint: {}".format(config['prometheus_url'])
+            )
 
-    def _create_kube_apiserver_metrics_instance(self, instance):
+        self.process(config, metric_transformers=self.metric_transformers)
+
+    # Overload parent class
+    def set_instance_defaults(self, instance):
         """
         Set up kube_apiserver_metrics instance so it can be used in OpenMetricsBaseCheck
         """
         kube_apiserver_metrics_instance = deepcopy(instance)
-        endpoint = instance.get('prometheus_url')
-        prometheus_url = endpoint
-
-        # Allow using a proper URL without introducing a breaking change since
-        # the scheme option is deprecated.
-        if not match('^https?://.*$', endpoint):
-            scheme = instance.get('scheme', self.DEFAULT_SCHEME)
-            prometheus_url = "{0}://{1}".format(scheme, endpoint)
-
-        kube_apiserver_metrics_instance['prometheus_url'] = prometheus_url
 
         # Most set ups are using self signed certificates as the APIServer can be used as a CA.
-        ssl_verify = instance.get('ssl_verify', self.DEFAULT_SSL_VERIFY)
+        ssl_verify = instance.get('ssl_verify', False)
         kube_apiserver_metrics_instance['ssl_verify'] = ssl_verify
 
         # We should default to supporting environments using RBAC to access the APIServer.
-        bearer_token_auth = instance.get('bearer_token_auth', self.DEFAULT_BEARER_TOKEN_AUTH)
+        bearer_token_auth = instance.get('bearer_token_auth', True)
         kube_apiserver_metrics_instance['bearer_token_auth'] = bearer_token_auth
 
         return kube_apiserver_metrics_instance
+
+    def _get_prometheus_url(self, instance):
+        endpoint = instance.get('prometheus_url')
+
+        # Allow using a proper URL directly.
+        if match('^https?://.*$', endpoint):
+            return endpoint
+
+        # Otherwise falls back to the legacy scheme+endpoint configuration.
+        # TODO: remove this when the scheme parameter is fully deprecated.
+        scheme = instance.get('scheme', 'https')
+        url = "{0}://{1}".format(scheme, endpoint)
+
+        return url
 
     def submit_as_gauge_and_monotonic_count(self, metric_suffix, metric, scraper_config):
         """

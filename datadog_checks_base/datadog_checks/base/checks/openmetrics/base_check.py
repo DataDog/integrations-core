@@ -92,12 +92,20 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             return self.config_map[endpoint]
 
         # Otherwise, we create the scraper configuration
-        config = self.create_scraper_configuration(instance)
+        mutated_instance = self.set_instance_defaults(instance)
+        config = self.create_scraper_configuration(mutated_instance)
 
         # Add this configuration to the config_map
         self.config_map[endpoint] = config
 
         return config
+
+    def set_instance_defaults(self, instance):
+        """
+        This method allows a child class to set default instance parameters
+        before the scraper configuration is created.
+        """
+        return instance
 
     def _finalize_tags_to_submit(self, _tags, metric_name, val, metric, custom_tags=None, hostname=None):
         """
