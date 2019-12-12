@@ -24,7 +24,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
       ```yaml
       instances:
         - host: localhost
-          port: 7199
+          port: 1616
           user: username
           password: password
           name: activemq_instance

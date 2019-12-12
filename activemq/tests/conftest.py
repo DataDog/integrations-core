@@ -10,14 +10,7 @@ import requests
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.utils import load_jmx_config
 
-from .common import HERE
-
-TEST_QUEUES = ('FOO_QUEUE', 'TEST_QUEUE')
-TEST_TOPICS = ('FOO_TOPIC', 'TEST_TOPIC')
-TEST_MESSAGE = {'body': 'test_message'}
-TEST_AUTH = ('admin', 'admin')
-
-BASE_URL = 'http://localhost:8161/api/message'
+from .common import BASE_URL, HERE, TEST_AUTH, TEST_MESSAGE, TEST_QUEUES, TEST_TOPICS
 
 
 def populate_server():
@@ -36,7 +29,7 @@ def dd_environment():
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         log_patterns=['ActiveMQ Jolokia REST API available'],
+        conditions=[populate_server],
         sleep=2,
     ):
-        populate_server()
         yield load_jmx_config(), {'use_jmx': True}
