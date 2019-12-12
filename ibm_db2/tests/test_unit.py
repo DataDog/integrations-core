@@ -1,15 +1,14 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 import mock
-
-from .common import DB, HOST, PASSWORD, PORT, USERNAME
+import pytest
 
 from datadog_checks.ibm_db2 import IbmDb2Check
 from datadog_checks.ibm_db2.errors import ConnectionError
 from datadog_checks.ibm_db2.utils import scrub_connection_string
+
+from .common import DB, HOST, PASSWORD, PORT, USERNAME
 
 pytestmark = pytest.mark.unit
 

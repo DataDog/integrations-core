@@ -11,8 +11,7 @@ import ibm_db
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
 
-from . import queries
-from . import errors
+from . import errors, queries
 from .utils import scrub_connection_string, status_to_service_check
 
 
@@ -47,7 +46,7 @@ class IbmDb2Check(AgentCheck):
 
         # Deduplicate
         self._custom_queries = list(iter_unique(custom_queries))
-    
+
     def _set_conn_config(self):
         self._db = self.instance.get('db', '')
         self._username = self.instance.get('username', '')
