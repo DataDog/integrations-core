@@ -533,16 +533,14 @@ class IbmDb2Check(AgentCheck):
             cursor = ibm_db.exec_immediate(self._conn, query)
         except Exception as e:
             error = str(e)
-            if "Connection is closed" in error and 'CLI0106E' in error:
-                connection = self.get_connection()
+            self.log.error("Error executing query, attempting to a new connection: {}".format(error))
+            connection = self.get_connection()
 
-                if connection is None:
-                    raise ConnectionError("Unable to create new connection")
+            if connection is None:
+                raise ConnectionError("Unable to create new connection")
 
-                self._conn = connection
-                cursor = ibm_db.exec_immediate(self._conn, query)
-            else:
-                raise
+            self._conn = connection
+            cursor = ibm_db.exec_immediate(self._conn, query)
 
         row = method(cursor)
         while row is not False:
