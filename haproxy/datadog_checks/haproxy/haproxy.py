@@ -107,8 +107,9 @@ class HAProxy(AgentCheck):
             info, data = self._fetch_socket_data(parsed_url)
             self._collect_version_from_socket(info)
         else:
-            self._collect_version_from_http(url)
-            data = self._fetch_url_data(url)
+            http_url = "%s%s" % (url, STATS_URL)
+            self._collect_version_from_http(http_url)
+            data = self._fetch_url_data(http_url)
 
         collect_aggregates_only = instance.get('collect_aggregates_only', True)
         collect_status_metrics = is_affirmative(instance.get('collect_status_metrics', False))
@@ -157,7 +158,6 @@ class HAProxy(AgentCheck):
     def _fetch_url_data(self, url):
         ''' Hit a given http url and return the stats lines '''
         # Try to fetch data from the stats URL
-        url = "%s%s" % (url, STATS_URL)
 
         self.log.debug("Fetching haproxy stats from url: %s" % url)
 
