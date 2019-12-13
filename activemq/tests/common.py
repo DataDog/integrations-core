@@ -15,7 +15,14 @@ TEST_AUTH = ('admin', 'admin')
 
 BASE_URL = 'http://{}:8161/api/message'.format(HOST)
 
-ACTIVEMQ_METRICS = [
+# not all metrics will be available in our E2E environment, specifically:
+# "activemq.queue.dequeue_count",
+# "activemq.queue.dispatch_count",
+# "activemq.queue.enqueue_count",
+# "activemq.queue.expired_count",
+# "activemq.queue.in_flight_count",
+
+ACTIVEMQ_E2E_METRICS = [
     "activemq.queue.avg_enqueue_time",
     "activemq.queue.consumer_count",
     "activemq.queue.producer_count",
@@ -23,11 +30,6 @@ ACTIVEMQ_METRICS = [
     "activemq.queue.min_enqueue_time",
     "activemq.queue.memory_pct",
     "activemq.queue.size",
-    "activemq.queue.dequeue_count",
-    "activemq.queue.dispatch_count",
-    "activemq.queue.enqueue_count",
-    "activemq.queue.expired_count",
-    "activemq.queue.in_flight_count",
     "activemq.broker.store_pct",
     "activemq.broker.temp_pct",
     "activemq.broker.memory_pct",

@@ -4,7 +4,7 @@
 
 import pytest
 
-from .common import ACTIVEMQ_METRICS
+from .common import ACTIVEMQ_E2E_METRICS
 
 
 @pytest.mark.e2e
@@ -12,5 +12,5 @@ def test(dd_agent_check):
     instance = {}
     aggregator = dd_agent_check(instance)
 
-    for metric in ACTIVEMQ_METRICS:
+    for metric in ACTIVEMQ_E2E_METRICS:
         aggregator.assert_metric(metric)
