@@ -79,6 +79,16 @@ def test_excluded_host_tags(vsphere, instance, aggregator):
     }
 
     with mock.patch("datadog_checks.vsphere.VSphereCheck._collect_mors_and_attributes", return_value=mocked_mors_attrs):
+
+        server_instance = vsphere._get_server_instance(instance)
+        result = MagicMock()
+        result.value = [23.4]
+        server_instance.content.perfManager.QueryPerf.return_value = [MagicMock(value=[result], entity=mocked_vm)]
+        vsphere.metadata_cache = MagicMock()
+        vsphere.metadata_cache.get_metadata.return_value = {"name": "mymetric", "unit": "kb"}
+        vsphere.in_compatibility_mode = MagicMock()
+        vsphere.in_compatibility_mode.return_value = False
+
         vsphere.check(instance)
         ext_host_tags = vsphere.get_external_host_tags()
 
@@ -91,12 +101,8 @@ def test_excluded_host_tags(vsphere, instance, aggregator):
                 break
 
         # vsphere_host tag still in cache for sending with metrics
-        cached_vm = vsphere.mor_cache.get_mor("vsphere_mock", str(mocked_vm))
-        for tag in cached_vm["tags"]:
-            if "vsphere_host:" in tag:
-                break
-        else:
-            raise AssertionError("tag vsphere_host not found in " + str(cached_vm["tags"]))
+        aggregator.assert_metric('vsphere.mymetric', value=23.4, hostname="mocked_vm", count=1)
+        aggregator.assert_metric_has_tag('vsphere.mymetric', tag="vsphere_host:mocked_host", count=1)
 
 
 def test__is_excluded():
