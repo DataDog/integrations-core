@@ -11,7 +11,7 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import WaitForPortListening
 from datadog_checks.dev.utils import load_jmx_config
 
-from .common import BASE_URL, HOST, TEST_PORT, HERE, TEST_AUTH, TEST_MESSAGE, TEST_QUEUES, TEST_TOPICS
+from .common import BASE_URL, HERE, HOST, TEST_AUTH, TEST_MESSAGE, TEST_PORT, TEST_QUEUES, TEST_TOPICS
 
 
 def populate_server():
@@ -30,9 +30,6 @@ def dd_environment():
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         log_patterns=['ActiveMQ Jolokia REST API available'],
-        conditions=[
-            WaitForPortListening(HOST, TEST_PORT),
-            populate_server
-        ],
+        conditions=[WaitForPortListening(HOST, TEST_PORT), populate_server],
     ):
         yield load_jmx_config(), {'use_jmx': True}
