@@ -13,7 +13,7 @@ TEST_TOPICS = ('FOO_TOPIC', 'TEST_TOPIC')
 TEST_MESSAGE = {'body': 'test_message'}
 TEST_AUTH = ('admin', 'admin')
 
-BASE_URL = 'http://localhost:8161/api/message'
+BASE_URL = 'http://{}:8161/api/message'.format(HOST)
 
 ACTIVEMQ_METRICS = [
     "activemq.queue.avg_enqueue_time",
