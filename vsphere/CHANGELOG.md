@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 4.3.0 / 2019-12-13
+
+* [Added] Add ability to exclude specific host tags from host metadata. See [#5201](https://github.com/DataDog/integrations-core/pull/5201).
+
 ## 4.2.2 / 2019-12-11
 
 * [Fixed] Creating container views using a context manager. See [#5187](https://github.com/DataDog/integrations-core/pull/5187).
