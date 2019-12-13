@@ -13,3 +13,21 @@ def create_submission_transformer(submit_method):
         return transformer
 
     return get_transformer
+
+
+def create_extra_transformer(column_transformer, source=None):
+    # Every column transformer expects a value to be given but in the post-processing
+    # phase the values are determined by references, so to avoid redefining every
+    # transformer we just map the proper source to the value.
+    if source:
+
+        def call_transformer(sources, **kwargs):
+            return column_transformer(sources[source], sources, **kwargs)
+
+    # Extra transformers that call regular transformers will want to pass values directly.
+    else:
+
+        def call_transformer(sources, value, **kwargs):
+            return column_transformer(value, sources, **kwargs)
+
+    return call_transformer
