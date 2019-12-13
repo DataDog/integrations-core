@@ -40,7 +40,7 @@ def test_retry_connection(aggregator, instance):
 
     with mock.patch('ibm_db.exec_immediate', side_effect=mock_exception):
 
-        with pytest.raises(Exception, match='^\[IBM]\[CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003$'):
+        with pytest.raises(Exception, match='CLI0106E  Connection is closed. SQLSTATE=08003'):
             ibmdb2.check(instance)
         # new connection made
         assert ibmdb2._conn != conn1
