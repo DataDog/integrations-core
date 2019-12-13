@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+import re
 import time
 
 import psutil
-from six import iteritems
 
 from datadog_checks.base import AgentCheck, _is_affirmative
 from datadog_checks.base.checks.cgroup import CgroupMetricsScraper
