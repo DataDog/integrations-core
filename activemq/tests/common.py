@@ -13,7 +13,8 @@ TEST_TOPICS = ('FOO_TOPIC', 'TEST_TOPIC')
 TEST_MESSAGE = {'body': 'test_message'}
 TEST_AUTH = ('admin', 'admin')
 
-BASE_URL = 'http://{}:8161/api/message'.format(HOST)
+TEST_PORT = 8161
+BASE_URL = 'http://{}:{}/api/message'.format(HOST, TEST_PORT)
 
 # not all metrics will be available in our E2E environment, specifically:
 # "activemq.queue.dequeue_count",
