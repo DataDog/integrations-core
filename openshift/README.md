@@ -60,6 +60,13 @@ If SELinux is in enforcing mode, it is recommend to grant [the `spc_t` type][6] 
 * `volumes: hostPath`: Accesses the Docker socket and the host's `proc` and `cgroup` folders, for metric collection.
 * `SELinux type: spc_t`: Accesses the Docker socket and all processes' `proc` and `cgroup` folders, for metric collection. You can read more about this type [in this Red Hat article][6].
 
+**Note**: The Docker socket is owned by the root group, so you may need to elevate the Agent's privileges to pull in Docker metrics. To allow the Agent process proper pe3rmissions, update your SCC with the below:
+
+```yaml
+		runAsUser:
+			type: RunAsAny
+```
+
 ### Validation
 
 Run the [Agent’s status subcommand][8] and look for openshift under the Checks section.
