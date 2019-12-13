@@ -63,8 +63,8 @@ If SELinux is in enforcing mode, it is recommend to grant [the `spc_t` type][6] 
 **Note**: The Docker socket is owned by the root group, so you may need to elevate the Agent's privileges to pull in Docker metrics. To allow the Agent process proper pe3rmissions, update your SCC with the below:
 
 ```yaml
-		runAsUser:
-			type: RunAsAny
+runAsUser:
+  type: RunAsAny
 ```
 
 ### Validation
