@@ -10,7 +10,7 @@ HERE = path.dirname(path.abspath(__file__))
 
 # Get version info
 ABOUT = {}
-with open(path.join(HERE, 'datadog_checks', 'process', '__about__.py')) as f:
+with open(path.join(HERE, 'datadog_checks', 'cgroup', '__about__.py')) as f:
     exec(f.read(), ABOUT)
 
 # Get the long description from the README file
@@ -29,7 +29,7 @@ CHECKS_BASE_REQ = 'datadog_checks_base'
 setup(
     name='datadog-cgroup',
     version=ABOUT['__version__'],
-    description='The Process check',
+    description='The cgroup check',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent cgroup check',
