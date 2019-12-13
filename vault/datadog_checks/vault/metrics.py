@@ -139,7 +139,7 @@ METRIC_MAP = {
     'replication_rpc_client_register_auth': 'replication.rpc.client.register_auth',
     'replication_rpc_client_register_lease': 'replication.rpc.client.register_lease',
     'replication_rpc_client_stream_wals': 'replication.rpc.client.stream_wals',
-    'replication_rpc_client_sub_page_hashes': 'replication.rpc.client.sub_page_hashes'
+    'replication_rpc_client_sub_page_hashes': 'replication.rpc.client.sub_page_hashes',
     'replication_rpc_client_sync_counter': 'replication.rpc.client.sync_counter',
     'replication_rpc_client_upsert_group': 'replication.rpc.client.upsert_group',
     'replication_rpc_client_wrap_in_cubbyhole': 'replication.rpc.client.wrap_in_cubbyhole',
@@ -161,7 +161,7 @@ METRIC_MAP = {
     'database_RevokeUser_error': 'database.revokeUser.error',
     'vault_azure_put': 'vault.azure.put',
     'vault_azure_get': 'vault.azure.get',
-    'vault_azure_get': 'vault.azure.delete',
+    'vault_azure_delete': 'vault.azure.delete',
     'vault_azure_list': 'vault.azure.list',
     'vault_cassandra_put': 'vault.cassandra.put',
     'vault_cassandra_get': 'vault.cassandra.get',
