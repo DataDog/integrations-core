@@ -34,6 +34,7 @@ def test_retry_connection(aggregator, instance):
     ibmdb2.get_connection = mock.MagicMock()
 
     exception_msg = "[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003"
+
     def mock_exception(*args, **kwargs):
         raise Exception(exception_msg)
 
