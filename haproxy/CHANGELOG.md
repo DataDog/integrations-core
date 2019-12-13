@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 2.5.1 / 2019-12-13
+
+* [Fixed] Handle failure on version endpoint. See [#5208](https://github.com/DataDog/integrations-core/pull/5208).
+
 ## 2.5.0 / 2019-12-02
 
 * [Added] Submit version metadata. See [#4851](https://github.com/DataDog/integrations-core/pull/4851).
