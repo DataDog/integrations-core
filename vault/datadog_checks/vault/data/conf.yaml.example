@@ -49,11 +49,6 @@ instances:
     #
     # client_token_path: <CLIENT_TOKEN_PATH>
 
-    ## @param token_renewal_wait - integer - optional - default: 5
-    ## The number of seconds to wait before reading `client_token_path` after an authorization error.
-    #
-    # token_renewal_wait: 5
-
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event, and service check emitted by this Integration.
     ##

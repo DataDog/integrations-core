@@ -369,39 +369,37 @@ class TestVault:
         instance = instance()
         instance['token_renewal_wait'] = 1
         c = Vault(Vault.CHECK_NAME, {}, [instance])
+        renew_client_token = c.renew_client_token
 
         run_check(c)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
-
-        c.set_client_token('foo')
-        aggregator.reset()
-
-        run_check(c)
-        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
-        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
-        assert (
-            'Permission denied, refreshing the client token in {} seconds...'.format(
-                float(instance['token_renewal_wait'])
-            )
-            in caplog.text
-        )
-
-    def test_token_renewal_fail(self, aggregator, instance, global_tags):
-        instance = instance()
-        instance['token_renewal_wait'] = 1
-        c = Vault(Vault.CHECK_NAME, {}, [instance])
-
-        run_check(c)
-        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
-        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
+        assert 'Permission denied, refreshing the client token...' not in caplog.text
 
         c.set_client_token('foo')
         c.renew_client_token = lambda: None
+        aggregator.reset()
+
+        run_check(c)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=0)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=1, tags=global_tags)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
+        assert 'Permission denied, refreshing the client token...' in caplog.text
+
         aggregator.reset()
 
         with pytest.raises(Exception, match='^403 Client Error: Forbidden for url'):
             run_check(c, extract_message=True)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=0)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=1, tags=global_tags)
+
+        renew_client_token()
+        aggregator.reset()
+
+        run_check(c)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)

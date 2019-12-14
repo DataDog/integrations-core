@@ -62,7 +62,6 @@ class Vault(OpenMetricsBaseCheck):
         self._api_url = self.instance.get('api_url', '')
         self._client_token = self.instance.get('client_token')
         self._client_token_path = self.instance.get('client_token_path')
-        self._token_renewal_wait = float(self.instance.get('token_renewal_wait', 5))
         self._tags = list(self.instance.get('tags', []))
         self._tags.append('api_url:{}'.format(self._api_url))
 
@@ -76,6 +75,12 @@ class Vault(OpenMetricsBaseCheck):
         # Only collect OpenMetrics if we are given tokens
         self._scraper_config = None
 
+        # Avoid error on the first attempt to refresh tokens
+        self._refreshing_token = False
+
+        # The Agent only makes one attempt to instantiate each AgentCheck so any errors occurring
+        # in `__init__` are logged just once, making it difficult to spot. Therefore, we emit
+        # potential configuration errors as part of the check run phase.
         self.check_initializations.append(self.parse_config)
 
     def check(self, _):
@@ -98,20 +103,21 @@ class Vault(OpenMetricsBaseCheck):
             try:
                 self.process(self._scraper_config)
             except Exception as e:
-                if self._client_token_path and str(e).startswith('403 Client Error: Forbidden for url'):
-                    self.log.warning(
-                        'Permission denied, refreshing the client token in %s seconds...', self._token_renewal_wait
-                    )
-                    time.sleep(self._token_renewal_wait)
+                error = str(e)
+                if self._client_token_path and error.startswith('403 Client Error: Forbidden for url'):
+                    message = 'Permission denied, refreshing the client token...'
+                    self.log.warning(message)
                     self.renew_client_token()
 
-                    try:
-                        self.process(self._scraper_config)
-                    except Exception as e:
-                        self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=str(e), tags=self._tags)
-                        raise
-                else:
-                    raise
+                    if not self._refreshing_token:
+                        self._refreshing_token = True
+                        self.service_check(self.SERVICE_CHECK_CONNECT, self.WARNING, message=message, tags=self._tags)
+                        return
+
+                self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
+                raise
+            else:
+                self._refreshing_token = False
 
         self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
 
@@ -228,10 +234,10 @@ class Vault(OpenMetricsBaseCheck):
             instance['prometheus_url'] = '{}/sys/metrics?format=prometheus'.format(self._api_url)
 
             # Remap important options until OpenMetricsBaseCheck uses the RequestsWrapper
-            instance['ssl_verify'] = instance.get('tls_verify')
-            instance['ssl_cert'] = instance.get('tls_cert')
-            instance['ssl_private_key'] = instance.get('tls_private_key')
-            instance['ssl_ca_cert'] = instance.get('tls_ca_cert')
+            instance['ssl_verify'] = instance.pop('tls_verify', None)
+            instance['ssl_cert'] = instance.pop('tls_cert', None)
+            instance['ssl_private_key'] = instance.pop('tls_private_key', None)
+            instance['ssl_ca_cert'] = instance.pop('tls_ca_cert', None)
 
             self._scraper_config = self.create_scraper_configuration(instance)
             self.set_client_token(self._client_token)
