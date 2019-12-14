@@ -64,7 +64,7 @@ class Oracle(AgentCheck):
     )
 
     def check(self, instance):
-        server, user, password, service, jdbc_driver, tags, custom_queries = self._get_config(instance)
+        server, user, password, service, jdbc_driver, tags, custom_queries, skip_metrics = self._get_config(instance)
 
         if not server or not user:
             raise OracleConfigError("Oracle host and user are needed")
@@ -91,7 +91,7 @@ class Oracle(AgentCheck):
         if is_affirmative(instance.get('use_global_custom_queries', True)):
             custom_queries.extend(self.init_config.get('global_custom_queries', []))
 
-        return server, user, password, service, jdbc_driver, tags, custom_queries
+        return server, user, password, service, jdbc_driver, tags, custom_queries, skip_metrics
 
     def _get_connection(self, server, user, password, service, jdbc_driver, tags):
         try:
