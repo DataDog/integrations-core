@@ -14,6 +14,7 @@ services:
     ports:
       - "${MYSQL_PORT}:3306"
     volumes:
+      - ${MYSQL_LOGS_PATH}:/opt/bitnami/mariadb/logs
       - ${MYSQL_CONF_PATH}:/bitnami/mariadb/conf/my_custom.cnf:ro
 
   mysql-slave:
