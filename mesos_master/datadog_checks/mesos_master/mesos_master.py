@@ -235,7 +235,7 @@ class MesosMaster(AgentCheck):
 
         if state_metrics is not None:
             self.version = [int(i) for i in state_metrics['version'].split('.')]
-            self._collect_metadata(state_metrics)
+            self.set_metadata('version', state_metrics['version'])
             if state_metrics['leader'] == state_metrics['pid']:
                 self.leader = True
 
@@ -295,7 +295,3 @@ class MesosMaster(AgentCheck):
                             metric_func(self, metric_name, stats_metrics[key_name], tags=tags)
 
         self.service_check_needed = True
-
-    def _collect_metadata(self, info):
-        if info and 'version' in info:
-            self.set_metadata('version', info['version'])

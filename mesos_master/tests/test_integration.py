@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_master import MesosMaster
 
-from .common import not_windows_ci, MESOS_MASTER_RAW_VERSION
+from .common import MESOS_MASTER_RAW_VERSION, not_windows_ci
 
 pytestmark = not_windows_ci
 
@@ -21,6 +21,7 @@ def test_service_check(bad_instance, aggregator):
         check.check(bad_instance)
 
     aggregator.assert_service_check('mesos_master.can_connect', count=1, status=AgentCheck.CRITICAL)
+
 
 @pytest.mark.usefixtures("dd_environment")
 def test_metadata(instance, datadog_agent):
