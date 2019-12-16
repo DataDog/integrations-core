@@ -103,6 +103,7 @@ class __AgentCheck(object):
     DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
     DEFAULT_METRIC_LIMIT = 0
 
+
     def __init__(self, *args, **kwargs):
         """In general, you don't need to and you should not override anything from the base
         class except the :py:meth:`check` method but sometimes it might be useful for a Check to
