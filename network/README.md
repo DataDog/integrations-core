@@ -40,11 +40,17 @@ sudo modprobe nf_conntrack_ipv6
 
 2. [Restart the Agent][5] to effect any configuration changes.
 
-**Note**: Some conntrack metrics require running conntrack with privileged access to be retrieved. Configure the following sudoers rule for this to work:
+**Note**: 
+
+Some conntrack metrics require running conntrack with privileged access to be retrieved. 
+
+Linux: Configure the following sudoers rule for this to work:
 
 ```
 dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ```
+
+Kubernetes: Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+. 
 
 ### Validation
 
