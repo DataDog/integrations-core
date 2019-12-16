@@ -29,6 +29,13 @@ CONFIG_E2E = {
         },
         {
             'type': 'file',
+            'path': '/var/log/mysql/mysql_error.log',
+            'source': 'mysql',
+            'sourcecategory': 'database',
+            'service': 'local_mysql',
+        },
+        {
+            'type': 'file',
             'path': '/var/log/mysql/mysql_slow.log',
             'source': 'mysql',
             'sourcecategory': 'database',
