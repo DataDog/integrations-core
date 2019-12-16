@@ -200,7 +200,10 @@ def _mysql_conf_path():
 
 def _mysql_logs_base_path():
     if MYSQL_FLAVOR == 'mysql':
-        return '/var/mysql/logs'
+        if MYSQL_VERSION == '8.0':
+            return '/opt/bitnami/mysql/logs'
+        else:
+            return '/var/mysql/logs'
     elif MYSQL_FLAVOR == 'mariadb':
         return '/opt/bitnami/mariadb/logs'
     else:
