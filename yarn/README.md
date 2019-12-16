@@ -46,7 +46,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 |----------------------|------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `yarn`                                                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                            |
-| `<INSTANCE_CONFIG>`  | `{"resourcemanager_uri": "http://%%host%%:%%port%%", "cluster_name": "default_cluster"}` |
+| `<INSTANCE_CONFIG>`  | `{"resourcemanager_uri": "http://%%host%%:%%port%%", "cluster_name": "<CLUSTER_NAME>"}` |
 
 ### Validation
 
