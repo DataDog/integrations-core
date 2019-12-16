@@ -107,7 +107,9 @@ GRANT SELECT ON sys.dba_tablespace_usage_metrics TO datadog;
 ```
 ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 ```
-
+#### Skip default metrics
+ To skip default metric checks for an instance and only run a custom query with an existing metrics gathering user insert the tag `skip_default_metrics` with a value. This will allow an configured instance of the oracle integration to skip the system, process and tablespace metrics from running and allow a custom queries to be run.
+ 
 ### Configuration
 #### Host
 
