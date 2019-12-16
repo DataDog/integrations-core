@@ -203,9 +203,6 @@ class DockerInterface(object):
                 # Ensure consistent naming
                 '--name',
                 self.container_name,
-                # Ensure access to host network
-                '--network',
-                'host',
                 # Agent 6 will simply fail without an API key
                 '-e',
                 'DD_API_KEY={}'.format(self.api_key),
