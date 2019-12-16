@@ -62,13 +62,17 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
     def check(self, instance):
         if self.kube_apiserver_config is None:
-            kube_apiserver_config = self._create_kube_apiserver_metrics_instance(instance)
-            self.kube_apiserver_config = self.get_scraper_config(kube_apiserver_config)
+            self.kube_apiserver_config = self.get_scraper_config(instance)
 
         if not self.kube_apiserver_config['metrics_mapper']:
             url = self.kube_apiserver_config['prometheus_url']
             raise CheckException("You have to collect at least one metric from the endpoint: {}".format(url))
         self.process(self.kube_apiserver_config, metric_transformers=self.metric_transformers)
+
+    def get_scraper_config(self, instance):
+        # Change config before it's cached by parent get_scraper_config
+        config = self._create_kube_apiserver_metrics_instance(instance)
+        return super(KubeAPIServerMetricsCheck, self).get_scraper_config(config)
 
     def _create_kube_apiserver_metrics_instance(self, instance):
         """

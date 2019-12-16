@@ -119,6 +119,9 @@ class VSphereCheck(AgentCheck):
         # Event configuration
         self.event_config = {}
 
+        # Host tags exclusion
+        self.excluded_host_tags = instances[0].get("excluded_host_tags", init_config.get("excluded_host_tags", []))
+
         # Caching configuration
         self.cache_config = CacheConfig()
 
@@ -569,9 +572,17 @@ class VSphereCheck(AgentCheck):
                 if vsphere_type:
                     instance_tags.append(vsphere_type)
 
-                obj_list[vimtype].append(
-                    {"mor_type": mor_type, "mor": obj, "hostname": hostname, "tags": tags + instance_tags}
-                )
+                mor = {
+                    "mor_type": mor_type,
+                    "mor": obj,
+                    "hostname": hostname,
+                    "tags": [t for t in tags + instance_tags if t.split(":", 1)[0] not in self.excluded_host_tags],
+                }
+                if self.excluded_host_tags:
+                    mor["excluded_host_tags"] = [
+                        t for t in tags + instance_tags if t.split(":", 1)[0] in self.excluded_host_tags
+                    ]
+                obj_list[vimtype].append(mor)
 
         self.log.debug("All objects with attributes cached in %s seconds.", time.time() - start)
         return obj_list
@@ -869,6 +880,8 @@ class VSphereCheck(AgentCheck):
                         tags.extend(mor['tags'])
                     else:
                         hostname = to_string(hostname)
+                        if self.excluded_host_tags:
+                            tags.extend(mor["excluded_host_tags"])
 
                     tags.extend(instance.get('tags', []))
 
