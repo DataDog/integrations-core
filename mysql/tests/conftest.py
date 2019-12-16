@@ -7,7 +7,7 @@ import mock
 import pymysql
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
@@ -16,26 +16,51 @@ MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
+CONFIG_E2E = {
+    'init_config': {},
+    'instances': [{'server': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
+    'logs': [
+        {
+            'type': 'file',
+            'path': '/var/log/mysql/mysql.log',
+            'source': 'mysql',
+            'sourcecategory': 'database',
+            'service': 'local_mysql',
+        },
+        {
+            'type': 'file',
+            'path': '/var/log/mysql/mysql_slow.log',
+            'source': 'mysql',
+            'sourcecategory': 'database',
+            'service': 'local_mysql',
+        },
+    ],
+}
+
 
 @pytest.fixture(scope='session')
-def dd_environment(instance_basic):
-    with docker_run(
-        os.path.join(common.HERE, 'compose', COMPOSE_FILE),
-        env_vars={
-            'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
-            'MYSQL_PORT': str(common.PORT),
-            'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
-            'MYSQL_CONF_PATH': _mysql_conf_path(),
-            'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
-        },
-        conditions=[
-            WaitFor(init_master, wait=2),
-            WaitFor(init_slave, wait=2),
-            CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
-            populate_database,
-        ],
-    ):
-        yield instance_basic
+def dd_environment():
+    with TempDir('logs') as logs_host_path:
+        e2e_metadata = {'docker_volumes': ['{}:/var/log/mysql'.format(logs_host_path)]}
+
+        with docker_run(
+            os.path.join(common.HERE, 'compose', COMPOSE_FILE),
+            env_vars={
+                'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
+                'MYSQL_PORT': str(common.PORT),
+                'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
+                'MYSQL_CONF_PATH': _mysql_conf_path(),
+                'MYSQL_LOGS_PATH': logs_host_path,
+                'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
+            },
+            conditions=[
+                WaitFor(init_master, wait=2),
+                WaitFor(init_slave, wait=2),
+                CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
+                populate_database,
+            ],
+        ):
+            yield CONFIG_E2E, e2e_metadata
 
 
 @pytest.fixture(scope='session')
