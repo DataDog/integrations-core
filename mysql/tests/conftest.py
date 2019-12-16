@@ -45,6 +45,9 @@ def config_e2e():
                 'source': 'mysql',
                 'sourcecategory': 'database',
                 'service': 'local_mysql',
+                'log_processing_rules': [
+                    {'type': 'multi_line', 'name': 'log_starts_with_time', 'pattern': '# Time: '},
+                ],
             },
         ],
     }
