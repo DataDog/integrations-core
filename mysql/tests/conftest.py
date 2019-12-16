@@ -16,39 +16,46 @@ MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
-CONFIG_E2E = {
-    'init_config': {},
-    'instances': [{'server': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
-    'logs': [
-        {
-            'type': 'file',
-            'path': '/var/log/mysql/mysql.log',
-            'source': 'mysql',
-            'sourcecategory': 'database',
-            'service': 'local_mysql',
-        },
-        {
-            'type': 'file',
-            'path': '/var/log/mysql/mysql_error.log',
-            'source': 'mysql',
-            'sourcecategory': 'database',
-            'service': 'local_mysql',
-        },
-        {
-            'type': 'file',
-            'path': '/var/log/mysql/mysql_slow.log',
-            'source': 'mysql',
-            'sourcecategory': 'database',
-            'service': 'local_mysql',
-        },
-    ],
-}
+
+@pytest.fixture(scope='session')
+def config_e2e():
+    logs_base_path = _mysql_logs_base_path()
+
+    return {
+        'init_config': {},
+        'instances': [{'server': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
+        'logs': [
+            {
+                'type': 'file',
+                'path': '{}/mysql.log'.format(logs_base_path),
+                'source': 'mysql',
+                'sourcecategory': 'database',
+                'service': 'local_mysql',
+            },
+            {
+                'type': 'file',
+                'path': '{}/mysql_error.log'.format(logs_base_path),
+                'source': 'mysql',
+                'sourcecategory': 'database',
+                'service': 'local_mysql',
+            },
+            {
+                'type': 'file',
+                'path': '{}/mysql_slow.log'.format(logs_base_path),
+                'source': 'mysql',
+                'sourcecategory': 'database',
+                'service': 'local_mysql',
+            },
+        ],
+    }
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(config_e2e):
+    logs_base_path = _mysql_logs_base_path()
+
     with TempDir('logs') as logs_host_path:
-        e2e_metadata = {'docker_volumes': ['{}:/var/log/mysql'.format(logs_host_path)]}
+        e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_base_path)]}
 
         with docker_run(
             os.path.join(common.HERE, 'compose', COMPOSE_FILE),
@@ -67,7 +74,7 @@ def dd_environment():
                 populate_database,
             ],
         ):
-            yield CONFIG_E2E, e2e_metadata
+            yield config_e2e, e2e_metadata
 
 
 @pytest.fixture(scope='session')
@@ -186,6 +193,15 @@ def _mysql_conf_path():
 
     conf = os.path.join(common.HERE, 'compose', filename)
     return os.path.abspath(conf)
+
+
+def _mysql_logs_base_path():
+    if MYSQL_FLAVOR == 'mysql':
+        return '/var/mysql/logs'
+    elif MYSQL_FLAVOR == 'mariadb':
+        return '/opt/bitnami/mariadb/logs'
+    else:
+        raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
 
 
 def _mysql_docker_repo():
