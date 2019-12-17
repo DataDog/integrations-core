@@ -44,5 +44,4 @@ metrics:
     metric_tags:
       - tag: adapter
         column: adapterName
-        MIB: INTEL-LAN-ADAPTERS-MIB
         table: genericAdaptersAttrTable
