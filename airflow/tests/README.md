@@ -5,28 +5,16 @@
 On a machine/vm with the desired agent version installed and Dogstatsd activated (enabled by default).
 
 ```
-pip install apache-airflow
-pip install 'apache-airflow[statsd]'
 
-# airflow needs a home, ~/airflow is the default,
-# but you can lay foundation somewhere else if you prefer
-# (optional)
-export AIRFLOW_HOME=~/airflow
+# 1. Copy the `dogstatsd_mapper_profiles` mappings from the main readme.md to `/etc/datadog/datadog.yaml`
 
-# install from pypi using pip
-pip install apache-airflow
+# 2. Set `network_mode: host` in airflow/tests/compose/docker-compose.yaml
 
-# initialize the database
-airflow initdb
+# 3. Start airflow
 
-# enable statsd
-Set `statsd_on = True` in `~/airflow/airflow.cfg`
+docker-compose -f airflow/tests/compose/docker-compose.yaml up
 
-# copy the `dogstatsd_mapper_profiles` mappings from the main readme.md to `/etc/datadog/datadog.yaml`
+# 4. Check the agent is receiving the airflow statsd metrics
 
-# start the web server, default port is 8080
-airflow webserver -p 8080
-
-# check the agent is receiving the airflow statsd metrics
 sudo -u dd-agent datadog-agent dogstatsd-stats
 ```
