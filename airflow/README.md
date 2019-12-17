@@ -12,7 +12,7 @@ The Datadog Agent collects many metrics from Airflow, including those for:
 
 Metrics are collected through the [Airflow StatsD](https://airflow.apache.org/docs/stable/metrics.html) plugin and sent to Datadog's [DogStatsD][8].
 
-In addition to metrics, the Datadog Agent also sends Service Checks related to Airflow's health.
+In addition to metrics, the Datadog Agent also sends service checks related to Airflow's health.
 
 ## Setup
 
