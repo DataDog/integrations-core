@@ -7,12 +7,7 @@ instances:
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_url: "%%host%%:6443/metrics"
-
-    ## @param scheme - string - optional
-    ## Used to specify the scheme to reach the APIServer endpoints. Default to https.
-    #
-    # scheme: "https"
+  - prometheus_url: "https://%%host%%:6443/metrics"
 
     ## @param bearer_token_auth - string - optional
     ## Used if you are using RBACs and need the Agent to authenticate

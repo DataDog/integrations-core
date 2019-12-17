@@ -1,5 +1,9 @@
 # CHANGELOG - supervisord
 
+## 1.3.0 / 2019-12-02
+
+* [Added] Add version metadata. See [#4979](https://github.com/DataDog/integrations-core/pull/4979).
+
 ## 1.2.0 / 2019-05-14
 
 * [Added] Support Python 3. See [#3605](https://github.com/DataDog/integrations-core/pull/3605).

@@ -10,31 +10,25 @@ Get metrics from OpenStack service in real time to:
 * Be notified about OpenStack failovers and events.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][12] for guidance on applying these instructions.
-
 ### Installation
 
-To capture OpenStack metrics you need to [install the Agent][2] on your hosts running hypervisors.
-
-**Note**: Installing the OpenStack Integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit our Billing FAQ.
+To capture your OpenStack metrics, [install the Agent][2] on your hosts running hypervisors.
 
 ### Configuration
+#### Prepare OpenStack
+Then configure a Datadog role and user with your identity server:
 
-1. First configure a Datadog role and user with your identity server
+```console
+openstack role create datadog_monitoring
+openstack user create datadog \
+    --password my_password \
+    --project my_project_name
+openstack role add datadog_monitoring \
+    --project my_project_name \
+    --user datadog
+```
 
-    ```
-    openstack role create datadog_monitoring
-    openstack user create datadog \
-        --password my_password \
-        --project my_project_name
-    openstack role add datadog_monitoring \
-        --project my_project_name \
-        --user datadog
-    ```
-
-2. Update your policy.json files to grant the needed permissions.
-```role:datadog_monitoring``` requires access to the following operations:
+Finally, update your `policy.json` files to grant the needed permissions. `role:datadog_monitoring` requires access to the following operations:
 
 **Nova**
 
@@ -75,9 +69,46 @@ To capture OpenStack metrics you need to [install the Agent][2] on your hosts ru
 
 You may need to restart your Keystone, Neutron and Nova API services to ensure that the policy changes take.
 
-3. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample openstack.d/conf.yaml][4] for all available configuration options.
+**Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit our Billing FAQ.
 
-4. [Restart the Agent][5]
+#### Agent Configuration
+
+1. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] with the configuration below. See the [sample openstack.d/conf.yaml][4] for all available configuration options:
+
+    ```yaml
+        init_config:
+
+            ## @param keystone_server_url - string - required
+            ## Where your identity server lives.
+            ## Note that the server must support Identity API v3
+            #
+            keystone_server_url: "https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/"
+
+        instances:
+
+            ## @param name - string - required
+            ## Unique identifier for this instance.
+            #
+          - name: "<INSTANCE_NAME>"
+
+            ## @param user - object - required
+            ## User credentials
+            ## Password authentication is the only auth method supported.
+            ## `user` object expects the parameter `username`, `password`,
+            ## and `user.domain.id`.
+            ##
+            ## `user` should resolve to a structure like:
+            ##
+            ##  {'password': '<PASSWORD>', 'name': '<USERNAME>', 'domain': {'id': '<DOMAINE_ID>'}}
+            #
+            user:
+              password: "<PASSWORD>"
+              name: datadog
+              domain:
+                id: "<DOMAINE_ID>"
+    ```
+
+2. [Restart the Agent][5].
 
 ### Validation
 
@@ -91,30 +122,32 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 The OpenStack check does not include any events.
 
 ### Service Checks
-**openstack.neutron.api.up**
+**openstack.neutron.api.up**:
 
 Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
 
-**openstack.nova.api.up**
+**openstack.nova.api.up**:
 
 Returns `CRITICAL` if the Agent is unable to query the Nova API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
 
-**openstack.keystone.api.up**
+**openstack.keystone.api.up**:
 
 Returns `CRITICAL` if the Agent is unable to query the Keystone API. Returns `OK` otherwise.
 
-**openstack.nova.hypervisor.up**
+**openstack.nova.hypervisor.up**:
 
 Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL` if the Hypervisor is down. Returns `OK` otherwise.
 
-**openstack.neutron.network.up**
+**openstack.neutron.network.up**:
 
 Returns `UNKNOWN` if the Agent is unable to get the Network state, `CRITICAL` if the Network is down. Returns `OK` otherwise.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][8].
 
 ## Further Reading
+
 To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out our [series of blog posts][9] about it.
 
 See also our blog posts:
@@ -125,13 +158,12 @@ See also our blog posts:
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/openstack/images/openstack_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/openstack/datadog_checks/openstack/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openstack/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/openstack-monitoring-nova
 [10]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
 [11]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones
-[12]: https://docs.datadoghq.com/agent/autodiscovery/integrations

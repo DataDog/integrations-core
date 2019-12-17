@@ -87,6 +87,11 @@ def test_e2e_v_4_0(dd_agent_check, master_instance):
     aggregator.assert_metric('redis.mem.overhead', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.longest_output_list', count=2, tags=tags)
     aggregator.assert_metric('redis.mem.startup', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.running', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.hits', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.misses', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.key_hits', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.key_misses', count=2, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -100,5 +105,10 @@ def test_e2e_v_latest(dd_agent_check, master_instance):
     tags = ['redis_host:{}'.format(common.HOST), 'redis_port:6382', 'redis_role:master']
     aggregator.assert_metric('redis.mem.overhead', count=2, tags=tags)
     aggregator.assert_metric('redis.mem.startup', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.running', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.hits', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.misses', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.key_hits', count=2, tags=tags)
+    aggregator.assert_metric('redis.active_defrag.key_misses', count=2, tags=tags)
 
     aggregator.assert_all_metrics_covered()

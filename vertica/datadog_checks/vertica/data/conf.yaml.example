@@ -148,6 +148,13 @@ instances:
     #     tags:
     #       - test:vertica
 
+    ## @param client_lib_log_level - string - optional
+    ## Vertica library log level.
+    ## By default the vertica library logging is disabled.
+    ## Valid values: CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG
+    #
+    # client_lib_log_level: DEBUG
+
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)

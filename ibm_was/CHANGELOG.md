@@ -1,5 +1,9 @@
 # CHANGELOG - IBM WAS
 
+## 1.4.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
 ## 1.3.1 / 2019-10-17
 
 * [Fixed] Fix character casing logic for custom_queries_units_gauge option. See [#4796](https://github.com/DataDog/integrations-core/pull/4796).

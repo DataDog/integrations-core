@@ -118,8 +118,8 @@ Need help? Contact [Datadog support][10].
 [1]: https://www.twistlock.com
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://github.com/DataDog/integrations-core/blob/master/twistlock/datadog_checks/twistlock/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
 [7]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
 [8]: https://docs.datadoghq.com/logs/log_collection/docker/?tab=containerinstallation

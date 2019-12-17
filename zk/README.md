@@ -62,7 +62,7 @@ instances:
       %d [%t] %-5p %c - %m%n
       %r [%t] %p %c %x - %m%n
     ```
-    
+
     Make sure you clone and edit the integration pipeline if you have a different format.
 
 3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -140,11 +140,11 @@ Need help? Contact [Datadog support][11].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_clusterOptions
 [8]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [11]: https://docs.datadoghq.com/help

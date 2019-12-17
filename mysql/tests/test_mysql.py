@@ -249,14 +249,12 @@ def test__get_server_pid():
             assert mysql_check.log.exception.call_count == 0
 
 
-def test_version_metadata(instance_basic, version_metadata):
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_version_metadata(instance_basic, datadog_agent, version_metadata):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
     mysql_check.check_id = 'test:123'
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        mysql_check.check(instance_basic)
-
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
-
-        assert m.call_count == len(version_metadata)
+    mysql_check.check(instance_basic)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))

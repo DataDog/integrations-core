@@ -103,6 +103,7 @@ def test_locks_metrics(aggregator, integration_check, pg_instance):
         'port:{}'.format(PORT),
         'db:datadog_test',
         'lock_mode:AccessExclusiveLock',
+        'lock_type:relation',
         'table:persons',
         'schema:public',
     ]
@@ -133,8 +134,26 @@ def test_wrong_version(aggregator, integration_check, pg_instance):
     assert_state_clean(check)
 
     check.check(pg_instance)
-    assert check._version.major == int(POSTGRES_VERSION)
     assert_state_set(check)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_version_metadata(integration_check, pg_instance, datadog_agent):
+    check = integration_check(pg_instance)
+    check.check_id = 'test:123'
+    # Enforce to cache wrong version
+    check.check(pg_instance)
+    version = POSTGRES_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': version[0],
+    }
+    if len(version) == 2:
+        version_metadata['version.minor'] = version[1]
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(5)  # for raw and patch
 
 
 @pytest.mark.integration
@@ -159,7 +178,6 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
 
 
 def assert_state_clean(check):
-    assert check._version is None
     assert check.instance_metrics is None
     assert check.bgw_metrics is None
     assert check.archiver_metrics is None
@@ -169,8 +187,7 @@ def assert_state_clean(check):
     assert check.activity_metrics is None
 
 
-def assert_state_set(check,):
-    assert check._version
+def assert_state_set(check):
     assert check.instance_metrics
     assert check.bgw_metrics
     if POSTGRES_VERSION != '9.3':

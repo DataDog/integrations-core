@@ -1,5 +1,9 @@
 # CHANGELOG - nginx
 
+## 3.5.0 / 2019-12-02
+
+* [Added] Submit version metadata. See [#4736](https://github.com/DataDog/integrations-core/pull/4736).
+
 ## 3.4.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).

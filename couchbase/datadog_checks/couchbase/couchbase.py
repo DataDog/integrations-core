@@ -194,16 +194,23 @@ class Couchbase(AgentCheck):
         self._collect_version(data)
         self._create_metrics(data, instance_state, server, tags=list(set(tags)))
 
-    def _collect_version(self, data):
+    def collect_version(self, data):
         nodes = data['stats']['nodes']
 
-        if nodes is not None:
-            try:
-                version = nodes[0]['version']
-            except KeyError:
-                self.log.debug("Unable to find version information")
-            else:
-                self.set_metadata('version', version)
+        if nodes:
+            # Mixed version clusters are discouraged and are therefore rare, see:
+            # https://forums.couchbase.com/t/combining-multiple-versions-in-one-cluster/8782/5
+            version = nodes[0]['version']
+
+            # Convert e.g. 5.5.3-4039-enterprise to semver
+            num_separators = version.count('-')
+            if num_separators == 2:
+                build_separator = version.rindex('-')
+                version = list(version)
+                version[build_separator] = '+'
+                version = ''.join(version)
+
+            self.set_metadata('version', version)
 
     def get_data(self, server, instance):
         # The dictionary to be returned.

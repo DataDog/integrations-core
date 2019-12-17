@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 2.7.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
 ## 2.6.1 / 2019-10-17
 
 * [Fixed] Add missing go_memstats_stack_sys_bytes metric in conf file. See [#4800](https://github.com/DataDog/integrations-core/pull/4800).

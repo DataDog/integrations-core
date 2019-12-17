@@ -29,6 +29,12 @@ class Redis(AgentCheck):
     SOURCE_TYPE_NAME = 'redis'
 
     GAUGE_KEYS = {
+        # Active defrag metrics
+        'active_defrag_running': 'redis.active_defrag.running',
+        'active_defrag_hits': 'redis.active_defrag.hits',
+        'active_defrag_misses': 'redis.active_defrag.misses',
+        'active_defrag_key_hits': 'redis.active_defrag.key_hits',
+        'active_defrag_key_misses': 'redis.active_defrag.key_misses',
         # Append-only metrics
         'aof_last_rewrite_time_sec': 'redis.aof.last_rewrite_time',
         'aof_rewrite_in_progress': 'redis.aof.rewrite',

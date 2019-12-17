@@ -1,5 +1,9 @@
 # CHANGELOG - cacti
 
+## 1.6.0 / 2019-12-02
+
+* [Added] Standardize logging format. See [#4901](https://github.com/DataDog/integrations-core/pull/4901).
+
 ## 1.5.0 / 2019-10-11
 
 * [Added] Allow custom port for mysql access. See [#4654](https://github.com/DataDog/integrations-core/pull/4654).

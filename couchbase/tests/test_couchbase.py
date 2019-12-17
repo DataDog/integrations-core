@@ -143,7 +143,8 @@ def test_metadata(instance_query, datadog_agent):
         'version.minor': minor,
         'version.patch': patch,
         'version.release': mock.ANY,
-        'version.raw': mock.ANY,
+        'version.build': 'enterprise',
+        'version.raw': raw_version.replace('-enterprise', '+enterprise'),
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)

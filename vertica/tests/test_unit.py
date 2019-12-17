@@ -47,3 +47,43 @@ def test_ssl_config_ok(aggregator):
             assert check._connection is not None
 
     aggregator.assert_service_check("vertica.can_connect", status=AgentCheck.OK, tags=['db:abc', 'foo:bar'])
+
+
+def test_client_logging_enabled(aggregator, instance):
+    instance['client_lib_log_level'] = 'DEBUG'
+
+    check = VerticaCheck('vertica', {}, [instance])
+
+    with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
+        check.check(instance)
+
+        vertica.connect.assert_called_with(
+            database=mock.ANY,
+            host=mock.ANY,
+            port=mock.ANY,
+            user=mock.ANY,
+            password=mock.ANY,
+            backup_server_node=mock.ANY,
+            connection_load_balance=mock.ANY,
+            connection_timeout=mock.ANY,
+            log_level='DEBUG',
+            log_path=os.devnull,
+        )
+
+
+def test_client_logging_disabled(aggregator, instance):
+    check = VerticaCheck('vertica', {}, [instance])
+
+    with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
+        check.check(instance)
+
+        vertica.connect.assert_called_with(
+            database=mock.ANY,
+            host=mock.ANY,
+            port=mock.ANY,
+            user=mock.ANY,
+            password=mock.ANY,
+            backup_server_node=mock.ANY,
+            connection_load_balance=mock.ANY,
+            connection_timeout=mock.ANY,
+        )

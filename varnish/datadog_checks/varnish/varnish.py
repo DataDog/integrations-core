@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import re
-import shlex
 import xml.parsers.expat  # python 2.4 compatible
 from collections import defaultdict
 from distutils.version import LooseVersion
@@ -103,7 +102,7 @@ class Varnish(AgentCheck):
         # discovery feature. This change allows for passing in additional parameters to
         # the script (i.e. %%host%%) so that the command is properly formatted and the
         # desired container is queried.
-        varnishstat_path = shlex.split(instance.get("varnishstat"))
+        varnishstat_path = instance.get('varnishstat', '').split()
         name = instance.get('name')
         metrics_filter = instance.get("metrics_filter", [])
         if not isinstance(metrics_filter, list):
@@ -136,7 +135,7 @@ class Varnish(AgentCheck):
             # discovery feature. This change allows for passing in additional parameters to
             # the script (i.e. %%host%%) so that the command is properly formatted and the
             # desired container is queried.
-            varnishadm_path = shlex.split(instance.get('varnishadm'))
+            varnishadm_path = instance.get('varnishadm', '').split()
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
 
             daemon_host = instance.get('daemon_host', 'localhost')

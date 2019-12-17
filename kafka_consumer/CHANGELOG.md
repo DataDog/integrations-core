@@ -1,5 +1,11 @@
 # CHANGELOG - kafka_consumer
 
+## 2.1.1 / 2019-11-27
+
+* [Fixed] Handle missing partitions. See [#5035](https://github.com/DataDog/integrations-core/pull/5035).
+* [Fixed] Handle topics set to empty dict. See [#4974](https://github.com/DataDog/integrations-core/pull/4974).
+* [Fixed] Fix error on missing config. See [#4959](https://github.com/DataDog/integrations-core/pull/4959).
+
 ## 2.1.0 / 2019-10-09
 
 * [Added] Add support for fetching consumer offsets stored in Kafka to `monitor_unlisted_consumer_groups`. See [#3957](https://github.com/DataDog/integrations-core/pull/3957). Thanks [jeffwidman](https://github.com/jeffwidman).

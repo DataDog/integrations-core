@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import mock
 import psycopg2
 import pytest
 from mock import MagicMock
 from semver import VersionInfo
+from six import iteritems
 
 from datadog_checks.postgres import util
 
@@ -172,3 +174,24 @@ def test_malformed_get_custom_queries(check):
         malformed_custom_query_column['name'],
         malformed_custom_query['metric_prefix'],
     )
+
+
+@pytest.mark.parametrize(
+    'test_case, params',
+    [
+        ('9.6.2', {'version.major': '9', 'version.minor': '6', 'version.patch': '2'}),
+        ('10.0', {'version.major': '10', 'version.minor': '0', 'version.patch': '0'}),
+        (
+            '11nightly3',
+            {'version.major': '11', 'version.minor': '0', 'version.patch': '0', 'version.release': 'nightly.3'},
+        ),
+    ],
+)
+def test_version_metadata(check, test_case, params):
+    check.check_id = 'test:123'
+    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+        check.set_metadata('version', test_case)
+        for name, value in iteritems(params):
+            m.assert_any_call('test:123', name, value)
+        m.assert_any_call('test:123', 'version.scheme', 'semver')
+        m.assert_any_call('test:123', 'version.raw', test_case)
