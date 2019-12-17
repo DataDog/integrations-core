@@ -133,10 +133,21 @@ def test_metadata(instance_query, datadog_agent):
     check = Couchbase('couchbase', {}, instances=[instance_query])
     check.check_id = 'test:123'
     check.check(instance_query)
+    server = instance_query['server']
 
-    raw_version = os.getenv("COUCHBASE_VERSION")
+    data = check.get_data(server, instance_query)
+
+    nodes = data['stats']['nodes']
+
+    raw_version = ""
+
+    # Next, get all the nodes
+    if nodes is not None:
+        for node in nodes:
+            raw_version = node['version']
 
     major, minor, patch = raw_version.split("-")[0].split(".")
+
     version_metadata = {
         'version.scheme': 'semver',
         'version.major': major,
