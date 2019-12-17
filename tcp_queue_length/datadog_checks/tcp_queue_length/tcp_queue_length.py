@@ -25,14 +25,15 @@ class TcpQueueLengthCheck(AgentCheck):
 
         for line in r.json():
             try:
-                tags = ['saddr:{}'.format(line['Conn']['Saddr']),
-                        'daddr:{}'.format(line['Conn']['Daddr']),
-                        'sport:{}'.format(line['Conn']['Sport']),
-                        'dport:{}'.format(line['Conn']['Dport'])]
+                tags = ['saddr:{}'.format(line['conn']['saddr']),
+                        'daddr:{}'.format(line['conn']['daddr']),
+                        'sport:{}'.format(line['conn']['sport']),
+                        'dport:{}'.format(line['conn']['dport']),
+                        'pid:{}'.format(line['stats']['pid'])]
 
-                self.gauge(self.NAMESPACE + '.rqueue.min', float(line['Stats']['Rqueue']['Min']), instance_tags + tags)
-                self.gauge(self.NAMESPACE + '.rqueue.max', float(line['Stats']['Rqueue']['Max']), instance_tags + tags)
-                self.gauge(self.NAMESPACE + '.wqueue.min', float(line['Stats']['Wqueue']['Min']), instance_tags + tags)
-                self.gauge(self.NAMESPACE + '.wqueue.max', float(line['Stats']['Wqueue']['Max']), instance_tags + tags)
+                self.gauge(self.NAMESPACE + '.rqueue.min', float(line['stats']['read queue']['min']), instance_tags + tags)
+                self.gauge(self.NAMESPACE + '.rqueue.max', float(line['stats']['read queue']['max']), instance_tags + tags)
+                self.gauge(self.NAMESPACE + '.wqueue.min', float(line['stats']['write queue']['min']), instance_tags + tags)
+                self.gauge(self.NAMESPACE + '.wqueue.max', float(line['stats']['write queue']['max']), instance_tags + tags)
             except KeyError as e:
                 self.log.error('Invalid line received from `/probe/tcp_queue_length`: {}'.format(e))
