@@ -194,7 +194,7 @@ class Couchbase(AgentCheck):
         self._collect_version(data)
         self._create_metrics(data, instance_state, server, tags=list(set(tags)))
 
-    def collect_version(self, data):
+    def _collect_version(self, data):
         nodes = data['stats']['nodes']
 
         if nodes:
