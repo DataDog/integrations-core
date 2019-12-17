@@ -28,7 +28,7 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 #### Step 2: Connect Airflow to DogStatsD (included in the Datadog Agent) by using Airflow `statsd` feature to collect metrics
 
-1. Install the [Airflow Statsd plugin][1].
+1. Install the [Airflow StatsD plugin][1].
 
     ```
     pip install 'apache-airflow[statsd]'
