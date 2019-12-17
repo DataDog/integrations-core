@@ -10,7 +10,7 @@ The Datadog Agent collects many metrics from Airflow, including those for:
 - Executors: Open slots, queued tasks, running tasks, etc.
 - and more
 
-Metrics are collected via [Airflow Statsd](https://airflow.apache.org/docs/stable/metrics.html) plugin sent to Datadog Agent [DogStatsD][8].
+Metrics are collected through the [Airflow StatsD](https://airflow.apache.org/docs/stable/metrics.html) plugin and sent to Datadog's [DogStatsD][8].
 
 In addition to metrics, the Datadog Agent also sends Service Checks related to Airflow's health.
 
