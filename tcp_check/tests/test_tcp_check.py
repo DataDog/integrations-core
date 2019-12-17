@@ -18,6 +18,8 @@ def test_down(aggregator):
     expected_tags = ["instance:DownService", "target_host:127.0.0.1", "port:65530", "foo:bar"]
     aggregator.assert_service_check('tcp.can_connect', status=check.CRITICAL, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=0, tags=expected_tags)
+    aggregator.assert_all_metrics_covered()
+    assert len(aggregator._service_checks['tcp.can_connect']) == 1
 
 
 def test_up(aggregator, check):
@@ -28,6 +30,8 @@ def test_up(aggregator, check):
     expected_tags = ["instance:UpService", "target_host:datadoghq.com", "port:80", "foo:bar"]
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
+    aggregator.assert_all_metrics_covered()
+    assert len(aggregator._service_checks['tcp.can_connect']) == 1
 
 
 def test_response_time(aggregator):
@@ -49,3 +53,4 @@ def test_response_time(aggregator):
     expected_tags = ['url:datadoghq.com:80', 'instance:instance:response_time', 'foo:bar']
     aggregator.assert_metric('network.tcp.response_time', tags=expected_tags)
     aggregator.assert_all_metrics_covered()
+    assert len(aggregator._service_checks['tcp.can_connect']) == 1
