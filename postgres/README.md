@@ -103,7 +103,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 **Available for Agent >6.0**
 
-PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix.  Refer to the PostgresQL [documentation][14] on this topic for additional details.
+PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. Refer to the PostgreSQL [documentation][14] on this topic for additional details.
 
 1. Logging is configured within the file `/etc/postgresql/<VERSION>/main/postgresql.conf`, for regular log results including statement outputs uncomment the following parameters in the log section:
 
