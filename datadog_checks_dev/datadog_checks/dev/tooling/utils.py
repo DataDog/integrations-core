@@ -86,7 +86,7 @@ def get_metadata_file(check_name):
 
 
 def get_config_spec(check_name):
-    return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'spec.yaml')
+    return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'conf_spec.yaml')
 
 
 def get_config_files(check_name):
