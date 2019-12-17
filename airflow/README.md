@@ -24,7 +24,7 @@ All three steps below are needed for the Airflow integration to work properly. B
 
 Configure the Airflow check included in the [Datadog Agent][2] package to collect health metrics and service checks.
 
-Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your airflow service checks. See the [sample airflow.d/conf.yaml][3] for all available configuration options.
+Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][3] for all available configuration options.
 
 #### Step 2: Connect Airflow to DogStatsD (included in the Datadog Agent) by using Airflow `statsd` feature to collect metrics
 
