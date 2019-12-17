@@ -62,9 +62,6 @@ class TCPCheck(AgentCheck):
                 sock.connect((self.addr, self.port))
             finally:
                 sock.close()
-
-            self.log.debug("%s:%d is UP", self.addr, self.port)
-            self.report_as_service_check(AgentCheck.OK, 'UP')
         except socket.timeout as e:
             # The connection timed out because it took more time than the specified value in the yaml config file
             length = int((time.time() - start) * 1000)
@@ -72,7 +69,6 @@ class TCPCheck(AgentCheck):
             self.report_as_service_check(
                 AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
             )
-
         except socket.error as e:
             length = int((time.time() - start) * 1000)
             if "timed out" in str(e):
@@ -92,19 +88,20 @@ class TCPCheck(AgentCheck):
                         str(e), length
                     ),
                 )
-
             else:
                 self.log.info("%s:%d is DOWN (%s). Connection failed after %d ms", self.addr, self.port, str(e), length)
                 self.report_as_service_check(
                     AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
                 )
-
         except Exception as e:
             length = int((time.time() - start) * 1000)
             self.log.info("%s:%d is DOWN (%s). Connection failed after %d ms", self.addr, self.port, str(e), length)
             self.report_as_service_check(
                 AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
             )
+        else:
+            self.log.debug("%s:%d is UP", self.addr, self.port)
+            self.report_as_service_check(AgentCheck.OK, 'UP')
 
         if self.response_time:
             self.gauge(
