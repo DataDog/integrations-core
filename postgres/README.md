@@ -103,7 +103,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 **Available for Agent >6.0**
 
-PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix.  Refer to the PostgresQL [documentation][13] on this topic for additional details.
+PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix.  Refer to the PostgresQL [documentation][14] on this topic for additional details.
 
 1. Logging is configured within the file `/etc/postgresql/<VERSION>/main/postgresql.conf`, for regular log results including statement outputs uncomment the following parameters in the log section:
 
@@ -120,7 +120,7 @@ PostgreSQL default logging is to `stderr` and logs do not include detailed infor
       #log_destination = 'eventlog'
     ```
 
-2. To gather detailed duration metrics and make them searchable in the Datadog interface, they should be configured inline with the statement themselves.  See below for the recommended configuration differences from above and note that both `log_statement` and `log_duration` options are commented out. See discussion on this topic [here][15]
+2. To gather detailed duration metrics and make them searchable in the Datadog interface, they should be configured inline with the statement themselves.  See below for the recommended configuration differences from above and note that both `log_statement` and `log_duration` options are commented out. See discussion on this topic [here][15].
    
    This config logs all statements, but to reduce the output to those which have a certain duration, set the `log_min_duration_statement` value to the desired minimum duration (in milliseconds):
 
