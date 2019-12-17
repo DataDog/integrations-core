@@ -34,7 +34,7 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
     pip install 'apache-airflow[statsd]'
     ```
 
-2. Update Airflow configuration file `airflow.cfg` by adding the following configs:
+2. Update the Airflow configuration file `airflow.cfg` by adding the following configs:
 
     ```
     [scheduler]
