@@ -44,7 +44,7 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
     statsd_prefix = airflow
     ```
 
-3. Update [Datadog Agent main configuration file][10] `datadog.yaml` by adding the following configs:
+3. Update the [Datadog Agent main configuration file][10] `datadog.yaml` by adding the following configs:
 
     ```yaml
     dogstatsd_mapper_cache_size: 500
