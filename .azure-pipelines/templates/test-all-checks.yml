@@ -26,6 +26,9 @@ jobs:
     - checkName: aerospike
       displayName: Aerospike
       os: linux
+    - checkName: airflow
+      displayName: Airflow
+      os: linux
     - checkName: ambari
       displayName: Ambari
       os: linux
