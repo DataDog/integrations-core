@@ -1096,6 +1096,12 @@ def test_idrac(aggregator):
         'systemStateProcessorDeviceStatusCombined',
         'systemStateTemperatureStatisticsStatusCombined',
     ]
+    disk_gauges = [
+        'physicalDiskState',
+        'physicalDiskCapacityInMB',
+        'physicalDiskUsedSpaceInMB',
+        'physicalDiskFreeSpaceInMB',
+    ]
     interfaces = ['eth0', 'en1']
     for interface in interfaces:
         tags = ['adapter:{}'.format(interface)] + common.CHECK_TAGS
@@ -1112,5 +1118,10 @@ def test_idrac(aggregator):
     for power in powers:
         tags = ['supply_name:{}'.format(power)] + common.CHECK_TAGS
         aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags, count=1)
+    disks = ['disk1', 'disk2']
+    for disk in disks:
+        tags = ['disk_name:{}'.format(disk)] + common.CHECK_TAGS
+        for gauge in disk_gauges:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()

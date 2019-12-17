@@ -21,6 +21,16 @@ metrics:
       - tag: chassis_index
         column: systemStatechassisIndex
   - MIB: IDRAC-MIB-SMIv2
+    table: physicalDiskTable
+    symbols:
+      - physicalDiskState
+      - physicalDiskCapacityInMB
+      - physicalDiskUsedSpaceInMB
+      - physicalDiskFreeSpaceInMB
+    metric_tags:
+      - tag: disk_name
+        column: physicalDiskName
+  - MIB: IDRAC-MIB-SMIv2
     table: enclosurePowerSupplyTable
     symbols:
       - enclosurePowerSupplyState
