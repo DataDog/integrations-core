@@ -1054,3 +1054,63 @@ def test_3850(aggregator):
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_idrac(aggregator):
+    instance = common.generate_instance_config([])
+    # We need the full path as we're not in installed mode
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'idrac.yaml')
+    instance['community_string'] = 'idrac'
+    instance['profile'] = 'idrac'
+    instance['enforce_mib_constraints'] = False
+
+    init_config = {'profiles': {'idrac': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    if_counts = [
+        'adapterRxPackets',
+        'adapterTxPackets',
+        'adapterRxBytes',
+        'adapterTxBytes',
+        'adapterRxErrors',
+        'adapterTxErrors',
+        'adapterRxDropped',
+        'adapterTxDropped',
+        'adapterRxMulticast',
+        'adapterCollisions',
+    ]
+    status_gauges = [
+        'systemStateChassisStatus',
+        'systemStatePowerUnitStatusRedundancy',
+        'systemStatePowerSupplyStatusCombined',
+        'systemStateAmperageStatusCombined',
+        'systemStateCoolingUnitStatusRedundancy',
+        'systemStateCoolingDeviceStatusCombined',
+        'systemStateTemperatureStatusCombined',
+        'systemStateMemoryDeviceStatusCombined',
+        'systemStateChassisIntrusionStatusCombined',
+        'systemStatePowerUnitStatusCombined',
+        'systemStateCoolingUnitStatusCombined',
+        'systemStateProcessorDeviceStatusCombined',
+        'systemStateTemperatureStatisticsStatusCombined',
+    ]
+    interfaces = ['eth0', 'en1']
+    for interface in interfaces:
+        tags = ['adapter:{}'.format(interface)] + common.CHECK_TAGS
+        for count in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+    indexes = ['26', '29']
+    for index in indexes:
+        tags = ['chassis_index:{}'.format(index)] + common.CHECK_TAGS
+        for gauge in status_gauges:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    powers = ['supply1', 'supply2']
+    for power in powers:
+        tags = ['supply_name:{}'.format(power)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
