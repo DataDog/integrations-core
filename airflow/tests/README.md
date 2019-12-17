@@ -1,6 +1,6 @@
 # Airflow Dev Readme
 
-## Testing Airflow Statsd emitter with Agent Dogstatsd
+## Testing Airflow StatsD emitter with Agent DogStatsD
 
 On a machine/VM with the desired Agent version installed and DogStatsD activated (enabled by default).
 
