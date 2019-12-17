@@ -2,7 +2,7 @@
 
 ## Testing Airflow Statsd emitter with Agent Dogstatsd
 
-On a machine/vm with the desired agent version installed and Dogstatsd activated (enabled by default).
+On a machine/VM with the desired Agent version installed and DogStatsD activated (enabled by default).
 
 ```
 
