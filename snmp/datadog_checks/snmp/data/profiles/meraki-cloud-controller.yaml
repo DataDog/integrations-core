@@ -7,8 +7,11 @@ sysobjectid: 1.3.6.1.4.1.29671.*
 metrics:
   # Meaki cloud devices
   - MIB: MERAKI-CLOUD-CONTROLLER-MIB
-    symbol: devStatus # 0 or 1 values
+    table: devTable
     forced_type: gauge
+    symbols:
+      - devStatus # 0 or 1 values
+      - devClientCount
     metrics_tags:
       - tag: device
         column: devName
@@ -19,56 +22,13 @@ metrics:
       - tag: vlan
         column: vlanNetworkName
   - MIB: MERAKI-CLOUD-CONTROLLER-MIB
-    symbol: devClientCount
+    table: devInterfaceTable
     forced_type: gauge
-    metrics_tags:
-      - tag: device
-        column: devName
-      - tag: product
-        column: devProductCode
-      - tag: network
-        column: devNetworkName
-      - tag: vlan
-        column: vlanNetworkName
-  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
-    symbol: devInterfaceSentPkts
-    forced_type: gauge
-    metrics_tags:
-      - tag: device
-        column: devName
-      - tag: product
-        column: devProductCode
-      - tag: network
-        column: devNetworkName
-      - tag: vlan
-        column: vlanNetworkName
-  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
-    symbol: devInterfaceRecvPkts
-    forced_type: gauge
-    metrics_tags:
-      - tag: device
-        column: devName
-      - tag: product
-        column: devProductCode
-      - tag: network
-        column: devNetworkName
-      - tag: vlan
-        column: vlanNetworkName
-  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
-    symbol: devInterfaceSentBytes
-    forced_type: gauge
-    metrics_tags:
-      - tag: device
-        column: devName
-      - tag: product
-        column: devProductCode
-      - tag: network
-        column: devNetworkName
-      - tag: vlan
-        column: vlanNetworkName
-  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
-    symbol: devInterfaceRecvBytes
-    forced_type: gauge
+    symbols:
+      - devInterfaceSentPkts
+      - devInterfaceRecvPkts
+      - devInterfaceSentBytes
+      - devInterfaceRecvBytes
     metrics_tags:
       - tag: device
         column: devName
