@@ -8,7 +8,6 @@ The Datadog Agent collects many metrics from Airflow, including those for:
 - Tasks: Task failures, successes, killed, etc.
 - Pools: Open slots, used slots, etc.
 - Executors: Open slots, queued tasks, running tasks, etc.
-- and more
 
 Metrics are collected through the [Airflow StatsD](https://airflow.apache.org/docs/stable/metrics.html) plugin and sent to Datadog's [DogStatsD][8].
 
