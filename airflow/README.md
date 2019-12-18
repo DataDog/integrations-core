@@ -157,7 +157,7 @@ The Airflow check does not include any events.
 
 ## Annexe
 
-## Airflow DatadogHook
+### Airflow DatadogHook
 
 In addition, [Airflow DatadogHook][11] can be used to interact with Datadog: 
 
