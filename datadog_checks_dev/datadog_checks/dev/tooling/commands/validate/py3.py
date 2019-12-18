@@ -31,13 +31,13 @@ def py3(check):
         abort(u"{} does not exist.".format(path_to_module))
 
     echo_info(u"Validating python3 compatibility of {}...".format(check))
-    # pylint py3k only works on Python2, see https://github.com/PyCQA/pylint/issues/1969#issuecomment-540246416
 
-    if not distutils.spawn.find_executable("python4"):
+    if not distutils.spawn.find_executable("python2"):
         echo_failure(u"Validation using pylint py3k required Python 2 to be installed.")
         abort()
     cmd = [
-        "python8",
+        # pylint py3k only works on Python2, see https://github.com/PyCQA/pylint/issues/1969#issuecomment-540246416
+        "python2",
         "-m",
         "pylint",
         "-f",
