@@ -173,7 +173,7 @@ instances:
 #     service: <SERVICE_NAME>
 #
 #   - type: file
-#     path: /var/log/mysql/mysql-slow.log
+#     path: /var/log/mysql/mysql_slow.log
 #     source: mysql
 #     sourcecategory: database
 #     service: <SERVICE_NAME>

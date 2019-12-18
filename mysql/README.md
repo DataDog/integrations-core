@@ -62,7 +62,7 @@ mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-For mySQL 8.0+ set `max_user_connections` with:
+For MySQL 8.0+ set `max_user_connections` with:
 
 ```
 mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
@@ -133,15 +133,16 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
     - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
     - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error, and slow query logs:
 
-      ```
+      ```conf
         [mysqld_safe]
-        log_error=/var/log/mysql/mysql_error.log
+        log_error = /var/log/mysql/mysql_error.log
+
         [mysqld]
         general_log = on
         general_log_file = /var/log/mysql/mysql.log
-        log_error=/var/log/mysql/mysql_error.log
+        log_error = /var/log/mysql/mysql_error.log
         slow_query_log = on
-        slow_query_log_file = /var/log/mysql/mysql-slow.log
+        slow_query_log_file = /var/log/mysql/mysql_slow.log
         long_query_time = 2
       ```
 
@@ -151,7 +152,7 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
     - In `/etc/logrotate.d/mysql-server` there should be something similar to:
 
       ```
-        /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql-slow.log {
+        /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql_slow.log {
                 daily
                 rotate 7
                 missingok
@@ -177,7 +178,7 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
             service: myapplication
 
           - type: file
-            path: /var/log/mysql/mysql-slow.log
+            path: /var/log/mysql/mysql_slow.log
             source: mysql
             sourcecategory: database
             service: myapplication
