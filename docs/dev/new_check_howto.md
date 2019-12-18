@@ -90,6 +90,7 @@ After answering the questions, the output will match that of the dry-run above, 
 
 A Check is a Python class with the following requirements:
 
+* If running with Agent v7+ it should be Python 3 compatible, Python 2 otherwise.
 * It must derive from `AgentCheck`
 * It must provide a method with this signature: `check(self, instance)`
 
