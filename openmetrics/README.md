@@ -4,7 +4,7 @@
 
 Extract custom metrics from any OpenMetrics endpoints.
 
-**Note:** All the metrics retrieved by this integration are considered as [custom metrics][1].
+<div class="alert alert-warning">All the metrics retrieved by this integration are considered <a href="https://docs.datadoghq.com/developers/metrics/custom_metrics">custom metrics</a>.</div>
 
 ## Setup
 
@@ -16,19 +16,21 @@ The OpenMetrics check is packaged with the [Datadog Agent starting version 6.6.0
 
 ### Configuration
 
-Edit the `openmetrics.d/conf.yaml` file at the root of your [Agent's configuration directory][4] to add the different OpenMetrics instances you want to retrieve metrics from.
+Edit the `openmetrics.d/conf.yaml` file at the root of your [Agent's configuration directory][4]. See the [sample openmetrics.d/conf.yaml][5] for all available configuration options.
 
-Each instance is at least composed of the following parameters:
+For each instance the following parameters are required:
 
-* `prometheus_url`: Points to the metric route (**Note:** it must be unique)
-* `namespace`: Namespace to be prepended to all metrics (allows to avoid metrics name collision)
-* `metrics`: A list of metrics that you want to retrieve as custom metrics, for each metric you can either simply add it to the list `- metric_name` or renaming it like `- metric_name: renamed`. It's also possible to use a `*` wildcard such as `- metric*` that fetches all matching metrics (to use with caution as it can potentially send a lot of custom metrics).
+| Parameter        | Description                                                                                                                                                                                                                                                              |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `prometheus_url` | The URL where your application metrics are exposed by Prometheus (must be unique).                                                                                                                                                                                       |
+| `namespace`      | The namespace to prepend to all metrics.                                                                                                                                                                                                                                 |
+| `metrics`        | A list of metrics to retrieve as custom metrics. Add each metric to the list as `metric_name` or `metric_name: renamed` to rename it. Use `*` as a wildcard (`metric*`) to fetch all matching metrics. **Note**: Wildcards can potentially send a lot of custom metrics. |
 
-There is also a couple of more advanced settings (`ssl`, `labels joining`, `tags`,...) that are documented in the [`conf.yaml` example configuration][5]
+For more configurations, see [Prometheus and OpenMetrics Metrics Collection][10].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][6] and look for `openmetrics` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `openmetrics` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -52,12 +54,12 @@ Need help? Contact [Datadog support][7].
 * [Configuring a OpenMetrics Check][8]
 * [Writing a custom OpenMetrics Check][9]
 
-[1]: https://docs.datadoghq.com/developers/metrics/custom_metrics
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[5]: https://docs.datadoghq.com/agent/openmetrics
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[3]: https://docs.datadoghq.com/getting_started/integrations/prometheus/?tab=docker#configuration
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[5]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help
 [8]: https://docs.datadoghq.com/agent/openmetrics
 [9]: https://docs.datadoghq.com/developers/openmetrics
+[10]: https://docs.datadoghq.com/getting_started/integrations/prometheus

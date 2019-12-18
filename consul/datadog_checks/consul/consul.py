@@ -137,7 +137,7 @@ class ConsulCheck(AgentCheck):
         ).get('Server')
 
         agent_url = "{}:{}".format(agent_addr, agent_port)
-        self.log.debug("Agent url is %s" % agent_url)
+        self.log.debug("Agent url is %s", agent_url)
         return agent_url
 
     def _get_agent_datacenter(self, instance, instance_state):
@@ -150,7 +150,7 @@ class ConsulCheck(AgentCheck):
         try:
             agent_url = self._get_agent_url(instance, instance_state)
             leader = instance_state.last_known_leader or self._get_cluster_leader(instance)
-            self.log.debug("Consul agent lives at %s . Consul Leader lives at %s" % (agent_url, leader))
+            self.log.debug("Consul agent lives at %s . Consul Leader lives at %s", agent_url, leader)
             return agent_url == leader
 
         except Exception:
@@ -196,9 +196,7 @@ class ConsulCheck(AgentCheck):
             if perform_new_leader_checks or (perform_self_leader_check and agent == leader):
                 # We either emit all leadership changes or emit when we become the leader and that just happened
                 self.log.info(
-                    'Leader change from {} to {}. Sending new leader event'.format(
-                        instance_state.last_known_leader, leader
-                    )
+                    'Leader change from %s to %s. Sending new leader event', instance_state.last_known_leader, leader
                 )
 
                 self.event(
@@ -237,7 +235,7 @@ class ConsulCheck(AgentCheck):
 
         if service_whitelist:
             if len(service_whitelist) > max_services:
-                self.warning('More than %d services in whitelist. Service list will be truncated.' % max_services)
+                self.warning('More than %d services in whitelist. Service list will be truncated.', max_services)
 
             whitelisted_services = [s for s in services if s in service_whitelist]
             services = {s: services[s] for s in whitelisted_services[:max_services]}
@@ -269,6 +267,7 @@ class ConsulCheck(AgentCheck):
         instance_state = self._instance_states[hash_mutable(instance)]
 
         self._check_for_leader_change(instance, instance_state)
+        self._collect_metadata(instance, instance_state)
 
         peers = self.get_peers_in_cluster(instance)
         main_tags = []
@@ -526,3 +525,10 @@ class ConsulCheck(AgentCheck):
     def count_all_nodes(self, instance, main_tags):
         nodes = self._get_all_nodes(instance)
         self.gauge('consul.catalog.total_nodes', len(nodes), tags=main_tags)
+
+    def _collect_metadata(self, instance, instance_state):
+        local_config = self._get_local_config(instance, instance_state)
+        agent_version = local_config.get('Config', {}).get('Version')
+        self.log.debug("Agent version is `%s`", agent_version)
+        if agent_version:
+            self.set_metadata('version', agent_version)

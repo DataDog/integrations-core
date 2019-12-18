@@ -8,8 +8,9 @@ from collections import OrderedDict
 
 import mock
 import pytest
+from six import PY3
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
 pytestmark = pytest.mark.metadata
 
@@ -54,6 +55,24 @@ class TestRaw:
             check.set_metadata('foo', 'bar')
 
             m.assert_called_once_with('test:123', 'foo', 'rab')
+
+    def test_encoding(self):
+        check = AgentCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+        if PY3:
+            constructor = ensure_bytes
+            finalizer = ensure_unicode
+        else:
+            constructor = ensure_unicode
+            finalizer = ensure_bytes
+
+        name = constructor(u'nam\u00E9')
+        value = constructor(u'valu\u00E9')
+
+        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.set_metadata(name, value)
+
+            m.assert_called_once_with('test:123', finalizer(name), finalizer(value))
 
 
 class TestVersion:
@@ -262,6 +281,68 @@ class TestVersion:
             expected_message = (
                 'Unable to transform `version` metadata value `1.0.0`: '
                 'Regular expression pattern has no named subgroups'
+            )
+            for _, level, message in caplog.record_tuples:
+                if level == logging.ERROR and message == expected_message:
+                    break
+            else:
+                raise AssertionError('Expected ERROR log with message: {}'.format(expected_message))
+
+    def test_parts(self):
+        check = AgentCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+
+        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.set_metadata(
+                'version',
+                '19.15.2.2',
+                scheme='parts',
+                part_map={'year': '19', 'major': '15', 'minor': '2', 'patch': '2', 'revision': '56789'},
+            )
+
+            m.assert_any_call('test:123', 'version.year', '19')
+            m.assert_any_call('test:123', 'version.major', '15')
+            m.assert_any_call('test:123', 'version.minor', '2')
+            m.assert_any_call('test:123', 'version.patch', '2')
+            m.assert_any_call('test:123', 'version.revision', '56789')
+            m.assert_any_call('test:123', 'version.raw', '19.15.2.2')
+            m.assert_any_call('test:123', 'version.scheme', 'test')
+            assert m.call_count == 7
+
+    def test_parts_final_scheme(self):
+        check = AgentCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+
+        with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.set_metadata(
+                'version',
+                '19.15.2.2',
+                scheme='parts',
+                final_scheme='calver',
+                part_map={'year': '19', 'major': '15', 'minor': '2', 'patch': '2', 'revision': '56789'},
+            )
+
+            m.assert_any_call('test:123', 'version.year', '19')
+            m.assert_any_call('test:123', 'version.major', '15')
+            m.assert_any_call('test:123', 'version.minor', '2')
+            m.assert_any_call('test:123', 'version.patch', '2')
+            m.assert_any_call('test:123', 'version.revision', '56789')
+            m.assert_any_call('test:123', 'version.raw', '19.15.2.2')
+            m.assert_any_call('test:123', 'version.scheme', 'calver')
+            assert m.call_count == 7
+
+    def test_parts_no_part_map(self, caplog):
+        check = AgentCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+
+        with caplog.at_level(logging.DEBUG), mock.patch(SET_CHECK_METADATA_METHOD) as m:
+            check.set_metadata('version', '1.0', scheme='parts')
+
+            assert m.call_count == 0
+
+            expected_message = (
+                'Unable to transform `version` metadata value `1.0`: '
+                'Version scheme `parts` requires a `part_map` option'
             )
             for _, level, message in caplog.record_tuples:
                 if level == logging.ERROR and message == expected_message:

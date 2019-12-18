@@ -2,7 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import os
+
 from datadog_checks.zk import ZookeeperCheck
+
+ZK_VERSION = os.environ['ZK_VERSION']
 
 MNTR_METRICS = [
     'zookeeper.packets_sent',

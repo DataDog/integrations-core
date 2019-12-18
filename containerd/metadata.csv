@@ -35,3 +35,4 @@ containerd.blkio.serviced_recursive,rate,,,,The blkio io serviced recursive,0,co
 containerd.blkio.wait_time_recursive,rate,,nanosecond,,The blkio io wait time recursive,0,containerd,io_wait_time_recursive
 containerd.blkio.service_time_recursive,rate,,,,The blkio io service time recursive,0,containerd,io service time recursive
 containerd.image.size,gauge,,byte,,The size of the container image,0,containerd,image size
+containerd.proc.open_fds,gauge,,file,,The number of open file descriptors,0,containerd,open_fds

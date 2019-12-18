@@ -9,12 +9,12 @@ from os.path import isfile
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, itervalues, string_types
-from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_string
+from ...utils.warnings_util import disable_warnings_ctx
 from .. import AgentCheck
 
 if PY3:
@@ -491,7 +491,7 @@ class OpenMetricsScraperMixin(object):
                     transformer = metric_transformers[metric.name]
                     transformer(metric, scraper_config)
                 except Exception as err:
-                    self.log.warning('Error handling metric: {} - error: {}'.format(metric.name, err))
+                    self.log.warning('Error handling metric: %s - error: %s', metric.name, err)
 
                 return
 
@@ -535,7 +535,7 @@ class OpenMetricsScraperMixin(object):
         try:
             response = self.send_request(endpoint, scraper_config, headers)
         except requests.exceptions.SSLError:
-            self.log.error("Invalid SSL settings for requesting {} endpoint".format(endpoint))
+            self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
         except IOError:
             if health_service_check:
@@ -579,25 +579,27 @@ class OpenMetricsScraperMixin(object):
         if scraper_config['ssl_ca_cert'] is False:
             verify = False
 
+        disable_insecure_warnings = False
         if isinstance(scraper_config['ssl_ca_cert'], string_types):
             verify = scraper_config['ssl_ca_cert']
         elif verify is False:
-            disable_warnings(InsecureRequestWarning)
+            disable_insecure_warnings = True
 
         # Determine the authentication settings
         username = scraper_config['username']
         password = scraper_config['password']
         auth = (username, password) if username is not None and password is not None else None
 
-        return requests.get(
-            endpoint,
-            headers=headers,
-            stream=True,
-            timeout=scraper_config['prometheus_timeout'],
-            cert=cert,
-            verify=verify,
-            auth=auth,
-        )
+        with disable_warnings_ctx(InsecureRequestWarning, disable=disable_insecure_warnings):
+            return requests.get(
+                endpoint,
+                headers=headers,
+                stream=True,
+                timeout=scraper_config['prometheus_timeout'],
+                cert=cert,
+                verify=verify,
+                auth=auth,
+            )
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """
@@ -623,7 +625,7 @@ class OpenMetricsScraperMixin(object):
             for sample in metric.samples:
                 val = sample[self.SAMPLE_VALUE]
                 if not self._is_value_valid(val):
-                    self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                    self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                     continue
                 custom_hostname = self._get_hostname(hostname, sample, scraper_config)
                 # Determine the tags to send
@@ -639,7 +641,7 @@ class OpenMetricsScraperMixin(object):
         elif metric.type == "summary":
             self._submit_gauges_from_summary(metric_name, metric, scraper_config)
         else:
-            self.log.error("Metric type {} unsupported for metric {}.".format(metric.type, metric_name))
+            self.log.error("Metric type %s unsupported for metric %s.", metric.type, metric_name)
 
     def _get_hostname(self, hostname, sample, scraper_config):
         """
@@ -664,7 +666,7 @@ class OpenMetricsScraperMixin(object):
         for sample in metric.samples:
             val = sample[self.SAMPLE_VALUE]
             if not self._is_value_valid(val):
-                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum"):
@@ -703,7 +705,7 @@ class OpenMetricsScraperMixin(object):
         for sample in metric.samples:
             val = sample[self.SAMPLE_VALUE]
             if not self._is_value_valid(val):
-                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum") and not scraper_config['send_distribution_buckets']:
@@ -810,9 +812,9 @@ class OpenMetricsScraperMixin(object):
     def _submit_sample_histogram_buckets(self, metric_name, sample, scraper_config, hostname=None):
         if "lower_bound" not in sample[self.SAMPLE_LABELS] or "le" not in sample[self.SAMPLE_LABELS]:
             self.log.warning(
-                "Metric: {} was not containing required bucket boundaries labels: {}".format(
-                    metric_name, sample[self.SAMPLE_LABELS]
-                )
+                "Metric: %s was not containing required bucket boundaries labels: %s",
+                metric_name,
+                sample[self.SAMPLE_LABELS],
             )
             return
         sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
@@ -820,7 +822,7 @@ class OpenMetricsScraperMixin(object):
         if sample[self.SAMPLE_LABELS]["le"] == sample[self.SAMPLE_LABELS]["lower_bound"]:
             # this can happen for -inf/-inf bucket that we don't want to send (always 0)
             self.log.warning(
-                "Metric: {} has bucket boundaries equal, skipping: {}".format(metric_name, sample[self.SAMPLE_LABELS])
+                "Metric: %s has bucket boundaries equal, skipping: %s", metric_name, sample[self.SAMPLE_LABELS]
             )
             return
         tags = self._metric_tags(metric_name, sample[self.SAMPLE_VALUE], sample, scraper_config, hostname)
@@ -864,7 +866,7 @@ class OpenMetricsScraperMixin(object):
             if isfile(bearer_token_path):
                 path = bearer_token_path
             else:
-                self.log.error("File not found: {}".format(bearer_token_path))
+                self.log.error("File not found: %s", bearer_token_path)
         elif isfile(self.KUBERNETES_TOKEN_PATH):
             path = self.KUBERNETES_TOKEN_PATH
 
@@ -876,5 +878,5 @@ class OpenMetricsScraperMixin(object):
             with open(path, 'r') as f:
                 return f.read().rstrip()
         except Exception as err:
-            self.log.error("Cannot get bearer token from path: {} - error: {}".format(path, err))
+            self.log.error("Cannot get bearer token from path: %s - error: %s", path, err)
             raise

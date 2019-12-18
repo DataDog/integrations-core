@@ -23,6 +23,7 @@ from .._env import (
 )
 
 __aggregator = None
+__datadog_agent = None
 
 
 @pytest.fixture
@@ -40,6 +41,20 @@ def aggregator():
 
     __aggregator.reset()
     return __aggregator
+
+
+@pytest.fixture
+def datadog_agent():
+    global __datadog_agent
+
+    if __datadog_agent is None:
+        try:
+            from datadog_checks.base.stubs import datadog_agent as __datadog_agent
+        except ImportError:
+            raise ImportError('datadog-checks-base is not installed!')
+
+    __datadog_agent.reset()
+    return __datadog_agent
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -150,7 +165,11 @@ def dd_agent_check(request, aggregator):
             )
 
         _, _, collector_output = result.stdout.partition(AGENT_COLLECTOR_SEPARATOR)
-        collector = json.loads(collector_output.strip())
+        collector_output = collector_output.strip()
+        if not collector_output.endswith(']'):
+            # JMX needs some additional cleanup
+            collector_output = collector_output[: collector_output.rfind(']') + 1]
+        collector = json.loads(collector_output)
 
         replay_check_run(collector, aggregator)
 

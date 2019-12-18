@@ -3,7 +3,13 @@
 # Licensed under Simplified BSD License see LICENSE
 
 import hashlib
+import json
+import logging
 import os
+
+from datadog_checks.cisco_aci.api import SessionWrapper
+
+log = logging.getLogger('test_cisco_aci')
 
 CHECK_NAME = 'cisco_aci'
 
@@ -11,7 +17,7 @@ FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixture
 CAPACITY_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'capacity')
 FABRIC_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'fabric')
 TENANT_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'tenant')
-ALL_FICTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TENANT_FIXTURES_DIR]
+ALL_FIXTURE_DIR = [FIXTURES_DIR, CAPACITY_FIXTURES_DIR, FABRIC_FIXTURES_DIR, TENANT_FIXTURES_DIR]
 
 USERNAME = 'datadog'
 PASSWORD = 'datadog'
@@ -631,3 +637,55 @@ FIXTURE_LIST = [
 FIXTURE_LIST_FILE_MAP = {}
 for fixture in FIXTURE_LIST:
     FIXTURE_LIST_FILE_MAP[fixture] = hashlib.md5(fixture.encode('utf-8')).hexdigest()
+
+
+class FakeSessionWrapper(SessionWrapper):
+    """ This mock:
+    1. Takes the requested path and replace all special characters to underscore
+    2. Fetch the corresponding hash from common.FIXTURE_LIST_FILE_MAP
+    3. Returns the corresponding file content
+    """
+
+    fixture_dirs = ALL_FIXTURE_DIR
+
+    def login(self, password):
+        self.apic_cookie = 'cookie'
+
+    def make_request(self, path):
+        mock_path = path.replace('/', '_')
+        mock_path = mock_path.replace('?', '_')
+        mock_path = mock_path.replace('&', '_')
+        mock_path = mock_path.replace('=', '_')
+        mock_path = mock_path.replace(',', '_')
+        mock_path = mock_path.replace('-', '_')
+        mock_path = mock_path.replace('.', '_')
+        mock_path = mock_path.replace('"', '_')
+        mock_path = mock_path.replace('(', '_')
+        mock_path = mock_path.replace(')', '_')
+        mock_path = mock_path.replace('[', '_')
+        mock_path = mock_path.replace(']', '_')
+        mock_path = mock_path.replace('|', '_')
+        mock_path = FIXTURE_LIST_FILE_MAP[mock_path]
+        for p in self.fixture_dirs:
+            path = os.path.join(p, mock_path)
+            path += '.txt'
+
+            try:
+                log.info(os.listdir(p))
+                with open(path, 'r') as f:
+                    return json.loads(f.read())
+            except Exception:
+                continue
+        return {"imdata": []}
+
+
+class FakeCapacitySessionWrapper(FakeSessionWrapper):
+    fixture_dirs = [CAPACITY_FIXTURES_DIR]
+
+
+class FakeTenantSessionWrapper(FakeSessionWrapper):
+    fixture_dirs = [TENANT_FIXTURES_DIR]
+
+
+class FakeFabricSessionWrapper(FakeSessionWrapper):
+    fixture_dirs = [FABRIC_FIXTURES_DIR]

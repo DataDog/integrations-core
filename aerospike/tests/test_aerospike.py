@@ -1,17 +1,60 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
+
+import mock
 import pytest
 
 from datadog_checks.aerospike import AerospikeCheck
+
+LAZY_METRICS = [
+    'aerospike.namespace.latency.write_over_64ms',
+    'aerospike.namespace.latency.write_over_8ms',
+    'aerospike.namespace.latency.write_over_1ms',
+    'aerospike.namespace.latency.write_ops_sec',
+    'aerospike.namespace.latency.read_over_64ms',
+    'aerospike.namespace.latency.read_over_8ms',
+    'aerospike.namespace.latency.read_over_1ms',
+    'aerospike.namespace.latency.read_ops_sec',
+    'aerospike.namespace.tps.read',
+]
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check(aggregator, instance):
     check = AerospikeCheck('aerospike', {}, [instance])
-    check.check(instance)
+    # sleep to make sure client is available
+    time.sleep(30)
+    for _ in range(10):
+        check.check(instance)
+        time.sleep(1)
     _test_check(aggregator)
+
+
+def test_version_metadata(aggregator, instance, datadog_agent):
+
+    check = AerospikeCheck('aerospike', {}, [instance])
+    check.check_id = 'test:123'
+
+    # sleep to make sure client is available
+    time.sleep(30)
+    for _ in range(10):
+        check.check(instance)
+        time.sleep(1)
+
+    raw_version = check.get_info("build")[0]
+    major, minor = raw_version.split('.')[:2]
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
 
 
 @pytest.mark.e2e
@@ -36,6 +79,10 @@ def _test_check(aggregator):
     aggregator.assert_metric(
         'aerospike.set.stop_writes_count', 0, tags=['namespace:test', 'set:characters', 'tag:value']
     )
+
+    for metric in LAZY_METRICS:
+        aggregator.assert_metric(metric)
+
     aggregator.assert_metric('aerospike.namespace.tps.write', at_least=0)
     aggregator.assert_all_metrics_covered()
 

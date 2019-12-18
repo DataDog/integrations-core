@@ -14,15 +14,18 @@
   ],
   "public_title": "Datadog-MapR Integration",
   "categories": [
-    "data-store",
+    "data store",
     "os & system",
-    "processing"
+    "processing",
+    "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "mapr",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "MapR - Overview": "assets/dashboards/mapr_overview.json"
+    },
     "monitors": {},
     "service_checks": "assets/service_checks.json"
   }

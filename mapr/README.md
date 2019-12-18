@@ -32,7 +32,7 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 
 #### Log collection
 
-MapR uses fluentD for logs. Use the [fluent datadog plugin][11] to collect MapR logs.
+MapR uses fluentD for logs. Use the [fluentD datadog plugin][11] to collect MapR logs.
 The following command downloads and installs the plugin into the right directory.
 
 `curl https://raw.githubusercontent.com/DataDog/fluent-plugin-datadog/master/lib/fluent/plugin/out_datadog.rb -o /opt/mapr/fluentd/fluentd-<VERSION>/lib/fluentd-<VERSION>-linux-x86_64/lib/app/lib/fluent/plugin/out_datadog.rb`
@@ -87,8 +87,8 @@ Need help? Contact [Datadog support][6].
 [1]: https://mapr.com
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/mapr/datadog_checks/mapr/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/help
 [7]: https://mapr.com/docs/61/MapR_Streams/MapRStreamsPythonExample.html
 [8]: https://mapr.com/docs/61/SecurityGuide/GeneratingServiceTicket.html

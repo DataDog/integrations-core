@@ -101,13 +101,16 @@ class HAProxy(AgentCheck):
     def check(self, instance):
         url = instance.get('url')
         self.log.debug('Processing HAProxy data for %s' % url)
-
         parsed_url = urlparse(url)
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
-            data = self._fetch_socket_data(parsed_url)
-
+            info, data = self._fetch_socket_data(parsed_url)
+            self._collect_version_from_socket(info)
         else:
+            try:
+                self._collect_version_from_http(url)
+            except Exception as e:
+                self.log.warning("Couldn't collect version information: %s", e)
             data = self._fetch_url_data(url)
 
         collect_aggregates_only = instance.get('collect_aggregates_only', True)
@@ -163,7 +166,9 @@ class HAProxy(AgentCheck):
 
         response = self.http.get(url)
         response.raise_for_status()
+        return self._decode_response(response)
 
+    def _decode_response(self, response):
         # it only needs additional decoding in py3, so skip it if it's py2
         if PY2:
             return response.content.splitlines()
@@ -179,6 +184,25 @@ class HAProxy(AgentCheck):
 
             return content.splitlines()
 
+    def _collect_version_from_http(self, url):
+        # the csv format does not offer version info, therefore we need to get the HTML page
+        self.log.debug("collecting version info for HAProxy from {}".format(url))
+
+        r = self.http.get(url)
+        r.raise_for_status()
+        raw_version = ""
+        for line in self._decode_response(r):
+            if "HAProxy version" in line:
+                raw_version = line
+                break
+
+        if raw_version == "":
+            self.log.debug("unable to find HAProxy version info")
+        else:
+            version = re.search(r"HAProxy version ([^,]+)", raw_version).group(1)
+            self.log.debug(u"HAProxy version is {}".format(version))
+            self.set_metadata('version', version)
+
     def _fetch_socket_data(self, parsed_url):
         ''' Hit a given stats socket and return the stats lines '''
 
@@ -193,17 +217,32 @@ class HAProxy(AgentCheck):
         else:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
-        sock.send(b"show stat\r\n")
+
+        sock.send(b"show info;show stat\r\n")
 
         response = ""
         output = sock.recv(BUFSIZE)
         while output:
             response += output.decode("ASCII")
             output = sock.recv(BUFSIZE)
+        info, data = response.split('\n\n')[:2]
 
         sock.close()
 
-        return response.splitlines()
+        return info, data.splitlines()
+
+    def _collect_version_from_socket(self, info):
+        version = ''
+        for line in info.splitlines():
+            key, value = line.split(':')
+            if key == 'Version':
+                version = value
+                break
+        if version == '':
+            self.log.debug("unable to collect version info from socket")
+        else:
+            self.log.debug("HAProxy version is {}".format(version))
+            self.set_metadata('version', version)
 
     def _process_data(
         self,

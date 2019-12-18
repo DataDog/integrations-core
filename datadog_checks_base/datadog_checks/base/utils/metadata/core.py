@@ -7,6 +7,7 @@ import re
 
 from six import iteritems
 
+from ..common import to_string
 from .constants import DEFAULT_BLACKLIST
 from .utils import is_primitive
 from .version import parse_version
@@ -32,7 +33,7 @@ class MetadataManager(object):
             self.metadata_transformers.update(metadata_transformers)
 
     def submit_raw(self, name, value):
-        datadog_agent.set_check_metadata(self.check_id, name, value)
+        datadog_agent.set_check_metadata(self.check_id, to_string(name), to_string(value))
 
     def submit(self, name, value, options):
         transformer = self.metadata_transformers.get(name)
@@ -67,7 +68,7 @@ class MetadataManager(object):
         the value of ``version.scheme`` unless ``final_scheme`` is also set, which will take precedence.
         """
         scheme, version_parts = parse_version(version, options)
-        if scheme == 'regex':
+        if scheme == 'regex' or scheme == 'parts':
             scheme = options.get('final_scheme', self.check_name)
 
         data = {'version.{}'.format(part_name): part_value for part_name, part_value in iteritems(version_parts)}

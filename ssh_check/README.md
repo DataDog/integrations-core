@@ -5,14 +5,14 @@
 This check lets you monitor SSH connectivity to remote hosts and SFTP response times.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying these instructions.
-
 ### Installation
 
 The SSH/SFTP check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your server from which you'd like to test SSH connectivity.
 
 ### Configuration
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `ssh_check.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2].
     See the [sample ssh_check.d/conf.yaml][3] for all available configuration options:
@@ -32,6 +32,15 @@ The SSH/SFTP check is included in the [Datadog Agent][1] package, so you don't n
     ```
 
 2. [Restart the Agent][4] to start sending SSH/SFTP metrics and service checks to Datadog.
+
+#### Containerized
+For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                        |
+|----------------------|--------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `ssh`                                                        |
+| `<INIT_CONFIG>`      | blank or `{}`                                                |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"22", "username":"<USERNAME>"}` |
 
 ### Validation
 
@@ -59,10 +68,10 @@ Returns CRITICAL if the Agent cannot open an SFTP session, otherwise OK.
 Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/datadog_checks/ssh_check/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/ssh_check/metadata.csv
 [7]: https://docs.datadoghq.com/help
 [8]: https://docs.datadoghq.com/agent/autodiscovery/integrations

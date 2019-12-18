@@ -3,8 +3,11 @@ aerospike==3.6.0; sys_platform != 'win32'
 beautifulsoup4==4.5.1
 binary==1.0.0
 boto==2.46.1
+boto3==1.10.27
+clickhouse-cityhash==1.0.2.3
+clickhouse-driver==0.1.2
 contextlib2==0.5.5
-cryptography==2.7
+cryptography==2.8
 cx-oracle==7.2.0
 ddtrace==0.13.0
 dnspython==1.16.0
@@ -12,7 +15,7 @@ flup==1.0.3.dev-20110405; python_version < '3.0'
 flup-py3==1.0.3; python_version > '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 httplib2==0.10.3
-in-toto==0.3.0
+in-toto==0.4.1
 ipaddress==1.0.22; python_version < '3.0'
 jaydebeapi==1.1.1
 jpype1==0.7.0
@@ -21,16 +24,18 @@ kazoo==2.6.1; sys_platform != 'win32'
 kubernetes==8.0.1
 ldap3==2.5
 lxml==4.4.1
+lz4==2.2.1
 meld3==1.0.2
 openstacksdk==0.24.0
 paramiko==2.6.0
 ply==3.10
 prometheus-client==0.3.0
 protobuf==3.7.0
-psutil==5.6.3
-psycopg2-binary==2.8.2
+psutil==5.6.7
+psycopg2-binary==2.8.4
 pyasn1==0.4.6
 pycryptodomex==3.8.2
+pyhdb==0.3.4
 pymongo==3.8.0
 pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.9.3
@@ -44,21 +49,22 @@ python-binary-memcached==0.26.1; sys_platform != 'win32'
 python-dateutil==2.8.0
 python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
 pyvmomi==v6.5.0.2017.5-1
-pywin32==225; sys_platform == 'win32'
+pywin32==227; sys_platform == 'win32'
 pyyaml==5.1
 redis==2.10.5
 requests==2.22.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
 scandir==1.8
-securesystemslib[crypto,pynacl]==0.11.3
+securesystemslib[crypto,pynacl]==0.12.2
 selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
+semver==2.9.0
 serpent==1.27; sys_platform == 'win32'
 service_identity[idna]==18.1.0
 simplejson==3.6.5
 six==1.12.0
 supervisor==4.0.1
-tuf==0.11.2.dev3
+tuf==0.12.1
 uptime==3.0.1
 vertica-python==0.9.4
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'

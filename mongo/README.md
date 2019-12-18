@@ -11,6 +11,8 @@ Connect MongoDB to Datadog in order to:
 
 You can also create your own metrics using custom `find`, `count` and `aggregate` queries.
 
+**Note**: MongoDB v2.6+ is required for this integration.
+
 ## Setup
 ### Installation
 
@@ -115,7 +117,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 | Parameter            | Value                                                                                                                                                                           |
 |----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `mongodb`                                                                                                                                                                       |
+| `<INTEGRATION_NAME>` | `mongo`                                                                                                                                                                       |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                   |
 | `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}` |
 
@@ -123,7 +125,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 **Available for Agent v6.5+**
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][5].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
 
 | Parameter      | Value                                       |
 |----------------|---------------------------------------------|
@@ -131,14 +133,14 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][7] and look for `mongo` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `mongo` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this check.
 
-See the [MongoDB 3.0 Manual][9] for more detailed descriptions of some of these metrics.
+See the [MongoDB 3.0 Manual][10] for more detailed descriptions of some of these metrics.
 
 **NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
@@ -170,24 +172,25 @@ This check emits an event each time a Mongo node has a change in its replication
 Returns `CRITICAL` if the Agent cannot connect to MongoDB to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][11].
 
 ## Further Reading
 Read our series of blog posts about collecting metrics from MongoDB with Datadog:
 
-* [Monitoring MongoDB performance metrics (WiredTiger)][11]
-* [Monitoring MongoDB performance metrics (MMAP)][12]
+* [Monitoring MongoDB performance metrics (WiredTiger)][12]
+* [Monitoring MongoDB performance metrics (MMAP)][13]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/mongo/datadog_checks/mongo/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv
-[9]: https://docs.mongodb.org/manual/reference/command/dbStats
-[10]: https://docs.datadoghq.com/help
-[11]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
-[12]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
+[7]: https://docs.datadoghq.com/agent/docker/log/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv
+[10]: https://docs.mongodb.org/manual/reference/command/dbStats
+[11]: https://docs.datadoghq.com/help
+[12]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
+[13]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap

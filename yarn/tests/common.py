@@ -5,13 +5,7 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.yarn.yarn import (
-    YARN_APPLICATION_STATES,
-    YARN_APPS_PATH,
-    YARN_CLUSTER_METRICS_PATH,
-    YARN_NODES_PATH,
-    YARN_SCHEDULER_PATH,
-)
+from datadog_checks.yarn.yarn import YARN_APPS_PATH, YARN_CLUSTER_METRICS_PATH, YARN_NODES_PATH, YARN_SCHEDULER_PATH
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -23,7 +17,7 @@ RM_ADDRESS = 'http://{}:8088'.format(get_docker_hostname())
 
 # Service URLs
 YARN_CLUSTER_METRICS_URL = '{}{}'.format(RM_ADDRESS, YARN_CLUSTER_METRICS_PATH)
-YARN_APPS_URL = '{}{}?states={}'.format(RM_ADDRESS, YARN_APPS_PATH, YARN_APPLICATION_STATES)
+YARN_APPS_URL = '{}{}'.format(RM_ADDRESS, YARN_APPS_PATH)
 YARN_NODES_URL = '{}{}'.format(RM_ADDRESS, YARN_NODES_PATH)
 YARN_SCHEDULER_URL = '{}{}'.format(RM_ADDRESS, YARN_SCHEDULER_PATH)
 
@@ -32,7 +26,10 @@ CUSTOM_TAGS = ['optional:tag1']
 TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
 
-INSTANCE_INTEGRATION = {"resourcemanager_uri": RM_ADDRESS, "cluster_name": CLUSTER_NAME}
+INSTANCE_INTEGRATION = {
+    "resourcemanager_uri": RM_ADDRESS,
+    "cluster_name": CLUSTER_NAME,
+}
 
 CLUSTER_TAG = "cluster_name:{}".format(CLUSTER_NAME)
 
@@ -103,6 +100,28 @@ YARN_CONFIG = {
             'tags': list(CUSTOM_TAGS),
             'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
             'queue_blacklist': ['nofollowqueue'],
+        }
+    ]
+}
+YARN_CONFIG_STATUS_MAPPING = {
+    'instances': [
+        {
+            'resourcemanager_uri': RM_ADDRESS,
+            'cluster_name': CLUSTER_NAME,
+            'tags': list(CUSTOM_TAGS),
+            'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
+            'queue_blacklist': ['nofollowqueue'],
+            "application_status_mapping": {
+                'ALL': 'unknown',
+                'NEW': 'ok',
+                'NEW_SAVING': 'ok',
+                'SUBMITTED': 'ok',
+                'ACCEPTED': 'ok',
+                'RUNNING': 'ok',
+                'FINISHED': 'ok',
+                'FAILED': 'warning',
+                'KILLED': 'warning',
+            },
         }
     ]
 }

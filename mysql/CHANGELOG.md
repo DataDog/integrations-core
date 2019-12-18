@@ -1,5 +1,11 @@
 # CHANGELOG - mysql
 
+## 1.10.0 / 2019-12-02
+
+* [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
+* [Fixed] Fix TypeError in schema size check. See [#5043](https://github.com/DataDog/integrations-core/pull/5043). Thanks [rayatbuzzfeed](https://github.com/rayatbuzzfeed).
+* [Added] Submit version metadata. See [#4814](https://github.com/DataDog/integrations-core/pull/4814).
+
 ## 1.9.1 / 2019-10-11
 
 * [Fixed] Fix typo in logs (Instace -> Instance). See [#4715](https://github.com/DataDog/integrations-core/pull/4715). Thanks [ajacoutot](https://github.com/ajacoutot).

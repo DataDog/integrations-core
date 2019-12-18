@@ -65,7 +65,7 @@ Set the corresponding `source` parameter to the same channel name to benefit fro
 
 Finally, [restart the Agent][4].
 
-**Note**: For the Security logs channel, make sure that your Datadog Agent user is added to the `Event Log Readers` list.
+**Note**: For the Security logs channel, add your Datadog Agent user to the `Event Log Readers` user group.
 
 ### Filters
 Use the Windows Event Viewer GUI to list all the event logs available for capture with this integration.
@@ -170,11 +170,11 @@ Need help? Contact [Datadog support][7].
 
 
 [1]: https://app.datadoghq.com/account/settings#agent/windows
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/logs/processing/pipelines/#integration-pipelines
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help
 [8]: https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class
 [9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012

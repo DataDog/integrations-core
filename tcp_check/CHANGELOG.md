@@ -1,5 +1,9 @@
 # CHANGELOG - tcp_check
 
+## 2.3.2 / 2019-12-17
+
+* [Fixed] Fix service_checks submission. See [#5229](https://github.com/DataDog/integrations-core/pull/5229).
+
 ## 2.3.1 / 2019-10-11
 
 * [Fixed] Remove legacy network check tcp. See [#4580](https://github.com/DataDog/integrations-core/pull/4580).

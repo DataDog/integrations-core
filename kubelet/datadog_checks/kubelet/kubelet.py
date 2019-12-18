@@ -38,6 +38,7 @@ NODE_SPEC_PATH = '/spec'
 POD_LIST_PATH = '/pods'
 CADVISOR_METRICS_PATH = '/metrics/cadvisor'
 KUBELET_METRICS_PATH = '/metrics'
+STATS_PATH = '/stats/summary/'
 
 # Suffixes per
 # https://github.com/kubernetes/kubernetes/blob/8fd414537b5143ab039cb910590237cabf4af783/pkg/api/resource/suffix.go#L108
@@ -116,6 +117,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     DEFAULT_METRIC_LIMIT = 0
 
+    COUNTER_METRICS = {'kubelet_evictions': 'kubelet.evictions'}
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         self.NAMESPACE = 'kubernetes'
         if instances is not None and len(instances) > 1:
@@ -132,9 +135,11 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         self.cadvisor_scraper_config = self.get_scraper_config(cadvisor_instance)
         # Filter out system slices (empty pod name) to reduce memory footprint
-        self.cadvisor_scraper_config['_text_filter_blacklist'] = ['pod_name=""']
+        self.cadvisor_scraper_config['_text_filter_blacklist'] = ['pod_name=""', 'pod=""']
 
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
+
+        self.COUNTER_TRANSFORMERS = {k: self.send_always_counter for k in self.COUNTER_METRICS}
 
     def _create_kubelet_prometheus_instance(self, instance):
         """
@@ -181,6 +186,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.kube_health_url = urljoin(endpoint, KUBELET_HEALTH_PATH)
         self.node_spec_url = urljoin(endpoint, NODE_SPEC_PATH)
         self.pod_list_url = urljoin(endpoint, POD_LIST_PATH)
+        self.stats_url = urljoin(endpoint, STATS_PATH)
         self.instance_tags = instance.get('tags', [])
         self.kubelet_credentials = KubeletCredentials(kubelet_conn_info)
 
@@ -220,17 +226,20 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self._report_pods_running(self.pod_list, self.instance_tags)
         self._report_container_spec_metrics(self.pod_list, self.instance_tags)
         self._report_container_state_metrics(self.pod_list, self.instance_tags)
+        self._report_ephemeral_storage_usage(self.pod_list, self.instance_tags)
 
         if self.cadvisor_legacy_url:  # Legacy cAdvisor
             self.log.debug('processing legacy cadvisor metrics')
             self.process_cadvisor(instance, self.cadvisor_legacy_url, self.pod_list, self.pod_list_utils)
         elif self.cadvisor_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing cadvisor metrics')
-            self.process(self.cadvisor_scraper_config, metric_transformers=self.CADVISOR_METRIC_TRANSFORMERS)
+            transformers = self.CADVISOR_METRIC_TRANSFORMERS
+            transformers.update(self.COUNTER_TRANSFORMERS)
+            self.process(self.cadvisor_scraper_config, metric_transformers=transformers)
 
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
-            self.process(self.kubelet_scraper_config)
+            self.process(self.kubelet_scraper_config, metric_transformers=self.COUNTER_TRANSFORMERS)
 
         # Free up memory
         self.pod_list = None
@@ -295,6 +304,18 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         # TODO: report allocatable for cpu, mem, and pod capacity
         # if we can get it locally or thru the DCA instead of the /nodes endpoint directly
         return node_spec
+
+    def _retrieve_stats(self):
+        """
+        Retrieve stats from kubelet.
+        """
+        try:
+            stats_response = self.perform_kubelet_query(self.stats_url)
+            stats_response.raise_for_status()
+            return stats_response.json()
+        except Exception as e:
+            self.log.warning('GET on kubelet s `/stats/summary` failed: {}'.format(str(e)))
+            return {}
 
     def _report_node_metrics(self, instance_tags):
         node_spec = self._retrieve_node_spec()
@@ -487,6 +508,32 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             gauge_name = '{}.containers.{}.{}'.format(self.NAMESPACE, metric_name, state_name)
             self.gauge(gauge_name, 1, tags + reason_tags)
 
+    def _report_ephemeral_storage_usage(self, pod_list, instance_tags):
+        stats = self._retrieve_stats()
+
+        ephemeral_storage_usage = {}
+        for pod in stats.get('pods', []):
+            pod_uid = pod.get('podRef', {}).get('uid')
+            pod_ephemeral_usage = pod.get('ephemeral-storage', {}).get('usedBytes')
+            if pod_uid and pod_ephemeral_usage:
+                ephemeral_storage_usage[pod_uid] = pod_ephemeral_usage
+
+        for pod in pod_list['items']:
+            pod_uid = pod.get('metadata', {}).get('uid')
+            if pod_uid is None:
+                continue
+
+            pod_usage = ephemeral_storage_usage.get(pod_uid)
+            if pod_usage is None:
+                continue
+
+            tags = tagger.tag('kubernetes_pod_uid://{}'.format(pod_uid), tagger.ORCHESTRATOR)
+            if not tags:
+                continue
+            tags += instance_tags
+
+            self.gauge(self.NAMESPACE + '.ephemeral_storage.usage', pod_usage, tags)
+
     @staticmethod
     def parse_quantity(string):
         """
@@ -517,3 +564,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         if not name or phase not in ["Running", "Pending"]:
             return True
         return False
+
+    def send_always_counter(self, metric, scraper_config, hostname=None):
+        metric_name_with_namespace = '{}.{}'.format(scraper_config['namespace'], self.COUNTER_METRICS[metric.name])
+        for sample in metric.samples:
+            val = sample[self.SAMPLE_VALUE]
+            if not self._is_value_valid(val):
+                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                continue
+            custom_hostname = self._get_hostname(hostname, sample, scraper_config)
+            # Determine the tags to send
+            tags = self._metric_tags(metric.name, val, sample, scraper_config, hostname=custom_hostname)
+            self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)

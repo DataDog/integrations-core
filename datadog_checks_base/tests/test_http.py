@@ -186,6 +186,20 @@ class TestAuth:
 
         assert http.options['auth'] == ('user', 'pass')
 
+    def test_config_basic_authtype(self):
+        instance = {'username': 'user', 'password': 'pass', 'auth_type': 'basic'}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['auth'] == ('user', 'pass')
+
+    def test_config_digest_authtype(self):
+        instance = {'username': 'user', 'password': 'pass', 'auth_type': 'digest'}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert isinstance(http.options['auth'], requests.auth.HTTPDigestAuth)
+
     def test_config_basic_only_username(self):
         instance = {'username': 'user'}
         init_config = {}
@@ -552,6 +566,107 @@ class TestProxies:
         http = RequestsWrapper(instance, init_config)
         http.get('http://www.google.com')
         http.get('http://nginx')
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_domain(self, socks5_proxy):
+        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,example.com,9'}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        # no_proxy match: .google.com
+        http.get('http://www.google.com')
+
+        # no_proxy match: example.com
+        http.get('http://www.example.com')
+        http.get('http://example.com')
+
+        # no_proxy match: 9
+        http.get('http://127.0.0.9')
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_domain_fail(self, socks5_proxy):
+        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,example.com,example,9'}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        # no_proxy not match: .google.com
+        # ".y.com" matches "x.y.com" but not "y.com"
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://google.com', timeout=1)
+
+        # no_proxy not match: example or example.com
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://notexample.com', timeout=1)
+
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://example.org', timeout=1)
+
+        # no_proxy not match: 9
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.0.0.99', timeout=1)
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_ip(self, socks5_proxy):
+        instance = {
+            'proxy': {
+                'http': 'http://1.2.3.4:567',
+                'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
+            }
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        # no_proxy match: 127.0.0.1
+        http.get('http://127.0.0.1', timeout=1)
+
+        # no_proxy match: 127.0.0.2/32
+        http.get('http://127.0.0.2', timeout=1)
+
+        # no_proxy match: IP within 127.1.0.0/25 subnet - cidr bits format
+        http.get('http://127.1.0.50', timeout=1)
+        http.get('http://127.1.0.100', timeout=1)
+
+        # no_proxy match: IP within 127.1.1.0/255.255.255.128 subnet - net mask format
+        http.get('http://127.1.1.50', timeout=1)
+        http.get('http://127.1.1.100', timeout=1)
+
+        # no_proxy match: IP within 127.1.2.0/0.0.0.127 subnet - host mask format
+        http.get('http://127.1.2.50', timeout=1)
+        http.get('http://127.1.2.100', timeout=1)
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_ip_fail(self, socks5_proxy):
+        instance = {
+            'proxy': {
+                'http': 'http://1.2.3.4:567',
+                'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
+            }
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        # no_proxy not match: 127.0.0.1
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.0.0.11', timeout=1)
+
+        # no_proxy not match: 127.0.0.2/32
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.0.0.22', timeout=1)
+
+        # no_proxy not match: IP outside 127.1.0.0/25 subnet - cidr bits format
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.1.0.150', timeout=1)
+            http.get('http://127.1.0.200', timeout=1)
+
+        # no_proxy not match: IP outside 127.1.1.0/255.255.255.128 subnet - net mask format
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.1.1.150', timeout=1)
+            http.get('http://127.1.1.200', timeout=1)
+
+        # no_proxy not match: IP outside 127.1.2.0/0.0.0.127 subnet - host mask format
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.1.2.150', timeout=1)
+            http.get('http://127.1.2.200', timeout=1)
 
 
 class TestIgnoreTLSWarning:

@@ -52,6 +52,7 @@ init_config:
   ##  - which columns / indexes to use as tags with the 'metric_tags' parameter.
   ##  - which column to read the tag value from with the 'column' parameter.
   ##  - which index you want to read the tag value from with the 'index' parameter.
+  ##  - which table and MIB are required if the tag is in a different table.
   ##
   ## Example:
   ##
@@ -67,9 +68,18 @@ init_config:
   ##    table: ipSystemStatsTable
   ##    symbols:
   ##      - ipSystemStatsInReceives
-  ##         metric_tags:
-  ##           - tag: ipversion
-  ##             index: 1
+  ##    metric_tags:
+  ##      - tag: ipversion
+  ##        index: 1
+  ##  - MIB: ENTITY-SENSOR-MIB
+  ##    table: entitySensorObjects
+  ##    symbols:
+  ##      - entPhySensorValue
+  ##    metric_tags:
+  ##      - tag: description
+  ##        column: entLogicalDescr
+  ##        table: entLogicalTable
+  ##        MIB: ENTITY-MIB
   #
   # global_metrics:
   #   - MIB: UDP-MIB
@@ -83,21 +93,21 @@ init_config:
   #     metric_tags:
   #       - TCP
 
-  ## @param profiles - dictionary - optional
+  ## @param profiles - object - optional
   ## Specify profiles to be able to reference a set of metrics by name.
   ## One of definition_file or definition needs to be defined.
-  ## definition_file points to a file with the same structure as
-  ## global_metrics, whereas definition inlines it directly here.
+  ## definition_file points to a file with a prfile, whereas definition inlines
+  ## it directly here.
   ## When using a profile present on the profiles directory of the
   ## configuration, you can directly pass the filename.
-  ## sysObjectID can be set to match the devices that are going to
-  ## automatically use this profile.
   #
-  # profiles:
-  #   profile1:
-  #   	definition_file: <PROFILE_FILE>
-  #   	definition: <PROFILE>
-  #   	sysobjectid: <OID>
+  profiles:
+    f5-big-ip:
+      definition_file: f5-big-ip.yaml
+    router:
+      definition_file: generic-router.yaml
+    cisco-3850:
+      definition_file: cisco-3850.yaml
 
 instances:
   -

@@ -2,7 +2,8 @@ version: '3'
 services:
 
   fluentd:
-    image: fluent/fluentd:${FLUENTD_VERSION}
+    image: fluent/fluentd:${FLUENTD_IMAGE_TAG}
+    container_name: ${FLUENTD_CONTAINER_NAME}
     ports:
       - 24220:24220
     volumes:

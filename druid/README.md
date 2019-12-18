@@ -47,7 +47,7 @@ More info about this step can be found on the [official guide for loading Druid 
 2. Update Druid java properties by adding the following configs:
 
     ```
-    # Add `statsd-emitter` to the extensions list to be loaded 
+    # Add `statsd-emitter` to the extensions list to be loaded
     druid.extensions.loadList=[..., "statsd-emitter"]
 
     # By default druid emission period is 1 minute (PT1M).
@@ -131,10 +131,10 @@ Need help? Contact [Datadog support][9].
 [1]: https://druid.apache.org/docs/latest/operations/metrics.html
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/druid/datadog_checks/druid/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://druid.apache.org/docs/latest/development/extensions-contrib/statsd.html
 [6]: https://druid.apache.org/docs/latest/operations/including-extensions.html
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/druid/metadata.csv
 [9]: https://docs.datadoghq.com/help
 [10]: https://docs.datadoghq.com/developers/dogstatsd/

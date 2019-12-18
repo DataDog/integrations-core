@@ -7,13 +7,9 @@
 import argparse
 import re
 
-# 3rd party.
-from tuf.exceptions import UnknownTargetError
-
-# 2nd party.
 # 2nd party.
 from .download import REPOSITORY_URL_PREFIX, TUFDownloader
-from .exceptions import NonCanonicalVersion, NonDatadogPackage, NoSuchDatadogPackageOrVersion
+from .exceptions import NonCanonicalVersion, NonDatadogPackage
 
 # Private module functions.
 
@@ -25,11 +21,6 @@ def __is_canonical(version):
 
     P = r'^([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$'
     return re.match(P, version) is not None
-
-
-def __get_wheel_distribution_name(standard_distribution_name):
-    # https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
-    return re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)
 
 
 # Public module functions.
@@ -60,23 +51,11 @@ def download():
 
     if not standard_distribution_name.startswith('datadog-'):
         raise NonDatadogPackage(standard_distribution_name)
-    else:
-        wheel_distribution_name = __get_wheel_distribution_name(standard_distribution_name)
-        tuf_downloader = TUFDownloader(repository_url_prefix=repository_url_prefix, verbose=verbose)
 
-        if not version:
-            version = tuf_downloader.get_latest_version(standard_distribution_name, wheel_distribution_name)
-        else:
-            if not __is_canonical(version):
-                raise NonCanonicalVersion(version)
+    if version and not __is_canonical(version):
+        raise NonCanonicalVersion(version)
 
-        target_relpath = 'simple/{}/{}-{}-py2.py3-none-any.whl'.format(
-            standard_distribution_name, wheel_distribution_name, version
-        )
-
-        try:
-            target_abspath = tuf_downloader.download(target_relpath)
-        except UnknownTargetError:
-            raise NoSuchDatadogPackageOrVersion(standard_distribution_name, version)
-
-        print(target_abspath)  # pylint: disable=print-statement
+    tuf_downloader = TUFDownloader(repository_url_prefix=repository_url_prefix, verbose=verbose)
+    wheel_relpath = tuf_downloader.get_wheel_relpath(standard_distribution_name, version=version)
+    wheel_abspath = tuf_downloader.download(wheel_relpath)
+    print(wheel_abspath)  # pylint: disable=print-statement

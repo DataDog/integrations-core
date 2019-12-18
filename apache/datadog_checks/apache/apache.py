@@ -54,19 +54,23 @@ class Apache(AgentCheck):
         service_check_tags = ['host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
             self.log.debug(
-                'apache check initiating request, connect timeout %d receive %d'
-                % (self.http.options['timeout'][0], self.http.options['timeout'][1])
+                'apache check initiating request, connect timeout %d receive %d',
+                self.http.options['timeout'][0],
+                self.http.options['timeout'][1],
             )
 
             r = self.http.get(url)
             r.raise_for_status()
 
         except Exception as e:
-            self.log.warning("Caught exception %s" % str(e))
+            self.log.warning("Caught exception %s", e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
         else:
             self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
+        server = r.headers.get("Server")
+        if server:
+            self._collect_metadata(server)
         self.log.debug("apache check succeeded")
         metric_count = 0
         # Loop through and extract the numerical values
@@ -96,7 +100,7 @@ class Apache(AgentCheck):
                     self.rate(metric_name, value, tags=tags)
 
         if metric_count == 0:
-            if self.assumed_url.get(instance['apache_status_url'], None) is None and url[-5:] != '?auto':
+            if self.assumed_url.get(instance['apache_status_url']) is None and url[-5:] != '?auto':
                 self.assumed_url[instance['apache_status_url']] = '%s?auto' % url
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
                 self.check(instance)
@@ -105,3 +109,9 @@ class Apache(AgentCheck):
                     ("No metrics were fetched for this instance. Make sure that %s is the proper url.")
                     % instance['apache_status_url']
                 )
+
+    def _collect_metadata(self, value):
+        raw_version = value.split(' ')[0]
+        version = raw_version.split('/')[1]
+        self.set_metadata('version', version)
+        self.log.debug("found apache version %s", version)

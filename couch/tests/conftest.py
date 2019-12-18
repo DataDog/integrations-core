@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-import time
 from collections import defaultdict
 from copy import deepcopy
 from time import sleep
@@ -58,7 +57,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
         env_vars=env,
-        conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version), lambda: time.sleep(20)],
+        conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version)],
     ):
         if couch_version == '1':
             yield common.BASIC_CONFIG
@@ -103,6 +102,20 @@ def generate_data(couch_version):
                     if res.json():
                         ready[url] = True
             if len(ready) and all(ready.values()):
+                break
+        except Exception:
+            pass
+        sleep(1)
+
+    if couch_version == "1":
+        return
+
+    doc_url = "{}/_replicator/_all_docs".format(common.URL)
+    for _ in range(120):
+        try:
+            res = requests.get(doc_url, auth=auth, headers=headers)
+            data = res.json()
+            if data.get('rows'):
                 break
         except Exception:
             pass

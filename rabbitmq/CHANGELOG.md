@@ -1,5 +1,9 @@
 # CHANGELOG - rabbitmq
 
+## 1.11.0 / 2019-12-02
+
+* [Added] Add version metadata to RabbitMQ check. See [#4918](https://github.com/DataDog/integrations-core/pull/4918).
+
 ## 1.10.1 / 2019-10-18
 
 * [Fixed] Fix for rabbit 3.1 queue_totals introduced in #4668. See [#4805](https://github.com/DataDog/integrations-core/pull/4805).

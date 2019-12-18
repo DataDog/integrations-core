@@ -98,6 +98,8 @@ class __AgentCheck(object):
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
     METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
+    TAG_REPLACEMENT = re.compile(br'[,\+\*\-/()\[\]{}\s]')
+    MULTIPLE_UNDERSCORE_CLEANUP = re.compile(br'__+')
     DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
     DEFAULT_METRIC_LIMIT = 0
 
@@ -109,6 +111,21 @@ class __AgentCheck(object):
         When overriding `__init__` you have to remember that, depending on the configuration,
         the Agent might create several different Check instances and the method would be
         called as many times.
+
+        Agent 5 signature:
+
+            AgentCheck(name, init_config, agentConfig, instances=None)
+            AgentCheck.check(instance)
+
+        Agent 6,7 signature:
+
+            AgentCheck(name, init_config, instances)    # instances contain only 1 instance
+            AgentCheck.check(instance)
+
+        Agent 8 signature:
+
+            AgentCheck(name, init_config, instance)     # one instance
+            AgentCheck.check()                          # no more instance argument for check method
 
         :warning: when loading a Custom check, the Agent will inspect the module searching
             for a subclass of `AgentCheck`. If such a class exists but has been derived in
@@ -134,7 +151,8 @@ class __AgentCheck(object):
         if len(args) > 1:
             self.init_config = args[1]
         if len(args) > 2:
-            if len(args) > 3 or 'instances' in kwargs:
+            # agent pass instances as tuple but in test we are usually using list, so we are testing for both
+            if len(args) > 3 or not isinstance(args[2], (list, tuple)) or 'instances' in kwargs:
                 # old-style init: the 3rd argument is `agentConfig`
                 self.agentConfig = args[2]
                 if len(args) > 3:
@@ -208,8 +226,8 @@ class __AgentCheck(object):
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
                 self.warning(
-                    'Setting max_returned_metrics to zero is not allowed, reverting '
-                    'to the default of {} metrics'.format(self.DEFAULT_METRIC_LIMIT)
+                    'Setting max_returned_metrics to zero is not allowed, reverting to the default of %s metrics',
+                    self.DEFAULT_METRIC_LIMIT,
                 )
         except Exception:
             metric_limit = self.DEFAULT_METRIC_LIMIT
@@ -520,7 +538,7 @@ class __AgentCheck(object):
                     source_map[src_name] = self._normalize_tags_type(tags)
             datadog_agent.set_external_tags(new_tags)
         except IndexError:
-            self.log.exception('Unexpected external tags format: {}'.format(external_tags))
+            self.log.exception('Unexpected external tags format: %s', external_tags)
             raise
 
     def convert_to_underscore_separated(self, name):
@@ -601,20 +619,28 @@ class __AgentCheck(object):
             if prefix is not None:
                 prefix = self.convert_to_underscore_separated(prefix)
         else:
-            name = re.sub(br"[,\+\*\-/()\[\]{}\s]", b"_", metric)
-        # Eliminate multiple _
-        name = re.sub(br"__+", b"_", name)
-        # Don't start/end with _
-        name = re.sub(br"^_", b"", name)
-        name = re.sub(br"_$", b"", name)
-        # Drop ._ and _.
-        name = re.sub(br"\._", b".", name)
-        name = re.sub(br"_\.", b".", name)
+            name = self.METRIC_REPLACEMENT.sub(br'_', metric)
+            name = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', name).strip(b'_')
+
+        name = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', name)
 
         if prefix is not None:
             name = ensure_bytes(prefix) + b"." + name
 
         return to_string(name)
+
+    def normalize_tag(self, tag):
+        """Normalize tag values.
+
+        This happens for legacy reasons, when we cleaned up some characters (like '-')
+        which are allowed in tags.
+        """
+        if isinstance(tag, text_type):
+            tag = tag.encode('utf-8', 'ignore')
+        tag = self.TAG_REPLACEMENT.sub(br'_', tag)
+        tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', tag)
+        tag = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', tag).strip(b'_')
+        return to_string(tag)
 
     def check(self, instance):
         raise NotImplementedError
@@ -698,7 +724,7 @@ class __AgentCheckPy3(__AgentCheck):
                     event[key] = event[key].decode('utf-8')
                 except UnicodeError:
                     self.log.warning(
-                        'Error decoding unicode field `{}` to utf-8 encoded string, cannot submit event'.format(key)
+                        'Error decoding unicode field `%s` to utf-8 encoded string, cannot submit event', key
                     )
                     return
 
@@ -736,7 +762,7 @@ class __AgentCheckPy3(__AgentCheck):
                         tag = tag.decode('utf-8')
                     except Exception:
                         self.log.warning(
-                            'Error decoding tag `{}` as utf-8 for metric `{}`, ignoring tag'.format(tag, metric_name)
+                            'Error decoding tag `%s` as utf-8 for metric `%s`, ignoring tag', tag, metric_name
                         )
                         continue
 
@@ -790,9 +816,7 @@ class __AgentCheckPy2(__AgentCheck):
             device_tag = self._to_bytes("device:{}".format(device_name))
             if device_tag is None:
                 self.log.warning(
-                    'Error encoding device name `{}` to utf-8 for metric `{}`, ignoring tag'.format(
-                        repr(device_name), repr(metric_name)
-                    )
+                    'Error encoding device name `%r` to utf-8 for metric `%r`, ignoring tag', device_name, metric_name
                 )
             else:
                 normalized_tags.append(device_tag)
@@ -803,11 +827,7 @@ class __AgentCheckPy2(__AgentCheck):
                     continue
                 encoded_tag = self._to_bytes(tag)
                 if encoded_tag is None:
-                    self.log.warning(
-                        'Error encoding tag `{}` to utf-8 for metric `{}`, ignoring tag'.format(
-                            repr(tag), repr(metric_name)
-                        )
-                    )
+                    self.log.warning('Error encoding tag `%r` to utf-8 for metric `%r`, ignoring tag', tag, metric_name)
                     continue
                 normalized_tags.append(encoded_tag)
 

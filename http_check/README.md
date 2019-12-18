@@ -108,14 +108,14 @@ Need help? Contact [Datadog support][13].
 
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/developers/write_agent_check/?tab=agentv6#collection-interval
+[5]: https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
 [6]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
 [7]: https://docs.datadoghq.com/getting_started/tagging
 [8]: https://www.datadoghq.com/blog/the-power-of-tagged-metrics
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
 [12]: https://app.datadoghq.com/monitors#/create
 [13]: https://docs.datadoghq.com/help

@@ -29,6 +29,7 @@ STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
 STATS_SOCKET = "tcp://{0}:{1}".format(HOST, SOCKET_PORT)
 USERNAME = 'datadog'
 PASSWORD = 'isdevops'
+HAPROXY_VERSION = os.getenv('HAPROXY_VERSION')
 
 platform_supports_sockets = ON_LINUX
 requires_socket_support = pytest.mark.skipif(

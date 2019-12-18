@@ -72,6 +72,179 @@ def test_warning_args_errors():
     assert ["should not raise error: %s"] == check.warnings
 
 
+@pytest.mark.parametrize(
+    'case_name, check, expected_attributes',
+    [
+        (
+            'agent 5 signature: only args',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}, [{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: instances as kwarg',
+            AgentCheck(
+                'check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: agentConfig and instances as kwarg',
+            AgentCheck(
+                'check_name',
+                {'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+                instances=[{'foo': 'bar'}],
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: init_config, agentConfig and instances as kwarg',
+            AgentCheck(
+                'check_name',
+                init_config={'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+                instances=[{'foo': 'bar'}],
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: name, init_config, agentConfig and instances as kwarg',
+            AgentCheck(
+                name='check_name',
+                init_config={'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+                instances=[{'foo': 'bar'}],
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: no instances',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 5 signature: no instances and agentConfig as kwarg',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 5 signature: no instances and init_config, agentConfig as kwarg',
+            AgentCheck(
+                'check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 5 signature: no instances and name, init_config, agentConfig as kwarg',
+            AgentCheck(
+                name='check_name',
+                init_config={'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 6 signature: only args (instances as list)',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, [{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: only args (instances as tuple)',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, ({'foo': 'bar'},)),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: instances as kwarg',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: init_config, instances as kwarg',
+            AgentCheck('check_name', init_config={'init_conf1': 'init_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: name, init_config, instances as kwarg',
+            AgentCheck(name='check_name', init_config={'init_conf1': 'init_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+    ],
+)
+def test_agent_signature(case_name, check, expected_attributes):
+    actual_attributes = {attr: getattr(check, attr) for attr in expected_attributes}
+    assert expected_attributes == actual_attributes
+
+
 class TestMetricNormalization:
     def test_default(self):
         check = AgentCheck()
@@ -90,8 +263,8 @@ class TestMetricNormalization:
     def test_prefix(self):
         check = AgentCheck()
         metric_name = u'metric'
-        prefix = u'some'
-        normalized_metric_name = 'some.metric'
+        prefix = u'somePrefix'
+        normalized_metric_name = 'somePrefix.metric'
 
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
 
@@ -110,6 +283,14 @@ class TestMetricNormalization:
         normalized_metric_name = 'some.metric'
 
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
+
+    def test_prefix_fix_case(self):
+        check = AgentCheck()
+        metric_name = b'metric'
+        prefix = u'somePrefix'
+        normalized_metric_name = 'some_prefix.metric'
+
+        assert check.normalize(metric_name, fix_case=True, prefix=prefix) == normalized_metric_name
 
     def test_underscores_redundant(self):
         check = AgentCheck()
@@ -131,6 +312,29 @@ class TestMetricNormalization:
         normalized_metric_name = 'some.dots.and.underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
+
+    def test_invalid_chars_and_underscore(self):
+        check = AgentCheck()
+        metric_name = u'metric.hello++aaa$$_bbb'
+        normalized_metric_name = 'metric.hello_aaa_bbb'
+
+        assert check.normalize(metric_name) == normalized_metric_name
+
+
+@pytest.mark.parametrize(
+    'case, tag, expected_tag',
+    [
+        ('nothing to normalize', 'abc:123', 'abc:123'),
+        ('unicode', u'Klüft inför på fédéral', 'Klüft_inför_på_fédéral'),
+        ('invalid chars', 'foo,+*-/()[]{}  \t\nbar:123', 'foo_bar:123'),
+        ('leading and trailing underscores', '__abc:123__', 'abc:123'),
+        ('redundant underscore', 'foo_____bar', 'foo_bar'),
+        ('invalid chars and underscore', 'foo++__bar', 'foo_bar'),
+    ],
+)
+def test_normalize_tag(case, tag, expected_tag):
+    check = AgentCheck()
+    assert check.normalize_tag(tag) == expected_tag, 'Failed case: {}'.format(case)
 
 
 class TestMetrics:

@@ -52,6 +52,57 @@ def test__init__(instance):
     assert not check.latest_event_query
     assert check.batch_collector_size == 0
     assert check.batch_morlist_size == 50
+    assert check.excluded_host_tags == []
+
+
+def test_excluded_host_tags(vsphere, instance, aggregator):
+    # Check default value and precedence of instance config over init config
+    check = VSphereCheck('vsphere', {}, {}, [instance])
+    assert check.excluded_host_tags == []
+    check = VSphereCheck('vsphere', {"excluded_host_tags": ["vsphere_host"]}, {}, [instance])
+    assert check.excluded_host_tags == ["vsphere_host"]
+    instance["excluded_host_tags"] = []
+    check = VSphereCheck('vsphere', {"excluded_host_tags": ["vsphere_host"]}, {}, [instance])
+    assert check.excluded_host_tags == []
+
+    # Test host tags are excluded from external host metadata, but still stored in the cache for metrics
+    vsphere.excluded_host_tags = ["vsphere_host"]
+    mocked_vm = MockedMOR(spec="VirtualMachine")
+    mocked_host = MockedMOR(spec="HostSystem")
+    mocked_mors_attrs = {
+        mocked_vm: {
+            "name": "mocked_vm",
+            "parent": mocked_host,
+            "runtime.powerState": vim.VirtualMachinePowerState.poweredOn,
+        },
+        mocked_host: {"name": "mocked_host", "parent": None},
+    }
+
+    with mock.patch("datadog_checks.vsphere.VSphereCheck._collect_mors_and_attributes", return_value=mocked_mors_attrs):
+
+        server_instance = vsphere._get_server_instance(instance)
+        result = MagicMock()
+        result.value = [23.4]
+        server_instance.content.perfManager.QueryPerf.return_value = [MagicMock(value=[result], entity=mocked_vm)]
+        vsphere.metadata_cache = MagicMock()
+        vsphere.metadata_cache.get_metadata.return_value = {"name": "mymetric", "unit": "kb"}
+        vsphere.in_compatibility_mode = MagicMock()
+        vsphere.in_compatibility_mode.return_value = False
+
+        vsphere.check(instance)
+        ext_host_tags = vsphere.get_external_host_tags()
+
+        # vsphere_host tag not in external metadata
+        for host, source_tags in ext_host_tags:
+            if host == u"mocked_vm":
+                tags = source_tags["vsphere"]
+                for tag in tags:
+                    assert "vsphere_host:" not in tag
+                break
+
+        # vsphere_host tag still in cache for sending with metrics
+        aggregator.assert_metric('vsphere.mymetric', value=23.4, hostname="mocked_vm", count=1)
+        aggregator.assert_metric_has_tag('vsphere.mymetric', tag="vsphere_host:mocked_host", count=1)
 
 
 def test__is_excluded():

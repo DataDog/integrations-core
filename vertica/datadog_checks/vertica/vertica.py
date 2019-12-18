@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import os
 import ssl
 from collections import defaultdict
 from datetime import datetime
@@ -33,16 +34,18 @@ class VerticaCheck(AgentCheck):
 
         self._db = self.instance.get('db', '')
         self._server = self.instance.get('server', '')
-        self._port = self.instance.get('port', 5433)
+        self._port = int(self.instance.get('port', 5433))
         self._username = self.instance.get('username', '')
         self._password = self.instance.get('password', '')
         self._backup_servers = [
-            '{}:{}'.format(bs.get('server', self._server), bs.get('port', self._port))
+            (bs.get('server', self._server), int(bs.get('port', self._port)))
             for bs in self.instance.get('backup_servers', [])
         ]
         self._connection_load_balance = is_affirmative(self.instance.get('connection_load_balance', False))
         self._timeout = float(self.instance.get('timeout', 10))
         self._tags = self.instance.get('tags', [])
+
+        self._client_lib_log_level = self.instance.get('client_lib_log_level')
 
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
@@ -96,6 +99,8 @@ class VerticaCheck(AgentCheck):
                 return
 
             self._connection = connection
+        elif self._connection_load_balance or self._connection.closed():
+            self._connection.reset_connection()
 
         # The order of queries is important as some results are cached for later re-use
         try:
@@ -557,6 +562,11 @@ class VerticaCheck(AgentCheck):
             'connection_load_balance': self._connection_load_balance,
             'connection_timeout': self._timeout,
         }
+        if self._client_lib_log_level:
+            connection_options['log_level'] = self._client_lib_log_level
+            # log_path is required by vertica client for using logging
+            # we still get vertica client logs in the agent log even if `log_path` is set to os.devnull
+            connection_options['log_path'] = os.devnull
 
         if self._tls_verify:  # no cov
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext

@@ -40,7 +40,7 @@ If your service doesn't already listen for HTTP requests (with the http package)
               - path: my_func_counter
                 # if you don't want it named my_go_app.my_func_counter
                 #alias: my_go_app.preferred_counter_name
-                type: counter # other valid options: rate, gauge
+                type: count # other valid options: rate, gauge
                 #tags:
                 #  - "tag_name1:tag_value1"
     ```
@@ -81,12 +81,12 @@ Need help? Contact [Datadog support][12].
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://golang.org/pkg/expvar
 [6]: https://golang.org/pkg/net/http/#ListenAndServe
-[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [8]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/datadog_checks/go_expvar/data/conf.yaml.example
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [10]: https://docs.datadoghq.com/developers/metrics/custom_metrics
 [11]: https://docs.datadoghq.com/account_management/billing/custom_metrics
 [12]: https://docs.datadoghq.com/help
-[13]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
 [15]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog

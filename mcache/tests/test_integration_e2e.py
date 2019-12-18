@@ -70,6 +70,22 @@ def test_metrics(client, check, instance, aggregator):
     assert_check_coverage(aggregator)
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata(check, instance, datadog_agent):
+    check.check_id = 'test:123'
+    check.check(instance)
+    version_metadata = {
+        'version.major': '1',
+        'version.minor': '5',
+        'version.patch': '7',
+        'version.scheme': 'semver',
+        'version.raw': '1.5.7',
+    }
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
+
+
 @requires_socket_support
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

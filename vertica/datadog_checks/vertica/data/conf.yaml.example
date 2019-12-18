@@ -52,6 +52,8 @@ instances:
     ## the overhead caused by client connections across clusters by having hosts redirect
     ## client connections to other hosts. If the server disables connection load balancing,
     ## load balancing requests is ignored.
+    ##
+    ## Setting this to `true` will force the creation of a new connection at every check run.
     #
     # connection_load_balance: false
 
@@ -145,6 +147,13 @@ instances:
     #         type: tag
     #     tags:
     #       - test:vertica
+
+    ## @param client_lib_log_level - string - optional
+    ## Vertica library log level.
+    ## By default the vertica library logging is disabled.
+    ## Valid values: CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG
+    #
+    # client_lib_log_level: DEBUG
 
 ## Log Section (Available for Agent >=6.0)
 ##

@@ -20,6 +20,10 @@ pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux
 HERE = os.path.abspath(os.path.dirname(__file__))
 QUANTITIES = {'12k': 12 * 1000, '12M': 12 * (1000 * 1000), '12Ki': 12.0 * 1024, '12K': 12.0, '12test': 12.0}
 
+# Kubernetes versions, used to differentiate cadvisor payloads after the label change
+KUBE_POST_1_16 = '1.16'
+KUBE_PRE_1_16 = '1.14'
+
 NODE_SPEC = {
     u'cloud_provider': u'GCE',
     u'instance_type': u'n1-standard-1',
@@ -54,6 +58,7 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.memory.swap',
     'kubernetes.network.rx_bytes',
     'kubernetes.network.tx_bytes',
+    'kubernetes.ephemeral_storage.usage',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
@@ -86,6 +91,7 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.volume.stats.inodes',
     'kubernetes.kubelet.volume.stats.inodes_free',
     'kubernetes.kubelet.volume.stats.inodes_used',
+    'kubernetes.kubelet.evictions',
 ]
 
 COMMON_TAGS = {
@@ -175,7 +181,7 @@ def tagger():
     return tagger
 
 
-def mock_kubelet_check(monkeypatch, instances):
+def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16, stats_summary_fail=False):
     """
     Returns a check that uses mocked data for responses from prometheus endpoints, pod list,
     and node spec.
@@ -183,16 +189,22 @@ def mock_kubelet_check(monkeypatch, instances):
     check = KubeletCheck('kubelet', None, {}, instances)
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    if stats_summary_fail:
+        monkeypatch.setattr(check, '_retrieve_stats', mock.Mock(return_value={}))
+    else:
+        monkeypatch.setattr(
+            check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
+        )
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
-    def mocked_poll(*args, **kwargs):
+    def mocked_poll_pre_1_16(*args, **kwargs):
         scraper_config = args[0]
         prometheus_url = scraper_config['prometheus_url']
 
         if prometheus_url.endswith('/metrics/cadvisor'):
             # Mock response for "/metrics/cadvisor"
-            content = mock_from_file('cadvisor_metrics.txt')
+            content = mock_from_file('cadvisor_metrics_pre_1_16.txt')
         elif prometheus_url.endswith('/metrics'):
             # Mock response for "/metrics"
             content = mock_from_file('kubelet_metrics.txt')
@@ -202,7 +214,26 @@ def mock_kubelet_check(monkeypatch, instances):
         attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
         return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
 
-    monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll))
+    def mocked_poll_post_1_16(*args, **kwargs):
+        scraper_config = args[0]
+        prometheus_url = scraper_config['prometheus_url']
+
+        if prometheus_url.endswith('/metrics/cadvisor'):
+            # Mock response for "/metrics/cadvisor"
+            content = mock_from_file('cadvisor_metrics_post_1_16.txt')
+        elif prometheus_url.endswith('/metrics'):
+            # Mock response for "/metrics"
+            content = mock_from_file('kubelet_metrics.txt')
+        else:
+            raise Exception("Must be a valid endpoint")
+
+        attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
+        return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+
+    if kube_version == KUBE_POST_1_16:
+        monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll_post_1_16))
+    else:
+        monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll_pre_1_16))
 
     return check
 
@@ -251,6 +282,7 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, instance_tag
     assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
+    check._retrieve_stats.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
     check.process_cadvisor.assert_not_called()
 
@@ -344,11 +376,25 @@ def test_prometheus_net_summed(monkeypatch, aggregator, tagger):
 
 def test_prometheus_filtering(monkeypatch, aggregator):
     # Let's intercept the container_cpu_usage_seconds_total
-    # metric to make sure no sample with an empty pod_name
-    # goes through input filtering
-    # 12 out of the 45 samples should pass through the filter
+    # metric to make sure no sample with an empty pod (k8s >= 1.16)
+    # or pod_name (k8s < 1.16) label goes through input filtering
+    # 12 out of the 45 samples should pass through the filter for k8s < 1.16
+    # 27 out of 31 for k8s >= 1.16
     method_name = "datadog_checks.kubelet.prometheus.CadvisorPrometheusScraperMixin.container_cpu_usage_seconds_total"
     with mock.patch(method_name) as mock_method:
+        # k8s >= 1.16
+        check = mock_kubelet_check(monkeypatch, [{}], kube_version=KUBE_POST_1_16)
+        check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+        mock_method.assert_called_once()
+        metric = mock_method.call_args[0][0]
+        assert len(metric.samples) == 27
+        for name, labels, _ in metric.samples:
+            assert name == "container_cpu_usage_seconds_total"
+            assert labels["pod"] != ""
+
+    with mock.patch(method_name) as mock_method:
+        # k8s < 1.16
         check = mock_kubelet_check(monkeypatch, [{}])
         check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
@@ -708,3 +754,12 @@ def test_report_container_requests_limits(monkeypatch, tagger):
         mock.call('kubernetes.ephemeral-storage.limits', 2147483648.0, ['pod_name:cassandra-0'] + tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
+
+
+def test_kubelet_stats_summary_not_available(monkeypatch, aggregator, tagger):
+    instance = {"tags": ["instance:tag"]}
+
+    check = mock_kubelet_check(monkeypatch, [instance], stats_summary_fail=True)
+
+    check.check(instance)
+    check._retrieve_stats.assert_called_once()
