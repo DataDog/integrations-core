@@ -155,6 +155,16 @@ Returns `CRITICAL` if Airflow is not healthy. Returns `OK` otherwise.
 
 The Airflow check does not include any events.
 
+## Annexe
+
+## Airflow DatadogHook
+
+In addition, [Airflow DatadogHook][11] can be used to interact with Datadog: 
+
+- Send Metric
+- Query Metric
+- Post Event
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
@@ -169,3 +179,4 @@ Need help? Contact [Datadog support][7].
 [8]: https://docs.datadoghq.com/developers/dogstatsd/
 [9]: https://docs.datadoghq.com/agent/
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
+[11]: https://airflow.apache.org/docs/stable/_modules/airflow/contrib/hooks/datadog_hook.html
