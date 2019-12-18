@@ -205,6 +205,20 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
     ```
 3. Now, whenever a Fargate task runs, Fluent Bit sends the container logs to your Datadog monitoring with information about all of the containers managed by your Fargate tasks. You can see the raw logs on the [Log Explorer page][30], [build monitors][31] for the logs, and use the [Live Container view][29].
 
+**Note** In order to parse serialized JSON logs coming from a container's `stdout`, add the following required argument directly in your FireLens configuration: 
+
+```
+relensConfiguration": {
+    "type": "fluentbit",
+    "options": {
+        "config-file-type": "file",
+        "config-file-value": "/fluent-bit/configs/parse-json.conf"
+    }
+},
+```
+
+This converts serialized JSON from the `log:` field into top-level fields. See the AWS sample [Parsing container stdout logs that are serialized JSON][34] for more details.
+
 #### AWS logDriver
 
 Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to route logs to Datadog.
@@ -296,3 +310,4 @@ Need help? Contact [Datadog support][19].
 [31]: https://docs.datadoghq.com/monitors/monitor_types/
 [32]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
 [33]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/ 
+[34]: https://github.com/aws-samples/amazon-ecs-firelens-examples/tree/master/examples/fluent-bit/parse-json
