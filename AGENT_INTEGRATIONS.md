@@ -4,6 +4,7 @@
 * datadog-activemq-xml: 1.5.0
 * datadog-activemq: 1.3.0
 * datadog-aerospike: 1.4.0
+* datadog-amazon-msk: 1.0.0
 * datadog-ambari: 1.2.0
 * datadog-apache: 1.9.1
 * datadog-aspdotnet: 1.4.0
@@ -14,7 +15,9 @@
 * datadog-ceph: 1.8.0
 * datadog-checks-base: 10.0.2
 * datadog-checks-downloader: 2.0.0
+* datadog-cilium: 1.0.1
 * datadog-cisco-aci: 1.8.1
+* datadog-clickhouse: 0.0.1
 * datadog-cockroachdb: 1.1.0
 * datadog-consul: 1.11.0
 * datadog-coredns: 1.3.0
@@ -31,6 +34,7 @@
 * datadog-envoy: 1.11.0
 * datadog-etcd: 2.1.0
 * datadog-exchange-server: 1.6.0
+* datadog-external-dns: 0.0.2
 * datadog-fluentd: 1.5.0
 * datadog-gearmand: 1.3.1
 * datadog-gitlab-runner: 2.6.0
@@ -96,6 +100,7 @@
 * datadog-redisdb: 1.14.0
 * datadog-riak: 1.6.0
 * datadog-riakcs: 2.1.0
+* datadog-sap-hana: 1.0.0
 * datadog-snmp: 2.1.0
 * datadog-solr: 1.2.0
 * datadog-spark: 1.10.1

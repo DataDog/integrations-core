@@ -4,6 +4,7 @@
 * ActiveMQ XML [1.5.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * ActiveMQ [1.3.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
 * Aerospike [1.4.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)
+* Amazon Kafka [1.0.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
 * Ambari [1.2.0](https://github.com/DataDog/integrations-core/blob/master/ambari/CHANGELOG.md)
 * Apache [1.9.1](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
 * ASP.NET [1.4.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
@@ -12,7 +13,9 @@
 * Cassandra Nodetool [1.5.1](https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/CHANGELOG.md)
 * datadog_checks_base [10.0.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
 * datadog_checks_downloader [2.0.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md) **BREAKING CHANGE**
+* Cilium [1.0.1](https://github.com/DataDog/integrations-core/blob/master/cilium/CHANGELOG.md)
 * Cisco ACI [1.8.1](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* ClickHouse [0.0.1](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
 * Consul [1.11.0](https://github.com/DataDog/integrations-core/blob/master/consul/CHANGELOG.md)
 * CoreDNS [1.3.0](https://github.com/DataDog/integrations-core/blob/master/coredns/CHANGELOG.md)
 * CouchDB [3.6.0](https://github.com/DataDog/integrations-core/blob/master/couch/CHANGELOG.md)
@@ -25,6 +28,7 @@
 * Envoy [1.11.0](https://github.com/DataDog/integrations-core/blob/master/envoy/CHANGELOG.md)
 * etcd [2.1.0](https://github.com/DataDog/integrations-core/blob/master/etcd/CHANGELOG.md)
 * Exchange Server [1.6.0](https://github.com/DataDog/integrations-core/blob/master/exchange_server/CHANGELOG.md)
+* External DNS [0.0.2](https://github.com/DataDog/integrations-core/blob/master/external_dns/CHANGELOG.md)
 * fluentd [1.5.0](https://github.com/DataDog/integrations-core/blob/master/fluentd/CHANGELOG.md)
 * Gitlab Runner [2.6.0](https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/CHANGELOG.md)
 * Gitlab [2.7.0](https://github.com/DataDog/integrations-core/blob/master/gitlab/CHANGELOG.md)
@@ -61,6 +65,7 @@
 * Process [1.10.3](https://github.com/DataDog/integrations-core/blob/master/process/CHANGELOG.md)
 * RabbitMQ [1.11.0](https://github.com/DataDog/integrations-core/blob/master/rabbitmq/CHANGELOG.md)
 * Redis [1.14.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
+* SAP HANA [1.0.0](https://github.com/DataDog/integrations-core/blob/master/sap_hana/CHANGELOG.md)
 * SNMP [2.1.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md) **BREAKING CHANGE**
 * Spark [1.10.1](https://github.com/DataDog/integrations-core/blob/master/spark/CHANGELOG.md)
 * SQL Server [1.15.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
