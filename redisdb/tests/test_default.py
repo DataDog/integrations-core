@@ -29,7 +29,7 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     db.lpush("test_list", 3)
     db.set("key1", "value")
     db.set("key2", "value")
-    db.setex("expirekey", "expirevalue", 1000)
+    db.setex("expirekey", 1000, "expirevalue")
 
     redis_check = Redis('redisdb', {}, {})
     redis_check.check(redis_instance)
