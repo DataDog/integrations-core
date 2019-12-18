@@ -107,7 +107,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 | -------------------- | -------------------------------- |
 | `<INTEGRATION_NAME>` | `rabbitmq`                       |
 | `<INIT_CONFIG>`      | blank or `{}`                    |
-| `<INSTANCE_CONFIG>`  | `{"host":"%%host%%:15672/api/"}` |
+| `<INSTANCE_CONFIG>`  | `{"rabbitmq_api_url":"%%host%%:15672/api/"}` |
 
 ##### Log collection
 
