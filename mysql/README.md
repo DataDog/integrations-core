@@ -182,6 +182,12 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
             source: mysql
             sourcecategory: database
             service: "<SERVICE_NAME>"
+            log_processing_rules:
+              - type: multi_line
+                name: new_slow_query_log_entry
+                pattern: "# Time:"
+                # If mysqld was started with `--log-short-format`, use:
+                # pattern: "# Query_time:"
 
           - type: file
             path: "<GENERAL_LOG_FILE_PATH>"
