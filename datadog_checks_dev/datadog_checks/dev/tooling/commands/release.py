@@ -284,7 +284,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         echo_success(current_agent_version)
 
     current_release_branch = '{}.x'.format(current_agent_version)
-    diff_target_branch = 'master'
+    diff_target_branch = 'origin/master'
     echo_info('Branch `{}` will be compared to `{}`.'.format(current_release_branch, diff_target_branch))
 
     echo_waiting('Getting diff... ', nl=False)
@@ -382,7 +382,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 elif api_response.status_code == 403:
                     echo_failure(
                         'Error getting info for #{}. Please set a GitHub HTTPS '
-                        'token to avoid rate limits.'.format(commit_id)
+                        'token to avoid rate limits.'.format(commit_hash)
                     )
                     continue
 

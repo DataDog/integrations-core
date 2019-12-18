@@ -69,6 +69,9 @@ class KafkaCheck(AgentCheck):
         )
         self._consumer_groups = self.instance.get('consumer_groups', {})
         self._kafka_client = self._create_kafka_admin_client()
+        self._kafka_version = self.instance.get('kafka_client_api_version')
+        if isinstance(self._kafka_version, str):
+            self._kafka_version = tuple(map(int, self._kafka_version.split(".")))
 
     def check(self, instance):
         """The main entrypoint of the check."""
@@ -123,7 +126,10 @@ class KafkaCheck(AgentCheck):
             bootstrap_servers=kafka_connect_str,
             client_id='dd-agent',
             request_timeout_ms=self.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
-            api_version=self.instance.get('kafka_client_api_version'),
+            # There is a bug with kafka-python where pinning api_version for KafkaAdminClient raises an
+            # `IncompatibleBrokerVersion`. Change to `api_version=self._kafka_version` once fixed upstream.
+            # See linked issues in PR: https://github.com/dpkp/kafka-python/pull/1953
+            api_version=None,
             # While we check for SASL/SSL params, if not present they will default to the kafka-python values for
             # plaintext connections
             security_protocol=self.instance.get('security_protocol', 'PLAINTEXT'),
@@ -139,6 +145,7 @@ class KafkaCheck(AgentCheck):
             ssl_crlfile=self.instance.get('ssl_crlfile'),
             ssl_password=self.instance.get('ssl_password'),
         )
+        self.log.debug("KafkaAdminClient api_version: {}".format(kafka_admin_client.config['api_version']))
         # Force initial population of the local cluster metadata cache
         kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
         if kafka_admin_client._client.cluster.topics(exclude_internal_topics=False) is None:
@@ -432,6 +439,8 @@ class KafkaCheck(AgentCheck):
     def _determine_kafka_version(cls, init_config, instance):
         """Return the Kafka cluster version as a tuple."""
         kafka_version = instance.get('kafka_client_api_version')
+        if isinstance(kafka_version, str):
+            kafka_version = tuple(map(int, kafka_version.split(".")))
         if kafka_version is None:  # if unspecified by the user, we have to probe the cluster
             kafka_connect_str = instance.get('kafka_connect_str')  # TODO call validation method
             kafka_client = KafkaClient(
@@ -441,7 +450,7 @@ class KafkaCheck(AgentCheck):
                 # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for
                 # broker version during the bootstrapping process. Note that this returns the first version found, so in
                 # a mixed-version cluster this will be a non-deterministic result.
-                api_version=instance.get('kafka_client_api_version'),
+                api_version=kafka_version,
                 # While we check for SASL/SSL params, if not present they will default to the kafka-python values for
                 # plaintext connections
                 security_protocol=instance.get('security_protocol', 'PLAINTEXT'),

@@ -97,6 +97,6 @@ Need help? Contact [Datadog support][6].
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://github.com/DataDog/go-metro
 [3]: https://github.com/DataDog/integrations-core/blob/master/go-metro/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/go-metro/metadata.csv
 [6]: https://docs.datadoghq.com/help

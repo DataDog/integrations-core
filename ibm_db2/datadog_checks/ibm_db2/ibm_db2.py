@@ -23,7 +23,6 @@ class IbmDb2Check(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
-
         self._db = self.instance.get('db', '')
         self._username = self.instance.get('username', '')
         self._password = self.instance.get('password', '')
@@ -530,7 +529,18 @@ class IbmDb2Check(AgentCheck):
 
     def iter_rows(self, query, method):
         # https://github.com/ibmdb/python-ibmdb/wiki/APIs
-        cursor = ibm_db.exec_immediate(self._conn, query)
+        try:
+            cursor = ibm_db.exec_immediate(self._conn, query)
+        except Exception as e:
+            error = str(e)
+            self.log.error("Error executing query, attempting to a new connection: {}".format(error))
+            connection = self.get_connection()
+
+            if connection is None:
+                raise ConnectionError("Unable to create new connection")
+
+            self._conn = connection
+            cursor = ibm_db.exec_immediate(self._conn, query)
 
         row = method(cursor)
         while row is not False:

@@ -47,6 +47,14 @@ def mock_get():
         yield
 
 
+@pytest.fixture()
+def mock_read_bearer_token():
+    with mock.patch(
+        'datadog_checks.checks.openmetrics.OpenMetricsBaseCheck._get_bearer_token', return_value="XXX",
+    ):
+        yield
+
+
 class TestKubeAPIServerMetrics:
     """Basic Test for kube_apiserver integration."""
 
@@ -108,23 +116,30 @@ class TestKubeAPIServerMetrics:
         os.remove(temp_bearer_file)
         assert configured_instance["_bearer_token"] == APISERVER_INSTANCE_BEARER_TOKEN
 
-    def test_default_config(self, aggregator):
+    def test_default_config(self, aggregator, mock_read_bearer_token):
         """
         Testing the default configuration.
         """
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance])
-        apiserver_instance = check._create_kube_apiserver_metrics_instance(minimal_instance)
+
+        check.process = mock.MagicMock()
+        check.check(minimal_instance)
+
+        apiserver_instance = check.kube_apiserver_config
 
         assert not apiserver_instance["ssl_verify"]
         assert apiserver_instance["bearer_token_auth"]
         assert apiserver_instance["prometheus_url"] == "https://localhost:443/metrics"
 
-    def test_default_config_legacy(self, aggregator):
+    def test_default_config_legacy(self, aggregator, mock_read_bearer_token):
         """
-        Testing the default configuration.
+        Testing the default legacy configuration.
         """
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance_legacy])
-        apiserver_instance = check._create_kube_apiserver_metrics_instance(minimal_instance_legacy)
+        check.process = mock.MagicMock()
+        check.check(minimal_instance_legacy)
+
+        apiserver_instance = check.kube_apiserver_config
 
         assert not apiserver_instance["ssl_verify"]
         assert apiserver_instance["bearer_token_auth"]

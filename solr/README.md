@@ -4,134 +4,58 @@
 
 ## Overview
 
-The Solr check tracks the state and performance of a Solr cluster. It collects metrics like number of documents indexed, cache hits and evictions, average request times, average requests per second, and more.
+The Solr check tracks the state and performance of a Solr cluster. It collects metrics for the number of documents indexed, cache hits and evictions, average request times, average requests per second, and more.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The Solr check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Solr nodes.
 
-This check is JMX-based, so you'll need to enable JMX Remote on your Solr servers. Read the [JMX Check documentation][4] for more information on that.
+This check is JMX-based, so you need to enable JMX Remote on your Solr servers. Read the [JMX Check documentation][4] for more details.
 
 ### Configuration
+#### Host
 
-Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample solr.d/conf.yaml][6] for all available configuration options:
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-```
-instances:
-  # location of tomcat
-  - host: localhost
-    port: 9999
+1. Edit the `solr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample solr.d/conf.yaml][6] for all available configuration options.
 
-  # if tomcat requires authentication
-  #   user: <SOLR_USERNAME>
-  #   password: <SOLR_PASSWORD>
+    ```yaml
+      instances:
+        ## @param host - string - required
+        ## Solr host to connect to.
+        - host: localhost
 
-init_config:
-  conf:
-    - include:
-      type: searcher
-      attribute:
-        maxDoc:
-          alias: solr.searcher.maxdoc
-          metric_type: gauge
-        numDocs:
-          alias: solr.searcher.numdocs
-          metric_type: gauge
-        warmupTime:
-          alias: solr.searcher.warmup
-          metric_type: gauge
-    - include:
-      id: org.apache.solr.search.FastLRUCache
-      attribute:
-        cumulative_lookups:
-          alias: solr.cache.lookups
-          metric_type: counter
-        cumulative_hits:
-          alias: solr.cache.hits
-          metric_type: counter
-        cumulative_inserts:
-          alias: solr.cache.inserts
-          metric_type: counter
-        cumulative_evictions:
-          alias: solr.cache.evictions
-          metric_type: counter
-    - include:
-      id: org.apache.solr.search.LRUCache
-      attribute:
-        cumulative_lookups:
-          alias: solr.cache.lookups
-          metric_type: counter
-        cumulative_hits:
-          alias: solr.cache.hits
-          metric_type: counter
-        cumulative_inserts:
-          alias: solr.cache.inserts
-          metric_type: counter
-        cumulative_evictions:
-          alias: solr.cache.evictions
-          metric_type: counter
-    - include:
-      id: org.apache.solr.handler.component.SearchHandler
-      attribute:
-        errors:
-          alias: solr.search_handler.errors
-          metric_type: counter
-        requests:
-          alias: solr.search_handler.requests
-          metric_type: counter
-        timeouts:
-          alias: solr.search_handler.timeouts
-          metric_type: counter
-        totalTime:
-          alias: solr.search_handler.time
-          metric_type: counter
-        avgTimePerRequest:
-          alias: solr.search_handler.avg_time_per_req
-          metric_type: gauge
-        avgRequestsPerSecond:
-          alias: solr.search_handler.avg_requests_per_sec
-          metric_type: gauge
-```
+        ## @param port - integer - required
+        ## Solr port to connect to.
+          port: 9999
+    ```
 
-Again, see the [JMX Check documentation][4] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
+2. [Restart the Agent][7].
 
-[Restart the Agent][7] to start sending Solr metrics to Datadog.
+#### List of metrics
 
-Configuration Options
+The `conf` parameter is a list of metrics to be collected by the integration. Only 2 keys are allowed:
 
-* `user` and `password` (Optional) - Username and password.
-* `process_name_regex` - (Optional) - Instead of specifying a host and port or jmx_url, the agent can connect using the attach api. This requires the JDK to be installed and the path to tools.jar to be set.
-* `tools_jar_path` - (Optional) - To be set when process_name_regex is set.
-* `java_bin_path` - (Optional) - Should be set if the agent cannot find your java executable.
-* `java_options` - (Optional) - Java JVM options
-* `trust_store_path` and `trust_store_password` - (Optional) - should be set if "com.sun.management.jmxremote.ssl" is set to true on the target JVM.
-* `key_store_path` and `key_store_password` - (Optional) - should be set if "com.sun.management.jmxremote.ssl.need.client.auth" is set to true on the target JVM.
-* `rmi_registry_ssl` - (Optional) - should be set to true if "com.sun.management.jmxremote.registry.ssl" is set to true on the target JVM.
-
-
-The `conf` parameter is a list of dictionaries. Only 2 keys are allowed in this dictionary:
-
-* `include` (**mandatory**): Dictionary of filters, any attribute that matches these filters will be collected unless it also matches the "exclude" filters (see below)
-* `exclude` (**optional**): Another dictionary of filters. Attributes that match these filters won't be collected
+* `include` (**mandatory**): A dictionary of filters, any attribute that matches these filters are collected unless it also matches the `exclude` filters (see below).
+* `exclude` (**optional**): A dictionary of filters, attributes that match these filters are not collected.
 
 For a given bean, metrics get tagged in the following manner:
 
-    mydomain:attr0=val0,attr1=val1
+```
+mydomain:attr0=val0,attr1=val1
+```
 
-Your metric will be mydomain (or some variation depending on the attribute inside the bean) and have the tags `attr0:val0, attr1:val1, domain:mydomain`.
+In this example, your metric is `mydomain` (or some variation depending on the attribute inside the bean) and has the tags `attr0:val0`, `attr1:val1`, and `domain:mydomain`.
 
-If you specify an alias in an `include` key that is formatted as *camel case*, it will be converted to *snake case*. For example, `MyMetricName` will be shown in Datadog as `my_metric_name`.
+If you specify an alias in an `include` key that is formatted as *camel case*, it is converted to *snake case*. For example, `MyMetricName` is shown in Datadog as `my_metric_name`.
 
-#### The `attribute` filter
+##### The attribute filter
 
 The `attribute` filter can accept two types of values:
 
-* A dictionary whose keys are attributes names:
-
+* A dictionary whose keys are attributes names (see below). For this case, you can specify an alias for the metric that becomes the metric name in Datadog. You can also specify the metric type as a gauge or counter. If you choose counter, a rate per second is computed for the metric.
+    ```yaml
       conf:
         - include:
           attribute:
@@ -144,12 +68,10 @@ The `attribute` filter can accept two types of values:
             bytesReceived:
               alias: tomcat.bytes_rcvd
               metric_type: counter
+    ```
 
-
-In that case you can specify an alias for the metric that will become the metric name in Datadog. You can also specify the metric type either a gauge or a counter. If you choose counter, a rate per second will be computed for this metric.
-
-* A list of attributes names:
-
+* A list of attributes names (see below). For this case, the metric type is a gauge, and the metric name is `jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]`.
+    ```yaml
       conf:
         - include:
           domain: org.apache.cassandra.db
@@ -163,32 +85,9 @@ In that case you can specify an alias for the metric that will become the metric
             - ExceptionCount
             - Hits
             - RecentHitRate
+    ```
 
-
-In that case:
-
-  * The metric type is a gauge
-  * The metric name is `jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]`
-
-Here is another filtering example:
-
-    instances:
-      - host: 127.0.0.1
-        name: jmx_instance
-        port: 9999
-
-    init_config:
-      conf:
-        - include:
-          bean: org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency
-          attribute:
-            - OneMinuteRate
-            - 75thPercentile
-            - 95thPercentile
-            - 99thPercentile
-
-
-#### Note
+#### Older versions
 
 List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, use singletons and multiple `include` statements instead.
 
@@ -209,10 +108,13 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
           domain: domain_name
           bean: second_bean_name
 
+#### Containerized
+
+For containerized environments, see the [Autodiscovery with JMX][2] guide.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][8] and look for `solr` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `solr` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -223,13 +125,12 @@ See [metadata.csv][9] for a list of metrics provided by this check.
 The Solr check does not include any events.
 
 ### Service Checks
-**solr.can_connect**
 
+**solr.can_connect**:<br>
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored SolR instance. Returns `OK` otherwise.
 
-
 ## Troubleshooting
-### Commands to view the metrics that are available:
+### Commands to view the available metrics
 
 The `datadog-agent jmx` command was added in version 4.1.0.
 
@@ -237,7 +138,7 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 `sudo datadog-agent jmx list matching`
   * List attributes that do match one of your instances configuration but that are not being collected because it would exceed the number of metrics that can be collected:
 `sudo datadog-agent jmx list limited`
-  * List attributes that will actually be collected by your current instances configuration:
+  * List attributes expected to be collected by your current instances configuration:
 `sudo datadog-agent jmx list collected`
   * List attributes that don't match any of your instances configuration:
 `sudo datadog-agent jmx list not-matching`
@@ -270,11 +171,11 @@ You may use the `attribute` filter as follow:
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/solr/images/solrgraph.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/integrations/java
-[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [6]: https://github.com/DataDog/integrations-core/blob/master/solr/datadog_checks/solr/data/conf.yaml.example
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv

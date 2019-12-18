@@ -49,6 +49,22 @@ instances:
     #   - migrate_rx_objs
     #   - migrate_tx_objs
 
+    ## @param namespaces - list of strings - optional
+    ## all namespaces are collected  by default. If you want to collect specific namespaces
+    ## specify them here.
+    #
+    # namespaces:
+    #   - example_namespace
+    #   - another_example_namespace
+
+    ## @param datacenters - list of strings - optional
+    ## all datacenters are collected  by default. If you want to collect specific datacenters
+    ## specify them here.
+    #
+    # datacenters:
+    #   - example_datacenter
+    #   - another_example_datacenter
+
     ## @param namespace_metrics - list of strings - optional
     ## All Namespace metrics collected by default. You probably don't want to do this,
     ## so list the ones you do want here. Check with:
@@ -64,6 +80,16 @@ instances:
     #   - migrate-rx-partitions-remaining
     #   - migrate-tx-partitions-initial
     #   - migrate-tx-partitions-remaining
+
+    ## @param datacenter_metrics - list of strings - optional
+    ## All datacenter metrics collected by default specify which
+    ## metrics you want here. List datacenters using this command:
+    ##  asinfo -v dcs -l.
+    #
+    # datacenter_metrics:
+    #   - dc_rec_ship_attempts        # renamed dc_ship_attempt
+    #   - dc_remote_ship_ok
+    #   - dc_delete_ship_attempts    # renamed dc_ship_delete_success
 
 init_config:
 

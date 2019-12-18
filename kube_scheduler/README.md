@@ -66,9 +66,9 @@ Need help? Contact [Datadog support][8].
 
 [1]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/datadog_checks/kube_scheduler/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#restart-the-agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
 [4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
 [5]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/metadata.csv
 [8]: https://docs.datadoghq.com/help

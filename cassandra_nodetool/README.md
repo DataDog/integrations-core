@@ -75,9 +75,9 @@ Need help? Contact [Datadog support][119].
 [111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard.png
 [112]: https://github.com/DataDog/integrations-core/tree/master/cassandra
 [114]: https://app.datadoghq.com/account/settings#agent
-[115]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[115]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [116]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/datadog_checks/cassandra_nodetool/data/conf.yaml.example
-[117]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[117]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [118]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/metadata.csv
 [119]: https://docs.datadoghq.com/help
 [120]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics

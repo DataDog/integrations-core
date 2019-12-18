@@ -87,8 +87,8 @@ Need help? Contact [Datadog support][6].
 [1]: https://mapr.com
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/mapr/datadog_checks/mapr/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/help
 [7]: https://mapr.com/docs/61/MapR_Streams/MapRStreamsPythonExample.html
 [8]: https://mapr.com/docs/61/SecurityGuide/GeneratingServiceTicket.html

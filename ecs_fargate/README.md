@@ -198,16 +198,30 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
             "dd_source": "redis",
             "dd_tags": "project:fluentbit",
             "TLS": "on",
-	     "Host": "http-intake.logs.datadoghq.com",
+            "Host": "http-intake.logs.datadoghq.com",
             "provider": "ecs"
 	    }
     }
 
     ```
 
-The full list of available parameters is described in the [Datadog Fluentbit documentation][34].
+The full list of available parameters is described in the [Datadog Fluentbit documentation][35].
 
 3. Now, whenever a Fargate task runs, Fluent Bit sends the container logs to your Datadog monitoring with information about all of the containers managed by your Fargate tasks. You can see the raw logs on the [Log Explorer page][30], [build monitors][31] for the logs, and use the [Live Container view][29].
+
+**Note** In order to parse serialized JSON logs coming from a container's `stdout`, add the following required argument directly in your FireLens configuration: 
+
+```
+relensConfiguration": {
+    "type": "fluentbit",
+    "options": {
+        "config-file-type": "file",
+        "config-file-value": "/fluent-bit/configs/parse-json.conf"
+    }
+},
+```
+
+This converts serialized JSON from the `log:` field into top-level fields. See the AWS sample [Parsing container stdout logs that are serialized JSON][34] for more details.
 
 #### AWS logDriver
 
@@ -299,5 +313,6 @@ Need help? Contact [Datadog support][19].
 [30]: https://app.datadoghq.com/logs
 [31]: https://docs.datadoghq.com/monitors/monitor_types/
 [32]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
-[33]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/ 
-[34]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
+[33]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/
+[34]: https://github.com/aws-samples/amazon-ecs-firelens-examples/tree/master/examples/fluent-bit/parse-json
+[35]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
