@@ -338,4 +338,3 @@ def test_proc_permissions_error(aggregator, check, caplog):
         assert 'Unable to read /proc/net/dev.' in caplog.text
         assert 'Unable to read /proc/net/netstat.' in caplog.text
         assert 'Unable to read /proc/net/snmp.' in caplog.text
-        assert 'Unable to list the files in /proc/sys/net/netfilter.' in caplog.text
