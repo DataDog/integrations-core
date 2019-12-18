@@ -5,6 +5,6 @@ value:
   items:
     type: string
 description: |
-  A list of container identifiers that will be used by autodiscovery to identify
+  A list of container identifiers that are used by Autodiscovery to identify
   which container the check should be run against. For more information, see:
   https://docs.datadoghq.com/agent/autodiscovery/ad_identifiers/
