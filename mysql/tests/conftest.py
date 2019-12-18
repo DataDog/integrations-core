@@ -64,8 +64,8 @@ def dd_environment(config_e2e):
                 'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
             },
             conditions=[
-                WaitFor(init_master, wait=2),
-                WaitFor(init_slave, wait=2),
+                WaitFor(init_master, wait=20),
+                WaitFor(init_slave, wait=20),
                 CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
                 populate_database,
             ],
