@@ -17,7 +17,7 @@ SSH_REMOTE_VERSION_PATTERN = re.compile(
     (?P<major>0|[1-9]\d*)
     \.
     (?P<minor>0|[1-9]\d*)
-    (?P<release>0|p[1-9]\d*)
+    (?P<release>0|p[1-9]\d*)?
     """,
     re.VERBOSE,
 )
