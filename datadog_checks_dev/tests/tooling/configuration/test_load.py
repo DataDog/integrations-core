@@ -86,6 +86,18 @@ def test_version_not_string():
     assert 'test: The top-level `version` attribute must be a string' in spec.errors
 
 
+def test_version_loaded():
+    spec = get_spec(
+        """
+        name: foo
+        """,
+        version='0.0.0',
+    )
+    spec.load()
+
+    assert 'test: Configuration specifications must contain a top-level `files` attribute' in spec.errors
+
+
 def test_no_files():
     spec = get_spec(
         """

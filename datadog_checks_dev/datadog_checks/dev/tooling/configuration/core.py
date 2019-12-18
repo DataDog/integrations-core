@@ -8,9 +8,10 @@ from .template import ConfigTemplates
 
 
 class ConfigSpec(object):
-    def __init__(self, contents, source=None, template_paths=None):
+    def __init__(self, contents, template_paths=None, source=None, version=None):
         self.contents = contents
         self.source = source
+        self.version = version
         self.templates = ConfigTemplates(template_paths)
         self.data = None
         self.errors = []

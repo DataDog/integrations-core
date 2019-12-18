@@ -11,7 +11,7 @@ from datadog_checks.dev.tooling.configuration import ConfigSpec
 from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 
 from ....utils import basepath, file_exists, get_parent_dir, path_join, read_file, write_file
-from ...utils import get_config_files, get_config_spec, get_valid_checks, load_manifest
+from ...utils import get_config_files, get_config_spec, get_valid_checks, get_version_string, load_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 FILE_INDENT = ' ' * 8
@@ -60,11 +60,13 @@ def config(ctx, check, sync):
         if check == 'agent':
             display_name = 'Datadog Agent'
             source = 'datadog'
+            version = None
         else:
             display_name = load_manifest(check).get('display_name', check)
             source = check
+            version = get_version_string(check)
 
-        spec = ConfigSpec(read_file(spec_path), source)
+        spec = ConfigSpec(read_file(spec_path), source=source, version=version)
         spec.load()
 
         if spec.errors:

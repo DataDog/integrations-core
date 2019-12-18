@@ -20,14 +20,13 @@ def spec_validator(spec, loader):
         loader.errors.append('{}: The top-level `name` attribute must be a string'.format(loader.source))
         return
 
-    if 'version' not in spec:
+    release_version = spec.setdefault('version', loader.version)
+    if not release_version:
         loader.errors.append(
             '{}: Configuration specifications must contain a top-level `version` attribute'.format(loader.source)
         )
         return
-
-    release_version = spec['version']
-    if not isinstance(release_version, str):
+    elif not isinstance(release_version, str):
         loader.errors.append('{}: The top-level `version` attribute must be a string'.format(loader.source))
         return
 
