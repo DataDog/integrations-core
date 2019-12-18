@@ -31,11 +31,14 @@ def test_redis_auth_empty_pass(redis_auth):
 
     try:
         redis.check(instance)
-        assert 0, "Check should raise an exception"
     except Exception as e:
-        pre28_err = "noauth authentication required"
-        post28_err = "operation not permitted"
-        assert pre28_err in str(e).lower() or post28_err in str(e).lower()
+        error = str(e).lower()
+        pre28_err = 'noauth authentication required'
+        post28_err = 'operation not permitted'
+        post33_err = 'authentication required'
+        assert pre28_err in error or post28_err in error or post33_err in error
+    else:
+        raise AssertionError('Check should raise an exception')
 
 
 @pytest.mark.integration
