@@ -32,6 +32,10 @@ def init_db():
         'quote_cnt': 47,
     }
     client.put(key, bins)
+
+    for _ in range(10):
+        client.get(key)
+
     client.close()
 
 

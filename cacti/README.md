@@ -110,7 +110,7 @@ Need help? Contact [Datadog support][8].
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/cacti/datadog_checks/cacti/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
 [6]: https://github.com/pbanaszkiewicz/python-rrdtool
 [7]: https://github.com/commx/python-rrdtool/issues/25

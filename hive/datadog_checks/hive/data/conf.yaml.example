@@ -621,7 +621,7 @@ init_config:
             metric_type: gauge
 
     - include:
-        bean: metrics:name=directsql_error
+        bean: metrics:name=directsql_errors
         attribute:
           Count:
             alias: hive.metastore.directsql_errors

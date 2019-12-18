@@ -14,20 +14,16 @@ This check collects varnish metrics regarding:
 It also submits service checks for the health of each backend.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The Varnish check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
 
 ### Configuration
+#### Host
 
-1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Varnish [metrics](#metric-collection) and [logs](#log-collection). See the [sample varnish.d/conf.yaml][5] for all available configuration options.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-2. [Restart the Agent][6].
-
-#### Prepare Varnish
+##### Prepare Varnish
 
 If you're running Varnish 4.1+, add the `dd-agent` system user to the Varnish group using:
 
@@ -35,39 +31,30 @@ If you're running Varnish 4.1+, add the `dd-agent` system user to the Varnish gr
 sudo usermod -G varnish -a dd-agent
 ```
 
-#### Metric collection
+##### Metric collection
 
-* Add this configuration block to your `varnish.d/conf.yaml` file to start gathering your [Varnish metrics](#metrics):
+1. Edit the `varnish.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample varnish.d/conf.yaml][5] for all available configuration options.
 
-  ```
-  init_config:
+    ```
+      init_config:
 
-  instances:
-    - varnishstat: /usr/bin/varnishstat        # or wherever varnishstat lives
-      varnishadm: <PATH_TO_VARNISHADM_BIN>     # to submit service checks for the health of each backend
-  #   secretfile: <PATH_TO_VARNISH_SECRETFILE> # if you configured varnishadm and your secret file isn't /etc/varnish/secret
-  #   tags:
-  #     - instance:production
-  ```
+      instances:
+        - varnishstat: /usr/bin/varnishstat        # or wherever varnishstat lives
+          varnishadm: <PATH_TO_VARNISHADM_BIN>     # to submit service checks for the health of each backend
+      #   secretfile: <PATH_TO_VARNISH_SECRETFILE> # if you configured varnishadm and your secret file isn't /etc/varnish/secret
+      #   tags:
+      #     - instance:production
+    ```
 
-  If you don't set `varnishadm`, the Agent won't check backend health. If you do set it, the Agent needs privileges to execute the binary with root privileges. Add the following to your `/etc/sudoers` file:
+    **Note**: If you don't set `varnishadm`, the Agent won't check backend health. If you do set it, the Agent needs privileges to execute the binary with root privileges. Add the following to your `/etc/sudoers` file:
 
-  ```
-  dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
-  ```
+    ```
+      dd-agent ALL=(ALL) NOPASSWD:/usr/bin/varnishadm
+    ```
 
-  See the [sample varnish.yaml][5] for all available configuration options.
+2. [Restart the Agent][6].
 
-* [Restart the Agent][6] to start sending Varnish metrics and service checks to Datadog.
-
-##### Autodiscovery
-
-Configuration of the Varnish check using Autodiscovery in containerized environments is not supported. Collecting metrics in this type of environment may be possible by pushing metrics to DogStatsD using a StatsD plugin. The following 3rd party plugins are available:
-
-* [libvmod-statsd][7]
-* [prometheus_varnish_exporter][8]
-
-#### Log collection
+##### Log collection
 
 **Available for Agent >6.0**
 
@@ -109,6 +96,13 @@ Configuration of the Varnish check using Autodiscovery in containerized environm
 
 6. [Restart the Agent][6].
 
+#### Containerized
+
+Configuration of the Varnish check using Autodiscovery in containerized environments is not supported. Collecting metrics in this type of environment may be possible by pushing metrics to DogStatsD using a StatsD plugin. The following 3rd party plugins are available:
+
+* [libvmod-statsd][7]
+* [prometheus_varnish_exporter][8]
+
 ### Validation
 
 [Run the Agent's status subcommand][10] and look for `varnish` under the Checks section.
@@ -122,7 +116,7 @@ The Varnish check does not include any events.
 
 ### Service Checks
 **varnish.backend_healthy**:<br>
-The Agent submits this service check if you configure `varnishadm`. It submits a service check for each Varnish backend, tagging each with `backend:<backend_name>`.
+The Agent submits this service check if you configure `varnishadm`. It submits a service check for each Varnish backend, tagging each with `backend:<BACKEND_NAME>`.
 
 ## Troubleshooting
 Need help? Contact [Datadog support][12].
@@ -138,12 +132,12 @@ Additional helpful documentation, links, and articles:
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/varnish/images/varnish.png
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/varnish/datadog_checks/varnish/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://github.com/jib/libvmod-statsd
 [8]: https://github.com/jonnenauha/prometheus_varnish_exporter
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
 [12]: https://docs.datadoghq.com/help
 [13]: https://www.datadoghq.com/blog/top-varnish-performance-metrics

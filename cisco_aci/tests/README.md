@@ -16,8 +16,9 @@ Cisco has created VM images for a simulator that is said to behave exactly like 
 https://devnetsandbox.cisco.com/
 
 Even if the simulator cannot be installed on a VM, cisco offers a publicly available sandbox which is running a specific version
-of the simulator. This AlwaysOn simulator is very convenient to use as it doesn't require a VPN and you can just configure the Agent
-to point at the sandbox with the following configuration:
+of the simulator. This AlwaysOn simulator is very convenient to use as it doesn't require a VPN.
+
+To use it, configure a locally-running Agent to point at the sandbox with the following configuration:
 
 ```yaml
 instances:
@@ -25,6 +26,30 @@ instances:
     username: admin
     pwd: ciscopsdt
 ```
+
+Alternatively, add a temporary `conftest.py` with the following contents:
+
+```python
+import pytest
+
+SANDBOX_CONFIG = {
+    'instances': [
+        {
+            'aci_url': 'https://sandboxapicdc.cisco.com',
+            'username': 'admin',
+            'pwd': 'ciscopsdt',
+            'tls_verify': False,  # As of 2019-12-03, the sandbox endpoint doesn't have a valid TLS certificate.
+        }
+    ]
+}
+
+
+@pytest.fixture(scope="session")
+def dd_environment():
+    return SANDBOX_CONFIG
+```
+
+and use `ddev` to run the check. (Be sure not to commit this `conftest.py`, as we should only use the sandbox for manual testing.)
 
 The main downsides of this are that:
 - Anyone can modify the environment and thus tests cannot be reproducible.

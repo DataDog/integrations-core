@@ -11,3 +11,5 @@ services:
       - PROXY_PASSWORD=proxy_password
   nginx:
     image: nginx:stable-alpine
+    ports:
+      - "80:80"

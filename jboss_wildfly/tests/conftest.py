@@ -15,7 +15,8 @@ E2E_METADATA = {
     'use_jmx': True,
     'start_commands': [
         'mkdir /opt/jboss',
-        'curl -o /opt/jboss/jboss-client.jar https://storage.googleapis.com/datadog-integrations-lab/jboss-client.jar',
+        'curl -o /opt/jboss/jboss-client.jar '
+        'https://ddintegrations.blob.core.windows.net/jboss-wildfly/jboss-client.jar',
     ],
 }
 

@@ -68,6 +68,9 @@ class Apache(AgentCheck):
             raise
         else:
             self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
+        server = r.headers.get("Server")
+        if server:
+            self._collect_metadata(server)
         self.log.debug("apache check succeeded")
         metric_count = 0
         # Loop through and extract the numerical values
@@ -75,8 +78,6 @@ class Apache(AgentCheck):
             values = line.split(': ')
             if len(values) == 2:  # match
                 metric, value = values
-                if metric == '<dl><dt>Server Version':
-                    self._collect_metadata(value)
                 try:
                     value = float(value)
                 except ValueError:
@@ -99,7 +100,7 @@ class Apache(AgentCheck):
                     self.rate(metric_name, value, tags=tags)
 
         if metric_count == 0:
-            if self.assumed_url.get(instance['apache_status_url'], None) is None and url[-5:] != '?auto':
+            if self.assumed_url.get(instance['apache_status_url']) is None and url[-5:] != '?auto':
                 self.assumed_url[instance['apache_status_url']] = '%s?auto' % url
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
                 self.check(instance)

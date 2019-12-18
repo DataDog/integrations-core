@@ -1,5 +1,15 @@
 # CHANGELOG - apache
 
+## 1.9.1 / 2019-12-04
+
+* [Fixed] Fix version collection. See [#5144](https://github.com/DataDog/integrations-core/pull/5144).
+
+## 1.9.0 / 2019-12-02
+
+* [Added] Standardize logging format. See [#4899](https://github.com/DataDog/integrations-core/pull/4899).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+* [Added] Submit version metadata. See [#4818](https://github.com/DataDog/integrations-core/pull/4818).
+
 ## 1.8.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).

@@ -14,3 +14,5 @@ def _test_check(aggregator):
     expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:UpService']
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
     aggregator.assert_service_check('tcp.can_connect', status=TCPCheck.OK, tags=expected_tags)
+    aggregator.assert_all_metrics_covered()
+    assert len(aggregator.service_checks('tcp.can_connect')) == 1

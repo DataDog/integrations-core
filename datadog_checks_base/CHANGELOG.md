@@ -1,5 +1,17 @@
 # CHANGELOG - datadog_checks_base
 
+## 10.0.2 / 2019-12-09
+
+* [Fixed] Fix normalize for invalid chars and underscore. See [#5172](https://github.com/DataDog/integrations-core/pull/5172).
+
+## 10.0.1 / 2019-12-04
+
+* [Fixed] Ensure metadata is submitted as strings. See [#5139](https://github.com/DataDog/integrations-core/pull/5139).
+
+## 10.0.0 / 2019-12-02
+
+* [Changed] Aligns `no_proxy` behavior to general convention. See [#5081](https://github.com/DataDog/integrations-core/pull/5081).
+
 ## 9.6.0 / 2019-11-28
 
 * [Added] Support downloading universal and pure Python wheels. See [#4981](https://github.com/DataDog/integrations-core/pull/4981).
