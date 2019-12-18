@@ -181,6 +181,12 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
             source: mysql
             sourcecategory: database
             service: myapplication
+            log_processing_rules:
+              - type: multi_line
+                # Depending on your MySQL configuration, slow query logs may start with a
+                # different line, so you may need to tweak this pattern.
+                name: new_log_starts_with_time
+                pattern: "# Time:"
 
           - type: file
             path: /var/log/mysql/mysql.log
