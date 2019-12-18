@@ -14,14 +14,14 @@ This check collects metrics from your YARN ResourceManager, including (but not l
 `yarn.apps.<METRIC>` metrics have been deprecated in favor of `yarn.apps.<METRIC>_gauge` metrics, because `yarn.apps` metrics are incorrectly reported as a `RATE` instead of a `GAUGE`.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The YARN check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your YARN ResourceManager.
 
 ### Configuration
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `yarn.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
 
@@ -37,6 +37,16 @@ The YARN check is included in the [Datadog Agent][3] package, so you don't need 
     See the [example check configuration][5] for a comprehensive list and description of all check options.
 
 2. [Restart the Agent][6] to start sending YARN metrics to Datadog.
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                    |
+|----------------------|------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `yarn`                                                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                            |
+| `<INSTANCE_CONFIG>`  | `{"resourcemanager_uri": "http://%%host%%:%%port%%", "cluster_name": "<CLUSTER_NAME>"}` |
 
 ### Validation
 
@@ -73,10 +83,10 @@ Need help? Contact [Datadog support][9].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/yarn/images/yarn_dashboard.png
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/yarn/datadog_checks/yarn/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/yarn/metadata.csv
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/hadoop-architecture-overview

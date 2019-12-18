@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-2019
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import fnmatch
 import ipaddress
 import json
 import os
@@ -21,6 +22,15 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
 from .config import InstanceConfig
+
+try:
+    from datadog_checks.base.utils.common import total_time_to_temporal_percent
+except ImportError:
+
+    # Provide fallback for agent < 6.16
+    def total_time_to_temporal_percent(total_time, scale=1000):
+        return total_time / scale * 100
+
 
 try:
     from datadog_agent import get_config, read_persistent_cache, write_persistent_cache
@@ -94,7 +104,7 @@ class SnmpCheck(AgentCheck):
             else:
                 data = profile_data['definition']
             self.profiles[profile] = {'definition': data}
-            sys_object_oid = profile_data.get('sysobjectid')
+            sys_object_oid = data.get('sysobjectid')
             if sys_object_oid:
                 self.profiles_by_oid[sys_object_oid] = profile
 
@@ -145,12 +155,13 @@ class SnmpCheck(AgentCheck):
                 except Exception as e:
                     self.log.debug("Error scanning host %s: %s", host, e)
                     continue
-                if sys_object_oid not in self.profiles_by_oid:
+                try:
+                    profile = self._profile_for_sysobject_oid(sys_object_oid)
+                except ConfigurationError:
                     if not (host_config.table_oids or host_config.raw_oids):
                         self.log.warn("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
-                    profile = self.profiles_by_oid[sys_object_oid]
                     host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
                 config.discovered_instances[host] = host_config
 
@@ -177,6 +188,7 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)
         enforce_constraints = config.enforce_constraints
         oids = []
+        all_oids = []
         bulk_oids = []
         # Use bulk for SNMP version > 1 and there are enough symbols
         bulk_limit = config.bulk_threshold if config.auth_data.mpModel else 0
@@ -185,11 +197,20 @@ class SnmpCheck(AgentCheck):
                 # No table to browse, just one symbol
                 oids.append(table)
             elif len(symbols) < bulk_limit:
-                oids.extend(symbols)
+                all_oids.append(symbols)
             else:
                 bulk_oids.append(table)
 
-        all_binds, error = self.fetch_oids(config, oids, enforce_constraints=enforce_constraints)
+        if oids:
+            all_oids.insert(0, oids)
+
+        all_binds = []
+        error = None
+        for to_fetch in all_oids:
+            binds, current_error = self.fetch_oids(config, to_fetch, enforce_constraints=enforce_constraints)
+            all_binds.extend(binds)
+            if not error:
+                error = current_error
 
         for oid in bulk_oids:
             try:
@@ -203,8 +224,10 @@ class SnmpCheck(AgentCheck):
                     ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                     lexicographicMode=False,
                 )
-                binds, error = self._consume_binds_iterator(binds_iterator, config)
+                binds, current_error = self._consume_binds_iterator(binds_iterator, config)
                 all_binds.extend(binds)
+                if not error:
+                    error = current_error
 
             except PySnmpError as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
@@ -217,7 +240,7 @@ class SnmpCheck(AgentCheck):
                 # if enforce_constraints is false, then MIB resolution has not been done yet
                 # so we need to do it manually. We have to specify the mibs that we will need
                 # to resolve the name.
-                oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple()).loadMibs(*config.mibs_to_load)
+                oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple())
                 result_oid = oid_to_resolve.resolveWithMib(config.mib_view_controller)
             _, metric, indexes = result_oid.getMibSymbol()
             results[metric][indexes] = value
@@ -311,6 +334,18 @@ class SnmpCheck(AgentCheck):
         self.log.debug('Returned vars: %s', var_binds)
         return var_binds[0][1].prettyPrint()
 
+    def _profile_for_sysobject_oid(self, sys_object_oid):
+        """Return, if any, a matching profile for sys_object_oid.
+
+        If several profiles match, it will return the longer match, ie the
+        closest one to the sys_object_oid.
+        """
+        oids = [oid for oid in self.profiles_by_oid if fnmatch.fnmatch(sys_object_oid, oid)]
+        oids.sort()
+        if not oids:
+            raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
+        return self.profiles_by_oid[oids[-1]]
+
     def _consume_binds_iterator(self, binds_iterator, config):
         all_binds = []
         error = None
@@ -386,9 +421,7 @@ class SnmpCheck(AgentCheck):
         try:
             if not (config.table_oids or config.raw_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
-                if sys_object_oid not in self.profiles_by_oid:
-                    raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
-                profile = self.profiles_by_oid[sys_object_oid]
+                profile = self._profile_for_sysobject_oid(sys_object_oid)
                 config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
 
             if config.table_oids:
@@ -469,20 +502,24 @@ class SnmpCheck(AgentCheck):
                         self.log.warning('No indication on what value to use for this tag')
 
                 for value_to_collect in metric.get('symbols', []):
+                    if value_to_collect not in results:
+                        self.log.debug('Ignoring metric %s from table %s', value_to_collect, metric['table'])
+                        continue
                     for index, val in iteritems(results[value_to_collect]):
                         metric_tags = tags + self.get_index_tags(index, results, index_based_tags, column_based_tags)
                         self.submit_metric(value_to_collect, val, forced_type, metric_tags)
 
             elif 'symbol' in metric:
                 name = metric['symbol']
+                if name not in results:
+                    self.log.debug('Ignoring metric %s', name)
+                    continue
                 result = list(results[name].items())
                 if len(result) > 1:
                     self.log.warning('Several rows corresponding while the metric is supposed to be a scalar')
                     continue
                 val = result[0][1]
-                metric_tags = tags
-                if metric.get('metric_tags'):
-                    metric_tags = metric_tags + metric.get('metric_tags')
+                metric_tags = tags + metric.get('metric_tags', [])
                 self.submit_metric(name, val, forced_type, metric_tags)
             elif 'OID' in metric:
                 pass  # This one is already handled by the other batch of requests
@@ -541,9 +578,15 @@ class SnmpCheck(AgentCheck):
             if forced_type.lower() == 'gauge':
                 value = int(snmp_value)
                 self.gauge(metric_name, value, tags)
+            elif forced_type.lower() == 'percent':
+                value = total_time_to_temporal_percent(int(snmp_value), scale=1)
+                self.rate(metric_name, value, tags)
             elif forced_type.lower() == 'counter':
                 value = int(snmp_value)
                 self.rate(metric_name, value, tags)
+            elif forced_type.lower() == 'monotonic_count':
+                value = int(snmp_value)
+                self.monotonic_count(metric_name, value, tags)
             else:
                 self.warning('Invalid forced-type specified: {} in {}'.format(forced_type, name))
                 raise ConfigurationError('Invalid forced-type in config file: {}'.format(name))

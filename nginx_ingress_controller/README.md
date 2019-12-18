@@ -98,9 +98,9 @@ Need help? Contact [Datadog support][8].
 
 [1]: https://kubernetes.github.io/ingress-nginx
 [2]: https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/datadog_checks/nginx_ingress_controller/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
 [5]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/nginx_ingress_controller/metadata.csv
 [8]: https://docs.datadoghq.com/help

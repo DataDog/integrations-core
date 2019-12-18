@@ -17,6 +17,7 @@ DEPRECATED_MASTER_ADDRESS = 'resourcemanager_uri'
 # Switch that determines the mode Spark is running in. Can be either
 # 'yarn' or 'standalone'
 SPARK_CLUSTER_MODE = 'spark_cluster_mode'
+SPARK_DRIVER_MODE = 'spark_driver_mode'
 SPARK_YARN_MODE = 'spark_yarn_mode'
 SPARK_STANDALONE_MODE = 'spark_standalone_mode'
 SPARK_MESOS_MODE = 'spark_mesos_mode'
@@ -26,6 +27,7 @@ SPARK_PRE_20_MODE = 'spark_pre_20_mode'
 
 # Service Checks
 SPARK_STANDALONE_SERVICE_CHECK = 'spark.standalone_master.can_connect'
+SPARK_DRIVER_SERVICE_CHECK = 'spark.driver.can_connect'
 YARN_SERVICE_CHECK = 'spark.resource_manager.can_connect'
 SPARK_SERVICE_CHECK = 'spark.application_master.can_connect'
 MESOS_SERVICE_CHECK = 'spark.mesos_master.can_connect'
@@ -261,8 +263,34 @@ class SparkCheck(AgentCheck):
             running_apps = self._yarn_init(master_address, tags)
             return self._get_spark_app_ids(running_apps, tags)
 
+        elif cluster_mode == SPARK_DRIVER_MODE:
+            return self._driver_init(master_address, tags)
+
         else:
             raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, cluster_mode))
+
+    def _driver_init(self, spark_driver_address, tags):
+        """
+        Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
+        """
+        running_apps = {}
+        metrics_json = self._rest_request_to_json(
+            spark_driver_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
+        )
+
+        for app_json in metrics_json:
+            app_id = app_json.get('id')
+            app_name = app_json.get('name')
+            running_apps[app_id] = (app_name, spark_driver_address)
+
+        self.service_check(
+            SPARK_DRIVER_SERVICE_CHECK,
+            AgentCheck.OK,
+            tags=['url:%s' % spark_driver_address] + tags,
+            message='Connection to Spark driver "%s" was successful' % spark_driver_address,
+        )
+        self.log.info("Returning running apps %s" % running_apps)
+        return running_apps
 
     def _standalone_init(self, spark_master_address, pre_20_mode, tags):
         """

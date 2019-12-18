@@ -107,7 +107,10 @@ class HAProxy(AgentCheck):
             info, data = self._fetch_socket_data(parsed_url)
             self._collect_version_from_socket(info)
         else:
-            self._collect_version_from_http(url)
+            try:
+                self._collect_version_from_http(url)
+            except Exception as e:
+                self.log.warning("Couldn't collect version information: %s", e)
             data = self._fetch_url_data(url)
 
         collect_aggregates_only = instance.get('collect_aggregates_only', True)

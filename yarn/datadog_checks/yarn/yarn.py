@@ -161,9 +161,7 @@ class YarnCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):
         super(YarnCheck, self).__init__(*args, **kwargs)
-        application_status_mapping = self.instances[0].get(
-            'application_status_mapping', DEFAULT_APPLICATION_STATUS_MAPPING
-        )
+        application_status_mapping = self.instance.get('application_status_mapping', DEFAULT_APPLICATION_STATUS_MAPPING)
         try:
             self.application_status_mapping = {
                 k.upper(): getattr(AgentCheck, v.upper()) for k, v in application_status_mapping.items()
@@ -262,6 +260,7 @@ class YarnCheck(AgentCheck):
         Get metrics related to YARN nodes
         """
         metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH, addl_tags)
+        version_set = False
 
         if metrics_json and metrics_json['nodes'] is not None and metrics_json['nodes']['node'] is not None:
 
@@ -272,6 +271,10 @@ class YarnCheck(AgentCheck):
                 tags.extend(addl_tags)
 
                 self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
+                version = node_json.get('version')
+                if not version_set and version:
+                    self.set_metadata('version', version)
+                    version_set = True
 
     def _yarn_scheduler_metrics(self, rm_address, addl_tags, queue_blacklist):
         """

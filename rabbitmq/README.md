@@ -165,13 +165,13 @@ Additional helpful documentation, links, and articles:
 [2]: https://www.rabbitmq.com
 [3]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [4]: https://app.datadoghq.com/account/settings#agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [6]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/datadog_checks/rabbitmq/data/conf.yaml.example
 [7]: https://www.rabbitmq.com/management.html
 [8]: https://www.rabbitmq.com/rabbitmqctl.8.html#set_permissions
 [9]: https://www.rabbitmq.com/management.html
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
 [13]: https://docs.datadoghq.com/help
 [14]: https://www.datadoghq.com/blog/rabbitmq-monitoring

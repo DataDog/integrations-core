@@ -25,7 +25,9 @@
   "integration_id": "envoy",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Envoy - Overview": "assets/dashboards/envoy_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

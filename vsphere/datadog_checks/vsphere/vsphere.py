@@ -9,7 +9,8 @@ import threading
 import time
 import traceback
 from collections import defaultdict
-from datetime import timedelta
+from contextlib import contextmanager
+from datetime import datetime, timedelta
 
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
@@ -117,6 +118,9 @@ class VSphereCheck(AgentCheck):
 
         # Event configuration
         self.event_config = {}
+
+        # Host tags exclusion
+        self.excluded_host_tags = instances[0].get("excluded_host_tags", init_config.get("excluded_host_tags", []))
 
         # Caching configuration
         self.cache_config = CacheConfig()
@@ -390,58 +394,68 @@ class VSphereCheck(AgentCheck):
             return parent_tags
         return []
 
+    @staticmethod
+    @contextmanager
+    def create_container_view(server_instance, resources):
+        content = server_instance.content
+        view_ref = content.viewManager.CreateContainerView(content.rootFolder, resources, True)
+        try:
+            yield view_ref
+        finally:
+            view_ref.Destroy()
+
     def _collect_mors_and_attributes(self, server_instance):
         resources = list(RESOURCE_TYPE_METRICS)
         resources.extend(RESOURCE_TYPE_NO_METRIC)
-
         content = server_instance.content
-        view_ref = content.viewManager.CreateContainerView(content.rootFolder, resources, True)
 
-        # Object used to query MORs as well as the attributes we require in one API call
-        # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
-        collector = content.propertyCollector
+        with VSphereCheck.create_container_view(server_instance, resources) as view_ref:
 
-        # Specify the root object from where we collect the rest of the objects
-        obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
-        obj_spec.obj = view_ref
-        obj_spec.skip = True
+            # Object used to query MORs as well as the attributes we require in one API call
+            # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
+            collector = content.propertyCollector
 
-        # Specify the attribute of the root object to traverse to obtain all the attributes
-        traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
-        traversal_spec.path = "view"
-        traversal_spec.skip = False
-        traversal_spec.type = view_ref.__class__
-        obj_spec.selectSet = [traversal_spec]
+            # Specify the root object from where we collect the rest of the objects
+            obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
+            obj_spec.obj = view_ref
+            obj_spec.skip = True
 
-        property_specs = []
-        # Specify which attributes we want to retrieve per object
-        for resource in resources:
-            property_spec = vmodl.query.PropertyCollector.PropertySpec()
-            property_spec.type = resource
-            property_spec.pathSet = ["name", "parent", "customValue"]
-            if resource == vim.VirtualMachine:
-                property_spec.pathSet.append("runtime.powerState")
-                property_spec.pathSet.append("runtime.host")
-                property_spec.pathSet.append("guest.hostName")
-            property_specs.append(property_spec)
+            # Specify the attribute of the root object to traverse to obtain all the attributes
+            traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
+            traversal_spec.path = "view"
+            traversal_spec.skip = False
+            traversal_spec.type = view_ref.__class__
+            obj_spec.selectSet = [traversal_spec]
 
-        # Create our filter spec from the above specs
-        filter_spec = vmodl.query.PropertyCollector.FilterSpec()
-        filter_spec.objectSet = [obj_spec]
-        filter_spec.propSet = property_specs
+            property_specs = []
+            # Specify which attributes we want to retrieve per object
+            for resource in resources:
+                property_spec = vmodl.query.PropertyCollector.PropertySpec()
+                property_spec.type = resource
+                property_spec.pathSet = ["name", "parent", "customValue"]
+                if resource == vim.VirtualMachine:
+                    property_spec.pathSet.append("runtime.powerState")
+                    property_spec.pathSet.append("runtime.host")
+                    property_spec.pathSet.append("guest.hostName")
+                property_specs.append(property_spec)
 
-        retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
-        # To limit the number of objects retrieved per call.
-        # If batch_collector_size is 0, collect maximum number of objects.
-        retr_opts.maxObjects = self.batch_collector_size or None
+            # Create our filter spec from the above specs
+            filter_spec = vmodl.query.PropertyCollector.FilterSpec()
+            filter_spec.objectSet = [obj_spec]
+            filter_spec.propSet = property_specs
 
-        # Collect the objects and their properties
-        res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
-        objects = res.objects
-        # Results can be paginated
-        while res.token is not None:
-            res = collector.ContinueRetrievePropertiesEx(res.token)
-            objects.extend(res.objects)
+            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
+            # To limit the number of objects retrieved per call.
+            # If batch_collector_size is 0, collect maximum number of objects.
+            retr_opts.maxObjects = self.batch_collector_size or None
+
+            # Collect the objects and their properties
+            res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+            objects = res.objects
+            # Results can be paginated
+            while res.token is not None:
+                res = collector.ContinueRetrievePropertiesEx(res.token)
+                objects.extend(res.objects)
 
         mor_attrs = {}
         error_counter = 0
@@ -558,9 +572,17 @@ class VSphereCheck(AgentCheck):
                 if vsphere_type:
                     instance_tags.append(vsphere_type)
 
-                obj_list[vimtype].append(
-                    {"mor_type": mor_type, "mor": obj, "hostname": hostname, "tags": tags + instance_tags}
-                )
+                mor = {
+                    "mor_type": mor_type,
+                    "mor": obj,
+                    "hostname": hostname,
+                    "tags": [t for t in tags + instance_tags if t.split(":", 1)[0] not in self.excluded_host_tags],
+                }
+                if self.excluded_host_tags:
+                    mor["excluded_host_tags"] = [
+                        t for t in tags + instance_tags if t.split(":", 1)[0] in self.excluded_host_tags
+                    ]
+                obj_list[vimtype].append(mor)
 
         self.log.debug("All objects with attributes cached in %s seconds.", time.time() - start)
         return obj_list
@@ -845,7 +867,11 @@ class VSphereCheck(AgentCheck):
                         continue
 
                     instance_name = result.id.instance or "none"
-                    value = self._transform_value(instance, result.id.counterId, result.value[0])
+                    # Get the most recent value that isn't negative
+                    valid_values = [v for v in result.value if v >= 0]
+                    if not valid_values:
+                        continue
+                    value = self._transform_value(instance, result.id.counterId, valid_values[-1])
 
                     hostname = mor['hostname']
 
@@ -854,6 +880,8 @@ class VSphereCheck(AgentCheck):
                         tags.extend(mor['tags'])
                     else:
                         hostname = to_string(hostname)
+                        if self.excluded_host_tags:
+                            tags.extend(mor["excluded_host_tags"])
 
                     tags.extend(instance.get('tags', []))
 
@@ -889,8 +917,14 @@ class VSphereCheck(AgentCheck):
                     max_historical_metrics = int(vcenter_settings[0].value)
                 if max_historical_metrics < 0:
                     max_historical_metrics = float('inf')
-            except Exception:
-                pass
+            except Exception as e:
+                self.log.debug(
+                    "Error getting maxQueryMetrics setting "
+                    "(max_historical_metrics=%s, DEFAULT_MAX_HIST_METRICS=%s): %s",
+                    max_historical_metrics,
+                    DEFAULT_MAX_HIST_METRICS,
+                    e,
+                )
 
         # TODO: Remove me once the fix for `max_query_metrics` is here by default
         mors_batch_method = (
@@ -926,11 +960,14 @@ class VSphereCheck(AgentCheck):
                 query_spec = vim.PerformanceManager.QuerySpec()
                 query_spec.entity = mor["mor"]
                 query_spec.intervalId = mor.get("interval")
-                query_spec.maxSample = 1
                 if mor['mor_type'] in REALTIME_RESOURCES:
                     query_spec.metricId = self.metadata_cache.get_metric_ids(i_key)
+                    query_spec.maxSample = 1  # Request a single datapoint
                 else:
                     query_spec.metricId = mor["metrics"]
+                    # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
+                    # contain at least one element
+                    query_spec.startTime = datetime.now() - timedelta(hours=2)
                 query_specs.append(query_spec)
 
             if query_specs:

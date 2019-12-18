@@ -3,6 +3,9 @@ ad_identifiers:
 
 init_config:
 
+# Ignore tags coming from autodiscovery
+ignore_autodiscovery_tags: true
+
 instances:
 
     ## @param kube_state_url - string - required

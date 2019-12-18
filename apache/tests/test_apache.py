@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import mock
 import pytest
 
 from datadog_checks.apache import Apache
 
-from .common import APACHE_GAUGES, APACHE_RATES, AUTO_CONFIG, BAD_CONFIG, HOST, PORT, STATUS_CONFIG
+from .common import APACHE_GAUGES, APACHE_RATES, APACHE_VERSION, AUTO_CONFIG, BAD_CONFIG, HOST, PORT, STATUS_CONFIG
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -65,14 +64,19 @@ def test_e2e(dd_agent_check):
     aggregator.assert_all_metrics_covered()
 
 
-def test_metadata(check, version_metadata):
-    check = check(STATUS_CONFIG)
+@pytest.mark.usefixtures("dd_environment")
+def test_metadata(check, datadog_agent):
+    check = check(AUTO_CONFIG)
     check.check_id = 'test:123'
+    major, minor, patch = APACHE_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': APACHE_VERSION,
+    }
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        check.check(STATUS_CONFIG)
-
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
-
-        assert m.call_count == len(version_metadata)
+    check.check(AUTO_CONFIG)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))

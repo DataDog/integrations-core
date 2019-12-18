@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+
 from datadog_checks.dev import get_docker_hostname, get_here
 
 HERE = get_here()
@@ -15,6 +17,9 @@ TEST_USERNAME = 'AzureDiamond'
 TEST_PASSWORD = 'hunter2'
 
 INSTANCE_INTEGRATION = {"hdfs_datanode_jmx_uri": "http://{}:50075".format(HOST)}
+
+HDFS_RAW_VERSION = os.environ.get('HDFS_RAW_VERSION')
+HDFS_IMAGE_TAG = os.environ.get('HDFS_IMAGE_TAG')
 
 EXPECTED_METRICS = [
     'hdfs.datanode.dfs_remaining',
@@ -41,6 +46,7 @@ HDFS_DATANODE_AUTH_CONFIG = {
         }
     ]
 }
+
 
 HDFS_DATANODE_METRICS_VALUES = {
     'hdfs.datanode.dfs_remaining': 27914526720,

@@ -276,6 +276,8 @@ SYNTHETIC_VARS = {
 
 BUILDS = ('log', 'standard', 'debug', 'valgrind', 'embedded')
 
+MySQLMetadata = namedtuple('MySQLMetadata', ['version', 'flavor', 'build'])
+
 
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
@@ -288,7 +290,6 @@ class MySql(AgentCheck):
         self.metadata = None
 
     def _get_metadata(self, db):
-        MySQLMetadata = namedtuple('MySQLMetadata', ['version', 'flavor', 'build'])
         with closing(db.cursor()) as cursor:
             cursor.execute('SELECT VERSION()')
             result = cursor.fetchone()
@@ -1347,7 +1348,7 @@ class MySql(AgentCheck):
 
         sql_query_schema_size = """
         SELECT   table_schema,
-                 SUM(data_length+index_length)/1024/1024 AS total_mb
+                 IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
                  FROM     information_schema.tables
                  GROUP BY table_schema;
         """

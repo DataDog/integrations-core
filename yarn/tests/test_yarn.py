@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import os
 
 from requests.exceptions import SSLError
 from six import iteritems
@@ -25,6 +26,7 @@ from .common import (
     YARN_CLUSTER_METRICS_VALUES,
     YARN_CONFIG,
     YARN_CONFIG_EXCLUDING_APP,
+    YARN_CONFIG_STATUS_MAPPING,
     YARN_NODE_METRICS_TAGS,
     YARN_NODE_METRICS_VALUES,
     YARN_QUEUE_METRICS_TAGS,
@@ -97,6 +99,40 @@ def test_check(aggregator, mocked_request):
         aggregator.assert_metric(metric, tags=YARN_QUEUE_NOFOLLOW_METRICS_TAGS + CUSTOM_TAGS, count=0)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_check_mapping(aggregator, mocked_request):
+    instance = YARN_CONFIG_STATUS_MAPPING['instances'][0]
+
+    # Instantiate YarnCheck
+    yarn = YarnCheck('yarn', {}, [instance])
+
+    # Run the check once
+    yarn.check(instance)
+
+    aggregator.assert_service_check(
+        SERVICE_CHECK_NAME,
+        status=YarnCheck.OK,
+        tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
+    )
+
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.OK,
+        tags=['app_queue:default', 'app_name:word count', 'optional:tag1', 'cluster_name:SparkCluster'],
+    )
+
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.WARNING,
+        tags=['app_queue:default', 'app_name:dead app', 'optional:tag1', 'cluster_name:SparkCluster'],
+    )
+
+    aggregator.assert_service_check(
+        APPLICATION_STATUS_SERVICE_CHECK,
+        status=YarnCheck.OK,
+        tags=['app_queue:default', 'app_name:new app', 'optional:tag1', 'cluster_name:SparkCluster'],
+    )
 
 
 def test_check_excludes_app_metrics(aggregator, mocked_request):
@@ -197,3 +233,24 @@ def test_ssl_verification(aggregator, mocked_bad_cert_request):
         tags=YARN_CLUSTER_METRICS_TAGS + CUSTOM_TAGS + ['url:{}'.format(RM_ADDRESS)],
         count=4,
     )
+
+
+def test_metadata(aggregator, instance, datadog_agent):
+    check = YarnCheck("yarn", {}, [instance])
+    check.check_id = "test:123"
+
+    check.check(instance)
+
+    raw_version = os.getenv("YARN_VERSION")
+
+    major, minor, patch = raw_version.split(".")
+
+    version_metadata = {
+        "version.scheme": "semver",
+        "version.major": major,
+        "version.minor": minor,
+        "version.patch": patch,
+        "version.raw": raw_version,
+    }
+
+    datadog_agent.assert_metadata("test:123", version_metadata)

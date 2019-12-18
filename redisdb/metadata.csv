@@ -1,4 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+redis.active_defrag.running,gauge,,,,Whether active defragmentation is running or not.,0,redis,active defrag running
+redis.active_defrag.hits,gauge,,operation,,Number of value reallocations performed by active the defragmentation process.,1,redis,active defrag hits
+redis.active_defrag.misses,gauge,,operation,,Number of aborted value reallocations started by the active defragmentation process.,1,redis,active defrag misses
+redis.active_defrag.key_hits,gauge,,key,,Number of keys that were actively defragmented.,1,redis,active defrag key hits
+redis.active_defrag.key_misses,gauge,,key,,Number of keys that were skipped by.,1,redis,active defrag key misses
 redis.aof.buffer_length,gauge,,byte,,Size of the AOF buffer.,0,redis,aof buf len
 redis.aof.last_rewrite_time,gauge,,second,,Duration of the last AOF rewrite.,0,redis,last aof rewrite time
 redis.aof.rewrite,gauge,,,,Flag indicating a AOF rewrite operation is on-going.,0,redis,aof rewrite
@@ -30,6 +35,7 @@ redis.net.commands,gauge,,command,,The number of commands processed by the serve
 redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands
 redis.net.rejected,gauge,,connection,,The number of rejected connections.,-1,redis,net rejected
 redis.net.slaves,gauge,,connection,,The number of connected slaves.,0,redis,slaves
+redis.net.maxclients,gauge,,connection,,The maximum number of connected clients.,0,redis,maxclients
 redis.perf.latest_fork_usec,gauge,,microsecond,,The duration of the latest fork.,-1,redis,latest fork usec
 redis.persist,gauge,,key,,The number of keys persisted (redis.keys - redis.expires).,0,redis,persist
 redis.persist.percent,gauge,,percent,,Percentage of total keys that are persisted.,0,redis,persist pct

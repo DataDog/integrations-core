@@ -89,8 +89,8 @@ Need help? Contact [Datadog support][8].
 [1]: https://ambari.apache.org
 [2]: https://docs.datadoghq.com/agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
 [7]: https://github.com/DataDog/integrations-core/blob/master/ambari/metadata.csv
 [8]: https://docs.datadoghq.com/help

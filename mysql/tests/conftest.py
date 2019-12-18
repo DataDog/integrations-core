@@ -25,6 +25,7 @@ def dd_environment(instance_basic):
             'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
             'MYSQL_PORT': str(common.PORT),
             'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
+            'MYSQL_CONF_PATH': _mysql_conf_path(),
             'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
         },
         conditions=[
@@ -143,6 +144,18 @@ def _wait_for_it_script():
     return os.path.abspath(script)
 
 
+def _mysql_conf_path():
+    if MYSQL_FLAVOR == 'mysql':
+        filename = 'mysql.conf'
+    elif MYSQL_FLAVOR == 'mariadb':
+        filename = 'mariadb.conf'
+    else:
+        raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
+
+    conf = os.path.join(common.HERE, 'compose', filename)
+    return os.path.abspath(conf)
+
+
 def _mysql_docker_repo():
     if MYSQL_FLAVOR == 'mysql':
         # The image for testing Mysql 5.5 is located at `jfullaondo/mysql-replication` or `bergerx/mysql-replication`
@@ -154,3 +167,5 @@ def _mysql_docker_repo():
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'
+    else:
+        raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))

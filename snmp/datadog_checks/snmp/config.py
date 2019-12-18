@@ -37,7 +37,7 @@ class InstanceConfig:
         if profile:
             if profile not in profiles:
                 raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.metrics.extend(profiles[profile]['definition'])
+            self.metrics.extend(profiles[profile]['definition']['metrics'])
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self.snmp_engine, self.mib_view_controller = self.create_snmp_engine(mibs_path)
         self.ip_address = None
@@ -46,6 +46,8 @@ class InstanceConfig:
         self.failing_instances = defaultdict(int)
         self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
+        # Temporary flag until we secure the content
+        self.autofetch = is_affirmative(instance.get('autofetch', False))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
@@ -73,14 +75,14 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
-        self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(self.metrics, warning, log)
+        self.table_oids, self.raw_oids = self.parse_metrics(self.metrics, warning, log)
 
         self.auth_data = self.get_auth_data(instance)
         self.context_data = hlapi.ContextData(*self.get_context_data(instance))
 
     def refresh_with_profile(self, profile, warning, log):
-        self.metrics.extend(profile['definition'])
-        self.table_oids, self.raw_oids, self.mibs_to_load = self.parse_metrics(self.metrics, warning, log)
+        self.metrics.extend(profile['definition']['metrics'])
+        self.table_oids, self.raw_oids = self.parse_metrics(self.metrics, warning, log)
 
     def call_cmd(self, cmd, *args, **kwargs):
         return cmd(self.snmp_engine, self.auth_data, self.transport, self.context_data, *args, **kwargs)
@@ -171,7 +173,6 @@ class InstanceConfig:
 
         `raw_oids` is a list of SNMP numerical OIDs to query.
         `table_oids` is a dictionnary of SNMP tables to symbols to query.
-        `mibs_to_load` contains the relevant MIBs used for querying.
         """
         raw_oids = []
         table_oids = {}
@@ -241,10 +242,11 @@ class InstanceConfig:
             try:
                 self.mib_view_controller.mibBuilder.loadModule(mib)
             except MibNotFoundError:
-                log.debug("Couldn't found mib %s, trying to fetch it", mib)
-                self.fetch_mib(mib)
+                if self.autofetch:
+                    log.debug("Couldn't found mib %s, trying to fetch it", mib)
+                    self.fetch_mib(mib)
 
-        return dict(table_oids.values()), raw_oids, mibs_to_load
+        return dict(table_oids.values()), raw_oids
 
     @staticmethod
     def fetch_mib(mib):

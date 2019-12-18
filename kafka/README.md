@@ -128,11 +128,11 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 [4]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [5]: https://app.datadoghq.com/account/settings#agent
 [6]: https://github.com/DataDog/jmxfetch
-[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [9]: https://github.com/DataDog/integrations-core/blob/master/kafka/datadog_checks/kafka/data/conf.yaml.example
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [11]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[13]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
 [15]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka
 [16]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub
