@@ -7,39 +7,23 @@
 The Zookeeper check tracks client connections and latencies, monitors the number of unprocessed requests, and more.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The Zookeeper check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Zookeeper servers.
 
 ### Configuration
 
+#### Zookeepr whitelist
+As of version 3.5, Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][7]) that whitelists [four letter word commands][8]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
+
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
 1. Edit the `zk.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Zookeeper [metrics](#metric-collection) and [logs](#log-collection).
   See the [sample zk.d/conf.yaml][5] for all available configuration options.
 
-2. [Restart the Agent][6]
-
-### Zookeepr Whitelist
-As of version 3.5, Zookeeper has a `4lw.commands.whitelist` parameter (see [Zookeeper documentation][7]) that whitelists [4 letter word commands][8]. By default, only `srvr` is whitelisted. Add `stat` and `mntr` to the whitelist, as the integration is based on these commands.
-
-#### Metric collection
-
-*  Add this configuration block to your `zk.yaml` file to start gathering your [Zookeeper metrics](#metrics):
-
-```
-init_config:
-
-instances:
-  - host: localhost
-    port: 2181
-    timeout: 3
-```
-
-* See the [sample zk.yaml][5] for all available configuration options.
-
-* [Restart the Agent][6] to start sending Zookeeper metrics to Datadog.
+2. [Restart the Agent][6].
 
 #### Log collection
 
@@ -62,7 +46,7 @@ instances:
       %d [%t] %-5p %c - %m%n
       %r [%t] %p %c %x - %m%n
     ```
-    
+
     Make sure you clone and edit the integration pipeline if you have a different format.
 
 3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -71,7 +55,7 @@ instances:
       logs_enabled: true
     ```
 
-4. Add this configuration block to your `zk.yaml` file to start collecting your Zookeeper Logs:
+4. Uncomment and edit this configuration block at the bottom of your `zk.d/conf.yaml`:
 
     ```yaml
       logs:
@@ -86,9 +70,31 @@ instances:
           #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
     ```
 
-    See the [sample zk.yaml][5] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample zk.d/conf.yaml][5] for all available configuration options.
 
 5. [Restart the Agent][6].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                  |
+|----------------------|----------------------------------------|
+| `<INTEGRATION_NAME>` | `zk`                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                          |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port": "2181"}` |
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][12].
+
+| Parameter      | Value                                           |
+|----------------|-------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "zk", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
@@ -105,7 +111,7 @@ Duplicate information is being reported by both `mntr` and `stat`: the duplicate
 **Important:** if available, make use of the data reported by `mntr`, not `stat`.
 
 | Metric reported by `mntr`         | Duplicate reported by `stat` |
-| -------------------------         | ---------------------------- |
+|-----------------------------------|------------------------------|
 | `zookeeper.avg_latency`           | `zookeeper.latency.avg`      |
 | `zookeeper.max_latency`           | `zookeeper.latency.max`      |
 | `zookeeper.min_latency`           | `zookeeper.latency.min`      |
@@ -114,12 +120,12 @@ Duplicate information is being reported by both `mntr` and `stat`: the duplicate
 | `zookeeper.num_alive_connections` | `zookeeper.connections`      |
 | `zookeeper.znode_count`           | `zookeeper.nodes`            |
 
-See [metadata.csv][10]
-for a list of metrics provided by this check.
+See [metadata.csv][10] for a list of metrics provided by this check.
 
 #### Deprecated metrics
 
 Following metrics are still sent but will be removed eventually:
+
  * `zookeeper.bytes_received`
  * `zookeeper.bytes_sent`
 
@@ -140,11 +146,12 @@ Need help? Contact [Datadog support][11].
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_clusterOptions
 [8]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [11]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/agent/docker/log/

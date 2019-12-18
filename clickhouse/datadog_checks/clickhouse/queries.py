@@ -17,6 +17,7 @@ SystemMetrics = Query(
                 'type': 'match',
                 'source': 'value',
                 'items': {
+                    'BackgroundMovePoolTask': {'name': 'background_pool.move.task.active', 'type': 'gauge'},
                     'BackgroundPoolTask': {'name': 'background_pool.processing.task.active', 'type': 'gauge'},
                     'BackgroundSchedulePoolTask': {'name': 'background_pool.schedule.task.active', 'type': 'gauge'},
                     'ContextLockWait': {'name': 'thread.lock.context.waiting', 'type': 'gauge'},
@@ -36,6 +37,10 @@ SystemMetrics = Query(
                     'LocalThreadActive': {'name': 'thread.local.active', 'type': 'gauge'},
                     'MemoryTracking': {'name': 'query.memory', 'type': 'gauge'},
                     'MemoryTrackingForMerges': {'name': 'merge.memory', 'type': 'gauge'},
+                    'MemoryTrackingInBackgroundMoveProcessingPool': {
+                        'name': 'background_pool.move.memory',
+                        'type': 'gauge',
+                    },
                     'MemoryTrackingInBackgroundProcessingPool': {
                         'name': 'background_pool.processing.memory',
                         'type': 'gauge',

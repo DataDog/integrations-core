@@ -57,3 +57,17 @@ EXPECTED_E2E_METRICS = [
     'spark.job.num_skipped_stages',
     'spark.job.num_failed_tasks',
 ]
+
+
+INSTANCE_STANDALONE = {
+    'spark_url': 'http://{}:8080'.format(HOST),
+    'cluster_name': 'SparkCluster',
+    'spark_cluster_mode': 'spark_standalone_mode',
+}
+
+
+INSTANCE_DRIVER = {
+    'spark_url': 'http://{}:4040'.format(HOST),
+    'cluster_name': 'SparkDriver',
+    'spark_cluster_mode': 'spark_driver_mode',
+}

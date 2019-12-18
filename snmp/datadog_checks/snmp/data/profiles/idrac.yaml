@@ -1,0 +1,57 @@
+# Profile for iDRAC devices
+sysobjectid: 1.3.6.1.4.1.674.10892.*
+metrics:
+  - MIB: IDRAC-MIB-SMIv2
+    table: systemStateTable
+    symbols:
+      - systemStateChassisStatus
+      - systemStatePowerUnitStatusRedundancy
+      - systemStatePowerSupplyStatusCombined
+      - systemStateAmperageStatusCombined
+      - systemStateCoolingUnitStatusRedundancy
+      - systemStateCoolingDeviceStatusCombined
+      - systemStateTemperatureStatusCombined
+      - systemStateMemoryDeviceStatusCombined
+      - systemStateChassisIntrusionStatusCombined
+      - systemStatePowerUnitStatusCombined
+      - systemStateCoolingUnitStatusCombined
+      - systemStateProcessorDeviceStatusCombined
+      - systemStateTemperatureStatisticsStatusCombined
+    metric_tags:
+      - tag: chassis_index
+        column: systemStatechassisIndex
+  - MIB: IDRAC-MIB-SMIv2
+    table: physicalDiskTable
+    symbols:
+      - physicalDiskState
+      - physicalDiskCapacityInMB
+      - physicalDiskUsedSpaceInMB
+      - physicalDiskFreeSpaceInMB
+    metric_tags:
+      - tag: disk_name
+        column: physicalDiskName
+  - MIB: IDRAC-MIB-SMIv2
+    table: enclosurePowerSupplyTable
+    symbols:
+      - enclosurePowerSupplyState
+    metric_tags:
+      - tag: supply_name
+        column: enclosurePowerSupplyName
+  - MIB: INTEL-LAN-ADAPTERS-MIB
+    table: genericAdaptersTrafficStatsAttrTable
+    forced_type: monotonic_count
+    symbols:
+      - adapterRxPackets
+      - adapterTxPackets
+      - adapterRxBytes
+      - adapterTxBytes
+      - adapterRxErrors
+      - adapterTxErrors
+      - adapterRxDropped
+      - adapterTxDropped
+      - adapterRxMulticast
+      - adapterCollisions
+    metric_tags:
+      - tag: adapter
+        column: adapterName
+        table: genericAdaptersAttrTable

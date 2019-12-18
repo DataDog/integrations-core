@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+
 from datadog_checks.dev import get_here
 from datadog_checks.dev.docker import get_docker_hostname
 
@@ -19,6 +21,9 @@ NAME_SYSTEM_STATE_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FS
 # Namesystem url
 NAME_SYSTEM_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=FSNamesystem'
 
+# Namesystem metadata url
+NAME_SYSTEM_METADATA_URL = NAMENODE_JMX_URI + '?qry=Hadoop:service=NameNode,name=NameNodeInfo'
+
 CUSTOM_TAGS = ["cluster_name:hdfs_dev", "instance:level_tags"]
 
 # Authentication Parameters
@@ -28,6 +33,9 @@ TEST_PASSWORD = 'NCC-1701'
 HDFS_NAMENODE_CONFIG = {'instances': [{'hdfs_namenode_jmx_uri': NAMENODE_URI, 'tags': list(CUSTOM_TAGS)}]}
 
 INSTANCE_INTEGRATION = {'hdfs_namenode_jmx_uri': NAMENODE_URI}
+
+HDFS_RAW_VERSION = os.environ.get('HDFS_RAW_VERSION')
+HDFS_IMAGE_TAG = os.environ.get('HDFS_IMAGE_TAG')
 
 EXPECTED_METRICS = [
     'hdfs.namenode.capacity_total',

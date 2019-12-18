@@ -1,5 +1,9 @@
 # CHANGELOG - activemq
 
+## 1.3.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
 ## 1.2.0 / 2019-07-04
 
 * [Added] Add log section. See [#4013](https://github.com/DataDog/integrations-core/pull/4013).

@@ -38,6 +38,7 @@ Need help? Contact [Datadog support][9].
 
 * [Monitor Amazon EKS with Datadog][10]
 * [Key metrics for Amazon EKS monitoring][11]
+* [Amazon EKS on AWS Fargate][12]
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/amazon_eks/images/amazon_eks_dashboard.png
@@ -51,3 +52,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/announcing-eks
 [11]: https://www.datadoghq.com/blog/eks-cluster-metrics
+[12]: https://docs.datadoghq.com/integrations/amazon_eks_fargate/

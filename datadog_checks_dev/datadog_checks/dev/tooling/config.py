@@ -16,7 +16,16 @@ from ..utils import ensure_parent_dir_exists, file_exists, read_file
 APP_DIR = user_data_dir('dd-checks-dev', '')
 CONFIG_FILE = os.path.join(APP_DIR, 'config.toml')
 
-SECRET_KEYS = {'dd_api_key', 'github.token', 'pypi.pass', 'trello.key', 'trello.token'}
+SECRET_KEYS = {
+    'dd_api_key',
+    'dd_app_key',
+    'orgs.*.api_key',
+    'orgs.*.app_key',
+    'github.token',
+    'pypi.pass',
+    'trello.key',
+    'trello.token',
+}
 
 DEFAULT_CONFIG = OrderedDict(
     [
@@ -26,11 +35,24 @@ DEFAULT_CONFIG = OrderedDict(
         ('repo', 'core'),
         ('color', bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None),
         ('dd_api_key', os.getenv('DD_API_KEY')),
+        ('dd_app_key', os.getenv('DD_APP_KEY')),
+        ('org', 'default'),
         ('agent6', OrderedDict((('docker', 'datadog/agent-dev:master'), ('local', 'latest')))),
         ('agent5', OrderedDict((('docker', 'datadog/dev-dd-agent:master'), ('local', 'latest')))),
         ('github', OrderedDict((('user', ''), ('token', '')))),
         ('pypi', OrderedDict((('user', ''), ('pass', '')))),
         ('trello', OrderedDict((('key', ''), ('token', '')))),
+        (
+            'orgs',
+            OrderedDict(
+                (
+                    (
+                        'default',
+                        OrderedDict((('api_key', os.getenv('DD_API_KEY')), ('app_key', os.getenv('DD_APP_KEY')))),
+                    ),
+                )
+            ),
+        ),
     ]
 )
 
@@ -107,5 +129,14 @@ def scrub_secrets(config):
                     branch = branch[path]
             else:
                 break
+
+    for data in config['orgs'].values():
+        api_key = data.get('api_key')
+        if api_key:
+            data['api_key'] = '*' * len(api_key)
+
+        app_key = data.get('app_key')
+        if app_key:
+            data['app_key'] = '*' * len(app_key)
 
     return config

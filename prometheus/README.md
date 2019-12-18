@@ -66,11 +66,11 @@ Need help? Contact [Datadog support][4].
 * [Writing a custom Prometheus Check][7]
 
 [2]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://docs.datadoghq.com/help
 [5]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
 [6]: https://docs.datadoghq.com/agent/prometheus
 [7]: https://docs.datadoghq.com/developers/prometheus
 [8]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
-[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[9]: https://docs.datadoghq.com/getting_started/integrations/prometheus?tab=docker#configuration
 [10]: https://docs.datadoghq.com/integrations/openmetrics

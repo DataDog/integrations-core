@@ -7,6 +7,9 @@ services:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
     ports:
       - "${MYSQL_PORT}:3306"
+    volumes:
+      # This is a supported conf location that isn't used by the image.
+      - ${MYSQL_CONF_PATH}:/etc/my.cnf
 
   mysql-slave:
     container_name: mysql-slave

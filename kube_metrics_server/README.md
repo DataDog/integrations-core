@@ -43,7 +43,7 @@ Need help? Contact [Datadog support][6].
 
 [1]: https://github.com/kubernetes-incubator/metrics-server
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/datadog_checks/kube_metrics_server/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#restart-the-agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/metadata.csv
 [6]: https://docs.datadoghq.com/help

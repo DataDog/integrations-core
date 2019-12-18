@@ -1,6 +1,32 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 ibm_mq.channel.channels,gauge,,resource,,The number of active channels,0,ibm_mq,active channel count
 ibm_mq.channel.count,gauge,,,,Sum by status to count channels. Filter by channel and status tags to create notifications.,0,ibm_mq,channel count
+ibm_mq.channel.batch_interval,gauge,,second,,The batch interval in seconds,0,ibm_mq,batch interval
+ibm_mq.channel.batch_size,gauge,,resource,,The batch size,0,ibm_mq,batch size
+ibm_mq.channel.disc_interval,gauge,,second,,The disconnection interval in seconds,0,ibm_mq,disc interval
+ibm_mq.channel.hb_interval,gauge,,second,,Heartbeat interval in seconds,0,ibm_mq,hb interval
+ibm_mq.channel.keep_alive_interval,gauge,,second,,KeepAlive interval in seconds,0,ibm_mq,keep alive interval
+ibm_mq.channel.long_retry,gauge,,time,,Long retry count,0,ibm_mq,long retry
+ibm_mq.channel.long_timer,gauge,,second,,Long timer,0,ibm_mq,long timer
+ibm_mq.channel.max_message_length,gauge,,byte,,Maximum message length,0,ibm_mq,max msg length
+ibm_mq.channel.mr_count,gauge,,,,Message retry count,0,ibm_mq,mr count
+ibm_mq.channel.mr_interval,gauge,,second,,Message retry interval in seconds,0,ibm_mq,mr interval
+ibm_mq.channel.network_priority,gauge,,,,Network priority,0,ibm_mq,network priority
+ibm_mq.channel.npm_speed,gauge,,,,Speed at which non-persistent messages are to be sent,0,ibm_mq,npm speed
+ibm_mq.channel.sharing_conversations,gauge,,,,Number of sharing conversations,0,ibm_mq,sharing conversations
+ibm_mq.channel.short_retry,gauge,,,,Short retry count,0,ibm_mq,short retry
+ibm_mq.channel.short_timer,gauge,,second,,Short timer,0,ibm_mq,short timer
+ibm_mq.channel.buffers_rcvd,gauge,,buffer,,Number of buffers received,0,ibm_mq,buffers rcvd
+ibm_mq.channel.buffers_sent,gauge,,buffer,,Number of buffers sent,0,ibm_mq,buffers sent
+ibm_mq.channel.bytes_rcvd,gauge,,byte,,Number of bytes received,0,ibm_mq,bytes rcvd
+ibm_mq.channel.bytes_sent,gauge,,byte,,Number of bytes sent,0,ibm_mq,bytes sent
+ibm_mq.channel.channel_status,gauge,,,,Channel status,0,ibm_mq,channel status
+ibm_mq.channel.mca_status,gauge,,,,MCA status,0,ibm_mq,mca status
+ibm_mq.channel.msgs,gauge,,message,,"Number of messages sent or received, or number of MQI calls handled",0,ibm_mq,msgs
+ibm_mq.channel.ssl_key_resets,gauge,,,,SSL secret key resets,0,ibm_mq,ssl key resets
+ibm_mq.channel.batches,gauge,,,,Number of completed batches,0,ibm_mq,batches
+ibm_mq.channel.current_msgs,gauge,,message,,Number of messages in-doubt,0,ibm_mq,current msgs
+ibm_mq.channel.indoubt_status,gauge,,,,Whether the channel is currently in doubt,0,ibm_mq,indoubt status
 ibm_mq.queue.service_interval,gauge,,millisecond,,the time since last serviced,0,ibm_mq,service interval
 ibm_mq.queue.inhibit_put,gauge,,occurrence,,puts are inhibited,0,ibm_mq,puts inhibited
 ibm_mq.queue.depth_low_limit,gauge,,item,,the low limit on the depth to create an alert,0,ibm_mq,depth low limit

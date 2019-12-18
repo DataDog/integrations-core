@@ -4,6 +4,7 @@
 import logging
 import os
 from contextlib import contextmanager
+from ipaddress import ip_address, ip_network
 
 import requests
 from six import iteritems, string_types
@@ -12,6 +13,7 @@ from urllib3.exceptions import InsecureRequestWarning
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
+from .common import ensure_unicode
 from .headers import get_default_headers, update_headers
 from .warnings_util import disable_warnings_ctx
 
@@ -302,13 +304,8 @@ class RequestsWrapper(object):
         if self.log_requests:
             self.logger.debug(u'Sending %s request to %s', method.upper(), url)
 
-        if self.no_proxy_uris:
-            parsed_uri = urlparse(url)
-
-            for no_proxy_uri in self.no_proxy_uris:
-                if no_proxy_uri in parsed_uri.netloc:
-                    options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
-                    break
+        if self.no_proxy_uris and should_bypass_proxy(url, self.no_proxy_uris):
+            options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
 
         persist = options.pop('persist', None)
         if persist is None:
@@ -408,3 +405,28 @@ def ensure_ntlm():
     global requests_ntlm
     if requests_ntlm is None:
         import requests_ntlm
+
+
+def should_bypass_proxy(url, no_proxy_uris):
+    # Accepts a URL and a list of no_proxy URIs
+    # Returns True if URL should bypass the proxy.
+    parsed_uri = urlparse(url).hostname
+
+    for no_proxy_uri in no_proxy_uris:
+        try:
+            # If no_proxy_uri is an IP or IP CIDR.
+            # A ValueError is raised if address does not represent a valid IPv4 or IPv6 address.
+            ipnetwork = ip_network(ensure_unicode(no_proxy_uri))
+            ipaddress = ip_address(ensure_unicode(parsed_uri))
+            if ipaddress in ipnetwork:
+                return True
+        except ValueError:
+            # Treat no_proxy_uri as a domain name
+            # A domain name matches that name and all subdomains.
+            #   e.g. "foo.com" matches "foo.com" and "bar.foo.com"
+            # A domain name with a leading "." matches subdomains only.
+            #   e.g. ".y.com" matches "x.y.com" but not "y.com".
+            dot_no_proxy_uri = no_proxy_uri if no_proxy_uri.startswith(".") else ".{}".format(no_proxy_uri)
+            if no_proxy_uri == parsed_uri or parsed_uri.endswith(dot_no_proxy_uri):
+                return True
+    return False

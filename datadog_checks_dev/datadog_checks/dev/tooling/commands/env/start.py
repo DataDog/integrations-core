@@ -90,7 +90,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
         profile_memory = False
         echo_warning('Collecting metrics about memory usage is only supported on Python 3+.')
 
-    api_key = ctx.obj['dd_api_key']
+    api_key = ctx.obj['orgs'].get(ctx.obj['org'], {}).get('api_key') or ctx.obj['dd_api_key']
     if api_key is None:
         echo_warning(
             'Environment variable DD_API_KEY does not exist; a well-formatted '
