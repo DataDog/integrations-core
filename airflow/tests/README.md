@@ -6,7 +6,9 @@ On a machine/VM with the desired Agent version installed and DogStatsD activated
 
 ```
 
-# 1. Copy the `dogstatsd_mapper_profiles` mappings from the main readme.md to `/etc/datadog/datadog.yaml`
+# 1a. Copy the `dogstatsd_mapper_profiles` mappings from the main readme.md to main `datadog.yaml`
+# 1b. Also set `dogstatsd_metrics_stats_enable=true` in main `datadog.yaml`
+# 1c. Restart Agent
 
 # 2. Set `network_mode: host` in airflow/tests/compose/docker-compose.yaml
 
