@@ -333,15 +333,21 @@ class Network(AgentCheck):
                 self.log.exception("Error collecting connection stats.")
 
         proc_dev_path = "{}/net/dev".format(net_proc_base_location)
-        with open(proc_dev_path, 'r') as proc:
-            lines = proc.readlines()
+        try:
+            with open(proc_dev_path, 'r') as proc:
+                lines = proc.readlines()
+        except IOError:
+            # On Openshift, /proc/net/snmp is only readable by root
+            self.log.debug("Unable to read %s.", proc_dev_path)
+            lines = []
+
         # Inter-|   Receive                                                 |  Transmit
         #  face |bytes     packets errs drop fifo frame compressed multicast|bytes       packets errs drop fifo colls carrier compressed # noqa: E501
         #     lo:45890956   112797   0    0    0     0          0         0    45890956   112797    0    0    0     0       0          0 # noqa: E501
         #   eth0:631947052 1042233   0   19    0   184          0      1206  1208625538  1320529    0    0    0     0       0          0 # noqa: E501
         #   eth1:       0        0   0    0    0     0          0         0           0        0    0    0    0     0       0          0 # noqa: E501
-        for l in lines[2:]:
-            cols = l.split(':', 1)
+        for line in lines[2:]:
+            cols = line.split(':', 1)
             x = cols[1].split()
             # Filter inactive interfaces
             if self._parse_value(x[0]) or self._parse_value(x[8]):
