@@ -4,8 +4,8 @@
       http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
       https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
       no_proxy:
-        - <HOSTNAME_1>
-        - <HOSTNAME_2>
+      - <HOSTNAME_1>
+      - <HOSTNAME_2>
     type: object
     properties:
     - name: http
