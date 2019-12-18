@@ -19,7 +19,7 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 @pytest.fixture(scope='session')
 def config_e2e():
-    logs_base_path = _mysql_logs_base_path()
+    logs_path = _mysql_logs_path()
 
     return {
         'init_config': {},
@@ -27,14 +27,14 @@ def config_e2e():
         'logs': [
             {
                 'type': 'file',
-                'path': '{}/mysql.log'.format(logs_base_path),
+                'path': '{}/mysql.log'.format(logs_path),
                 'source': 'mysql',
                 'sourcecategory': 'database',
                 'service': 'local_mysql',
             },
             {
                 'type': 'file',
-                'path': '{}/mysql_slow.log'.format(logs_base_path),
+                'path': '{}/mysql_slow.log'.format(logs_path),
                 'source': 'mysql',
                 'sourcecategory': 'database',
                 'service': 'local_mysql',
@@ -48,10 +48,10 @@ def config_e2e():
 
 @pytest.fixture(scope='session')
 def dd_environment(config_e2e):
-    logs_base_path = _mysql_logs_base_path()
+    logs_path = _mysql_logs_path()
 
     with TempDir('logs') as logs_host_path:
-        e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_base_path)]}
+        e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
 
         with docker_run(
             os.path.join(common.HERE, 'compose', COMPOSE_FILE),
@@ -60,7 +60,8 @@ def dd_environment(config_e2e):
                 'MYSQL_PORT': str(common.PORT),
                 'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
                 'MYSQL_CONF_PATH': _mysql_conf_path(),
-                'MYSQL_LOGS_PATH': logs_host_path,
+                'MYSQL_LOGS_HOST_PATH': logs_host_path,
+                'MYSQL_LOGS_PATH': logs_path,
                 'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
             },
             conditions=[
@@ -180,6 +181,9 @@ def _wait_for_it_script():
 
 
 def _mysql_conf_path():
+    """
+    Return the path to a local MySQL configuration file suited for the current environment.
+    """
     if MYSQL_FLAVOR == 'mysql':
         filename = 'mysql.conf'
     elif MYSQL_FLAVOR == 'mariadb':
@@ -191,12 +195,18 @@ def _mysql_conf_path():
     return os.path.abspath(conf)
 
 
-def _mysql_logs_base_path():
+def _mysql_logs_path():
+    """
+    Return the path to the MySQL logs directory in the MySQL container.
+
+    Should be kept in sync with the log paths set in the local MySQL configuration files
+    (which don't support interpolation of environment variables).
+    """
     if MYSQL_FLAVOR == 'mysql':
         if MYSQL_VERSION == '8.0':
             return '/opt/bitnami/mysql/logs'
         else:
-            return '/var/mysql/logs'
+            return '/var/log/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return '/opt/bitnami/mariadb/logs'
     else:
