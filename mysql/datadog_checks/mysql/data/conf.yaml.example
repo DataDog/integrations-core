@@ -179,10 +179,10 @@ instances:
 #     service: "<SERVICE_NAME>"
 #     log_processing_rules:
 #       - type: multi_line
-#         # Depending on your MySQL configuration, slow query logs may start with a
-#         # different line, so you may need to tweak this pattern.
-#         name: new_log_starts_with_time
+#         name: new_slow_query_log_entry
 #         pattern: "# Time:"
+#         # If mysqld was started with `--log-short-format`, use:
+#         # pattern: "# Query_time:"
 #
 #   - type: file
 #     path: "<GENERAL_LOG_FILE_PATH>"
