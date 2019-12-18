@@ -86,10 +86,17 @@ def get_metadata_file(check_name):
 
 
 def get_config_spec(check_name):
-    return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'conf_spec.yaml')
+    if check_name == 'agent':
+        return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')
+    else:
+        return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'conf_spec.yaml')
 
 
 def get_config_files(check_name):
+    """TODO: Remove this function when all specs are finished"""
+    if check_name == 'agent':
+        return [os.path.join(get_root(), 'pkg', 'config', 'config_template.yaml')]
+
     files = []
 
     if check_name in NOT_CHECKS:

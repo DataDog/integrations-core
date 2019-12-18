@@ -28,6 +28,8 @@ def config(ctx, check, sync):
     repo_choice = ctx.obj['repo_choice']
     if check:
         checks = [check]
+    elif repo_choice == 'agent':
+        checks = ['agent']
     else:
         checks = sorted(get_valid_checks())
 
@@ -53,7 +55,7 @@ def config(ctx, check, sync):
         file_counter.append(None)
 
         # source is the default file name
-        if repo_choice == 'agent':
+        if check == 'agent':
             display_name = 'Datadog Agent'
             source = 'datadog'
         else:
