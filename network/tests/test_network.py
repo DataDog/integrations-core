@@ -323,3 +323,13 @@ def test_get_net_proc_base_location(aggregator, check, proc_location, envs, expe
     with EnvVars(envs):
         actual = check._get_net_proc_base_location(proc_location)
         assert expected_net_proc_base_location == actual
+
+
+@pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Linux systems")
+@pytest.mark.skipif(not PY3, reason="assertLogs only available on Python 3.4+")
+def test_proc_permissions_error(aggregator, check, caplog):
+    with mock.patch('builtins.open', mock.mock_open()) as mock_file:
+        mock_file.side_effect = IOError()
+        check.check(instance=None)
+        print(caplog.text)
+        assert 'Unable to read /proc/1/net/dev.' in caplog.text
