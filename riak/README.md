@@ -81,7 +81,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | -------------------- | ------------------------------- |
 | `<INTEGRATION_NAME>` | `riak`                          |
 | `<INIT_CONFIG>`      | blank or `{}`                   |
-| `<INSTANCE_CONFIG>`  | `{"url":"%%host%%:8098/stats"}` |
+| `<INSTANCE_CONFIG>`  | `{"url":"http://%%host%%:8098/stats"}` |
 
 ##### Log collection
 
