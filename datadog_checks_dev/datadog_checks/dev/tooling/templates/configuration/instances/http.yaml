@@ -1,0 +1,191 @@
+- name: proxy
+  value:
+    example:
+      http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+      https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+      no_proxy:
+      - <HOSTNAME_1>
+      - <HOSTNAME_2>
+    type: object
+    properties:
+    - name: http
+      type: string
+    - name: https
+      type: string
+    - name: no_proxy
+      type: array
+      items:
+        type: string
+  description: |
+    This overrides the `proxy` setting in `init_config`.
+
+    Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
+    to specify hosts that must bypass proxies.
+
+    The SOCKS protocol is also supported like so:
+
+      socks5://user:pass@host:port
+
+    Using the scheme `socks5` causes the DNS resolution to happen on the
+    client, rather than on the proxy server. This is in line with `curl`,
+    which uses the scheme to decide whether to do the DNS resolution on
+    the client or proxy. If you want to resolve the domains on the proxy
+    server, use `socks5h` as the scheme.
+- name: skip_proxy
+  value:
+    example: false
+    type: boolean
+  description: |
+    This overrides the `skip_proxy` setting in `init_config`.
+
+    If set to `true`, this makes the check bypass any proxy
+    settings enabled and attempt to reach services directly.
+- name: username
+  value:
+    type: string
+  description: The username to use if services are behind basic auth.
+- name: password
+  secret: true
+  value:
+    type: string
+  description: The password to use if services are behind basic or NTLM auth.
+- name: ntlm_domain
+  value:
+    example: <NTLM_DOMAIN>/<USERNAME>
+    type: string
+  description: |
+    If your services uses NTLM authentication, you can specify
+    a domain that is used in the check. For NTLM Auth, append
+    the username to domain, not as the `username` parameter.
+- name: kerberos_auth
+  value:
+    example: disabled
+    type: string
+  description: |
+    If your service uses Kerberos authentication, you can specify the Kerberos
+    strategy to use between:
+
+      - required
+      - optional
+      - disabled
+
+    See https://github.com/requests/requests-kerberos#mutual-authentication
+- name: kerberos_delegate
+  value:
+    example: false
+    type: boolean
+  description: |
+    Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
+
+    See https://github.com/requests/requests-kerberos#delegation
+- name: kerberos_force_initiate
+  value:
+    example: false
+    type: boolean
+  description: |
+    Set to `true` to preemptively initiate the Kerberos GSS exchange and
+    present a Kerberos ticket on the initial request (and all subsequent).
+
+    See https://github.com/requests/requests-kerberos#preemptive-authentication
+- name: kerberos_hostname
+  value:
+    type: string
+  description: |
+    Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
+    match its kerberos hostname (e.g. behind a content switch or load balancer).
+
+    See https://github.com/requests/requests-kerberos#hostname-override
+- name: kerberos_principal
+  value:
+    type: string
+  description: |
+    Set an explicit principal, to force Kerberos to look for a
+    matching credential cache for the named user.
+
+    See https://github.com/requests/requests-kerberos#explicit-principal
+- name: kerberos_keytab
+  value:
+    example: <KEYTAB_FILE_PATH>
+    type: string
+  description: Set the path to your Kerberos key tab file.
+- name: tls_verify
+  value:
+    example: true
+    type: boolean
+  description: Instructs the check to validate the TLS certificate of services.
+- name: tls_ignore_warning
+  value:
+    example: false
+    type: boolean
+  description: |
+    If `tls_verify` is disabled, security warnings are logged by the check.
+    Disable those by setting `tls_ignore_warning` to true.
+- name: tls_cert
+  value:
+    example: <CERT_PATH>
+    type: string
+  description: |
+    The path to a single file in PEM format containing a certificate as well as any
+    number of CA certificates needed to establish the certificate's authenticity for
+    use when connecting to services. It may also contain an unencrypted private key to use.
+- name: tls_private_key
+  value:
+    example: <PRIVATE_KEY_PATH>
+    type: string
+  description: |
+    The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    required if `tls_cert` is set and it does not already contain a private key.
+- name: tls_ca_cert
+  value:
+    example: <CA_CERT_PATH>
+    type: string
+  description: |
+    The path to a file of concatenated CA certificates in PEM format or a directory
+    containing several CA certificates in PEM format. If a directory, the directory
+    must have been processed using the c_rehash utility supplied with OpenSSL. See:
+    https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+- name: headers
+  value:
+    example:
+      Host: <ALTERNATIVE_HOSTNAME>
+      X-Auth-Token: <AUTH_TOKEN>
+    type: object
+  description: |
+    The headers parameter allows you to send specific headers with every request.
+    You can use it for explicitly specifying the host header or adding headers for
+    authorization purposes.
+
+    This overrides any default headers.
+- name: extra_headers
+  value:
+    example:
+      Host: <ALTERNATIVE_HOSTNAME>
+      X-Auth-Token: <AUTH_TOKEN>
+    type: object
+  description: Additional headers to send with every request.
+- name: timeout
+  value:
+    example: 10
+    type: number
+  description: |
+    The timeout for accessing services.
+
+    This overrides the `timeout` setting in `init_config`.
+- name: connect_timeout
+  value:
+    type: number
+  description: The connect timeout for accessing services. Defaults to `timeout`.
+- name: read_timeout
+  value:
+    type: number
+  description: The read timeout for accessing services. Defaults to `timeout`.
+- name: log_requests
+  value:
+    example: false
+    type: boolean
+  description: Whether or not to debug log the HTTP(S) requests made, including the method and URL.
+- name: persist_connections
+  value:
+    example: false
+    type: boolean
+  description: Whether or not to persist cookies and use connection pooling for increased performance.
