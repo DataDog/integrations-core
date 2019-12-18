@@ -28,6 +28,10 @@ class Redis(AgentCheck):
 
     SOURCE_TYPE_NAME = 'redis'
 
+    CONFIG_GAUGE_KEYS = {
+        'maxclients': 'redis.net.maxclients',
+    }
+
     GAUGE_KEYS = {
         # Active defrag metrics
         'active_defrag_running': 'redis.active_defrag.running',
@@ -183,6 +187,7 @@ class Redis(AgentCheck):
             latency_ms = round_value((time.time() - start) * 1000, 2)
             tags = sorted(tags + ["redis_role:%s" % info["role"]])
             self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
+            config = conn.config_get("maxclients")
             status = AgentCheck.OK
             self.service_check('redis.can_connect', status, tags=tags)
             self._collect_metadata(info)
@@ -225,6 +230,11 @@ class Redis(AgentCheck):
                 self.gauge(self.GAUGE_KEYS[info_name], info[info_name], tags=tags)
             elif info_name in self.RATE_KEYS:
                 self.rate(self.RATE_KEYS[info_name], info[info_name], tags=tags)
+
+        for config_key, value in iteritems(config):
+            metric_name = self.CONFIG_GAUGE_KEYS.get(config_key)
+            if metric_name is not None:
+                self.gauge(metric_name, value, tags=tags)
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)

@@ -30,6 +30,7 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.perf.latest_fork_usec', count=2, tags=tags)
     aggregator.assert_metric('redis.keys.evicted', count=2, tags=tags)
     aggregator.assert_metric('redis.net.slaves', count=2, tags=tags)
+    aggregator.assert_metric('redis.net.maxclients', count=2, tags=tags)
     aggregator.assert_metric('redis.clients.blocked', count=2, tags=tags)
     aggregator.assert_metric('redis.stats.keyspace_misses', count=1, tags=tags)
     aggregator.assert_metric('redis.pubsub.channels', count=2, tags=tags)
