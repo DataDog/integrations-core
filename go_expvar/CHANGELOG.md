@@ -1,5 +1,11 @@
 # CHANGELOG - go_expvar
 
+## 1.7.0 / 2019-12-02
+
+* [Added] Adhere to logging style. See [#5106](https://github.com/DataDog/integrations-core/pull/5106).
+* [Added] Add count type to go_expvar. See [#5097](https://github.com/DataDog/integrations-core/pull/5097).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
 ## 1.6.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).

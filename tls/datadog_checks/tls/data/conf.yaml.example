@@ -37,7 +37,7 @@ instances:
 
     ## @param server_hostname - string - optional
     ## The hostname of the service with which to connect for servers that support SNI. This
-    ## is also the value used for hostname validation. If not specified, `server` paramter is used.
+    ## is also the value used for hostname validation. If not specified, `server` parameter is used.
     ## See: https://en.wikipedia.org/wiki/Server_Name_Indication
     #
     # server_hostname: <HOST>

@@ -40,7 +40,7 @@ from .util import (
     STATIO_METRICS,
     fmt,
 )
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, get_version
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, get_raw_version, parse_version, transform_version
 
 MAX_CUSTOM_RESULTS = 100
 TABLE_COUNT_LIMIT = 200
@@ -59,6 +59,7 @@ class PostgreSql(AgentCheck):
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = 'postgres.can_connect'
+    METADATA_TRANSFORMERS = {'version': transform_version}
 
     def __init__(self, name, init_config, instances):
         AgentCheck.__init__(self, name, init_config, instances)
@@ -124,8 +125,9 @@ class PostgreSql(AgentCheck):
     @property
     def version(self):
         if self._version is None:
-            self._version = get_version(self.db)
-            self.service_metadata('version', [self._version.major, self._version.minor, self._version.patch])
+            raw_version = get_raw_version(self.db)
+            self._version = parse_version(raw_version)
+            self.set_metadata('version', raw_version)
         return self._version
 
     def _get_instance_metrics(self, database_size_metrics, collect_default_db):
@@ -722,7 +724,7 @@ class PostgreSql(AgentCheck):
             self._connect(host, port, user, password, dbname, ssl, tags)
             if tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
-            self.log.debug("Running check against version %s", self.version)
+            self.log.debug("Running check against version %s", str(self.version))
             self._collect_stats(
                 user,
                 tags,
@@ -749,3 +751,4 @@ class PostgreSql(AgentCheck):
                 self.db.commit()
             except Exception as e:
                 self.log.warning("Unable to commit: %s", e)
+        self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata

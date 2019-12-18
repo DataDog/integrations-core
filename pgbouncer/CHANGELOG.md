@@ -1,5 +1,9 @@
 # CHANGELOG - pgbouncer
 
+## 1.8.0 / 2019-12-02
+
+* [Added] Upgrade psycopg2-binary to 2.8.4. See [#4840](https://github.com/DataDog/integrations-core/pull/4840).
+
 ## 1.7.0 / 2019-07-04
 
 * [Added] Add logs section. See [#3961](https://github.com/DataDog/integrations-core/pull/3961).

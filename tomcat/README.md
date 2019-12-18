@@ -13,221 +13,97 @@ This check collects Tomcat metrics, for example:
 And more.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The Tomcat check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Tomcat servers.
 
-This check is JMX-based, so you need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][4] to do that.
+This check is JMX-based, so you need to enable JMX Remote on your Tomcat servers. Follow the instructions in the [Tomcat documentation][4].
 
 ### Configuration
+#### Host
 
-1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5] to start collecting your Tomcat [metrics](#metric-collection) and [logs](#log-collection). See the [sample tomcat.d/conf.yaml][6] for all available configuration options.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-2. [Restart the Agent][7]
+1. Edit the `tomcat.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5] to collect Tomcat metrics and [logs](#log-collection). See the [sample tomcat.d/conf.yaml][6] for all available configuration options.
 
-#### Metric collection
+2. [Restart the Agent][7].
 
-*  Add this configuration block to your `tomcat.yaml` file to start gathering your [Tomcat metrics](#metrics):
+See the [JMX Check documentation][8] for a list of configuration options usable by all JMX-based checks.
 
-```
-instances:
-    -   host: localhost
-        port: 7199
-        user: <TOMCAT_USERNAME>
-        password: <PASSWORD>
-        name: my_tomcat
+#### List of metrics
 
-init_config:
-  conf:
-    - include:
-        type: ThreadPool
-        attribute:
-          maxThreads:
-            alias: tomcat.threads.max
-            metric_type: gauge
-          currentThreadCount:
-            alias: tomcat.threads.count
-            metric_type: gauge
-          currentThreadsBusy:
-            alias: tomcat.threads.busy
-            metric_type: gauge
-    - include:
-        type: GlobalRequestProcessor
-        attribute:
-          bytesSent:
-            alias: tomcat.bytes_sent
-            metric_type: counter
-          bytesReceived:
-            alias: tomcat.bytes_rcvd
-            metric_type: counter
-          errorCount:
-            alias: tomcat.error_count
-            metric_type: counter
-          requestCount:
-            alias: tomcat.request_count
-            metric_type: counter
-          maxTime:
-            alias: tomcat.max_time
-            metric_type: gauge
-          processingTime:
-            alias: tomcat.processing_time
-            metric_type: counter
-    - include:
-        j2eeType: Servlet
-        attribute:
-          processingTime:
-            alias: tomcat.servlet.processing_time
-            metric_type: counter
-          errorCount:
-            alias: tomcat.servlet.error_count
-            metric_type: counter
-          requestCount:
-            alias: tomcat.servlet.request_count
-            metric_type: counter
-    - include:
-        type: Cache
-        attribute:
-          accessCount:
-            alias: tomcat.cache.access_count
-            metric_type: counter
-          hitsCounts:
-            alias: tomcat.cache.hits_count
-            metric_type: counter
-    - include:
-        type: JspMonitor
-        attribute:
-          jspCount:
-            alias: tomcat.jsp.count
-            metric_type: counter
-          jspReloadCount:
-            alias: tomcat.jsp.reload_count
-            metric_type: counter
-```
+The `conf` parameter is a list of metrics to be collected by the integration. Only two keys are allowed:
 
-See the [JMX Check documentation][8] for a list of configuration options usable by all JMX-based checks. The page also describes how the Agent tags JMX metrics.
-
-[Restart the Agent][7] to start sending Tomcat metrics to Datadog.
-
-Configuration Options:
-
-| Option                                        | Required | Description                                                                                                                                                                |
-|-----------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `user` and `password`                         | No       | Username and password                                                                                                                                                      |
-| `process_name_regex`                          | No       | Instead of specifying a host and port or `jmx_url`, the Agent can connect using the attach api. This requires the JDK to be installed and the path to tools.jar to be set. |
-| `tools_jar_path`                              | No       | Should be set when `process_name_regex` is set.                                                                                                                            |
-| `java_bin_path`                               | No       | Should be set if the Agent cannot find your java executable.                                                                                                               |
-| `java_options`                                | No       | Java JVM options                                                                                                                                                           |
-| `trust_store_path` and `trust_store_password` | No       | Should be set if `com.sun.management.jmxremote.ssl` is set to true on the target JVM.                                                                                      |
-| `key_store_path` and `key_store_password`     | No       | Should be set if `com.sun.management.jmxremote.ssl.need.client.auth` is set to true on the target JVM.                                                                     |
-| `rmi_registry_ssl`                            | No       | Should be set to true if `com.sun.management.jmxremote.registry.ssl` is set to true on the target JVM.                                                                     |
-
-The `conf` parameter is a list of dictionaries. Only 2 keys are allowed in this dictionary:
-
-| Key       | Required | Description                                                                                                                   |
-|-----------|----------|-------------------------------------------------------------------------------------------------------------------------------|
-| `include` | Yes      | A dictionary of filters. Any attribute that matches these filters are collected unless it also matches the "exclude" filters. |
-| `exclude` | No       | A dictionary of filters. Attributes that match these filters won't be collected.                                              |
+* `include` (**mandatory**): A dictionary of filters. Any attribute that matches these filters is collected unless it also matches the `exclude` filters (see below).
+* `exclude` (**optional**): A dictionary of filters. Attributes that match these filters are not collected.
 
 For a given bean, metrics get tagged in the following manner:
 
-    mydomain:attr0=val0,attr1=val1
+```
+mydomain:attr0=val0,attr1=val1
+```
 
-Your metric is mydomain (or some variation depending on the attribute inside the bean) and has the tags `attr0:val0, attr1:val1, domain:mydomain`.
+In this example, your metric is `mydomain` (or some variation depending on the attribute inside the bean) and has the tags `attr0:val0`, `attr1:val1`, and `domain:mydomain`.
 
 If you specify an alias in an `include` key that is formatted as *camel case*, it is converted to *snake case*. For example, `MyMetricName` is shown in Datadog as `my_metric_name`.
 
-See the [sample tomcat.yaml][6] for all available configuration options.
-
 ##### The attribute filter
 
-The `attribute` filter accepts two types of values:
+The `attribute` filter can accept two types of values:
 
-* A dictionary whose keys are attributes names:
+* A dictionary whose keys are attributes names (see below). For this case, you can specify an alias for the metric that becomes the metric name in Datadog. You can also specify the metric type as a gauge or counter. If you choose counter, a rate per second is computed for the metric.
+    ```yaml
+      conf:
+        - include:
+          attribute:
+            maxThreads:
+              alias: tomcat.threads.max
+              metric_type: gauge
+            currentThreadCount:
+              alias: tomcat.threads.count
+              metric_type: gauge
+            bytesReceived:
+              alias: tomcat.bytes_rcvd
+              metric_type: counter
+    ```
 
-```
-  conf:
-    - include:
-        attribute:
-          maxThreads:
-            alias: tomcat.threads.max
-            metric_type: gauge
-          currentThreadCount:
-            alias: tomcat.threads.count
-            metric_type: gauge
-          bytesReceived:
-            alias: tomcat.bytes_rcvd
-            metric_type: counter
-```
+* A list of attributes names (see below). For this case, the metric type is a gauge, and the metric name is `jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]`.
+    ```yaml
+      conf:
+        - include:
+          domain: org.apache.cassandra.db
+          attribute:
+            - BloomFilterDiskSpaceUsed
+            - BloomFilterFalsePositives
+            - BloomFilterFalseRatio
+            - Capacity
+            - CompressionRatio
+            - CompletedTasks
+            - ExceptionCount
+            - Hits
+            - RecentHitRate
+    ```
 
-For the case above, the metric aliases specified become the metric name in Datadog. Also, the metric type can be specified as a gauge or counter. If you choose counter, a rate per second is computed for this metric.
+#### Older versions
 
-* A list of attributes names:
+List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, use singletons and multiple `include` statements instead.
 
-```
-  conf:
-    - include:
-        domain: org.apache.cassandra.db
-        attribute:
-          - BloomFilterDiskSpaceUsed
-          - BloomFilterFalsePositives
-          - BloomFilterFalseRatio
-          - Capacity
-          - CompressionRatio
-          - CompletedTasks
-          - ExceptionCount
-          - Hits
-          - RecentHitRate
-```
+    # Datadog Agent > 5.3.0
+      conf:
+        - include:
+          domain: domain_name
+          bean:
+            - first_bean_name
+            - second_bean_name
 
-In that case:
-
-  * The metric type is a gauge
-  * The metric name is `jmx.\[DOMAIN_NAME].\[ATTRIBUTE_NAME]`
-
-Here is another filtering example:
-
-```
-instances:
-  - host: 127.0.0.1
-    name: jmx_instance
-    port: 9999
-
-init_config:
-  conf:
-    - include:
-        bean: org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency
-        attribute:
-          - OneMinuteRate
-          - 75thPercentile
-          - 95thPercentile
-          - 99thPercentile
-```
-
-<div class="alert alert-warning">
-  <b>Note:</b> List of filters is only supported in Datadog Agent > 5.3.0. If you are using an older version, use singletons and multiple <code>include</code> statements instead.
-</div>
-
-```
-# Datadog Agent > 5.3.0
-  conf:
-    - include:
-        domain: domain_name
-        bean:
-          - first_bean_name
-          - second_bean_name
-
-# Older Datadog Agent versions
-  conf:
-    - include:
-        domain: domain_name
-        bean: first_bean_name
-    - include:
-        domain: domain_name
-        bean: second_bean_name
-```
+    # Older Datadog Agent versions
+      conf:
+        - include:
+          domain: domain_name
+          bean: first_bean_name
+        - include:
+          domain: domain_name
+          bean: second_bean_name
 
 #### Log collection
 
@@ -283,7 +159,7 @@ init_config:
       %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
       %d [%t] %-5p %c - %m%n
     ```
-    
+
     Clone and edit the [integration pipeline][10] if you have a different format. Check Tomcat [logging documentation][9] for more information about Tomcat logging capabilities.
 
 3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
@@ -311,6 +187,10 @@ init_config:
 
 5. [Restart the Agent][7].
 
+#### Containerized
+
+For containerized environments, see the [Autodiscovery with JMX][2] guide.
+
 ### Validation
 
 [Run the Agent's status subcommand][11] and look for `tomcat` under the **Checks** section.
@@ -328,7 +208,7 @@ The Tomcat check does not include any events.
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Tomcat instance, otherwise returns `OK`.
 
 ## Troubleshooting
-### Commands to view the metrics that are available:
+### Commands to view the available metrics
 
 The `datadog-agent jmx` command was added in version 4.1.0.
 
@@ -353,16 +233,16 @@ Additional helpful documentation, links, and articles:
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://tomcat.apache.org/tomcat-6.0-doc/monitoring.html
-[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [6]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/integrations/java
 [9]: https://tomcat.apache.org/tomcat-7.0-doc/logging.html
 [10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
 [13]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
 [14]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance

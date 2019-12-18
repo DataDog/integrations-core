@@ -1,5 +1,13 @@
 # CHANGELOG - postfix
 
+## 1.5.1 / 2019-12-04
+
+* [Fixed] Properly collect metadata when `postqueue` is false. See [#5142](https://github.com/DataDog/integrations-core/pull/5142).
+
+## 1.5.0 / 2019-12-02
+
+* [Added] Add version metadata. See [#4949](https://github.com/DataDog/integrations-core/pull/4949).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3556](https://github.com/DataDog/integrations-core/pull/3556).

@@ -96,7 +96,8 @@ class ZookeeperCheck(AgentCheck):
 
     # example match:
     # "Zookeeper version: 3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT"
-    version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
+    # This regex matches the entire version rather than <major>.<minor>.<patch>
+    metadata_version_pattern = re.compile('Zookeeper version: ([^,]+)')
 
     SOURCE_TYPE_NAME = 'zookeeper'
 
@@ -259,12 +260,16 @@ class ZookeeperCheck(AgentCheck):
         # body correctly. Particularly, the Connections val was added in
         # >= 3.4.4.
         start_line = buf.readline()
-        match = self.version_pattern.search(start_line)
-        if match is None:
+        # this is to grab the additional version information
+        total_match = self.metadata_version_pattern.search(start_line)
+        if total_match is None:
             return (None, None, "inactive", None)
             raise Exception("Could not parse version from stat command output: %s" % start_line)
         else:
-            version = match.group()
+            version = total_match.group(1).split("-")[0]
+            # grabs the entire version number for inventories.
+            metadata_version = total_match.group(1)
+            self.set_metadata('version', metadata_version)
         has_connections_val = LooseVersion(version) > LooseVersion("3.4.4")
 
         # Clients:

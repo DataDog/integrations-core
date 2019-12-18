@@ -1,5 +1,10 @@
 # CHANGELOG - Envoy
 
+## 1.11.0 / 2019-12-02
+
+* [Added] Add new metrics for Redis. See [#4946](https://github.com/DataDog/integrations-core/pull/4946). Thanks [tony612](https://github.com/tony612).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
 ## 1.10.0 / 2019-10-11
 
 * [Added] Add xDS-related metrics. See [#4634](https://github.com/DataDog/integrations-core/pull/4634). Thanks [csssuf](https://github.com/csssuf).

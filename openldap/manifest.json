@@ -2,7 +2,8 @@
   "aliases": [],
   "categories": [
     "data store",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "OpenLDAP",

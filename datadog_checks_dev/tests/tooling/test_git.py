@@ -12,6 +12,8 @@ from datadog_checks.dev.tooling.git import (
     git_show_file,
     git_tag,
     git_tag_list,
+    ignored_by_git,
+    tracked_by_git,
 )
 
 
@@ -137,3 +139,21 @@ def test_git_tag_list():
             res = git_tag_list(r'^a')
             assert res == ['a']
             chdir.assert_called_once_with('/foo/')
+
+
+def test_ignored_by_git():
+    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
+        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+            set_root('/foo/')
+            ignored_by_git('bar')
+            chdir.assert_called_once_with('/foo/')
+            run.assert_called_once_with('git check-ignore -q bar', capture=True)
+
+
+def test_tracked_by_git():
+    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
+        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+            set_root('/foo/')
+            tracked_by_git('bar')
+            chdir.assert_called_once_with('/foo/')
+            run.assert_called_once_with('git ls-files --error-unmatch bar', capture=True)

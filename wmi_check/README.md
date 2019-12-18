@@ -134,7 +134,7 @@ Need help? Contact [Datadog support][13].
 [8]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
 [9]: https://docs.datadoghq.com/developers/metrics/custom_metrics
 [10]: https://docs.datadoghq.com/account_management/billing/custom_metrics
-[11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
 [13]: https://docs.datadoghq.com/help
 [14]: https://docs.datadoghq.com/integrations/pdh_check/

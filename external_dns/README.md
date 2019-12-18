@@ -24,13 +24,13 @@ apiVersion: v1
 kind: Pod
 metadata:
   annotations:
-    service-discovery.datadoghq.com/external_dns.check_names: '["external_dns"]'
-    service-discovery.datadoghq.com/external_dns.init_configs: '[{}]'
-    service-discovery.datadoghq.com/external_dns.instances: '[[{"prometheus_url":"http://%%host%%:7979/metrics", "tags":["dns-pod:%%host%%"]}]]'
+    ad.datadoghq.com/external-dns.check_names: '["external_dns"]'
+    ad.datadoghq.com/external-dns.init_configs: '[{}]'
+    ad.datadoghq.com/external-dns.instances: '[{"prometheus_url":"http://%%host%%:7979/metrics", "tags":["externaldns-pod:%%host%%"]}]'
 ```
 
-- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the service discovery.
-- The service discovery annotations are done on the pod. To deploy, add the annotations to the metadata of the template's specification.
+- The `externaldns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the autodiscovery.
+- The autodiscovery annotations are done on the pod. To deploy, add the annotations to the metadata of the template's specification.
 
 ### Validation
 
@@ -56,9 +56,9 @@ Returns `CRITICAL` if the check cannot access the metrics endpoint, otherwise re
 Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/external_dns/datadog_checks/external_dns/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/external_dns/metadata.csv
 [6]: https://docs.datadoghq.com/help
 [7]: https://github.com/kubernetes-incubator/external-dns

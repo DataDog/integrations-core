@@ -170,7 +170,6 @@ def test_mock_case(aggregator, http_check):
 def test_service_check_instance_name_normalization(aggregator, http_check):
     """
     Service check `instance` tag value is normalized.
-
     Note: necessary to avoid mismatch and backward incompatibility.
     """
 
