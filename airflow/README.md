@@ -17,7 +17,7 @@ In addition to metrics, the Datadog Agent also sends service checks related to A
 
 ### Installation
 
-All three steps below are needed for the Airflow integration to work properly. Before you begin, you [install the Datadog Agent][9].
+All three steps below are needed for the Airflow integration to work properly. Before you begin, you [install the Datadog Agent][9] version `>=6.17` or `>=7.17` that includes Statsd/DogStatsD Mapping feature. 
 
 #### Step 1: Configure Airflow to collect health metrics and service checks
 
