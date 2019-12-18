@@ -34,13 +34,6 @@ def config_e2e():
             },
             {
                 'type': 'file',
-                'path': '{}/mysql_error.log'.format(logs_base_path),
-                'source': 'mysql',
-                'sourcecategory': 'database',
-                'service': 'local_mysql',
-            },
-            {
-                'type': 'file',
                 'path': '{}/mysql_slow.log'.format(logs_base_path),
                 'source': 'mysql',
                 'sourcecategory': 'database',
