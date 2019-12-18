@@ -170,7 +170,7 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 [6]: https://kubernetes.io/docs/api-reference/v1.7/#configmap-v1-core
 [7]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account
 [8]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/datadog_checks/kubernetes/data/conf.yaml.example#L118
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/metadata.csv
 [11]: https://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html
 [12]: https://github.com/DataDog/dd-agent/pull/3051

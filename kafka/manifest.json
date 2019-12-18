@@ -11,7 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "kafka.",
-  "metric_to_check": "kafka.net.bytes_out",
+  "metric_to_check": "kafka.net.bytes_out.rate",
   "name": "kafka",
   "process_signatures": [
     "java kafka.kafka"

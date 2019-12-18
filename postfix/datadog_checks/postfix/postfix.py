@@ -90,6 +90,8 @@ class PostfixCheck(AgentCheck):
             self.log.debug('running the check in classic mode')
             self._get_queue_count(directory, queues, tags)
 
+        self._collect_metadata()
+
     def _get_config(self, instance):
         directory = instance.get('directory', None)
         postfix_config_dir = instance.get('config_directory', None)
@@ -163,8 +165,6 @@ class PostfixCheck(AgentCheck):
             tags=tags + ['queue:deferred', 'instance:{}'.format(postfix_config_dir)],
         )
 
-        self._collect_metadata()
-
     def _get_queue_count(self, directory, queues, tags):
         for queue in queues:
             queue_path = os.path.join(directory, queue)
@@ -199,7 +199,12 @@ class PostfixCheck(AgentCheck):
             #     sum:postfix.queue.size{instance:postfix-2,queue:incoming,host:hostname.domain.tld}
 
     def _collect_metadata(self):
-        pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
+        try:
+            pc_output, _, _ = get_subprocess_output(['postconf', 'mail_version'], self.log, False)
+        except Exception as e:
+            self.log.warning('unable to call `postconf mail_version`: %s', e)
+            return
+
         self.log.debug('postconf mail_version output: %s', pc_output)
 
         postfix_version = pc_output.strip('\n').split('=')[1].strip()

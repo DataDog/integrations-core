@@ -5,6 +5,7 @@
 import os
 from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 
+import mock
 import pytest
 
 from datadog_checks.zk import ZookeeperCheck
@@ -66,3 +67,24 @@ def test_error_state(aggregator, dd_environment, get_conn_failure_config):
     expected_mode = get_conn_failure_config['expected_mode']
     mname = "zookeeper.instances.{}".format(expected_mode)
     aggregator.assert_metric(mname, value=1, count=1)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata(datadog_agent):
+    check = ZookeeperCheck(conftest.CHECK_NAME, {}, [conftest.VALID_CONFIG])
+
+    check.check_id = 'test:123'
+
+    check.check(conftest.VALID_CONFIG)
+
+    raw_version = common.ZK_VERSION
+    major, minor = raw_version.split('.')[:2]
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': mock.ANY,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

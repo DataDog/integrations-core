@@ -191,20 +191,26 @@ class Couchbase(AgentCheck):
             tags = list(set(tags))
         tags.append('instance:{}'.format(server))
         data = self.get_data(server, instance)
-        self.collect_version(data)
+        self._collect_version(data)
         self._create_metrics(data, instance_state, server, tags=list(set(tags)))
 
-    def collect_version(self, data):
-        version = ""
-
+    def _collect_version(self, data):
         nodes = data['stats']['nodes']
 
-        # Next, get all the nodes
-        if nodes is not None:
-            for node in nodes:
-                version = node['version']
+        if nodes:
+            # Mixed version clusters are discouraged and are therefore rare, see:
+            # https://forums.couchbase.com/t/combining-multiple-versions-in-one-cluster/8782/5
+            version = nodes[0]['version']
 
-        self.set_metadata('version', version)
+            # Convert e.g. 5.5.3-4039-enterprise to semver
+            num_separators = version.count('-')
+            if num_separators == 2:
+                build_separator = version.rindex('-')
+                version = list(version)
+                version[build_separator] = '+'
+                version = ''.join(version)
+
+            self.set_metadata('version', version)
 
     def get_data(self, server, instance):
         # The dictionary to be returned.

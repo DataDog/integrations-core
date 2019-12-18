@@ -38,6 +38,7 @@ Follow the instructions below to configure this check for an Agent running on a 
             spark_cluster_mode: spark_standalone_mode # default
         #   spark_cluster_mode: spark_mesos_mode
         #   spark_cluster_mode: spark_yarn_mode
+        #   spark_cluster_mode: spark_driver_mode
 
             cluster_name: <CLUSTER_NAME> # required; adds a tag 'cluster_name:<CLUSTER_NAME>' to all metrics
         #   spark_pre_20_mode: true   # if you use Standalone Spark < v2.0
@@ -82,6 +83,9 @@ Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's App
 **spark.resource_manager.can_connect**<br>
 Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ResourceManager. Returns `OK` otherwise.
 
+**spark.driver.can_connect**<br>
+Returns `CRITICAL` if the Agent is unable to connect to the Spark instance's ResourceManager. Returns `OK` otherwise.
+
 ## Troubleshooting
 ### Spark on AWS EMR
 
@@ -97,10 +101,10 @@ Additional helpful documentation, links, and articles:
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv
 [9]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html
 [10]: https://docs.datadoghq.com/agent

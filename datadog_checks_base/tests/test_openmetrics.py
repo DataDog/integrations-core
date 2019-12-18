@@ -13,6 +13,7 @@ import pytest
 import requests
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from six import iteritems
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
@@ -2066,32 +2067,51 @@ def test_filter_metrics(
     aggregator.assert_all_metrics_covered()
 
 
-def test_metadata_default(mocked_openmetrics_check_factory, text_data):
+def test_metadata_default(mocked_openmetrics_check_factory, text_data, datadog_agent):
     instance = dict(OPENMETRICS_CHECK_INSTANCE)
     check = mocked_openmetrics_check_factory(instance)
     check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        check.check(instance)
-
-        assert m.call_count == 0
+    check.check(instance)
+    datadog_agent.assert_metadata_count(0)
 
 
-def test_metadata_transformer(mocked_openmetrics_check_factory, text_data):
+def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datadog_agent):
     instance = dict(OPENMETRICS_CHECK_INSTANCE)
     instance['metadata_metric_name'] = 'kubernetes_build_info'
     instance['metadata_label_map'] = {'version': 'gitVersion'}
     check = mocked_openmetrics_check_factory(instance)
     check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        check.check(instance)
+    version_metadata = {
+        'version.major': '1',
+        'version.minor': '6',
+        'version.patch': '0',
+        'version.release': 'alpha.0.680',
+        'version.build': '3872cb93abf948-dirty',
+        'version.raw': 'v1.6.0-alpha.0.680+3872cb93abf948-dirty',
+        'version.scheme': 'semver',
+    }
 
-        m.assert_any_call('test:123', 'version.major', '1')
-        m.assert_any_call('test:123', 'version.minor', '6')
-        m.assert_any_call('test:123', 'version.patch', '0')
-        m.assert_any_call('test:123', 'version.release', 'alpha.0.680')
-        m.assert_any_call('test:123', 'version.build', '3872cb93abf948-dirty')
-        m.assert_any_call('test:123', 'version.raw', 'v1.6.0-alpha.0.680+3872cb93abf948-dirty')
-        m.assert_any_call('test:123', 'version.scheme', 'semver')
-        assert m.call_count == 7
+    check.check(instance)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+def test_ssl_verify_not_raise_warning(mocked_openmetrics_check_factory, text_data):
+    instance = dict(
+        {
+            'prometheus_url': 'https://www.example.com',
+            'metrics': [{'foo': 'bar'}],
+            'namespace': 'openmetrics',
+            'ssl_verify': False,
+        }
+    )
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    with pytest.warns(None) as record:
+        resp = check.send_request('https://httpbin.org/get', scraper_config)
+
+    assert "httpbin.org" in resp.content.decode('utf-8')
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)

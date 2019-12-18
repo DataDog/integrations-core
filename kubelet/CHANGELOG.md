@@ -1,5 +1,10 @@
 # CHANGELOG - kubelet
 
+## 3.4.0 / 2019-12-02
+
+* [Added] Collect a new metric: kubelet.evictions. See [#5076](https://github.com/DataDog/integrations-core/pull/5076).
+* [Added] Add a gauge for effective usage of ephemeral storage per POD. See [#5052](https://github.com/DataDog/integrations-core/pull/5052).
+
 ## 3.3.4 / 2019-10-30
 
 * [Fixed] Fix container collection for k8s 1.16. See [#4925](https://github.com/DataDog/integrations-core/pull/4925).

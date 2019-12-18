@@ -7,9 +7,6 @@
 Get metrics from Oracle Database servers in real time to visualize and monitor availability and performance.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying these instructions.
-
 ### Installation
 
 #### Prerequisite
@@ -49,15 +46,15 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
 
 3. Update your `LD_LIBRARY_PATH` to include the location of the Instant Client libraries when starting/restarting the agent:
 
-  ```
-  export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
-  ```
+    ```
+    export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
+    ```
 
 **Note:** Agent 6 uses Upstart or systemd to orchestrate the `datadog-agent` service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][5] or [systemd][6] for more information on how to configure these settings.
 
 The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files (`/int/init/datadog-agent.conf`) on a system using Upstart.
 
-```
+```conf
 description "Datadog Agent"
 
 start on started networking
@@ -112,35 +109,78 @@ ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 ```
 
 ### Configuration
+#### Host
 
-Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to point to your server and port, set the masters to monitor. See the [sample oracle.d/conf.yaml][3] for all available configuration options.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. Update the `server` and `port` to set the masters to monitor. See the [sample oracle.d/conf.yaml][3] for all available configuration options.
+
+    ```yaml
+      init_config:
+
+      instances:
+
+          ## @param server - string - required
+          ## The IP address or hostname of the Oracle Database Server.
+          #
+        - server: localhost:1521
+
+          ## @param service_name - string - required
+          ## The Oracle Database service name. To view the services available on your server,
+          ## run the following query:
+          ## `SELECT value FROM v$parameter WHERE name='service_names'`
+          #
+          service_name: "<SERVICE_NAME>"
+
+          ## @param user - string - required
+          ## The username for the user account.
+          #
+          user: datadog
+
+          ## @param password - string - required
+          ## The password for the user account.
+          #
+          password: "<PASSWORD>"
+    ```
+
+2. [Restart the Agent][8].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                                     |
+|----------------------|-----------------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `oracle`                                                                                                  |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                             |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "user":"datadog", "password":"<PASSWORD>"}` |
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `oracle` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `oracle` under the Checks section.
 
 ## Custom Query
 
 Providing custom queries is also supported. Each query must have 3 parameters:
 
-| Parameter | Description |
-| ----      | ---         |
-| `metric_prefix`  | This is what each metric starts with. |
-| `query`  | This is the SQL to execute. It can be a simple statement or a multi-line script. All rows of the result are evaluated. |
-| `columns` | This is a list representing each column, ordered sequentially from left to right. There are 2 required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix to append to the `metric_prefix` in order to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
+| Parameter       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `metric_prefix` | This is what each metric starts with.                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `query`         | This is the SQL to execute. It can be a simple statement or a multi-line script. All rows of the result are evaluated.                                                                                                                                                                                                                                                                                                                        |
+| `columns`       | This is a list representing each column, ordered sequentially from left to right. There are 2 required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix to append to the `metric_prefix` in order to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
 
 Optionally use the `tags` parameter to apply a list of tags to each metric collected.
 
 The following:
 
-```
+```python
 self.gauge('oracle.custom_query.metric1', value, tags=['tester:oracle', 'tag1:value'])
 self.count('oracle.custom_query.metric2', value, tags=['tester:oracle', 'tag1:value'])
 ```
 
 is what the following example configuration would become:
 
-```
+```yaml
 - metric_prefix: oracle.custom_query
   query: |  # Use the pipe if you require a multi-line script.
    SELECT columns
@@ -164,7 +204,7 @@ See the [sample oracle.d/conf.yaml][3] for all available configuration options.
 ## Data Collected
 
 ### Metrics
-See [metadata.csv][9] for a list of metrics provided by this integration.
+See [metadata.csv][11] for a list of metrics provided by this integration.
 
 ### Events
 The Oracle Database check does not include any events.
@@ -174,7 +214,7 @@ The Oracle Database check does not include any events.
 Verifies the database is available and accepting connections.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][10].
+Need help? Contact [Datadog support][12].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
 [2]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
@@ -182,8 +222,9 @@ Need help? Contact [Datadog support][10].
 [4]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
 [5]: http://upstart.ubuntu.com/cookbook/#environment-variables
 [6]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
-[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
-[10]: https://docs.datadoghq.com/help
-[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
+[12]: https://docs.datadoghq.com/help

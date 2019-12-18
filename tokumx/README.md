@@ -11,9 +11,6 @@ This check collects TokuMX metrics like:
 And more.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
-
 ### Installation
 
 The TokuMX check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your TokuMX servers.
@@ -51,7 +48,9 @@ The TokuMX check is included in the [Datadog Agent][2] package, so you don't nee
 
 For more details about creating and managing users in MongoDB, see [the MongoDB documentation][3].
 
-#### Connect the Agent
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `tokumx.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
     See the [sample tokumx.d/conf.yaml][5] for all available configuration options:
@@ -60,10 +59,20 @@ For more details about creating and managing users in MongoDB, see [the MongoDB 
         init_config:
 
         instances:
-            - server: mongodb://datadog:<UNIQUEPASSWORD>@localhost:27017
+            - server: mongodb://<USER>:<PASSWORD>@localhost:27017
     ```
 
 2. [Restart the Agent][6] to start sending TokuMX metrics to Datadog.
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                      |
+|----------------------|------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `tokumx`                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                              |
+| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://<USER>:<PASSWORD>@%%host%%:27017"}` |
 
 ### Validation
 
@@ -95,10 +104,10 @@ Need help? Contact [Datadog support][9].
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://www.mongodb.org/display/DOCS/Security+and+Authentication
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/tokumx/datadog_checks/tokumx/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/tokumx/metadata.csv
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications

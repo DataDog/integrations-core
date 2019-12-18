@@ -24,6 +24,15 @@ from datadog_checks.base.errors import CheckException
 from .config import InstanceConfig
 
 try:
+    from datadog_checks.base.utils.common import total_time_to_temporal_percent
+except ImportError:
+
+    # Provide fallback for agent < 6.16
+    def total_time_to_temporal_percent(total_time, scale=1000):
+        return total_time / scale * 100
+
+
+try:
     from datadog_agent import get_config, read_persistent_cache, write_persistent_cache
 except ImportError:
 
@@ -179,6 +188,7 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)
         enforce_constraints = config.enforce_constraints
         oids = []
+        all_oids = []
         bulk_oids = []
         # Use bulk for SNMP version > 1 and there are enough symbols
         bulk_limit = config.bulk_threshold if config.auth_data.mpModel else 0
@@ -187,11 +197,20 @@ class SnmpCheck(AgentCheck):
                 # No table to browse, just one symbol
                 oids.append(table)
             elif len(symbols) < bulk_limit:
-                oids.extend(symbols)
+                all_oids.append(symbols)
             else:
                 bulk_oids.append(table)
 
-        all_binds, error = self.fetch_oids(config, oids, enforce_constraints=enforce_constraints)
+        if oids:
+            all_oids.insert(0, oids)
+
+        all_binds = []
+        error = None
+        for to_fetch in all_oids:
+            binds, current_error = self.fetch_oids(config, to_fetch, enforce_constraints=enforce_constraints)
+            all_binds.extend(binds)
+            if not error:
+                error = current_error
 
         for oid in bulk_oids:
             try:
@@ -205,8 +224,10 @@ class SnmpCheck(AgentCheck):
                     ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                     lexicographicMode=False,
                 )
-                binds, error = self._consume_binds_iterator(binds_iterator, config)
+                binds, current_error = self._consume_binds_iterator(binds_iterator, config)
                 all_binds.extend(binds)
+                if not error:
+                    error = current_error
 
             except PySnmpError as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
@@ -219,7 +240,7 @@ class SnmpCheck(AgentCheck):
                 # if enforce_constraints is false, then MIB resolution has not been done yet
                 # so we need to do it manually. We have to specify the mibs that we will need
                 # to resolve the name.
-                oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple()).loadMibs(*config.mibs_to_load)
+                oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple())
                 result_oid = oid_to_resolve.resolveWithMib(config.mib_view_controller)
             _, metric, indexes = result_oid.getMibSymbol()
             results[metric][indexes] = value
@@ -557,9 +578,15 @@ class SnmpCheck(AgentCheck):
             if forced_type.lower() == 'gauge':
                 value = int(snmp_value)
                 self.gauge(metric_name, value, tags)
+            elif forced_type.lower() == 'percent':
+                value = total_time_to_temporal_percent(int(snmp_value), scale=1)
+                self.rate(metric_name, value, tags)
             elif forced_type.lower() == 'counter':
                 value = int(snmp_value)
                 self.rate(metric_name, value, tags)
+            elif forced_type.lower() == 'monotonic_count':
+                value = int(snmp_value)
+                self.monotonic_count(metric_name, value, tags)
             else:
                 self.warning('Invalid forced-type specified: {} in {}'.format(forced_type, name))
                 raise ConfigurationError('Invalid forced-type in config file: {}'.format(name))

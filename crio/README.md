@@ -48,7 +48,7 @@ Need help? Contact [Datadog support][7].
 [1]: http://cri-o.io
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://github.com/DataDog/integrations-core/blob/master/crio/datadog_checks/crio/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/crio/metadata.csv
 [7]: https://docs.datadoghq.com/help

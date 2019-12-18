@@ -19,7 +19,8 @@ TAGS = "tags"
 
 GAUGE = "gauge"
 RATE = "rate"
-COUNTER = "counter"
+COUNT = "count"
+COUNTER = "counter"  # Deprecated
 MONOTONIC_COUNTER = "monotonic_counter"
 DEFAULT_TYPE = GAUGE
 
@@ -27,7 +28,8 @@ DEFAULT_TYPE = GAUGE
 SUPPORTED_TYPES = {
     GAUGE: AgentCheck.gauge,
     RATE: AgentCheck.rate,
-    COUNTER: AgentCheck.increment,
+    COUNT: AgentCheck.count,
+    COUNTER: AgentCheck.increment,  # Deprecated
     MONOTONIC_COUNTER: AgentCheck.monotonic_count,
 }
 
@@ -142,18 +144,18 @@ class GoExpvar(AgentCheck):
             alias = metric.get(ALIAS)
 
             if not path:
-                self.warning("Metric %s has no path" % metric)
+                self.warning("Metric %s has no path", metric)
                 continue
 
             if metric_type not in SUPPORTED_TYPES:
-                self.warning("Metric type %s not supported for this check" % metric_type)
+                self.warning("Metric type %s not supported for this check", metric_type)
                 continue
 
             keys = path.split("/")
             values = self.deep_get(data, keys)
 
             if len(values) == 0:
-                self.warning("No results matching path %s" % path)
+                self.warning("No results matching path %s", path)
                 continue
 
             tag_by_path = alias is not None
@@ -167,7 +169,7 @@ class GoExpvar(AgentCheck):
                 try:
                     float(value)
                 except (TypeError, ValueError):
-                    self.log.warning("Unreportable value for path %s: %s" % (path, value))
+                    self.log.warning("Unreportable value for path %s: %s", path, value)
                     continue
 
                 if count >= max_metrics:
@@ -228,7 +230,7 @@ class GoExpvar(AgentCheck):
                 try:
                     key_regex = re.compile(regex)
                 except Exception:
-                    self.warning("Cannot compile regex: %s" % regex)
+                    self.warning("Cannot compile regex: %s", regex)
                     return []
                 self._regexes[key] = key_regex
             matcher = key_regex.match

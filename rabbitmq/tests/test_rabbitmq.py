@@ -1,17 +1,21 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
+import os
+
 import pytest
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata(check, instance, aggregator, version_metadata):
+def test_metadata(check, instance, datadog_agent):
     check.check_id = 'test:123'
 
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        check.check(instance)
-        for name, value in version_metadata.items():
-            m.assert_any_call('test:123', name, value)
+    version = os.environ['RABBITMQ_VERSION']
+    major, minor = version.split('.')
 
-        assert m.call_count == len(version_metadata)
+    version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
+
+    check.check(instance)
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata) + 2)

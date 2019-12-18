@@ -124,21 +124,56 @@ QUEUE_METRICS = [
     'ibm_mq.queue.open_output_count',
     'ibm_mq.queue.trigger_type',
     'ibm_mq.queue.depth_percent',
+    'ibm_mq.queue.high_q_depth',
+    'ibm_mq.queue.msg_deq_count',
+    'ibm_mq.queue.msg_enq_count',
+    'ibm_mq.queue.time_since_reset',
 ]
 
-METRICS = [
-    'ibm_mq.queue_manager.dist_lists',
-    'ibm_mq.queue_manager.max_msg_list',
-    'ibm_mq.channel.channels',
-    'ibm_mq.channel.count',
-] + QUEUE_METRICS
+QUEUE_STATUS_METRICS = ['ibm_mq.queue.uncommitted_msgs']
+
+CHANNEL_METRICS = [
+    'ibm_mq.channel.batch_size',
+    'ibm_mq.channel.batch_interval',
+    'ibm_mq.channel.long_retry',
+    'ibm_mq.channel.long_timer',
+    'ibm_mq.channel.max_message_length',
+    'ibm_mq.channel.short_retry',
+    'ibm_mq.channel.disc_interval',
+    'ibm_mq.channel.hb_interval',
+    'ibm_mq.channel.keep_alive_interval',
+    'ibm_mq.channel.mr_count',
+    'ibm_mq.channel.mr_interval',
+    'ibm_mq.channel.network_priority',
+    'ibm_mq.channel.npm_speed',
+    'ibm_mq.channel.sharing_conversations',
+    'ibm_mq.channel.short_timer',
+]
+
+CHANNEL_STATUS_METRICS = [
+    'ibm_mq.channel.buffers_rcvd',
+    'ibm_mq.channel.buffers_sent',
+    'ibm_mq.channel.bytes_rcvd',
+    'ibm_mq.channel.bytes_sent',
+    'ibm_mq.channel.channel_status',
+    'ibm_mq.channel.mca_status',
+    'ibm_mq.channel.msgs',
+    'ibm_mq.channel.ssl_key_resets',
+]
+
+METRICS = (
+    [
+        'ibm_mq.queue_manager.dist_lists',
+        'ibm_mq.queue_manager.max_msg_list',
+        'ibm_mq.channel.channels',
+        'ibm_mq.channel.count',
+    ]
+    + QUEUE_METRICS
+    + QUEUE_STATUS_METRICS
+    + CHANNEL_METRICS
+    + CHANNEL_STATUS_METRICS
+)
 
 OPTIONAL_METRICS = [
     'ibm_mq.queue.max_channels',
-    'ibm_mq.channel.batch_size',
-    'ibm_mq.channel.batch_interval',
-    'ibm_mq.channel.long_retry_count',
-    'ibm_mq.channel.long_retry_interval',
-    'ibm_mq.channel.max_message_length',
-    'ibm_mq.channel.short_retry_count',
 ]
