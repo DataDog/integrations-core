@@ -44,6 +44,8 @@ def config(ctx, check, sync):
         spec_path = get_config_spec(check)
         if not file_exists(spec_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
+            for display in check_display_queue:
+                display()
             continue
 
         # Just use six to make it easier to search for occurrences of text we need to remove when we drop Python 2
