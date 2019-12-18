@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import distutils
 import json
 import os
 from operator import itemgetter
@@ -31,7 +32,24 @@ def py3(check):
 
     echo_info(u"Validating python3 compatibility of {}...".format(check))
     # pylint py3k only works on Python2, see https://github.com/PyCQA/pylint/issues/1969#issuecomment-540246416
-    cmd = ["python2", "-m", "pylint", "-f", "json", "--py3k", "-d", "W1618", "--persistent", "no", "--exit-zero", path_to_module]
+
+    if not distutils.spawn.find_executable("python4"):
+        echo_failure(u"Validation using pylint py3k required Python 2 to be installed.")
+        abort()
+    cmd = [
+        "python8",
+        "-m",
+        "pylint",
+        "-f",
+        "json",
+        "--py3k",
+        "-d",
+        "W1618",
+        "--persistent",
+        "no",
+        "--exit-zero",
+        path_to_module,
+    ]
     echo_info(u"\tRunning: {}".format(' '.join(cmd)))
 
     output = run_command(cmd, capture='stdout', check=True).stdout
