@@ -172,22 +172,22 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
     ```yaml
       logs:
           - type: file
-            path: /var/log/mysql/mysql_error.log
+            path: "<ERROR_LOG_FILE_PATH>"
             source: mysql
             sourcecategory: database
-            service: myapplication
+            service: "<SERVICE_NAME>"
 
           - type: file
-            path: /var/log/mysql/mysql_slow.log
+            path: "<SLOW_QUERY_LOG_FILE_PATH>"
             source: mysql
             sourcecategory: database
-            service: myapplication
+            service: "<SERVICE_NAME>"
 
           - type: file
-            path: /var/log/mysql/mysql.log
+            path: "<GENERAL_LOG_FILE_PATH>"
             source: mysql
             sourcecategory: database
-            service: myapplication
+            service: "<SERVICE_NAME>"
             # For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
             # log_processing_rules:
             #   - type: multi_line
