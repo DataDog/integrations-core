@@ -1,5 +1,9 @@
 # CHANGELOG - btrfs
 
+## 1.8.1 / 2019-12-13
+
+* [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
+
 ## 1.8.0 / 2019-12-02
 
 * [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).

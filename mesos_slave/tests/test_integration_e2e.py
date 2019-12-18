@@ -7,7 +7,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.mesos_slave import MesosSlave
 
-from .common import CHECK_NAME, not_windows_ci
+from .common import CHECK_NAME, URL, not_windows_ci
 
 pytestmark = not_windows_ci
 
@@ -39,8 +39,13 @@ def assert_metrics_covered(aggregator):
     ):
         metrics.update(d)
 
+    expected_tags = ["instance:mytag1", "url:{}/metrics/snapshot".format(URL), "mesos_node:slave"]
+
     for _, v in iteritems(metrics):
         aggregator.assert_metric(v[0])
+        for tag in expected_tags:
+            aggregator.assert_metric_has_tag(v[0], tag)
+        aggregator.assert_metric_has_tag_prefix(v[0], "mesos_pid")
 
     aggregator.assert_all_metrics_covered()
     # We should submit 2 service checks per check run because 2 endpoints were tried

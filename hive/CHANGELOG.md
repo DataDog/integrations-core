@@ -1,5 +1,9 @@
 # CHANGELOG - Hive
 
+## 1.1.2 / 2019-12-04
+
+* [Fixed] Fix bean name of directsql_errors metric. See [#5141](https://github.com/DataDog/integrations-core/pull/5141).
+
 ## 1.1.1 / 2019-12-02
 
 * [Fixed] Fix directsql_error metric bean in config. See [#5074](https://github.com/DataDog/integrations-core/pull/5074).

@@ -1,5 +1,9 @@
 # CHANGELOG - IBM Db2
 
+## 1.2.0 / 2019-12-16
+
+* [Added] Retry connection after closed connection. See [#5194](https://github.com/DataDog/integrations-core/pull/5194).
+
 ## 1.1.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3518](https://github.com/DataDog/integrations-core/pull/3518).

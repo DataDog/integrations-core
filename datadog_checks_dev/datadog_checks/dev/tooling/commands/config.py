@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from fnmatch import fnmatch
 
 import click
 import toml
@@ -84,7 +85,7 @@ def set_value(ctx, key, value):
     """
     scrubbing = False
     if value is None:
-        scrubbing = key in SECRET_KEYS
+        scrubbing = any(fnmatch(key, pattern) for pattern in SECRET_KEYS)
         value = click.prompt('Value for `{}`'.format(key), hide_input=scrubbing)
 
     if key in ('core', 'extras', 'agent') and not value.startswith('~'):

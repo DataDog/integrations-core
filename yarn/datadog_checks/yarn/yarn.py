@@ -161,9 +161,7 @@ class YarnCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):
         super(YarnCheck, self).__init__(*args, **kwargs)
-        application_status_mapping = self.instances[0].get(
-            'application_status_mapping', DEFAULT_APPLICATION_STATUS_MAPPING
-        )
+        application_status_mapping = self.instance.get('application_status_mapping', DEFAULT_APPLICATION_STATUS_MAPPING)
         try:
             self.application_status_mapping = {
                 k.upper(): getattr(AgentCheck, v.upper()) for k, v in application_status_mapping.items()

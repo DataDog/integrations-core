@@ -50,6 +50,8 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
 
     aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected_db + ['key:test_list', 'key_type:list'])
 
+    aggregator.assert_metric('redis.net.maxclients')
+
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names
     version = db.info().get('redis_version')

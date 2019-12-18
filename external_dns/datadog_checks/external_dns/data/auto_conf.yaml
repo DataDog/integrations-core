@@ -1,6 +1,5 @@
 ad_identifiers:
-  - externaldns-amd64
-  - k8s-dns-external-dns-amd64
+  - external-dns
 
 init_config:
 
