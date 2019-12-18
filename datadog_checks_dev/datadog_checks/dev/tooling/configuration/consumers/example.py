@@ -6,8 +6,6 @@ from collections import OrderedDict
 import yaml
 from six import StringIO
 
-from ..utils import default_option_example
-
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
 
 
@@ -110,7 +108,7 @@ def write_option(option, writer, indent='', start_list=False):
             elif example_type in (int, float):
                 writer.write(' - default: ', str(example))
             elif example_type is str:
-                if example != default_option_example(option_name):
+                if example and not (example[0] == '<' and example[-1] == '>'):
                     writer.write(' - default: ', example)
 
         writer.write('\n')

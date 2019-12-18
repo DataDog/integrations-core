@@ -33,7 +33,7 @@ def test_option_no_section():
     assert contents == normalize_yaml(
         """
         ## @param ad_identifiers - list of strings - required
-        ## A list of container identifiers that will be used by autodiscovery to identify
+        ## A list of container identifiers that are used by Autodiscovery to identify
         ## which container the check should be run against. For more information, see:
         ## https://docs.datadoghq.com/agent/autodiscovery/ad_identifiers/
         #
@@ -70,7 +70,7 @@ def test_section_with_option():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## All options defined here will be available to all instances.
+        ## All options defined here are available to all instances.
         #
         init_config:
 
@@ -115,7 +115,7 @@ def test_section_with_option_hidden():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## All options defined here will be available to all instances.
+        ## All options defined here are available to all instances.
         #
         init_config:
 
@@ -158,7 +158,7 @@ def test_section_hidden():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance will be scheduled independent of the others.
+        ## Every instance is scheduled independent of the others.
         #
         instances:
 
@@ -227,7 +227,7 @@ def test_section_example_indent():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## All options defined here will be available to all instances.
+        ## All options defined here are available to all instances.
         #
         init_config:
 
@@ -288,7 +288,7 @@ def test_section_multiple_required():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## All options defined here will be available to all instances.
+        ## All options defined here are available to all instances.
         #
         init_config:
 
@@ -297,7 +297,7 @@ def test_section_multiple_required():
             #
             # foo: <FOO>
 
-        ## Every instance will be scheduled independent of the others.
+        ## Every instance is scheduled independent of the others.
         #
         instances:
 
@@ -338,7 +338,7 @@ def test_section_multiple_no_required():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## All options defined here will be available to all instances.
+        ## All options defined here are available to all instances.
         #
         init_config:
 
@@ -347,7 +347,7 @@ def test_section_multiple_no_required():
             #
             # foo: <FOO>
 
-        ## Every instance will be scheduled independent of the others.
+        ## Every instance is scheduled independent of the others.
         #
         instances:
 
@@ -393,7 +393,7 @@ def test_section_multiple_required_not_first():
     contents, _ = files['test.yaml.example']
     assert contents == normalize_yaml(
         """
-        ## All options defined here will be available to all instances.
+        ## All options defined here are available to all instances.
         #
         init_config:
 
@@ -402,7 +402,7 @@ def test_section_multiple_required_not_first():
             #
             # foo: <FOO>
 
-        ## Every instance will be scheduled independent of the others.
+        ## Every instance is scheduled independent of the others.
         #
         instances:
 
@@ -731,7 +731,7 @@ def test_deprecation():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## All options defined here will be available to all instances.
+        ## All options defined here are available to all instances.
         #
         init_config:
 
@@ -774,7 +774,7 @@ def test_template():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## Every instance will be scheduled independent of the others.
+        ## Every instance is scheduled independent of the others.
         #
         instances:
 
@@ -820,11 +820,11 @@ def test_no_options():
     assert not errors
     assert contents == normalize_yaml(
         """
-        ## All options defined here will be available to all instances.
+        ## All options defined here are available to all instances.
         #
         init_config:
 
-        ## Every instance will be scheduled independent of the others.
+        ## Every instance is scheduled independent of the others.
         #
         instances:
 
