@@ -30,7 +30,8 @@ def py3(check):
         abort(u"{} does not exist.".format(path_to_module))
 
     echo_info(u"Validating python3 compatibility of {}...".format(check))
-    cmd = ["pylint", "-f", "json", "--py3k", "-d", "W1618", "--persistent", "no", "--exit-zero", path_to_module]
+    # pylint py3k only works on Python2, see https://github.com/PyCQA/pylint/issues/1969#issuecomment-540246416
+    cmd = ["python2", "-m", "pylint", "-f", "json", "--py3k", "-d", "W1618", "--persistent", "no", "--exit-zero", path_to_module]
     echo_info(u"\tRunning: {}".format(' '.join(cmd)))
 
     output = run_command(cmd, capture='stdout', check=True).stdout
