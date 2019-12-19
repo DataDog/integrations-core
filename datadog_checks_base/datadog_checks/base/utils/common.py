@@ -28,6 +28,13 @@ def ensure_unicode(s):
 to_string = ensure_unicode if PY3 else ensure_bytes
 
 
+def compute_percent(part, total):
+    if total:
+        return part / total * 100
+
+    return 0
+
+
 def total_time_to_temporal_percent(total_time, scale=MILLISECOND):
     # This is really confusing, sorry.
     #

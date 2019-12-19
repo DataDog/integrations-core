@@ -181,6 +181,19 @@ class TestQueryCompilation:
         with pytest.raises(ValueError, match='^unknown type `something` for column test.foo of test query$'):
             query_manager.compile_queries()
 
+    def test_column_duplicate_error(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}, {'name': 'test.foo', 'type': 'source'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^the name test.foo of test query was already defined in column #1$'):
+            query_manager.compile_queries()
+
     def test_compilation_idempotent(self):
         query_manager = create_query_manager(
             {'name': 'test query', 'query': 'foo', 'columns': [{}], 'tags': ['test:bar']}
@@ -188,6 +201,149 @@ class TestQueryCompilation:
 
         query_manager.compile_queries()
         query_manager.compile_queries()
+
+    def test_extras_not_list(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': 'bar',
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^field `extras` for test query must be a list$'):
+            query_manager.compile_queries()
+
+    def test_extra_not_dict(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [['extras']],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^extra #1 of test query is not a mapping$'):
+            query_manager.compile_queries()
+
+    def test_extra_no_name(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^field `name` for extra #1 of test query is required$'):
+            query_manager.compile_queries()
+
+    def test_extra_name_not_string(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 5}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^field `name` for extra #1 of test query must be a string$'):
+            query_manager.compile_queries()
+
+    def test_extra_no_type(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^field `type` for extra foo of test query is required$'):
+            query_manager.compile_queries()
+
+    def test_extra_type_not_string(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 5}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^field `type` for extra foo of test query must be a string$'):
+            query_manager.compile_queries()
+
+    def test_extra_type_unknown(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'something'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^unknown type `something` for extra foo of test query$'):
+            query_manager.compile_queries()
+
+    def test_extra_type_submission_no_source(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'gauge'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^field `source` for extra foo of test query is required$'):
+            query_manager.compile_queries()
+
+    def test_extra_duplicate_error(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {'name': 'foo', 'type': 'gauge', 'source': 'test.foo'},
+                    {'name': 'foo', 'type': 'count', 'source': 'test.foo'},
+                ],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^the name foo of test query was already defined in extra #1$'):
+            query_manager.compile_queries()
+
+    def test_column_extra_duplicate_error(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'test.foo', 'type': 'gauge', 'source': 'test.foo'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(ValueError, match='^the name test.foo of test query was already defined in column #1$'):
+            query_manager.compile_queries()
 
 
 class TestTransformerCompilation:
@@ -442,6 +598,214 @@ class TestTransformerCompilation:
         ):
             query_manager.compile_queries()
 
+    def test_expression_none(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'expression'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `expression` for extra foo of test query: '
+                'the `expression` parameter is required$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_expression_not_string(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'expression', 'expression': 5}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `expression` for extra foo of test query: '
+                'the `expression` parameter must be a string$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_expression_empty(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'expression', 'expression': ''}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `expression` for extra foo of test query: '
+                'the `expression` parameter must not be empty$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_expression_submit_type_unknown(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'expression', 'expression': '5', 'submit_type': 'something'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match='^error compiling type `expression` for extra foo of test query: unknown submit_type `something`$',
+        ):
+            query_manager.compile_queries()
+
+    @pytest.mark.parametrize('expression', ['import os', 'raise Exception', 'foo = 5'])
+    def test_expression_compile_error(self, expression):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'expression', 'expression': expression}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            SyntaxError, match='^error compiling type `expression` for extra foo of test query: invalid syntax'
+        ):
+            query_manager.compile_queries()
+
+    def test_percent_no_part(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'percent'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match='^error compiling type `percent` for extra foo of test query: the `part` parameter is required$',
+        ):
+            query_manager.compile_queries()
+
+    def test_percent_part_not_string(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'percent', 'part': 5}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match='^error compiling type `percent` for extra foo of test query: the `part` parameter must be a string$',
+        ):
+            query_manager.compile_queries()
+
+    def test_percent_part_not_source(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'pct', 'type': 'percent', 'part': 'foo'}, {'name': 'foo', 'expression': '5'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `percent` for extra pct of test query: '
+                'the `part` parameter `foo` is not an available source$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_percent_no_total(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'percent', 'part': 'test.foo'}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match='^error compiling type `percent` for extra foo of test query: the `total` parameter is required$',
+        ):
+            query_manager.compile_queries()
+
+    def test_percent_total_not_string(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [{'name': 'foo', 'type': 'percent', 'part': 'test.foo', 'total': 5}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `percent` for extra foo of test query: '
+                'the `total` parameter must be a string$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_percent_total_not_source(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'source'}],
+                'extras': [
+                    {'name': 'pct', 'type': 'percent', 'part': 'test.foo', 'total': 'foo'},
+                    {'name': 'foo', 'expression': '5'},
+                ],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `percent` for extra pct of test query: '
+                'the `total` parameter `foo` is not an available source$'
+            ),
+        ):
+            query_manager.compile_queries()
+
 
 class TestSubmission:
     @pytest.mark.parametrize(
@@ -513,7 +877,7 @@ class TestSubmission:
                 'query': 'foo',
                 'columns': [
                     {'name': 'test.foo', 'type': 'gauge', 'tags': ['override:ok']},
-                    {'name': 'test.foo', 'type': 'gauge', 'raw': True},
+                    {'name': 'test.baz', 'type': 'gauge', 'raw': True},
                 ],
                 'tags': ['test:bar'],
             },
@@ -525,7 +889,7 @@ class TestSubmission:
         query_manager.execute()
 
         aggregator.assert_metric('test_check.test.foo', 1, metric_type=aggregator.GAUGE, tags=['override:ok'])
-        aggregator.assert_metric('test.foo', 2, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar'])
+        aggregator.assert_metric('test.baz', 2, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar'])
         aggregator.assert_all_metrics_covered()
 
     def test_query_execution_error(self, caplog, aggregator):
@@ -633,8 +997,39 @@ class TestSubmission:
 
         aggregator.assert_all_metrics_covered()
 
+    def test_extra_transformer_error(self, caplog, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'gauge'}],
+                'extras': [
+                    {'name': 'nope', 'expression': 'test.foo / 0', 'submit_type': 'gauge'},
+                    {'name': 'foo', 'expression': 'test.foo / 2', 'submit_type': 'gauge'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', 5]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
 
-class TestTransformers:
+        aggregator.assert_metric(
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_metric('foo', 2.5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1'])
+
+        expected_message = 'Error transforming nope'
+        matches = [level for _, level, message in caplog.record_tuples if message.startswith(expected_message)]
+
+        assert len(matches) == 1, 'Expected log starting with message: {}'.format(expected_message)
+        assert matches[0] == logging.ERROR
+
+        aggregator.assert_all_metrics_covered()
+
+
+class TestColumnTransformers:
     def test_tag_boolean(self, aggregator):
         query_manager = create_query_manager(
             {
@@ -816,6 +1211,167 @@ class TestTransformers:
         query_manager.compile_queries()
         query_manager.execute()
 
+        aggregator.assert_all_metrics_covered()
+
+
+class TestExtraTransformers:
+    def test_expression(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'gauge'}],
+                'extras': [
+                    {'name': 'divide', 'type': 'expression', 'expression': 'test.foo / 2', 'submit_type': 'gauge'}
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', 5]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_metric(
+            'divide', 2.5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_all_metrics_covered()
+
+    def test_expression_detect_type(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'gauge'}],
+                'extras': [{'name': 'divide', 'expression': 'test.foo / 2', 'submit_type': 'gauge'}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', 5]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_metric(
+            'divide', 2.5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_all_metrics_covered()
+
+    def test_expression_verbose(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'gauge'}],
+                'extras': [
+                    {'name': 'divide', 'expression': 'SOURCES["test.foo"] / 2', 'verbose': True, 'submit_type': 'gauge'}
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', 5]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_metric(
+            'divide', 2.5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_all_metrics_covered()
+
+    def test_expression_store_source(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'gauge'}],
+                'extras': [
+                    {'name': 'src', 'expression': '2 ** 3'},
+                    {'name': 'src.cube', 'type': 'gauge', 'source': 'src'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', 5]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_metric(
+            'src.cube', 8, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_all_metrics_covered()
+
+    def test_expression_pass_modifiers(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'gauge'}],
+                'extras': [
+                    {
+                        'name': 'temp.pct',
+                        'expression': 'test.foo / 2',
+                        'submit_type': 'temporal_percent',
+                        'scale': 'second',
+                    }
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', 10]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo', 10, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_metric(
+            'temp.pct', 500, metric_type=aggregator.RATE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_all_metrics_covered()
+
+    def test_percent(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'test.part', 'type': 'gauge'},
+                    {'name': 'test.total', 'type': 'gauge'},
+                ],
+                'extras': [{'name': 'percent', 'type': 'percent', 'part': 'test.part', 'total': 'test.total'}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', 3, 5]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.part', 3, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_metric(
+            'test.total', 5, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_metric(
+            'percent', 60, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
         aggregator.assert_all_metrics_covered()
 
 

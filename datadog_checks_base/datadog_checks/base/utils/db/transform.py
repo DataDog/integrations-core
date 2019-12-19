@@ -1,9 +1,26 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import division
+
+import re
+
 from ... import is_affirmative
 from .. import constants
-from ..common import total_time_to_temporal_percent
+from ..common import compute_percent, total_time_to_temporal_percent
+from .utils import create_extra_transformer
+
+# Used for the user-defined `expression`s
+ALLOWED_GLOBALS = {
+    '__builtins__': {
+        # pytest turns it into a dict instead of a module
+        name: getattr(__builtins__, name) if hasattr(__builtins__, name) else globals()['__builtins__'][name]
+        for name in ('abs', 'all', 'any', 'bool', 'divmod', 'float', 'int', 'len', 'max', 'min', 'pow', 'str', 'sum')
+    }
+}
+
+# Simple heuristic to not mistake a source for part of a string (which we also transform it into)
+SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
 
 def get_tag(column_name, transformers, **modifiers):
@@ -58,20 +75,103 @@ def get_match(column_name, transformers, **modifiers):
     # Do work in a separate function to avoid having to `del` a bunch of variables
     compiled_items = _compile_match_items(transformers, modifiers)
 
-    def match(value, row, *_, **kwargs):
+    def match(value, sources, *_, **kwargs):
         if value in compiled_items:
             source, transformer = compiled_items[value]
-            transformer(row[source], **kwargs)
+            transformer(sources[source], **kwargs)
 
     return match
 
 
-TRANSFORMERS = {
+def get_expression(name, transformers, **modifiers):
+    available_sources = modifiers.pop('sources')
+
+    expression = modifiers.pop('expression', None)
+    if expression is None:
+        raise ValueError('the `expression` parameter is required')
+    elif not isinstance(expression, str):
+        raise ValueError('the `expression` parameter must be a string')
+    elif not expression:
+        raise ValueError('the `expression` parameter must not be empty')
+
+    if not modifiers.pop('verbose', False):
+        # Sort the sources in reverse order of length to prevent greedy matching
+        available_sources = sorted(available_sources, key=lambda s: -len(s))
+
+        # Escape special characters, mostly for the possible dots in metric names
+        available_sources = list(map(re.escape, available_sources))
+
+        # Finally, utilize the order by relying on the guarantees provided by the alternation operator
+        available_sources = '|'.join(available_sources)
+
+        expression = re.sub(
+            SOURCE_PATTERN.format(available_sources),
+            # Replace by the particular source that matched
+            lambda match_obj: 'SOURCES["{}"]'.format(match_obj.group(1)),
+            expression,
+        )
+
+    expression = compile(expression, filename=name, mode='eval')
+
+    del available_sources
+
+    if 'submit_type' in modifiers:
+        if modifiers['submit_type'] not in transformers:
+            raise ValueError('unknown submit_type `{}`'.format(modifiers['submit_type']))
+
+        submit_method = transformers[modifiers.pop('submit_type')](name, transformers, **modifiers)
+        submit_method = create_extra_transformer(submit_method)
+
+        def execute_expression(sources, **kwargs):
+            result = eval(expression, ALLOWED_GLOBALS, {'SOURCES': sources})
+            submit_method(sources, result, **kwargs)
+            return result
+
+    else:
+
+        def execute_expression(sources, **kwargs):
+            return eval(expression, ALLOWED_GLOBALS, {'SOURCES': sources})
+
+    return execute_expression
+
+
+def get_percent(name, transformers, **modifiers):
+    available_sources = modifiers.pop('sources')
+
+    part = modifiers.pop('part', None)
+    if part is None:
+        raise ValueError('the `part` parameter is required')
+    elif not isinstance(part, str):
+        raise ValueError('the `part` parameter must be a string')
+    elif part not in available_sources:
+        raise ValueError('the `part` parameter `{}` is not an available source'.format(part))
+
+    total = modifiers.pop('total', None)
+    if total is None:
+        raise ValueError('the `total` parameter is required')
+    elif not isinstance(total, str):
+        raise ValueError('the `total` parameter must be a string')
+    elif total not in available_sources:
+        raise ValueError('the `total` parameter `{}` is not an available source'.format(total))
+
+    del available_sources
+    gauge = transformers['gauge'](name, transformers, **modifiers)
+    gauge = create_extra_transformer(gauge)
+
+    def percent(sources, **kwargs):
+        gauge(sources, compute_percent(sources[part], sources[total]), **kwargs)
+
+    return percent
+
+
+COLUMN_TRANSFORMERS = {
     'temporal_percent': get_temporal_percent,
     'monotonic_gauge': get_monotonic_gauge,
     'tag': get_tag,
     'match': get_match,
 }
+
+EXTRA_TRANSFORMERS = {'expression': get_expression, 'percent': get_percent}
 
 
 def _compile_match_items(transformers, modifiers):
