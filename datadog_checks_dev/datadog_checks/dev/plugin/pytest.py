@@ -176,7 +176,7 @@ def dd_agent_check(request, aggregator):
                     break
                 elif line.endswith('}') and lines[-i + 1] == ']':
                     # check for '}\n]' condition of already pretty printed json
-                    collector_output = '\n'.join(lines[:-i + 2])
+                    collector_output = '\n'.join(lines[: -i + 2])
                     break
 
             else:
