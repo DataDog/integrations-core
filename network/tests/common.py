@@ -10,6 +10,10 @@ INSTANCE = {"collect_connection_state": True}
 
 INSTANCE_BLACKLIST = {"collect_connection_state": True, "blacklist_conntrack_metrics": ["count"]}
 
+
+# In order to collect connection state we need `ss` command included in `iproute2` package
+E2E_METADATA = {'start_commands': ['apt-get update', 'apt-get install iproute2 -y',]}
+
 EXPECTED_METRICS = [
     'system.net.bytes_rcvd',
     'system.net.bytes_sent',
