@@ -215,7 +215,7 @@ class Nginx(AgentCheck):
         return payload
 
     def _set_version_metadata(self, version):
-        if version:
+        if version and version != 'nginx':
             if '/' in version:
                 version = version.split('/')[1]
             self.set_metadata('version', version)
