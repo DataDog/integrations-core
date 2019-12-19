@@ -321,6 +321,8 @@ class TwistlockCheck(AgentCheck):
             j = response.json()
             # it's possible to get a null response from the server
             # {} is a bit easier to deal with
+            if 'err' in j:
+                self.log.error("Error in response: {}".format(j.get("err")))
             return j or {}
         except Exception as e:
             self.log.debug("cannot get a response: {} response is: {}".format(e, response.text))
