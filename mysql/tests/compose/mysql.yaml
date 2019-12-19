@@ -8,6 +8,7 @@ services:
     ports:
       - "${MYSQL_PORT}:3306"
     volumes:
+      - ${MYSQL_LOGS_HOST_PATH}:${MYSQL_LOGS_PATH}
       # This is a supported conf location that isn't used by the image.
       - ${MYSQL_CONF_PATH}:/etc/my.cnf
 
