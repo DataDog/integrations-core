@@ -20,7 +20,7 @@
   "id": 929073,
   "isIntegration": false,
   "isShared": false,
-  "modified": "2019-12-19T13:42:43.124102+00:00",
+  "modified": "2019-12-19T14:05:34.007621+00:00",
   "new_id": "b6s-n9f-vzu",
   "originalHeight": 80,
   "originalWidth": "calc(100% - 32px)",
@@ -164,7 +164,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.dagbag_size{*}",
+            "q": "avg:airflow.dagbag_size{$host,$scope}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -202,7 +202,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.dagbag_import_errors{*}",
+            "q": "avg:airflow.dagbag_import_errors{$host,$scope}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -242,7 +242,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.dag_processing.processes{*}.as_count()",
+            "q": "avg:airflow.dag_processing.processes{$host,$scope}.as_count()",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -307,7 +307,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.executor.open_slots{*}",
+            "q": "avg:airflow.executor.open_slots{$host,$scope}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -347,7 +347,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.executor.queued_tasks{*}, avg:airflow.executor.running_tasks{*}",
+            "q": "avg:airflow.executor.queued_tasks{$host,$scope}, avg:airflow.executor.running_tasks{$host,$scope}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -437,7 +437,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.job.start{*} by {job_name}.as_count()",
+            "q": "avg:airflow.job.start{$host,$scope} by {job_name}.as_count()",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -477,7 +477,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.job.end{*} by {job_name}.as_count()",
+            "q": "avg:airflow.job.end{$host,$scope} by {job_name}.as_count()",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -517,7 +517,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.scheduler_heartbeat{*}.as_count()",
+            "q": "avg:airflow.scheduler_heartbeat{$host,$scope}.as_count()",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -557,7 +557,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.dag.task.duration.avg{*} by {dag_id}",
+            "q": "avg:airflow.dag.task.duration.avg{$host,$scope} by {dag_id}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -597,7 +597,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.dagrun.duration.success.avg{*} by {dag_id}",
+            "q": "avg:airflow.dagrun.duration.success.avg{$host,$scope} by {dag_id}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -637,7 +637,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.dagrun.duration.failed.avg{*} by {dag_id}",
+            "q": "avg:airflow.dagrun.duration.failed.avg{$host,$scope} by {dag_id}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -677,7 +677,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.dagrun.schedule_delay.avg{*} by {dag_id}",
+            "q": "avg:airflow.dagrun.schedule_delay.avg{$host,$scope} by {dag_id}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -717,7 +717,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.dag.loading_duration.avg{*} by {dag_file}",
+            "q": "avg:airflow.dag.loading_duration.avg{$host,$scope} by {dag_file}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -757,7 +757,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.ti_failures{*}.as_count(), avg:airflow.ti_successes{*}.as_count()",
+            "q": "avg:airflow.ti_failures{$host,$scope}.as_count(), avg:airflow.ti_successes{$host,$scope}.as_count()",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
@@ -797,7 +797,7 @@
           {
             "aggregator": "avg",
             "conditional_formats": [],
-            "q": "avg:airflow.pool.open_slots{*}, avg:airflow.pool.used_slots{*}, avg:airflow.pool.starving_tasks{*}",
+            "q": "avg:airflow.pool.open_slots{$host,$scope}, avg:airflow.pool.used_slots{$host,$scope}, avg:airflow.pool.starving_tasks{$host,$scope}",
             "style": {
               "palette": "dog_classic",
               "type": "solid",
