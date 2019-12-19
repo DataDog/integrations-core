@@ -48,6 +48,7 @@ def docker_run(
     service_name=None,
     up=None,
     down=None,
+    on_error=None,
     sleep=None,
     endpoints=None,
     log_patterns=None,
@@ -68,6 +69,8 @@ def docker_run(
     :type up: ``callable``
     :param down: A custom tear down callable. This is required when using a custom setup.
     :type down: ``callable``
+    :param on_error: A callable called in case of an unhandled exception.
+    :type on_error: ``callable``
     :param sleep: Number of seconds to wait before yielding.
     :type sleep: ``float``
     :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
@@ -95,6 +98,8 @@ def docker_run(
             tear_down = down
         else:
             tear_down = ComposeFileDown(compose_file)
+        if on_error is None:
+            on_error = ComposeFileLogs(compose_file)
     else:
         set_up = up
         tear_down = down
@@ -115,6 +120,7 @@ def docker_run(
     with environment_run(
         up=set_up,
         down=tear_down,
+        on_error=on_error,
         sleep=sleep,
         endpoints=endpoints,
         conditions=docker_conditions,
@@ -139,6 +145,16 @@ class ComposeFileUp(LazyFunction):
 
     def __call__(self):
         return run_command(self.command, check=True)
+
+
+class ComposeFileLogs(LazyFunction):
+    def __init__(self, compose_file, check=True):
+        self.compose_file = compose_file
+        self.check = check
+        self.command = ['docker-compose', '-f', self.compose_file, 'logs']
+
+    def __call__(self, exception):
+        return run_command(self.command, capture=False, check=self.check)
 
 
 class ComposeFileDown(LazyFunction):

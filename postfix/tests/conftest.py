@@ -54,7 +54,7 @@ class CreateQueues(LazyFunction):
 def dd_environment():
     with TempDir() as temp_dir:
         # No tear down necessary as `TempDir` will do the clean up
-        with environment_run(CreateQueues(temp_dir), lambda: None) as result:
+        with environment_run(up=CreateQueues(temp_dir), down=lambda: None) as result:
             set_env_vars({k: serialize_data(v) for k, v in result.items()})
 
             yield get_e2e_instance(), get_e2e_metadata()

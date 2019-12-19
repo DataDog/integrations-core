@@ -11,13 +11,15 @@ from .utils import mock_context_manager
 
 
 @contextmanager
-def environment_run(up, down, sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper=None):
+def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper=None):
     """This utility provides a convenient way to safely set up and tear down arbitrary types of environments.
 
     :param up: A custom setup callable.
     :type up: ``callable``
     :param down: A custom tear down callable.
     :type down: ``callable``
+    :param on_error: A callable called in case of an unhandled exception.
+    :type on_error: ``callable``
     :param sleep: Number of seconds to wait before yielding.
     :type sleep: ``float``
     :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
@@ -63,6 +65,10 @@ def environment_run(up, down, sleep=None, endpoints=None, conditions=None, env_v
                 result = get_env_vars().get(key)
                 if result:
                     yield deserialize_data(result)
+        except BaseException as exc:
+            if on_error is not None:
+                on_error(exc)
+            raise
         finally:
             if tear_down_env():
                 down()
