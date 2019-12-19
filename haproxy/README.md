@@ -14,7 +14,7 @@ Capture HAProxy activity in Datadog to:
 
 ### Installation
 
-The Marathon check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Haproxy server.
+The Haproxy check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Haproxy server.
 
 #### Prepare HAProxy
 
