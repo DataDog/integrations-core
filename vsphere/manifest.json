@@ -3,8 +3,7 @@
     "/integrations/vmware/"
   ],
   "categories": [
-    "cloud",
-    "autodiscovery"
+    "cloud"
   ],
   "creates_events": true,
   "display_name": "vSphere",
