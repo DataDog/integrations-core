@@ -13,10 +13,6 @@ The vSphere check is included in the [Datadog Agent][2] package, so you don't ne
 
 ### Configuration
 
-#### Host
-
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
 In the **Administration** section of vCenter, add a read-only user called `datadog-readonly`.
 
 Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample vsphere.d/conf.yaml][4] for all available configuration options:
@@ -34,16 +30,6 @@ instances:
 [Restart the Agent][5] to start sending vSphere metrics and events to Datadog.
 
 **Note**: The Datadog Agent doesn't need to be on the same server as the vSphere appliance software. An Agent with the vSphere check enabled can be set up -no matter what OS it's running on- to point to a vSphere appliance server. Update your `<VCENTER_HOSTNAME>` accordingly.
-
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying the parameters below.
-
-| Parameter            | Value                                                                                                                  |
-|----------------------|------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `vsphere`                                                                                                              |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                          |
-| `<INSTANCE_CONFIG>`  | `{"name": "main-vcenter", "host": "%%host%%", "username": "datadog-readonly@vsphere.local", "password": "<PASSWORD>"}` |
 
 ### Compatibility
 
@@ -67,7 +53,7 @@ The following scenarios are possible when using the vSphere integration:
 | `ssl_capath`              | No       | Set to the absolute file path of a directory containing CA certificates in PEM format.                                                                                                                                                                                                                                                                           |
 | `host_include_only_regex` | No       | Use a regex like this if you want the check to only fetch metrics for these ESXi hosts and the VMs running on it.                                                                                                                                                                                                                                                |
 | `vm_include_only_regex`   | No       | Use a regex to include only the VMs that are matching this pattern.                                                                                                                                                                                                                                                                                              |
-| `include_only_marked`     | No       | Set to true if you'd like to only collect metrics on vSphere VMs which are marked by a custom field with the value 'DatadogMonitored'. To set this custom field, you can use the UI to apply a tag or through the CLI with [PowerCLI][6]. An example working on VSphere 5.1 is: `Get-VM VM | Set-CustomField -Name "DatadogMonitored" -Value "DatadogMonitored"`. |
+| `include_only_marked`     | No       | Set to true if you'd like to only collect metrics on vSphere VMs which are marked by a custom field with the value 'DatadogMonitored'. To set this custom field, you can use the UI to apply a tag or through the CLI with [PowerCLI][6] An example working on VSphere 5.1 is: `Get-VM VM | Set-CustomField -Name "DatadogMonitored" -Value "DatadogMonitored"`. |
 | `collection_level`        | No       | A number between 1 and 4 to specify how many metrics are sent, 1 meaning only important monitoring metrics and 4 meaning every metric available.                                                                                                                                                                                                                 |
 | `all_metrics`             | No       | (Deprecated) When set to true, this collects EVERY metric from vCenter, which means a LOT of metrics. When set to false, this collects a subset of metrics we selected that are interesting to monitor                                                                                                                                                           |
 | `event_config`            | No       | Event config is a dictionary. For now the only switch you can flip is `collect_vcenter_alarms` which sends the alarms set in vCenter as events.                                                                                                                                                                                                                  |
@@ -104,7 +90,7 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 
 ### Service Checks
 
-`vcenter.can_connect`:
+**vcenter.can_connect**:<br>
 Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, otherwise OK.
 
 ## Troubleshooting
@@ -125,4 +111,3 @@ See our [blog post][10] on monitoring vSphere environments with Datadog.
 [8]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
 [9]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
 [10]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
-[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations
