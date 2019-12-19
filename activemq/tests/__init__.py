@@ -1,3 +1,3 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
