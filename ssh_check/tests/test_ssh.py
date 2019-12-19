@@ -60,12 +60,19 @@ def test_ssh_bad_config(aggregator):
                 'version.minor': '7',
                 'version.release': 'p1',
                 'version.scheme': 'ssh_check',
+                'version.raw': 'OpenSSH_for_Windows_7.7p1, LibreSSL 2.6.5',
                 'flavor': 'OpenSSH',
             },
         ),
         (
             'SSH-2.0-OpenSSH_8.1',
-            {'version.major': '8', 'version.minor': '1', 'version.scheme': 'ssh_check', 'flavor': 'OpenSSH'},
+            {
+                'version.major': '8',
+                'version.minor': '1',
+                'version.scheme': 'ssh_check',
+                'version.raw': 'SSH-2.0-OpenSSH_8.1',
+                'flavor': 'OpenSSH',
+            },
         ),
         (
             'SSH-2.0-OpenSSH_7.4p1 Debian-10+deb9u2',
@@ -74,6 +81,7 @@ def test_ssh_bad_config(aggregator):
                 'version.minor': '4',
                 'version.release': 'p1',
                 'version.scheme': 'ssh_check',
+                'version.raw': 'SSH-2.0-OpenSSH_7.4p1 Debian-10+deb9u2',
                 'flavor': 'OpenSSH',
             },
         ),
@@ -87,3 +95,14 @@ def test_collect_metadata(version, metadata, datadog_agent):
     ssh.check_id = 'test:123'
     ssh._collect_metadata(client)
     datadog_agent.assert_metadata('test:123', metadata)
+
+
+def test_collect_bad_metadata(datadog_agent):
+    client = MagicMock()
+    client.get_transport = MagicMock(return_value=namedtuple('Transport', ['remote_version'])('Cannot parse this'))
+
+    ssh = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
+    ssh.check_id = 'test:123'
+    ssh._collect_metadata(client)
+    datadog_agent.assert_metadata_count(1)
+    datadog_agent.assert_metadata('test:123', {'flavor': 'unknown'})
