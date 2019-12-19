@@ -207,11 +207,17 @@ class RequestsWrapper(object):
                     hostname_override=config['kerberos_hostname'],
                     principal=config['kerberos_principal'],
                 )
-            elif config['aws_host']:
+            elif config['auth_type'].lower() == 'aws':
                 ensure_aws()
+
+                if not config['aws_host']:
+                    raise ConfigurationError('AWS auth requires the setting `aws_host`')
 
                 if not config['aws_region']:
                     raise ConfigurationError('AWS auth requires the setting `aws_region`')
+
+                if not config['aws_service']:
+                    raise ConfigurationError('AWS auth requires the setting `aws_service`')
 
                 auth = requests_aws.BotoAWSRequestsAuth(
                     aws_host=config['aws_host'], aws_region=config['aws_region'], aws_service=config['aws_service']
