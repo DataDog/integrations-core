@@ -4,7 +4,6 @@
 import threading
 from collections import namedtuple
 
-import mock
 import pytest
 from mock import MagicMock
 
