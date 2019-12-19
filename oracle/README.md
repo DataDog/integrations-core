@@ -175,6 +175,10 @@ Follow the instructions below to configure this check for an Agent running on a 
        #
        password: "<PASSWORD>"
 
+       ## @param skip_default_metrics - string - optional
+       ## Set this parameter to any value if you want to skip default system,
+       ## process, and tablespace metrics checks. 
+       #
        skip_default_metrics: true
  ```
 #### Containerized
