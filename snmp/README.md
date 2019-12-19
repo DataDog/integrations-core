@@ -8,7 +8,7 @@ SNMP uses sysOIDs (System Object Identifiers) to uniquely identify devices, and 
 
 A MIB (Management Information Base) acts as a translator between OIDs and human readable names, and organizes a subset of the hierarchy. Because of the way the tree is structured, most SNMP values start with the same set of objects:
 
-* `1.3.6.1.1`: (MIB-II) A standard that holds system information like uptime, interfaces, network stack.
+* `1.3.6.1.1`: (MIB-II) A standard that holds system information like uptime, interfaces, and network stack.
 * `1.3.6.1.4.1`: A standard that holds vendor specific information.
 
 ## Setup
@@ -22,13 +22,13 @@ The SNMP check is included in the [Datadog Agent][1] package. No additional inst
 <b>Note</b>: The following features are in beta.
 </div>
 
-The Datadog SNMP check scans a provided subnet, auto discovers network devices, and collects metrics using Datadog's sysOID mapped device profiles.
+The Datadog SNMP check scans a provided subnet, Autodiscovers network devices, and collects metrics using Datadog's sysOID mapped device profiles.
 
-Edit the subnet, snmp version, and profiles in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
+Edit the subnet, SNMP version, and profiles in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
 
-#### Auto-Discovery
+#### Autodiscovery
 
-To use Auto-Discovery with the SNMP check:
+To use Autodiscovery with the SNMP check:
 
 1. Install or upgrade the Datadog Agent to v6.15+. For platform specific instructions, see the [Datadog Agent][23] documentation.
 
@@ -129,7 +129,7 @@ instances:
 
 If necessary, additional metrics can be defined in the instances. These metrics are collected in addition to those in the profile.
 
-#### Metric definition by Profile
+#### Metric definition by profile
 Profiles can be used interchangeably, such that devices that share MIB dependencies can reuse the same profiles. For example, the Cisco c3850 profile can be used across many Cisco switches.
 
 **Note**: Profiles require a local version of the MIBs to be referenced.
@@ -138,7 +138,7 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 
 The [generic router profile][20] collects the following metrics.
 
-MIBs needed for local reference: IF-MIB, IP-MIB, TCP-MIB, UDP-MIB
+MIBs needed for local reference: IF-MIB, IP-MIB, TCP-MIB, UDP-MIB.
 
 | Metric                                 | Description                                                                                                                                                                                                                                                               | Tags                     |
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|
@@ -165,7 +165,7 @@ MIBs needed for local reference: IF-MIB, IP-MIB, TCP-MIB, UDP-MIB
 | `snmp.ipSystemStatsHCInForwDatagrams`  | The number of input datagrams for which this entity was not their final IP destination and for which this entity attempted to find a route to forward them to that final destination.                                                                                     | `ipversion`              |
 | `snmp.ipSystemStatsReasmReqds`         | The number of IP fragments received that needed to be reassembled at this interface.                                                                                                                                                                                      | `ipversion`              |
 | `snmp.ipSystemStatsReasmOKs`           | The number of IP datagrams successfully reassembled.                                                                                                                                                                                                                      | `ipversion`              |
-| `snmp.ipSystemStatsReasmFails`         | The number of failures detected by the IP re-assembly algorithm (for whatever reason: timed out, errors, etc.).                                                                                                                                                           | `ipversion`              |
+| `snmp.ipSystemStatsReasmFails`         | The number of failures detected by the IP reassembly algorithm (for whatever reason: timed out, errors, etc.).                                                                                                                                                           | `ipversion`              |
 | `snmp.ipSystemStatsInDiscards`         | The number of input IP datagrams for which no problems were encountered to prevent their continued processing, but were discarded due to other reasons, for example lack of buffer space.                                                                                 | `ipversion`              |
 | ` snmp.ipSystemStatsHCInDelivers`      | The total number of datagrams successfully delivered to IP user-protocols (including ICMP).                                                                                                                                                                               | `ipversion`              |
 | `snmp.ipSystemStatsHCOutRequests`      | The total number of IP datagrams that local IP user-protocols (including ICMP) supplied to IP in requests for transmission.                                                                                                                                               | `ipversion`              |
@@ -193,7 +193,7 @@ MIBs needed for local reference: IF-MIB, IP-MIB, TCP-MIB, UDP-MIB
 | `snmp.ipIfStatsHCInForwDatagrams`      | The number of input datagrams for which this entity was not their final IP destination and for which this entity attempted to find a route to forward them to that final destination.                                                                                     | `ipversion`, `interface` |
 | `snmp.ipIfStatsReasmReqds`             | The number of IP fragments received that needed to be reassembled at this interface.                                                                                                                                                                                      | `ipversion`, `interface` |
 | `snmp.ipIfStatsReasmOKs`               | The number of IP datagrams successfully reassembled.                                                                                                                                                                                                                      | `ipversion`, `interface` |
-| `snmp.ipIfStatsReasmFails`             | The number of failures detected by the IP re-assembly algorithm (for whatever reason: timed out, errors, etc.).                                                                                                                                                           | `ipversion`, `interface` |
+| `snmp.ipIfStatsReasmFails`             | The number of failures detected by the IP reassembly algorithm (for whatever reason: timed out, errors, etc.).                                                                                                                                                           | `ipversion`, `interface` |
 | `snmp.ipIfStatsInDiscards`             | The number of input IP datagrams for which no problems were encountered to prevent their continued processing, but were discarded due to other reasons, for example lack of buffer space.                                                                                 | `ipversion`, `interface` |
 | `snmp.ipIfStatsHCInDelivers`           | The total number of datagrams successfully delivered to IP user-protocols (including ICMP).                                                                                                                                                                               | `ipversion`, `interface` |
 | `snmp.ipIfStatsHCOutRequests`          | The total number of IP datagrams that local IP user-protocols (including ICMP) supplied to IP in requests for transmission.                                                                                                                                               | `ipversion`, `interface` |
@@ -230,7 +230,7 @@ MIBs needed for local reference: IF-MIB, IP-MIB, TCP-MIB, UDP-MIB
 
 The [F5 BIG-IP profile][21] collects the following metrics.
 
-MIBs needed for local reference: F5-BIGIP-SYSTEM-MIB, IF-MIB
+MIBs needed for local reference: F5-BIGIP-SYSTEM-MIB, IF-MIB.
 
 | Metric                                   | Description                                                                                                                                                                                                                                                          | Tags        |
 |------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
@@ -293,7 +293,7 @@ MIBs needed for local reference: F5-BIGIP-SYSTEM-MIB, IF-MIB
 
 The [Cisco c3850 device profile][22] collects the following metrics.
 
-MIBs needed for local reference: CISCO-ENTITY-SENSOR-MIB, CISCO-ENTITY-FRU-CONTROL-MIB, CISCO-PROCESS-MIB, CISCO-IF-EXTENSION-MIB, IF-MIB, TCP-MIB, UDP-MIB
+MIBs needed for local reference: CISCO-ENTITY-SENSOR-MIB, CISCO-ENTITY-FRU-CONTROL-MIB, CISCO-PROCESS-MIB, CISCO-IF-EXTENSION-MIB, IF-MIB, TCP-MIB, UDP-MIB.
 
 | Metric                             | Description                                                                                                                                                                                                            | Tags                       |
 |------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
@@ -305,7 +305,7 @@ MIBs needed for local reference: CISCO-ENTITY-SENSOR-MIB, CISCO-ENTITY-FRU-CONTR
 | `snmp.cpmCPUMemoryUsed`            | The overall CPU wide system memory currently in use.                                                                                                                                                       | `cpu`                      |
 | `snmp.cpmCPUMemoryFree`            | The overall CPU wide system memory currently free.                                                                                                                                                            | `cpu`                      |
 | `snmp.cieIfLastInTime`             | The elapsed time in milliseconds since the last protocol input packet was received.                                                                                                                                        | `interface`                |
-| `snmp.cieIfLastOutTime`            | The elapsed time in milliseconds since the last protocol  output packet was transmitted.                                                                                                                                   | `interface`                |
+| `snmp.cieIfLastOutTime`            | The elapsed time in milliseconds since the last protocol output packet was transmitted.                                                                                                                                   | `interface`                |
 | `snmp.cieIfInputQueueDrops`        | The number of input packets dropped.                                                                                                                                                                        | `interface`                |
 | `snmp.cieIfOutputQueueDrops`       | The number of output packets dropped by the interface even though no error was detected to prevent them being transmitted.                                                                                       | `interface`                |
 | `snmp.cieIfResetCount`             | The number of times the interface was internally reset and brought up.                                                                                                                                                 | `interface`                |
