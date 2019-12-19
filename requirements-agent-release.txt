@@ -15,7 +15,7 @@ datadog-checks-base==10.0.2
 datadog-checks-downloader==2.0.0
 datadog-cilium==1.0.1
 datadog-cisco-aci==1.8.1
-datadog-clickhouse==0.0.1
+datadog-clickhouse==1.0.0
 datadog-cockroachdb==1.1.0
 datadog-consul==1.11.0
 datadog-coredns==1.3.0; sys_platform == 'linux2'
@@ -32,7 +32,7 @@ datadog-elastic==1.15.0
 datadog-envoy==1.11.0
 datadog-etcd==2.1.0
 datadog-exchange-server==1.6.0; sys_platform == 'win32'
-datadog-external-dns==0.0.2
+datadog-external-dns==1.0.0
 datadog-fluentd==1.5.0
 datadog-gearmand==1.3.1; sys_platform != 'win32'
 datadog-gitlab-runner==2.6.0
