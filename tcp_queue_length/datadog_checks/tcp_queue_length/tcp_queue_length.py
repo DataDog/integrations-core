@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import requests_unixsocket
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.tagging import tagger
 
 class TcpQueueLengthCheck(AgentCheck):
 
@@ -25,15 +27,23 @@ class TcpQueueLengthCheck(AgentCheck):
 
         for line in r.json():
             try:
-                tags = ['saddr:{}'.format(line['conn']['saddr']),
-                        'daddr:{}'.format(line['conn']['daddr']),
-                        'sport:{}'.format(line['conn']['sport']),
-                        'dport:{}'.format(line['conn']['dport']),
-                        'pid:{}'.format(line['stats']['pid'])]
+                tags = copy.deepcopy(instance_tags)
 
-                self.gauge(self.NAMESPACE + '.rqueue.min', float(line['stats']['read queue']['min']), instance_tags + tags)
-                self.gauge(self.NAMESPACE + '.rqueue.max', float(line['stats']['read queue']['max']), instance_tags + tags)
-                self.gauge(self.NAMESPACE + '.wqueue.min', float(line['stats']['write queue']['min']), instance_tags + tags)
-                self.gauge(self.NAMESPACE + '.wqueue.max', float(line['stats']['write queue']['max']), instance_tags + tags)
+                cid = line.get('containerid')
+                if cid:
+                    tags += tagger.tag('container_id://{}'.format(cid), tagger.ORCHESTRATOR)
+
+                tags += ['saddr:{}'.format(line['conn']['saddr']),
+                         'daddr:{}'.format(line['conn']['daddr']),
+                         'sport:{}'.format(line['conn']['sport']),
+                         'dport:{}'.format(line['conn']['dport']),
+                         'pid:{}'.format(line['stats']['pid'])]
+
+                self.gauge(self.NAMESPACE + '.rqueue.size', float(line['stats'][ 'read queue']['size']), tags)
+                self.gauge(self.NAMESPACE + '.rqueue.min',  float(line['stats'][ 'read queue']['min']),  tags)
+                self.gauge(self.NAMESPACE + '.rqueue.max',  float(line['stats'][ 'read queue']['max']),  tags)
+                self.gauge(self.NAMESPACE + '.wqueue.size', float(line['stats']['write queue']['size']), tags)
+                self.gauge(self.NAMESPACE + '.wqueue.min',  float(line['stats']['write queue']['min']),  tags)
+                self.gauge(self.NAMESPACE + '.wqueue.max',  float(line['stats']['write queue']['max']),  tags)
             except KeyError as e:
                 self.log.error('Invalid line received from `/probe/tcp_queue_length`: {}'.format(e))
