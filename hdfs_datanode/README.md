@@ -65,7 +65,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 |----------------------|------------------------------------|
 | `<INTEGRATION_NAME>` | `hdfs_datanode`                    |
 | `<INIT_CONFIG>`      | blank or `{}`                      |
-| `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%:50075"}` |
+| `<INSTANCE_CONFIG>`  | `{"hdfs_datanode_jmx_uri": "http://%%host%%:50075"}` |
 
 ### Validation
 
