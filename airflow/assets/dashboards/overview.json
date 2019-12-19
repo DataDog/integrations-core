@@ -14,7 +14,7 @@
     "role": null,
     "verified": true
   },
-  "description": "",
+  "description": "## Airflow\n\nThis dashboard provides a high-level overview of your Airflow instances so you can monitor metrics related to DAGs, tasks, pools and executors.\n\nFor further reading on monitoring Airflow, see:\n\n- [Official Envoy integration docs](https://docs.datadoghq.com/integrations/airflow/#data-collected)\n\nClone this template to make changes and add your own graphs and widgets.",
   "disableCog": false,
   "disableEditing": false,
   "id": 929073,
