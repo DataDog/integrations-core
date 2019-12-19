@@ -166,9 +166,25 @@ def dd_agent_check(request, aggregator):
 
         _, _, collector_output = result.stdout.partition(AGENT_COLLECTOR_SEPARATOR)
         collector_output = collector_output.strip()
-        if not collector_output.endswith(']'):
-            # JMX needs some additional cleanup
-            collector_output = collector_output[: collector_output.rfind(']') + 1]
+        if not collector_output.endswith('} ]') or not collector_output.endswith('}\n]'):
+            # JMX and E2E parsing need some additional cleanup
+            # There can be extra text and log file output after JSON contents
+            lines = collector_output.splitlines()
+            for i, line in enumerate(lines[::-1]):
+                if line.startswith('} ]'):
+                    collector_output = '\n'.join(lines[:-i])
+                    break
+                elif line.endswith('}') and lines[-i + 1] == ']':
+                    # check for '}\n]' condition of already pretty printed json
+                    collector_output = '\n'.join(lines[:-i + 2])
+                    break
+
+            else:
+                raise ValueError(
+                    '{}{}\nCould parse JSON from the output'.format(
+                        result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR
+                    )
+                )
         collector = json.loads(collector_output)
 
         replay_check_run(collector, aggregator)

@@ -23,6 +23,21 @@ EXPECTED_METRICS = [
     'system.net.packets_out.error',
 ]
 
+E2E_EXPECTED_METRICS = EXPECTED_METRICS + [
+    "system.net.tcp4.closing",
+    "system.net.tcp4.established",
+    "system.net.tcp4.listening",
+    "system.net.tcp4.opening",
+    "system.net.tcp4.time_wait",
+    "system.net.tcp6.closing",
+    "system.net.tcp6.established",
+    "system.net.tcp6.listening",
+    "system.net.tcp6.opening",
+    "system.net.tcp6.time_wait",
+    "system.net.udp4.connections",
+    "system.net.udp6.connections",
+]
+
 CONNTRACK_METRICS = [
     'system.net.conntrack.acct',
     'system.net.conntrack.buckets',
