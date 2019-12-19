@@ -54,7 +54,7 @@
     example: <NTLM_DOMAIN>/<USERNAME>
     type: string
   description: |
-    If your services uses NTLM authentication, you can specify
+    If your services use NTLM authentication, you can specify
     a domain that is used in the check. For NTLM Auth, append
     the username to domain, not as the `username` parameter.
 - name: kerberos_auth
@@ -62,7 +62,7 @@
     example: disabled
     type: string
   description: |
-    If your service uses Kerberos authentication, you can specify the Kerberos
+    If your services use Kerberos authentication, you can specify the Kerberos
     strategy to use between:
 
       - required
@@ -108,6 +108,20 @@
     example: <KEYTAB_FILE_PATH>
     type: string
   description: Set the path to your Kerberos key tab file.
+- name: aws_host
+  value:
+    type: string
+  description: |
+    If your services require AWS Signature Version 4 Signing, set the host.
+
+    See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
+- name: aws_region
+  value:
+    type: string
+  description: |
+    If your services require AWS Signature Version 4 Signing, set the region.
+
+    See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: tls_verify
   value:
     example: true

@@ -28,6 +28,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 # Import lazily to reduce memory footprint and ease installation for development
+requests_aws = None
 requests_kerberos = None
 requests_ntlm = None
 
@@ -40,6 +41,9 @@ DEFAULT_TIMEOUT = 10
 
 STANDARD_FIELDS = {
     'auth_type': '',
+    'aws_host': '',
+    'aws_region': '',
+    'aws_service': '',
     'connect_timeout': None,
     'extra_headers': None,
     'headers': None,
@@ -181,27 +185,37 @@ class RequestsWrapper(object):
 
                 auth = requests_ntlm.HttpNtlmAuth(config['ntlm_domain'], config['password'])
 
-        if auth is None and config['kerberos_auth']:
-            ensure_kerberos()
+        if auth is None:
+            if config['kerberos_auth']:
+                ensure_kerberos()
 
-            # For convenience
-            if is_affirmative(config['kerberos_auth']):
-                config['kerberos_auth'] = 'required'
+                # For convenience
+                if is_affirmative(config['kerberos_auth']):
+                    config['kerberos_auth'] = 'required'
 
-            if config['kerberos_auth'] not in KERBEROS_STRATEGIES:
-                raise ConfigurationError(
-                    'Invalid Kerberos strategy `{}`, must be one of: {}'.format(
-                        config['kerberos_auth'], ' | '.join(KERBEROS_STRATEGIES)
+                if config['kerberos_auth'] not in KERBEROS_STRATEGIES:
+                    raise ConfigurationError(
+                        'Invalid Kerberos strategy `{}`, must be one of: {}'.format(
+                            config['kerberos_auth'], ' | '.join(KERBEROS_STRATEGIES)
+                        )
                     )
-                )
 
-            auth = requests_kerberos.HTTPKerberosAuth(
-                mutual_authentication=KERBEROS_STRATEGIES[config['kerberos_auth']],
-                delegate=is_affirmative(config['kerberos_delegate']),
-                force_preemptive=is_affirmative(config['kerberos_force_initiate']),
-                hostname_override=config['kerberos_hostname'],
-                principal=config['kerberos_principal'],
-            )
+                auth = requests_kerberos.HTTPKerberosAuth(
+                    mutual_authentication=KERBEROS_STRATEGIES[config['kerberos_auth']],
+                    delegate=is_affirmative(config['kerberos_delegate']),
+                    force_preemptive=is_affirmative(config['kerberos_force_initiate']),
+                    hostname_override=config['kerberos_hostname'],
+                    principal=config['kerberos_principal'],
+                )
+            elif config['aws_host']:
+                ensure_aws()
+
+                if not config['aws_region']:
+                    raise ConfigurationError('AWS auth requires the setting `aws_region`')
+
+                auth = requests_aws.BotoAWSRequestsAuth(
+                    aws_host=config['aws_host'], aws_region=config['aws_region'], aws_service=config['aws_service']
+                )
 
         # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         verify = True
@@ -405,6 +419,12 @@ def ensure_ntlm():
     global requests_ntlm
     if requests_ntlm is None:
         import requests_ntlm
+
+
+def ensure_aws():
+    global requests_aws
+    if requests_aws is None:
+        from aws_requests_auth import boto_utils as requests_aws
 
 
 def should_bypass_proxy(url, no_proxy_uris):

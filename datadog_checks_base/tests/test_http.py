@@ -10,6 +10,7 @@ import pytest
 import requests
 import requests_kerberos
 import requests_ntlm
+from aws_requests_auth import boto_utils as requests_aws
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
@@ -420,6 +421,36 @@ class TestAuth:
             RequestsWrapper(instance, init_config)
 
             m.assert_called_once_with('domain\\user', 'pass')
+
+    def test_config_aws(self):
+        instance = {'aws_host': 'uri', 'aws_region': 'earth', 'aws_service': 'saas'}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_aws.BotoAWSRequestsAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_aws.BotoAWSRequestsAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with(aws_host='uri', aws_region='earth', aws_service='saas')
+
+    def test_config_aws_service_remapper(self):
+        instance = {'aws_host': 'uri', 'aws_region': 'earth'}
+        init_config = {}
+        remapper = {'aws_service': {'name': 'aws_service', 'default': 'es'}}
+
+        with mock.patch('datadog_checks.base.utils.http.requests_aws.BotoAWSRequestsAuth') as m:
+            RequestsWrapper(instance, init_config, remapper)
+
+            m.assert_called_once_with(aws_host='uri', aws_region='earth', aws_service='es')
+
+    def test_config_aws_no_region(self):
+        instance = {'aws_host': 'uri'}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError):
+            RequestsWrapper(instance, init_config)
 
 
 class TestProxies:
