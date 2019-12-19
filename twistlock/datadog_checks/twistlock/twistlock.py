@@ -288,7 +288,7 @@ class TwistlockCheck(AgentCheck):
         vulns = data.get('info', {}).get('complianceDistribution', {}) or {}
         types = ["critical", "high", "medium", "low"]
         for type in types:
-            compliance[type] += vulns[type]
+            compliance[type] += vulns.get(type, 0)
             compliance_tags = SEVERITY_TAGS.get(type, []) + tags
             self.gauge('{}.compliance.count'.format(namespace), compliance[type], compliance_tags)
 
