@@ -99,7 +99,7 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
             tags:
                dag_id: '$1'
           - match: 'airflow.dag.*.*.duration'
-            name: 'airflow.dag.duration'
+            name: 'airflow.dag.task.duration'
             tags:
                dag_id: '$1'
                task_id: '$2'
