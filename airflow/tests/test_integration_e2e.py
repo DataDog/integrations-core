@@ -25,7 +25,7 @@ def test_service_checks_e2e(dd_agent_check):
 
 
 def assert_service_checks(aggregator):
-    tags = ['key:my-tag', 'url:http://localhost:8080/api/experimental/test']
+    tags = ['key:my-tag', 'url:http://localhost:8080']
 
     aggregator.assert_service_check('airflow.can_connect', AgentCheck.OK, tags=tags, count=1)
     aggregator.assert_metric('airflow.can_connect', 1, tags=tags, count=1)

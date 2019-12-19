@@ -14,7 +14,7 @@ def test_service_checks_cannot_connect(aggregator):
     check = AirflowCheck('airflow', {}, [common.INSTANCE_WONG_URL])
     check.check(common.INSTANCE_WONG_URL)
 
-    tags = ['key:my-tag', 'url:http://localhost:5555/api/experimental/test']
+    tags = ['key:my-tag', 'url:http://localhost:5555']
 
     aggregator.assert_service_check('airflow.can_connect', AgentCheck.CRITICAL, tags=tags, count=1)
     aggregator.assert_metric('airflow.can_connect', 0, tags=tags, count=1)
@@ -37,7 +37,7 @@ def test_service_checks_healthy(aggregator, json_resp, expected_healthy_status, 
 
         check.check(instance)
 
-    tags = ['key:my-tag', 'url:http://localhost:8080/api/experimental/test']
+    tags = ['key:my-tag', 'url:http://localhost:8080']
 
     aggregator.assert_service_check('airflow.healthy', expected_healthy_status, tags=tags, count=1)
     aggregator.assert_metric('airflow.healthy', expected_healthy_value, tags=tags, count=1)
