@@ -5,14 +5,17 @@
 This check monitors [Harbor][1] through the Datadog Agent.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The Harbor check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
 
 ### Configuration
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+#### Host
+
+##### Metric Collection
 
 1. Edit the `harbor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Harbor performance data. See the [sample harbor.d/conf.yaml][5] for all available configuration options.
 
@@ -20,7 +23,7 @@ The Harbor check is included in the [Datadog Agent][3] package. No additional in
 
 You can specify any type of user in the config but an account with admin permissions is required to fetch disk metrics. The metric `harbor.projects.count` only reflects the number of projects the provided user can access.
 
-#### Log Collection
+##### Log Collection
 
 **Available for Agent >6.0**
 
@@ -41,6 +44,28 @@ You can specify any type of user in the config but an account with admin permiss
     ```
 
 3. [Restart the Agent][6].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates](https://docs.datadoghq.com/agent/autodiscovery/integrations) for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                  |
+|----------------------|----------------------------------------|
+| `<INTEGRATION_NAME>` | `harbor`                               |
+| `<INIT_CONFIG>`      | blank or `{}`                          |
+| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%:%%port%%"}` |
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection](https://docs.datadoghq.com/agent/docker/log/).
+
+| Parameter      | Value                                                 |
+|----------------|-------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "marathon", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
