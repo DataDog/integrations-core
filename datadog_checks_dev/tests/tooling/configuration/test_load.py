@@ -2665,31 +2665,37 @@ def test_template_array():
     assert not spec.errors
 
     options = spec.data['files'][0]['options'][0]['options']
-    assert options[0]['name'] == 'foo'
-    assert options[1]['name'] == 'proxy'
-    assert options[2]['name'] == 'skip_proxy'
-    assert options[3]['name'] == 'username'
-    assert options[4]['name'] == 'password'
-    assert options[5]['name'] == 'ntlm_domain'
-    assert options[6]['name'] == 'kerberos_auth'
-    assert options[7]['name'] == 'kerberos_delegate'
-    assert options[8]['name'] == 'kerberos_force_initiate'
-    assert options[9]['name'] == 'kerberos_hostname'
-    assert options[10]['name'] == 'kerberos_principal'
-    assert options[11]['name'] == 'kerberos_keytab'
-    assert options[12]['name'] == 'tls_verify'
-    assert options[13]['name'] == 'tls_ignore_warning'
-    assert options[14]['name'] == 'tls_cert'
-    assert options[15]['name'] == 'tls_private_key'
-    assert options[16]['name'] == 'tls_ca_cert'
-    assert options[17]['name'] == 'headers'
-    assert options[18]['name'] == 'extra_headers'
-    assert options[19]['name'] == 'timeout'
-    assert options[20]['name'] == 'connect_timeout'
-    assert options[21]['name'] == 'read_timeout'
-    assert options[22]['name'] == 'log_requests'
-    assert options[23]['name'] == 'persist_connections'
-    assert options[24]['name'] == 'bar'
+    option_names = [option['name'] for option in options]
+    assert option_names == [
+        'foo',
+        'proxy',
+        'skip_proxy',
+        'username',
+        'password',
+        'ntlm_domain',
+        'kerberos_auth',
+        'kerberos_delegate',
+        'kerberos_force_initiate',
+        'kerberos_hostname',
+        'kerberos_principal',
+        'kerberos_keytab',
+        'aws_region',
+        'aws_host',
+        'aws_service',
+        'tls_verify',
+        'tls_ignore_warning',
+        'tls_cert',
+        'tls_private_key',
+        'tls_ca_cert',
+        'headers',
+        'extra_headers',
+        'timeout',
+        'connect_timeout',
+        'read_timeout',
+        'log_requests',
+        'persist_connections',
+        'bar',
+    ]
 
 
 def test_template_array_empty():

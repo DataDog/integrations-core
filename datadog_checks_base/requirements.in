@@ -1,4 +1,6 @@
+aws-requests-auth==0.4.2
 binary==1.0.0
+botocore==1.13.42
 contextlib2==0.5.5
 ddtrace==0.13.0
 ipaddress==1.0.22; python_version < '3.0'
