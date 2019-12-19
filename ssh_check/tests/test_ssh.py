@@ -80,13 +80,11 @@ def test_ssh_bad_config(aggregator):
         ),
     ],
 )
-def test_collect_metadata(version, metadata):
+def test_collect_metadata(version, metadata, datadog_agent):
     client = MagicMock()
     client.get_transport = MagicMock(return_value=namedtuple('Transport', ['remote_version'])(version))
 
     ssh = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
     ssh.check_id = 'test:123'
-    with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
-        ssh._collect_metadata(client)
-        for key, value in metadata.items():
-            m.assert_any_call('test:123', key, value)
+    ssh._collect_metadata(client)
+    datadog_agent.assert_metadata('test:123', metadata)
