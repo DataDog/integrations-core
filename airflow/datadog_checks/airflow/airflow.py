@@ -19,8 +19,8 @@ class AirflowCheck(AgentCheck):
         self._submit_health_status(base_url, tags)
 
     def _submit_health_status(self, base_url, base_tags):
+        tags = ['url:{}'.format(base_url)] + base_tags
         url = base_url + "/api/experimental/test"
-        tags = ['url:{}'.format(url)] + base_tags
 
         resp = self._get_json(url)
 
