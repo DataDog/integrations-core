@@ -1,0 +1,10 @@
+{ 
+  "name": "Ambari poulet patterns",
+  "type": "logs",
+  "page": "patterns",
+  "query": "chicken",
+  "timerange": {
+    "interval_ms": 54321
+  },
+  "visible_facets": ["service", "@http.referer_details.path"]
+}

@@ -1,0 +1,23 @@
+{ 
+  "name": "Activemq chicken table",
+  "type": "logs",
+  "page": "analytics",
+  "query": "table",
+  "timerange": {
+    "interval_ms": 345678
+  },
+  "visible_facets": ["status", "@http.referer_details.path", "@duration"],
+  "options": {
+    "group_bys": [
+      { "facet": "@http.referer_details.path" },
+      { "facet": "status" }
+    ],
+    "aggregations": [
+      { "metric": "@http.referer_details.path", "type": "count" },
+      { "metric": "status", "type": "avg" }
+    ],
+    "limit": "5",
+    "order": "top",
+    "widget": "query_table"
+  }
+}

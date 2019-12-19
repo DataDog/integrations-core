@@ -31,8 +31,9 @@
     "monitors": {},
     "dashboards": {},
     "saved_views": {
-      "ActiveMQ base saved view": "assets/saved_views/base_saved_view.json",
-      "ActiveMQ overview saved view": "assets/saved_views/overview_saved_view.json"
+      "ActiveMQ Analytics Timeseries": "assets/saved_views/analytics_timeseries_saved_view.json",
+      "ActiveMQ Stream": "assets/saved_views/stream_saved_view.json",
+      "ActiveMQ Analytics Table": "assets/saved_views/analytics_table_saved_view.json"
     },
     "service_checks": "assets/service_checks.json"
   }

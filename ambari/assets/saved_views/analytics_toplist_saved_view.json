@@ -1,0 +1,21 @@
+{ 
+  "name": "Ambari cocorico toplist",
+  "type": "logs",
+  "page": "analytics",
+  "query": "cocorico",
+  "timerange": {
+    "interval_ms": 600000
+  },
+  "visible_facets": ["status", "@http.referer_details.path"],
+  "options": {
+    "group_bys": [
+      { "facet": "@http.referer_details.path" }
+    ],
+    "aggregations": [
+      { "metric": "count", "type": "count" }
+    ],
+    "step_ms": "30000",
+    "limit": "50",
+    "widget": "toplist"
+  }
+}

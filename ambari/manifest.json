@@ -27,8 +27,8 @@
       "Ambari base dashboard": "assets/dashboards/base_dashboard.json"
     },
     "saved_views": {
-      "Ambari base saved view": "assets/saved_views/base_saved_view.json",
-      "Ambari overview saved view": "assets/saved_views/overview_saved_view.json"
+      "Ambari Patterns": "assets/saved_views/patterns_saved_view.json",
+      "Ambari Analytics Toplist": "assets/saved_views/analytics_toplist_saved_view.json"
     },
     "service_checks": "assets/service_checks.json"
   }
