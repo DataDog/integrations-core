@@ -4,7 +4,8 @@
   ],
   "categories": [
     "languages",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Go-Expvar",
