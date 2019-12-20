@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+import time
 
 import pytest
 import requests
@@ -16,9 +17,8 @@ from .common import BASE_URL, HERE, HOST, TEST_AUTH, TEST_MESSAGE, TEST_PORT, TE
 
 def populate_server():
     """Add some queues and topics to ensure more metrics are available."""
-    out = run_command('docker logs dd-test-activemq-server', capture='both')
-    print(HOST, BASE_URL)
-    print(out)
+    time.sleep(3)
+
     for queue in TEST_QUEUES:
         url = '{}/{}?type=queue'.format(BASE_URL, queue)
         requests.post(url, data=TEST_MESSAGE, auth=TEST_AUTH)
