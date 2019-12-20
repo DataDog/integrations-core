@@ -42,6 +42,7 @@ YARN_APPS_PATH = 'ws/v1/cluster/apps'
 MESOS_APPS_PATH = 'frameworks'
 STANDALONE_APPS_PATH = 'json/'
 STANDALONE_APP_PATH_HTML = 'app/'
+VERSION_PATH = '/api/v1/version'
 
 # Service Check Names
 SPARK_SERVICE_CHECK = 'spark.application_master.can_connect'
@@ -85,6 +86,9 @@ class Url(object):
     def __hash__(self):
         return hash(self.parts)
 
+
+# PATH to Spark Version
+VERSION_PATH = Url(urljoin(SPARK_APP_URL, VERSION_PATH))
 
 # YARN Service URLs
 YARN_APP_URL = Url(urljoin(SPARK_YARN_URL, YARN_APPS_PATH) + '?states=RUNNING&applicationTypes=SPARK')
@@ -435,6 +439,11 @@ def standalone_requests_pre20_get_mock(*args, **kwargs):
 
     elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL_PRE20:
         with open(os.path.join(FIXTURE_DIR, 'streaming_statistics'), 'rb') as f:
+            body = f.read()
+            return MockStandaloneResponse(body, 200)
+
+    elif arg_url == VERSION_PATH:
+        with open(os.path.join(FIXTURE_DIR, 'version'), 'rb') as f:
             body = f.read()
             return MockStandaloneResponse(body, 200)
 
@@ -937,6 +946,29 @@ def test_standalone_pre20(aggregator):
 
         # Assert coverage for this check on this instance
         aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.unit
+def test_metadata(aggregator, datadog_agent):
+    with mock.patch('requests.get', standalone_requests_pre20_get_mock):
+        c = SparkCheck(CHECK_NAME, {}, [STANDALONE_CONFIG_PRE_20])
+        c.check_id = "test:123"
+        c.check(STANDALONE_CONFIG_PRE_20)
+
+        c._collect_version(SPARK_APP_URL)
+
+        raw_version = "2.4.0"
+
+        major, minor, patch = raw_version.split(".")
+
+        version_metadata = {
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': raw_version,
+        }
+
+        datadog_agent.assert_metadata('test:123', version_metadata)
 
 
 @pytest.mark.unit
