@@ -86,7 +86,7 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
             ## @param mysql_host - string - required
             ## url of your MySQL database
             #
-          - mysql_host: localhost
+          - mysql_host: "localhost"
 
             ## @param mysql_port - integer - optional - default: 3306
             ## port of your MySQL database
@@ -96,12 +96,12 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
             ## @param mysql_user - string - required
             ## User to use to connect to MySQL in order to gather metrics
             #
-            mysql_user: datadog
+            mysql_user: "datadog"
 
             ## @param mysql_password - string - required
             ## Password to use to connect to MySQL in order to gather metrics
             #
-            mysql_password: <MYSQL_PASSWORD>
+            mysql_password: "<MYSQL_PASSWORD>"
 
             ## @param rrd_path - string - required
             ## The Cacti checks requires access to the Cacti DB in MySQL and to the RRD
@@ -111,7 +111,7 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
             ## The `rrd_path` will probably be `/var/lib/cacti/rra` on Ubuntu
             ## or `/var/www/html/cacti/rra` on any other machines.
             #
-            rrd_path: <CACTI_RRA_PATH>
+            rrd_path: "<CACTI_RRA_PATH>"
     ```
 
 2. [Restart the Agent][3].
