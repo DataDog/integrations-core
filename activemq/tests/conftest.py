@@ -7,7 +7,7 @@ import os
 import pytest
 import requests
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import WaitForPortListening
 from datadog_checks.dev.utils import load_jmx_config
 
@@ -16,6 +16,9 @@ from .common import BASE_URL, HERE, HOST, TEST_AUTH, TEST_MESSAGE, TEST_PORT, TE
 
 def populate_server():
     """Add some queues and topics to ensure more metrics are available."""
+    out = run_command('docker logs dd-test-activemq-server', capture='both')
+    print(HOST, BASE_URL)
+    print(out)
     for queue in TEST_QUEUES:
         url = '{}/{}?type=queue'.format(BASE_URL, queue)
         requests.post(url, data=TEST_MESSAGE, auth=TEST_AUTH)
