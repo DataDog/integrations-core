@@ -1054,3 +1054,22 @@ def test_3850(aggregator):
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_meraki_cloud_controller(aggregator):
+    instance = common.generate_instance_config([])
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'meraki-cloud-controller.yaml')
+    instance['community_string'] = 'meraki-cloud-controller'
+    instance['profile'] = 'meraki'
+    instance['enforce_mib_constraints'] = False
+    init_config = {'profiles': {'meraki': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+    dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK'] + common.CHECK_TAGS
+    aggregator.assert_metric('snmp.devStatus', metric_type=aggregator.GAUGE, tags=dev_tags, count=1)
+    aggregator.assert_metric('snmp.devClientCount', metric_type=aggregator.GAUGE, tags=dev_tags, count=1)
+    if_tags = ['interface:wifi0', 'index:4'] + common.CHECK_TAGS
+    aggregator.assert_metric('snmp.devInterfaceSentPkts', metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+    aggregator.assert_metric('snmp.devInterfaceRecvPkts', metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+    aggregator.assert_metric('snmp.devInterfaceSentBytes', metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+    aggregator.assert_metric('snmp.devInterfaceRecvBytes', metric_type=aggregator.GAUGE, tags=if_tags, count=1)
