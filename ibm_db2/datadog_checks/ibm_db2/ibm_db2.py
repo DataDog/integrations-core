@@ -7,12 +7,13 @@ from itertools import chain
 from time import time as timestamp
 
 import ibm_db
+import re
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
-from .utils import scrub_connection_string, status_to_service_check
+from .utils import get_version, scrub_connection_string, status_to_service_check
 
 
 class IbmDb2Check(AgentCheck):
@@ -20,6 +21,14 @@ class IbmDb2Check(AgentCheck):
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
     SERVICE_CHECK_STATUS = '{}.status'.format(METRIC_PREFIX)
     EVENT_TABLE_SPACE_STATE = '{}.tablespace_state_change'.format(METRIC_PREFIX)
+    VERSION_REGEX = re.compile(
+        r"""(?P<major>0|[1-11]{1,2})
+        \.
+        (?P<minor>[0-9]\d*)
+        \.
+        (?P<release>[0-9]{1,4}\d*)
+        """,
+        re.VERBOSE,)
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
@@ -59,12 +68,24 @@ class IbmDb2Check(AgentCheck):
 
             self._conn = connection
 
+        v = self.collect_metadata()
         self.query_instance()
         self.query_database()
         self.query_buffer_pool()
         self.query_table_space()
         self.query_transaction_log()
         self.query_custom()
+
+    def collect_metadata(self):
+        # Only 1 row and 1 column returned in query
+        version = get_version(self._conn)
+
+        if version is not None:
+            self.set_metadata('version', version, scheme='regex', pattern=self.VERSION_REGEX)
+
+            self.log.debug('Found ibm_db2 version: {}'.format(version))
+        else:
+            self.log.warning('Could not retrieve ibm_db2 version info: {}'.format(row))
 
     def query_instance(self):
         # Only 1 instance

@@ -5,9 +5,11 @@ import mock
 import pytest
 
 from datadog_checks.ibm_db2 import IbmDb2Check
-from datadog_checks.ibm_db2.utils import scrub_connection_string
+from datadog_checks.ibm_db2.utils import get_version, scrub_connection_string
 
 pytestmark = pytest.mark.unit
+
+CHECK_ID = "test:123"
 
 
 class TestPasswordScrubber:
@@ -44,3 +46,25 @@ def test_retry_connection(aggregator, instance):
             ibmdb2.check(instance)
         # new connection made
         assert ibmdb2._conn != conn1
+
+
+def test_metadata(aggregator, instance, datadog_agent):
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check.check_id = CHECK_ID
+
+    check.check(instance)
+
+    # The version string differs from the image tag version
+    version = get_version(check._conn)
+
+    major, minor, release = version.split(".")
+
+    version_metadata = {
+        "version.scheme": "ibm_db2",
+        "version.major": major,
+        "version.minor": minor,
+        "version.release": release,
+        "version.raw": version,
+    }
+
+    datadog_agent.assert_metadata(CHECK_ID, version_metadata)
