@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import re
 from itertools import chain
 from time import time as timestamp
 
 import ibm_db
-import re
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
@@ -28,7 +28,8 @@ class IbmDb2Check(AgentCheck):
         \.
         (?P<release>[0-9]\d*)
         """,
-        re.VERBOSE,)
+        re.VERBOSE,
+    )
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
@@ -88,7 +89,7 @@ class IbmDb2Check(AgentCheck):
 
             self.log.debug('Found ibm_db2 version: {}'.format(version))
         else:
-            self.log.warning('Could not retrieve ibm_db2 version info: {}'.format(row))
+            self.log.warning('Could not retrieve ibm_db2 version info: {}'.format(version))
 
     def query_instance(self):
         # Only 1 instance
