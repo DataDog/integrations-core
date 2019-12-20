@@ -2,7 +2,7 @@
 
 ## 1.9.2 / 2019-12-20
 
-* [Fixed] Fix version collection. See [#5252](https://github.com/DataDog/integrations-core/pull/5252).
+* [Fixed] Fix version collection again. See [#5252](https://github.com/DataDog/integrations-core/pull/5252).
 
 ## 1.9.1 / 2019-12-04
 
