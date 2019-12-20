@@ -181,9 +181,7 @@ def dd_agent_check(request, aggregator):
 
             else:
                 raise ValueError(
-                    '{}{}\nCould parse JSON from the output'.format(
-                        result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR
-                    )
+                    'Could not parse JSON from the output. stdout:\n{}\nstderr{}'.format(result.stdout, result.stderr)
                 )
         collector = json.loads(collector_output)
 
