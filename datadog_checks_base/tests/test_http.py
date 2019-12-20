@@ -11,6 +11,7 @@ import requests
 import requests_kerberos
 import requests_ntlm
 from aws_requests_auth import boto_utils as requests_aws
+from requests import auth as requests_auth
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
@@ -198,8 +199,12 @@ class TestAuth:
         instance = {'username': 'user', 'password': 'pass', 'auth_type': 'digest'}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_auth.HTTPDigestAuth)
 
-        assert isinstance(http.options['auth'], requests.auth.HTTPDigestAuth)
+        with mock.patch('datadog_checks.base.utils.http.requests_auth.HTTPDigestAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with('user', 'pass')
 
     def test_config_basic_only_username(self):
         instance = {'username': 'user'}

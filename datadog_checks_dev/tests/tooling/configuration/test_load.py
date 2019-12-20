@@ -2670,6 +2670,7 @@ def test_template_array():
         'foo',
         'proxy',
         'skip_proxy',
+        'auth_type',
         'username',
         'password',
         'ntlm_domain',

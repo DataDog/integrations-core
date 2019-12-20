@@ -40,6 +40,18 @@
 
     If set to `true`, this makes the check bypass any proxy
     settings enabled and attempt to reach services directly.
+- name: auth_type
+  value:
+    example: basic
+    type: string
+  description: |
+    The type of authentication to use. The available types are:
+
+      - basic
+      - digest
+      - ntlm
+      - kerberos
+      - aws
 - name: username
   value:
     type: string
