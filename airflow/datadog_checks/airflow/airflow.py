@@ -9,18 +9,29 @@ AIRFLOW_STATUS_OK = "OK"
 
 
 class AirflowCheck(AgentCheck):
+
+    def __init__(self, name, init_config, instances):
+        super(AirflowCheck, self).__init__(
+            name,
+            init_config,
+            instances,
+        )
+
+        self._url = self.instance.get('url', '')
+        self._tags = self.instance.get('tags', [])
+
+        # The Agent only makes one attempt to instantiate each AgentCheck so any errors occurring
+        # in `__init__` are logged just once, making it difficult to spot. Therefore, we emit
+        # potential configuration errors as part of the check run phase.
+        # The configuration is only parsed once if it succeed, otherwise it's retried.
+        self.check_initializations.append(self._parse_config)
+
     def check(self, instance):
-        tags = instance.get('tags', [])
+        self._submit_health_status()
 
-        base_url = instance.get('url')
-        if not base_url:
-            raise ConfigurationError('Missing configuration: url')
-
-        self._submit_health_status(base_url, tags)
-
-    def _submit_health_status(self, base_url, base_tags):
-        tags = ['url:{}'.format(base_url)] + base_tags
-        url = base_url + "/api/experimental/test"
+    def _submit_health_status(self):
+        tags = ['url:{}'.format(self._url)] + self._tags
+        url = self._url + "/api/experimental/test"
 
         resp = self._get_json(url)
 
@@ -40,6 +51,10 @@ class AirflowCheck(AgentCheck):
 
             self.service_check('airflow.healthy', health_status, tags=tags)
             self.gauge('airflow.healthy', int(health_status == AgentCheck.OK), tags=tags)
+
+    def _parse_config(self):
+        if not self._url:
+            raise ConfigurationError('Missing configuration: url')
 
     def _get_json(self, url):
         try:
