@@ -14,12 +14,14 @@ from .._env import (
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
     TESTING_PLUGIN,
+    deserialize_data,
     e2e_active,
     e2e_testing,
     format_config,
     get_env_vars,
     replay_check_run,
     serialize_data,
+    set_env_vars,
 )
 
 __aggregator = None
@@ -178,6 +180,35 @@ def dd_agent_check(request, aggregator):
     # Give an explicit name so we don't shadow other uses
     with TempDir('dd_agent_check') as temp_dir:
         yield run_check
+
+
+@pytest.fixture
+def dd_run_check():
+    def run_check(check, extract_message=False):
+        error = check.run()
+
+        if error:
+            error = json.loads(error)[0]
+            if extract_message:
+                raise Exception(error['message'])
+            else:
+                exc_lines = ['']
+                exc_lines.extend(error['traceback'].splitlines())
+                raise Exception('\n'.join(exc_lines))
+
+        return ''
+
+    return run_check
+
+
+@pytest.fixture
+def dd_get_state(key):
+    return deserialize_data(get_env_vars().get(key.lower()))
+
+
+@pytest.fixture
+def dd_save_state(key, value):
+    set_env_vars({key.lower(): serialize_data(value)})
 
 
 def pytest_configure(config):
