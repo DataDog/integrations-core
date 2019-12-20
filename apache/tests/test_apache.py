@@ -65,7 +65,27 @@ def test_e2e(dd_agent_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_metadata(check, datadog_agent):
+def test_metadata_in_content(check, datadog_agent):
+    check = check(AUTO_CONFIG)
+    check.check_id = 'test:123'
+    major, minor, patch = APACHE_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': APACHE_VERSION,
+    }
+
+    check.check(AUTO_CONFIG)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_metadata_in_header(check, datadog_agent, mock_hide_server_version):
+    """For older Apache versions, the version is not in the output. This test asserts that
+    the check can fallback to the headers."""
     check = check(AUTO_CONFIG)
     check.check_id = 'test:123'
     major, minor, patch = APACHE_VERSION.split('.')
