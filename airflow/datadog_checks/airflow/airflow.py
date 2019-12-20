@@ -9,12 +9,9 @@ AIRFLOW_STATUS_OK = "OK"
 
 
 class AirflowCheck(AgentCheck):
-
     def __init__(self, name, init_config, instances):
         super(AirflowCheck, self).__init__(
-            name,
-            init_config,
-            instances,
+            name, init_config, instances,
         )
 
         self._url = self.instance.get('url', '')
@@ -27,9 +24,6 @@ class AirflowCheck(AgentCheck):
         self.check_initializations.append(self._parse_config)
 
     def check(self, instance):
-        self._submit_health_status()
-
-    def _submit_health_status(self):
         tags = ['url:{}'.format(self._url)] + self._tags
         url = self._url + "/api/experimental/test"
 
