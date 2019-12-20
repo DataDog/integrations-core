@@ -11,6 +11,7 @@ import requests
 import requests_kerberos
 import requests_ntlm
 from aws_requests_auth import boto_utils as requests_aws
+from requests import auth as requests_auth
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
@@ -198,8 +199,12 @@ class TestAuth:
         instance = {'username': 'user', 'password': 'pass', 'auth_type': 'digest'}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_auth.HTTPDigestAuth)
 
-        assert isinstance(http.options['auth'], requests.auth.HTTPDigestAuth)
+        with mock.patch('datadog_checks.base.utils.http.requests_auth.HTTPDigestAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with('user', 'pass')
 
     def test_config_basic_only_username(self):
         instance = {'username': 'user'}
@@ -215,7 +220,7 @@ class TestAuth:
 
         assert http.options['auth'] is None
 
-    def test_config_kerberos(self):
+    def test_config_kerberos_legacy(self):
         instance = {'kerberos_auth': 'required'}
         init_config = {}
 
@@ -234,8 +239,27 @@ class TestAuth:
                 principal=None,
             )
 
+    def test_config_kerberos(self):
+        instance = {'auth_type': 'kerberos', 'kerberos_auth': 'required'}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_kerberos.HTTPKerberosAuth)
+
         with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
-            RequestsWrapper({'kerberos_auth': 'optional'}, init_config)
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with(
+                mutual_authentication=requests_kerberos.REQUIRED,
+                delegate=False,
+                force_preemptive=False,
+                hostname_override=None,
+                principal=None,
+            )
+
+        with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
+            RequestsWrapper({'auth_type': 'kerberos', 'kerberos_auth': 'optional'}, init_config)
 
             m.assert_called_once_with(
                 mutual_authentication=requests_kerberos.OPTIONAL,
@@ -246,7 +270,7 @@ class TestAuth:
             )
 
         with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
-            RequestsWrapper({'kerberos_auth': 'disabled'}, init_config)
+            RequestsWrapper({'auth_type': 'kerberos', 'kerberos_auth': 'disabled'}, init_config)
 
             m.assert_called_once_with(
                 mutual_authentication=requests_kerberos.DISABLED,
@@ -257,7 +281,7 @@ class TestAuth:
             )
 
     def test_config_kerberos_shortcut(self):
-        instance = {'kerberos_auth': True}
+        instance = {'auth_type': 'kerberos', 'kerberos_auth': True}
         init_config = {}
 
         # Trigger lazy import
@@ -276,14 +300,14 @@ class TestAuth:
             )
 
     def test_config_kerberos_unknown(self):
-        instance = {'kerberos_auth': 'unknown'}
+        instance = {'auth_type': 'kerberos', 'kerberos_auth': 'unknown'}
         init_config = {}
 
         with pytest.raises(ConfigurationError):
             RequestsWrapper(instance, init_config)
 
     def test_config_kerberos_keytab_file(self):
-        instance = {'kerberos_keytab': '/test/file'}
+        instance = {'auth_type': 'kerberos', 'kerberos_keytab': '/test/file'}
         init_config = {}
 
         http = RequestsWrapper(instance, init_config)
@@ -296,7 +320,7 @@ class TestAuth:
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
     def test_config_kerberos_cache(self):
-        instance = {'kerberos_cache': '/test/file'}
+        instance = {'auth_type': 'kerberos', 'kerberos_cache': '/test/file'}
         init_config = {}
 
         http = RequestsWrapper(instance, init_config)
@@ -309,7 +333,7 @@ class TestAuth:
         assert os.environ.get('KRB5CCNAME') is None
 
     def test_config_kerberos_cache_restores_rollback(self):
-        instance = {'kerberos_cache': '/test/file'}
+        instance = {'auth_type': 'kerberos', 'kerberos_cache': '/test/file'}
         init_config = {}
 
         http = RequestsWrapper(instance, init_config)
@@ -321,7 +345,7 @@ class TestAuth:
             assert os.environ.get('KRB5CCNAME') == 'old'
 
     def test_config_kerberos_keytab_file_rollback(self):
-        instance = {'kerberos_keytab': '/test/file'}
+        instance = {'auth_type': 'kerberos', 'kerberos_keytab': '/test/file'}
         init_config = {}
 
         http = RequestsWrapper(instance, init_config)
@@ -335,7 +359,7 @@ class TestAuth:
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
     def test_config_kerberos_legacy_remap(self):
-        instance = {'kerberos': True}
+        instance = {'auth_type': 'kerberos', 'kerberos': True}
         init_config = {}
 
         # Trigger lazy import
@@ -366,6 +390,7 @@ class TestAuth:
     def test_kerberos_auth_principal_inexistent(self, kerberos):
         instance = {
             'url': kerberos["url"],
+            'auth_type': 'kerberos',
             'kerberos_auth': 'required',
             'kerberos_hostname': kerberos["hostname"],
             'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
@@ -382,6 +407,7 @@ class TestAuth:
     def test_kerberos_auth_principal_incache_nokeytab(self, kerberos):
         instance = {
             'url': kerberos["url"],
+            'auth_type': 'kerberos',
             'kerberos_auth': 'required',
             'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
             'kerberos_hostname': kerberos["hostname"],
@@ -397,6 +423,7 @@ class TestAuth:
     def test_kerberos_auth_principal_inkeytab_nocache(self, kerberos):
         instance = {
             'url': kerberos["url"],
+            'auth_type': 'kerberos',
             'kerberos_auth': 'required',
             'kerberos_hostname': kerberos["hostname"],
             'kerberos_cache': "DIR:{}".format(kerberos["tmp_dir"]),
@@ -410,6 +437,19 @@ class TestAuth:
         assert response.status_code == 200
 
     def test_config_ntlm(self):
+        instance = {'auth_type': 'ntlm', 'ntlm_domain': 'domain\\user', 'password': 'pass'}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_ntlm.HttpNtlmAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_ntlm.HttpNtlmAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with('domain\\user', 'pass')
+
+    def test_config_ntlm_legacy(self, caplog):
         instance = {'ntlm_domain': 'domain\\user', 'password': 'pass'}
         init_config = {}
 
@@ -421,6 +461,11 @@ class TestAuth:
             RequestsWrapper(instance, init_config)
 
             m.assert_called_once_with('domain\\user', 'pass')
+
+        assert (
+            'The ability to use NTLM auth without explicitly setting auth_type to '
+            '`ntlm` is deprecated and will be removed in Agent 8'
+        ) in caplog.text
 
     def test_config_aws(self):
         instance = {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'earth', 'aws_service': 'saas'}
