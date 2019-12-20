@@ -1,5 +1,11 @@
 # CHANGELOG - mysql
 
+## 1.11.0 / 2019-12-20
+
+* [Added] Document log_processing_rules for MySQL slow query logs. See [#5237](https://github.com/DataDog/integrations-core/pull/5237).
+* [Fixed] Fix formatting and typos in the MySQL documentation. See [#5238](https://github.com/DataDog/integrations-core/pull/5238).
+* [Fixed] Improve perf (minor) by only defining metadata namedtuple once. See [#5138](https://github.com/DataDog/integrations-core/pull/5138).
+
 ## 1.10.0 / 2019-12-02
 
 * [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
