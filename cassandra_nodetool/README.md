@@ -30,8 +30,8 @@ Follow the instructions below to configure this check for an Agent running on a 
           ## An empty list results in no metrics being sent.
           #
         - keyspaces:
-            - <KEYSPACE_1>
-            - <KEYSPACE_2>
+            - "<KEYSPACE_1>"
+            - "<KEYSPACE_2>"
     ```
 
 2. [Restart the Agent][116]
