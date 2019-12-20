@@ -10,6 +10,7 @@ import pytest
 import requests
 import requests_kerberos
 import requests_ntlm
+from aws_requests_auth import boto_utils as requests_aws
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
@@ -420,6 +421,53 @@ class TestAuth:
             RequestsWrapper(instance, init_config)
 
             m.assert_called_once_with('domain\\user', 'pass')
+
+    def test_config_aws(self):
+        instance = {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'earth', 'aws_service': 'saas'}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_aws.BotoAWSRequestsAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_aws.BotoAWSRequestsAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with(aws_host='uri', aws_region='earth', aws_service='saas')
+
+    def test_config_aws_service_remapper(self):
+        instance = {'auth_type': 'aws', 'aws_region': 'us-east-1'}
+        init_config = {}
+        remapper = {
+            'aws_service': {'name': 'aws_service', 'default': 'es'},
+            'aws_host': {'name': 'aws_host', 'default': 'uri'},
+        }
+
+        with mock.patch('datadog_checks.base.utils.http.requests_aws.BotoAWSRequestsAuth') as m:
+            RequestsWrapper(instance, init_config, remapper)
+
+            m.assert_called_once_with(aws_host='uri', aws_region='us-east-1', aws_service='es')
+
+    def test_config_aws_no_host(self):
+        instance = {'auth_type': 'aws'}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^AWS auth requires the setting `aws_host`$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_config_aws_no_region(self):
+        instance = {'auth_type': 'aws', 'aws_host': 'uri'}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^AWS auth requires the setting `aws_region`$'):
+            RequestsWrapper(instance, init_config)
+
+    def test_config_aws_no_service(self):
+        instance = {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'us-east-1'}
+        init_config = {}
+
+        with pytest.raises(ConfigurationError, match='^AWS auth requires the setting `aws_service`$'):
+            RequestsWrapper(instance, init_config)
 
 
 class TestProxies:

@@ -1,6 +1,7 @@
 {
   "categories": [
-    "network"
+    "network",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "Cisco ACI",

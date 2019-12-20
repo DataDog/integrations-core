@@ -110,6 +110,8 @@ init_config:
       definition_file: cisco-3850.yaml
     meraki-cloud-controller:
       definition_file: meraki-cloud-controller.yaml
+    idrac:
+      definition_file: idrac.yaml
 
 instances:
   -

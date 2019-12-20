@@ -2,6 +2,8 @@ import copy
 import os
 from collections import defaultdict
 
+import mock
+
 from . import common
 
 BASE_CONFIG = {'url': 'http://localhost/admin?stats', 'collect_status_metrics': True, 'enable_service_check': True}
@@ -249,3 +251,19 @@ def test_regex_tags(aggregator, check, haproxy_mock):
         'backend:i-1',
     ]
     aggregator.assert_service_check('haproxy.backend_up', tags=tags)
+
+
+def test_version_failure(aggregator, check, datadog_agent):
+    config = copy.deepcopy(BASE_CONFIG)
+    haproxy_check = check(config)
+    filepath = os.path.join(common.HERE, 'fixtures', 'mock_data')
+    with open(filepath, 'rb') as f:
+        data = f.read()
+    with mock.patch('requests.get') as m:
+        m.side_effect = [RuntimeError("Ooops"), mock.Mock(content=data)]
+        haproxy_check.check(config)
+
+    # Version failed, but we should have some metrics
+    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:open', 'service:a'])
+    # But no metadata
+    datadog_agent.assert_metadata_count(0)

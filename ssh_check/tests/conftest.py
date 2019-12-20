@@ -14,7 +14,10 @@ from . import common
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    env = {"ROOT_PASSWORD": common.INSTANCE_INTEGRATION.get("password", "1234")}
+    env = {
+        "ROOT_PASSWORD": common.INSTANCE_INTEGRATION.get("password", "1234"),
+        "SSH_SERVER_IMAGE": common.SSH_SERVER_IMAGE,
+    }
 
     with docker_run(
         compose_file=os.path.join(get_here(), "compose", "docker-compose.yml"),

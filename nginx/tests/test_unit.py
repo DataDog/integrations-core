@@ -80,7 +80,7 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
     c = check(instance)
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
-        r.get.return_value = mock.MagicMock(status_code=200, content='{}')
+        r.get.return_value = mock.MagicMock(status_code=200, content=b'{}')
 
         c.check(instance)
 
@@ -90,3 +90,15 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
         http_wargs.update(expected_http_kwargs)
 
         r.get.assert_called_with('http://localhost:8080/nginx_status', **http_wargs)
+
+
+def test_no_version(check, instance, caplog):
+    c = check(instance)
+
+    with mock.patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = mock.MagicMock(status_code=200, content=b'{}', headers={'server': 'nginx'})
+
+        c.check(instance)
+
+    errors = [record for record in caplog.records if record.levelname == "ERROR"]
+    assert not errors

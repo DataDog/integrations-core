@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import logging
 import os
 import platform
 import socket
@@ -323,3 +324,17 @@ def test_get_net_proc_base_location(aggregator, check, proc_location, envs, expe
     with EnvVars(envs):
         actual = check._get_net_proc_base_location(proc_location)
         assert expected_net_proc_base_location == actual
+
+
+@pytest.mark.skipif(not PY3, reason="mock builtins only works on Python 3")
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_proc_permissions_error(aggregator, check, caplog):
+    caplog.set_level(logging.DEBUG)
+    with mock.patch('builtins.open', mock.mock_open()) as mock_file:
+        mock_file.side_effect = IOError()
+        # force linux check so it will run on macOS too
+        check._collect_cx_state = False
+        check._check_linux(instance={})
+        assert 'Unable to read /proc/net/dev.' in caplog.text
+        assert 'Unable to read /proc/net/netstat.' in caplog.text
+        assert 'Unable to read /proc/net/snmp.' in caplog.text

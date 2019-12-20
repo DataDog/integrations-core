@@ -12,7 +12,6 @@ To consider an Agent-based integration complete, and thus ready to be included i
 
 * A `README.md` file with the right format
 * A battery of tests verifying metrics collection
-* A set of images to be used in the UI tile
 * A `metadata.csv` file listing all of the collected metrics
 * A complete `manifest.json` file
 * If the integration collects Service Checks, the `service_checks.json` must be complete as well
@@ -91,6 +90,7 @@ After answering the questions, the output will match that of the dry-run above, 
 
 A Check is a Python class with the following requirements:
 
+* If running with Agent v7+ it should be Python 3 compatible, Python 2 otherwise.
 * It must derive from `AgentCheck`
 * It must provide a method with this signature: `check(self, instance)`
 
@@ -507,45 +507,6 @@ Our example integration contains a service check, so we need to add it to the `a
 ]
 ```
 
-### Add images and logos
-
-The directory structure for images and logos:
-
-```
-    awesome/
-    ├── images
-    │   └── an_awesome_image.png
-    ├── assets
-    │   └── logos/
-            ├── avatars-bot.png
-            ├── saas_logos-bot.png
-            └── saas_logos-small.png
-```
-
-The `images` folder contains all images that are used in the integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`:
-
-```markdown
-![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/awesome/images/snapshot.png)
-```
-
-The `assets/logos/` directory must contain **three** images with filenames and sizes that match the following specifications _exactly_. Underneath each specification is a list of places where the images may appear in the web app.
-
-#### saas_logos-bot.png (200 × 128)
-
-* Integration tile images at `/account/settings`
-* Description heading at `/account/settings#integrations/{integration_name}`
-* Integration monitor tiles and search bar results images at `/monitors#create/integration`
-
-#### saas_logos-small.png (120 × 60)
-
-* Integration dashboards list images at `/dash/list`
-* Some integration dashboards/screenboards at `/dash/integration/{integration_dash_name}`
-
-#### avatars-bot.png (128 × 128)
-
-* Event stream at `/event/stream`
-* Notification icons at `/report/monitor`
-
 ### Building
 
 `setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official Python documentation][15].
@@ -557,7 +518,7 @@ Once your `setup.py` is ready, create a wheel:
 
 #### What's in the wheel?
 
-The wheel contains only the files necessary for the functioning of the integration itself. This includes the Check itself, the configuration example file, and some artifacts generated during the build of the wheel. All of the other elements, including images, metadata files, and so forth, are *not* meant to be contained within the wheel. These latter elements are used elsewhere by the greater Datadog platform and eco-system.
+The wheel contains only the files necessary for the functioning of the integration itself. This includes the Check itself, the configuration example file, and some artifacts generated during the build of the wheel. All of the other elements, including the metadata files are *not* meant to be contained within the wheel. These latter elements are used elsewhere by the greater Datadog platform and eco-system.
 
 ### Installing
 
