@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 '''
 Check the performance counters from SQL Server
+
 For information on how to report the metrics available in the sys.dm_os_performance_counters table see
 http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-values-from-sys-dm-os-performance-counters.aspx  # noqa: E501
 '''
