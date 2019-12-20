@@ -13,6 +13,7 @@ def test_down(aggregator):
     Service expected to be down
     """
     instance = deepcopy(common.INSTANCE_KO)
+    instance['collect_response_time'] = True
     check = TCPCheck(common.CHECK_NAME, {}, [instance])
     check.check(instance)
     expected_tags = ["instance:DownService", "target_host:127.0.0.1", "port:65530", "foo:bar"]

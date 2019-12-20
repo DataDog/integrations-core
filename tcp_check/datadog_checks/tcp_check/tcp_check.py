@@ -53,13 +53,15 @@ class TCPCheck(AgentCheck):
                 raise ConfigurationError(msg)
 
     def check(self, instance):
-        start = time.time()
+        response_time = None
         try:
             self.log.debug("Connecting to %s %d", self.addr, self.port)
             sock = socket.socket(self.socket_type)
             try:
                 sock.settimeout(self.timeout)
+                start = time.time()
                 sock.connect((self.addr, self.port))
+                response_time = time.time() - start
             finally:
                 sock.close()
         except socket.timeout as e:
@@ -103,10 +105,10 @@ class TCPCheck(AgentCheck):
             self.log.debug("%s:%d is UP", self.addr, self.port)
             self.report_as_service_check(AgentCheck.OK, 'UP')
 
-        if self.response_time:
+        if self.response_time and response_time is not None:
             self.gauge(
                 'network.tcp.response_time',
-                time.time() - start,
+                response_time,
                 tags=[
                     'url:{}:{}'.format(instance.get('host', None), self.port),
                     'instance:{}'.format(instance.get('name')),
