@@ -85,6 +85,7 @@ class Apache(AgentCheck):
                 if metric == 'ServerVersion':
                     self._submit_metadata(value)
                     version_submitted = True
+                    continue
                 try:
                     value = float(value)
                 except ValueError:
@@ -127,8 +128,9 @@ class Apache(AgentCheck):
     def _submit_metadata(self, value):
         """Possible formats:
             Apache | Apache/X | Apache/X.Y | Apache/X.Y.Z | Apache/X.Y.Z (<OS>)
+            Incomplete versions are ignored.
         """
-        match = re.match(self.VERSION_REGEX, value)
+        match = self.VERSION_REGEX.match(value)
 
         if not match or not match.groups():
             self.log.info("Cannot parse the complete Apache version from %s.".format(value))
