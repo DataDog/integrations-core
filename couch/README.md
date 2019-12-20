@@ -73,11 +73,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Metric collection
 
-| Parameter            | Value                             |
-|----------------------|-----------------------------------|
-| `<INTEGRATION_NAME>` | `couch`                           |
-| `<INIT_CONFIG>`      | blank or `{}`                     |
-| `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%:5984"}` |
+| Parameter            | Value                                |
+|----------------------|--------------------------------------|
+| `<INTEGRATION_NAME>` | `couch`                              |
+| `<INIT_CONFIG>`      | blank or `{}`                        |
+| `<INSTANCE_CONFIG>`  | `{"server": "http://%%host%%:5984"}` |
 
 ##### Log collection
 
