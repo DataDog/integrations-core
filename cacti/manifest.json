@@ -1,6 +1,7 @@
 {
   "categories": [
-    "monitoring"
+    "monitoring",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Cacti",
