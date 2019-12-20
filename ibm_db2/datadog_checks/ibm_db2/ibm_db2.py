@@ -68,13 +68,13 @@ class IbmDb2Check(AgentCheck):
 
             self._conn = connection
 
-        v = self.collect_metadata()
         self.query_instance()
         self.query_database()
         self.query_buffer_pool()
         self.query_table_space()
         self.query_transaction_log()
         self.query_custom()
+        self.collect_metadata()
 
     def collect_metadata(self):
         # Only 1 row and 1 column returned in query
