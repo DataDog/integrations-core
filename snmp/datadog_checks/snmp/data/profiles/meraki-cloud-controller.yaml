@@ -12,15 +12,13 @@ metrics:
     symbols:
       - devStatus # 0 or 1 values
       - devClientCount
-    metrics_tags:
+    metric_tags:
       - tag: device
         column: devName
       - tag: product
         column: devProductCode
       - tag: network
         column: devNetworkName
-      - tag: vlan
-        column: vlanNetworkName
   - MIB: MERAKI-CLOUD-CONTROLLER-MIB
     table: devInterfaceTable
     forced_type: gauge
@@ -29,39 +27,8 @@ metrics:
       - devInterfaceRecvPkts
       - devInterfaceSentBytes
       - devInterfaceRecvBytes
-    metrics_tags:
-      - tag: device
-        column: devName
-      - tag: product
-        column: devProductCode
-      - tag: network
-        column: devNetworkName
-      - tag: vlan
-        column: vlanNetworkName
-  # Basic interface stats
-  - MIB: IF-MIB
-    table: ifTable
-    forced_type: monotonic_count
-    symbols:
-      - ifInErrors
-      - ifOutErrors
     metric_tags:
       - tag: interface
-        column: ifDescr
-  - MIB: IF-MIB
-    table: ifTable
-    symbols:
-      - ifAdminStatus
-      - ifOperStatus
-    metric_tags:
-      - tag: interface
-        column: ifDescr
-  - MIB: IF-MIB
-    table: ifXTable
-    forced_type: monotonic_count
-    symbols:
-      - ifHCInOctets
-      - ifHCOutOctets
-    metric_tags:
-      - tag: interface
-        column: ifName
+        column: devInterfaceName
+      - tag: index
+        column: devInterfaceIndex
