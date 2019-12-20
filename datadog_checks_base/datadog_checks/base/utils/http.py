@@ -179,13 +179,13 @@ class RequestsWrapper(object):
             if config['kerberos_auth']:
                 self.logger.warning(
                     'The ability to use Kerberos auth without explicitly setting auth_type to '
-                    '`kerberos` is deprecated and will be removed in Agent 7.20.0'
+                    '`kerberos` is deprecated and will be removed in Agent 8'
                 )
                 auth_type = 'kerberos'
             elif config['ntlm_domain']:
                 self.logger.warning(
                     'The ability to use NTLM auth without explicitly setting auth_type to '
-                    '`ntlm` is deprecated and will be removed in Agent 7.20.0'
+                    '`ntlm` is deprecated and will be removed in Agent 8'
                 )
                 auth_type = 'ntlm'
 
@@ -432,7 +432,7 @@ def create_kerberos_auth(config):
         KERBEROS_STRATEGIES['disabled'] = requests_kerberos.DISABLED
 
     # For convenience
-    if is_affirmative(config['kerberos_auth']):
+    if config['kerberos_auth'] is None or is_affirmative(config['kerberos_auth']):
         config['kerberos_auth'] = 'required'
 
     if config['kerberos_auth'] not in KERBEROS_STRATEGIES:
