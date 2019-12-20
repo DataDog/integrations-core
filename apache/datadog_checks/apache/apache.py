@@ -112,6 +112,8 @@ class Apache(AgentCheck):
 
     def _collect_metadata(self, value):
         raw_version = value.split(' ')[0]
-        version = raw_version.split('/')[1]
-        self.set_metadata('version', version)
-        self.log.debug("found apache version %s", version)
+        split = raw_version.split('/')
+        if len(split) > 2:
+            version = split[1]
+            self.set_metadata('version', version)
+            self.log.debug("found apache version %s", version)
