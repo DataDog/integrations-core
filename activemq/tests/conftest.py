@@ -8,7 +8,7 @@ import time
 import pytest
 import requests
 
-from datadog_checks.dev import docker_run, run_command
+from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import WaitForPortListening
 from datadog_checks.dev.utils import load_jmx_config
 
