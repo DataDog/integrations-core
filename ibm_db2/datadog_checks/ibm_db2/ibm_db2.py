@@ -77,8 +77,11 @@ class IbmDb2Check(AgentCheck):
         self.collect_metadata()
 
     def collect_metadata(self):
-        # Only 1 row and 1 column returned in query
-        version = get_version(self._conn)
+        try:
+            version = get_version(self._conn)
+        except Exception as e:
+            self.log.error("Error getting version: {}".format(str(e)))
+            return
 
         if version is not None:
             self.set_metadata('version', version, scheme='regex', pattern=self.VERSION_REGEX)
