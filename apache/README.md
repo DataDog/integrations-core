@@ -8,39 +8,36 @@ The Apache check tracks requests per second, bytes served, number of worker thre
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The Apache check is packaged with the Agent. To start gathering your Apache metrics and logs, you need to:
 
-1. [Install the Agent][3] on your Apache servers.
+1. [Install the Agent][2] on your Apache servers.
 
 2. Install `mod_status` on your Apache servers and enable `ExtendedStatus`.
 
 ### Configuration
 
-1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Apache [metrics](#metric-collection) and [logs](#log-collection).
-  See the [sample apache.d/conf.yaml][5] for all available configuration options.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-2. [Restart the Agent][6].
+#### Host
 
 #### Metric collection
 
-1. Add this configuration block to your `apache.d/conf.yaml` file to start gathering your [Apache Metrics](#metrics):
+1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Apache metrics. See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
-        init_config:
+    ```yaml
+      init_config:
 
-        instances:
-          - apache_status_url: http://example.com/server-status?auto
-          #  username: example_user # if apache_status_url needs HTTP basic auth
-          #  password: example_password
-          #  tls_verify: false # if you need to enable TLS cert validation, i.e. for self-signed certs
+      instances:
 
-    Change the `apache_status_url` parameter value and configure it for your environment.
-    See the [sample apache.d/conf.yaml][5] for all available configuration options.
+          ## @param apache_status_url - string - required
+          ## Status url of your Apache server.
+          #
+        - apache_status_url: http://localhost/server-status?auto
+    ```
 
-2.  [Restart the Agent][6].
+2. [Restart the Agent][5].
 
 #### Log collection
 
@@ -70,9 +67,31 @@ The Apache check is packaged with the Agent. To start gathering your Apache metr
     ```
 
     Change the `path` and `service` parameter values and configure them for your environment.
-    See the [sample apache.d/conf.yaml][5] for all available configuration options.
+    See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
-3. [Restart the Agent][6].
+3. [Restart the Agent][5].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                                          |
+|----------------------|----------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `apache`                                                       |
+| `<INIT_CONFIG>`      | blank or `{}`                                                  |
+| `<INSTANCE_CONFIG>`  | `{"apache_status_url": "http://localhost/server-status?auto"}` |
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
+
+| Parameter      | Value                                               |
+|----------------|-----------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "apache", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
@@ -94,7 +113,7 @@ Returns `CRITICAL` if the Agent cannot connect to the configured `apache_status_
 ## Troubleshooting
 
 ### Apache status URL
-If you are having issues with your Apache integration, it is mostly like due to the Agent not being able to access your Apache status URL. Try running curl for the `apache_status_url` listed in [your `apache.d/conf.yaml` file][5] (include your login credentials if applicable).
+If you are having issues with your Apache integration, it is mostly like due to the Agent not being able to access your Apache status URL. Try running curl for the `apache_status_url` listed in [your `apache.d/conf.yaml` file][4] (include your login credentials if applicable).
 
 * [Apache SSL certificate issues][10]
 
@@ -108,11 +127,12 @@ Additional helpful documentation, links, and articles:
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[7]: https://docs.datadoghq.com/agent/docker/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
 [10]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues

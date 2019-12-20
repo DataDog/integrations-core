@@ -4,7 +4,8 @@
   ],
   "categories": [
     "web",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "description": "Track requests per second, bytes served, worker threads, uptime, and more.",
