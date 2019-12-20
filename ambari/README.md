@@ -6,20 +6,34 @@ This check monitors [Ambari][1] through the Datadog Agent.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying these instructions.
-
 ### Installation
 
-The Ambari check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+The Ambari check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
 
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+#### Host
+
+##### Metric Collection
+
 1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][3] for all available configuration options.
+
+    ```yaml
+      init_config:
+
+      instances:
+
+          ## @param url - string - required
+          ## The URL of the Ambari Server, include http:// or https://
+          #
+        - url: localhost
+    ```
 
 2. [Restart the Agent][4].
 
-#### Log collection
+##### Log collection
 
  **Available for Agent >6.0**
 
@@ -46,10 +60,31 @@ No additional installation is needed on your server.
 
  3. [Restart the Agent][4].
 
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                        |
+|----------------------|------------------------------|
+| `<INTEGRATION_NAME>` | `ambari`                     |
+| `<INIT_CONFIG>`      | blank or `{}`                |
+| `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%"}` |
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][6].
+
+| Parameter      | Value                                                                                                                                                                                             |
+|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "ambari", "service": "<SERVICE_NAME>", "log_processing_rules":{"type":"multi_line","name":"new_log_start_with_date","pattern":"\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])"}}` |
+
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `ambari` under the Checks section.
-
+[Run the Agent's status subcommand][7] and look for `ambari` under the Checks section.
 
 ## Data Collected
 
@@ -67,7 +102,7 @@ If service metrics collection is enabled with `collect_service_metrics` this int
 
 ### Metrics
 
-See [metadata.csv][7] for a list of all metrics provided by this integration.
+See [metadata.csv][8] for a list of all metrics provided by this integration.
 
 ### Service Checks
 
@@ -84,14 +119,14 @@ Ambari does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][8].
+Need help? Contact [Datadog support][9].
 
 [1]: https://ambari.apache.org
 [2]: https://docs.datadoghq.com/agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/ambari/datadog_checks/ambari/data/conf.yaml.example
-[7]: https://github.com/DataDog/integrations-core/blob/master/ambari/metadata.csv
-[8]: https://docs.datadoghq.com/help
-[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[5]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[6]: https://docs.datadoghq.com/agent/docker/log/
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/ambari/metadata.csv
+[9]: https://docs.datadoghq.com/help
