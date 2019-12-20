@@ -42,9 +42,9 @@ class MetadataManager(object):
                 transformed = transformer(value, options)
             except Exception as e:
                 if is_primitive(value):
-                    self.logger.error('Unable to transform `%s` metadata value `%s`: %s', name, value, e)
+                    self.logger.warning('Unable to transform `%s` metadata value `%s`: %s', name, value, e)
                 else:
-                    self.logger.error('Unable to transform `%s` metadata: %s', name, e)
+                    self.logger.warning('Unable to transform `%s` metadata: %s', name, e)
 
                 return
 
