@@ -74,6 +74,8 @@ class TwistlockCheck(AgentCheck):
         service_check_name = "{}.license_ok".format(self.NAMESPACE)
         try:
             license = self._retrieve_json("/api/v1/settings/license")
+            if "expiration_date" not in license:
+                raise Exception("expiration_date not found.")
         except Exception as e:
             self.warning("cannot retrieve license data: {}".format(e))
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
