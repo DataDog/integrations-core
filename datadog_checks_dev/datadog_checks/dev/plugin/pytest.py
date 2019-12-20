@@ -202,13 +202,19 @@ def dd_run_check():
 
 
 @pytest.fixture
-def dd_get_state(key):
-    return deserialize_data(get_env_vars().get(key.lower()))
+def dd_get_state():
+    def get_state(key):
+        return deserialize_data(get_env_vars().get(key.lower()))
+
+    return get_state
 
 
 @pytest.fixture
-def dd_save_state(key, value):
-    set_env_vars({key.lower(): serialize_data(value)})
+def dd_save_state():
+    def save_state(key, value):
+        set_env_vars({key.lower(): serialize_data(value)})
+
+    return save_state
 
 
 def pytest_configure(config):
