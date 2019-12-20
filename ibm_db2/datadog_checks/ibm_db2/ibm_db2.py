@@ -22,11 +22,11 @@ class IbmDb2Check(AgentCheck):
     SERVICE_CHECK_STATUS = '{}.status'.format(METRIC_PREFIX)
     EVENT_TABLE_SPACE_STATE = '{}.tablespace_state_change'.format(METRIC_PREFIX)
     VERSION_REGEX = re.compile(
-        r"""(?P<major>0|[1-11]{1,2})
+        r"""(?P<major>[0-9]\d*)
         \.
         (?P<minor>[0-9]\d*)
         \.
-        (?P<release>[0-9]{1,4}\d*)
+        (?P<release>[0-9]\d*)
         """,
         re.VERBOSE,)
 
