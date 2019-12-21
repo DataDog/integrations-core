@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 2.0.0 / 2019-12-21
+
+* [Changed] Collect metrics if a client token is available. See [#5177](https://github.com/DataDog/integrations-core/pull/5177).
+
 ## 1.7.1 / 2019-10-21
 
 * [Fixed] Fix is_leader when vault sealed. See [#4838](https://github.com/DataDog/integrations-core/pull/4838).
