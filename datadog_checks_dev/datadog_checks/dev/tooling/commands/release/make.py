@@ -6,13 +6,13 @@ import os
 import click
 from semver import finalize_version, parse_version_info
 
-from . import changelog
-from .show import changes
 from ...constants import BETA_PACKAGES, NOT_CHECKS, VERSION_BUMP, get_agent_release_requirements
 from ...git import get_current_branch, git_commit
 from ...release import get_agent_requirement_line, update_agent_requirements, update_version_module
 from ...utils import get_bump_function, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
+from . import changelog
+from .show import changes
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Release one or more checks')
