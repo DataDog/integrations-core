@@ -84,7 +84,7 @@ class IbmDb2Check(AgentCheck):
             self.log.error("Error getting version: {}".format(str(e)))
             return
 
-        if version is not None:
+        if version:
             self.set_metadata('version', version, scheme='regex', pattern=self.VERSION_REGEX)
 
             self.log.debug('Found ibm_db2 version: {}'.format(version))
