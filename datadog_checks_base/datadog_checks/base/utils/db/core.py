@@ -40,10 +40,10 @@ class QueryManager(object):
     def compile_queries(self):
         column_transformers = COLUMN_TRANSFORMERS.copy()
 
-        for submission_method in SUBMISSION_METHODS:
+        for submission_method, transformer_name in SUBMISSION_METHODS.items():
             method = getattr(self.check, submission_method)
             # Save each method in the initializer -> callable format
-            column_transformers[submission_method] = create_submission_transformer(method)
+            column_transformers[transformer_name] = create_submission_transformer(method)
 
         for query in self.queries:
             query.compile(column_transformers, EXTRA_TRANSFORMERS.copy())
@@ -104,12 +104,12 @@ class QueryManager(object):
                     if transformer is None:
                         continue
                     elif column_type == 'tag':
-                        tags.append(transformer(value, None))
+                        tags.append(transformer(None, value))
                     else:
                         submission_queue.append((transformer, value))
 
                 for transformer, value in submission_queue:
-                    transformer(value, sources, tags=tags)
+                    transformer(sources, value, tags=tags)
 
                 for name, transformer in query_extras:
                     try:

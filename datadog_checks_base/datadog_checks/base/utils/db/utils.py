@@ -1,14 +1,31 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-SUBMISSION_METHODS = {'gauge', 'count', 'monotonic_count', 'rate', 'histogram', 'historate'}
+from itertools import chain
+
+SUBMISSION_METHODS = {
+    'gauge': 'gauge',
+    'count': 'count',
+    'monotonic_count': 'monotonic_count',
+    'rate': 'rate',
+    'histogram': 'histogram',
+    'historate': 'historate',
+}
 
 
 def create_submission_transformer(submit_method):
-    def get_transformer(name, _, **modifiers):
-        def transformer(value, *_, **kwargs):
+
+    # During the compilation phase every transformer will have access to all the others and may be
+    # passed the first arguments (e.g. name) that will be forwarded the actual AgentCheck methods.
+    def get_transformer(_transformers, *creation_args, **modifiers):
+
+        # The first argument of every transformer is a map of named references to collected values.
+        def transformer(_sources, *call_args, **kwargs):
             kwargs.update(modifiers)
-            submit_method(name, value, **kwargs)
+
+            # TODO: When Python 2 goes away simply do:
+            # submit_method(*creation_args, *call_args, **kwargs)
+            submit_method(*chain(creation_args, call_args), **kwargs)
 
         return transformer
 
@@ -21,13 +38,12 @@ def create_extra_transformer(column_transformer, source=None):
     # transformer we just map the proper source to the value.
     if source:
 
-        def call_transformer(sources, **kwargs):
-            return column_transformer(sources[source], sources, **kwargs)
+        def transformer(sources, **kwargs):
+            return column_transformer(sources, sources[source], **kwargs)
 
     # Extra transformers that call regular transformers will want to pass values directly.
     else:
 
-        def call_transformer(sources, value, **kwargs):
-            return column_transformer(value, sources, **kwargs)
+        transformer = column_transformer
 
-    return call_transformer
+    return transformer
