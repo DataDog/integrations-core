@@ -10,10 +10,9 @@ This check monitors [Harbor][1] through the Datadog Agent.
 The Harbor check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
+#### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-#### Host
 
 ##### Metric Collection
 
@@ -50,11 +49,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Metric collection
 
-| Parameter            | Value                         |
-|----------------------|-------------------------------|
-| `<INTEGRATION_NAME>` | `harbor`                      |
-| `<INIT_CONFIG>`      | blank or `{}`                 |
-| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%"}` |
+| Parameter            | Value                                                                                 |
+|----------------------|---------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `harbor`                                                                              |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                         |
+| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%", "username": "<USER_ID>", "password": "<USER_PASSWORD>"}` |
 
 ##### Log collection
 
@@ -78,15 +77,14 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-- `harbor.can_connect`
+**harbor.can_connect**:<br>
 Returns `OK` if the Harbor API is reachable and authentication is successful, otherwise returns `CRITICAL`.
 
-- `harbor.status`
+**harbor.status**:<br>
 Returns `OK` if the specified Harbor component is healthy, otherwise returns `CRITICAL`. Returns `UNKNOWN` with Harbor < 1.5.
 
-- `harbor.registry.status`
+**harbor.registry.status**:<br>
 Returns `OK` if the service is healthy, otherwise returns `CRITICAL`. Monitors the health of external registries used by Harbor for replication.
-
 
 ### Events
 
