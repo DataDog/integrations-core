@@ -14,7 +14,3 @@ def is_affirmative(value):
     # use object's implementation of `__bool__`, it's faster than cast.
     # None -> False, 0 -> False, 1 -> True, etc.
     return not not value
-
-
-# Compatibility layer for Agent5
-_is_affirmative = is_affirmative
