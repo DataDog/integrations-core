@@ -118,9 +118,7 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below.
-
-##### Metric collection
+For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below:
 
 | Parameter            | Value                                                                                                                    |
 |----------------------|--------------------------------------------------------------------------------------------------------------------------|
