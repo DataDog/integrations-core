@@ -96,7 +96,7 @@ class IbmDb2Check(AgentCheck):
         return {
             'major': str(int(major)),
             'minor': str(int(minor)),
-            'modification': str(int(modification)),
+            'mod': str(int(modification)),
             'fix': str(int(fix)),
         }
 

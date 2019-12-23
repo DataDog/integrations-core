@@ -13,17 +13,6 @@ pytestmark = pytest.mark.unit
 
 CHECK_ID = 'test:123'
 
-VERSIONS = {
-    '11.1': {
-        'version.scheme': 'ibm_db2',
-        'version.major': '11',
-        'version.minor': '1',
-        'version.modification': '2',
-        'version.fix': '2',
-        'version.raw': '11.01.0202',
-    }
-}
-
 
 class TestPasswordScrubber:
     def test_start(self):
@@ -67,6 +56,25 @@ def test_metadata(aggregator, instance, datadog_agent):
 
     check.check(instance)
 
-    version = VERSIONS[DB2_VERSION]
+    # only major and minor are consistent values
+    major, minor = DB2_VERSION.split('.')
 
-    datadog_agent.assert_metadata(CHECK_ID, version)
+    version_metadata = {
+        'version.scheme': 'ibm_db2',
+        'version.major': '11',
+        'version.minor': '1',
+    }
+
+    datadog_agent.assert_metadata(CHECK_ID, version_metadata)
+
+
+def test_parse_version(instance):
+    raw_version = '11.01.0202'
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    expected = {
+        'major': '11',
+        'minor': '1',
+        'mod': '2',
+        'fix': '2',
+    }
+    assert check.parse_version(raw_version) == expected
