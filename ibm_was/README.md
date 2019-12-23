@@ -6,15 +6,15 @@ This check monitors [IBM Websphere Application Server (WAS)][1] through the Data
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
 The IBM WAS Datadog integration collects enabled PMI Counters from the WebSphere Application Server environment. Setup requires enabling the PerfServlet, which provides a way for Datadog to retrieve performance data from WAS.
 
-By default, this check collects JDBC, JVM, thread pool, and Servlet Session Manager metrics. You may optionally specify additional metrics to collect in the "custom_queries" section. See the [sample check configuration][2] for examples.
+By default, this check collects JDBC, JVM, thread pool, and Servlet Session Manager metrics. You may optionally specify additional metrics to collect in the "custom_queries" section. See the [sample check configuration][3] for examples.
 
 ### Installation
 
-The IBM WAS check is included in the [Datadog Agent][3] package.
+The IBM WAS check is included in the [Datadog Agent][4] package.
 
 #### Enable the PerfServlet
 
@@ -40,9 +40,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Metric collection
 
-1. Edit the `ibm_was.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your IBM WAS performance data. See the [sample ibm_was.d/conf.yaml][2] for all available configuration options.
+1. Edit the `ibm_was.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your IBM WAS performance data. See the [sample ibm_was.d/conf.yaml][3] for all available configuration options.
 
-2. [Restart the Agent][4].
+2. [Restart the Agent][5].
 
 ##### Log collection
 
@@ -64,11 +64,11 @@ Follow the instructions below to configure this check for an Agent running on a 
           service: websphere
     ```
 
-3. [Restart the Agent][4].
+3. [Restart the Agent][5].
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates](https://docs.datadoghq.com/agent/autodiscovery/integrations) for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -82,7 +82,7 @@ For containerized environments, see the [Autodiscovery Integration Templates](ht
 
 **Available for Agent v6.5+**
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection](https://docs.datadoghq.com/agent/docker/log/).
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][6].
 
 | Parameter      | Value                                                |
 |----------------|------------------------------------------------------|
@@ -90,13 +90,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `ibm_was` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `ibm_was` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][8] for a list of metrics provided by this check.
 
 ### Service Checks
 
@@ -109,13 +109,14 @@ IBM WAS does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][9].
 
 [1]: https://www.ibm.com/cloud/websphere-application-platform
-[2]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/datadog_checks/ibm_was/data/conf.yaml.example
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
-[7]: https://docs.datadoghq.com/help
-[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/datadog_checks/ibm_was/data/conf.yaml.example
+[4]: https://app.datadoghq.com/account/settings#agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/docker/log/
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://github.com/DataDog/integrations-core/blob/master/ibm_was/metadata.csv
+[9]: https://docs.datadoghq.com/help
