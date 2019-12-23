@@ -25,6 +25,8 @@ def create_query_manager(*args, **kwargs):
         executor = mock_executor()
 
     check = kwargs.pop('check', None) or AgentCheck('test', {}, [{}])
+    check.check_id = 'test:instance'
+
     return QueryManager(check, executor, [Query(arg) for arg in args], **kwargs)
 
 
@@ -1026,6 +1028,34 @@ class TestSubmission:
         assert len(matches) == 1, 'Expected log starting with message: {}'.format(expected_message)
         assert matches[0] == logging.ERROR
 
+        aggregator.assert_all_metrics_covered()
+
+    def test_metadata(self, aggregator, datadog_agent):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'version', 'type': 'metadata'}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['1.2.3-rc.4+5']]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        version_metadata = {
+            'version.major': '1',
+            'version.minor': '2',
+            'version.patch': '3',
+            'version.release': 'rc.4',
+            'version.build': '5',
+            'version.raw': '1.2.3-rc.4+5',
+            'version.scheme': 'semver',
+        }
+
+        datadog_agent.assert_metadata('test:instance', version_metadata)
+        datadog_agent.assert_metadata_count(len(version_metadata))
         aggregator.assert_all_metrics_covered()
 
 

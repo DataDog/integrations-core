@@ -11,6 +11,7 @@ SUBMISSION_METHODS = {
     'rate': 'rate',
     'histogram': 'histogram',
     'historate': 'historate',
+    'set_metadata': 'metadata',
 }
 
 
