@@ -70,6 +70,7 @@ instances:
     ## @param skip_default_metrics - string - optional
     ## Set this parameter if you want to skip default system, process, and
     ## tablespace metrics checks. Any value will enable skipping of these checks;
+    #
     # skip_default_metrics: true
 
     ## @param jdbc_driver_path - string - optional
