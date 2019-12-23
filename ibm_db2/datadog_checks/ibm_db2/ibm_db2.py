@@ -21,15 +21,6 @@ class IbmDb2Check(AgentCheck):
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
     SERVICE_CHECK_STATUS = '{}.status'.format(METRIC_PREFIX)
     EVENT_TABLE_SPACE_STATE = '{}.tablespace_state_change'.format(METRIC_PREFIX)
-    VERSION_REGEX = re.compile(
-        r"""(?P<major>[0-9]\d*)
-        \.
-        (?P<minor>[0-9]\d*)
-        \.
-        (?P<release>[0-9]\d*)
-        """,
-        re.VERBOSE,
-    )
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
@@ -85,7 +76,8 @@ class IbmDb2Check(AgentCheck):
             return
 
         if version:
-            self.set_metadata('version', version, scheme='regex', pattern=self.VERSION_REGEX)
+            version_parts = {name: part for name, part in zip(('major', 'minor', 'release'), version.split('.'))}
+            self.set_metadata('version', version, scheme='parts', part_map=version_parts)
 
             self.log.debug('Found ibm_db2 version: {}'.format(version))
         else:
