@@ -29,7 +29,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][6].
 
-#### Log Collection
+##### Log Collection
 
 **Available for Agent >6.0**
 
