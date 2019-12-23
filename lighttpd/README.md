@@ -23,14 +23,13 @@ Follow the instructions below to configure this check for an Agent running on a 
 1. Edit the  `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample lighttpd.d/conf.yaml][4] for all available configuration options:
 
     ```yaml
-		init_config:
+      init_config:
 
-		instances:
-
-		    ## @param lighttpd_status_url - string - required
-		    ## Status url of your Lighttpd server.
-		    #
-		  - lighttpd_status_url: http://localhost/server-status?auto
+      instances:
+        ## @param lighttpd_status_url - string - required
+        ## Status url of your Lighttpd server.
+        #
+        - lighttpd_status_url: http://localhost/server-status?auto
     ```
 
 2. [Restart the Agent][5] to begin sending lighttpd metrics to Datadog.
