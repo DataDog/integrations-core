@@ -57,4 +57,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/metadata.csv
 [6]: https://docs.datadoghq.com/help
-[7]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example#L108-L124
+[7]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example
