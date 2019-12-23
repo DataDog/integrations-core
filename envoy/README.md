@@ -164,11 +164,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
 ##### Metric collection
 
-| Parameter            | Value                                |
-|----------------------|--------------------------------------|
-| `<INTEGRATION_NAME>` | `envoy`                              |
-| `<INIT_CONFIG>`      | blank or `{}`                        |
-| `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%:80/stats}` |
+| Parameter            | Value                                      |
+|----------------------|--------------------------------------------|
+| `<INTEGRATION_NAME>` | `envoy`                                    |
+| `<INIT_CONFIG>`      | blank or `{}`                              |
+| `<INSTANCE_CONFIG>`  | `{"stats_url": "http://%%host%%:80/stats}` |
 
 ##### Log collection
 
