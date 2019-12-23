@@ -4,16 +4,24 @@
 import mock
 import pytest
 
-from .common import DB2_VERSION
 from datadog_checks.ibm_db2 import IbmDb2Check
 from datadog_checks.ibm_db2.utils import scrub_connection_string
 
+from .common import DB2_VERSION
+
 pytestmark = pytest.mark.unit
 
-CHECK_ID = "test:123"
+CHECK_ID = 'test:123'
 
 VERSIONS = {
-    '11.1': '11.01.0202',
+    '11.1': {
+        'version.scheme': 'ibm_db2',
+        'version.major': '11',
+        'version.minor': '1',
+        'version.modification': '2',
+        'version.fix': '2',
+        'version.raw': '11.01.0202',
+    }
 }
 
 
@@ -61,14 +69,4 @@ def test_metadata(aggregator, instance, datadog_agent):
 
     version = VERSIONS[DB2_VERSION]
 
-    major, minor, release = version.split(".")
-
-    version_metadata = {
-        "version.scheme": "ibm_db2",
-        "version.major": major,
-        "version.minor": minor,
-        "version.release": release,
-        "version.raw": version,
-    }
-
-    datadog_agent.assert_metadata(CHECK_ID, version_metadata)
+    datadog_agent.assert_metadata(CHECK_ID, version)
