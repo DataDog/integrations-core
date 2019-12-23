@@ -8,7 +8,7 @@ from ....git import get_commits_since
 from ....github import get_changelog_types, get_pr, parse_pr_numbers
 from ....release import get_release_tag_string
 from ....utils import get_valid_checks, get_version_string
-from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ...console import CONTEXT_SETTINGS, echo_failure, echo_info, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the checks that can be released.')

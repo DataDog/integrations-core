@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 
 import click
 from semver import parse_version_info

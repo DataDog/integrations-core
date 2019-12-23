@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import namedtuple
 
 import click
 from semver import finalize_version, parse_version_info
 
+from . import changelog
+from .show import changes
 from ...constants import BETA_PACKAGES, NOT_CHECKS, VERSION_BUMP, get_agent_release_requirements
 from ...git import get_current_branch, git_commit
 from ...release import get_agent_requirement_line, update_agent_requirements, update_version_module

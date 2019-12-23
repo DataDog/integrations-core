@@ -1,9 +1,6 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-from collections import namedtuple
-
 import click
 
 from ...git import git_tag
