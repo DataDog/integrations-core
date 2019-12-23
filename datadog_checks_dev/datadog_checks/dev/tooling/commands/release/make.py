@@ -23,8 +23,6 @@ from ...release import (
 from ...utils import get_bump_function, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
-ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
-
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Release one or more checks')
 @click.argument('checks', nargs=-1, required=True)

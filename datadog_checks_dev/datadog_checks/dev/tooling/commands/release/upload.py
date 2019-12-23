@@ -23,8 +23,6 @@ from ...release import (
 from ...utils import get_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_success, echo_waiting
 
-ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
-
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Build and upload a check to PyPI')
 @click.argument('check')

@@ -1,10 +1,8 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 import time
 from collections import OrderedDict, namedtuple
-from datetime import datetime
 
 import click
 from semver import parse_version_info
@@ -31,10 +29,8 @@ from ...github import (
 )
 
 from ...trello import TrelloClient
-from ...utils import format_commit_id, get_bump_function, get_current_agent_version, get_valid_checks, get_version_string
+from ...utils import format_commit_id, get_current_agent_version
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-
-ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
 
 def validate_version(ctx, param, value):

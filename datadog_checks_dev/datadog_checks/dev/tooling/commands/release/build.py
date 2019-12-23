@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import namedtuple
 
 import click
 
@@ -20,8 +19,6 @@ from ...release import (
 )
 from ...utils import get_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
-
-ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Build a wheel for a check')
