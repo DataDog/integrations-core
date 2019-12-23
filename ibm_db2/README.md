@@ -65,10 +65,9 @@ Now if you run `get dbm cfg`, you should see the following:
 ```
 
 ### Configuration
+#### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-#### Host
 
 ##### Metric collection
 
@@ -108,11 +107,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                                        |
-|----------------------|--------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `ibm_db2`                                                                                                    |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                |
-| `<INSTANCE_CONFIG>`  | `{"db": "<DB_NAME>", "username":"<USERNAME>", "password":"<PASSWORD>", "host":"%%host%%","port":"%%port%%"}` |
+| Parameter            | Value                                                                                                         |
+|----------------------|---------------------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `ibm_db2`                                                                                                     |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                 |
+| `<INSTANCE_CONFIG>`  | `{"db": "<DB_NAME>", "username":"<USERNAME>", "password":"<PASSWORD>", "host":"%%host%%", "port":"%%port%%"}` |
 
 ##### Log collection
 
@@ -120,9 +119,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][8].
 
-| Parameter      | Value                                                                                                                                                                                               |
-|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `<LOG_CONFIG>` | `{"source": "ibm_db2", "service": "<SERVICE_NAME>", "log_processing_rules":{"type":"multi_line","name":"new_log_start_with_date", "pattern":"\d{4}\-(0?[1-9]|[12][0-9]|3[01])\-(0?[1-9]|1[012])"}}` |
+| Parameter      | Value                                                                                                                                                                                                |
+|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "ibm_db2", "service": "<SERVICE_NAME>", "log_processing_rules": {"type":"multi_line","name":"new_log_start_with_date", "pattern":"\d{4}\-(0?[1-9]|[12][0-9]|3[01])\-(0?[1-9]|1[012])"}}` |
 
 ### Validation
 
