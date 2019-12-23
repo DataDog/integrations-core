@@ -29,19 +29,7 @@ The Datadog Agent's Consul check is included in the [Datadog Agent][2] package, 
 
 ### Configuration
 
-1. Connect Consul Agent to [DogStatsD][3]. In the main Consul configuration file, add your `dogstatsd_addr` nested under the top-level `telemetry` key:
-
-    ```conf
-    {
-      ...
-      "telemetry": {
-        "dogstatsd_addr": "127.0.0.1:8125"
-      },
-      ...
-    }
-    ```
-
-2. Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 #### Host
 
@@ -112,6 +100,20 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | Parameter      | Value                                               |
 |----------------|-----------------------------------------------------|
 | `<LOG_CONFIG>` | `{"source": "consul", "service": "<SERVICE_NAME>"}` |
+
+#### DogStatsD
+
+Alternatively, you can configure consul to send its data to the Agent through [DogStatsD][3] instead of relying on the Agent to pull the data from consul. To achieve this, add your `dogstatsd_addr` nested under the top-level `telemetry` key in the main Consul configuration file:
+
+```conf
+{
+  ...
+  "telemetry": {
+    "dogstatsd_addr": "127.0.0.1:8125"
+  },
+  ...
+}
+```
 
 ### Validation
 
