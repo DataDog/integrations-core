@@ -252,6 +252,19 @@ class __AgentCheck(object):
         return self._http
 
     @property
+    def http_remapper(self):
+        """
+        This is for updating default values before the creation of ``self.http``.
+        Every access makes a copy to avoid affecting other instances.
+        """
+        if self.HTTP_CONFIG_REMAPPER is None:
+            self.HTTP_CONFIG_REMAPPER = {}
+        else:
+            self.HTTP_CONFIG_REMAPPER = copy.deepcopy(self.HTTP_CONFIG_REMAPPER)
+
+        return self.HTTP_CONFIG_REMAPPER
+
+    @property
     def metadata_manager(self):
         if self._metadata_manager is None:
             if not self.check_id and not using_stub_aggregator:
