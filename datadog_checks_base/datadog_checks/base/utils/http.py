@@ -42,9 +42,9 @@ DEFAULT_TIMEOUT = 10
 
 STANDARD_FIELDS = {
     'auth_type': 'basic',
-    'aws_host': '',
-    'aws_region': '',
-    'aws_service': '',
+    'aws_host': None,
+    'aws_region': None,
+    'aws_service': None,
     'connect_timeout': None,
     'extra_headers': None,
     'headers': None,
