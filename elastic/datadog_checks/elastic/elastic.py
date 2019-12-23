@@ -43,7 +43,10 @@ class ESCheck(AgentCheck):
 
         if self.instance.get('auth_type') == 'aws' and self.instance.get('url'):
             self.HTTP_CONFIG_REMAPPER = self.HTTP_CONFIG_REMAPPER.copy()
-            self.HTTP_CONFIG_REMAPPER['aws_host'] = urlparse(self.instance['url']).hostname
+            self.HTTP_CONFIG_REMAPPER['aws_host'] = {
+                'name': 'aws_host',
+                'default': urlparse(self.instance['url']).hostname,
+            }
 
     def check(self, instance):
         config = from_instance(instance)
