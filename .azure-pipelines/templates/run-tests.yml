@@ -6,31 +6,15 @@ parameters:
   benchmark: false
 
 steps:
-- ${{ if eq(parameters.test, 'true') }}:
-  - script: ddev test --cov --junit ${{ parameters.check }}
-    displayName: 'Run Unit/Integration tests'
-    env:
-      CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
-  - script: "ddev env test --base --new-env --junit ${{ parameters.check }}:py37 --agent datadog/agent:7.16.1-rc.1"
+  - script: "ddev env test --base --new-env --junit sqlserver:py37 --agent datadog/agent:7.16.1-rc.1"
     displayName: 'Run E2E tests Python 3'
     env:
       DD_API_KEY: $(DD_API_KEY)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
-  - script: "ddev env test --base --new-env --junit ${{ parameters.check }}:py27 --agent datadog/agent:6.16.1-rc.1"
+  - script: "ddev env test --base --new-env --junit sqlserver:py27 --agent datadog/agent:6.16.1-rc.1"
     displayName: 'Run E2E tests Python 2'
     env:
       DD_API_KEY: $(DD_API_KEY)
-
-- ${{ if eq(parameters.benchmark, 'true') }}:
-  - script: ddev test --bench --junit ${{ parameters.check }}
-    displayName: 'Run benchmarks'
-
-- task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
-  condition: succeededOrFailed()
-  inputs:
-    testResultsFiles: '**/test-*.xml'
-    testRunTitle: '${{ parameters.test_run }}'
-    mergeTestResults: true
