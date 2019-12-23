@@ -16,11 +16,11 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
 
 1. Edit the `exchange_server.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Exchange Server performance data.
 
-2. [Restart the Agent][3]
+2. [Restart the Agent][3].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][4] and look for `exchange_server` under the Checks section.
+[Run the Agent's status subcommand][4] and look for `exchange_server` under the Checks section.
 
 ## Data Collected
 ### Metrics
