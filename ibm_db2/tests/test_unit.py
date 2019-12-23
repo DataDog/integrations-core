@@ -62,13 +62,13 @@ def test_metadata(aggregator, instance, datadog_agent):
 
     version = VERSIONS[DB2_VERSION]
 
-    major, minor, release = version.split(".")
+    major, minor, _ = version.split(".")
 
     version_metadata = {
         "version.scheme": "ibm_db2",
         "version.major": major,
         "version.minor": minor,
-        "version.release": release,
+        "version.release": mock.ANY,
         "version.raw": version,
     }
 
