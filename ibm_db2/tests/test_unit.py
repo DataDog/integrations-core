@@ -15,7 +15,7 @@ CHECK_ID = "test:123"
 
 VERSIONS = {
     # The version string differs from the image tag version
-    '11.1': '11.01.0002',
+    '11.1': '11.01.0202',
 }
 
 class TestPasswordScrubber:
