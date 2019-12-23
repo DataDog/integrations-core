@@ -62,7 +62,7 @@ The Kafka-consumer check does not include any service checks.
 [111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
 [112]: https://app.datadoghq.com/account/settings#agent
 [113]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/datadog_checks/kafka_consumer/data/conf.yaml.example
-[114]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7#agent-configuration-directory
+[114]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [115]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [116]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [117]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
