@@ -1,22 +1,21 @@
 # (C) Datadog, Inc. 2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 import mock
 import pytest
 
 from .common import DB2_VERSION
 from datadog_checks.ibm_db2 import IbmDb2Check
-from datadog_checks.ibm_db2.utils import get_version, scrub_connection_string
+from datadog_checks.ibm_db2.utils import scrub_connection_string
 
 pytestmark = pytest.mark.unit
 
 CHECK_ID = "test:123"
 
 VERSIONS = {
-    # The version string differs from the image tag version
     '11.1': '11.01.0202',
 }
+
 
 class TestPasswordScrubber:
     def test_start(self):
@@ -62,13 +61,13 @@ def test_metadata(aggregator, instance, datadog_agent):
 
     version = VERSIONS[DB2_VERSION]
 
-    major, minor, _ = version.split(".")
+    major, minor, release = version.split(".")
 
     version_metadata = {
         "version.scheme": "ibm_db2",
         "version.major": major,
         "version.minor": minor,
-        "version.release": mock.ANY,
+        "version.release": release,
         "version.raw": version,
     }
 

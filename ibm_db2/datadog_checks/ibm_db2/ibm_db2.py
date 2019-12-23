@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-import re
 from itertools import chain
 from time import time as timestamp
 
