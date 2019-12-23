@@ -52,13 +52,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 
 ##### Metric collection
 
-To collect JBoss/WildFly metrics in containerized environments, see the [Autodiscovery with JMX][2] guide.
+To collect JBoss/WildFly metrics in containerized environments, see the [Autodiscovery with JMX][9] guide.
 
 ##### Log collection
 
 **Available for Agent v6.5+**
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
 
 | Parameter      | Value                                                      |
 |----------------|------------------------------------------------------------|
@@ -66,13 +66,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][10] and look for `jboss_wildfly` under the Checks section.
+[Run the Agent's status subcommand][11] and look for `jboss_wildfly` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this integration.
+See [metadata.csv][11] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -94,5 +94,6 @@ Need help? Contact [Datadog support][7].
 [6]: https://docs.datadoghq.com/help
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[9]: https://docs.datadoghq.com/agent/docker/log/
-[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[10]: https://docs.datadoghq.com/agent/docker/log/
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
