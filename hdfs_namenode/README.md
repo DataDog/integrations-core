@@ -31,10 +31,9 @@ The HDFS NameNode check is included in the [Datadog Agent][113] package, so you 
 2. Restart the NameNode process to enable the JMX interface.
 
 #### Connect the Agent
+##### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-##### Host
 
 1. Edit the `hdfs_namenode.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][114]. See the [sample hdfs_namenode.d/conf.yaml][115] for all available configuration options:
 
@@ -69,7 +68,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
 ### Validation
 
-[Run the Agent's `status` subcommand][117] and look for `hdfs_namenode` under the Checks section.
+[Run the Agent's status subcommand][117] and look for `hdfs_namenode` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -81,8 +80,7 @@ The HDFS-namenode check does not include any events.
 
 ### Service Checks
 
-`hdfs.namenode.jmx.can_connect`:
-
+**hdfs.namenode.jmx.can_connect**:<br>
 Returns `Critical` if the Agent cannot connect to the NameNode's JMX interface for any reason (e.g. wrong port provided, timeout, un-parseable JSON response).
 
 ## Troubleshooting
