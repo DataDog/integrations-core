@@ -100,7 +100,6 @@ class IbmDb2Check(AgentCheck):
             'fix': str(int(fix)),
         }
 
-
     def query_instance(self):
         # Only 1 instance
         for inst in self.iter_rows(queries.INSTANCE_TABLE, ibm_db.fetch_assoc):
