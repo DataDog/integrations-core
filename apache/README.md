@@ -22,7 +22,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 #### Host
 
-#### Metric collection
+##### Metric collection
 
 1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Apache metrics. See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
@@ -39,7 +39,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5].
 
-#### Log collection
+##### Log collection
 
 **Available for Agent >6.0**
 
