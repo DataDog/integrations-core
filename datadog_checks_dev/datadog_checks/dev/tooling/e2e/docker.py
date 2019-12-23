@@ -4,6 +4,8 @@
 import re
 from contextlib import contextmanager
 
+from datadog_checks.dev.ssh_tunnel import find_free_port, get_ip
+
 from ...subprocess import run_command
 from ...utils import file_exists, path_join
 from ..constants import REQUIREMENTS_IN, get_root
@@ -195,6 +197,8 @@ class DockerInterface(object):
 
     def start_agent(self):
         if self.agent_build:
+            ip = get_ip()
+            free_port = find_free_port(ip)
             command = [
                 'docker',
                 'run',
@@ -214,7 +218,7 @@ class DockerInterface(object):
                 'DD_EXPVAR_PORT=0',
                 # Run API on a random port
                 '-e',
-                'DD_CMD_PORT=0',
+                'DD_CMD_PORT={}'.format(free_port),
                 # Disable trace agent
                 '-e',
                 'DD_APM_ENABLED=false',
