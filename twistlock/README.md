@@ -51,7 +51,11 @@ spec:
       annotations:
         ad.datadoghq.com/twistlock-console.check_names: '["twistlock"]'
         ad.datadoghq.com/twistlock-console.init_configs: '[{}]'
-        ad.datadoghq.com/twistlock-console.instances: '[{"url":"http://%%host%%:8083", "username":"<USERNAME>", "password": "<PASSWORD>"}]'
+        ad.datadoghq.com/twistlock-console.instances: '[{
+          "url":"http://%%host%%:8083",
+          "username":"<USERNAME>",
+          "password": "<PASSWORD>"
+        }]'
         ad.datadoghq.com/twistlock-console.logs: '[{"source": "twistlock", "service": "twistlock"}]'
       name: twistlock-console
       namespace: twistlock
