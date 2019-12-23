@@ -9,24 +9,11 @@ import click
 from semver import parse_version_info
 from six import StringIO
 
-from ....utils import (
-    stream_file_lines,
-    write_file,
-)
-from ...constants import (
-    CHANGELOG_TYPE_NONE,
-    get_root,
-)
+from ....utils import stream_file_lines, write_file
+from ...constants import CHANGELOG_TYPE_NONE, get_root
 from ...git import get_commits_since
-from ...github import (
-    from_contributor,
-    get_changelog_types,
-    get_pr,
-    parse_pr_numbers,
-)
-from ...release import (
-    get_release_tag_string,
-)
+from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
+from ...release import get_release_tag_string
 from ...utils import get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 

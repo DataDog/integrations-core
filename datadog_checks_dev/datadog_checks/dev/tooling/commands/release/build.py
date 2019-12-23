@@ -5,18 +5,9 @@ import os
 
 import click
 
-from ....utils import (
-    basepath,
-    dir_exists,
-    remove_path,
-    resolve_path,
-)
-from ...constants import (
-    get_root,
-)
-from ...release import (
-    build_package,
-)
+from ....utils import basepath, dir_exists, remove_path, resolve_path
+from ...constants import get_root
+from ...release import build_package
 from ...utils import get_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting
 

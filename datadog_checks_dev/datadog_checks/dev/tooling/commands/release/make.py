@@ -7,19 +7,9 @@ from collections import namedtuple
 import click
 from semver import finalize_version, parse_version_info
 
-from ...constants import (
-    BETA_PACKAGES,
-    NOT_CHECKS,
-    VERSION_BUMP,
-    get_agent_release_requirements,
-)
+from ...constants import BETA_PACKAGES, NOT_CHECKS, VERSION_BUMP, get_agent_release_requirements
 from ...git import get_current_branch, git_commit
-
-from ...release import (
-    get_agent_requirement_line,
-    update_agent_requirements,
-    update_version_module,
-)
+from ...release import get_agent_requirement_line, update_agent_requirements, update_version_module
 from ...utils import get_bump_function, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
@@ -176,4 +166,3 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
 
     # done
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')
-

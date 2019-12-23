@@ -7,9 +7,7 @@ from collections import namedtuple
 import click
 
 from ...git import git_tag
-from ...release import (
-    get_release_tag_string,
-)
+from ...release import get_release_tag_string
 from ...utils import get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 

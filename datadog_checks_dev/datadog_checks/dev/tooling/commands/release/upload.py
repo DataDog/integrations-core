@@ -7,19 +7,9 @@ from collections import namedtuple
 import click
 
 from ....subprocess import run_command
-from ....utils import (
-    basepath,
-    chdir,
-    dir_exists,
-    resolve_path,
-)
-from ...constants import (
-    get_root,
-)
-
-from ...release import (
-    build_package,
-)
+from ....utils import basepath, chdir, dir_exists, resolve_path
+from ...constants import get_root
+from ...release import build_package
 from ...utils import get_valid_checks
 from ..console import CONTEXT_SETTINGS, abort, echo_success, echo_waiting
 

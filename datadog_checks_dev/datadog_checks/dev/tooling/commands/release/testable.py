@@ -9,25 +9,9 @@ from semver import parse_version_info
 from six import iteritems
 
 from ....subprocess import run_command
-from ....utils import (
-    basepath,
-    chdir,
-    ensure_unicode,
-    get_next,
-)
-from ...constants import (
-    CHANGELOG_LABEL_PREFIX,
-    CHANGELOG_TYPE_NONE,
-    get_root,
-)
-from ...github import (
-    get_pr,
-    get_pr_from_hash,
-    get_pr_labels,
-    get_pr_milestone,
-    parse_pr_number,
-)
-
+from ....utils import basepath, chdir, ensure_unicode, get_next
+from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
+from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ...trello import TrelloClient
 from ...utils import format_commit_id, get_current_agent_version
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
