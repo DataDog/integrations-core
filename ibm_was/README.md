@@ -17,6 +17,7 @@ By default, this check collects JDBC, JVM, thread pool, and Servlet Session Mana
 The IBM WAS check is included in the [Datadog Agent][3] package.
 
 #### Enable the PerfServlet
+
 The servlet's .ear file (PerfServletApp.ear) is located in the `<WAS_HOME>/installableApps` directory, where `<WAS_HOME>` is the installation path for WebSphere Application Server.
 
 The performance servlet is deployed exactly as any other servlet. Deploy the servlet on a single application server instance within the domain.
@@ -24,6 +25,7 @@ The performance servlet is deployed exactly as any other servlet. Deploy the ser
 **Note**: Starting with version 6.1, you must enable application security to get the PerfServlet working.
 
 ### Modify the currently monitored statistic set
+
 By default, your application server is only configured for "Basic" monitoring. In order to gain complete visibility into your JVM, JDBC connections, and servlet connections, change the currently monitored statistic set for your application server from "Basic" to "All".
 
 From the Websphere Administration Console, you can find this setting in `Application servers > <YOUR_APP_SERVER> > Performance Monitoring Infrastructure (PMI)`.
@@ -32,11 +34,17 @@ Once you've made this change, click "Apply" to save the configuration and restar
 
 ### Configuration
 
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+#### Host
+
+##### Metric collection
+
 1. Edit the `ibm_was.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your IBM WAS performance data. See the [sample ibm_was.d/conf.yaml][2] for all available configuration options.
 
 2. [Restart the Agent][4].
 
-#### Log collection
+##### Log collection
 
 **Available for Agent >6.0**
 
@@ -57,6 +65,28 @@ Once you've made this change, click "Apply" to save the configuration and restar
     ```
 
 3. [Restart the Agent][4].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates](https://docs.datadoghq.com/agent/autodiscovery/integrations) for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                                                         |
+|----------------------|-------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `ibm_was`                                                                     |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                 |
+| `<INSTANCE_CONFIG>`  | `{"servlet_url": "http://%%host%%:%%port%%/wasPerfTool/servlet/perfservlet"}` |
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection](https://docs.datadoghq.com/agent/docker/log/).
+
+| Parameter      | Value                                                |
+|----------------|------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "ibm_was", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
