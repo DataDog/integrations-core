@@ -9,7 +9,8 @@ import inspect
 import os
 import platform
 import shutil
-from contextlib import contextmanager
+import socket
+from contextlib import closing, contextmanager
 from io import open
 from tempfile import mkdtemp
 
@@ -262,3 +263,19 @@ def temp_move_path(path, d):
 @contextmanager
 def mock_context_manager(obj=None):
     yield obj
+
+
+def find_free_port(ip):
+    """Return a port available for listening on the given `ip`."""
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind((ip, 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
+
+
+def get_ip():
+    """Return the IP address used to connect to external networks."""
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        return s.getsockname()[0]

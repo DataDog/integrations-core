@@ -4,10 +4,8 @@
 import re
 from contextlib import contextmanager
 
-from datadog_checks.dev.ssh_tunnel import find_free_port, get_ip
-
 from ...subprocess import run_command
-from ...utils import file_exists, path_join
+from ...utils import file_exists, find_free_port, get_ip, path_join
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
