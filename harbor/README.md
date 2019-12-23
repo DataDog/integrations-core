@@ -18,10 +18,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 ##### Metric Collection
 
 1. Edit the `harbor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Harbor performance data. See the [sample harbor.d/conf.yaml][5] for all available configuration options.
+  **Note**: You can specify any type of user in the config but an account with admin permissions is required to fetch disk metrics. The metric `harbor.projects.count` only reflects the number of projects the provided user can access.
 
 2. [Restart the Agent][6].
-
-You can specify any type of user in the config but an account with admin permissions is required to fetch disk metrics. The metric `harbor.projects.count` only reflects the number of projects the provided user can access.
 
 ##### Log Collection
 
@@ -51,11 +50,11 @@ For containerized environments, see the [Autodiscovery Integration Templates](ht
 
 ##### Metric collection
 
-| Parameter            | Value                                  |
-|----------------------|----------------------------------------|
-| `<INTEGRATION_NAME>` | `harbor`                               |
-| `<INIT_CONFIG>`      | blank or `{}`                          |
-| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%:%%port%%"}` |
+| Parameter            | Value                         |
+|----------------------|-------------------------------|
+| `<INTEGRATION_NAME>` | `harbor`                      |
+| `<INIT_CONFIG>`      | blank or `{}`                 |
+| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%"}` |
 
 ##### Log collection
 
@@ -63,9 +62,9 @@ For containerized environments, see the [Autodiscovery Integration Templates](ht
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection](https://docs.datadoghq.com/agent/docker/log/).
 
-| Parameter      | Value                                                 |
-|----------------|-------------------------------------------------------|
-| `<LOG_CONFIG>` | `{"source": "marathon", "service": "<SERVICE_NAME>"}` |
+| Parameter      | Value                                               |
+|----------------|-----------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "harbor", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
