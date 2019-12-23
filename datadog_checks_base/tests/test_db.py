@@ -808,6 +808,111 @@ class TestTransformerCompilation:
         ):
             query_manager.compile_queries()
 
+    def test_service_check_no_status_map(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'service_check'}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['known']]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `service_check` for column test.foo of test query: '
+                'the `status_map` parameter is required$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_service_check_status_map_not_dict(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'service_check', 'status_map': 5}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['known']]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `service_check` for column test.foo of test query: '
+                'the `status_map` parameter must be a mapping$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_service_check_status_map_empty(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'service_check', 'status_map': {}}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['known']]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `service_check` for column test.foo of test query: '
+                'the `status_map` parameter must not be empty$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_service_check_status_map_status_not_string(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'service_check', 'status_map': {'known': 0}}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['known']]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `service_check` for column test.foo of test query: '
+                'status `0` for value `known` of parameter `status_map` is not a string$'
+            ),
+        ):
+            query_manager.compile_queries()
+
+    def test_service_check_status_map_status_invalid(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'service_check', 'status_map': {'known': '0k'}}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['known']]),
+            tags=['test:foo'],
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `service_check` for column test.foo of test query: '
+                'invalid status `0k` for value `known` of parameter `status_map`$'
+            ),
+        ):
+            query_manager.compile_queries()
+
 
 class TestSubmission:
     @pytest.mark.parametrize(
@@ -1241,6 +1346,44 @@ class TestColumnTransformers:
         query_manager.compile_queries()
         query_manager.execute()
 
+        aggregator.assert_all_metrics_covered()
+
+    def test_service_check_known(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test.foo', 'type': 'service_check', 'status_map': {'known': 'ok'}, 'message': 'baz'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['known']]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_service_check('test.foo', 0, message='baz', tags=['test:foo', 'test:bar'])
+        aggregator.assert_all_metrics_covered()
+
+    def test_service_check_unknown(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test.foo', 'type': 'service_check', 'status_map': {'known': 'ok'}, 'message': 'baz'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['unknown']]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_service_check('test.foo', 3, message='baz', tags=['test:foo', 'test:bar'])
         aggregator.assert_all_metrics_covered()
 
 

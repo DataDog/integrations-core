@@ -6,6 +6,7 @@ from __future__ import division
 import re
 
 from ... import is_affirmative
+from ...constants import ServiceCheck
 from .. import constants
 from ..common import compute_percent, total_time_to_temporal_percent
 from .utils import create_extra_transformer
@@ -81,6 +82,18 @@ def get_match(transformers, column_name, **modifiers):
             transformer(sources, sources[source], **kwargs)
 
     return match
+
+
+def get_service_check(transformers, column_name, **modifiers):
+    # Do work in a separate function to avoid having to `del` a bunch of variables
+    status_map = _compile_service_check_statuses(modifiers)
+
+    service_check_method = transformers['__service_check'](transformers, column_name, **modifiers)
+
+    def service_check(_, value, **kwargs):
+        service_check_method(_, status_map.get(value, ServiceCheck.UNKNOWN), **kwargs)
+
+    return service_check
 
 
 def get_expression(transformers, name, **modifiers):
@@ -169,9 +182,36 @@ COLUMN_TRANSFORMERS = {
     'monotonic_gauge': get_monotonic_gauge,
     'tag': get_tag,
     'match': get_match,
+    'service_check': get_service_check,
 }
 
 EXTRA_TRANSFORMERS = {'expression': get_expression, 'percent': get_percent}
+
+
+def _compile_service_check_statuses(modifiers):
+    status_map = modifiers.pop('status_map', None)
+    if status_map is None:
+        raise ValueError('the `status_map` parameter is required')
+    elif not isinstance(status_map, dict):
+        raise ValueError('the `status_map` parameter must be a mapping')
+    elif not status_map:
+        raise ValueError('the `status_map` parameter must not be empty')
+
+    for value, status_string in list(status_map.items()):
+        if not isinstance(status_string, str):
+            raise ValueError(
+                'status `{}` for value `{}` of parameter `status_map` is not a string'.format(status_string, value)
+            )
+
+        status = getattr(ServiceCheck, status_string.upper(), None)
+        if status is None:
+            raise ValueError(
+                'invalid status `{}` for value `{}` of parameter `status_map`'.format(status_string, value)
+            )
+
+        status_map[value] = status
+
+    return status_map
 
 
 def _compile_match_items(transformers, modifiers):
