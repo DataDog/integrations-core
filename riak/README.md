@@ -12,9 +12,12 @@ This check lets you track node, vnode and ring performance metrics from RiakKV o
 The Riak check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Riak servers.
 
 ### Configuration
-#### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+#### Host
+
+##### Metric collection
 
 1. Edit the `riak.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample riak.yaml][4] for all available configuration options:
 
@@ -31,7 +34,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5] to start sending Riak metrics to Datadog.
 
-#### Log collection
+##### Log collection
 
 **Available for Agent >6.0**
 
