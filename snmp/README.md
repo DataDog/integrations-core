@@ -30,7 +30,7 @@ Edit the subnet, SNMP version, and profiles in the `snmp.d/conf.yaml` file in th
 
 To use Autodiscovery with the SNMP check:
 
-1. Install or upgrade the Datadog Agent to v6.15+. For platform specific instructions, see the [Datadog Agent][23] documentation.
+1. Install or upgrade the Datadog Agent to v6.16+. For platform specific instructions, see the [Datadog Agent][23] documentation.
 
 2. Configure the SNMP check with [snmp.d/conf.yaml][17]. The following parameters are available. See the [sample config](#sample-config) for required parameters, default values, and examples.
 
@@ -325,6 +325,43 @@ MIBs needed for local reference: CISCO-ENTITY-SENSOR-MIB, CISCO-ENTITY-FRU-CONTR
 | `snmp.ifHCOutMulticastPkts`        | The total number of packets that higher-level protocols requested be transmitted that were addressed to a multicast address at this sub-layer including those discarded or not sent.                  | `interface`                |
 | `snmp.ifHCOutBroadcastPkts`        | The total number of packets that higher-level protocols requested be transmitted addressed to a broadcast address at this sub-layer including those discarded or not sent.                  | `interface`                |
 
+
+##### Dell iDRAC Profile
+The Dell iDRAC device profile collects the following metrics.
+
+MIBs needed for local reference: IDRAC-MIB-SMIv2, INTEL-LAN-ADAPTERS-MIB/
+
+| Metric | Description | Tags |
+| --- | --- | --- |
+| `systemStateChassisStatus` | The status of this system chassis. | `chassis_index` |
+| `systemStatePowerUnitStatusRedundancy` | The combined redundancy status of all power units of this system. |`chassis_index`  |
+| `systemStatePowerSupplyStatusCombined` | The combined status of all power supplies of this system. | `chassis_index` |
+| `systemStateAmperageStatusCombined` | The combined status of all amperage probes of this system. |`chassis_index`  |
+| `systemStatePowerSupplyStatusCombined` | The combined status of all power supplies of this system.  |`chassis_index`  |
+| `systemStateCoolingUnitStatusRedundancy` | The combined redundancy status of all cooling units of this system.| `chassis_index` |
+| `systemStateCoolingDeviceStatusCombined` | The combined status of all cooling devices of this system. |`chassis_index`  |
+| `systemStateTemperatureStatusCombined` | The combined status of all temperature probes of this system.|`chassis_index`  |
+| `systemStateMemoryDeviceStatusCombined` | The combined status of all memory devices of this system. | `chassis_index` |
+| `systemStateChassisIntrusionStatusCombined` | The combined status of all intrusion detection devices of this system chassis. | `chassis_index` |
+| `systemStatePowerUnitStatusCombined` | The combined status of all power units of this chassis. | `chassis_index` |
+| `systemStateCoolingUnitStatusCombined` | The combined status of all cooling units of this system.  | `chassis_index` |
+| `systemStateProcessorDeviceStatusCombined` | The combined status of all processor devices of this system. |`chassis_index`  |
+| `systemStateTemperatureStatisticsStatusCombined` | The combined status of all temperature statistics objects of this system. | `chassis_index` |
+| `physicalDiskState`| The current state of this physical disk. Possible states: 1 - The current state could not be determined., 2 - The physical disk is available for use, but no RAID configuration has been assigned. 3- A RAID configuration has been assigned to the physical disk. 4- The physical disk has been moved from another controller and contains all or some portion of a virtual disk. 5 - The physical disk is not available to the RAID controller. 6 - The physical disk is currently blocked by controller. 7 - The physical disk is not operational. 8 - The physical disk is not a RAID capable disk. 9 - The physical disk has been removed. 10 - The physical disk media has been placed in read only mode.| `disk_name`|
+| `physicalDiskCapacityInMB`| The size of the physical disk in megabytes. |`disk_name`  |
+| `physicalDiskUsedSpaceInMB`| The amount of used space in megabytes on the physical disk. |`disk_name`  |
+| `physicalDiskFreeSpaceInMB`| The amount of free space in megabytes on the physical disk.  |`disk_name` |
+| `enclosurePowerSupplyState`| The current state of this power supply unit. Possible states: 1- The current state could not be determined. 2- The power supply unit is operating normally. 3- The power supply unit has encountered a hardware problem or is not responding. 4- The power supply unit is no longer connected to the enclosure or there exists a problem communicating to it. 5- The power supply unit is unstable. |`supply_name`|
+| `adapterRxPackets`| Total packets received. |`adapter` |
+| `adapterTxPackets`| Total packets transmitted. | `adapter`|
+| `adapterRxBytes`| Total number of bytes received. |`adapter`|
+| `adapterTxBytes`| Total number of bytes transmitted. | `adapter`|
+| `adapterRxErrors`| Total number of packets received with errors (packets that failed to reach the protocol). |`adapter`|
+| `adapterTxErrors`| Total number of packets that failed to transmit. |`adapter`|
+| `adapterRxDropped`| Total number of receive packets dropped due to overrun. |`adapter`|
+| `adapterTxDropped`| Total number of transmit packets dropped due to successive collisions. |`adapter`|
+| `adapterRxMulticast`| Total number of Multicast packets received. |`adapter`|
+| `adapterCollisions`| Total number of single collisions. |`adapter`|
 
 ### Validation
 
