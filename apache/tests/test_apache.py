@@ -6,8 +6,17 @@ import pytest
 
 from datadog_checks.apache import Apache
 
-from .common import APACHE_GAUGES, APACHE_RATES, APACHE_VERSION, AUTO_CONFIG, BAD_CONFIG, HOST, PORT, STATUS_CONFIG, \
-    NO_METRIC_CONFIG
+from .common import (
+    APACHE_GAUGES,
+    APACHE_RATES,
+    APACHE_VERSION,
+    AUTO_CONFIG,
+    BAD_CONFIG,
+    HOST,
+    NO_METRIC_CONFIG,
+    PORT,
+    STATUS_CONFIG,
+)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -27,8 +36,9 @@ def test_no_metrics_failure(aggregator, check):
     with pytest.raises(Exception) as excinfo:
         check.check(NO_METRIC_CONFIG)
 
-    assert str(excinfo.value) == ("No metrics were fetched for this instance. Make sure that http://localhost:18180 "
-                                  "is the proper url.")
+    assert str(excinfo.value) == (
+        "No metrics were fetched for this instance. Make sure that http://localhost:18180 " "is the proper url."
+    )
 
     sc_tags = ['host:localhost', 'port:18180']
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
