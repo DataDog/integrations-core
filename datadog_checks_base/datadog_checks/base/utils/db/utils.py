@@ -11,6 +11,10 @@ SUBMISSION_METHODS = {
     'rate': 'rate',
     'histogram': 'histogram',
     'historate': 'historate',
+    'set_metadata': 'metadata',
+    # These submission methods require more configuration than just a name
+    # and a value and therefore must be defined as a custom transformer.
+    'service_check': '__service_check',
 }
 
 
