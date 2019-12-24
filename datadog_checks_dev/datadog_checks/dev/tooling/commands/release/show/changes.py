@@ -6,8 +6,8 @@ import click
 from ....git import get_commits_since
 from ....github import get_changelog_types, get_pr, parse_pr_numbers
 from ....release import get_release_tag_string
-from ....utils import get_valid_checks, get_version_string, validate_check_arg
-from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
+from ....utils import get_valid_checks, get_version_string
+from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning, validate_check_arg
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')

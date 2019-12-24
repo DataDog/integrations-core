@@ -6,8 +6,8 @@ import re
 
 import requests
 
-from .constants import CHANGELOG_LABEL_PREFIX, get_root
 from ..utils import basepath
+from .constants import CHANGELOG_LABEL_PREFIX, get_root
 
 API_URL = 'https://api.github.com'
 PR_ENDPOINT = API_URL + '/repos/DataDog/{}/pulls/{}'

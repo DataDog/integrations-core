@@ -7,13 +7,12 @@ import re
 from ast import literal_eval
 from collections import OrderedDict
 
-import click
 import requests
 import semver
 from six import string_types
 
 from ..utils import file_exists, read_file
-from .constants import INTEGRATION_REPOS, NOT_CHECKS, VERSION_BUMP, get_root, set_root
+from .constants import NOT_CHECKS, VERSION_BUMP, get_root
 from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
@@ -205,14 +204,3 @@ def parse_version_parts(version):
     if not isinstance(version, string_types):
         return []
     return [int(v) for v in version.split('.') if v.isdigit()]
-
-
-def validate_check_arg(ctx, param, value):
-    # Treat '.' as a special value, meaning run the command against a repository, not an individual check
-    if value == '.':
-        if os.getcwd() in INTEGRATION_REPOS:
-            raise click.BadParameter('Needs to be the name of a real check or `.` for other repositories')
-        else:
-            set_root(os.getcwd())
-            return
-    return value

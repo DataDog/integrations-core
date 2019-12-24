@@ -10,8 +10,8 @@ CHANGELOG_LABEL_PREFIX = 'changelog/'
 CHANGELOG_TYPE_NONE = 'no-changelog'
 INTEGRATION_REPOS = [
     'integrations-core',
-    'integrations-internal',
     'integrations-extras',
+    'integrations-internal',
 ]
 VERSION_BUMP = OrderedDict(
     [
