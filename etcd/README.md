@@ -17,10 +17,9 @@ Collect Etcd metrics to:
 The etcd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Etcd instance(s).
 
 ### Configuration
+#### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-#### Host
 
 1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Etcd performance data. See the [sample etcd.d/conf.yaml][4] for all available configuration options.
 2. [Restart the Agent][5]
