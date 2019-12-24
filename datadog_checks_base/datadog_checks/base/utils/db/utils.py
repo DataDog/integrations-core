@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from itertools import chain
 
+# AgentCheck methods to transformer name e.g. set_metadata -> metadata
 SUBMISSION_METHODS = {
     'gauge': 'gauge',
     'count': 'count',
