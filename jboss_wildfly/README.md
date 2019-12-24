@@ -46,8 +46,19 @@ Follow the instructions below to configure this check for an Agent running on a 
 3. [Restart the Agent][7].
 
 #### Containerized
+##### Metric collection
 
 For containerized environments, see the [Autodiscovery with JMX][9] guide.
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
+
+| Parameter      | Value                                                      |
+|----------------|------------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "jboss_wildfly", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
