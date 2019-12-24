@@ -7,6 +7,7 @@ import re
 import requests
 
 from .constants import CHANGELOG_LABEL_PREFIX, get_root
+from ..utils import basepath
 
 API_URL = 'https://api.github.com'
 PR_ENDPOINT = API_URL + '/repos/DataDog/{}/pulls/{}'
@@ -55,7 +56,7 @@ def get_pr(pr_num, config=None, raw=False):
     """
     Get the payload for the given PR number. Let exceptions bubble up.
     """
-    repo = os.path.basename(os.path.normpath(get_root()))
+    repo = basepath(get_root())
     response = requests.get(PR_ENDPOINT.format(repo, pr_num), auth=get_auth_info(config))
 
     if raw:
