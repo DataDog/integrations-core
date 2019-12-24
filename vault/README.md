@@ -4,18 +4,27 @@
 This check monitors [Vault][1] cluster health and leader changes.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The Vault check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
 
 ### Configuration
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `vault.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your vault performance data. See the [sample vault.d/conf.yaml][5] for all available configuration options.
 
 2. [Restart the Agent][6].
+
+#### Containerized
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+| Parameter            | Value                                    |
+|----------------------|------------------------------------------|
+| `<INTEGRATION_NAME>` | `vault`                                  |
+| `<INIT_CONFIG>`      | blank or `{}`                            |
+| `<INSTANCE_CONFIG>`  | `{"api_url": "http://%%host%%:8200/v1"}` |
 
 ### Validation
 

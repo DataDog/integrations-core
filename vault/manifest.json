@@ -4,7 +4,8 @@
     "configuration & deployment",
     "aws",
     "google cloud",
-    "azure"
+    "azure",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "Vault",
