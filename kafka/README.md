@@ -22,16 +22,15 @@ The Agent's Kafka check is included in the [Datadog Agent][4] package, so you do
 The check collects metrics via JMX, so you need a JVM on each kafka node so the Agent can fork [jmxfetch][5]. You can use the same JVM that Kafka uses.
 
 ### Configuration
+#### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-#### Host
 
 ##### Metric collection
 
 1. Edit the `kafka.d/conf.yaml` file,  in the `conf.d/` folder at the root of your [Agent's configuration directory][6]. Kafka bean names depend on the exact Kafka version you're running. Use the [example configuration file][7] that comes packaged with the Agent as a base since it is the most up-to-date configuration. **Note**: the Agent version in the example may be for a newer version of the Agent than what you have installed.
 
-2. After you've configured `kafka.yaml`, [restart the Agent][8].
+2. [Restart the Agent][8].
 
 ##### Log collection
 
