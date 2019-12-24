@@ -1,5 +1,9 @@
 # CHANGELOG - apache
 
+## 1.9.3 / 2019-12-24
+
+* [Fixed] Fix version metadata submitted twice. See [#5325](https://github.com/DataDog/integrations-core/pull/5325).
+
 ## 1.9.2 / 2019-12-20
 
 * [Fixed] Fix version collection again. See [#5252](https://github.com/DataDog/integrations-core/pull/5252).
