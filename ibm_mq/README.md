@@ -10,9 +10,9 @@ This check monitors [IBM MQ][1].
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
 
-In order to use the IBM MQ check, you need to:
+To use the IBM MQ check, you need to:
 
-1. Make sure the [IBM MQ Client][3] is installed (unless the IBM MQ server is already installed)
+1. Make sure the [IBM MQ Client][3] is installed (unless the IBM MQ server is already installed).
 2. Update your LD_LIBRARY_PATH to include the location of the libraries
 
 For example:
@@ -21,7 +21,7 @@ For example:
 export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib:$LD_LIBRARY_PATH
 ```
 
-*Note*: Agent 6 uses Upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of:
+**Note**: Agent v6+ uses Upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of:
 
 * Upstart: `/etc/init/datadog-agent.conf`
 * Systemd: `/lib/systemd/system/datadog-agent.service`
@@ -96,7 +96,7 @@ sudo ldconfig
 
 There are a number of ways to set up permissions in IBM MQ. Depending on how your setup works, create a `datadog` user within MQ with read only permissions.
 
-Note: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done via the MQ UI or with an mqsc command:
+**Note**: "Queue Monitoring" must be enabled and set to at least "Medium". This can be done via the MQ UI or with an mqsc command:
 
 ```
 > /opt/mqm/bin/runmqsc
@@ -115,10 +115,9 @@ All valid MQSC commands were processed.
 ```
 
 ### Configuration
+#### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-#### Host
 
 ##### Metric collection
 
@@ -174,11 +173,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                                                          |
-|----------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `ibm_mq`                                                                                                                       |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                  |
-| `<INSTANCE_CONFIG>`  | `{"channel": "DEV.ADMIN.SVRCONN", "queue_manager":"datadog", "host":"%%host%%", "port":"%%port%%", "queues":["<QUEUE_NAME>"]}` |
+| Parameter            | Value                                                                                                                           |
+|----------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `ibm_mq`                                                                                                                        |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                   |
+| `<INSTANCE_CONFIG>`  | `{"channel": "DEV.ADMIN.SVRCONN", "queue_manager": "datadog", "host":"%%host%%", "port":"%%port%%", "queues":["<QUEUE_NAME>"]}` |
 
 ##### Log collection
 
@@ -186,9 +185,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
 
-| Parameter      | Value                                                                                                                                                             |
-|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `<LOG_CONFIG>` | `{"source": "ibm_mq", "service": "<SERVICE_NAME>", "log_processing_rules":{"type":"multi_line","name":"new_log_start_with_date", "pattern":"\d{2}/\d{2}/\d{4}"}}` |
+| Parameter      | Value                                                                                                                                                              |
+|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "ibm_mq", "service": "<SERVICE_NAME>", "log_processing_rules": {"type":"multi_line","name":"new_log_start_with_date", "pattern":"\d{2}/\d{2}/\d{4}"}}` |
 
 ### Validation
 
