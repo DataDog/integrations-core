@@ -23,11 +23,11 @@ ALLOWED_GLOBALS = {
 SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
 
-def get_tag(column_name, transformers, **modifiers):
+def get_tag(transformers, column_name, **modifiers):
     template = '{}:{{}}'.format(column_name)
     boolean = is_affirmative(modifiers.pop('boolean', None))
 
-    def tag(value, *_, **kwargs):
+    def tag(_, value, **kwargs):
         if boolean:
             value = str(is_affirmative(value)).lower()
 
@@ -36,18 +36,18 @@ def get_tag(column_name, transformers, **modifiers):
     return tag
 
 
-def get_monotonic_gauge(column_name, transformers, **modifiers):
-    gauge = transformers['gauge']('{}.total'.format(column_name), transformers, **modifiers)
-    monotonic_count = transformers['monotonic_count']('{}.count'.format(column_name), transformers, **modifiers)
+def get_monotonic_gauge(transformers, column_name, **modifiers):
+    gauge = transformers['gauge'](transformers, '{}.total'.format(column_name), **modifiers)
+    monotonic_count = transformers['monotonic_count'](transformers, '{}.count'.format(column_name), **modifiers)
 
-    def monotonic_gauge(value, *_, **kwargs):
-        gauge(value, **kwargs)
-        monotonic_count(value, **kwargs)
+    def monotonic_gauge(_, value, **kwargs):
+        gauge(_, value, **kwargs)
+        monotonic_count(_, value, **kwargs)
 
     return monotonic_gauge
 
 
-def get_temporal_percent(column_name, transformers, **modifiers):
+def get_temporal_percent(transformers, column_name, **modifiers):
     scale = modifiers.pop('scale', None)
     if scale is None:
         raise ValueError('the `scale` parameter is required')
@@ -63,27 +63,27 @@ def get_temporal_percent(column_name, transformers, **modifiers):
             'the `scale` parameter must be an integer representing parts of a second e.g. 1000 for millisecond'
         )
 
-    rate = transformers['rate'](column_name, transformers, **modifiers)
+    rate = transformers['rate'](transformers, column_name, **modifiers)
 
-    def temporal_percent(value, *_, **kwargs):
-        rate(total_time_to_temporal_percent(value, scale=scale), **kwargs)
+    def temporal_percent(_, value, **kwargs):
+        rate(_, total_time_to_temporal_percent(value, scale=scale), **kwargs)
 
     return temporal_percent
 
 
-def get_match(column_name, transformers, **modifiers):
+def get_match(transformers, column_name, **modifiers):
     # Do work in a separate function to avoid having to `del` a bunch of variables
     compiled_items = _compile_match_items(transformers, modifiers)
 
-    def match(value, sources, *_, **kwargs):
+    def match(sources, value, **kwargs):
         if value in compiled_items:
             source, transformer = compiled_items[value]
-            transformer(sources[source], **kwargs)
+            transformer(sources, sources[source], **kwargs)
 
     return match
 
 
-def get_expression(name, transformers, **modifiers):
+def get_expression(transformers, name, **modifiers):
     available_sources = modifiers.pop('sources')
 
     expression = modifiers.pop('expression', None)
@@ -119,7 +119,7 @@ def get_expression(name, transformers, **modifiers):
         if modifiers['submit_type'] not in transformers:
             raise ValueError('unknown submit_type `{}`'.format(modifiers['submit_type']))
 
-        submit_method = transformers[modifiers.pop('submit_type')](name, transformers, **modifiers)
+        submit_method = transformers[modifiers.pop('submit_type')](transformers, name, **modifiers)
         submit_method = create_extra_transformer(submit_method)
 
         def execute_expression(sources, **kwargs):
@@ -135,7 +135,7 @@ def get_expression(name, transformers, **modifiers):
     return execute_expression
 
 
-def get_percent(name, transformers, **modifiers):
+def get_percent(transformers, name, **modifiers):
     available_sources = modifiers.pop('sources')
 
     part = modifiers.pop('part', None)
@@ -155,7 +155,7 @@ def get_percent(name, transformers, **modifiers):
         raise ValueError('the `total` parameter `{}` is not an available source'.format(total))
 
     del available_sources
-    gauge = transformers['gauge'](name, transformers, **modifiers)
+    gauge = transformers['gauge'](transformers, name, **modifiers)
     gauge = create_extra_transformer(gauge)
 
     def percent(sources, **kwargs):
@@ -213,7 +213,7 @@ def _compile_match_items(transformers, modifiers):
         transform_modifiers.update(data)
         compiled_items[item] = (
             transform_source,
-            transformers[transform_type](transform_name, transformers, **transform_modifiers),
+            transformers[transform_type](transformers, transform_name, **transform_modifiers),
         )
 
     return compiled_items
