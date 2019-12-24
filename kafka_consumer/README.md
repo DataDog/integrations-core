@@ -17,12 +17,11 @@ This check fetches the highwater offsets from the Kafka brokers, consumer offset
 The Agent's Kafka consumer check is included in the [Datadog Agent][112] package, so you don't need to install anything else on your Kafka nodes.
 
 ### Configuration
+#### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-#### Host
-
-1. Create a `kafka_consumer.yaml` file using [this sample configuration file][113] as an example in the `kafka_consumer.d` folder in the [Agent check configuration directory][114]
+1. Create a `kafka_consumer.yaml` file using [this sample configuration file][113] as an example in the `kafka_consumer.d` folder in the [Agent check configuration directory][114].
 2. [Restart the Datadog Agent][115]
 
 #### Containerized
