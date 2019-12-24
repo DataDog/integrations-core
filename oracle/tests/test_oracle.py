@@ -11,7 +11,7 @@ def test__get_connection_instant_client(check, instance):
     Test the _get_connection method using the instant client
     """
     check.use_oracle_client = True
-    server, user, password, service, jdbc_driver, _, _ = check._get_config(instance)
+    server, user, password, service, jdbc_driver, _, _, _ = check._get_config(instance)
     con = mock.MagicMock()
     service_check = mock.MagicMock()
     check.service_check = service_check
@@ -29,7 +29,7 @@ def test__get_connection_jdbc(check, instance):
     Test the _get_connection method using the JDBC client
     """
     check.use_oracle_client = False
-    server, user, password, service, jdbc_driver, _, _ = check._get_config(instance)
+    server, user, password, service, jdbc_driver, _, _, _ = check._get_config(instance)
     con = mock.MagicMock()
     service_check = mock.MagicMock()
     check.service_check = service_check
@@ -56,7 +56,7 @@ def test__get_connection_failure(check, instance):
     expected_tags = ['server:localhost:1521', 'optional:tag1']
     service_check = mock.MagicMock()
     check.service_check = service_check
-    server, user, password, service, jdbc_driver, _, _ = check._get_config(instance)
+    server, user, password, service, jdbc_driver, _, _, _ = check._get_config(instance)
     with pytest.raises(Exception):
         check._get_connection(server, user, password, service, jdbc_driver, expected_tags)
     service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.CRITICAL, tags=expected_tags)
