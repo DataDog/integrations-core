@@ -54,9 +54,9 @@ On Windows >= 2008 (or equivalent), instead run:
 C:/> winmgmt /resyncperf
 ```
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
 #### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 ##### Metric collection
 
