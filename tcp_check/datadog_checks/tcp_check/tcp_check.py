@@ -19,7 +19,7 @@ class TCPCheck(AgentCheck):
         self.instance_name = self.normalize_tag(instance['name'])
         port = instance.get('port', None)
         self.timeout = float(instance.get('timeout', 10))
-        self.response_time = instance.get('collect_response_time', False)
+        self.collect_response_time = instance.get('collect_response_time', False)
         self.custom_tags = instance.get('tags', [])
         self.socket_type = None
 
@@ -105,7 +105,7 @@ class TCPCheck(AgentCheck):
             self.log.debug("%s:%d is UP", self.addr, self.port)
             self.report_as_service_check(AgentCheck.OK, 'UP')
 
-        if self.response_time and response_time is not None:
+        if self.collect_response_time and response_time is not None:
             self.gauge(
                 'network.tcp.response_time',
                 response_time,
