@@ -21,6 +21,8 @@ AUTO_CONFIG = {'apache_status_url': AUTO_STATUS_URL, 'tags': ['instance:second']
 
 BAD_CONFIG = {'apache_status_url': 'http://localhost:1234/server-status'}
 
+NO_METRIC_CONFIG = {'apache_status_url': BASE_URL}
+
 APACHE_GAUGES = [
     'apache.performance.idle_workers',
     'apache.performance.busy_workers',
