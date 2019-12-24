@@ -64,7 +64,9 @@ class Oracle(AgentCheck):
     )
 
     def check(self, instance):
-        server, user, password, service, jdbc_driver, tags, custom_queries, skip_default_metrics = self._get_config(instance)
+        server, user, password, service, jdbc_driver, tags, custom_queries, skip_default_metrics = self._get_config(
+            instance
+        )
 
         if not server or not user:
             raise OracleConfigError("Oracle host and user are needed")
