@@ -210,6 +210,9 @@ def parse_version_parts(version):
 def validate_check_arg(ctx, param, value):
     if not value or value == '.':
         if os.getcwd() in INTEGRATION_REPOS:
-            raise click.BadParameter('Needs to be real check name')
+            raise click.BadParameter('Needs to be the name of a real check or `.` for other repositories')
         else:
             set_root(os.getcwd())
+            return None
+    return value
+

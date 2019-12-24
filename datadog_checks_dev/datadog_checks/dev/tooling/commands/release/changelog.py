@@ -33,8 +33,6 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
 
     This method is supposed to be used by other tasks and not directly.
     """
-    check = None if check == '.' else check
-
     if check and check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
