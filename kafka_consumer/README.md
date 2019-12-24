@@ -21,8 +21,9 @@ The Agent's Kafka consumer check is included in the [Datadog Agent][112] package
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-1. Create a `kafka_consumer.yaml` file using [this sample configuration file][113] as an example in the `kafka_consumer.d` folder in the [Agent check configuration directory][114].
-2. [Restart the Datadog Agent][115]
+1. Edit the `kafka_consumer.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent’s configuration directory][114]. See the [sample kafka_consumer.d/conf.yaml][113] for all available configuration options.
+
+2. [Restart the Agent][115].
 
 #### Containerized
 
@@ -30,7 +31,7 @@ For containerized environments, see the [Autodiscovery with JMX][116] guide.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][117] and look for `kafka_consumer` under the Checks section.
+[Run the Agent's status subcommand][117] and look for `kafka_consumer` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -38,10 +39,8 @@ See [metadata.csv][118] for a list of metrics provided by this check.
 
 ### Events
 
-`consumer_lag`:
-
-The Datadog Agent emits an event when the value of the `consumer_lag` metric goes below 0, tagging it with `topic`,
-`partition` and `consumer_group`.
+**consumer_lag**:<br>
+The Datadog Agent emits an event when the value of the `consumer_lag` metric goes below 0, tagging it with `topic`, `partition` and `consumer_group`.
 
 ### Service Checks
 The Kafka-consumer check does not include any service checks.
