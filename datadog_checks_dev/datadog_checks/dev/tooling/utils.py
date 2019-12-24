@@ -215,4 +215,3 @@ def validate_check_arg(ctx, param, value):
             set_root(os.getcwd())
             return None
     return value
-
