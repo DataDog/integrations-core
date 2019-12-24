@@ -121,3 +121,12 @@ def test_metadata_in_header(check, datadog_agent, mock_hide_server_version):
     check.check(AUTO_CONFIG)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+def test_invalid_version(check):
+    check = check({})
+    check.log = mock.MagicMock()
+
+    check._submit_metadata("invalid_version")
+
+    check.log.info.assert_called_once_with("Cannot parse the complete Apache version from %s.", "invalid_version")
