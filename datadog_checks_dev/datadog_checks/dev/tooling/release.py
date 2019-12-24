@@ -19,7 +19,10 @@ def get_release_tag_string(check_name, version_string):
     """
     Compose a string to use for release tags
     """
-    return '{}-{}'.format(check_name, version_string)
+    if check_name:
+        return '{}-{}'.format(check_name, version_string)
+    else:
+        return version_string
 
 
 def update_version_module(check_name, old_ver, new_ver):

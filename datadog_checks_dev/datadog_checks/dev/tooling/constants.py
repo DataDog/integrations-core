@@ -8,6 +8,11 @@ import semver
 
 CHANGELOG_LABEL_PREFIX = 'changelog/'
 CHANGELOG_TYPE_NONE = 'no-changelog'
+INTEGRATION_REPOS = [
+    'integrations-core',
+    'integrations-extras',
+    'integrations-internal',
+]
 VERSION_BUMP = OrderedDict(
     [
         ('Added', semver.bump_minor),
