@@ -52,10 +52,11 @@ def get_changelog_types(pr_payload):
     return changelog_labels
 
 
-def get_pr(pr_num, config=None, repo=DEFAULT_REPO, raw=False):
+def get_pr(pr_num, config=None, repo=None, raw=False):
     """
     Get the payload for the given PR number. Let exceptions bubble up.
     """
+    repo = os.path.basename(os.getcwd()) if repo is None else repo
     response = requests.get(PR_ENDPOINT.format(repo, pr_num), auth=get_auth_info(config))
 
     if raw:

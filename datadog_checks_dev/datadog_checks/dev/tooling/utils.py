@@ -7,12 +7,14 @@ import re
 from ast import literal_eval
 from collections import OrderedDict
 
+import click
 import requests
 import semver
 from six import string_types
 
 from ..utils import file_exists, read_file
-from .constants import NOT_CHECKS, VERSION_BUMP, get_root
+from .constants import INTEGRATION_REPOS, NOT_CHECKS, VERSION_BUMP, get_root, set_root
+from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
@@ -143,9 +145,14 @@ def get_version_string(check_name):
     """
     Get the version string for the given check.
     """
-    version = VERSION.search(read_version_file(check_name))
-    if version:
-        return version.group(1)
+    # Check the version file of the integration if available
+    # Otherwise, get the latest SemVer git tag for the project
+    if check_name:
+        version = VERSION.search(read_version_file(check_name))
+        if version:
+            return version.group(1)
+    else:
+        return get_latest_tag()
 
 
 def load_manifest(check_name):
@@ -198,3 +205,11 @@ def parse_version_parts(version):
     if not isinstance(version, string_types):
         return []
     return [int(v) for v in version.split('.') if v.isdigit()]
+
+
+def validate_check_arg(ctx, param, value):
+    if not value or value == '.':
+        if os.getcwd() in INTEGRATION_REPOS:
+            raise click.BadParameter('Needs to be real check name')
+        else:
+            set_root(os.getcwd())

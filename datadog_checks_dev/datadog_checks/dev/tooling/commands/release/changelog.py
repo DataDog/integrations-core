@@ -14,14 +14,14 @@ from ...constants import CHANGELOG_TYPE_NONE, get_root
 from ...git import get_commits_since
 from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
 from ...release import get_release_tag_string
-from ...utils import get_valid_checks, get_version_string
+from ...utils import get_valid_checks, get_version_string, validate_check_arg
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Update the changelog for a check')
-@click.argument('check')
+@click.argument('check', callback=validate_check_arg)
 @click.argument('version')
 @click.argument('old_version', required=False)
 @click.option('--initial', is_flag=True)
@@ -33,12 +33,14 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
 
     This method is supposed to be used by other tasks and not directly.
     """
-    if check not in get_valid_checks():
+    check = None if check == '.' else check
+
+    if check and check not in get_valid_checks():
         abort('Check `{}` is not an Agent-based Integration'.format(check))
 
     # sanity check on the version provided
     cur_version = old_version or get_version_string(check)
-    if parse_version_info(version) <= parse_version_info(cur_version):
+    if parse_version_info(version.lstrip('v')) <= parse_version_info(cur_version.lstrip('v')):
         abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
 
     if not quiet:
@@ -107,7 +109,10 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
     new_entry.write('\n')
 
     # read the old contents
-    changelog_path = os.path.join(get_root(), check, 'CHANGELOG.md')
+    if check:
+        changelog_path = os.path.join(get_root(), check, 'CHANGELOG.md')
+    else:
+        changelog_path = os.path.join(get_root(), 'CHANGELOG.md')
     old = list(stream_file_lines(changelog_path))
 
     # write the new changelog in memory
