@@ -239,17 +239,17 @@ class TwistlockCheck(AgentCheck):
 
         if published_date < self.last_run:
             if host:
-                type = 'hosts'
+                vuln_type = 'hosts'
             elif image:
-                type = 'images'
+                vuln_type = 'images'
             else:
-                type = 'systems'
+                vuln_type = 'systems'
 
             msg_text = """
             There is a new CVE affecting your {}:
             {}
             """.format(
-                type, description
+                vuln_type, description
             )
 
             event = {
@@ -267,9 +267,9 @@ class TwistlockCheck(AgentCheck):
     def _report_vuln_info(self, namespace, data, tags):
         # CVE vulnerabilities
         summary = defaultdict(int)
-        types = ["critical", "high", "medium", "low"]
-        for type in types:
-            summary[type] = 0
+        severity_types = ["critical", "high", "medium", "low"]
+        for severity_type in severity_types:
+            summary[severity_type] = 0
 
         cves = data.get('info', {}).get('cveVulnerabilities', []) or []
         for cve in cves:
@@ -286,11 +286,11 @@ class TwistlockCheck(AgentCheck):
     def _report_compliance_information(self, namespace, data, tags):
         compliance = defaultdict(int)
         vulns = data.get('info', {}).get('complianceDistribution', {}) or {}
-        types = ["critical", "high", "medium", "low"]
-        for type in types:
-            compliance[type] += vulns.get(type, 0)
-            compliance_tags = SEVERITY_TAGS.get(type, []) + tags
-            self.gauge('{}.compliance.count'.format(namespace), compliance[type], compliance_tags)
+        severity_types = ["critical", "high", "medium", "low"]
+        for severity_type in severity_types:
+            compliance[severity_type] += vulns.get(severity_type, 0)
+            compliance_tags = SEVERITY_TAGS.get(severity_type, []) + tags
+            self.gauge('{}.compliance.count'.format(namespace), compliance[severity_type], compliance_tags)
 
     def _report_layer_count(self, data, namespace, tags):
         # Layer count and size
