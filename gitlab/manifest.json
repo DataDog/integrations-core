@@ -3,7 +3,8 @@
     "collaboration",
     "source control",
     "issue tracking",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Gitlab",
