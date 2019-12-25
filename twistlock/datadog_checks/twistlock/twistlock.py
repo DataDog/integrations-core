@@ -74,6 +74,8 @@ class TwistlockCheck(AgentCheck):
         service_check_name = "{}.license_ok".format(self.NAMESPACE)
         try:
             license = self._retrieve_json("/api/v1/settings/license")
+            if "expiration_date" not in license:
+                raise Exception("expiration_date not found.")
         except Exception as e:
             self.warning("cannot retrieve license data: {}".format(e))
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
@@ -322,7 +324,9 @@ class TwistlockCheck(AgentCheck):
             # it's possible to get a null response from the server
             # {} is a bit easier to deal with
             if 'err' in j:
-                self.log.error("Error in response: {}".format(j.get("err")))
+                err_msg = "Error in response: {}".format(j.get("err"))
+                self.log.error(err_msg)
+                raise Exception(err_msg)
             return j or {}
         except Exception as e:
             self.log.debug("cannot get a response: {} response is: {}".format(e, response.text))
