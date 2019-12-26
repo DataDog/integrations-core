@@ -28,7 +28,7 @@ def test_cisco(aggregator):
         ('login with password', {'password': common.PASSWORD}),
         (
             'login with cert',
-            {'cert_name': 'foo', 'cert_key': open(os.path.join(common.CERTIFICATE_DIR, 'cert.pem')).read()},
+            {'cert_name': 'foo', 'cert_key': open(os.path.join(common.CERTIFICATE_DIR, 'cert.pem'), 'rb').read()},
         ),
     ],
 )

@@ -58,7 +58,7 @@ class SessionWrapper:
             cookie = self.apic_cookie
         elif self.cert_key:
             payload = 'GET{}'.format(path)
-            signature = self.cert_key.sign(payload, padding.PKCS1v15(), hashes.SHA256())
+            signature = self.cert_key.sign(payload.encode('utf-8'), padding.PKCS1v15(), hashes.SHA256())
 
             signature = base64.b64encode(signature)
             cookie = (
