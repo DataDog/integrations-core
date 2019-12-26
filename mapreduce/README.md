@@ -37,7 +37,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `mapreduce` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `mapreduce` under the Checks section.
 
 ## Data Collected
 ### Metrics
