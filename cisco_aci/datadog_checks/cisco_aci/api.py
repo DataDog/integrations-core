@@ -9,7 +9,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import ConfigurationError, ensure_bytes
 
 from .exceptions import APIAuthException, APIConnectionException, APIParsingException
 
@@ -58,7 +58,7 @@ class SessionWrapper:
             cookie = self.apic_cookie
         elif self.cert_key:
             payload = 'GET{}'.format(path)
-            signature = self.cert_key.sign(payload.encode('utf-8'), padding.PKCS1v15(), hashes.SHA256())
+            signature = self.cert_key.sign(ensure_bytes(payload), padding.PKCS1v15(), hashes.SHA256())
 
             signature = base64.b64encode(signature)
             cookie = (
