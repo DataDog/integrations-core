@@ -83,9 +83,10 @@ static_resources:
 ```
 
 ### Configuration
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 #### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 ##### Metric collection
 
