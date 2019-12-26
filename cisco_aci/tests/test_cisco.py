@@ -37,9 +37,10 @@ def test_recover_from_expired_token(aggregator):
 
     api = Api(common.ACI_URLS, http, common.USERNAME, password=common.PASSWORD)
 
-    api.sessions = [session_wrapper]
+    api.sessions = {common.ACI_URL: session_wrapper}
 
     data = api.make_request("")
+
     # Assert that we retrieved the value from `valid_response.json()`
     assert data == {"foo": "bar"}
 
@@ -51,3 +52,9 @@ def test_recover_from_expired_token(aggregator):
     assert 'aaaLogin.xml' in post_calls[0].args[0]
     # Assert that the last call was to the ACI_URL again
     assert get_calls[1].args[0] == common.ACI_URL
+    # Assert session correctly renewed
+    assert len(api.sessions) == 1  # check the number of sessions doesn't grow
+    # assert api.sessions[common.ACI_URL] != session_wrapper  # check session renewed
+    # Assert cookie to check the session changed
+    assert get_calls[0].kwargs['headers']['Cookie'] == 'cookie'
+    assert get_calls[1].kwargs['headers']['Cookie'] != 'cookie'
