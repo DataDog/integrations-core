@@ -30,7 +30,7 @@ The Cassandra Nodetool check is included in the [Datadog Agent][113] package, so
             - "<KEYSPACE_2>"
     ```
 
-2. [Restart the Agent][116]
+2. [Restart the Agent][116].
 
 ### Validation
 
