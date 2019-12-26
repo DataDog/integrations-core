@@ -1,7 +1,6 @@
 {
   "categories": [
-    "containers",
-    "autodiscovery"
+    "containers"
   ],
   "creates_events": false,
   "display_name": "CRI-O",
