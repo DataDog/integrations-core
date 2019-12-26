@@ -10,7 +10,7 @@ The Agent's lighttpd check tracks uptime, bytes served, requests per second, res
 
 ### Installation
 
-The lighttpd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your lighttpd servers.
+The Lighttpd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Lighttpd servers.
 
 In addition, install `mod_status` on your Lighttpd servers.
 
@@ -32,7 +32,7 @@ Follow the instructions below to configure this check for an Agent running on a 
         - lighttpd_status_url: http://localhost/server-status?auto
     ```
 
-2. [Restart the Agent][5] to begin sending lighttpd metrics to Datadog.
+2. [Restart the Agent][5].
 
 #### Containerized
 
