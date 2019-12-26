@@ -13,14 +13,14 @@ from six import PY3
 from .env import environment_run
 from .structures import LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import chdir, copy_dir_contents, path_join
+from .utils import chdir, copy_dir_contents, get_here, path_join
 
 if PY3:
     from shutil import which
 else:
     from shutilwhich import which
 
-TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'terraform_shared')
+TEMPLATES_DIR = path_join(get_here(), 'tooling', 'templates', 'terraform')
 
 
 def construct_env_vars():
