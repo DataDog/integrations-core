@@ -11,7 +11,7 @@ import requests
 import semver
 from six import string_types
 
-from ..utils import file_exists, read_file
+from ..utils import file_exists, read_file, write_file
 from .constants import NOT_CHECKS, VERSION_BUMP, get_root
 from .git import get_latest_tag
 
@@ -158,10 +158,15 @@ def load_manifest(check_name):
     """
     Load the manifest file into a dictionary
     """
-    manifest_path = os.path.join(get_root(), check_name, 'manifest.json')
+    manifest_path = get_manifest_file(check_name)
     if file_exists(manifest_path):
-        return json.loads(read_file(manifest_path))
+        return json.loads(read_file(manifest_path).strip(), object_pairs_hook=OrderedDict)
     return {}
+
+
+def write_manifest(manifest, check_name):
+    manifest_path = get_manifest_file(check_name)
+    write_file(manifest_path, '{}\n'.format(json.dumps(manifest, indent=2)))
 
 
 def get_bump_function(changelog_types):
