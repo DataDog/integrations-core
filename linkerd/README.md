@@ -27,13 +27,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 | Parameter            | Value                                                                 |
 |----------------------|-----------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `marathon`                                                            |
+| `<INTEGRATION_NAME>` | `linkerd`                                                            |
 | `<INIT_CONFIG>`      | blank or `{}`                                                         |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:9990/admin/metrics/prometheus"}` |
 
 ### Validation
 
-[Run the Agent's `status` subcommand][7] and look for `linkerd` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `linkerd` under the Checks section.
 
 ## Data Collected
 
