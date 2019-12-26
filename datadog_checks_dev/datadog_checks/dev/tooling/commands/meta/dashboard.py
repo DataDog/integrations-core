@@ -13,8 +13,8 @@ from ...constants import get_root
 from ...utils import get_valid_integrations, load_manifest, write_manifest
 from ..console import CONTEXT_SETTINGS, abort
 
-BOARD_ID_PATTERN = r'datadoghq\.com/[^/]+/([^/]+)/.+'
-SCREEN_API = 'https://api.datadoghq.com/api/v1/screen/'
+BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)/.+'
+SCREEN_API = 'https://api.{site}/api/v1/screen/{board_id}'
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Dashboard utilities')
@@ -41,20 +41,26 @@ def export(ctx, url, integration):
 
     api_key = org.get('api_key')
     if not api_key:
-        abort('No `api_key` has been set')
+        abort('No `api_key` has been set for org `{}`'.format(org))
 
     app_key = org.get('app_key')
     if not app_key:
-        abort('No `app_key` has been set')
+        abort('No `app_key` has been set for org `{}`'.format(org))
 
-    match = re.search(BOARD_ID_PATTERN, url)
+    site = org.get('site')
+    if not site:
+        abort('No `site` has been set for org `{}`'.format(org))
+
+    match = re.search(BOARD_ID_PATTERN.format(site=re.escape(site)), url)
     if match:
         board_id = match.group(1)
     else:
         abort('Invalid `url`')
 
     try:
-        response = requests.get(SCREEN_API + board_id, params={'api_key': api_key, 'application_key': app_key})
+        response = requests.get(
+            SCREEN_API.format(site=site, board_id=board_id), params={'api_key': api_key, 'application_key': app_key}
+        )
         response.raise_for_status()
     except Exception as e:
         abort(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
