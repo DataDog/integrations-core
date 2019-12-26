@@ -17,9 +17,9 @@ The Mapreduce check is included in the [Datadog Agent][2] package, so you don't 
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
 #### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `mapreduce.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to point to your server and port, set the masters to monitor. See the [sample mapreduce.d/conf.yaml][4] for all available configuration options.
 
