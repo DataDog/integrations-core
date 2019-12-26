@@ -81,7 +81,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 |----------------------|----------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `apache`                                                       |
 | `<INIT_CONFIG>`      | blank or `{}`                                                  |
-| `<INSTANCE_CONFIG>`  | `{"apache_status_url": "http://localhost/server-status?auto"}` |
+| `<INSTANCE_CONFIG>`  | `{"apache_status_url": "http://%%host%%/server-status?auto"}` |
 
 ##### Log collection
 
