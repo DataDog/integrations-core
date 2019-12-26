@@ -14,7 +14,7 @@
         "role": null,
         "verified": true
     },
-    "description": "",
+    "description": "## Aerospike Dashboard\n\nThis is an example Aerospike dashboard demonstrating the metrics that the integration collects.",
     "disableCog": false,
     "disableEditing": false,
     "id": 932434,
