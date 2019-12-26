@@ -1,34 +1,4 @@
-variable "account_json" {
-  type = string
-}
-
-variable "user" {
-  type = string
-}
-
-resource "random_shuffle" "az" {
-  input = ["europe-west2-a", "europe-west2-b", "europe-west2-c"]
-  result_count = 1
-}
-
-provider "google" {
-  credentials = var.account_json
-  project = "datadog-integrations-lab"
-  region = "europe-west2"
-  zone = "${random_shuffle.az.result[0]}"
-}
-
-resource "tls_private_key" "ssh-key" {
-  algorithm = "RSA"
-  rsa_bits = 4096
-}
-
-resource "random_string" "suffix" {
-  length = 8
-  special = false
-  upper = false
-}
-
+# Shared common terraform config found in the templates/terraform_shared folder in datadog_checks_dev
 resource "google_compute_instance" "devstack" {
   name = replace("devstack-${var.user}-${random_string.suffix.result}", ".", "-")
   machine_type = "n1-standard-4"
