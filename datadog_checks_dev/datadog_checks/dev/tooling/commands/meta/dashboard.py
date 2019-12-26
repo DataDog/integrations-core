@@ -66,7 +66,9 @@ def export(ctx, url, integration):
         abort(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
 
     payload = response.json()
+    payload.setdefault('author_info', {})
     payload['author_info']['author_name'] = 'Datadog'
+    payload.setdefault('created_by', {})
     payload['created_by']['email'] = 'support@datadoghq.com'
     payload['created_by']['handle'] = 'support@datadoghq.com'
     payload['created_by']['name'] = 'Datadog'
