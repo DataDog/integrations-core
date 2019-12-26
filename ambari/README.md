@@ -12,9 +12,9 @@ The Ambari check is included in the [Datadog Agent][2] package. No additional in
 
 ### Configuration
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
 #### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 ##### Metric Collection
 
