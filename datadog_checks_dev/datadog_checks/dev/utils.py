@@ -161,6 +161,11 @@ def copy_path(path, d):
         shutil.copy(path, d)
 
 
+def copy_dir_contents(path, d):
+    for p in os.listdir(path):
+        copy_path(os.path.join(path, p), d)
+
+
 def remove_path(path):
     try:
         shutil.rmtree(path, ignore_errors=False)
