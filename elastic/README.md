@@ -40,7 +40,7 @@ Follow the instructions below to configure this check for an Agent running on a 
     * If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster - e.g. if you use a hosted Elasticsearch - set `cluster_stats` to true.
     * To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
 
-2. [Restart the Agent][5]
+2. [Restart the Agent][5].
 
 ##### Log collection
 
