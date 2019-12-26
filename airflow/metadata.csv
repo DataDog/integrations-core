@@ -30,3 +30,6 @@ airflow.dagrun.duration.success,gauge,,millisecond,,Milliseconds taken for a Dag
 airflow.dagrun.duration.failed,gauge,,millisecond,,Milliseconds taken for a DagRun to reach failed state,-1,airflow,dagrun.duration.failed
 airflow.dagrun.schedule_delay,gauge,,millisecond,,Milliseconds of delay between the scheduled DagRun start date and the actual DagRun start date,-1,airflow,dagrun.schedule_delay
 airflow.dag.loading_duration,gauge,,second,,DAG loading duration in seconds (deprecated),-1,airflow,dag.loading_duration
+airflow.dag.task_removed,gauge,,second,,Tasks removed from DAG,0,airflow,dag.task_removed
+airflow.dag.task_restored,gauge,,second,,Tasks restored to DAG,0,airflow,dag.task_restored
+airflow.task.instance_created,gauge,,second,,Task instances created,0,airflow,task.instance_created

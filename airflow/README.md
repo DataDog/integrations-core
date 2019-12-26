@@ -120,6 +120,18 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
             name: 'airflow.dagrun.schedule_delay'
             tags:
                dag_id: '$1'
+          - match: 'airflow.task_removed_from_dag.*'
+            name: 'airflow.dag.task_removed'
+            tags:
+               dag_id: '$1'
+          - match: 'airflow.task_restored_to_dag.*'
+            name: 'airflow.dag.task_restored'
+            tags:
+               dag_id: '$1'
+          - match: 'airflow.task_instance_created-*'
+            name: 'airflow.task.instance_created'
+            tags:
+               task_class: '$1'
     ```
 
 #### Step 3: Restart Datadog Agent and Airflow
