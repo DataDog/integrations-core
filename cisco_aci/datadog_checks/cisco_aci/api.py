@@ -171,7 +171,8 @@ class Api:
         aci_url = random.choice(tuple(self.sessions))
         try:
             return self.sessions[aci_url].make_request(path)
-        except APIAuthException:
+        except APIAuthException as e:
+            self.log.debug('Token expired for url `%s` (will be automatically renewed): %s', aci_url, e)
             # If we get a 403 answer this may mean that the token expired. Let's refresh the token
             # by login again and retry the request. If it fails again, the integration should exit.
             self.sessions[aci_url] = self.login_for_url(aci_url)  # refresh session for url
