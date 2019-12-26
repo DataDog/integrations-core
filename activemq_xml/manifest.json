@@ -1,7 +1,8 @@
 {
   "categories": [
     "processing",
-    "messaging"
+    "messaging",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "ActiveMQ XML",
