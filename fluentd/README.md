@@ -131,7 +131,7 @@ Configuration example:
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates](https://docs.datadoghq.com/agent/autodiscovery/integrations) for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -145,7 +145,7 @@ For containerized environments, see the [Autodiscovery Integration Templates](ht
 
 **Available for Agent v6.5+**
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection](https://docs.datadoghq.com/agent/docker/log/).
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][18].
 
 | Parameter      | Value                                                |
 |----------------|------------------------------------------------------|
@@ -153,7 +153,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's `status` subcommand][14] and look for `fluentd` under the Checks section.
+[Run the Agent's status subcommand][14] and look for `fluentd` under the Checks section.
 
 ## Data Collected
 ### Metrics
@@ -165,9 +165,8 @@ The FluentD check does not include any events.
 
 ### Service Checks
 
-`fluentd.is_ok`:
-
-Returns 'Critical' if the Agent cannot connect to Fluentd to collect metrics. This is the check which most other integrations would call `can_connect`.
+**fluentd.is_ok**:<br>
+Returns `CRITICAL` if the Agent cannot connect to Fluentd to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
 
@@ -194,3 +193,4 @@ Need help? Contact [Datadog support][16].
 [15]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
 [16]: https://docs.datadoghq.com/help
 [17]: https://www.datadoghq.com/blog/monitor-fluentd-datadog
+[18]: https://docs.datadoghq.com/agent/docker/log/
