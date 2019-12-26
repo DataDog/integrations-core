@@ -90,7 +90,19 @@ def get_config_spec(check_name):
     if check_name == 'agent':
         return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')
     else:
-        return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data', 'conf_spec.yaml')
+        path = load_manifest(check_name).get('assets', {}).get('configuration', {}).get('spec', '')
+        return os.path.join(get_root(), check_name, *path.split('/'))
+
+
+def get_default_config_spec(check_name):
+    return os.path.join(get_root(), check_name, 'assets', 'configuration', 'spec.yaml')
+
+
+def get_data_directory(check_name):
+    if check_name == 'agent':
+        return os.path.join(get_root(), 'pkg', 'config')
+    else:
+        return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data')
 
 
 def get_config_files(check_name):
