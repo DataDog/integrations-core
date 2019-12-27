@@ -1,5 +1,9 @@
 # CHANGELOG - apache
 
+## 1.9.4 / 2019-12-26
+
+* [Fixed] Don't ship incomplete config spec. See [#5338](https://github.com/DataDog/integrations-core/pull/5338).
+
 ## 1.9.3 / 2019-12-24
 
 * [Fixed] Fix version metadata submitted twice. See [#5325](https://github.com/DataDog/integrations-core/pull/5325).
