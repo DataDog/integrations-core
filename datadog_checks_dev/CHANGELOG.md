@@ -9,9 +9,7 @@
 * [Added] Make changes and changelog command work with other repos. See [#5331](https://github.com/DataDog/integrations-core/pull/5331).
 * [Fixed] Fix agent status with ddev. See [#5293](https://github.com/DataDog/integrations-core/pull/5293).
 * [Added] Decrease default verbosity of tracebacks in pytest. See [#5291](https://github.com/DataDog/integrations-core/pull/5291).
-* [Added] Refactor auth handling of RequestsWrapper. See [#5263](https://github.com/DataDog/integrations-core/pull/5263).
 * [Added] Add more global utilities the pytest plugin. See [#5283](https://github.com/DataDog/integrations-core/pull/5283).
-* [Added] Add support for AWS Signature Version 4 Signing to the RequestsWrapper. See [#5249](https://github.com/DataDog/integrations-core/pull/5249).
 * [Added] Display Docker Compose logs when test environment fails to start. See [#5258](https://github.com/DataDog/integrations-core/pull/5258).
 * [Fixed] Remove command to validate Python 3 compatibility. See [#5246](https://github.com/DataDog/integrations-core/pull/5246).
 * [Added] Implement configuration specifications. See [#5072](https://github.com/DataDog/integrations-core/pull/5072).
