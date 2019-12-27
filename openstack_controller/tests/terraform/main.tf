@@ -1,4 +1,4 @@
-# Shared common terraform config found in the templates/terraform_shared folder in datadog_checks_dev
+# Shared common terraform config found in the templates/terraform folder in datadog_checks_dev
 resource "google_compute_instance" "devstack" {
   name = replace("devstack-${var.user}-${random_string.suffix.result}", ".", "-")
   machine_type = "n1-standard-4"

@@ -1,4 +1,4 @@
-# Shared common terraform config found in the templates/terraform_shared folder in datadog_checks_dev
+# Shared common terraform config found in the templates/terraform folder in datadog_checks_dev
 resource "google_container_cluster" "gke_cluster" {
   name = replace("cilium-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
   location = random_shuffle.az.result[0]
