@@ -197,7 +197,24 @@ def get_here():
 
 
 def load_jmx_config():
-    root = get_parent_dir(inspect.currentframe().f_back.f_code.co_filename)
+    # Only called in tests of a check, so just go back one frame
+    root = find_check_root(depth=1)
+
+    check = basepath(root)
+    jmx_config = path_join(root, 'datadog_checks', check, 'data', 'conf.yaml.example')
+
+    return yaml.safe_load(read_file(jmx_config))
+
+
+def find_check_root(depth=0):
+    # Account for this call
+    depth += 1
+
+    frame = inspect.currentframe()
+    for _ in range(depth):
+        frame = frame.f_back
+
+    root = get_parent_dir(frame.f_code.co_filename)
     while True:
         if file_exists(path_join(root, 'setup.py')):
             break
@@ -208,10 +225,7 @@ def load_jmx_config():
 
         root = new_root
 
-    check = basepath(root)
-    jmx_config = path_join(root, 'datadog_checks', check, 'data', 'conf.yaml.example')
-
-    return yaml.safe_load(read_file(jmx_config))
+    return root
 
 
 @contextmanager

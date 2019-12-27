@@ -4,7 +4,16 @@
 import time
 from contextlib import contextmanager
 
-from ._env import deserialize_data, get_env_vars, serialize_data, set_env_vars, set_up_env, tear_down_env
+from ._env import (
+    deserialize_data,
+    get_env_vars,
+    get_state,
+    save_state,
+    serialize_data,
+    set_env_vars,
+    set_up_env,
+    tear_down_env,
+)
 from .conditions import CheckEndpoints
 from .structures import EnvVars
 from .utils import mock_context_manager
@@ -74,4 +83,12 @@ def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditi
                 down()
 
 
-__all__ = ['environment_run', 'deserialize_data', 'get_env_vars', 'serialize_data', 'set_env_vars']
+__all__ = [
+    'environment_run',
+    'deserialize_data',
+    'get_env_vars',
+    'get_state',
+    'save_state',
+    'serialize_data',
+    'set_env_vars',
+]
