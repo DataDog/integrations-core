@@ -27,5 +27,4 @@ def test_check(aggregator):
     ]
     check = AmbariCheck(init_config=init_config, instances=instances)
     check.check(instances[0])
-    # import pdb; pdb.set_trace()
     aggregator.assert_all_metrics_covered()
