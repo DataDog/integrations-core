@@ -212,7 +212,7 @@ The full list of available parameters is described in the [Datadog Fluentbit doc
 **Note** In order to parse serialized JSON logs coming from a container's `stdout`, add the following required argument directly in your FireLens configuration: 
 
 ```
-relensConfiguration": {
+firelensConfiguration": {
     "type": "fluentbit",
     "options": {
         "config-file-type": "file",
