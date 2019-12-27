@@ -1,5 +1,9 @@
 # CHANGELOG - cisco_aci
 
+## 1.8.2 / 2019-12-27
+
+* [Fixed] Fix make request refresh auth token. See [#5334](https://github.com/DataDog/integrations-core/pull/5334).
+
 ## 1.8.1 / 2019-12-02
 
 * [Fixed] Use RequestsWrapper. See [#5037](https://github.com/DataDog/integrations-core/pull/5037).
