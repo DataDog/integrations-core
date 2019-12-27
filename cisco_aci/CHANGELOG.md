@@ -2,7 +2,7 @@
 
 ## 1.8.2 / 2019-12-27
 
-* [Fixed] Fix make request refresh auth token. See [#5334](https://github.com/DataDog/integrations-core/pull/5334).
+* [Fixed] Ensure only one session object per url. See [#5334](https://github.com/DataDog/integrations-core/pull/5334).
 
 ## 1.8.1 / 2019-12-02
 
