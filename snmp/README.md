@@ -168,7 +168,7 @@ PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\pyt
   --destination-format=pysnmp <MIB_FILE_NAME>
 ```
 
-Example using the `CISCO-TCP-MIB.my`:
+Example using the `CISCO-TCP-MIB`:
 
 ```
  # /opt/datadog-agent/embedded/bin/mibdump.py --mib-source <PATH_TO_MIB_FILE>  --mib-source http://mibs.snmplabs.com/asn1/@mib@ --destination-directory=/opt/datadog-agent/pysnmp/custom_mibpy/ --destination-format=pysnmp CISCO-TCP-MIB
