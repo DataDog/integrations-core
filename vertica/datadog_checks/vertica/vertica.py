@@ -565,8 +565,9 @@ class VerticaCheck(AgentCheck):
         if self._client_lib_log_level:
             connection_options['log_level'] = self._client_lib_log_level
             # log_path is required by vertica client for using logging
-            # we still get vertica client logs in the agent log even if `log_path` is set to os.devnull
-            connection_options['log_path'] = os.devnull
+            # when log_path is set to '', vertica won't log to a file
+            # but we still get logs via parent root logger
+            connection_options['log_path'] = ''
 
         if self._tls_verify:  # no cov
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
