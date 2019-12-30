@@ -22,7 +22,8 @@ QUANTITIES = {'12k': 12 * 1000, '12M': 12 * (1000 * 1000), '12Ki': 12.0 * 1024, 
 
 # Kubernetes versions, used to differentiate cadvisor payloads after the label change
 KUBE_POST_1_16 = '1.16'
-KUBE_PRE_1_16 = '1.14'
+KUBE_1_14 = '1.14'
+KUBE_PRE_1_14 = '1.13'
 
 NODE_SPEC = {
     u'cloud_provider': u'GCE',
@@ -84,7 +85,6 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.runtime.errors',
     'kubernetes.kubelet.network_plugin.latency.sum',
     'kubernetes.kubelet.network_plugin.latency.count',
-    'kubernetes.kubelet.network_plugin.latency.quantile',
     'kubernetes.kubelet.volume.stats.available_bytes',
     'kubernetes.kubelet.volume.stats.capacity_bytes',
     'kubernetes.kubelet.volume.stats.used_bytes',
@@ -92,6 +92,10 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.volume.stats.inodes_free',
     'kubernetes.kubelet.volume.stats.inodes_used',
     'kubernetes.kubelet.evictions',
+]
+
+EXPECTED_METRICS_PROMETHEUS_PRE_1_14 = EXPECTED_METRICS_PROMETHEUS + [
+    'kubernetes.kubelet.network_plugin.latency.quantile'
 ]
 
 COMMON_TAGS = {
@@ -181,7 +185,7 @@ def tagger():
     return tagger
 
 
-def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16, stats_summary_fail=False):
+def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_summary_fail=False):
     """
     Returns a check that uses mocked data for responses from prometheus endpoints, pod list,
     and node spec.
@@ -198,42 +202,57 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_PRE_1_16, stats
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
-    def mocked_poll_pre_1_16(*args, **kwargs):
-        scraper_config = args[0]
-        prometheus_url = scraper_config['prometheus_url']
+    def mocked_poll(cadvisor_response, kubelet_response):
+        def _mocked_poll(*args, **kwargs):
+            scraper_config = args[0]
+            prometheus_url = scraper_config['prometheus_url']
 
-        if prometheus_url.endswith('/metrics/cadvisor'):
-            # Mock response for "/metrics/cadvisor"
-            content = mock_from_file('cadvisor_metrics_pre_1_16.txt')
-        elif prometheus_url.endswith('/metrics'):
-            # Mock response for "/metrics"
-            content = mock_from_file('kubelet_metrics.txt')
-        else:
-            raise Exception("Must be a valid endpoint")
+            if prometheus_url.endswith('/metrics/cadvisor'):
+                # Mock response for "/metrics/cadvisor"
+                content = mock_from_file(cadvisor_response)
+            elif prometheus_url.endswith('/metrics'):
+                # Mock response for "/metrics"
+                content = mock_from_file(kubelet_response)
+            else:
+                raise Exception("Must be a valid endpoint")
 
-        attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
-        return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
-
-    def mocked_poll_post_1_16(*args, **kwargs):
-        scraper_config = args[0]
-        prometheus_url = scraper_config['prometheus_url']
-
-        if prometheus_url.endswith('/metrics/cadvisor'):
-            # Mock response for "/metrics/cadvisor"
-            content = mock_from_file('cadvisor_metrics_post_1_16.txt')
-        elif prometheus_url.endswith('/metrics'):
-            # Mock response for "/metrics"
-            content = mock_from_file('kubelet_metrics.txt')
-        else:
-            raise Exception("Must be a valid endpoint")
-
-        attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
-        return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+            attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
+            return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+        return _mocked_poll
 
     if kube_version == KUBE_POST_1_16:
-        monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll_post_1_16))
-    else:
-        monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll_pre_1_16))
+        monkeypatch.setattr(
+            check,
+            'poll',
+            mock.Mock(
+                side_effect=mocked_poll(
+                    cadvisor_response='cadvisor_metrics_post_1_16.txt',
+                    kubelet_response='kubelet_metrics_1_14.txt'
+                )
+            )
+        )
+    elif kube_version == KUBE_1_14:
+        monkeypatch.setattr(
+            check,
+            'poll',
+            mock.Mock(
+                side_effect=mocked_poll(
+                    cadvisor_response='cadvisor_metrics_pre_1_16.txt',
+                    kubelet_response='kubelet_metrics_1_14.txt',
+                )
+            )
+        )
+    elif kube_version == KUBE_PRE_1_14:
+        monkeypatch.setattr(
+            check,
+            'poll',
+            mock.Mock(
+                side_effect=mocked_poll(
+                    cadvisor_response='cadvisor_metrics_pre_1_16.txt',
+                    kubelet_response='kubelet_metrics.txt'
+                )
+            )
+        )
 
     return check
 
@@ -263,19 +282,35 @@ def test_kubelet_default_options():
 
 
 def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator, tagger):
-    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, ["instance:tag"])
+    _test_kubelet_check_prometheus(
+        monkeypatch, aggregator, tagger, kube_version=KUBE_1_14, instance_tags=["instance:tag"]
+    )
 
 
 def test_kubelet_check_prometheus_no_instance_tags(monkeypatch, aggregator, tagger):
-    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, None)
+    _test_kubelet_check_prometheus(
+        monkeypatch, aggregator, tagger, kube_version=KUBE_1_14, instance_tags=None
+    )
 
 
-def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, instance_tags):
+def test_kubelet_check_prometheus_instance_tags_pre_1_14(monkeypatch, aggregator, tagger):
+    _test_kubelet_check_prometheus(
+        monkeypatch, aggregator, tagger, kube_version=KUBE_PRE_1_14, instance_tags=["instance:tag"]
+    )
+
+
+def test_kubelet_check_prometheus_no_instance_tags_pre_1_14(monkeypatch, aggregator, tagger):
+    _test_kubelet_check_prometheus(
+        monkeypatch, aggregator, tagger, kube_version=KUBE_PRE_1_14, instance_tags=None
+    )
+
+
+def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version, instance_tags):
     instance = {}
     if instance_tags:
         instance["tags"] = instance_tags
 
-    check = mock_kubelet_check(monkeypatch, [instance])
+    check = mock_kubelet_check(monkeypatch, [instance], kube_version=kube_version)
     monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
 
     check.check(instance)
@@ -293,7 +328,12 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, instance_tag
         if instance_tags:
             for tag in instance_tags:
                 aggregator.assert_metric_has_tag(metric, tag)
-    for metric in EXPECTED_METRICS_PROMETHEUS:
+
+    prom_metrics = EXPECTED_METRICS_PROMETHEUS
+    if kube_version == KUBE_PRE_1_14:
+        prom_metrics = EXPECTED_METRICS_PROMETHEUS_PRE_1_14
+
+    for metric in prom_metrics:
         aggregator.assert_metric(metric)
         if instance_tags:
             for tag in instance_tags:
