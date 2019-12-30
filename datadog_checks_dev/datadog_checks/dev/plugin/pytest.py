@@ -14,14 +14,14 @@ from .._env import (
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
     TESTING_PLUGIN,
-    deserialize_data,
     e2e_active,
     e2e_testing,
     format_config,
     get_env_vars,
+    get_state,
     replay_check_run,
+    save_state,
     serialize_data,
-    set_env_vars,
 )
 
 __aggregator = None
@@ -104,6 +104,18 @@ def dd_environment_runner(request):
     # Save any environment variables
     metadata.setdefault('env_vars', {})
     metadata['env_vars'].update(get_env_vars(raw=True))
+
+    # Inject any log configuration
+    logs_config = get_state('logs_config', [])
+    if logs_config:
+        config = format_config(config)
+        config['logs'] = logs_config
+
+    # Mount any volumes for Docker
+    if metadata['env_type'] == 'docker':
+        docker_volumes = get_state('docker_volumes', [])
+        if docker_volumes:
+            metadata.setdefault('docker_volumes', []).extend(docker_volumes)
 
     data = {'config': config, 'metadata': metadata}
 
@@ -205,17 +217,11 @@ def dd_run_check():
 
 @pytest.fixture
 def dd_get_state():
-    def get_state(key):
-        return deserialize_data(get_env_vars().get(key.lower()))
-
     return get_state
 
 
 @pytest.fixture
 def dd_save_state():
-    def save_state(key, value):
-        set_env_vars({key.lower(): serialize_data(value)})
-
     return save_state
 
 
