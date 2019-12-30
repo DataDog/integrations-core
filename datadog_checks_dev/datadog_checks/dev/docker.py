@@ -1,19 +1,18 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import os
 from contextlib import contextmanager
 
-import yaml
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
+from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import create_file, file_exists, find_check_root, read_file
+from .utils import create_file, file_exists, find_check_root
 
 try:
     from contextlib import ExitStack
@@ -69,7 +68,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
             d = stack.enter_context(TempDir(log_name))
 
             # Create the file that will ultimately be shared by containers
-            shared_log_file = os.path.join(d, '{}_{}.txt'.format(log_source, log_name))
+            shared_log_file = os.path.join(d, '{}_{}.log'.format(log_source, log_name))
             if not file_exists(shared_log_file):
                 create_file(shared_log_file)
 
@@ -81,6 +80,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
             # Make it available to reference for Docker volumes
             env_vars[log_name.upper()] = shared_log_file
 
+        # Inject and persist this data for `env test` & `env stop`
         save_state('logs_config', example_log_configs)
         save_state('docker_volumes', docker_volumes)
 
@@ -174,11 +174,16 @@ def docker_run(
         else:
             # An extra level deep because of the context manager
             check_root = find_check_root(depth=2)
+
             example_log_configs = _read_example_logs_config(check_root)
             if mount_logs is True:
                 wrapper = shared_logs(example_log_configs)
             elif isinstance(mount_logs, (list, set)):
                 wrapper = shared_logs(example_log_configs, mount_whitelist=mount_logs)
+            else:
+                raise TypeError(
+                    'mount_logs: expected True, a list or a set, but got {}'.format(type(mount_logs).__name__)
+                )
 
     with environment_run(
         up=set_up,
@@ -231,8 +236,7 @@ class ComposeFileDown(LazyFunction):
 
 
 def _read_example_logs_config(check_root):
-    spec_path = _get_spec_path(check_root)
-    spec = yaml.safe_load(read_file(spec_path))
+    spec = load_spec(check_root)
 
     for f in spec['files']:
         for option in f['options']:
@@ -240,16 +244,3 @@ def _read_example_logs_config(check_root):
                 return option['example']
 
     raise ValueError('No logs example found')
-
-
-def _get_spec_path(check_root):
-    manifest = json.loads(read_file(os.path.join(check_root, 'manifest.json')))
-    relative_spec_path = manifest.get('assets', {}).get('configuration', {}).get('spec', '')
-    if not relative_spec_path:
-        raise OSError('No config spec defined')
-
-    spec_path = os.path.join(check_root, *relative_spec_path.split('/'))
-    if not file_exists(spec_path):
-        raise OSError('No config spec found')
-
-    return spec_path
