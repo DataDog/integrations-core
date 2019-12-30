@@ -1,0 +1,48 @@
+# https://github.com/actions/stale
+
+name: Stale issues and pull requests
+on:
+  schedule:
+  # Around midnight (EDT/EST)
+  - cron: '0 5 * * *'
+
+jobs:
+  address:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: >-
+          This issue has been automatically marked as stale because it has not had activity
+          in the last 30 days. Note that this will not be automatically closed, but the
+          notification will remind us to investigate why there's been inactivity.
+
+          If you would like this issue to remain open:
+
+          1. Verify that you can still reproduce the issue in the latest version of the integration.
+          1. Comment that the issue is still reproducible and include updated details if possible.
+
+          Thank you for participating in the Datadog open source community!
+        days-before-stale: 30
+        days-before-close: 1095
+        stale-issue-label: stale
+        exempt-issue-label:
+        - community/help-wanted
+        - do-not-merge/HOLD
+        - do-not-merge/WIP
+        - kind/feature-request
+        - severity/critical
+        - severity/major
+        stale-pr-message: >-
+          This pull request has been automatically marked as stale because it has not had activity
+          in the last 30 days. Note that this will not be automatically closed, but the notification
+          will remind us to investigate why there's been inactivity.
+        stale-pr-label: stale
+        exempt-pr-label:
+        - community/help-wanted
+        - do-not-merge/HOLD
+        - do-not-merge/WIP
+        - kind/feature-request
+        - severity/critical
+        - severity/major
