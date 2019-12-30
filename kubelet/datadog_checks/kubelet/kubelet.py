@@ -186,7 +186,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         self.COUNTER_TRANSFORMERS = {k: self.send_always_counter for k in self.COUNTER_METRICS}
 
-        self.histogram_transformers = {k: self._histogram_from_seconds_to_microseconds for k in TRANSFORM_VALUE_HISTOGRAMS}
+        self.histogram_transformers = {
+            k: self._histogram_from_seconds_to_microseconds for k in TRANSFORM_VALUE_HISTOGRAMS
+        }
 
     def _create_kubelet_prometheus_instance(self, instance):
         """
