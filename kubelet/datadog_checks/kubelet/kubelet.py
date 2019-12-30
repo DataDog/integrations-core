@@ -66,7 +66,7 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
     'terminated': ['oomkilled', 'containercannotrun', 'error'],
 }
 
-DEFAULT_GUAGES = {
+DEFAULT_GAUGES = {
     'rest_client_requests_total': 'rest.client.requests',
     'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
     'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
@@ -76,12 +76,12 @@ DEFAULT_GUAGES = {
     'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
 }
 
-DEPRECATED_GUAGES = {
+DEPRECATED_GAUGES = {
     'kubelet_runtime_operations': 'kubelet.runtime.operations',
     'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
 }
 
-NEW_1_14_GUAGES = {
+NEW_1_14_GAUGES = {
     'kubelet_runtime_operations_total': 'kubelet.runtime.operations',
     'kubelet_runtime_operations_errors_total': 'kubelet.runtime.errors',
 }
@@ -202,9 +202,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 # so the key is different than the cadvisor scraper.
                 'prometheus_url': instance.get('kubelet_metrics_endpoint', 'dummy_url/kubelet'),
                 'metrics': [
-                    DEFAULT_GUAGES,
-                    DEPRECATED_GUAGES,
-                    NEW_1_14_GUAGES,
+                    DEFAULT_GAUGES,
+                    DEPRECATED_GAUGES,
+                    NEW_1_14_GAUGES,
                     DEFAULT_HISTOGRAMS,
                     DEPRECATED_HISTOGRAMS,
                     NEW_1_14_HISTOGRAMS,
