@@ -6330,7 +6330,7 @@
                 "cvss": 0,
                 "status": "",
                 "cve": "",
-                "cause": "Users in docker group vagrant",
+                "cause": "Users in docker group xxxxxxx",
                 "description": "Docker allows you to share a directory between the Docker host and a guest container\nwithout limiting the access rights of the container. This means that you can start a\ncontainer and map the / directory on your host to the container. The container will then be\nable to alter your host file system without any restrictions. In simple terms, it means that\nyou can attain elevated privileges with just being a member of the docker group and then\nstarting a container with mapped / directory on the host",
                 "title": "(CIS_Docker_CE_v1.1.0 - 1.4) Only allow trusted users to control Docker daemon",
                 "vecStr": "",
@@ -6744,7 +6744,7 @@
                 "cvss": 0,
                 "status": "",
                 "cve": "",
-                "cause": "Home directory /home/vagrant of user vagrant contains 5 group/world writable files",
+                "cause": "Home directory /yyyy/xxxxxxx of user xxxxxxx contains 5 group/world writable files",
                 "description": "While the system administrator can establish secure permissions for users' \"dot\" files, the\nusers can easily override these",
                 "title": "(CIS_Linux_1.1.0 - 6.2.10) Ensure users' dot files are not group or world writable",
                 "vecStr": "",
@@ -6813,7 +6813,7 @@
                 "cvss": 0,
                 "status": "",
                 "cve": "",
-                "cause": "Home directory permissions of 7 users is more permissive than 750, e.g /home/dbadmin:755",
+                "cause": "Home directory permissions of 7 users is more permissive than 750, e.g /yyyy/dbadmin:755",
                 "description": "While the system administrator can establish secure permissions for users' home\ndirectories, the users can easily override these",
                 "title": "(CIS_Linux_1.1.0 - 6.2.8) Ensure users' home directories permissions are 750 or more restrictive",
                 "vecStr": "",
@@ -31479,8 +31479,8 @@
         },
         "hostDevices": [
             {
-                "name": "enp0s3",
-                "ip": "10.0.2.15"
+                "name": "enp9s3",
+                "ip": "10.0.2.30"
             }
         ],
         "firstScanTime": "0001-01-01T00:00:00Z",
