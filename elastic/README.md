@@ -96,6 +96,7 @@ Finally, [Restart the Agent][6] to begin sending Elasticsearch metrics to Datado
     ```
 
   * Add additional instances to start collecting slow logs:
+
     ```yaml
         - type: file
           path: /var/log/elasticsearch/elasticsearch_index_indexing_slowlog.log
