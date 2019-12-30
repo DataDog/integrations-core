@@ -1,6 +1,7 @@
 {
   "categories": [
-    "web"
+    "web",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Lighttpd",
