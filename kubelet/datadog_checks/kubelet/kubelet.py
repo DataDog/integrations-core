@@ -98,15 +98,13 @@ NEW_1_14_HISTOGRAMS = {
     'rest_client_request_duration_seconds': 'rest.client.latency',
 }
 
-DEFAULT_SUMMARIES = {
-}
+DEFAULT_SUMMARIES = {}
 
 DEPRECATED_SUMMARIES = {
     'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
 }
 
-NEW_1_14_SUMMARIES = {
-}
+NEW_1_14_SUMMARIES = {}
 
 TRANSFORM_VALUE_HISTOGRAMS = {
     'kubelet_network_plugin_operations_duration_seconds': 'kubelet.network_plugin.latency',
