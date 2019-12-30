@@ -218,6 +218,7 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_sum
 
             attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
             return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+
         return _mocked_poll
 
     if kube_version == KUBE_POST_1_16:
@@ -226,10 +227,9 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_sum
             'poll',
             mock.Mock(
                 side_effect=mocked_poll(
-                    cadvisor_response='cadvisor_metrics_post_1_16.txt',
-                    kubelet_response='kubelet_metrics_1_14.txt'
+                    cadvisor_response='cadvisor_metrics_post_1_16.txt', kubelet_response='kubelet_metrics_1_14.txt'
                 )
-            )
+            ),
         )
     elif kube_version == KUBE_1_14:
         monkeypatch.setattr(
@@ -237,10 +237,9 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_sum
             'poll',
             mock.Mock(
                 side_effect=mocked_poll(
-                    cadvisor_response='cadvisor_metrics_pre_1_16.txt',
-                    kubelet_response='kubelet_metrics_1_14.txt',
+                    cadvisor_response='cadvisor_metrics_pre_1_16.txt', kubelet_response='kubelet_metrics_1_14.txt',
                 )
-            )
+            ),
         )
     elif kube_version == KUBE_PRE_1_14:
         monkeypatch.setattr(
@@ -248,10 +247,9 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_sum
             'poll',
             mock.Mock(
                 side_effect=mocked_poll(
-                    cadvisor_response='cadvisor_metrics_pre_1_16.txt',
-                    kubelet_response='kubelet_metrics.txt'
+                    cadvisor_response='cadvisor_metrics_pre_1_16.txt', kubelet_response='kubelet_metrics.txt'
                 )
-            )
+            ),
         )
 
     return check
@@ -288,9 +286,7 @@ def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator, tagger)
 
 
 def test_kubelet_check_prometheus_no_instance_tags(monkeypatch, aggregator, tagger):
-    _test_kubelet_check_prometheus(
-        monkeypatch, aggregator, tagger, kube_version=KUBE_1_14, instance_tags=None
-    )
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version=KUBE_1_14, instance_tags=None)
 
 
 def test_kubelet_check_prometheus_instance_tags_pre_1_14(monkeypatch, aggregator, tagger):
@@ -300,9 +296,7 @@ def test_kubelet_check_prometheus_instance_tags_pre_1_14(monkeypatch, aggregator
 
 
 def test_kubelet_check_prometheus_no_instance_tags_pre_1_14(monkeypatch, aggregator, tagger):
-    _test_kubelet_check_prometheus(
-        monkeypatch, aggregator, tagger, kube_version=KUBE_PRE_1_14, instance_tags=None
-    )
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version=KUBE_PRE_1_14, instance_tags=None)
 
 
 def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version, instance_tags):
