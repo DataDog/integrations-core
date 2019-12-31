@@ -1,7 +1,7 @@
 # Configuration for labeler - https://github.com/actions/labeler
 
 documentation:
-- "**/README.md"
+- "*.md"
 
 dev/testing:
 - .azure-pipelines/
