@@ -1,0 +1,28 @@
+name: Vault
+files:
+- name: vault.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+  - template: instances
+    options:
+    - name: api_url
+      required: true
+      description: URL of the Vault to query.
+      value:
+        example: http://localhost:8200/v1
+        type: string
+    - template: instances/http
+    - template: instances/tags
+    - template: instances/global
+  - template: logs
+    example:
+    - type: file
+      path: /vault/vault-audit.log
+      source: vault
+      service: vault
+    - type: file
+      path: /var/log/vault.log
+      source: vault
+      service: vault
