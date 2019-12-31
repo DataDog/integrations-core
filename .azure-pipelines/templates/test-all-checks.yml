@@ -3,30 +3,30 @@ jobs:
   parameters:
     checks:
     - checkName: tcp_check
-      displayName: TCP
+      displayName: TCP (linux)
       os: linux
     - checkName: tcp_check
-      displayName: TCP
+      displayName: TCP (windows)
       os: windows
 
     - checkName: process
-      displayName: Process
+      displayName: Process (linux)
       os: linux
     - checkName: process
-      displayName: Process
+      displayName: Process (windows)
       os: windows
 
     - checkName: vsphere
-      displayName: vSphere
+      displayName: vSphere (linux)
       os: linux
     - checkName: vsphere
-      displayName: vSphere
+      displayName: vSphere (windows)
       os: windows
 
     - checkName: ibm_db2
-      displayName: IBM Db2
+      displayName: IBM Db2 (linux)
       os: linux
 
     - checkName: ibm_db2
-      displayName: IBM Db2
+      displayName: IBM Db2 (windows)
       os: windows
