@@ -102,7 +102,7 @@ def docker_run(
     mount_logs=False,
     conditions=None,
     env_vars=None,
-    wrapper=None,
+    wrappers=None,
 ):
     """This utility provides a convenient way to safely set up and tear down Docker environments.
 
@@ -134,7 +134,7 @@ def docker_run(
     :type conditions: ``callable``
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
-    :param wrapper: A context manager to use during execution.
+    :param wrappers: A list of context managers to use during execution.
     """
     if compose_file and up:
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')
@@ -167,9 +167,11 @@ def docker_run(
     if conditions is not None:
         docker_conditions.extend(conditions)
 
+    docker_wrappers = []
+
     if mount_logs:
         if isinstance(mount_logs, dict):
-            wrapper = shared_logs(mount_logs['logs'])
+            docker_wrappers.append(shared_logs(mount_logs['logs']))
         # Easy mode, read example config
         else:
             # An extra level deep because of the context manager
@@ -177,13 +179,16 @@ def docker_run(
 
             example_log_configs = _read_example_logs_config(check_root)
             if mount_logs is True:
-                wrapper = shared_logs(example_log_configs)
+                docker_wrappers.append(shared_logs(example_log_configs))
             elif isinstance(mount_logs, (list, set)):
-                wrapper = shared_logs(example_log_configs, mount_whitelist=mount_logs)
+                docker_wrappers.append(shared_logs(example_log_configs, mount_whitelist=mount_logs))
             else:
                 raise TypeError(
                     'mount_logs: expected True, a list or a set, but got {}'.format(type(mount_logs).__name__)
                 )
+
+    if wrappers is not None:
+        docker_wrappers.extend(wrappers)
 
     with environment_run(
         up=set_up,
@@ -193,7 +198,7 @@ def docker_run(
         endpoints=endpoints,
         conditions=docker_conditions,
         env_vars=env_vars,
-        wrapper=wrapper,
+        wrappers=docker_wrappers,
     ) as result:
         yield result
 
