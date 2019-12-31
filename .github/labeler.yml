@@ -1,10 +1,10 @@
 # Configuration for labeler - https://github.com/actions/labeler
 
 documentation:
-- 'README.md'
+- "README.md"
 
 dev/testing:
 - .azure-pipelines/
 
 dev/tooling:
-- '.github/workflows/*'
+- ".github/workflows/*"
