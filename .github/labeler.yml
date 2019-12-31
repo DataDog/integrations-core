@@ -7,5 +7,4 @@ dev/testing:
 - .azure-pipelines/**/*
 
 dev/tooling:
-- .github/workflows/*
 - .github/workflows/**/*
