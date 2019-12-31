@@ -4,7 +4,7 @@ name: Stale issues and pull requests
 on:
   schedule:
   # Around midnight (EDT/EST)
-  - cron: '0 5 * * *'
+  - cron: "0 5 * * *"
 
 jobs:
   address:
