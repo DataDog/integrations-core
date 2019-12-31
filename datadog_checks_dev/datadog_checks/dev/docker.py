@@ -167,11 +167,11 @@ def docker_run(
     if conditions is not None:
         docker_conditions.extend(conditions)
 
-    docker_wrappers = []
+    wrappers = list(wrappers) if wrappers is not None else []
 
     if mount_logs:
         if isinstance(mount_logs, dict):
-            docker_wrappers.append(shared_logs(mount_logs['logs']))
+            wrappers.append(shared_logs(mount_logs['logs']))
         # Easy mode, read example config
         else:
             # An extra level deep because of the context manager
@@ -179,16 +179,13 @@ def docker_run(
 
             example_log_configs = _read_example_logs_config(check_root)
             if mount_logs is True:
-                docker_wrappers.append(shared_logs(example_log_configs))
+                wrappers.append(shared_logs(example_log_configs))
             elif isinstance(mount_logs, (list, set)):
-                docker_wrappers.append(shared_logs(example_log_configs, mount_whitelist=mount_logs))
+                wrappers.append(shared_logs(example_log_configs, mount_whitelist=mount_logs))
             else:
                 raise TypeError(
                     'mount_logs: expected True, a list or a set, but got {}'.format(type(mount_logs).__name__)
                 )
-
-    if wrappers is not None:
-        docker_wrappers.extend(wrappers)
 
     with environment_run(
         up=set_up,
@@ -198,7 +195,7 @@ def docker_run(
         endpoints=endpoints,
         conditions=docker_conditions,
         env_vars=env_vars,
-        wrappers=docker_wrappers,
+        wrappers=wrappers,
     ) as result:
         yield result
 
