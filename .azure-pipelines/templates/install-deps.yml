@@ -1,7 +1,6 @@
 parameters:
   repo: 'core'
 
-
 steps:
 # Install the Python version with which to use globally last as
 # these tasks prepend to PATH instead of appending to it. See:
