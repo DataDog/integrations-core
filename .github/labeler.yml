@@ -2,7 +2,7 @@
 
 documentation:
 - "**/*.md"
-- "./**/datadog_checks/**/*"
+- "**/datadog_checks/**"
 
 dev/testing:
 - .azure-pipelines/**/*
