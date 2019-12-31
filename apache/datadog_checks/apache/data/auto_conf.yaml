@@ -18,3 +18,4 @@ instances:
     ## Status url of your Apache server.
     #
   - apache_status_url: http://%%host%%/server-status?auto
+
