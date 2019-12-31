@@ -37,7 +37,7 @@ def construct_env_vars():
 
 
 @contextmanager
-def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper=None):
+def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
     """This utility provides a convenient way to safely set up and tear down Terraform environments.
 
     :param directory: A path containing Terraform files.
@@ -51,7 +51,7 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
     :type conditions: ``callable``
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
-    :param wrapper: A context manager to use during execution.
+    :param wrappers: A list of context managers to use during execution.
     """
     if not which('terraform'):
         pytest.skip('Terraform not available')
@@ -66,7 +66,7 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
         endpoints=endpoints,
         conditions=conditions,
         env_vars=env_vars,
-        wrapper=wrapper,
+        wrappers=wrappers,
     ) as result:
         yield result
 
