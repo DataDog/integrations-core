@@ -57,7 +57,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
     log_source = example_log_configs[0].get('source', 'check')
 
     if mount_whitelist is not None:
-        mount_whitelist = [normalize(name) for name in mount_whitelist]
+        mount_whitelist = [normalize(alias) for alias in mount_whitelist]
 
     env_vars = {}
     docker_volumes = get_state('docker_volumes', [])
@@ -65,19 +65,19 @@ def shared_logs(example_log_configs, mount_whitelist=None):
     with ExitStack() as stack:
         for example_log_config in example_log_configs:
             try:
-                name = example_log_config["name"]
+                alias = example_log_config["alias"]
             except KeyError:
                 raise RuntimeError(
-                    "Log config must have a 'name' when log mounting is enabled (path={})"
+                    "Log config must have a 'alias' when log mounting is enabled (path={})"
                     .format(example_log_config["path"])
                 )
 
-            name = normalize(name)
+            alias = normalize(alias)
 
-            if mount_whitelist is not None and name not in mount_whitelist:
+            if mount_whitelist is not None and alias not in mount_whitelist:
                 continue
 
-            log_name = 'dd_log_{}'.format(name)
+            log_name = 'dd_log_{}'.format(alias)
             d = stack.enter_context(TempDir(log_name))
 
             # Create the file that will ultimately be shared by containers
