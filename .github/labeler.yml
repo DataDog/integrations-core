@@ -13,4 +13,4 @@ changelog/no-changelog:
 - "all:!*/datadog_checks/**"
 
 integration/$1:
-- "([^/])+/.*"
+- "([^/]+)/.*"
