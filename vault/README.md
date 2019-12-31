@@ -26,6 +26,43 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                            |
 | `<INSTANCE_CONFIG>`  | `{"api_url": "http://%%host%%:8200/v1"}` |
 
+#### Log Collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+```
+logs_enabled: true
+```
+
+2. Add this configuration block to your `vault.d/conf.yaml` file to start collecting your Vault logs:
+    * Audit logs must enabled by a privileged user with the appropriate policies, [see more][11].
+        ```
+        $ vault audit enable file file_path=/vault/vault-audit.log
+        ```
+    * [Server logs][12] are not written to file by default. You can configure static server logs in the [start up script][13].
+        The following script is outputting the logs to `/var/log/vault.log`
+        ```
+        ...
+        [Service]
+        ...
+        ExecStart=/bin/sh -c '/home/vagrant/bin/vault server -config=/home/vagrant/vault_nano/config/vault -log-level="trace" > /var/log/vault.log
+        ...
+        ```
+ 
+
+    ````yaml
+    logs:
+    - type: file
+        path: /vault/vault-audit.log
+        source: vault
+        service: vault
+    - type: file
+        path: /var/log/vault.log
+        source: vault
+    ```
+
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `vault` under the Checks section.
@@ -73,3 +110,6 @@ Additional helpful documentation, links, and articles:
 [8]: https://github.com/DataDog/integrations-core/blob/master/vault/metadata.csv
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog
+[11]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#enabling-audit-devices
+[12]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#vault-server-logs
+[13]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#not-finding-the-server-logs
