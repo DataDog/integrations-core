@@ -1,11 +1,12 @@
 # Configuration for labeler - https://github.com/actions/labeler
 
 documentation:
-- "**/*.md"
+- '**/*.md'
 
 dev/testing:
-- .azure-pipelines/
+- .azure-pipelines/*
+- .azure-pipelines/**/*
 
 dev/tooling:
-- "./.github/workflows/*"
-- "./.github/workflows/**/*"
+- .github/workflows/*
+- .github/workflows/**/*
