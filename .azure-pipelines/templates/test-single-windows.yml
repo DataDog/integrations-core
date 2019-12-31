@@ -3,7 +3,7 @@ parameters:
   check: ''
   display: ''
   test: true
-  test_e2e: false
+  test_e2e: true
   benchmark: false
   validate: false
   repo: 'core'
