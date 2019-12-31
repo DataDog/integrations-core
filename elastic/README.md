@@ -71,7 +71,7 @@ Finally, [Restart the Agent][6] to begin sending Elasticsearch metrics to Datado
       }
       ```
 
-    * Configure search slow logs for an index
+    * To configure search slow logs for a given index `<INDEX>`:
       ```
       curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d' {
         "index.search.slowlog.threshold.query.warn": "0ms",
