@@ -2,13 +2,12 @@
 
 documentation:
 - "**/*.md"
-- "*/datadog_checks/**"
 
 dev/testing:
-- .azure-pipelines/**/*
+- .azure-pipelines/**
 
 dev/tooling:
-- .github/workflows/**/*
+- .github/workflows/**
 
 changelog/no-changelog:
-- "!./*/datadog_checks/**/*"
+- "!*/datadog_checks/**"
