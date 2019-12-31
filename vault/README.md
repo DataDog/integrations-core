@@ -36,13 +36,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 logs_enabled: true
 ```
 
-2. Add this configuration block to your `vault.d/conf.yaml` file to start collecting your Vault logs:
+2. Configure Vault to enable audit and server logs.
     * Audit logs must enabled by a privileged user with the appropriate policies, [see more][11].
         ```
         $ vault audit enable file file_path=/vault/vault-audit.log
         ```
     * [Server logs][12] are not written to file by default. You can configure static server logs in the [start up script][13].
-        The following script is outputting the logs to `/var/log/vault.log`
+        The following script is outputting the logs to `/var/log/vault.log`.
         ```
         ...
         [Service]
@@ -51,7 +51,7 @@ logs_enabled: true
         ...
         ```
  
-
+3. Add this configuration block to your `vault.d/conf.yaml` file to start collecting your Vault logs:
     ````yaml
     logs:
     - type: file
