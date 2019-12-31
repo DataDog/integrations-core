@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 1.2.0 / 2019-12-31
+
+* [Changed] Change `wrapper` arg for environment runners to `wrappers`. See [#5361](https://github.com/DataDog/integrations-core/pull/5361).
+* [Added] Add mechanism to cross-mount temporary log files between containers. See [#5346](https://github.com/DataDog/integrations-core/pull/5346).
+
 ## 1.1.0 / 2019-12-27
 
 * [Added] Refactor terraform configs. See [#5339](https://github.com/DataDog/integrations-core/pull/5339).
