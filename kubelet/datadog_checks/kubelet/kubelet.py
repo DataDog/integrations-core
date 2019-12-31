@@ -182,11 +182,13 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 
-        self.COUNTER_TRANSFORMERS = {k: self.send_always_counter for k in self.COUNTER_METRICS}
+        counter_transformers = {k: self.send_always_counter for k in self.COUNTER_METRICS}
 
-        self.histogram_transformers = {
-            k: self._histogram_from_seconds_to_microseconds for k in TRANSFORM_VALUE_HISTOGRAMS
-        }
+        histogram_transformers = {k: self._histogram_from_seconds_to_microseconds for k in TRANSFORM_VALUE_HISTOGRAMS}
+
+        self.transformers = {}
+        for d in [self.CADVISOR_METRIC_TRANSFORMERS, counter_transformers, histogram_transformers]:
+            self.transformers.update(d)
 
     def _create_kubelet_prometheus_instance(self, instance):
         """
@@ -275,15 +277,11 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             self.process_cadvisor(instance, self.cadvisor_legacy_url, self.pod_list, self.pod_list_utils)
         elif self.cadvisor_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing cadvisor metrics')
-            transformers = self.CADVISOR_METRIC_TRANSFORMERS
-            transformers.update(self.COUNTER_TRANSFORMERS)
-            self.process(self.cadvisor_scraper_config, metric_transformers=transformers)
+            self.process(self.cadvisor_scraper_config, metric_transformers=self.transformers)
 
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
-            transformers = self.COUNTER_TRANSFORMERS
-            transformers.update(self.histogram_transformers)
-            self.process(self.kubelet_scraper_config, metric_transformers=transformers)
+            self.process(self.kubelet_scraper_config, metric_transformers=self.transformers)
 
         # Free up memory
         self.pod_list = None
