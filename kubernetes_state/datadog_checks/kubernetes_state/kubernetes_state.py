@@ -335,6 +335,10 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'label_to_match': 'persistentvolumeclaim',
                         'labels_to_get': ['storageclass'],
                     },
+                    'kube_persistentvolumeclaim_status_phase': {
+                        'label_to_match': 'persistentvolumeclaim',
+                        'labels_to_get': ['phase'],
+                    },
                 },
                 # Defaults that were set when kubernetes_state was based on PrometheusCheck
                 'send_monotonic_counter': ksm_instance.get('send_monotonic_counter', False),
@@ -344,6 +348,9 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         ksm_instance['prometheus_url'] = endpoint
         ksm_instance['label_joins'].update(extra_labels)
+        # For KSM always use namespaced tag matching as it avoids tag collisions between namespaces
+        ksm_instance['restrict_tag_matching_label'] = 'namespace'
+        ksm_instance['unrestricted_matching_labels'] = {'node'}
         if hostname_override:
             ksm_instance['label_to_hostname'] = 'node'
             clustername = get_clustername()

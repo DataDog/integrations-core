@@ -1960,6 +1960,95 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
         assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
 
 
+def test_label_join_cross_ns_overlap(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+    """ Tests label join and hostname override on a metric """
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['label_joins'] = {
+        'kube_persistentvolumeclaim_info': {
+            'label_to_match': 'persistentvolumeclaim',
+            'labels_to_get': ['storageclass'],
+        },
+        'kube_persistentvolumeclaim_status_phase': {
+            'label_to_match': 'persistentvolumeclaim',
+            'labels_to_get': ['phase'],
+        },
+    }
+    mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
+    mocked_prometheus_scraper_config['metrics_mapper'] = {
+        'kube_persistentvolumeclaim_status_phase': 'persistentvolumeclaim.status',
+        'kube_persistentvolumeclaim_resource_requests_storage_bytes': 'persistentvolumeclaim.request_storage',
+    }
+    mocked_prometheus_scraper_config['restrict_tag_matching_label'] = 'namespace'
+    # dry run to build mapping
+    check.process(mocked_prometheus_scraper_config)
+    # run with submit
+    check.process(mocked_prometheus_scraper_config)
+    # check a bunch of metrics
+    aggregator.assert_metric(
+        'ksm.persistentvolumeclaim.status',
+        1.0,
+        tags=['namespace:default', 'persistentvolumeclaim:www-web-1', 'phase:Bound', 'storageclass:standard'],
+        hostname='',
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.persistentvolumeclaim.status',
+        1.0,
+        tags=['namespace:foo', 'persistentvolumeclaim:www-web-1', 'phase:Lost', 'storageclass:standard'],
+        hostname='',
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.persistentvolumeclaim.request_storage',
+        1073741824.0,
+        tags=['namespace:default', 'persistentvolumeclaim:www-web-1', 'phase:Bound', 'storageclass:standard'],
+        hostname='',
+        count=1,
+    )
+    aggregator.assert_metric(
+        'ksm.persistentvolumeclaim.request_storage',
+        2073741824.0,
+        tags=['namespace:foo', 'persistentvolumeclaim:www-web-1', 'phase:Lost', 'storageclass:standard'],
+        hostname='',
+        count=1,
+    )
+
+
+def test_label_join_no_ns_matching(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+    """ Tests label join and hostname override on a metric """
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['label_joins'] = {
+        'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'podip']},
+        'kube_node_labels': {'label_to_match': 'node', 'labels_to_get': ['label_beta_kubernetes_io_arch']},
+    }
+    mocked_prometheus_scraper_config['metrics_mapper'] = {'kube_pod_info': 'pod.info'}
+    mocked_prometheus_scraper_config['restrict_tag_matching_label'] = 'namespace'
+    mocked_prometheus_scraper_config['unrestricted_matching_labels'] = {'node'}
+    # dry run to build mapping
+    check.process(mocked_prometheus_scraper_config)
+    # run with submit
+    check.process(mocked_prometheus_scraper_config)
+
+    # check a bunch of metrics
+    aggregator.assert_metric(
+        'ksm.pod.info',
+        1.0,
+        tags=[
+            'created_by_kind:DaemonSet',
+            'created_by_name:fluentd-gcp-v2.0.9',
+            'host_ip:11.132.0.7',
+            'label_beta_kubernetes_io_arch:amd64',
+            'namespace:kube-system',
+            'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
+            'pod:fluentd-gcp-v2.0.9-6dj58',
+            'pod_ip:11.132.0.7',
+        ],
+        count=1,
+    )
+
+
 def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """ Tests endpoint health service check OK """
     check = mocked_prometheus_check

@@ -121,7 +121,7 @@ class OpenMetricsScraperMixin(object):
         # label value, example:
         # self._label_mapping = {
         #     'pod': {
-        #         'dd-agent-9s1l1': [("node","yolo"),("host_ip","yey")]
+        #         'dd-agent-9s1l1': {"node":"yolo", "host_ip":"yey"}
         #     }
         # }
         config['_label_mapping'] = {}
@@ -129,9 +129,7 @@ class OpenMetricsScraperMixin(object):
         # `_active_label_mapping` holds a dictionary of label values found during the run
         # to cleanup the label_mapping of unused values, example:
         # self._active_label_mapping = {
-        #     'pod': {
-        #         'dd-agent-9s1l1': True
-        #     }
+        #     'pod': set('dd-agent-9s1l1')
         # }
         config['_active_label_mapping'] = {}
 
@@ -254,6 +252,17 @@ class OpenMetricsScraperMixin(object):
         # INTERNAL FEATURE, might be removed in future versions
         config['_text_filter_blacklist'] = []
 
+        # If set to something, will restrict tag matching (if the label name is present in the received metric)
+        # For instance, in Kubernetes, setting 'restrict_tag_matching_label' to 'namespace' will allow you to
+        # restrict tag matching on objects within the same namespace.
+        config['restrict_tag_matching_label'] = ""
+
+        # `unrestricted_matching_labels` holds a list of label names that will be excluding from restricted matching
+        # example: self.unrestricted_matching_labels = {'node'}
+        # Only useful when `restrict_tag_matching_label` is set
+        config['unrestricted_matching_labels'] = default_instance.get('unrestricted_matching_labels', set())
+        config['unrestricted_matching_labels'].update(instance.get('unrestricted_matching_labels', set()))
+
         # Whether or not to use the service account bearer token for authentication
         # if 'bearer_token_path' is not set, we use /var/run/secrets/kubernetes.io/serviceaccount/token
         # as a default path to get the token.
@@ -355,10 +364,10 @@ class OpenMetricsScraperMixin(object):
             # Set dry run off
             scraper_config['_dry_run'] = False
             # Garbage collect unused mapping and reset active labels
-            for metric, mapping in list(iteritems(scraper_config['_label_mapping'])):
+            for metric, mapping in iteritems(scraper_config['_label_mapping']):
                 for key in list(mapping):
                     if key not in scraper_config['_active_label_mapping'][metric]:
-                        del scraper_config['_label_mapping'][metric][key]
+                        del mapping[key]
             scraper_config['_active_label_mapping'] = {}
         finally:
             response.close()
@@ -407,6 +416,19 @@ class OpenMetricsScraperMixin(object):
                 tags.extend(extra_tags)
             self.count(metric_name_with_namespace, val, tags=tags)
 
+    def _get_label_key(self, sample, label, scraper_config):
+        # If we have a namespaced metric, we will only match inside same namespace
+        # Except for labels in the `unrestricted_matching_labels` list
+        restrict_label = scraper_config['restrict_tag_matching_label']
+        if (
+            restrict_label != ""
+            and label not in scraper_config['unrestricted_matching_labels']
+            and restrict_label in sample[self.SAMPLE_LABELS]
+        ):
+            return "{}_{}".format(sample[self.SAMPLE_LABELS][restrict_label], label)
+        else:
+            return label
+
     def _store_labels(self, metric, scraper_config):
         # If targeted metric, store labels
         if metric.name in scraper_config['label_joins']:
@@ -425,14 +447,14 @@ class OpenMetricsScraperMixin(object):
                         matching_value = label_value
                     elif label_name in scraper_config['label_joins'][metric.name]['labels_to_get']:
                         label_dict[label_name] = label_value
-                try:
-                    if scraper_config['_label_mapping'][matching_label].get(matching_value):
-                        scraper_config['_label_mapping'][matching_label][matching_value].update(label_dict)
-                    else:
-                        scraper_config['_label_mapping'][matching_label][matching_value] = label_dict
-                except KeyError:
-                    if matching_value is not None:
-                        scraper_config['_label_mapping'][matching_label] = {matching_value: label_dict}
+
+                if matching_value is not None:
+                    label_key = self._get_label_key(sample, matching_label, scraper_config)
+                    label_mapping = (
+                        scraper_config['_label_mapping'].setdefault(label_key, {}).setdefault(matching_value, {})
+                    )
+
+                    label_mapping.update(label_dict)
 
     def _join_labels(self, metric, scraper_config):
         # Filter metric to see if we can enrich with joined labels
@@ -440,14 +462,15 @@ class OpenMetricsScraperMixin(object):
             for sample in metric.samples:
                 watched_labels = scraper_config['_watched_labels'].intersection(set(sample[self.SAMPLE_LABELS].keys()))
                 for label_name in watched_labels:
+                    label_key = self._get_label_key(sample, label_name, scraper_config)
+
                     # Set this label value as active
-                    if label_name not in scraper_config['_active_label_mapping']:
-                        scraper_config['_active_label_mapping'][label_name] = {}
-                    scraper_config['_active_label_mapping'][label_name][sample[self.SAMPLE_LABELS][label_name]] = True
+                    active_set = scraper_config['_active_label_mapping'].setdefault(label_key, set())
+                    active_set.add(sample[self.SAMPLE_LABELS][label_name])
                     # If mapping found add corresponding labels
                     try:
                         for name, val in iteritems(
-                            scraper_config['_label_mapping'][label_name][sample[self.SAMPLE_LABELS][label_name]]
+                            scraper_config['_label_mapping'][label_key][sample[self.SAMPLE_LABELS][label_name]]
                         ):
                             sample[self.SAMPLE_LABELS][name] = val
                     except KeyError:

@@ -216,10 +216,12 @@ kube_node_status_condition{condition="Ready",node="gke-foobar-test-kube-default-
 # TYPE kube_persistentvolumeclaim_info gauge
 kube_persistentvolumeclaim_info{namespace="default",persistentvolumeclaim="www-web-0",storageclass="standard"} 1
 kube_persistentvolumeclaim_info{namespace="default",persistentvolumeclaim="www-web-1",storageclass="standard"} 1
+kube_persistentvolumeclaim_info{namespace="foo",persistentvolumeclaim="www-web-1",storageclass="standard"} 1
 # HELP kube_persistentvolumeclaim_resource_requests_storage_bytes The capacity of storage requested by the persistent volume claim.
 # TYPE kube_persistentvolumeclaim_resource_requests_storage_bytes gauge
 kube_persistentvolumeclaim_resource_requests_storage_bytes{namespace="default",persistentvolumeclaim="www-web-0"} 1.073741824e+09
 kube_persistentvolumeclaim_resource_requests_storage_bytes{namespace="default",persistentvolumeclaim="www-web-1"} 1.073741824e+09
+kube_persistentvolumeclaim_resource_requests_storage_bytes{namespace="foo",persistentvolumeclaim="www-web-1"} 2.073741824e+09
 # HELP kube_persistentvolumeclaim_status_phase The phase the persistent volume claim is currently in.
 # TYPE kube_persistentvolumeclaim_status_phase gauge
 kube_persistentvolumeclaim_status_phase{namespace="default",persistentvolumeclaim="www-web-0",phase="Bound"} 1
@@ -228,6 +230,9 @@ kube_persistentvolumeclaim_status_phase{namespace="default",persistentvolumeclai
 kube_persistentvolumeclaim_status_phase{namespace="default",persistentvolumeclaim="www-web-1",phase="Bound"} 1
 kube_persistentvolumeclaim_status_phase{namespace="default",persistentvolumeclaim="www-web-1",phase="Lost"} 0
 kube_persistentvolumeclaim_status_phase{namespace="default",persistentvolumeclaim="www-web-1",phase="Pending"} 0
+kube_persistentvolumeclaim_status_phase{namespace="foo",persistentvolumeclaim="www-web-1",phase="Bound"} 0
+kube_persistentvolumeclaim_status_phase{namespace="foo",persistentvolumeclaim="www-web-1",phase="Lost"} 1
+kube_persistentvolumeclaim_status_phase{namespace="foo",persistentvolumeclaim="www-web-1",phase="Pending"} 0
 # HELP kube_pod_container_info Information about a container in a pod.
 # TYPE kube_pod_container_info gauge
 kube_pod_container_info{container="autoscaler",container_id="docker://9e8fe714a4fd8e4f5ee417bfd7bdee10484dec917e2fd15e95a42c5673353b0f",image="eu.gcr.io/google_containers/cluster-proportional-autoscaler-amd64:1.1.2-r2",image_id="docker-pullable://eu.gcr.io/google_containers/cluster-proportional-autoscaler-amd64@sha256:003f98d9f411ddfa6ff6d539196355e03ddd69fa4ed38c7ffb8fec6f729afe2d",namespace="kube-system",pod="kube-dns-autoscaler-97162954-mf6d3"} 1
