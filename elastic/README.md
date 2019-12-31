@@ -59,7 +59,7 @@ Finally, [Restart the Agent][6] to begin sending Elasticsearch metrics to Datado
     ```
 
 2. To collect search slow logs and index slow logs, [configure your Elasticsearch settings][14]. By default, slow logs are not enabled.
-    * Configure index slow logs for an index
+    * To configure index slow logs for a given index `<INDEX>`:
       ```
       curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d' {
         "index.indexing.slowlog.threshold.index.warn": "0ms",
