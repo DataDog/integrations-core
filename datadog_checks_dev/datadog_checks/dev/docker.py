@@ -86,7 +86,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
                 create_file(shared_log_file)
 
             # Set config to the path in the Agent
-            agent_mount_path = '/var/log/{}/{}'.format(log_source, log_name)
+            agent_mount_path = '/var/log/{}/{}.log'.format(log_source, log_name)
             example_log_config['path'] = agent_mount_path
             docker_volumes.append('{}:{}'.format(shared_log_file, agent_mount_path))
 
