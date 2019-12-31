@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
+
 from fnmatch import fnmatchcase
 from math import isinf, isnan
 from os.path import isfile
