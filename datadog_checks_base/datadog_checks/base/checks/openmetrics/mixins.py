@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+from __future__ import division
 from fnmatch import fnmatchcase
 from math import isinf, isnan
 from os.path import isfile
@@ -31,6 +31,8 @@ class OpenMetricsScraperMixin(object):
     SAMPLE_NAME = 0
     SAMPLE_LABELS = 1
     SAMPLE_VALUE = 2
+
+    MICROS_IN_S = 1000000
 
     MINUS_INF = float("-inf")
 
@@ -880,3 +882,49 @@ class OpenMetricsScraperMixin(object):
         except Exception as err:
             self.log.error("Cannot get bearer token from path: %s - error: %s", path, err)
             raise
+
+    def _histogram_convert_values(self, metric_name, converter):
+        def _convert(metric, scraper_config=None):
+            for index, sample in enumerate(metric.samples):
+                val = sample[self.SAMPLE_VALUE]
+                if not self._is_value_valid(val):
+                    self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                    continue
+                if sample[self.SAMPLE_NAME].endswith("_sum"):
+                    lst = list(sample)
+                    lst[self.SAMPLE_VALUE] = converter(float(val))
+                    metric.samples[index] = tuple(lst)
+                elif sample[self.SAMPLE_NAME].endswith("_bucket") and "Inf" not in sample[self.SAMPLE_LABELS]["le"]:
+                    sample[self.SAMPLE_LABELS]["le"] = str(converter(float(sample[self.SAMPLE_LABELS]["le"])))
+            self.submit_openmetric(metric_name, metric, scraper_config)
+
+        return _convert
+
+    def _histogram_from_microseconds_to_seconds(self, metric_name):
+        return self._histogram_convert_values(metric_name, lambda v: v / self.MICROS_IN_S)
+
+    def _histogram_from_seconds_to_microseconds(self, metric_name):
+        return self._histogram_convert_values(metric_name, lambda v: v * self.MICROS_IN_S)
+
+    def _summary_convert_values(self, metric_name, converter):
+        def _convert(metric, scraper_config=None):
+            for index, sample in enumerate(metric.samples):
+                val = sample[self.SAMPLE_VALUE]
+                if not self._is_value_valid(val):
+                    self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                    continue
+                if sample[self.SAMPLE_NAME].endswith("_count"):
+                    continue
+                else:
+                    lst = list(sample)
+                    lst[self.SAMPLE_VALUE] = converter(float(val))
+                    metric.samples[index] = tuple(lst)
+            self.submit_openmetric(metric_name, metric, scraper_config)
+
+        return _convert
+
+    def _summary_from_microseconds_to_seconds(self, metric_name):
+        return self._summary_convert_values(metric_name, lambda v: v / self.MICROS_IN_S)
+
+    def _summary_from_seconds_to_microseconds(self, metric_name):
+        return self._summary_convert_values(metric_name, lambda v: v * self.MICROS_IN_S)
