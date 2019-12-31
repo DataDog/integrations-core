@@ -1,6 +1,5 @@
 trigger: none
 
-
 pr:
   branches:
     include:
