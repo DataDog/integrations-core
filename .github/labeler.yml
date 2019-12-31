@@ -8,3 +8,6 @@ dev/testing:
 
 dev/tooling:
 - .github/workflows/**/*
+
+changelog/no-changelog:
+- '!*/datadog_checks/**/*''
