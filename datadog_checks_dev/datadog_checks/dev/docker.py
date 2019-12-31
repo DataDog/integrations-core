@@ -68,8 +68,9 @@ def shared_logs(example_log_configs, mount_whitelist=None):
                 alias = example_log_config["alias"]
             except KeyError:
                 raise RuntimeError(
-                    "Log config must have a 'alias' when log mounting is enabled (path={})"
-                    .format(example_log_config["path"])
+                    "Log config must have a 'alias' when log mounting is enabled (path={})".format(
+                        example_log_config["path"]
+                    )
                 )
 
             alias = normalize(alias)
