@@ -13,7 +13,7 @@ steps:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
-  - script: ddev env test --base --new-env --junit ${{ parameters.check }}
+  - script: ddev env test --base --new-env --junit ${{ parameters.check }} -a datadog/agent:7.16.1-rc.2
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
