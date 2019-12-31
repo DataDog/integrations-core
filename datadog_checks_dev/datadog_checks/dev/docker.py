@@ -50,21 +50,34 @@ def compose_file_active(compose_file):
 
 @contextmanager
 def shared_logs(example_log_configs, mount_whitelist=None):
+    def normalize(s):
+        """Make sure 's' can be used as part of a file name and an environment variable name."""
+        return s.lower().replace(' ', '_')
+
     log_source = example_log_configs[0].get('source', 'check')
 
-    if mount_whitelist is None:
-        # Default to all
-        mount_whitelist = range(1, len(example_log_configs) + 1)
+    if mount_whitelist is not None:
+        mount_whitelist = [normalize(name) for name in mount_whitelist]
 
     env_vars = {}
     docker_volumes = get_state('docker_volumes', [])
 
     with ExitStack() as stack:
-        for i, example_log_config in enumerate(example_log_configs, 1):
-            if i not in mount_whitelist:
+        for example_log_config in example_log_configs:
+            try:
+                name = example_log_config["name"]
+            except KeyError:
+                raise RuntimeError(
+                    "Log config must have a 'name' when log mounting is enabled (path={})"
+                    .format(example_log_config["path"])
+                )
+
+            name = normalize(name)
+
+            if mount_whitelist is not None and name not in mount_whitelist:
                 continue
 
-            log_name = 'dd_log_{}'.format(i)
+            log_name = 'dd_log_{}'.format(name)
             d = stack.enter_context(TempDir(log_name))
 
             # Create the file that will ultimately be shared by containers
