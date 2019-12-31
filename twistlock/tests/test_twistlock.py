@@ -51,20 +51,22 @@ class MockResponse:
         return json.loads(self._json)
 
 
-def mock_get(url, *args, **kwargs):
-    split_url = url.split('/')
-    path = split_url[-1]
-    f_name = os.path.join(HERE, 'fixtures', "{}.json".format(path))
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-        return MockResponse(text_data)
+def get_mock_get(fixture_path):
+    def mock_get(url, *args, **kwargs):
+        split_url = url.split('/')
+        path = split_url[-1]
+        f_name = os.path.join(HERE, fixture_path, "{}.json".format(path))
+        with open(f_name, 'r') as f:
+            text_data = f.read()
+            return MockResponse(text_data)
+    return mock_get
 
 
 def test_check(aggregator):
 
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get, autospec=True):
+    with mock.patch('requests.get', side_effect=get_mock_get('fixtures_prisma_cloud'), autospec=True):
         check.check(instance)
         check.check(instance)
 
@@ -84,7 +86,7 @@ def test_config_project(aggregator):
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get, autospec=True) as r:
+    with mock.patch('requests.get', side_effect=get_mock_get('fixtures_prisma_cloud'), autospec=True) as r:
         check.check(instance)
 
         r.assert_called_with(

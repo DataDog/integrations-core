@@ -197,7 +197,7 @@ class TwistlockCheck(AgentCheck):
                 continue
 
             container_tags = []
-            container_info = container.get('info', {})
+            container_info = container
             name = container_info.get('name')
             if name:
                 container_tags += ["container_name:{}".format(name)]
@@ -273,7 +273,9 @@ class TwistlockCheck(AgentCheck):
         for severity_type in severity_types:
             summary[severity_type] = 0
 
-        cves = data.get('info', {}).get('cveVulnerabilities', []) or []
+        cves = data.get('vulnerabilities', []) or []
+        print("namespace:", namespace)
+        print("len(cves):", len(cves))
         for cve in cves:
             summary[cve['severity']] += 1
             cve_tags = ['cve:{}'.format(cve['cve'])] + SEVERITY_TAGS.get(cve['severity'], []) + tags
@@ -287,7 +289,7 @@ class TwistlockCheck(AgentCheck):
 
     def _report_compliance_information(self, namespace, data, tags):
         compliance = defaultdict(int)
-        vulns = data.get('info', {}).get('complianceDistribution', {}) or {}
+        vulns = data.get('complianceDistribution', {}) or {}
         severity_types = ["critical", "high", "medium", "low"]
         for severity_type in severity_types:
             compliance[severity_type] += vulns.get(severity_type, 0)
@@ -298,7 +300,7 @@ class TwistlockCheck(AgentCheck):
         # Layer count and size
         layer_count = 0
         layer_sizes = 0
-        for layer in data.get('info', {}).get('history', []):
+        for layer in data.get('history', []):
             layer_count += 1
             layer_sizes += layer.get('sizeBytes', 0)
         self.gauge('{}.size'.format(namespace), float(layer_sizes), tags)

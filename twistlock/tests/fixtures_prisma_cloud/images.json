@@ -2076,6 +2076,460 @@
                 "text": "",
                 "id": 46,
                 "severity": "moderate",
+                "cvss": 9.8,
+                "status": "affected",
+                "cve": "CVE-2019-9169",
+                "cause": "",
+                "description": "In the GNU C Library (aka glibc or libc6) through 2.29, proceed_next_node in posix/regexec.c has a heap-based buffer over-read via an attempted case-insensitive regular-expression match.",
+                "title": "",
+                "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "Attack vector: network": {},
+                    "Medium severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-9169",
+                "type": "image",
+                "packageName": "glibc",
+                "packageVersion": "2.17-292.el7",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1551148140,
+                "applicableRules": [
+                    "\u003c=2.29"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "low",
+                "cvss": 8.8,
+                "status": "affected",
+                "cve": "CVE-2019-1010023",
+                "cause": "",
+                "description": "GNU Libc current is affected by: Re-mapping current loaded libray with malicious ELF file. The impact is: In worst case attacker may evaluate privileges. The component is: libld. The attack vector is: Attacker sends 2 ELF files to victim and asks to run ldd on it. ldd execute code.",
+                "title": "",
+                "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-1010023",
+                "type": "image",
+                "packageName": "glibc",
+                "packageVersion": "2.17-292.el7",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1563164100,
+                "applicableRules": [
+                    "*"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "low",
+                "cvss": 2.1,
+                "status": "affected",
+                "cve": "CVE-2019-19126",
+                "cause": "",
+                "description": "On the x86-64 architecture, the GNU C Library (aka glibc) before 2.31 fails to ignore the LD_PREFER_MAP_32BIT_EXEC environment variable during program execution after a security transition, allowing local attackers to restrict the possible mapping addresses for loaded libraries and thus bypass ASLR for a setuid program.",
+                "title": "",
+                "vecStr": "AV:L/AC:L/Au:N/C:P/I:N/A:N",
+                "exploit": "",
+                "riskFactors": {
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-19126",
+                "type": "image",
+                "packageName": "glibc",
+                "packageVersion": "2.17-292.el7",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1574201700,
+                "applicableRules": [
+                    "\u003c2.31"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "low",
+                "cvss": 7.5,
+                "status": "fix deferred",
+                "cve": "CVE-2015-2059",
+                "cause": "",
+                "description": "The stringprep_utf8_to_ucs4 function in libin before 1.31, as used in jabberd2, allows context-dependent attackers to read system memory and possibly have other unspecified impact via invalid UTF-8 characters in a string, which triggers an out-of-bounds read.",
+                "title": "",
+                "vecStr": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack vector: network": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2015-2059",
+                "type": "image",
+                "packageName": "libidn",
+                "packageVersion": "1.28-4.el7",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1439391540,
+                "applicableRules": [
+                    "\u003c=1.30"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "moderate",
+                "cvss": 5.8,
+                "status": "affected",
+                "cve": "CVE-2019-17498",
+                "cause": "",
+                "description": "In libssh2 v1.9.0 and earlier versions, the SSH_MSG_DISCONNECT logic in packet.c has an integer overflow in a bounds check, enabling an attacker to specify an arbitrary (out-of-bounds) offset for a subsequent memory read. A crafted SSH server may be able to disclose sensitive information or cause a denial of service condition on the client system when a user connects to the server.",
+                "title": "",
+                "vecStr": "AV:N/AC:M/Au:N/C:P/I:N/A:P",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "Attack vector: network": {},
+                    "DoS": {},
+                    "Medium severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-17498",
+                "type": "image",
+                "packageName": "libssh2",
+                "packageVersion": "1.8.0-3.el7",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1571696100,
+                "applicableRules": [
+                    "\u003c=1.9.0"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "low",
+                "cvss": 7.8,
+                "status": "affected",
+                "cve": "CVE-2019-5436",
+                "cause": "",
+                "description": "A heap buffer overflow in the TFTP receiving code allows for DoS or arbitrary code execution in libcurl versions 7.19.4 through 7.64.1.",
+                "title": "",
+                "vecStr": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "DoS": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-5436",
+                "type": "image",
+                "packageName": "curl",
+                "packageVersion": "7.29.0-54.el7_7.1",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1559071740,
+                "applicableRules": [
+                    "*"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "moderate",
+                "cvss": 7.5,
+                "status": "affected",
+                "cve": "CVE-2019-5482",
+                "cause": "",
+                "description": "Heap buffer overflow in the TFTP protocol handler in cURL 7.19.4 to 7.65.3.",
+                "title": "",
+                "vecStr": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "Medium severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-5482",
+                "type": "image",
+                "packageName": "curl",
+                "packageVersion": "7.29.0-54.el7_7.1",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1568661300,
+                "applicableRules": [
+                    "\u003c=7.65.3",
+                    "\u003e=7.19.4"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "moderate",
+                "cvss": 7.8,
+                "status": "affected",
+                "cve": "CVE-2019-9924",
+                "cause": "",
+                "description": "rbash in Bash before 4.4-beta2 did not prevent the shell user from modifying BASH_CMDS, thus allowing the user to execute any command with the permissions of the shell.",
+                "title": "",
+                "vecStr": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "Medium severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-9924",
+                "type": "image",
+                "packageName": "bash",
+                "packageVersion": "4.2.46-33.el7",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1553243340,
+                "applicableRules": [
+                    "\u003c4.4"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "important",
+                "cvss": 8.8,
+                "status": "affected",
+                "cve": "CVE-2019-5827",
+                "cause": "",
+                "description": "Integer overflow in SQLite via WebSQL in Google Chrome prior to 74.0.3729.131 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page.",
+                "title": "",
+                "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "Attack vector: network": {},
+                    "High severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-5827",
+                "type": "image",
+                "packageName": "sqlite",
+                "packageVersion": "3.7.17-8.el7",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1561655700,
+                "applicableRules": [
+                    "*"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "moderate",
+                "cvss": 9.8,
+                "status": "affected",
+                "cve": "CVE-2019-8457",
+                "cause": "",
+                "description": "SQLite3 from 3.6.0 to and including 3.27.2 is vulnerable to heap out-of-bound read in the rtreenode() function when handling invalid rtree tables.",
+                "title": "",
+                "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "Attack vector: network": {},
+                    "Medium severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-8457",
+                "type": "image",
+                "packageName": "sqlite",
+                "packageVersion": "3.7.17-8.el7",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1559233740,
+                "applicableRules": [
+                    "\u003c=3.27.2",
+                    "\u003e=3.6.0"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "moderate",
+                "cvss": 4.9,
+                "status": "affected",
+                "cve": "CVE-2019-13057",
+                "cause": "",
+                "description": "An issue was discovered in the server in OpenLDAP before 2.4.48. When the server administrator delegates rootDN (database admin) privileges for certain databases but wants to maintain isolation (e.g., for multi-tenant deployments), slapd does not properly stop a rootDN from requesting authorization as an identity from another database during a SASL bind or with a proxyAuthz (RFC 4370) control. (It is not a common configuration to deploy a system where the server administrator and a DB administrator enjoy different levels of trust.)",
+                "title": "",
+                "vecStr": "CVSS:3.0/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:N/A:N",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "Attack vector: network": {},
+                    "Medium severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-13057",
+                "type": "image",
+                "packageName": "openldap",
+                "packageVersion": "2.4.44-21.el7_6",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1564146900,
+                "applicableRules": [
+                    "\u003c2.4.48"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "moderate",
+                "cvss": 5,
+                "status": "affected",
+                "cve": "CVE-2019-13565",
+                "cause": "",
+                "description": "An issue was discovered in OpenLDAP 2.x before 2.4.48. When using SASL authentication and session encryption, and relying on the SASL security layers in slapd access controls, it is possible to obtain access that would otherwise be denied via a simple bind for any identity covered in those ACLs. After the first SASL bind is completed, the sasl_ssf value is retained for all new non-SASL connections. Depending on the ACL configuration, this can affect different types of operations (searches, modifications, etc.). In other words, a successful authorization step completed by one user affects the authorization requirement for a different user.",
+                "title": "",
+                "vecStr": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack vector: network": {},
+                    "Medium severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-13565",
+                "type": "image",
+                "packageName": "openldap",
+                "packageVersion": "2.4.44-21.el7_6",
+                "layerTime": 1574169944,
+                "templates": null,
+                "twistlock": false,
+                "published": 1564146900,
+                "applicableRules": [
+                    "\u003c=2.4.47",
+                    "\u003e=2.0"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "moderate",
+                "cvss": 7.5,
+                "status": "affected",
+                "cve": "CVE-2019-11719",
+                "cause": "",
+                "description": "When importing a curve25519 private key in PKCS#8format with leading 0x00 bytes, it is possible to trigger an out-of-bounds read in the Network Security Services (NSS) library. This could lead to information disclosure. This vulnerability affects Firefox ESR \u003c 60.8, Firefox \u003c 68, and Thunderbird \u003c 60.8.",
+                "title": "",
+                "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack complexity: low": {},
+                    "Attack vector: network": {},
+                    "Medium severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-11719",
+                "type": "image",
+                "packageName": "nss",
+                "packageVersion": "3.44.0-7.el7_7",
+                "layerTime": 1577005535,
+                "templates": null,
+                "twistlock": false,
+                "published": 1563891300,
+                "applicableRules": [
+                    "*"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "low",
+                "cvss": 5.3,
+                "status": "affected",
+                "cve": "CVE-2019-11727",
+                "cause": "",
+                "description": "A vulnerability exists where it possible to force Network Security Services (NSS) to sign CertificateVerify with PKCS#1 v1.5 signatures when those are the only ones advertised by server in CertificateRequest in TLS 1.3. PKCS#1 v1.5 signatures should not be used for TLS 1.3 messages. This vulnerability affects Firefox \u003c 68.",
+                "title": "",
+                "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack vector: network": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-11727",
+                "type": "image",
+                "packageName": "nss",
+                "packageVersion": "3.44.0-7.el7_7",
+                "layerTime": 1577005535,
+                "templates": null,
+                "twistlock": false,
+                "published": 1563891300,
+                "applicableRules": [
+                    "*"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "moderate",
+                "cvss": 7.1,
+                "status": "affected",
+                "cve": "CVE-2019-11756",
+                "cause": "",
+                "description": "no description is available for this cve.",
+                "title": "",
+                "vecStr": "",
+                "exploit": "",
+                "riskFactors": {
+                    "Attack vector: network": {},
+                    "Medium severity": {},
+                    "Recent vulnerability": {}
+                },
+                "link": "https://access.redhat.com/security/cve/CVE-2019-11756",
+                "type": "image",
+                "packageName": "nss",
+                "packageVersion": "3.44.0-7.el7_7",
+                "layerTime": 1577005535,
+                "templates": null,
+                "twistlock": false,
+                "published": 1575936000,
+                "applicableRules": [
+                    "*"
+                ],
+                "discovered": "2019-12-30T22:23:37.394Z"
+            },
+            {
+                "text": "",
+                "id": 46,
+                "severity": "moderate",
                 "cvss": 8.1,
                 "status": "affected",
                 "cve": "CVE-2019-17006",
@@ -2117,14 +2571,14 @@
         ],
         "repoDigests": [],
         "creationTime": "2019-12-22T09:05:40.741Z",
-        "vulnerabilitiesCount": 1,
+        "vulnerabilitiesCount": 16,
         "complianceIssuesCount": 0,
         "vulnerabilityDistribution": {
             "critical": 0,
-            "high": 0,
-            "medium": 1,
-            "low": 0,
-            "total": 1
+            "high": 1,
+            "medium": 10,
+            "low": 5,
+            "total": 16
         },
         "complianceDistribution": {
             "critical": 0,
@@ -2133,7 +2587,7 @@
             "low": 0,
             "total": 0
         },
-        "vulnerabilityRiskScore": 100,
+        "vulnerabilityRiskScore": 11005,
         "complianceRiskScore": 0,
         "layers": [
             "sha256:6f4acc6ac0c0ffaab4fe2fa3d615c736b0b69464ace2df69353005b6d94aad7b",
@@ -2146,7 +2600,10 @@
         ],
         "topLayer": "sha256:421a077be289c45265b876a7dcfabce5c8206036fce505be3f4ba105315591bf",
         "riskFactors": {
+            "Attack complexity: low": {},
             "Attack vector: network": {},
+            "DoS": {},
+            "High severity": {},
             "Medium severity": {},
             "Recent vulnerability": {}
         },
