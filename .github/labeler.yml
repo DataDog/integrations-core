@@ -1,7 +1,7 @@
 # Configuration for labeler - https://github.com/actions/labeler
 
 documentation:
-- "!**/*.md"
+- "**/*.md"
 
 dev/testing:
 - .azure-pipelines/**/*
@@ -10,4 +10,4 @@ dev/tooling:
 - .github/workflows/**/*
 
 changelog/no-changelog:
-- "!**/datadog_checks/**/*"
+- "!./**/datadog_checks/**/*"
