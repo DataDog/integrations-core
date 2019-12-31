@@ -4,7 +4,6 @@ documentation:
 - '**/*.md'
 
 dev/testing:
-- .azure-pipelines/*
 - .azure-pipelines/**/*
 
 dev/tooling:
