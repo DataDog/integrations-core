@@ -61,6 +61,7 @@ def dd_environment(e2e_instance):
             env_vars={'JWT_DIR': jwt_dir, 'SINK_DIR': sink_dir},
             conditions=[WaitAndUnsealVault(HEALTH_ENDPOINT), ApplyPermissions(token_file)],
             sleep=10,
+            mount_logs=True,
         ):
             set_client_token_path(token_file)
 

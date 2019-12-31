@@ -22,6 +22,8 @@ services:
       - ./pub.pem:/home/pub.pem
       - ${JWT_DIR}:/home/jwt
       - ${SINK_DIR}:/home/sink
+      - ${DD_LOG_1}:/vault/vault-audit.log
+      - ${DD_LOG_2}:/var/log/vault.log
 
   vault-replica:
     container_name: vault-replica
