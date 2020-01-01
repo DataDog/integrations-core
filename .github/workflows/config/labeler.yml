@@ -8,10 +8,12 @@ documentation:
 
 dev/testing:
 - .azure-pipelines/**
+- .codecov.yml
 
 dev/tooling:
 - .github/workflows/**
 - .gitlab/**
+- .gitlab-ci.yml
 - datadog_checks_dev/datadog_checks/dev/tooling/**
 
 dependencies:
