@@ -2,6 +2,7 @@
 
 ![Elasitc search dashboard][1]
 
+
 ## Overview
 
 Stay up-to-date on the health of your Elasticsearch cluster, from its overall status down to JVM heap usage and everything in between. Get notified when you need to revive a replica, add capacity to the cluster, or otherwise tweak its configuration. After doing so, track how your cluster metrics respond.
