@@ -44,4 +44,3 @@ files:
       value:
         example: http://%%host%%/server-status?auto
         type: string
-
