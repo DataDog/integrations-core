@@ -1,6 +1,5 @@
 # Agent based integrations docs
 
-
 ## Sections
 
 * [Design proposals][1]
