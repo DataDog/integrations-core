@@ -19,6 +19,9 @@ dev/tooling:
 dependencies:
 - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
 
+release:
+- requirements-agent-release.txt
+
 changelog/no-changelog:
 - all:!*/datadog_checks/**
 
