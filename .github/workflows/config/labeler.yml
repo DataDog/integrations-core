@@ -23,6 +23,7 @@ release:
 - requirements-agent-release.txt
 
 changelog/no-changelog:
+- requirements-agent-release.txt
 - all:!*/datadog_checks/**
 
 integration/$1:
