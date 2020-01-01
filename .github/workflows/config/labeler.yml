@@ -2,6 +2,7 @@
 
 documentation:
 - "**/*.md"
+- "*/assets/configuration/**"
 - docs/**
 
 dev/testing:
