@@ -66,6 +66,49 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
     'terminated': ['oomkilled', 'containercannotrun', 'error'],
 }
 
+DEFAULT_GAUGES = {
+    'rest_client_requests_total': 'rest.client.requests',
+    'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
+    'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
+    'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
+    'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
+    'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
+    'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
+}
+
+DEPRECATED_GAUGES = {
+    'kubelet_runtime_operations': 'kubelet.runtime.operations',
+    'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
+}
+
+NEW_1_14_GAUGES = {
+    'kubelet_runtime_operations_total': 'kubelet.runtime.operations',
+    'kubelet_runtime_operations_errors_total': 'kubelet.runtime.errors',
+}
+
+DEFAULT_HISTOGRAMS = {
+    'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
+}
+
+DEPRECATED_HISTOGRAMS = {
+    'rest_client_request_latency_seconds': 'rest.client.latency',
+}
+
+NEW_1_14_HISTOGRAMS = {
+    'rest_client_request_duration_seconds': 'rest.client.latency',
+}
+
+DEFAULT_SUMMARIES = {}
+
+DEPRECATED_SUMMARIES = {
+    'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
+}
+
+NEW_1_14_SUMMARIES = {}
+
+TRANSFORM_VALUE_HISTOGRAMS = {
+    'kubelet_network_plugin_operations_duration_seconds': 'kubelet.network_plugin.latency',
+}
 
 log = logging.getLogger('collector')
 
@@ -139,7 +182,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 
-        self.COUNTER_TRANSFORMERS = {k: self.send_always_counter for k in self.COUNTER_METRICS}
+        counter_transformers = {k: self.send_always_counter for k in self.COUNTER_METRICS}
+
+        histogram_transformers = {
+            k: self._histogram_from_seconds_to_microseconds(v) for k, v in TRANSFORM_VALUE_HISTOGRAMS.items()
+        }
+
+        self.transformers = {}
+        for d in [self.CADVISOR_METRIC_TRANSFORMERS, counter_transformers, histogram_transformers]:
+            self.transformers.update(d)
 
     def _create_kubelet_prometheus_instance(self, instance):
         """
@@ -155,20 +206,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 # so the key is different than the cadvisor scraper.
                 'prometheus_url': instance.get('kubelet_metrics_endpoint', 'dummy_url/kubelet'),
                 'metrics': [
-                    {
-                        'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
-                        'rest_client_requests_total': 'rest.client.requests',
-                        'rest_client_request_latency_seconds': 'rest.client.latency',
-                        'kubelet_runtime_operations': 'kubelet.runtime.operations',
-                        'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
-                        'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
-                        'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
-                        'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
-                        'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
-                        'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
-                        'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
-                        'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
-                    }
+                    DEFAULT_GAUGES,
+                    DEPRECATED_GAUGES,
+                    NEW_1_14_GAUGES,
+                    DEFAULT_HISTOGRAMS,
+                    DEPRECATED_HISTOGRAMS,
+                    NEW_1_14_HISTOGRAMS,
+                    DEFAULT_SUMMARIES,
+                    DEPRECATED_SUMMARIES,
+                    NEW_1_14_SUMMARIES,
                 ],
                 # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
@@ -233,13 +279,11 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             self.process_cadvisor(instance, self.cadvisor_legacy_url, self.pod_list, self.pod_list_utils)
         elif self.cadvisor_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing cadvisor metrics')
-            transformers = self.CADVISOR_METRIC_TRANSFORMERS
-            transformers.update(self.COUNTER_TRANSFORMERS)
-            self.process(self.cadvisor_scraper_config, metric_transformers=transformers)
+            self.process(self.cadvisor_scraper_config, metric_transformers=self.transformers)
 
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
-            self.process(self.kubelet_scraper_config, metric_transformers=self.COUNTER_TRANSFORMERS)
+            self.process(self.kubelet_scraper_config, metric_transformers=self.transformers)
 
         # Free up memory
         self.pod_list = None
