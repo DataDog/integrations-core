@@ -1,8 +1,6 @@
 # Issues or Pull Requests with these labels will never be considered stale. Set to `[]` to disable
 exemptLabels:
-  - community/help-wanted
-  - do-not-merge/HOLD
-  - do-not-merge/WIP
+  - changelog/Security
   - kind/feature-request
   - severity/critical
   - severity/major
