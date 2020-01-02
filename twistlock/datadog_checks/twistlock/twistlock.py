@@ -274,8 +274,6 @@ class TwistlockCheck(AgentCheck):
             summary[severity_type] = 0
 
         cves = data.get('vulnerabilities', []) or []
-        print("namespace:", namespace)
-        print("len(cves):", len(cves))
         for cve in cves:
             summary[cve['severity']] += 1
             cve_tags = ['cve:{}'.format(cve['cve'])] + SEVERITY_TAGS.get(cve['severity'], []) + tags
