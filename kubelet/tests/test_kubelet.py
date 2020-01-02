@@ -59,6 +59,10 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.network.rx_bytes',
     'kubernetes.network.tx_bytes',
     'kubernetes.ephemeral_storage.usage',
+    'kubernetes.runtime.cpu.usage',
+    'kubernetes.runtime.memory.rss',
+    'kubernetes.kubelet.cpu.usage',
+    'kubernetes.kubelet.memory.rss',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
@@ -591,6 +595,10 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     # Test that we get only the node related metrics (no calls to the tagger for these ones)
     aggregator.assert_metric('kubernetes.memory.capacity')
     aggregator.assert_metric('kubernetes.cpu.capacity')
+    aggregator.assert_metric('kubernetes.runtime.cpu.usage')
+    aggregator.assert_metric('kubernetes.runtime.memory.rss')
+    aggregator.assert_metric('kubernetes.kubelet.cpu.usage')
+    aggregator.assert_metric('kubernetes.kubelet.memory.rss')
     aggregator.assert_all_metrics_covered()
 
 
@@ -763,3 +771,19 @@ def test_kubelet_stats_summary_not_available(monkeypatch, aggregator, tagger):
 
     check.check(instance)
     check._retrieve_stats.assert_called_once()
+
+
+def test_system_container_metrics(monkeypatch, aggregator, tagger):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(
+        check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
+    )
+
+    stats = check._retrieve_stats()
+    tags = ["instance:tag"]
+    check._report_system_container_metrics(stats, tags)
+
+    aggregator.assert_metric('kubernetes.kubelet.cpu.usage', 36755862.0, tags)
+    aggregator.assert_metric('kubernetes.runtime.cpu.usage', 19442853.0, tags)
+    aggregator.assert_metric('kubernetes.runtime.memory.rss', 101273600.0, tags)
+    aggregator.assert_metric('kubernetes.kubelet.memory.rss', 88477696.0, tags)
