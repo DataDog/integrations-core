@@ -8,7 +8,6 @@ import socket
 import time
 
 import mock
-import pysnmp_mibs
 import pytest
 import yaml
 
@@ -31,7 +30,7 @@ def test_command_generator():
     config = check._config
 
     # Test command generator MIB source
-    mib_folders = config.snmp_engine.getMibBuilder().getMibSources()
+    mib_folders = config._snmp_engine.getMibBuilder().getMibSources()
     full_path_mib_folders = [f.fullPath() for f in mib_folders]
     assert check.ignore_nonincreasing_oid is False  # Default value
 
@@ -370,6 +369,7 @@ def test_table_v3_SHA_AES(aggregator):
 
 def test_bulk_table(aggregator):
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
+    instance['bulk_threshold'] = 5
     check = common.create_check(instance)
 
     check.check(instance)
@@ -614,23 +614,6 @@ def test_discovery(aggregator):
 
     aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
     aggregator.assert_all_metrics_covered()
-
-
-def test_fetch_mib():
-    instance = common.generate_instance_config(common.DUMMY_MIB_OID)
-    # Try a small MIB
-    instance['metrics'][0]['MIB'] = 'A3COM-AUDL-R1-MIB'
-    instance['enforce_mib_constraints'] = False
-    # Remove it
-    path = os.path.join(os.path.dirname(pysnmp_mibs.__file__), 'A3COM-AUDL-R1-MIB.py')
-    # Make sure it doesn't exist
-    if os.path.exists(path):
-        os.unlink(path)
-    pyc = '{}c'.format(path)
-    if os.path.exists(pyc):
-        os.unlink(pyc)
-    SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
-    assert os.path.exists(path)
 
 
 def test_different_mibs(aggregator):
