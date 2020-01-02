@@ -25,7 +25,7 @@ release:
 
 changelog/no-changelog:
 - requirements-agent-release.txt
-- all:!*/datadog_checks/**
+- all:^(?![^/]+/datadog_checks/.*|[^/]+/setup\.py).*
 
 integration/$1:
 - ^(?!\.azure-pipelines|\.github|\.gitlab|\.in-toto|docs)([^/]+)/.*
