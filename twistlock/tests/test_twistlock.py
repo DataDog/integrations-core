@@ -54,7 +54,7 @@ class MockResponse:
 def mock_get(url, *args, **kwargs):
     split_url = url.split('/')
     path = split_url[-1]
-    f_name = os.path.join(HERE, 'fixtures', path)
+    f_name = os.path.join(HERE, 'fixtures', "{}.json".format(path))
     with open(f_name, 'r') as f:
         text_data = f.read()
         return MockResponse(text_data)
