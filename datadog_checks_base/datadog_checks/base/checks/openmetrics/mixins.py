@@ -893,7 +893,7 @@ class OpenMetricsScraperMixin(object):
                     continue
                 if sample[self.SAMPLE_NAME].endswith("_sum"):
                     lst = list(sample)
-                    lst[self.SAMPLE_VALUE] = converter(float(val))
+                    lst[self.SAMPLE_VALUE] = converter(val)
                     metric.samples[index] = tuple(lst)
                 elif sample[self.SAMPLE_NAME].endswith("_bucket") and "Inf" not in sample[self.SAMPLE_LABELS]["le"]:
                     sample[self.SAMPLE_LABELS]["le"] = str(converter(float(sample[self.SAMPLE_LABELS]["le"])))
@@ -918,7 +918,7 @@ class OpenMetricsScraperMixin(object):
                     continue
                 else:
                     lst = list(sample)
-                    lst[self.SAMPLE_VALUE] = converter(float(val))
+                    lst[self.SAMPLE_VALUE] = converter(val)
                     metric.samples[index] = tuple(lst)
             self.submit_openmetric(metric_name, metric, scraper_config)
 
