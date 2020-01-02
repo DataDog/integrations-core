@@ -184,7 +184,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         counter_transformers = {k: self.send_always_counter for k in self.COUNTER_METRICS}
 
-        histogram_transformers = {k: self._histogram_from_seconds_to_microseconds for k in TRANSFORM_VALUE_HISTOGRAMS}
+        histogram_transformers = {
+            k: self._histogram_from_seconds_to_microseconds(v) for k, v in TRANSFORM_VALUE_HISTOGRAMS.items()
+        }
 
         self.transformers = {}
         for d in [self.CADVISOR_METRIC_TRANSFORMERS, counter_transformers, histogram_transformers]:
@@ -618,17 +620,3 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             # Determine the tags to send
             tags = self._metric_tags(metric.name, val, sample, scraper_config, hostname=custom_hostname)
             self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
-
-    def _histogram_from_seconds_to_microseconds(self, metric, scraper_config):
-        for index, sample in enumerate(metric.samples):
-            val = sample[self.SAMPLE_VALUE]
-            if not self._is_value_valid(val):
-                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
-                continue
-            if sample[self.SAMPLE_NAME].endswith("_sum"):
-                lst = list(sample)
-                lst[self.SAMPLE_VALUE] = float(val) * 1000000
-                metric.samples[index] = tuple(lst)
-            elif sample[self.SAMPLE_NAME].endswith("_bucket") and "Inf" not in sample[self.SAMPLE_LABELS]["le"]:
-                sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]) / 1000000)
-        self.submit_openmetric(TRANSFORM_VALUE_HISTOGRAMS[metric.name], metric, scraper_config)
