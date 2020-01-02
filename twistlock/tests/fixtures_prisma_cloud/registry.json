@@ -266,8 +266,8 @@
         "scanVersion": "19.11.506",
         "firstScanTime": "0001-01-01T00:00:00Z",
         "trust": {
-            "status": "trusted",
-            "reason": ""
+            "status": "untrusted",
+            "reason": "not learned or trusted by rule Default - alert all"
         },
         "instances": [
             {
@@ -507,7 +507,36 @@
             }
         ],
         "allCompliance": {},
-        "vulnerabilities": null,
+        "vulnerabilities": [
+            {
+                "applicableRules": [
+                    "<1.8.3-1"
+                ],
+                "cause": "",
+                "cve": "CVE-2018-0495",
+                "cvss": 4.7,
+                "description": "Libgcrypt before 1.7.10 and 1.8.x before 1.8.3 allows a memory-cache side-channel attack on ECDSA signatures that can be mitigated through the use of blinding during the signing process in the _gcry_ecc_ecdsa_sign function in cipher/ecc-ecdsa.c, aka the Return Of the Hidden Number Problem or ROHNP. To discover an ECDSA key, the attacker needs access to either the local machine or a different virtual machine on the same physical host.",
+                "exploit": "",
+                "id": 46,
+                "layerTime": 1524897808,
+                "link": "https://security-tracker.debian.org/tracker/CVE-2018-0495",
+                "packageName": "libgcrypt20",
+                "packageVersion": "1.8.2-2",
+                "published": 1528932540,
+                "riskFactors": {
+                    "Has fix": {},
+                    "Recent vulnerability": {}
+                },
+                "severity": "low",
+                "status": "fixed in 1.8.3-1",
+                "templates": null,
+                "text": "",
+                "title": "",
+                "twistlock": false,
+                "type": "image",
+                "vecStr": "CVSS:3.0/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N"
+            }
+        ],
         "repoTag": {
             "registry": "",
             "repo": "library/alpine",
@@ -524,7 +553,7 @@
             "alpine@sha256:2171658620155679240babee0a7714f6509fae66898db422ad803b951257db78"
         ],
         "creationTime": "2019-12-24T19:20:12.362Z",
-        "vulnerabilitiesCount": 0,
+        "vulnerabilitiesCount": 1,
         "complianceIssuesCount": 1,
         "vulnerabilityDistribution": {
             "critical": 0,
@@ -554,8 +583,8 @@
         "scanVersion": "19.11.506",
         "firstScanTime": "0001-01-01T00:00:00Z",
         "trust": {
-            "status": "trusted",
-            "reason": ""
+            "status": "untrusted",
+            "reason": "not learned or trusted by rule Default - alert all"
         },
         "instances": [
             {
@@ -843,8 +872,8 @@
         "scanVersion": "19.11.506",
         "firstScanTime": "0001-01-01T00:00:00Z",
         "trust": {
-            "status": "trusted",
-            "reason": ""
+            "status": "untrusted",
+            "reason": "not learned or trusted by rule Default - alert all"
         },
         "instances": [
             {
@@ -1133,8 +1162,8 @@
         "scanVersion": "19.11.506",
         "firstScanTime": "0001-01-01T00:00:00Z",
         "trust": {
-            "status": "trusted",
-            "reason": ""
+            "status": "untrusted",
+            "reason": "not learned or trusted by rule Default - alert all"
         },
         "instances": [
             {
@@ -1420,8 +1449,8 @@
         "scanVersion": "19.11.506",
         "firstScanTime": "0001-01-01T00:00:00Z",
         "trust": {
-            "status": "trusted",
-            "reason": ""
+            "status": "untrusted",
+            "reason": "not learned or trusted by rule Default - alert all"
         },
         "instances": [
             {
