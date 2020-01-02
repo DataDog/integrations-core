@@ -60,7 +60,6 @@ metrics:
       - cieIfResetCount
     metric_tags:
       - tag: interface
-        # NOTE: should we use ifDescr from IF-MIB/ifTable here?
         column: ifName
         MIB: IF-MIB
         table: ifXTable

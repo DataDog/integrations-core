@@ -1174,26 +1174,27 @@ def test_cisco_nexus(aggregator):
         'ifOperStatus',
     ]
 
-    interfaces = ["eth0", "eth1"]
+    interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
-    # for interface in interfaces:
-    #     # tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
-    #     tags = common.CHECK_TAGS
-    #     for metric in if_counts:
-    #         aggregator.assert_metric(
-    #             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-    #         )
-    #     for metric in if_gauges:
-    #         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
-    # interfaces = ["eth0", "eth1"]
-    # for interface in interfaces:
-    #     # tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
-    #     tags = common.CHECK_TAGS
-    #     for metric in ifx_counts:
-    #         aggregator.assert_metric(
-    #             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-    #         )
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        for metric in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in if_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        for metric in ifx_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
 
     for metric in tcp_counts:
         aggregator.assert_metric(
@@ -1215,12 +1216,12 @@ def test_cisco_nexus(aggregator):
         tags = ['sensor_id:{}'.format(sensor), 'sensor_type:8'] + common.CHECK_TAGS
         aggregator.assert_metric('snmp.entSensorValue', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    # fru_metrics = ["cefcFRUPowerAdminStatus", "cefcFRUPowerOperStatus", "cefcFRUCurrent"]
-    # frus = [6, 7, 15, 16, 19, 27, 30, 31]
-    # for fru in frus:
-    #     tags = ['fru:{}'.format(fru)] + common.CHECK_TAGS
-    #     for metric in fru_metrics:
-    #         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    fru_metrics = ["cefcFRUPowerAdminStatus", "cefcFRUPowerOperStatus", "cefcFRUCurrent"]
+    frus = [6, 7, 15, 16, 19, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common.CHECK_TAGS
+        for metric in fru_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     cpus = [3173, 6692, 11571, 19529, 30674, 38253, 52063, 54474, 55946, 63960]
     cpu_metrics = ["cpmCPUTotalMonIntervalValue", "cpmCPUMemoryUsed", "cpmCPUMemoryFree"]
@@ -1229,4 +1230,4 @@ def test_cisco_nexus(aggregator):
         for metric in cpu_metrics:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    # aggregator.assert_all_metrics_covered()
+    aggregator.assert_all_metrics_covered()
