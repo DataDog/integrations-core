@@ -3,6 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from .base import AgentCheck
-from .network import NetworkCheck, Status, EventType
+from .network import EventType, NetworkCheck, Status
 
 __all__ = ['AgentCheck', 'NetworkCheck', 'Status', 'EventType']
