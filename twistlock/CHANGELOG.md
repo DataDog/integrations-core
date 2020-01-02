@@ -3,7 +3,7 @@
 ## 1.4.1 / 2020-01-02
 
 * [Fixed] Fix possible TypeError due to NoneType in parser.isoparse. See [#5265](https://github.com/DataDog/integrations-core/pull/5265).
-* [Fixed] Fixes possible KeyError in _report_compliance_information. See [#5248](https://github.com/DataDog/integrations-core/pull/5248).
+* [Fixed] Fix possible KeyError in _report_compliance_information. See [#5248](https://github.com/DataDog/integrations-core/pull/5248).
 
 ## 1.4.0 / 2019-11-06
 
