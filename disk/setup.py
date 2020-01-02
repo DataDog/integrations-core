@@ -58,4 +58,3 @@ setup(
     # Extra files to ship with the wheel package
     include_package_data=True,
 )
-
