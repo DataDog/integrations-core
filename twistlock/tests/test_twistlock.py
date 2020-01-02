@@ -6,6 +6,7 @@ import json
 import os
 
 import mock
+import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.twistlock import TwistlockCheck
@@ -99,3 +100,13 @@ def test_config_project(aggregator):
     # Check if metrics are tagged with the project.
     for metric in METRICS:
         aggregator.assert_metric_has_tag(metric, project_tag)
+
+
+def test_err_response(aggregator):
+
+    check = TwistlockCheck('twistlock', {}, [instance])
+
+    with pytest.raises(Exception, match='^Error in response'):
+        with mock.patch('requests.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):
+
+            check.check(instance)

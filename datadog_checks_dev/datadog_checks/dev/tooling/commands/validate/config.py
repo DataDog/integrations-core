@@ -10,8 +10,15 @@ from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERIT
 from datadog_checks.dev.tooling.configuration import ConfigSpec
 from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 
-from ....utils import basepath, file_exists, get_parent_dir, path_join, read_file, write_file
-from ...utils import get_config_files, get_config_spec, get_valid_checks, get_version_string, load_manifest
+from ....utils import basepath, file_exists, path_join, read_file, write_file
+from ...utils import (
+    get_config_files,
+    get_config_spec,
+    get_data_directory,
+    get_valid_checks,
+    get_version_string,
+    load_manifest,
+)
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 FILE_INDENT = ' ' * 8
@@ -82,7 +89,7 @@ def config(ctx, check, sync):
                     )
                 )
 
-            example_location = get_parent_dir(spec_path)
+            example_location = get_data_directory(check)
             example_consumer = ExampleConsumer(spec.data)
             for example_file, (contents, errors) in example_consumer.render().items():
                 file_counter.append(None)

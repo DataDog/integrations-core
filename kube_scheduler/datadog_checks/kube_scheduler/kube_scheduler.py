@@ -152,7 +152,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                 continue
             if sample[self.SAMPLE_NAME].endswith("_sum"):
                 lst = list(sample)
-                lst[self.SAMPLE_VALUE] = float(val) / 100000
+                lst[self.SAMPLE_VALUE] = float(val) / 1000000
                 metric.samples[index] = tuple(lst)
             elif sample[self.SAMPLE_NAME].endswith("_bucket") and "Inf" not in sample[self.SAMPLE_LABELS]["le"]:
                 sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]) / 1000000)
@@ -168,6 +168,6 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
                 continue
             else:
                 lst = list(sample)
-                lst[self.SAMPLE_VALUE] = float(val) / 100000
+                lst[self.SAMPLE_VALUE] = float(val) / 1000000
                 metric.samples[index] = tuple(lst)
         self.submit_openmetric(TRANSFORM_VALUE_SUMMARIES[metric.name], metric, scraper_config)

@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 1.10.4 / 2019-12-23
+
+* [Fixed] Add debug logging when processes are not found. See [#5313](https://github.com/DataDog/integrations-core/pull/5313).
+
 ## 1.10.3 / 2019-12-13
 
 * [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).

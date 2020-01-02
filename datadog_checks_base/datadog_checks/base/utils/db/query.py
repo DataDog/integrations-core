@@ -84,7 +84,7 @@ class Query(object):
             modifiers = {key: value for key, value in column.items() if key not in ('name', 'type')}
 
             try:
-                transformer = column_transformers[column_type](column_name, column_transformers, **modifiers)
+                transformer = column_transformers[column_type](column_transformers, column_name, **modifiers)
             except Exception as e:
                 error = 'error compiling type `{}` for column {} of {}: {}'.format(
                     column_type, column_name, query_name, e
@@ -153,7 +153,7 @@ class Query(object):
                 modifiers['sources'] = sources
 
             try:
-                transformer = transformer_factory(extra_name, submission_transformers, **modifiers)
+                transformer = transformer_factory(submission_transformers, extra_name, **modifiers)
             except Exception as e:
                 error = 'error compiling type `{}` for extra {} of {}: {}'.format(extra_type, extra_name, query_name, e)
 

@@ -34,6 +34,8 @@ sudo modprobe nf_conntrack_ipv6
 
         ## @param collect_connection_state - boolean - required
         ## Set to true to collect connection states for your interfaces
+        ## Note: this will require either the command `ss` from system package `iproute2` or
+        ## the command `netstat` from the system package `net-tools` to be installed
         #
         - collect_connection_state: false
     ```

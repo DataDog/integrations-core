@@ -26,7 +26,7 @@ Follow the instructions below to configure this check for an Agent running on a 
       ```yaml
       instances:
         - host: localhost
-          port: 7199
+          port: 1616
           user: username
           password: password
           name: activemq_instance

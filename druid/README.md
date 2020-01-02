@@ -98,7 +98,7 @@ Use the default configuration of your `druid.d/conf.yaml` file to activate the c
 
     Change the `path` and `service` parameter values and configure them for your environment.
 
-3. [Restart the Agent][6].
+3. [Restart the Agent][4].
 
 ### Validation
 

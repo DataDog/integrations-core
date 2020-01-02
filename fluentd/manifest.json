@@ -3,7 +3,8 @@
     "/logs/log_collection/fluentd"
   ],
   "categories": [
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "fluentd",

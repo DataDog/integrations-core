@@ -22,6 +22,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 
 
 REQUIRES = [
+    "contextlib2; python_version < '3.0'",
     'coverage==4.5.4',  # pinned due to https://github.com/nedbat/coveragepy/issues/883
     'mock',
     'psutil',

@@ -4,7 +4,8 @@
     "orchestration",
     "configuration & deployment",
     "notification",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "Consul",

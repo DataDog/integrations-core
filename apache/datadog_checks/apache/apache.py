@@ -112,6 +112,7 @@ class Apache(AgentCheck):
                 self.assumed_url[instance['apache_status_url']] = '%s?auto' % url
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
                 self.check(instance)
+                return
             else:
                 raise Exception(
                     ("No metrics were fetched for this instance. Make sure that %s is the proper url.")
@@ -133,7 +134,7 @@ class Apache(AgentCheck):
         match = self.VERSION_REGEX.match(value)
 
         if not match or not match.groups():
-            self.log.info("Cannot parse the complete Apache version from %s.".format(value))
+            self.log.info("Cannot parse the complete Apache version from %s.", value)
             return
 
         version = match.groups()[0]

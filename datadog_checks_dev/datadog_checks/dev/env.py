@@ -4,14 +4,27 @@
 import time
 from contextlib import contextmanager
 
-from ._env import deserialize_data, get_env_vars, serialize_data, set_env_vars, set_up_env, tear_down_env
+from ._env import (
+    deserialize_data,
+    get_env_vars,
+    get_state,
+    save_state,
+    serialize_data,
+    set_env_vars,
+    set_up_env,
+    tear_down_env,
+)
 from .conditions import CheckEndpoints
 from .structures import EnvVars
-from .utils import mock_context_manager
+
+try:
+    from contextlib import ExitStack
+except ImportError:
+    from contextlib2 import ExitStack
 
 
 @contextmanager
-def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper=None):
+def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
     """This utility provides a convenient way to safely set up and tear down arbitrary types of environments.
 
     :param up: A custom setup callable.
@@ -29,7 +42,7 @@ def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditi
     :type conditions: ``callable``
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
-    :param wrapper: A context manager to use during execution.
+    :param wrappers: A list of context managers to use during execution.
     """
     if not callable(up):
         raise TypeError('The custom setup `{}` is not callable.'.format(repr(up)))
@@ -37,15 +50,17 @@ def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditi
         raise TypeError('The custom tear down `{}` is not callable.'.format(repr(down)))
 
     conditions = list(conditions) if conditions is not None else []
-
     if endpoints is not None:
         conditions.append(CheckEndpoints(endpoints))
 
-    env_vars = mock_context_manager() if env_vars is None else EnvVars(env_vars)
-    wrapper = mock_context_manager() if wrapper is None else wrapper
+    wrappers = list(wrappers) if wrappers is not None else []
+    if env_vars is not None:
+        wrappers.insert(0, EnvVars(env_vars))
 
-    result = None
-    with env_vars, wrapper:
+    with ExitStack() as stack:
+        for wrapper in wrappers:
+            stack.enter_context(wrapper)
+
         try:
             # Create an environment variable to store setup result
             key = 'environment_result_{}'.format(up.__class__.__name__.lower())
@@ -74,4 +89,12 @@ def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditi
                 down()
 
 
-__all__ = ['environment_run', 'deserialize_data', 'get_env_vars', 'serialize_data', 'set_env_vars']
+__all__ = [
+    'environment_run',
+    'deserialize_data',
+    'get_env_vars',
+    'get_state',
+    'save_state',
+    'serialize_data',
+    'set_env_vars',
+]

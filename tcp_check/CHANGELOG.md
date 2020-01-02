@@ -1,5 +1,9 @@
 # CHANGELOG - tcp_check
 
+## 2.3.3 / 2019-12-24
+
+* [Fixed] Don't report response time when connection fails. See [#5271](https://github.com/DataDog/integrations-core/pull/5271).
+
 ## 2.3.2 / 2019-12-17
 
 * [Fixed] Fix service_checks submission. See [#5229](https://github.com/DataDog/integrations-core/pull/5229).

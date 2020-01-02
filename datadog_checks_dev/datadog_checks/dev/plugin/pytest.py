@@ -18,7 +18,9 @@ from .._env import (
     e2e_testing,
     format_config,
     get_env_vars,
+    get_state,
     replay_check_run,
+    save_state,
     serialize_data,
 )
 
@@ -103,6 +105,18 @@ def dd_environment_runner(request):
     metadata.setdefault('env_vars', {})
     metadata['env_vars'].update(get_env_vars(raw=True))
 
+    # Inject any log configuration
+    logs_config = get_state('logs_config', [])
+    if logs_config:
+        config = format_config(config)
+        config['logs'] = logs_config
+
+    # Mount any volumes for Docker
+    if metadata['env_type'] == 'docker':
+        docker_volumes = get_state('docker_volumes', [])
+        if docker_volumes:
+            metadata.setdefault('docker_volumes', []).extend(docker_volumes)
+
     data = {'config': config, 'metadata': metadata}
 
     message = serialize_data(data)
@@ -161,7 +175,9 @@ def dd_agent_check(request, aggregator):
         result = run_command(check_command, capture=True)
         if AGENT_COLLECTOR_SEPARATOR not in result.stdout:
             raise ValueError(
-                '{}{}\nCould find `{}` in the output'.format(result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR)
+                '{}{}\nCould not find `{}` in the output'.format(
+                    result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR
+                )
             )
 
         _, _, collector_output = result.stdout.partition(AGENT_COLLECTOR_SEPARATOR)
@@ -178,6 +194,35 @@ def dd_agent_check(request, aggregator):
     # Give an explicit name so we don't shadow other uses
     with TempDir('dd_agent_check') as temp_dir:
         yield run_check
+
+
+@pytest.fixture
+def dd_run_check():
+    def run_check(check, extract_message=False):
+        error = check.run()
+
+        if error:
+            error = json.loads(error)[0]
+            if extract_message:
+                raise Exception(error['message'])
+            else:
+                exc_lines = ['']
+                exc_lines.extend(error['traceback'].splitlines())
+                raise Exception('\n'.join(exc_lines))
+
+        return ''
+
+    return run_check
+
+
+@pytest.fixture
+def dd_get_state():
+    return get_state
+
+
+@pytest.fixture
+def dd_save_state():
+    return save_state
 
 
 def pytest_configure(config):
