@@ -59,6 +59,7 @@ def get_mock_get(fixture_path):
         with open(f_name, 'r') as f:
             text_data = f.read()
             return MockResponse(text_data)
+
     return mock_get
 
 
