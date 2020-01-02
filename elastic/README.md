@@ -92,7 +92,7 @@ Finally, [Restart the Agent][6] to begin sending Elasticsearch metrics to Datado
           - type: file
             path: /var/log/elasticsearch/*.log
             source: elasticsearch
-             service: <SERVICE_NAME>
+            service: <SERVICE_NAME>
     ```
 
   * Add additional instances to start collecting slow logs:
