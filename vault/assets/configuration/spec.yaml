@@ -13,6 +13,26 @@ files:
       value:
         example: http://localhost:8200/v1
         type: string
+    - name: detect_leader
+      required: false
+      description: Whether or not this instance should report cluster leader change events.
+      value:
+        example: false
+        type: boolean
+    - name: client_token
+      required: false
+      description: Client token necessary to collect metrics.
+      value:
+        example: <CLIENT_TOKEN>
+        type: string
+    - name: client_token_path
+      required: false
+      description: |
+         Path to a file containing the client token. Overrides `client_token`.
+         The token will be re-read after every authorization error.
+      value:
+        example: <CLIENT_TOKEN_PATH>
+        type: string
     - template: instances/http
     - template: instances/tags
     - template: instances/global

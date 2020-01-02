@@ -43,6 +43,22 @@ instances:
     #
   - api_url: http://localhost:8200/v1
 
+    ## @param detect_leader - boolean - optional - default: false
+    ## Whether or not this instance should report cluster leader change events.
+    #
+    # detect_leader: false
+
+    ## @param client_token - string - optional
+    ## Client token necessary to collect metrics.
+    #
+    # client_token: <CLIENT_TOKEN>
+
+    ## @param client_token_path - string - optional
+    ## Path to a file containing the client token. Overrides `client_token`.
+    ## The token will be re-read after every authorization error.
+    #
+    # client_token_path: <CLIENT_TOKEN_PATH>
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
