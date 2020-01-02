@@ -12,6 +12,7 @@ dev/testing:
 
 dev/tooling:
 - .github/workflows/**
+- .github/stale.yml
 - .gitlab/**
 - .gitlab-ci.yml
 - datadog_checks_dev/datadog_checks/dev/tooling/**
