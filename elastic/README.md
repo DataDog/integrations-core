@@ -99,12 +99,12 @@ Finally, [Restart the Agent][6] to begin sending Elasticsearch metrics to Datado
 
     ```yaml
         - type: file
-          path: /var/log/elasticsearch/elasticsearch_index_indexing_slowlog.log
+          path: /var/log/elasticsearch/<CLUSTER_NAME>_index_indexing_slowlog.log
           source: elasticsearch
           service: <SERVICE_NAME>
  
         - type: file
-          path: /var/log/elasticsearch/elasticsearch_index_search_slowlog.log
+          path: /var/log/elasticsearch/<CLUSTER_NAME>_index_search_slowlog.log
           source: elasticsearch
           service: <SERVICE_NAME>
     ```
