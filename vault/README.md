@@ -37,11 +37,11 @@ logs_enabled: true
 ```
 
 2. Configure Vault to enable audit and server logs.
-    * Audit logs must enabled by a privileged user with the appropriate policies, [see more][11].
+    * Audit logs must be enabled by a privileged user with the appropriate policies. See [Enabling audit devices][11] for more information.
         ```
         $ vault audit enable file file_path=/vault/vault-audit.log
         ```
-    * [Server logs][12] are not written to file by default. You can configure static server logs in the [start up script][13].
+    *  Make sure that [server logs][12] are written to file. You can configure static server logs in the [Vault systemd startup script][13].
         The following script is outputting the logs to `/var/log/vault.log`.
         ```
         ...
@@ -55,12 +55,13 @@ logs_enabled: true
     ````yaml
     logs:
     - type: file
-        path: /vault/vault-audit.log
-        source: vault
-        service: vault
+      path: /vault/vault-audit.log
+      source: vault
+      service: <SERVICE_NAME>
     - type: file
-        path: /var/log/vault.log
-        source: vault
+      path: /var/log/vault.log
+      source: vault
+      service: <SERVICE_NAME>
     ```
 
 ### Validation
