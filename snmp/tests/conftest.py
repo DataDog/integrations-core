@@ -15,8 +15,6 @@ from .common import COMPOSE_DIR, SCALAR_OBJECTS, SCALAR_OBJECTS_WITH_TAGS, TABUL
 FILES = [
     "https://ddintegrations.blob.core.windows.net/snmp/f5.snmprec",
     "https://ddintegrations.blob.core.windows.net/snmp/3850.snmprec",
-    # Todo: move meraki snmprec to common storage bucket
-    "https://gist.githubusercontent.com/ls339/e6a0d28a0595783819d094b9d1dccd84/raw/2978e3ab48aae46aa4fe64a305caeb71d02934eb/meraki-cloud-controller.snmprec",  # noqa: E501
 ]
 
 
