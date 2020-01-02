@@ -41,7 +41,7 @@ files:
     - type: file
       path: /vault/vault-audit.log
       source: vault
-      service: vault
+      service: <SERVICE_NAME>
     - type: file
       path: /var/log/vault.log
       source: vault
