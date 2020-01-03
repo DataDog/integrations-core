@@ -23,7 +23,9 @@
   "is_public": true,
   "integration_id": "clickhouse",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "ClickHouse Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {},
     "service_checks": "assets/service_checks.json"
   }
