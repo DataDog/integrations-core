@@ -8,8 +8,6 @@ The ActiveMQ check collects metrics for brokers and queues, producers and consum
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][13] for guidance on applying these instructions.
-
 ### Installation
 
 The Agent's ActiveMQ check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your ActiveMQ nodes.
@@ -18,13 +16,17 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 
 ### Configuration
 
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
 1. **Make sure that [JMX Remote is enabled][4] on your ActiveMQ server.**
 2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample activemq.d/conf.yaml][6] for all available configuration options.
 
       ```yaml
       instances:
         - host: localhost
-          port: 7199
+          port: 1616
           user: username
           password: password
           name: activemq_instance
@@ -88,7 +90,7 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 
 3. [Restart the agent][7]
 
-#### Log collection
+##### Log collection
 
  **Available for Agent >6.0**
 
@@ -114,6 +116,27 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
 
  3. [Restart the Agent][7].
 
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][13] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                                                                       |
+|----------------------|---------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `activemq`                                                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                               |
+| `<INSTANCE_CONFIG>`  | <pre>{"host": "%%host%%",<br> "port":"1099"}</pre> |
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][13].
+
+| Parameter      | Value                                               |
+|----------------|-----------------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "activemq", "service": "<YOUR_APP_NAME>"}` |
 
 ### Validation
 
@@ -153,3 +176,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics
 [12]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance
 [13]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[14]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#setup

@@ -1,0 +1,4 @@
+name: instances
+multiple: true
+description: |
+  Every instance is scheduled independent of the others.

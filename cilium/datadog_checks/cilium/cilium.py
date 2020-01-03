@@ -12,10 +12,6 @@ class CiliumCheck(OpenMetricsBaseCheck):
     """
 
     def __init__(self, name, init_config, instances):
-        instance = {}
-        endpoint = None
-        metrics = None
-
         instance = instances[0]
 
         agent_endpoint = instance.get('agent_endpoint')

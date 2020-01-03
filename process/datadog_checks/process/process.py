@@ -156,6 +156,13 @@ class ProcessCheck(AgentCheck):
                         matching_pids.add(proc.pid)
                         break
 
+        if not matching_pids:
+            self.log.debug(
+                "Unable to find process named '%s' from among processes:\n%s",
+                search_string,
+                ', '.join(repr(p) for p in psutil.process_iter()),
+            )
+
         self.pid_cache[name] = matching_pids
         self.last_pid_cache_ts[name] = time.time()
         if refresh_ad_cache:

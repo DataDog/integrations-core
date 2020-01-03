@@ -29,7 +29,7 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     db.lpush("test_list", 3)
     db.set("key1", "value")
     db.set("key2", "value")
-    db.setex("expirekey", "expirevalue", 1000)
+    db.setex("expirekey", 1000, "expirevalue")
 
     redis_check = Redis('redisdb', {}, {})
     redis_check.check(redis_instance)
@@ -49,6 +49,8 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
             aggregator.assert_metric(name, tags=expected)
 
     aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected_db + ['key:test_list', 'key_type:list'])
+
+    aggregator.assert_metric('redis.net.maxclients')
 
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names

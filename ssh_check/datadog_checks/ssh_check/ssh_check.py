@@ -1,12 +1,26 @@
 # (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 import time
 from collections import namedtuple
 
 import paramiko
 
 from datadog_checks.checks import AgentCheck
+
+# Example ssh remote version: http://supervisord.org/changes.html
+#   - SSH-2.0-OpenSSH_8.1
+SSH_REMOTE_VERSION_PATTERN = re.compile(
+    r"""
+    ^.*_
+    (?P<major>0|[1-9]\d*)
+    \.
+    (?P<minor>0|[1-9]\d*)
+    (?P<release>p[1-9]\d*)?
+    """,
+    re.VERBOSE,
+)
 
 
 class CheckSSH(AgentCheck):
@@ -94,6 +108,8 @@ class CheckSSH(AgentCheck):
                     self.service_check(self.SFTP_SERVICE_CHECK_NAME, status, tags=tags, message=exception_message)
                 raise
 
+            self._collect_metadata(client)
+
             # Open sftp session on the existing connection to check status of SFTP
             if conf.sftp_check:
                 try:
@@ -117,3 +133,20 @@ class CheckSSH(AgentCheck):
         finally:
             # Always close the client, failure to do so leaks one thread per connection left open
             client.close()
+
+    def _collect_metadata(self, client):
+        try:
+            version = client.get_transport().remote_version
+        except Exception as e:
+            self.log.warning("Error collecting version: %s", e)
+            return
+
+        if 'OpenSSH' in version:
+            flavor = 'OpenSSH'
+        else:
+            flavor = 'unknown'
+
+        self.log.debug('Version collected: %s, flavor: %s', version, flavor)
+
+        self.set_metadata('version', version, scheme='regex', pattern=SSH_REMOTE_VERSION_PATTERN)
+        self.set_metadata('flavor', flavor)

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
 import mock
 import pytest
 
@@ -128,7 +127,7 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_metadata(aggregator, instance_query, datadog_agent):
+def test_metadata(instance_query, datadog_agent):
     check = Couchbase('couchbase', {}, instances=[instance_query])
     check.check_id = 'test:123'
     check.check(instance_query)

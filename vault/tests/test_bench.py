@@ -1,19 +1,16 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-2019
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.vault import Vault
-
-from .common import INSTANCES
+from .utils import run_check
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_run(benchmark):
-    instance = INSTANCES['main']
-    c = Vault('vault', {}, [instance])
+def test_run(benchmark, check, instance):
+    check = check(instance())
 
     # Run once to get instantiation of config out of the way.
-    c.check(instance)
+    run_check(check)
 
-    benchmark(c.check, instance)
+    benchmark(run_check, check)

@@ -25,8 +25,3 @@ services:
       - sh
       - -c
       - echo "{\"master_password\":\"$$PASSWORD\"}" > /tmp/hana_password.json;cat /tmp/hana_password.json;/run_hana --agree-to-sap-license --passwords-url file:///tmp/hana_password.json
-    volumes:
-       - sap-hana-data:/hana/mounts
-
-volumes:
-  sap-hana-data:

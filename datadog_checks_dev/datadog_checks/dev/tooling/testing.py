@@ -174,6 +174,9 @@ def construct_pytest_options(
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
 
+    if not verbose:
+        pytest_options += ' --tb=short'
+
     if color is not None:
         pytest_options += ' --color=yes' if color else ' --color=no'
 

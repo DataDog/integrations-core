@@ -10,11 +10,15 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 HOST = get_docker_hostname()
 PORT = '50000'
+DB = 'datadog'
+USERNAME = 'db2inst1'
+PASSWORD = 'db2inst1-pwd'
+DB2_VERSION = os.getenv('DB2_VERSION')
 
 CONFIG = {
-    'db': 'datadog',
-    'username': 'db2inst1',
-    'password': 'db2inst1-pwd',
+    'db': DB,
+    'username': USERNAME,
+    'password': PASSWORD,
     'host': HOST,
     'port': PORT,
     'tags': ['foo:bar'],

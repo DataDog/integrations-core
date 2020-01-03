@@ -103,21 +103,36 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 **Available for Agent >6.0**
 
-PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix.
+PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. Refer to the PostgreSQL [documentation][14] on this topic for additional details.
 
-1. Edit your PostgreSQL configuration file `/etc/postgresql/<version>/main/postgresql.conf` and uncomment the following parameter in the log section:
+1. Logging is configured within the file `/etc/postgresql/<VERSION>/main/postgresql.conf`, for regular log results including statement outputs uncomment the following parameters in the log section:
 
     ```conf
       logging_collector = on
       log_directory = 'pg_log'  # directory where log files are written,
                                 # can be absolute or relative to PGDATA
-      log_filename = 'pg.log'   #log file name, can include pattern
-      log_statement = 'all'     #log all queries
+      log_filename = 'pg.log'   # log file name, can include pattern
+      log_statement = 'all'     # log all queries
+      #log_duration = on
       log_line_prefix= '%m [%p] %d %a %u %h %c '
       log_file_mode = 0644
       ## For Windows
       #log_destination = 'eventlog'
     ```
+
+2. To gather detailed duration metrics and make them searchable in the Datadog interface, they should be configured inline with the statement themselves.  See below for the recommended configuration differences from above and note that both `log_statement` and `log_duration` options are commented out. See discussion on this topic [here][15].
+   
+   This config logs all statements, but to reduce the output to those which have a certain duration, set the `log_min_duration_statement` value to the desired minimum duration (in milliseconds):
+
+    ```conf
+      log_min_duration_statement = 0    # -1 is disabled, 0 logs all statements
+                                        # and their durations, > 0 logs only
+                                        # statements running at least this number
+                                        # of milliseconds
+      #log_statement = 'all'
+      #log_duration = on
+    ```
+
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -125,15 +140,15 @@ PostgreSQL default logging is to `stderr` and logs do not include detailed infor
       logs_enabled: true
     ```
 
-3.  Add this configuration block to your `postgres.d/conf.yaml` file to start collecting your PostgreSQL logs:
+3.  Add and edit this configuration block to your `postgres.d/conf.yaml` file to start collecting your PostgreSQL logs:
 
     ```yaml
       logs:
           - type: file
-            path: /var/log/pg_log/pg.log
+            path: <LOG_FILE_PATH>
             source: postgresql
             sourcecategory: database
-            service: myapp
+            service: <SERVICE_NAME>
             #To handle multi line that starts with yyyy-mm-dd use the following pattern
             #log_processing_rules:
             #  - type: multi_line
@@ -214,3 +229,5 @@ Additional helpful documentation, links, and articles:
 [11]: https://www.datadoghq.com/blog/postgresql-monitoring
 [12]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
 [13]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
+[14]: https://www.postgresql.org/docs/11/runtime-config-logging.html
+[15]: https://www.postgresql.org/message-id/20100210180532.GA20138@depesz.com

@@ -65,19 +65,19 @@ def requests_get_mock(url, *args, **kwargs):
             return True
 
     if url == NAME_SYSTEM_STATE_URL:
-        system_state_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem_state')
+        system_state_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem_state.json')
         with open(system_state_file_path, 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif url == NAME_SYSTEM_URL:
-        system_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem')
+        system_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem.json')
         with open(system_file_path, 'r') as f:
             body = f.read()
             return MockResponse(body, 200)
 
     elif url == NAME_SYSTEM_METADATA_URL:
-        system_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem_info')
+        system_file_path = os.path.join(HERE, 'fixtures', 'hdfs_namesystem_info.json')
         with open(system_file_path, 'r') as f:
             body = f.read()
             return MockResponse(body, 200)

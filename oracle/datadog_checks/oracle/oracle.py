@@ -116,7 +116,7 @@ class Oracle(AgentCheck):
                             jpype.java.lang.ClassLoader.getSystemClassLoader()
                         )
                     con = jdb.connect(self.ORACLE_DRIVER_CLASS, connect_string, [user, password], jdbc_driver)
-                except jpype.JException(jpype.java.lang.RuntimeException) as e:
+                except Exception as e:
                     if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                         msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
                         is available.

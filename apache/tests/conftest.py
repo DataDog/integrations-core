@@ -4,6 +4,7 @@
 
 import os
 
+import mock
 import pytest
 import requests
 
@@ -24,6 +25,7 @@ def dd_environment():
         compose_file=os.path.join(HERE, 'compose', 'apache.yaml'),
         env_vars=env,
         conditions=[CheckEndpoints([STATUS_URL]), generate_metrics],
+        mount_logs=True,
         sleep=20,
     ):
         yield STATUS_CONFIG
@@ -32,6 +34,21 @@ def dd_environment():
 def generate_metrics():
     for _ in range(0, 100):
         requests.get(BASE_URL)
+
+
+@pytest.fixture
+def mock_hide_server_version():
+    with mock.patch('datadog_checks.base.utils.http.requests') as req:
+
+        def mock_requests_get_headers(*args, **kwargs):
+            r = requests.get(*args, **kwargs)
+            old_iter = r.iter_lines
+            r.iter_lines = mock.MagicMock()
+            r.iter_lines.return_value = (l for l in old_iter(decode_unicode=True) if 'ServerVersion' not in l)
+            return r
+
+        req.get = mock_requests_get_headers
+        yield
 
 
 @pytest.fixture

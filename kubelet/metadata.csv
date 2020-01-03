@@ -57,3 +57,7 @@ kubernetes.ephemeral_storage.limits,gauge,,byte,,Ephemeral storage limit of the 
 kubernetes.ephemeral_storage.requests,gauge,,byte,,Ephemeral storage request of the container (requires kubernetes v1.8+),0,kubelet,k8s.eph_storage.requests
 kubernetes.ephemeral_storage.usage,gauge,,byte,,Ephemeral storage usage of the POD,0,kubelet,k8s.eph_storage.usage
 kubernetes.kubelet.evictions,count,,,,The number of pods that have been evicted from the kubelet (ALPHA in kubernetes v1.16),-1,kubelet,k8s.evict
+kubernetes.kubelet.cpu.usage,gauge,,nanocore,,The number of cores used by kubelet,-1,kubelet,k8s.kubelet.cpu
+kubernetes.kubelet.memory.rss,gauge,,byte,,Size of kubelet RSS in bytes,-1,kubelet,k8s.kubelet.mem.rss
+kubernetes.runtime.cpu.usage,gauge,,nanocore,,The number of cores used by the runtime,-1,kubelet,k8s.runtime.cpu
+kubernetes.runtime.memory.rss,gauge,,byte,,Size of runtime RSS in bytes,-1,kubelet,k8s.runtime.mem.rss

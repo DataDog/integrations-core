@@ -74,6 +74,8 @@ class TwistlockCheck(AgentCheck):
         service_check_name = "{}.license_ok".format(self.NAMESPACE)
         try:
             license = self._retrieve_json("/api/v1/settings/license")
+            if "expiration_date" not in license:
+                raise Exception("expiration_date not found.")
         except Exception as e:
             self.warning("cannot retrieve license data: {}".format(e))
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
@@ -239,17 +241,17 @@ class TwistlockCheck(AgentCheck):
 
         if published_date < self.last_run:
             if host:
-                type = 'hosts'
+                vuln_type = 'hosts'
             elif image:
-                type = 'images'
+                vuln_type = 'images'
             else:
-                type = 'systems'
+                vuln_type = 'systems'
 
             msg_text = """
             There is a new CVE affecting your {}:
             {}
             """.format(
-                type, description
+                vuln_type, description
             )
 
             event = {
@@ -267,9 +269,9 @@ class TwistlockCheck(AgentCheck):
     def _report_vuln_info(self, namespace, data, tags):
         # CVE vulnerabilities
         summary = defaultdict(int)
-        types = ["critical", "high", "medium", "low"]
-        for type in types:
-            summary[type] = 0
+        severity_types = ["critical", "high", "medium", "low"]
+        for severity_type in severity_types:
+            summary[severity_type] = 0
 
         cves = data.get('info', {}).get('cveVulnerabilities', []) or []
         for cve in cves:
@@ -286,11 +288,11 @@ class TwistlockCheck(AgentCheck):
     def _report_compliance_information(self, namespace, data, tags):
         compliance = defaultdict(int)
         vulns = data.get('info', {}).get('complianceDistribution', {}) or {}
-        types = ["critical", "high", "medium", "low"]
-        for type in types:
-            compliance[type] += vulns[type]
-            compliance_tags = SEVERITY_TAGS.get(type, []) + tags
-            self.gauge('{}.compliance.count'.format(namespace), compliance[type], compliance_tags)
+        severity_types = ["critical", "high", "medium", "low"]
+        for severity_type in severity_types:
+            compliance[severity_type] += vulns.get(severity_type, 0)
+            compliance_tags = SEVERITY_TAGS.get(severity_type, []) + tags
+            self.gauge('{}.compliance.count'.format(namespace), compliance[severity_type], compliance_tags)
 
     def _report_layer_count(self, data, namespace, tags):
         # Layer count and size
@@ -321,6 +323,10 @@ class TwistlockCheck(AgentCheck):
             j = response.json()
             # it's possible to get a null response from the server
             # {} is a bit easier to deal with
+            if 'err' in j:
+                err_msg = "Error in response: {}".format(j.get("err"))
+                self.log.error(err_msg)
+                raise Exception(err_msg)
             return j or {}
         except Exception as e:
             self.log.debug("cannot get a response: {} response is: {}".format(e, response.text))

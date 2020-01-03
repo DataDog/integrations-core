@@ -12,7 +12,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
-from .utils import scrub_connection_string, status_to_service_check
+from .utils import get_version, scrub_connection_string, status_to_service_check
 
 
 class IbmDb2Check(AgentCheck):
@@ -23,7 +23,6 @@ class IbmDb2Check(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
-
         self._db = self.instance.get('db', '')
         self._username = self.instance.get('username', '')
         self._password = self.instance.get('password', '')
@@ -66,6 +65,40 @@ class IbmDb2Check(AgentCheck):
         self.query_table_space()
         self.query_transaction_log()
         self.query_custom()
+        self.collect_metadata()
+
+    def collect_metadata(self):
+        try:
+            raw_version = get_version(self._conn)
+        except Exception as e:
+            self.log.error("Error getting version: {}".format(str(e)))
+            return
+
+        if raw_version:
+            version_parts = self.parse_version(raw_version)
+            self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
+
+            self.log.debug('Found ibm_db2 version: {}'.format(raw_version))
+        else:
+            self.log.warning('Could not retrieve ibm_db2 version info: {}'.format(raw_version))
+
+    def parse_version(self, version):
+        """
+        Raw version string is in format MM.mm.uuuu.
+        Parse version to MM.mm.xx.yy
+        where xx is the modification number and yy is the fix pack number
+        https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.wn.doc/doc/c0070229.html#c0070229
+        """
+        major, minor, update = version.split('.')
+        modification, fix = update[:2], update[2:]
+
+        # remove leading zeros from raw version parts
+        return {
+            'major': str(int(major)),
+            'minor': str(int(minor)),
+            'mod': str(int(modification)),
+            'fix': str(int(fix)),
+        }
 
     def query_instance(self):
         # Only 1 instance
@@ -530,7 +563,18 @@ class IbmDb2Check(AgentCheck):
 
     def iter_rows(self, query, method):
         # https://github.com/ibmdb/python-ibmdb/wiki/APIs
-        cursor = ibm_db.exec_immediate(self._conn, query)
+        try:
+            cursor = ibm_db.exec_immediate(self._conn, query)
+        except Exception as e:
+            error = str(e)
+            self.log.error("Error executing query, attempting to a new connection: {}".format(error))
+            connection = self.get_connection()
+
+            if connection is None:
+                raise ConnectionError("Unable to create new connection")
+
+            self._conn = connection
+            cursor = ibm_db.exec_immediate(self._conn, query)
 
         row = method(cursor)
         while row is not False:

@@ -9,6 +9,10 @@ try:
 except ImportError:
     pymqi = None
 
+# Metric types
+GAUGE = 'gauge'
+RATE = 'rate'
+
 
 def queue_metrics():
     return {
@@ -45,7 +49,19 @@ def queue_metrics():
 
 
 def pcf_metrics():
-    return {'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1}}
+    return {
+        'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
+        'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
+    }
+
+
+def pcf_status_reset_metrics():
+    return {
+        'high_q_depth': (pymqi.CMQC.MQIA_HIGH_Q_DEPTH, GAUGE),
+        'msg_deq_count': (pymqi.CMQC.MQIA_MSG_DEQ_COUNT, RATE),
+        'msg_enq_count': (pymqi.CMQC.MQIA_MSG_ENQ_COUNT, RATE),
+        'time_since_reset': (pymqi.CMQC.MQIA_TIME_SINCE_RESET, RATE),
+    }
 
 
 def queue_manager_metrics():
@@ -56,10 +72,36 @@ def channel_metrics():
     return {
         'batch_size': pymqi.CMQCFC.MQIACH_BATCH_SIZE,
         'batch_interval': pymqi.CMQCFC.MQIACH_BATCH_INTERVAL,
-        'long_retry_count': pymqi.CMQCFC.MQIACH_LONG_RETRY,
-        'long_retry_interval': pymqi.CMQCFC.MQIACH_LONG_TIMER,
+        'long_retry': pymqi.CMQCFC.MQIACH_LONG_RETRY,
+        'long_timer': pymqi.CMQCFC.MQIACH_LONG_TIMER,
         'max_message_length': pymqi.CMQCFC.MQIACH_MAX_MSG_LENGTH,
-        'short_retry_count': pymqi.CMQCFC.MQIACH_SHORT_RETRY,
+        'short_retry': pymqi.CMQCFC.MQIACH_SHORT_RETRY,
+        'disc_interval': pymqi.CMQCFC.MQIACH_DISC_INTERVAL,
+        'hb_interval': pymqi.CMQCFC.MQIACH_HB_INTERVAL,
+        'keep_alive_interval': pymqi.CMQCFC.MQIACH_KEEP_ALIVE_INTERVAL,
+        'mr_count': pymqi.CMQCFC.MQIACH_MR_COUNT,
+        'mr_interval': pymqi.CMQCFC.MQIACH_MR_INTERVAL,
+        'network_priority': pymqi.CMQCFC.MQIACH_NETWORK_PRIORITY,
+        'npm_speed': pymqi.CMQCFC.MQIACH_NPM_SPEED,
+        'sharing_conversations': pymqi.CMQCFC.MQIACH_SHARING_CONVERSATIONS,
+        'short_timer': pymqi.CMQCFC.MQIACH_SHORT_TIMER,
+    }
+
+
+def channel_status_metrics():
+    return {
+        'buffers_rcvd': pymqi.CMQCFC.MQIACH_BUFFERS_RCVD,
+        'buffers_sent': pymqi.CMQCFC.MQIACH_BUFFERS_SENT,
+        'bytes_rcvd': pymqi.CMQCFC.MQIACH_BYTES_RCVD,
+        'bytes_sent': pymqi.CMQCFC.MQIACH_BYTES_SENT,
+        'channel_status': pymqi.CMQCFC.MQIACH_CHANNEL_STATUS,
+        'mca_status': pymqi.CMQCFC.MQIACH_MCA_STATUS,
+        'msgs': pymqi.CMQCFC.MQIACH_MSGS,
+        'ssl_key_resets': pymqi.CMQCFC.MQIACH_SSL_KEY_RESETS,
+        # NOTE: Following metrics are NOT tested in e2e. I didn't managed to to get those metrics locally.
+        'batches': pymqi.CMQCFC.MQIACH_BATCHES,
+        'current_msgs': pymqi.CMQCFC.MQIACH_CURRENT_MSGS,
+        'indoubt_status': pymqi.CMQCFC.MQIACH_INDOUBT_STATUS,
     }
 
 

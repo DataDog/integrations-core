@@ -19,10 +19,12 @@
     "data store"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "sap-hana",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "SAP HANA Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {},
     "service_checks": "assets/service_checks.json"
   }

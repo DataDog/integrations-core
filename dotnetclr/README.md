@@ -21,13 +21,14 @@ The Dotnetclr check is included in the [Datadog Agent][2] package, so you don't 
 
 ## Validation
 
-[Run the Agent's `status` subcommand][4] and look for `dotnetclr` under the Checks section.
+[Run the Agent's `status` subcommand][6] and look for `dotnetclr` under the Checks section.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][6].
+Need help? Contact [Datadog support][7].
 
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[4]: https://github.com/DataDog/integrations-core/blob/master/dotnetclr/datadog_checks/dotnetclr/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/help
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[7]: https://docs.datadoghq.com/help

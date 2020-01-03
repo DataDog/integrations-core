@@ -33,15 +33,21 @@ instances:
     #
   - api_url: http://localhost:8200/v1
 
-    ## @param client_token - string - optional
-    ## Client token if needed.
-    #
-    # client_token: <TOKEN>
-
     ## @param detect_leader - boolean - optional - default: false
     ## Whether or not this instance should report cluster leader change events.
     #
     # detect_leader: false
+
+    ## @param client_token - string - optional
+    ## Client token necessary to collect metrics.
+    #
+    # client_token: <CLIENT_TOKEN>
+
+    ## @param client_token_path - string - optional
+    ## Path to a file containing the client token. Overrides `client_token`.
+    ## The token will be re-read after every authorization error.
+    #
+    # client_token_path: <CLIENT_TOKEN_PATH>
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event, and service check emitted by this Integration.
@@ -219,4 +225,3 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
-    

@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import requests
 from six import iteritems, itervalues
-from six.moves.urllib.parse import urljoin
+from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, to_string
 
@@ -26,6 +26,7 @@ class AuthenticationError(requests.exceptions.HTTPError):
 
 class ESCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
+        'aws_service': {'name': 'aws_service', 'default': 'es'},
         'ssl_verify': {'name': 'tls_verify'},
         'ssl_cert': {'name': 'tls_cert'},
         'ssl_key': {'name': 'tls_private_key'},
@@ -39,6 +40,13 @@ class ESCheck(AgentCheck):
         super(ESCheck, self).__init__(name, init_config, instances)
         # Host status needs to persist across all checks
         self.cluster_status = {}
+
+        if self.instance.get('auth_type') == 'aws' and self.instance.get('url'):
+            self.HTTP_CONFIG_REMAPPER = self.HTTP_CONFIG_REMAPPER.copy()
+            self.HTTP_CONFIG_REMAPPER['aws_host'] = {
+                'name': 'aws_host',
+                'default': urlparse(self.instance['url']).hostname,
+            }
 
     def check(self, instance):
         config = from_instance(instance)
