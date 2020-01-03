@@ -120,7 +120,7 @@ class AggregatorStub(object):
         """
         Return all events
         """
-        return self._events[:]
+        return self._events
 
     def histogram_bucket(self, name):
         """
