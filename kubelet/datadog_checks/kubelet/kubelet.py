@@ -272,7 +272,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self._report_pods_running(self.pod_list, self.instance_tags)
         self._report_container_spec_metrics(self.pod_list, self.instance_tags)
         self._report_container_state_metrics(self.pod_list, self.instance_tags)
-        self._report_ephemeral_storage_usage(self.pod_list, self.instance_tags)
+
+        self.stats = self._retrieve_stats()
+        self._report_ephemeral_storage_usage(self.pod_list, self.stats, self.instance_tags)
+        self._report_system_container_metrics(self.stats, self.instance_tags)
 
         if self.cadvisor_legacy_url:  # Legacy cAdvisor
             self.log.debug('processing legacy cadvisor metrics')
@@ -552,9 +555,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             gauge_name = '{}.containers.{}.{}'.format(self.NAMESPACE, metric_name, state_name)
             self.gauge(gauge_name, 1, tags + reason_tags)
 
-    def _report_ephemeral_storage_usage(self, pod_list, instance_tags):
-        stats = self._retrieve_stats()
-
+    def _report_ephemeral_storage_usage(self, pod_list, stats, instance_tags):
         ephemeral_storage_usage = {}
         for pod in stats.get('pods', []):
             pod_uid = pod.get('podRef', {}).get('uid')
@@ -577,6 +578,24 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             tags += instance_tags
 
             self.gauge(self.NAMESPACE + '.ephemeral_storage.usage', pod_usage, tags)
+
+    def _report_system_container_metrics(self, stats, instance_tags):
+        sys_containers = stats.get('node', {}).get('systemContainers', [])
+        for ctr in sys_containers:
+            if ctr.get('name') == 'runtime':
+                mem_rss = ctr.get('memory', {}).get('rssBytes')
+                if mem_rss:
+                    self.gauge(self.NAMESPACE + '.runtime.memory.rss', mem_rss, instance_tags)
+                cpu_usage = ctr.get('cpu', {}).get('usageNanoCores')
+                if cpu_usage:
+                    self.gauge(self.NAMESPACE + '.runtime.cpu.usage', cpu_usage, instance_tags)
+            if ctr.get('name') == 'kubelet':
+                mem_rss = ctr.get('memory', {}).get('rssBytes')
+                if mem_rss:
+                    self.gauge(self.NAMESPACE + '.kubelet.memory.rss', mem_rss, instance_tags)
+                cpu_usage = ctr.get('cpu', {}).get('usageNanoCores')
+                if cpu_usage:
+                    self.gauge(self.NAMESPACE + '.kubelet.cpu.usage', cpu_usage, instance_tags)
 
     @staticmethod
     def parse_quantity(string):
