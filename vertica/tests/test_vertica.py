@@ -39,7 +39,7 @@ def test_check(aggregator, instance):
 def test_vertica_log_file_not_created(aggregator, instance):
     instance['client_lib_log_level'] = 'DEBUG'
 
-    vertica_default_log = os.path.abspath(os.path.join(common.HERE, os.pardir, 'vertica_python.log'))
+    vertica_default_log = os.path.join(os.path.dirname(common.HERE), 'vertica_python.log')
     if os.path.exists(vertica_default_log):
         os.remove(vertica_default_log)
 
