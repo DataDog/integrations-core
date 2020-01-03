@@ -112,11 +112,6 @@ class __AgentCheck(object):
         the Agent might create several different Check instances and the method would be
         called as many times.
 
-        Agent 5 signature:
-
-            AgentCheck(name, init_config, agentConfig, instances=None)
-            AgentCheck.check(instance)
-
         Agent 6,7 signature:
 
             AgentCheck(name, init_config, instances)    # instances contain only 1 instance
