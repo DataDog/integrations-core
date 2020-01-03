@@ -93,12 +93,10 @@ class WinWMICheck(AgentCheck):
             raise TagQueryUniquenessFailure
 
         if sampler[0][target_property] is None:
-            wmi_property = target_property
-            wmi_class = target_class
             self.log.error(
                 u"Incorrect 'target property' in `tag_queries` parameter: `%s` is empty or is not a property of `%s`",
-                wmi_property,
-                wmi_class,
+                target_property,
+                target_class,
             )
             raise TypeError
 
