@@ -277,7 +277,7 @@ class Redis(AgentCheck):
                         key_tags.append('redis_db:db{}'.format(instance_db))
                     key_tags.extend(tags)
                     self.gauge('redis.key.length', 0, tags=key_tags)
-                    self.warning("{} key not found in redis".format(key))
+                    self.warning("%s key not found in redis", key)
             return
 
         # convert to integer the output of `keyspace`, from `db0` to `0`
@@ -287,7 +287,7 @@ class Redis(AgentCheck):
         # user might have configured the instance to target one specific db
         if instance_db:
             if instance_db not in databases:
-                self.warning("Cannot find database {}".format(instance_db))
+                self.warning("Cannot find database %s", instance_db)
                 return
             databases = [instance_db]
 
@@ -313,7 +313,7 @@ class Redis(AgentCheck):
                     try:
                         key_type = ensure_unicode(db_conn.type(key))
                     except redis.ResponseError:
-                        self.log.info("key {} on remote server; skipping".format(text_key))
+                        self.log.info("key %s on remote server; skipping", text_key)
                         continue
 
                     if key_type == 'list':
@@ -366,7 +366,7 @@ class Redis(AgentCheck):
                     key_tags.append('redis_db:db{}'.format(instance_db))
                 key_tags.extend(tags)
                 self.gauge('redis.key.length', 0, tags=key_tags)
-                self.warning("{} key not found in redis".format(key))
+                self.warning("%s key not found in redis", key)
 
     def _check_replication(self, info, tags):
         # Save the replication delay for each slave

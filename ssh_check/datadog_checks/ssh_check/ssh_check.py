@@ -60,7 +60,7 @@ class CheckSSH(AgentCheck):
                 raise Exception("Please specify a valid {0}".format(option))
 
             if value is None or type(value) != expected_type:
-                self.log.debug("Bad or missing value for {0} parameter. Using default".format(option))
+                self.log.debug("Bad or missing value for %s parameter. Using default", option)
                 value = default
 
             params.append(value)
@@ -80,7 +80,7 @@ class CheckSSH(AgentCheck):
                 else:
                     private_key = paramiko.RSAKey.from_private_key_file(conf.private_key_file)
             except IOError:
-                self.warning("Unable to find private key file: {}".format(conf.private_key_file))
+                self.warning("Unable to find private key file: %s", conf.private_key_file)
             except paramiko.ssh_exception.PasswordRequiredException:
                 self.warning("Private key file is encrypted but no password was given")
             except paramiko.ssh_exception.SSHException:

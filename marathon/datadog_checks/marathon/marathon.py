@@ -235,7 +235,7 @@ class Marathon(AgentCheck):
                                 val = float(_attr)
                                 self.gauge(metric_name, val, tags=q_tags)
                         except (KeyError, TypeError):
-                            self.log.warn("Metric unavailable skipping: {}".format(metric_name))
+                            self.log.warning("Metric unavailable skipping: %s", metric_name)
 
                 else:
                     try:
@@ -245,7 +245,7 @@ class Marathon(AgentCheck):
                         val = float(_attr)
                         self.gauge(metric_name, val, tags=q_tags)
                     except (KeyError, TypeError):
-                        self.log.warn("Metric unavailable skipping: {}".format(metric_name))
+                        self.log.warning("Metric unavailable skipping: %s", metric_name)
 
         self.ensure_queue_count(queued, url, acs_url, tags, label_tags, group)
 

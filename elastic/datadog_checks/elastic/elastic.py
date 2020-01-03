@@ -125,10 +125,10 @@ class ESCheck(AgentCheck):
         except AuthenticationError:
             raise
         except Exception as e:
-            self.warning("Error while trying to get Elasticsearch version from %s %s" % (config.url, str(e)))
+            self.warning("Error while trying to get Elasticsearch version from %s %s", config.url, e)
             version = [1, 0, 0]
 
-        self.log.debug("Elasticsearch version is %s" % version)
+        self.log.debug("Elasticsearch version is %s", version)
         return version
 
     def _join_url(self, base, url, admin_forwarder=False):
@@ -218,7 +218,7 @@ class ESCheck(AgentCheck):
                 )
             raise
 
-        self.log.debug("request to url {} returned: {}".format(url, resp))
+        self.log.debug("request to url %s returned: %s", url, resp)
 
         return resp.json()
 

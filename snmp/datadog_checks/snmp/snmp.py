@@ -159,7 +159,7 @@ class SnmpCheck(AgentCheck):
                     profile = self._profile_for_sysobject_oid(sys_object_oid)
                 except ConfigurationError:
                     if not (host_config.table_oids or host_config.raw_oids):
-                        self.log.warn("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
+                        self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
                     host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
@@ -588,7 +588,7 @@ class SnmpCheck(AgentCheck):
                 value = int(snmp_value)
                 self.monotonic_count(metric_name, value, tags)
             else:
-                self.warning('Invalid forced-type specified: {} in {}'.format(forced_type, name))
+                self.warning('Invalid forced-type specified: %s in %s', forced_type, name)
                 raise ConfigurationError('Invalid forced-type in config file: {}'.format(name))
             return
 

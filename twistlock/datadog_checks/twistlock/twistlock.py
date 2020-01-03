@@ -77,7 +77,7 @@ class TwistlockCheck(AgentCheck):
             if "expiration_date" not in license:
                 raise Exception("expiration_date not found.")
         except Exception as e:
-            self.warning("cannot retrieve license data: {}".format(e))
+            self.warning("cannot retrieve license data: %s", e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             raise e
 
@@ -103,7 +103,7 @@ class TwistlockCheck(AgentCheck):
             scan_result = self._retrieve_json("/api/v1/registry")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
-            self.warning("cannot retrieve registry data: {}".format(e))
+            self.warning("cannot retrieve registry data: %s", e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             return None
 
@@ -130,7 +130,7 @@ class TwistlockCheck(AgentCheck):
             scan_result = self._retrieve_json("/api/v1/images")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
-            self.warning("cannot retrieve registry data: {}".format(e))
+            self.warning("cannot retrieve registry data: %s", e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             return None
 
@@ -162,7 +162,7 @@ class TwistlockCheck(AgentCheck):
             scan_result = self._retrieve_json("/api/v1/hosts")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
-            self.warning("cannot retrieve registry data: {}".format(e))
+            self.warning("cannot retrieve registry data: %s", e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             return None
 
@@ -187,7 +187,7 @@ class TwistlockCheck(AgentCheck):
             scan_result = self._retrieve_json("/api/v1/containers")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
-            self.warning("cannot retrieve registry data: {}".format(e))
+            self.warning("cannot retrieve registry data: %s", e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=self.config.tags)
             return None
 
@@ -329,5 +329,5 @@ class TwistlockCheck(AgentCheck):
                 raise Exception(err_msg)
             return j or {}
         except Exception as e:
-            self.log.debug("cannot get a response: {} response is: {}".format(e, response.text))
+            self.log.debug("cannot get a response: %s response is: %s", e, response.text)
             raise e

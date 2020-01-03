@@ -889,7 +889,7 @@ class OpenMetricsScraperMixin(object):
             for index, sample in enumerate(metric.samples):
                 val = sample[self.SAMPLE_VALUE]
                 if not self._is_value_valid(val):
-                    self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
+                    self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
                     continue
                 if sample[self.SAMPLE_NAME].endswith("_sum"):
                     lst = list(sample)
@@ -912,7 +912,7 @@ class OpenMetricsScraperMixin(object):
             for index, sample in enumerate(metric.samples):
                 val = sample[self.SAMPLE_VALUE]
                 if not self._is_value_valid(val):
-                    self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
+                    self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
                     continue
                 if sample[self.SAMPLE_NAME].endswith("_count"):
                     continue
