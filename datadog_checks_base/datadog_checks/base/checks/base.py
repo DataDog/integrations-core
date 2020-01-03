@@ -706,7 +706,7 @@ class AgentCheck(object):
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
         for key in event:
-            # transform any bytes objects to utf-8
+            # Ensure strings have the correct type
             try:
                 event[key] = to_string(event[key])
             except UnicodeError:
