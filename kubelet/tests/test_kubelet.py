@@ -98,6 +98,10 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.evictions',
 ]
 
+EXPECTED_METRICS_PROMETHEUS_1_14 = EXPECTED_METRICS_PROMETHEUS + [
+    'kubernetes.kubelet.container.log_filesystem.used_bytes'
+]
+
 EXPECTED_METRICS_PROMETHEUS_PRE_1_14 = EXPECTED_METRICS_PROMETHEUS + [
     'kubernetes.kubelet.network_plugin.latency.quantile'
 ]
@@ -327,9 +331,11 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version
             for tag in instance_tags:
                 aggregator.assert_metric_has_tag(metric, tag)
 
-    prom_metrics = EXPECTED_METRICS_PROMETHEUS
     if kube_version == KUBE_PRE_1_14:
         prom_metrics = EXPECTED_METRICS_PROMETHEUS_PRE_1_14
+
+    if kube_version == KUBE_1_14:
+        prom_metrics = EXPECTED_METRICS_PROMETHEUS_1_14
 
     for metric in prom_metrics:
         aggregator.assert_metric(metric)

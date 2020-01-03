@@ -61,3 +61,4 @@ kubernetes.kubelet.cpu.usage,gauge,,nanocore,,The number of cores used by kubele
 kubernetes.kubelet.memory.rss,gauge,,byte,,Size of kubelet RSS in bytes,-1,kubelet,k8s.kubelet.mem.rss
 kubernetes.runtime.cpu.usage,gauge,,nanocore,,The number of cores used by the runtime,-1,kubelet,k8s.runtime.cpu
 kubernetes.runtime.memory.rss,gauge,,byte,,Size of runtime RSS in bytes,-1,kubelet,k8s.runtime.mem.rss
+kubernetes.kubelet.container.log_filesystem.used_bytes,gauge,,byte,,Bytes used by the container's logs on the filesystem (requires kubernetes 1.14+),0,kubelet,k8s.kubelet.container.log_filesystem
