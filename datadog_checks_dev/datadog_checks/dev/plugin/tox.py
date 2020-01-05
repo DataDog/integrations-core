@@ -57,7 +57,16 @@ def add_style_checker(config, sections, make_envconfig, reader):
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'flake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
+        'deps': '\n'.join(
+            [
+                'flake8',
+                # bugbear version capped due to https://github.com/PyCQA/flake8-bugbear/issues/108
+                'flake8-bugbear==20.1.0',
+                'flake8-logging-format',
+                'black',
+                'isort[pyproject]>=4.3.15',
+            ]
+        ),
         'commands': '\n'.join(
             [
                 'flake8 --config=../.flake8 .',
