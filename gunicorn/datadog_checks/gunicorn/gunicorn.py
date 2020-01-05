@@ -68,7 +68,7 @@ class GUnicornCheck(AgentCheck):
         self.service_check(self.SVC_NAME, status, tags=tags, message=msg)
 
         # Submit the data.
-        self.log.debug("instance %s procs - working:%s idle:%s" % (proc_name, working, idle))
+        self.log.debug("instance %s procs - working:%s idle:%s", proc_name, working, idle)
         self.gauge("gunicorn.workers", working, tags + self.WORKING_TAGS)
         self.gauge("gunicorn.workers", idle, tags + self.IDLE_TAGS)
 
@@ -95,7 +95,7 @@ class GUnicornCheck(AgentCheck):
             try:
                 cpu_time_by_pid[proc.pid] = sum(proc.cpu_times())
             except psutil.NoSuchProcess:
-                self.warning('Process %s disappeared while scanning' % proc.name)
+                self.warning('Process %s disappeared while scanning', proc.name)
                 continue
 
         # Let them do a little bit more work.
@@ -111,7 +111,7 @@ class GUnicornCheck(AgentCheck):
                 cpu_time = sum(proc.cpu_times())
             except Exception:
                 # couldn't collect cpu time. assume it's dead.
-                self.log.debug("Couldn't collect cpu time for %s" % proc)
+                self.log.debug("Couldn't collect cpu time for %s", proc)
                 continue
             if cpu_time == cpu_time_by_pid[proc.pid]:
                 idle += 1
@@ -140,7 +140,7 @@ class GUnicornCheck(AgentCheck):
             )
             raise GUnicornCheckError("Found no master process with name: %s" % master_name)
         else:
-            self.log.debug("There exist %s master process(es) with the name %s" % (len(master_procs), name))
+            self.log.debug("There exist %s master process(es) with the name %s", len(master_procs), name)
             return master_procs
 
     @staticmethod

@@ -207,10 +207,10 @@ class Nginx(AgentCheck):
         except Exception as e:
             if endpoint in PLUS_API_STREAM_ENDPOINTS:
                 self.log.warning(
-                    "Stream may not be initialized. " "Error querying {} metrics at {}: {}".format(endpoint, url, e)
+                    "Stream may not be initialized. " "Error querying %s metrics at %s: %s", endpoint, url, e
                 )
             else:
-                self.log.exception("Error querying {} metrics at {}: {}".format(endpoint, url, e))
+                self.log.exception("Error querying %s metrics at %s: %s", endpoint, url, e)
 
         return payload
 

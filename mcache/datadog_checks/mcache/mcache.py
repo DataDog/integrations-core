@@ -203,7 +203,7 @@ class Memcache(AgentCheck):
                         arg,
                     )
                 except Exception as e:
-                    self.log.exception("Unable to retrieve optional stats from memcache instance: {}".format(e))
+                    self.log.exception("Unable to retrieve optional stats from memcache instance: %s", e)
 
     @staticmethod
     def get_items_stats(key, value):

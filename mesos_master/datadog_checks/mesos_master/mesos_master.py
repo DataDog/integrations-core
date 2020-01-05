@@ -143,7 +143,7 @@ class MesosMaster(AgentCheck):
             parsed_url = urlparse(url)
 
             if not self.http.options['verify'] and parsed_url.scheme == 'https':
-                self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
+                self.log.warning('Skipping TLS cert validation for %s based on configuration.', url)
             if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
                 # `default_timeout` config option will be removed with Agent 5
                 timeout = (

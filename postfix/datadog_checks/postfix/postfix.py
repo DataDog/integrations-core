@@ -120,7 +120,7 @@ class PostfixCheck(AgentCheck):
         pc_output, _, _ = get_subprocess_output(['postconf', 'authorized_mailq_users'], self.log, False)
         authorized_mailq_users = pc_output.strip('\n').split('=')[1].strip()
 
-        self.log.debug('authorized_mailq_users : {}'.format(authorized_mailq_users))
+        self.log.debug('authorized_mailq_users : %s', authorized_mailq_users)
 
         output, _, _ = get_subprocess_output(['postqueue', '-c', postfix_config_dir, '-p'], self.log, False)
 

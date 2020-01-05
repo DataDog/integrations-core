@@ -121,7 +121,7 @@ class CadvisorScraper(object):
         :param: depth: current depth of recursion
         """
         if depth >= self.max_depth:
-            self.log.warning('Reached max depth on metric=%s' % metric)
+            self.log.warning('Reached max depth on metric=%s', metric)
             return
 
         if isinstance(dat, numbers.Number):
@@ -185,7 +185,7 @@ class CadvisorScraper(object):
             tags = tagger.tag(replace_container_rt_prefix(cid), tagger.HIGH) or []
 
         if not tags:
-            self.log.debug("Subcontainer {} doesn't have tags, skipping.".format(subcontainer_id))
+            self.log.debug("Subcontainer %s doesn't have tags, skipping.", subcontainer_id)
             return
         tags = list(set(tags + instance.get('tags', [])))
 

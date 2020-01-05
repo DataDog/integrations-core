@@ -133,7 +133,7 @@ class AerospikeCheck(AgentCheck):
                 self.collect_datacenter(dc)
 
         except Exception as e:
-            self.log.debug("There were no datacenters found: %s" % e)
+            self.log.debug("There were no datacenters found: %s", e)
 
         # https://www.aerospike.com/docs/reference/info/#throughput
         self.collect_throughput(namespaces)
