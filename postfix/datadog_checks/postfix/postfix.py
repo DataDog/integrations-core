@@ -100,7 +100,7 @@ class PostfixCheck(AgentCheck):
 
         if not self.init_config.get('postqueue', False):
             self.log.debug('postqueue : get_config')
-            self.log.debug('postqueue: {}'.format(self.init_config.get('postqueue', False)))
+            self.log.debug('postqueue: %s', self.init_config.get('postqueue', False))
             if not queues or not directory:
                 raise Exception('using sudo: missing required yaml config entry')
         else:
