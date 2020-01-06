@@ -109,11 +109,11 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         )
         if total_contexts > self._context_limit:
             self.warning(
-                """Discovered {} metric contexts - this exceeds the maximum number of {} contexts permitted by the
+                """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
-                and partitions you wish to monitor.""".format(
-                    total_contexts, self._context_limit
-                )
+                and partitions you wish to monitor.""",
+                total_contexts,
+                self._context_limit,
             )
 
         # Report the metics
