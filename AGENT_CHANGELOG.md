@@ -1,3 +1,7 @@
+## Datadog Agent version [7.16.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7161)
+
+* Apache [1.9.2](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
+
 ## Datadog Agent version [7.16.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7160)
 
 * Active Directory [1.6.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
