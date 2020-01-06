@@ -953,11 +953,8 @@ class MySql(AgentCheck):
             with closing(db.cursor()) as cursor:
                 cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
-            self.warning(
-                "Privilege error or engine unavailable accessing the INNODB status \
-                         tables (must grant PROCESS): %s"
-                % str(e)
-            )
+            self.warning("Privilege error or engine unavailable accessing the INNODB status tables "
+                         "(must grant PROCESS): %s", e)
             return {}
 
         if cursor.rowcount < 1:
