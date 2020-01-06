@@ -169,10 +169,10 @@ def copy_dir_contents(path, d):
 def remove_path(path):
     try:
         shutil.rmtree(path, ignore_errors=False)
-    except (FileNotFoundError, OSError):
+    except (FileNotFoundError, OSError):  # noqa: B014
         try:
             os.remove(path)
-        except (FileNotFoundError, OSError, PermissionError):
+        except (FileNotFoundError, OSError, PermissionError):  # noqa: B014
             pass
 
 
