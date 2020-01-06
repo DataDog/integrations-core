@@ -378,9 +378,11 @@ class SimpleApi(AbstractApi):
                     # Only catch HTTPErrors to enable the retry mechanism.
                     # Other exceptions raised by _make_request (e.g. AuthenticationNeeded) should be caught downstream
                     self.logger.debug(
-                        "Error making paginated request to {}, lowering limit from {} to {}: {}".format(
-                            url, query_params['limit'], query_params['limit'] // 2, e
-                        )
+                        "Error making paginated request to %s, lowering limit from %s to %s: %s",
+                        url,
+                        query_params['limit'],
+                        query_params['limit'] // 2,
+                        e,
                     )
                     query_params['limit'] //= 2
                     retry += 1
