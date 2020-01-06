@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2014-2017
+# (C) Datadog, Inc. 2014-present
 # (C) Leif Walsh <leif.walsh@gmail.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)

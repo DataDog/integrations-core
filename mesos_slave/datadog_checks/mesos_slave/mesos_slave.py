@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2015-2017
+# (C) Datadog, Inc. 2015-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 

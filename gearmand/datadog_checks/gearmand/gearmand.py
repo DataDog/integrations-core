@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2017
+# (C) Datadog, Inc. 2013-present
 # (C) Patrick Galbraith <patg@patg.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)

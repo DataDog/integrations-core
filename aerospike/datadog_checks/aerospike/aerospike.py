@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # (C) 2018 Aerospike, Inc.
 # (C) 2017 Red Sift
 # (C) 2015 Pippio, Inc. All rights reserved.
