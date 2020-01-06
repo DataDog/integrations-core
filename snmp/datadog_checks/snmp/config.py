@@ -263,9 +263,9 @@ class InstanceConfig:
                         column = metric_tag['column']
                         if isinstance(column, dict):
                             column_name = column['name']
-                            column = column['OID']
-                            identity = hlapi.ObjectIdentity(column)
-                            self._resolver.register(to_oid_tuple(column), column_name)
+                            column_oid = column['OID']
+                            identity = hlapi.ObjectIdentity(column_oid)
+                            self._resolver.register(to_oid_tuple(column_oid), column_name)
                             column_tags.append((tag_key, column_name))
                         else:
                             identity = hlapi.ObjectIdentity(mib, column)
@@ -292,6 +292,11 @@ class InstanceConfig:
                                 self._resolver.register_index(
                                     symbol['name'], metric_tag['index'], metric_tag['mapping']
                                 )
+                            for tag in metric['metric_tags']:
+                                if 'column' in tag:
+                                    self._resolver.register_index(
+                                        tag['column']['name'], metric_tag['index'], metric_tag['mapping']
+                                    )
                 for symbol in metric['symbols']:
                     if isinstance(symbol, dict):
                         self._resolver.register(to_oid_tuple(symbol['OID']), symbol['name'])

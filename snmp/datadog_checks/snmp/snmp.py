@@ -218,8 +218,8 @@ class SnmpCheck(AgentCheck):
                 self.warning(message)
 
         for result_oid, value in all_binds:
-            metric, index = config.resolve_oid(result_oid)
-            results[metric][index] = value
+            metric, indexes = config.resolve_oid(result_oid)
+            results[metric][indexes] = value
         self.log.debug('Raw results: %s', results)
         # Freeze the result
         results.default_factory = None

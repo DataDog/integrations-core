@@ -217,6 +217,26 @@ def test_table(aggregator):
     aggregator.all_metrics_asserted()
 
 
+def test_resolved_table(aggregator):
+    instance = common.generate_instance_config(common.RESOLVED_TABULAR_OBJECTS)
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    for symbol in common.TABULAR_OBJECTS[0]['symbols']:
+        metric_name = "snmp." + symbol
+        aggregator.assert_metric(metric_name, at_least=1)
+        aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
+
+        for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
+            tag = mtag['tag']
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
 def test_table_v3_MD5_DES(aggregator):
     """
     Support SNMP V3 priv modes: MD5 + DES
