@@ -186,7 +186,7 @@ class Oracle(AgentCheck):
                             column_type = column.get('type')
                             if not column_type:
                                 self.log.error(
-                                    'column field `type` is required for column `%s` ' 'of metric_prefix `%s`',
+                                    'column field `type` is required for column `%s` of metric_prefix `%s`',
                                     name,
                                     metric_prefix,
                                 )
@@ -197,7 +197,7 @@ class Oracle(AgentCheck):
                             else:
                                 if not hasattr(self, column_type):
                                     self.log.error(
-                                        'invalid submission method `%s` for column `%s` "' '"of metric_prefix `%s`',
+                                        'invalid submission method `%s` for column `%s` of metric_prefix `%s`',
                                         column_type,
                                         name,
                                         metric_prefix,
@@ -207,7 +207,7 @@ class Oracle(AgentCheck):
                                     metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
                                 except (ValueError, TypeError):
                                     self.log.error(
-                                        'non-numeric value `%s` for metric column `%s` ' 'of metric_prefix `%s`',
+                                        'non-numeric value `%s` for metric column `%s` of metric_prefix `%s`',
                                         value,
                                         name,
                                         metric_prefix,

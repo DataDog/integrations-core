@@ -439,7 +439,7 @@ class CadvisorPrometheusScraperMixin(object):
                     self.gauge(pct_m_name, float(usage / float(limit)), tags)
                 else:
                     self.log.debug(
-                        "No corresponding usage found for metric %s and container %s, skipping usage_pct " "for now.",
+                        "No corresponding usage found for metric %s and container %s, skipping usage_pct for now.",
                         pct_m_name,
                         c_name,
                     )
