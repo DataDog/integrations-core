@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 1.13.0 / 2020-01-02
+
+* [Added] Gracefully handle /proc errors in network check. See [#5245](https://github.com/DataDog/integrations-core/pull/5245).
+
 ## 1.12.2 / 2019-12-13
 
 * [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).

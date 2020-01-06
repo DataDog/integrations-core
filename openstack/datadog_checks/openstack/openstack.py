@@ -714,7 +714,7 @@ class OpenStackCheck(AgentCheck):
             for network in net_details['networks']:
                 network_ids.append(network['id'])
         except Exception as e:
-            self.warning('Unable to get the list of all network ids: {0}'.format(str(e)))
+            self.warning('Unable to get the list of all network ids: %s', e)
             raise e
 
         return network_ids
@@ -771,7 +771,7 @@ class OpenStackCheck(AgentCheck):
 
                     hypervisor_ids.append(hv['id'])
             except Exception as e:
-                self.warning('Unable to get the list of all hypervisors: {0}'.format(str(e)))
+                self.warning('Unable to get the list of all hypervisors: %s', e)
                 raise e
 
             return hypervisor_ids
@@ -799,7 +799,7 @@ class OpenStackCheck(AgentCheck):
                     }
 
         except Exception as e:
-            self.warning('Unable to get the list of aggregates: {0}'.format(str(e)))
+            self.warning('Unable to get the list of aggregates: %s', e)
             raise e
 
         return hypervisor_aggregate_map
@@ -909,7 +909,7 @@ class OpenStackCheck(AgentCheck):
             self.changes_since_time[i_key] = datetime.utcnow().isoformat()
 
         except Exception as e:
-            self.warning('Unable to get the list of all servers: {0}'.format(str(e)))
+            self.warning('Unable to get the list of all servers: %s', e)
             raise e
 
         for server in servers:
@@ -949,7 +949,7 @@ class OpenStackCheck(AgentCheck):
             return r['project']['name']
 
         except Exception as e:
-            self.warning('Unable to get project name: {0}'.format(str(e)))
+            self.warning('Unable to get project name: %s', e)
             raise e
 
     def get_stats_for_single_server(self, server_details, tags=None):
@@ -977,7 +977,7 @@ class OpenStackCheck(AgentCheck):
                 self.log.debug("Received HTTP Error when reaching the nova endpoint")
                 raise e
         except Exception as e:
-            self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
+            self.warning("Unknown error when monitoring %s : %s", server_id, e)
             raise e
 
         if server_stats:
@@ -1321,7 +1321,7 @@ class OpenStackCheck(AgentCheck):
             return r['projects']
 
         except Exception as e:
-            self.warning('Unable to get projects: {0}'.format(str(e)))
+            self.warning('Unable to get projects: %s', e)
             raise e
 
         return None
@@ -1356,7 +1356,7 @@ class OpenStackCheck(AgentCheck):
                 return project_details["project"]
 
         except Exception as e:
-            self.warning('Unable to get the project details: {0}'.format(str(e)))
+            self.warning('Unable to get the project details: %s', e)
             raise e
 
         return None

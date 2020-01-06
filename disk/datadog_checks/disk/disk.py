@@ -78,12 +78,12 @@ class Disk(AgentCheck):
             # Exclude disks with size less than min_disk_size
             if disk_usage.total <= self._min_disk_size:
                 if disk_usage.total > 0:
-                    self.log.info('Excluding device {} with total disk size {}'.format(part.device, disk_usage.total))
+                    self.log.info('Excluding device %s with total disk size %s', part.device, disk_usage.total)
                 continue
 
             # For later, latency metrics
             self._valid_disks[part.device] = (part.fstype, part.mountpoint)
-            self.log.debug('Passed: {}'.format(part.device))
+            self.log.debug('Passed: %s', part.device)
 
             device_name = part.mountpoint if self._use_mount else part.device
 
@@ -130,7 +130,7 @@ class Disk(AgentCheck):
         """
         Return True for disks we don't want or that match regex in the config file
         """
-        self.log.debug('_exclude_disk: {}, {}, {}'.format(device, file_system, mount_point))
+        self.log.debug('_exclude_disk: %s, %s, %s', device, file_system, mount_point)
 
         if not device or device == 'none':
             device = None
@@ -240,7 +240,7 @@ class Disk(AgentCheck):
 
     def collect_latency_metrics(self):
         for disk_name, disk in iteritems(psutil.disk_io_counters(True)):
-            self.log.debug('IO Counters: {} -> {}'.format(disk_name, disk))
+            self.log.debug('IO Counters: %s -> %s', disk_name, disk)
             try:
                 # x100 to have it as a percentage,
                 # /1000 as psutil returns the value in ms
@@ -255,7 +255,7 @@ class Disk(AgentCheck):
             except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
-                self.log.debug('Latency metrics not collected for {}: {}'.format(disk_name, e))
+                self.log.debug('Latency metrics not collected for %s: %s', disk_name, e)
 
     def _compile_pattern_filters(self, instance):
         # Force exclusion of CDROM (iso9660)
@@ -318,7 +318,7 @@ class Disk(AgentCheck):
             try:
                 re.compile(pattern, casing)
             except Exception:
-                self.log.warning('{} is not a valid regular expression and will be ignored'.format(pattern))
+                self.log.warning('%s is not a valid regular expression and will be ignored', pattern)
             else:
                 valid_patterns.append(pattern)
 
@@ -334,7 +334,7 @@ class Disk(AgentCheck):
             try:
                 device_tag_list.append([re.compile(regex_str, IGNORE_CASE), [t.strip() for t in tags.split(',')]])
             except TypeError:
-                self.log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
+                self.log.warning('%s is not a valid regular expression and will be ignored', regex_str)
         self._device_tag_re = device_tag_list
 
     def _get_devices_label(self):

@@ -66,6 +66,49 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
     'terminated': ['oomkilled', 'containercannotrun', 'error'],
 }
 
+DEFAULT_GAUGES = {
+    'rest_client_requests_total': 'rest.client.requests',
+    'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
+    'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
+    'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
+    'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
+    'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
+    'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
+}
+
+DEPRECATED_GAUGES = {
+    'kubelet_runtime_operations': 'kubelet.runtime.operations',
+    'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
+}
+
+NEW_1_14_GAUGES = {
+    'kubelet_runtime_operations_total': 'kubelet.runtime.operations',
+    'kubelet_runtime_operations_errors_total': 'kubelet.runtime.errors',
+}
+
+DEFAULT_HISTOGRAMS = {
+    'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
+}
+
+DEPRECATED_HISTOGRAMS = {
+    'rest_client_request_latency_seconds': 'rest.client.latency',
+}
+
+NEW_1_14_HISTOGRAMS = {
+    'rest_client_request_duration_seconds': 'rest.client.latency',
+}
+
+DEFAULT_SUMMARIES = {}
+
+DEPRECATED_SUMMARIES = {
+    'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
+}
+
+NEW_1_14_SUMMARIES = {}
+
+TRANSFORM_VALUE_HISTOGRAMS = {
+    'kubelet_network_plugin_operations_duration_seconds': 'kubelet.network_plugin.latency',
+}
 
 log = logging.getLogger('collector')
 
@@ -139,7 +182,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         self.kubelet_scraper_config = self.get_scraper_config(kubelet_instance)
 
-        self.COUNTER_TRANSFORMERS = {k: self.send_always_counter for k in self.COUNTER_METRICS}
+        counter_transformers = {k: self.send_always_counter for k in self.COUNTER_METRICS}
+
+        histogram_transformers = {
+            k: self._histogram_from_seconds_to_microseconds(v) for k, v in TRANSFORM_VALUE_HISTOGRAMS.items()
+        }
+
+        self.transformers = {}
+        for d in [self.CADVISOR_METRIC_TRANSFORMERS, counter_transformers, histogram_transformers]:
+            self.transformers.update(d)
 
     def _create_kubelet_prometheus_instance(self, instance):
         """
@@ -155,20 +206,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 # so the key is different than the cadvisor scraper.
                 'prometheus_url': instance.get('kubelet_metrics_endpoint', 'dummy_url/kubelet'),
                 'metrics': [
-                    {
-                        'apiserver_client_certificate_expiration_seconds': 'apiserver.certificate.expiration',
-                        'rest_client_requests_total': 'rest.client.requests',
-                        'rest_client_request_latency_seconds': 'rest.client.latency',
-                        'kubelet_runtime_operations': 'kubelet.runtime.operations',
-                        'kubelet_runtime_operations_errors': 'kubelet.runtime.errors',
-                        'kubelet_network_plugin_operations_latency_microseconds': 'kubelet.network_plugin.latency',
-                        'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
-                        'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
-                        'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
-                        'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
-                        'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
-                        'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
-                    }
+                    DEFAULT_GAUGES,
+                    DEPRECATED_GAUGES,
+                    NEW_1_14_GAUGES,
+                    DEFAULT_HISTOGRAMS,
+                    DEPRECATED_HISTOGRAMS,
+                    NEW_1_14_HISTOGRAMS,
+                    DEFAULT_SUMMARIES,
+                    DEPRECATED_SUMMARIES,
+                    NEW_1_14_SUMMARIES,
                 ],
                 # Defaults that were set when the Kubelet scraper was based on PrometheusScraper
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
@@ -217,7 +263,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         try:
             self.cadvisor_legacy_url = self.detect_cadvisor(endpoint, self.cadvisor_legacy_port)
         except Exception as e:
-            self.log.debug('cAdvisor not found, running in prometheus mode: %s' % str(e))
+            self.log.debug('cAdvisor not found, running in prometheus mode: %s', e)
 
         self.pod_list = self.retrieve_pod_list()
         self.pod_list_utils = PodListUtils(self.pod_list)
@@ -226,20 +272,21 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self._report_pods_running(self.pod_list, self.instance_tags)
         self._report_container_spec_metrics(self.pod_list, self.instance_tags)
         self._report_container_state_metrics(self.pod_list, self.instance_tags)
-        self._report_ephemeral_storage_usage(self.pod_list, self.instance_tags)
+
+        self.stats = self._retrieve_stats()
+        self._report_ephemeral_storage_usage(self.pod_list, self.stats, self.instance_tags)
+        self._report_system_container_metrics(self.stats, self.instance_tags)
 
         if self.cadvisor_legacy_url:  # Legacy cAdvisor
             self.log.debug('processing legacy cadvisor metrics')
             self.process_cadvisor(instance, self.cadvisor_legacy_url, self.pod_list, self.pod_list_utils)
         elif self.cadvisor_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing cadvisor metrics')
-            transformers = self.CADVISOR_METRIC_TRANSFORMERS
-            transformers.update(self.COUNTER_TRANSFORMERS)
-            self.process(self.cadvisor_scraper_config, metric_transformers=transformers)
+            self.process(self.cadvisor_scraper_config, metric_transformers=self.transformers)
 
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
-            self.process(self.kubelet_scraper_config, metric_transformers=self.COUNTER_TRANSFORMERS)
+            self.process(self.kubelet_scraper_config, metric_transformers=self.transformers)
 
         # Free up memory
         self.pod_list = None
@@ -278,7 +325,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 pod_list['items'] = []
             return pod_list
         except Exception as e:
-            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s' % (self.pod_list_url, str(e)))
+            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s', self.pod_list_url, e)
             return None
 
     @staticmethod
@@ -314,7 +361,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             stats_response.raise_for_status()
             return stats_response.json()
         except Exception as e:
-            self.log.warning('GET on kubelet s `/stats/summary` failed: {}'.format(str(e)))
+            self.log.warning('GET on kubelet s `/stats/summary` failed: %s', e)
             return {}
 
     def _report_node_metrics(self, instance_tags):
@@ -352,7 +399,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     is_ok = False
 
         except Exception as e:
-            self.log.warning('kubelet check %s failed: %s' % (url, str(e)))
+            self.log.warning('kubelet check %s failed: %s', url, e)
             self.service_check(
                 service_check_base,
                 AgentCheck.CRITICAL,
@@ -508,9 +555,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             gauge_name = '{}.containers.{}.{}'.format(self.NAMESPACE, metric_name, state_name)
             self.gauge(gauge_name, 1, tags + reason_tags)
 
-    def _report_ephemeral_storage_usage(self, pod_list, instance_tags):
-        stats = self._retrieve_stats()
-
+    def _report_ephemeral_storage_usage(self, pod_list, stats, instance_tags):
         ephemeral_storage_usage = {}
         for pod in stats.get('pods', []):
             pod_uid = pod.get('podRef', {}).get('uid')
@@ -533,6 +578,24 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             tags += instance_tags
 
             self.gauge(self.NAMESPACE + '.ephemeral_storage.usage', pod_usage, tags)
+
+    def _report_system_container_metrics(self, stats, instance_tags):
+        sys_containers = stats.get('node', {}).get('systemContainers', [])
+        for ctr in sys_containers:
+            if ctr.get('name') == 'runtime':
+                mem_rss = ctr.get('memory', {}).get('rssBytes')
+                if mem_rss:
+                    self.gauge(self.NAMESPACE + '.runtime.memory.rss', mem_rss, instance_tags)
+                cpu_usage = ctr.get('cpu', {}).get('usageNanoCores')
+                if cpu_usage:
+                    self.gauge(self.NAMESPACE + '.runtime.cpu.usage', cpu_usage, instance_tags)
+            if ctr.get('name') == 'kubelet':
+                mem_rss = ctr.get('memory', {}).get('rssBytes')
+                if mem_rss:
+                    self.gauge(self.NAMESPACE + '.kubelet.memory.rss', mem_rss, instance_tags)
+                cpu_usage = ctr.get('cpu', {}).get('usageNanoCores')
+                if cpu_usage:
+                    self.gauge(self.NAMESPACE + '.kubelet.cpu.usage', cpu_usage, instance_tags)
 
     @staticmethod
     def parse_quantity(string):
@@ -570,7 +633,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         for sample in metric.samples:
             val = sample[self.SAMPLE_VALUE]
             if not self._is_value_valid(val):
-                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             # Determine the tags to send

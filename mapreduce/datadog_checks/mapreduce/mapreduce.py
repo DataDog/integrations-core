@@ -447,7 +447,7 @@ class MapReduceCheck(AgentCheck):
         elif metric_type == self.INCREMENT:
             self.increment(metric_name, value, tags=tags, device_name=device_name)
         else:
-            self.log.error('Metric type "{}" unknown'.format(metric_type))
+            self.log.error('Metric type "%s" unknown', metric_type)
 
     def _rest_request_to_json(self, address, object_path, service_name, tags=None, *args, **kwargs):
         """
@@ -467,7 +467,7 @@ class MapReduceCheck(AgentCheck):
             for directory in args:
                 url = self._join_url_dir(url, directory)
 
-        self.log.debug('Attempting to connect to "{}"'.format(url))
+        self.log.debug('Attempting to connect to "%s"', url)
 
         # Add kwargs as arguments
         if kwargs:

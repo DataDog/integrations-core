@@ -70,7 +70,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "prometheus_endpoint":"http://%%host%%:10055/metrics"}` |
 
 ##### Log collection
-gs
+
 **Available for Agent v6.5+**
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
