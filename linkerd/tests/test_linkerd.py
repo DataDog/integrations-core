@@ -62,6 +62,7 @@ def test_openmetrics_error(monkeypatch):
         with pytest.raises(Exception):
             check.check(MOCK_INSTANCE)
 
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
