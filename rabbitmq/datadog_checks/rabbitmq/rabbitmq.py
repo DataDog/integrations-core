@@ -210,9 +210,9 @@ class RabbitMQ(AgentCheck):
         version = str(overview_response['rabbitmq_version'])
         if version:
             self.set_metadata('version', version)
-            self.log.debug(u"found rabbitmq version {}".format(version))
+            self.log.debug("found rabbitmq version %s", version)
         else:
-            self.log.warning(u"could not retrieve rabbitmq version information")
+            self.log.warning("could not retrieve rabbitmq version information")
 
     def _get_vhosts(self, instance, base_url):
         vhosts = instance.get('vhosts')
