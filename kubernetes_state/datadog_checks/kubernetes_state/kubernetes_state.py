@@ -774,7 +774,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 if constraint in constraints:
                     constraint = constraints[constraint]
                 else:
-                    self.error("Constraint %s unsupported for metric %s" % (constraint, metric.name))
+                    self.log.error("Constraint %s unsupported for metric %s", constraint, metric.name)
                     continue
                 resource = sample[self.SAMPLE_LABELS].get("resource")
                 tags = (

@@ -160,7 +160,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
     def _tag_and_submit(self, metric, scraper_config, metric_name, tag_name, tag_value_trim):
         # Get tag value from original metric name or return trying
         if not metric.name.endswith(tag_value_trim):
-            self.debug("Cannot process metric {} with expected suffix {}".format(metric.name, tag_value_trim))
+            self.log.debug("Cannot process metric %s with expected suffix %s", metric.name, tag_value_trim)
             return
         tag_value = metric.name[: -len(tag_value_trim)]
 
