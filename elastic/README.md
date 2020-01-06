@@ -52,14 +52,55 @@ Follow the instructions below to configure this check for an Agent running on a 
       logs_enabled: true
     ```
 
-2. Add this configuration block to your `elastic.d/conf.yaml` file to start collecting your Elasticsearch logs:
+2. To collect search slow logs and index slow logs, [configure your Elasticsearch settings][14]. By default, slow logs are not enabled.
+    * To configure index slow logs for a given index `<INDEX>`:
+      ```
+      curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d' {
+        "index.indexing.slowlog.threshold.index.warn": "0ms",
+        "index.indexing.slowlog.threshold.index.info": "0ms",
+        "index.indexing.slowlog.threshold.index.debug": "0ms",
+        "index.indexing.slowlog.threshold.index.trace": "0ms",
+        "index.indexing.slowlog.level": "trace",
+        "index.indexing.slowlog.source": "1000"
+      }
+      ```
+
+    * To configure search slow logs for a given index `<INDEX>`:
+      ```
+      curl -X PUT "localhost:9200/<INDEX>/_settings?pretty" -H 'Content-Type: application/json' -d' {
+        "index.search.slowlog.threshold.query.warn": "0ms",
+        "index.search.slowlog.threshold.query.info": "0ms",
+        "index.search.slowlog.threshold.query.debug": "0ms",
+        "index.search.slowlog.threshold.query.trace": "0ms",
+        "index.search.slowlog.threshold.fetch.warn": "0ms",
+        "index.search.slowlog.threshold.fetch.info": "0ms",
+        "index.search.slowlog.threshold.fetch.debug": "0ms",
+        "index.search.slowlog.threshold.fetch.trace": "0ms"
+      }
+      ```
+
+3. Add this configuration block to your `elastic.d/conf.yaml` file to start collecting your Elasticsearch logs:
 
     ```yaml
       logs:
           - type: file
             path: /var/log/elasticsearch/*.log
             source: elasticsearch
-            service: myservice
+            service: <SERVICE_NAME>
+    ```
+
+  * Add additional instances to start collecting slow logs:
+
+    ```yaml
+        - type: file
+          path: /var/log/elasticsearch/<CLUSTER_NAME>_index_indexing_slowlog.log
+          source: elasticsearch
+          service: <SERVICE_NAME>
+ 
+        - type: file
+          path: /var/log/elasticsearch/<CLUSTER_NAME>_index_search_slowlog.log
+          source: elasticsearch
+          service: <SERVICE_NAME>
     ```
 
     Change the `path` and `service` parameter values and configure them for your environment.
@@ -142,3 +183,4 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [11]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect
 [12]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics
 [13]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
+[14]: https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-slowlog.html

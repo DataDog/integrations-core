@@ -263,7 +263,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         try:
             self.cadvisor_legacy_url = self.detect_cadvisor(endpoint, self.cadvisor_legacy_port)
         except Exception as e:
-            self.log.debug('cAdvisor not found, running in prometheus mode: %s' % str(e))
+            self.log.debug('cAdvisor not found, running in prometheus mode: %s', e)
 
         self.pod_list = self.retrieve_pod_list()
         self.pod_list_utils = PodListUtils(self.pod_list)
@@ -325,7 +325,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 pod_list['items'] = []
             return pod_list
         except Exception as e:
-            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s' % (self.pod_list_url, str(e)))
+            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s', self.pod_list_url, e)
             return None
 
     @staticmethod
@@ -361,7 +361,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             stats_response.raise_for_status()
             return stats_response.json()
         except Exception as e:
-            self.log.warning('GET on kubelet s `/stats/summary` failed: {}'.format(str(e)))
+            self.log.warning('GET on kubelet s `/stats/summary` failed: %s', e)
             return {}
 
     def _report_node_metrics(self, instance_tags):
@@ -399,7 +399,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     is_ok = False
 
         except Exception as e:
-            self.log.warning('kubelet check %s failed: %s' % (url, str(e)))
+            self.log.warning('kubelet check %s failed: %s', url, e)
             self.service_check(
                 service_check_base,
                 AgentCheck.CRITICAL,
@@ -633,7 +633,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         for sample in metric.samples:
             val = sample[self.SAMPLE_VALUE]
             if not self._is_value_valid(val):
-                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             # Determine the tags to send

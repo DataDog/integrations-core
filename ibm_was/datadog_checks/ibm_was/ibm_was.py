@@ -62,7 +62,7 @@ class IbmWasCheck(AgentCheck):
                 server_tags.extend(node_tags)
 
                 for category, prefix in iteritems(metric_categories):
-                    self.log.debug("Collecting {} stats".format(category))
+                    self.log.debug("Collecting %s stats", category)
                     if collect_stats.get(category):
                         stats = self.get_node_from_name(server, category)
                         self.process_stats(stats, prefix, metric_categories, nested_tags, server_tags)
@@ -74,7 +74,7 @@ class IbmWasCheck(AgentCheck):
         if len(data):
             return data[0]
         else:
-            self.warning('Error finding {} stats in XML output.'.format(path))
+            self.warning('Error finding %s stats in XML output.', path)
             return []
 
     def get_node_from_root(self, xml_data, path):
@@ -124,7 +124,7 @@ class IbmWasCheck(AgentCheck):
             self.submit_service_checks(tags, AgentCheck.OK)
         except (requests.HTTPError, requests.ConnectionError) as e:
             self.warning(
-                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable".format(url, e)
+                "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
             self.submit_service_checks(tags, AgentCheck.CRITICAL)
             raise e

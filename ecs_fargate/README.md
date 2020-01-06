@@ -324,7 +324,7 @@ Need help? Contact [Datadog support][19].
 [11]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html#service_scheduler_replica
 [12]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/datadog_checks/ecs_fargate/data/conf.yaml.example
 [13]: https://docs.datadoghq.com/developers/dogstatsd
-[14]: https://docs.datadoghq.com/graphing/infrastructure/process/?tab=docker#installation
+[14]: https://docs.datadoghq.com/infrastructure/process/?tab=docker#installation
 [15]: https://docs.datadoghq.com/agent/docker/#environment-variables
 [16]: https://docs.aws.amazon.com/AmazonECS/latest/userguide/task_definition_parameters.html#container_definition_labels
 [17]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html
@@ -337,7 +337,7 @@ Need help? Contact [Datadog support][19].
 [24]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
 [25]: https://app.datadoghq.com/logs
 [26]: https://docs.datadoghq.com/monitors/monitor_types/
-[27]: https://docs.datadoghq.com/graphing/infrastructure/livecontainers/?tab=linuxwindows
+[27]: https://docs.datadoghq.com/infrastructure/livecontainers/?tab=linuxwindows
 [28]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html
 [29]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html
 [30]: https://docs.datadoghq.com/integrations/amazon_lambda/#log-collection

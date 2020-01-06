@@ -152,7 +152,7 @@ class Win32EventLogWMI(WinWMICheck):
                 if log_ev.is_after(last_ts):
                     self.event(log_ev.to_event_dict())
                 else:
-                    self.log.debug('Skipping event after %s. ts=%s' % (last_ts, log_ev.timestamp))
+                    self.log.debug('Skipping event after %s. ts=%s', last_ts, log_ev.timestamp)
 
             # Update the last time checked
             self.last_ts[instance_key] = datetime.utcnow()

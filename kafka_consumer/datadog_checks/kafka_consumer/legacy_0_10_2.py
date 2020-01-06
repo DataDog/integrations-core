@@ -232,7 +232,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
-                    self.log.warn(
+                    self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
                         "if the broker that was the partition leader when kafka_admin_client last fetched metadata is "
                         "no longer the leader.",
@@ -243,7 +243,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     )
                     self._kafka_client.cluster.request_update()  # force metadata update on next poll()
                 elif error_type is kafka_errors.UnknownTopicOrPartitionError:
-                    self.log.warn(
+                    self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic: %s, partition: %s. This should only "
                         "happen if the topic is currently being deleted or the check configuration lists non-existent "
                         "topic partitions.",
@@ -277,7 +277,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
                 if (topic, partition) not in self._highwater_offsets:
-                    self.log.warn(
+                    self.log.warning(
                         "Consumer group: %s has offsets for topic: %s partition: %s, but no stored highwater offset "
                         "(likely the partition is in the middle of leader failover) so cannot calculate consumer lag.",
                         consumer_group,
@@ -301,7 +301,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     self.log.debug(message)
 
             else:
-                self.log.warn(
+                self.log.warning(
                     "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition doesn't "
                     "appear to exist in the cluster so skipping reporting these offsets.",
                     consumer_group,

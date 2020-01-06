@@ -103,15 +103,15 @@ class HTTPCheck(AgentCheck):
         r = None
         try:
             parsed_uri = urlparse(addr)
-            self.log.debug("Connecting to {}".format(addr))
+            self.log.debug("Connecting to %s", addr)
             self.http.session.trust_env = False
             if weakcipher:
                 base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
                 self.http.session.mount(base_addr, WeakCiphersAdapter())
                 self.log.debug(
-                    "Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
-                        base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS
-                    )
+                    "Weak Ciphers will be used for %s. Supported Cipherlist: %s",
+                    base_addr,
+                    WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS,
                 )
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
@@ -128,14 +128,14 @@ class HTTPCheck(AgentCheck):
             )
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
-            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
+            self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, e, length)
             service_checks.append(
                 (self.SC_STATUS, AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length))
             )
 
         except socket.error as e:
             length = int((time.time() - start) * 1000)
-            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
+            self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, repr(e), length)
             service_checks.append(
                 (
                     self.SC_STATUS,
@@ -146,7 +146,7 @@ class HTTPCheck(AgentCheck):
 
         except Exception as e:
             length = int((time.time() - start) * 1000)
-            self.log.error("Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
+            self.log.error("Unhandled exception %s. Connection failed after %s ms", e, length)
             raise
 
         else:
@@ -309,13 +309,13 @@ class HTTPCheck(AgentCheck):
         except Exception as e:
             msg = str(e)
             if 'expiration' in msg:
-                self.log.debug("error: {}. Cert might be expired.".format(e))
+                self.log.debug("error: %s. Cert might be expired.", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
-                self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
+                self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
             else:
-                self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
+                self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
@@ -323,8 +323,8 @@ class HTTPCheck(AgentCheck):
         days_left = time_left.days
         seconds_left = time_left.total_seconds()
 
-        self.log.debug("Exp_date: {}".format(exp_date))
-        self.log.debug("seconds_left: {}".format(seconds_left))
+        self.log.debug("Exp_date: %s", exp_date)
+        self.log.debug("seconds_left: %s", seconds_left)
 
         if seconds_left < seconds_critical:
             return (

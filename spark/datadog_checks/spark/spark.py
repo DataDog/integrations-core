@@ -206,8 +206,7 @@ class SparkCheck(AgentCheck):
 
             if master_address:
                 self.log.warning(
-                    'The use of `%s` is deprecated. Please use `%s` instead.'
-                    % (DEPRECATED_MASTER_ADDRESS, MASTER_ADDRESS)
+                    'The use of `%s` is deprecated. Please use `%s` instead.', DEPRECATED_MASTER_ADDRESS, MASTER_ADDRESS
                 )
             else:
                 raise Exception('URL for `%s` must be specified in the instance configuration' % MASTER_ADDRESS)
@@ -304,7 +303,7 @@ class SparkCheck(AgentCheck):
             tags=['url:%s' % spark_driver_address] + tags,
             message='Connection to Spark driver "%s" was successful' % spark_driver_address,
         )
-        self.log.info("Returning running apps %s" % running_apps)
+        self.log.info("Returning running apps %s", running_apps)
         return running_apps
 
     def _standalone_init(self, spark_master_address, pre_20_mode, tags):
@@ -353,7 +352,7 @@ class SparkCheck(AgentCheck):
             tags=['url:%s' % spark_master_address] + tags,
             message='Connection to Spark master "%s" was successful' % spark_master_address,
         )
-        self.log.info("Returning running apps %s" % running_apps)
+        self.log.info("Returning running apps %s", running_apps)
         return running_apps
 
     def _mesos_init(self, instance, master_address, tags):
@@ -611,7 +610,7 @@ class SparkCheck(AgentCheck):
         elif metric_type == MONOTONIC_COUNT:
             self.monotonic_count(metric_name, value, tags=tags)
         else:
-            self.log.error('Metric type "{}" unknown'.format(metric_type))
+            self.log.error('Metric type "%s" unknown', metric_type)
 
     def _rest_request(self, url, object_path, service_name, tags, *args, **kwargs):
         """
@@ -633,7 +632,7 @@ class SparkCheck(AgentCheck):
             url = urljoin(url, '?' + query)
 
         try:
-            self.log.debug('Spark check URL: %s' % url)
+            self.log.debug('Spark check URL: %s', url)
             response = self.http.get(url)
 
             response.raise_for_status()

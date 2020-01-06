@@ -71,16 +71,16 @@ class IbmDb2Check(AgentCheck):
         try:
             raw_version = get_version(self._conn)
         except Exception as e:
-            self.log.error("Error getting version: {}".format(str(e)))
+            self.log.error("Error getting version: %s", e)
             return
 
         if raw_version:
             version_parts = self.parse_version(raw_version)
             self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
 
-            self.log.debug('Found ibm_db2 version: {}'.format(raw_version))
+            self.log.debug('Found ibm_db2 version: %s', raw_version)
         else:
-            self.log.warning('Could not retrieve ibm_db2 version info: {}'.format(raw_version))
+            self.log.warning('Could not retrieve ibm_db2 version info: %s', raw_version)
 
     def parse_version(self, version):
         """
@@ -431,36 +431,35 @@ class IbmDb2Check(AgentCheck):
 
             query = custom_query.get('query')
             if not query:  # no cov
-                self.log.error('Custom query field `query` is required for metric_prefix `{}`'.format(metric_prefix))
+                self.log.error('Custom query field `query` is required for metric_prefix `%s`', metric_prefix)
                 continue
 
             columns = custom_query.get('columns')
             if not columns:  # no cov
-                self.log.error('Custom query field `columns` is required for metric_prefix `{}`'.format(metric_prefix))
+                self.log.error('Custom query field `columns` is required for metric_prefix `%s`', metric_prefix)
                 continue
 
             rows = self.iter_rows(query, ibm_db.fetch_tuple)
-            self.log.debug('Running query for metric_prefix `{}`: `{}`'.format(metric_prefix, query))
+            self.log.debug('Running query for metric_prefix `%s`: `%s`', metric_prefix, query)
 
             # Trigger query execution
             try:
                 first_row = next(rows)
             except Exception as e:  # no cov
-                self.log.error('Error executing query for metric_prefix `{}`: `{}`'.format(metric_prefix, e))
+                self.log.error('Error executing query for metric_prefix `%s`: `%s`', metric_prefix, e)
                 continue
 
             for row in chain((first_row,), rows):
                 if not row:  # no cov
-                    self.log.debug(
-                        'Query result for metric_prefix `{}`: returned an empty result'.format(metric_prefix)
-                    )
+                    self.log.debug('Query result for metric_prefix `%s`: returned an empty result', metric_prefix)
                     continue
 
                 if len(columns) != len(row):  # no cov
                     self.log.error(
-                        'Query result for metric_prefix `{}`: expected {} columns, got {}'.format(
-                            metric_prefix, len(columns), len(row)
-                        )
+                        'Query result for metric_prefix `%s`: expected %s columns, got %s',
+                        metric_prefix,
+                        len(columns),
+                        len(row),
                     )
                     continue
 
@@ -475,7 +474,7 @@ class IbmDb2Check(AgentCheck):
 
                     name = column.get('name')
                     if not name:  # no cov
-                        self.log.error('Column field `name` is required for metric_prefix `{}`'.format(metric_prefix))
+                        self.log.error('Column field `name` is required for metric_prefix `%s`', metric_prefix)
                         break
 
                     column_type = column.get('type')
@@ -540,9 +539,9 @@ class IbmDb2Check(AgentCheck):
             connection = ibm_db.connect(target, username, password, connection_options)
         except Exception as e:
             if self._host:
-                self.log.error('Unable to connect with `{}`: {}'.format(scrub_connection_string(target), e))
+                self.log.error('Unable to connect with `%s`: %s', scrub_connection_string(target), e)
             else:  # no cov
-                self.log.error('Unable to connect to database `{}` as user `{}`: {}'.format(target, username, e))
+                self.log.error('Unable to connect to database `%s` as user `%s`: %s', target, username, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
@@ -567,7 +566,7 @@ class IbmDb2Check(AgentCheck):
             cursor = ibm_db.exec_immediate(self._conn, query)
         except Exception as e:
             error = str(e)
-            self.log.error("Error executing query, attempting to a new connection: {}".format(error))
+            self.log.error("Error executing query, attempting to a new connection: %s", error)
             connection = self.get_connection()
 
             if connection is None:

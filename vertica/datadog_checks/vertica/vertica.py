@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-import os
 import ssl
 from collections import defaultdict
 from datetime import datetime
@@ -500,7 +499,7 @@ class VerticaCheck(AgentCheck):
             try:
                 first_row = next(rows)
             except Exception as e:  # no cov
-                self.log.error('Error executing custom query: {}'.format(e))
+                self.log.error('Error executing custom query: %s', e)
                 continue
 
             for row in chain((first_row,), rows):
@@ -509,7 +508,7 @@ class VerticaCheck(AgentCheck):
                     continue
 
                 if len(columns) != len(row):  # no cov
-                    self.log.error('Custom query result expected {} columns, got {}'.format(len(columns), len(row)))
+                    self.log.error('Custom query result expected %s columns, got %s', len(columns), len(row))
                     continue
 
                 metric_info = []
@@ -528,21 +527,19 @@ class VerticaCheck(AgentCheck):
 
                     column_type = column.get('type')
                     if not column_type:  # no cov
-                        self.log.error('Column field `type` is required for column `{}`'.format(name))
+                        self.log.error('Column field `type` is required for column `%s`', name)
                         break
 
                     if column_type == 'tag':
                         query_tags.append('{}:{}'.format(name, value))
                     else:
                         if not hasattr(self, column_type):
-                            self.log.error(
-                                'Invalid submission method `{}` for metric column `{}`'.format(column_type, name)
-                            )
+                            self.log.error('Invalid submission method `%s` for metric column `%s`', column_type, name)
                             break
                         try:
                             metric_info.append((name, float(value), column_type))
                         except (ValueError, TypeError):  # no cov
-                            self.log.error('Non-numeric value `{}` for metric column `{}`'.format(value, name))
+                            self.log.error('Non-numeric value `%s` for metric column `%s`', value, name)
                             break
 
                 # Only submit metrics if there were absolutely no errors - all or nothing.
@@ -565,8 +562,9 @@ class VerticaCheck(AgentCheck):
         if self._client_lib_log_level:
             connection_options['log_level'] = self._client_lib_log_level
             # log_path is required by vertica client for using logging
-            # we still get vertica client logs in the agent log even if `log_path` is set to os.devnull
-            connection_options['log_path'] = os.devnull
+            # when log_path is set to '', vertica won't log to a file
+            # but we still get logs via parent root logger
+            connection_options['log_path'] = ''
 
         if self._tls_verify:  # no cov
             # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
@@ -596,7 +594,7 @@ class VerticaCheck(AgentCheck):
         try:
             connection = vertica.connect(**connection_options)
         except Exception as e:
-            self.log.error('Unable to connect to database `{}` as user `{}`: {}'.format(self._db, self._username, e))
+            self.log.error('Unable to connect to database `%s` as user `%s`: %s', self._db, self._username, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)

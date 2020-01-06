@@ -1056,6 +1056,28 @@ def test_3850(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+def test_meraki_cloud_controller(aggregator):
+    instance = common.generate_instance_config([])
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'meraki-cloud-controller.yaml')
+    instance['community_string'] = 'meraki-cloud-controller'
+    instance['profile'] = 'meraki'
+    instance['enforce_mib_constraints'] = False
+    init_config = {'profiles': {'meraki': {'definition_file': path}}}
+
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+
+    dev_metrics = ['devStatus', 'devClientCount']
+    dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK'] + common.CHECK_TAGS
+    for metric in dev_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=1)
+
+    if_tags = ['interface:wifi0', 'index:4'] + common.CHECK_TAGS
+    if_metrics = ['devInterfaceSentPkts', 'devInterfaceRecvPkts', 'devInterfaceSentBytes', 'devInterfaceSentBytes']
+    for metric in if_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+
+
 def test_idrac(aggregator):
     instance = common.generate_instance_config([])
     # We need the full path as we're not in installed mode
@@ -1153,12 +1175,7 @@ def test_cisco_nexus(aggregator):
     ]
     tcp_gauges = ['tcpCurrEstab']
     udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
-    if_counts = [
-        'ifInErrors',
-        'ifInDiscards',
-        'ifOutErrors',
-        'ifOutDiscards',
-    ]
+    if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
     ifx_counts = [
         'ifHCInOctets',
         'ifHCInUcastPkts',
@@ -1169,10 +1186,7 @@ def test_cisco_nexus(aggregator):
         'ifHCOutMulticastPkts',
         'ifHCOutBroadcastPkts',
     ]
-    if_gauges = [
-        'ifAdminStatus',
-        'ifOperStatus',
-    ]
+    if_gauges = ['ifAdminStatus', 'ifOperStatus']
 
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
