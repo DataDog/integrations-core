@@ -29,6 +29,8 @@ def ddev(ctx, core, extras, agent, here, color, quiet):
         try:
             restore_config()
             echo_success('Success! Please see `ddev config`.')
+        # TODO: Remove IOError (and noqa: B014) when Python 2 is removed
+        # In Python 3, IOError have been merged into OSError
         except (IOError, OSError, PermissionError):  # noqa: B014
             echo_warning(
                 'Unable to create config file located at `{}`. ' 'Please check your permissions.'.format(CONFIG_FILE)
