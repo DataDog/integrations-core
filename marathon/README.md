@@ -90,7 +90,7 @@ Follow the instructions below to configure this check for an Agent running on a 
             service: <SERVICE_NAME>
       ```
 
-4. [Restart the Agent][3].
+4. [Restart the Agent][4].
 
 #### Containerized
 

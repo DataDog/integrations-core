@@ -82,7 +82,7 @@ Istio contains two types of logs. Envoy access logs that are collected with the 
 
 2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5] or mount the `/var/log/pods` directory if you are not using docker.
 
-3. [Restart the Agent][2].
+3. [Restart the Agent][13].
 
 
 ### Validation
@@ -121,3 +121,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/agent/kubernetes
 [11]: https://istio.io/docs/tasks/telemetry/logs/collecting-logs/
 [12]: https://docs.datadoghq.com/integrations/envoy/#log-collection
+[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
