@@ -219,26 +219,26 @@ class SQLServer(AgentCheck):
             except SQLConnectionError:
                 raise
             except Exception:
-                self.log.warning("Can't load the metric {}, ignoring".format(name), exc_info=True)
+                self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
 
         # Load any custom metrics from conf.d/sqlserver.yaml
         for row in custom_metrics:
             db_table = row.get('table', DEFAULT_PERFORMANCE_TABLE)
             if db_table not in self.valid_tables:
-                self.log.error('{} has an invalid table name: {}'.format(row['name'], db_table))
+                self.log.error('%s has an invalid table name: %s', row['name'], db_table)
                 continue
 
             if db_table == DEFAULT_PERFORMANCE_TABLE:
                 user_type = row.get('type')
                 if user_type is not None and user_type not in VALID_METRIC_TYPES:
-                    self.log.error('{} has an invalid metric type: {}'.format(row['name'], user_type))
+                    self.log.error('%s has an invalid metric type: %s', row['name'], user_type)
                 sql_type = None
                 try:
                     if user_type is None:
                         sql_type, base_name = self.get_sql_type(instance, row['counter_name'])
                 except Exception:
-                    self.log.warning("Can't load the metric {}, ignoring".format(row['name']), exc_info=True)
+                    self.log.warning("Can't load the metric %s, ignoring", row['name'], exc_info=True)
                     continue
 
                 metrics_to_collect.append(
@@ -258,7 +258,7 @@ class SQLServer(AgentCheck):
         wait_stat_metrics = []
         vfs_metrics = []
         clerk_metrics = []
-        self.log.debug("metrics to collect %s", str(metrics_to_collect))
+        self.log.debug("metrics to collect %s", metrics_to_collect)
         for m in metrics_to_collect:
             if type(m) is SqlSimpleMetric:
                 self.log.debug("Adding simple metric %s", m.sql_name)
@@ -323,7 +323,7 @@ class SQLServer(AgentCheck):
                 self.log.warning("Invalid database connector %s using default %s", connector, self.connector)
                 connector = self.connector
             else:
-                self.log.debug("Overriding default connector for {} with {}".format(instance['host'], connector))
+                self.log.debug("Overriding default connector for %s with %s", instance['host'], connector)
         return connector
 
     def _get_adoprovider(self, instance):
