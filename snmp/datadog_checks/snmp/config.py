@@ -207,20 +207,26 @@ class InstanceConfig:
         mibs_to_load = set()
         parsed_metrics = []
 
-        def get_table_symbols(mib, table):
-            if isinstance(table, dict):
-                table = table['OID']
-                identity = hlapi.ObjectIdentity(table)
+        def extract_symbol(mib, symbol):
+            if isinstance(symbol, dict):
+                symbol_oid = symbol['OID']
+                symbol = symbol['name']
+                self._resolver.register(to_oid_tuple(symbol_oid), symbol)
+                identity = hlapi.ObjectIdentity(symbol_oid)
             else:
-                identity = hlapi.ObjectIdentity(mib, table)
+                identity = hlapi.ObjectIdentity(mib, symbol)
+            return identity, symbol
+
+        def get_table_symbols(mib, table):
+            identity, table = extract_symbol(mib, table)
             key = (mib, table)
             if key in table_oids:
-                return table_oids[key][1]
+                return table_oids[key][1], table
 
             table_object = hlapi.ObjectType(identity)
             symbols = []
             table_oids[key] = (table_object, symbols)
-            return symbols
+            return symbols, table
 
         # Check the metrics completely defined
         for metric in metrics:
@@ -233,22 +239,17 @@ class InstanceConfig:
                 if 'symbol' in metric:
                     to_query = metric['symbol']
                     try:
-                        get_table_symbols(metric['MIB'], to_query)
+                        _, parsed_metric_name = get_table_symbols(metric['MIB'], to_query)
                     except Exception as e:
                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                     else:
-                        if isinstance(to_query, dict):
-                            self._resolver.register(to_oid_tuple(to_query['OID']), to_query['name'])
-                            parsed_metric_name = to_query['name']
-                        else:
-                            parsed_metric_name = to_query
                         parsed_metric = ParsedMetric(parsed_metric_name, metric_tags, forced_type)
                         parsed_metrics.append(parsed_metric)
                     continue
                 elif 'symbols' not in metric:
                     raise ConfigurationError('When specifying a table, you must specify a list of symbols')
 
-                symbols = get_table_symbols(metric['MIB'], metric['table'])
+                symbols, _ = get_table_symbols(metric['MIB'], metric['table'])
                 index_tags = []
                 column_tags = []
                 for metric_tag in metric_tags:
@@ -260,23 +261,15 @@ class InstanceConfig:
                     if 'column' in metric_tag:
                         # In case it's a column, we need to query it as well
                         mib = metric_tag.get('MIB', metric['MIB'])
-                        column = metric_tag['column']
-                        if isinstance(column, dict):
-                            column_name = column['name']
-                            column_oid = column['OID']
-                            identity = hlapi.ObjectIdentity(column_oid)
-                            self._resolver.register(to_oid_tuple(column_oid), column_name)
-                            column_tags.append((tag_key, column_name))
-                        else:
-                            identity = hlapi.ObjectIdentity(mib, column)
-                            column_tags.append((tag_key, column))
+                        identity, column = extract_symbol(mib, metric_tag['column'])
+                        column_tags.append((tag_key, column))
                         try:
                             object_type = hlapi.ObjectType(identity)
                         except Exception as e:
                             warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                         else:
                             if 'table' in metric_tag:
-                                tag_symbols = get_table_symbols(mib, metric_tag['table'])
+                                tag_symbols, _ = get_table_symbols(mib, metric_tag['table'])
                                 tag_symbols.append(object_type)
                             elif mib != metric['MIB']:
                                 raise ConfigurationError(
@@ -298,13 +291,7 @@ class InstanceConfig:
                                         tag['column']['name'], metric_tag['index'], metric_tag['mapping']
                                     )
                 for symbol in metric['symbols']:
-                    if isinstance(symbol, dict):
-                        self._resolver.register(to_oid_tuple(symbol['OID']), symbol['name'])
-                        identity = hlapi.ObjectIdentity(symbol['OID'])
-                        parsed_metric_name = symbol['name']
-                    else:
-                        identity = hlapi.ObjectIdentity(metric['MIB'], symbol)
-                        parsed_metric_name = symbol
+                    identity, parsed_metric_name = extract_symbol(metric['MIB'], symbol)
                     try:
                         symbols.append(hlapi.ObjectType(identity))
                     except Exception as e:
