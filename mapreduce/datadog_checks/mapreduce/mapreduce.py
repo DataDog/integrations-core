@@ -130,8 +130,8 @@ class MapReduceCheck(AgentCheck):
         cluster_name = instance.get('cluster_name')
         if cluster_name is None:
             self.warning(
-                "The cluster_name must be specified in the instance configuration, "
-                "defaulting to '{}'".format(self.DEFAULT_CLUSTER_NAME)
+                "The cluster_name must be specified in the instance configuration, defaulting to '%s'",
+                self.DEFAULT_CLUSTER_NAME,
             )
             cluster_name = self.DEFAULT_CLUSTER_NAME
 
