@@ -72,9 +72,9 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
     fi'
     ```
 
-4. Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
 #### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Configure the Agent to connect to MySQL, edit your `cacti.d/conf.yaml` file. See the [sample cacti.d/conf.yaml][2] for all available configuration options:
 
@@ -120,10 +120,10 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
 
 For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below:
 
-| Parameter            | Value                                                                                                                    |
-|----------------------|--------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `cacti`                                                                                                                  |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                            |
+| Parameter            | Value                                                                                                                         |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `cacti`                                                                                                                       |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                 |
 | `<INSTANCE_CONFIG>`  | `{"mysql_host": "%%host%%", "mysql_user":"<MYSQL_USER>", "mysql_password":"<MYSQL_PASSWORD>", "rrd_path":"<CACTI_RRA_PATH>"}` |
 
 ### Validation
