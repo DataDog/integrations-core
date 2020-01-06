@@ -2,19 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
-import os
 from collections import defaultdict
 
-import pysnmp_mibs
 from pyasn1.type.univ import OctetString
-from pysmi.codegen import PySnmpCodeGen
-from pysmi.compiler import MibCompiler
-from pysmi.parser import SmiStarParser
-from pysmi.reader import HttpReader
-from pysmi.writer import PyFileWriter
 from pysnmp import hlapi
 from pysnmp.smi import builder, view
-from pysnmp.smi.error import MibNotFoundError
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -75,8 +67,6 @@ class InstanceConfig:
         self.failing_instances = defaultdict(int)
         self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
-        # Temporary flag until we secure the content
-        self.autofetch = is_affirmative(instance.get('autofetch', False))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
@@ -204,7 +194,6 @@ class InstanceConfig:
         `oids` is a dictionnary of SNMP tables to symbols to query.
         """
         table_oids = {}
-        mibs_to_load = set()
         parsed_metrics = []
 
         def extract_symbol(mib, symbol):
@@ -235,7 +224,6 @@ class InstanceConfig:
             if 'MIB' in metric:
                 if not ('table' in metric or 'symbol' in metric):
                     raise ConfigurationError('When specifying a MIB, you must specify either table or symbol')
-                mibs_to_load.add(metric['MIB'])
                 if 'symbol' in metric:
                     to_query = metric['symbol']
                     try:
@@ -307,14 +295,6 @@ class InstanceConfig:
             else:
                 raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
 
-        for mib in mibs_to_load:
-            try:
-                self.mib_view_controller.mibBuilder.loadModule(mib)
-            except MibNotFoundError:
-                if self.autofetch:
-                    log.debug("Couldn't found mib %s, trying to fetch it", mib)
-                    self.fetch_mib(mib)
-
         oids = []
         all_oids = []
         bulk_oids = []
@@ -333,14 +313,3 @@ class InstanceConfig:
             all_oids.insert(0, oids)
 
         return all_oids, bulk_oids, parsed_metrics
-
-    @staticmethod
-    def fetch_mib(mib):
-        target_directory = os.path.dirname(pysnmp_mibs.__file__)
-
-        reader = HttpReader('mibs.snmplabs.com', 80, '/asn1/@mib@')
-        mibCompiler = MibCompiler(SmiStarParser(), PySnmpCodeGen(), PyFileWriter(target_directory))
-
-        mibCompiler.addSources(reader)
-
-        mibCompiler.compile(mib)
