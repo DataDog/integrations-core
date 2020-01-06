@@ -235,6 +235,13 @@ class InstanceConfig:
         return context_engine_id, context_name
 
     def resolve_oid(self, oid):
+        """Resolve an OID to a name and its indexes.
+
+        This first tries to do manual resolution using `self._resolver`, then
+        falls back to MIB resolution if that fails.  In the first case it also
+        tries to resolve indexes to name if that applies, using
+        `self._index_resolver`.
+        """
         oid_tuple = oid.asTuple()
         prefix, resolved = self._resolver.match(oid_tuple)
         if resolved is not None:
