@@ -153,6 +153,21 @@ PLAY_WITH_GET_NEXT_METRICS = [
     {"OID": "1.3.6.1.2.1.4.31.3.1.3.2.1", "name": "noFallbackAndSameResult"},
 ]
 
+RESOLVED_TABULAR_OBJECTS = [
+    {
+        "MIB": "IF-MIB",
+        "table": "ifTable",
+        "symbols": [
+            {"name": "ifInOctets", "OID": "1.3.6.1.2.1.2.2.1.10"},
+            {"name": "ifOutOctets", "OID": "1.3.6.1.2.1.2.2.1.16"},
+        ],
+        "metric_tags": [
+            {"tag": "interface", "column": {"name": "ifDescr", "OID": "1.3.6.1.2.1.2.2.1.2"}},
+            {"tag": "dumbindex", "index": 1, "mapping": {1: "one", 2: "two", 3: "three", 90: "other"}},
+        ],
+    }
+]
+
 
 def generate_instance_config(metrics, template=None):
     template = template if template else SNMP_CONF

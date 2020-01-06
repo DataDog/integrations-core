@@ -12,6 +12,7 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
+from datadog_checks.snmp.resolver import OIDTrie
 
 from . import common
 
@@ -25,7 +26,7 @@ def test_parse_metrics(hlapi_mock):
     # Unsupported metric
     metrics = [{"foo": "bar"}]
     config = InstanceConfig(
-        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3"}]},
+        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]},
         check.warning,
         check.log,
         [],
@@ -38,10 +39,9 @@ def test_parse_metrics(hlapi_mock):
         config.parse_metrics(metrics, check.warning, check.log)
 
     # Simple OID
-    metrics = [{"OID": "1.2.3"}]
-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
-    assert table == {}
-    assert len(raw) == 1
+    metrics = [{"OID": "1.2.3", "name": "foo"}]
+    table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
+    assert len(table) == 1
     hlapi_mock.ObjectIdentity.assert_called_once_with("1.2.3")
     hlapi_mock.reset_mock()
 
@@ -52,8 +52,7 @@ def test_parse_metrics(hlapi_mock):
 
     # MIB with symbol
     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
-    assert raw == []
+    table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
     assert len(table) == 1
     hlapi_mock.ObjectIdentity.assert_called_once_with("foo_mib", "foo")
     hlapi_mock.reset_mock()
@@ -65,10 +64,9 @@ def test_parse_metrics(hlapi_mock):
 
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
-    assert raw == []
+    table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
     assert len(table) == 1
-    assert len(list(table.values())[0]) == 2
+    assert len(table[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.reset_mock()
@@ -83,14 +81,21 @@ def test_parse_metrics(hlapi_mock):
     with pytest.raises(Exception):
         config.parse_metrics(metrics, check.warning, check.log)
 
+    # Table with manual OID
+    metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
+    table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
+    assert len(table) == 1
+    assert len(table[0]) == 1
+    hlapi_mock.ObjectIdentity.assert_any_call("1.2.3")
+    hlapi_mock.reset_mock()
+
     # MIB with table, symbols, metrics_tags index
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
     ]
-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
-    assert raw == []
+    table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
     assert len(table) == 1
-    assert len(list(table.values())[0]) == 2
+    assert len(table[0]) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.reset_mock()
@@ -99,13 +104,29 @@ def test_parse_metrics(hlapi_mock):
     metrics = [
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
     ]
-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
-    assert raw == []
+    table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
     assert len(table) == 1
-    assert len(list(table.values())[0]) == 3
+    assert len(table[0]) == 3
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "baz")
+    hlapi_mock.reset_mock()
+
+    # MIB with table, symbols, metrics_tags column with OID
+    metrics = [
+        {
+            "MIB": "foo_mib",
+            "table": "foo",
+            "symbols": ["foo", "bar"],
+            "metric_tags": [{"tag": "foo", "column": {"name": "baz", "OID": "1.5.6"}}],
+        }
+    ]
+    table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
+    assert len(table) == 1
+    assert len(table[0]) == 3
+    hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
+    hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
+    hlapi_mock.ObjectIdentity.assert_any_call("1.5.6")
     hlapi_mock.reset_mock()
 
 
@@ -228,3 +249,14 @@ def test_cache_building(write_mock, read_mock):
         check._running = False
 
     write_mock.assert_called_once_with('', '["192.168.0.1"]')
+
+
+def test_trie():
+    trie = OIDTrie()
+    trie.set((1, 2), 'bar')
+    trie.set((1, 2, 3), 'foo')
+    assert trie.match((1,)) == ((1,), None)
+    assert trie.match((1, 2)) == ((1, 2), 'bar')
+    assert trie.match((1, 2, 3)) == ((1, 2, 3), 'foo')
+    assert trie.match((1, 2, 3, 4)) == ((1, 2, 3), 'foo')
+    assert trie.match((2, 3, 4)) == ((), None)

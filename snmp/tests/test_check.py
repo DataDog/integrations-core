@@ -8,7 +8,6 @@ import socket
 import time
 
 import mock
-import pysnmp_mibs
 import pytest
 import yaml
 
@@ -31,7 +30,7 @@ def test_command_generator():
     config = check._config
 
     # Test command generator MIB source
-    mib_folders = config.snmp_engine.getMibBuilder().getMibSources()
+    mib_folders = config._snmp_engine.getMibBuilder().getMibSources()
     full_path_mib_folders = [f.fullPath() for f in mib_folders]
     assert check.ignore_nonincreasing_oid is False  # Default value
 
@@ -218,6 +217,26 @@ def test_table(aggregator):
     aggregator.all_metrics_asserted()
 
 
+def test_resolved_table(aggregator):
+    instance = common.generate_instance_config(common.RESOLVED_TABULAR_OBJECTS)
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    for symbol in common.TABULAR_OBJECTS[0]['symbols']:
+        metric_name = "snmp." + symbol
+        aggregator.assert_metric(metric_name, at_least=1)
+        aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
+
+        for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
+            tag = mtag['tag']
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
 def test_table_v3_MD5_DES(aggregator):
     """
     Support SNMP V3 priv modes: MD5 + DES
@@ -370,6 +389,7 @@ def test_table_v3_SHA_AES(aggregator):
 
 def test_bulk_table(aggregator):
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
+    instance['bulk_threshold'] = 5
     check = common.create_check(instance)
 
     check.check(instance)
@@ -614,23 +634,6 @@ def test_discovery(aggregator):
 
     aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
     aggregator.assert_all_metrics_covered()
-
-
-def test_fetch_mib():
-    instance = common.generate_instance_config(common.DUMMY_MIB_OID)
-    # Try a small MIB
-    instance['metrics'][0]['MIB'] = 'A3COM-AUDL-R1-MIB'
-    instance['enforce_mib_constraints'] = False
-    # Remove it
-    path = os.path.join(os.path.dirname(pysnmp_mibs.__file__), 'A3COM-AUDL-R1-MIB.py')
-    # Make sure it doesn't exist
-    if os.path.exists(path):
-        os.unlink(path)
-    pyc = '{}c'.format(path)
-    if os.path.exists(pyc):
-        os.unlink(pyc)
-    SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
-    assert os.path.exists(path)
 
 
 def test_different_mibs(aggregator):
