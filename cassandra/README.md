@@ -110,7 +110,7 @@ Need help? Contact [Datadog support][4].
 [4]: https://docs.datadoghq.com/help
 [5]: https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#multi-line-aggregation
+[7]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=exclude_at_match#multi-line-aggregation
 [8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [9]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [10]: https://docs.datadoghq.com/agent/docker/log/

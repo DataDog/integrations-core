@@ -5,9 +5,10 @@ import click
 
 from ..console import CONTEXT_SETTINGS
 from .changes import changes
+from .dashboard import dash
 from .prometheus import prom
 
-ALL_COMMANDS = (changes, prom)
+ALL_COMMANDS = (changes, dash, prom)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Collection of useful utilities')

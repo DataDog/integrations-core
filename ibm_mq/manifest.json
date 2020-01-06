@@ -16,7 +16,8 @@
   "categories": [
     "processing",
     "messaging",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "type": "check",
   "is_public": true,

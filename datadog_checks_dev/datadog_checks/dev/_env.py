@@ -52,6 +52,18 @@ def get_env_vars(raw=False):
         return env_vars
 
 
+def get_state(key, default=None):
+    value = get_env_vars().get(key.lower())
+    if value is None:
+        return default
+
+    return deserialize_data(value)
+
+
+def save_state(key, value):
+    set_env_vars({key.lower(): serialize_data(value)})
+
+
 def set_up_env():
     return os.getenv(E2E_SET_UP, 'true') != 'false'
 

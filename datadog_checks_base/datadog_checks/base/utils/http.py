@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from ipaddress import ip_address, ip_network
 
 import requests
+from requests import auth as requests_auth
 from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
@@ -40,10 +41,10 @@ LOGGER = logging.getLogger(__file__)
 DEFAULT_TIMEOUT = 10
 
 STANDARD_FIELDS = {
-    'auth_type': '',
-    'aws_host': '',
-    'aws_region': '',
-    'aws_service': '',
+    'auth_type': 'basic',
+    'aws_host': None,
+    'aws_region': None,
+    'aws_service': None,
     'connect_timeout': None,
     'extra_headers': None,
     'headers': None,
@@ -169,59 +170,26 @@ class RequestsWrapper(object):
             update_headers(headers, config['extra_headers'])
 
         # http://docs.python-requests.org/en/master/user/authentication/
-        auth = None
-        if config['password']:
-            if config['username']:
-                auth_type = config.get('auth_type', 'basic').lower()
-                if auth_type == 'digest':
-                    auth = requests.auth.HTTPDigestAuth(config['username'], config['password'])
-                else:
-                    if auth_type != 'basic':
-                        self.logger.debug('auth_type %s is not supported, defaulting to basic', auth_type)
-                    auth = (config['username'], config['password'])
+        auth_type = config['auth_type'].lower()
+        if auth_type not in AUTH_TYPES:
+            self.logger.warning('auth_type %s is not supported, defaulting to basic', auth_type)
+            auth_type = 'basic'
 
-            elif config['ntlm_domain']:
-                ensure_ntlm()
-
-                auth = requests_ntlm.HttpNtlmAuth(config['ntlm_domain'], config['password'])
-
-        if auth is None:
+        if auth_type == 'basic':
             if config['kerberos_auth']:
-                ensure_kerberos()
-
-                # For convenience
-                if is_affirmative(config['kerberos_auth']):
-                    config['kerberos_auth'] = 'required'
-
-                if config['kerberos_auth'] not in KERBEROS_STRATEGIES:
-                    raise ConfigurationError(
-                        'Invalid Kerberos strategy `{}`, must be one of: {}'.format(
-                            config['kerberos_auth'], ' | '.join(KERBEROS_STRATEGIES)
-                        )
-                    )
-
-                auth = requests_kerberos.HTTPKerberosAuth(
-                    mutual_authentication=KERBEROS_STRATEGIES[config['kerberos_auth']],
-                    delegate=is_affirmative(config['kerberos_delegate']),
-                    force_preemptive=is_affirmative(config['kerberos_force_initiate']),
-                    hostname_override=config['kerberos_hostname'],
-                    principal=config['kerberos_principal'],
+                self.logger.warning(
+                    'The ability to use Kerberos auth without explicitly setting auth_type to '
+                    '`kerberos` is deprecated and will be removed in Agent 8'
                 )
-            elif config['auth_type'].lower() == 'aws':
-                ensure_aws()
-
-                if not config['aws_host']:
-                    raise ConfigurationError('AWS auth requires the setting `aws_host`')
-
-                if not config['aws_region']:
-                    raise ConfigurationError('AWS auth requires the setting `aws_region`')
-
-                if not config['aws_service']:
-                    raise ConfigurationError('AWS auth requires the setting `aws_service`')
-
-                auth = requests_aws.BotoAWSRequestsAuth(
-                    aws_host=config['aws_host'], aws_region=config['aws_region'], aws_service=config['aws_service']
+                auth_type = 'kerberos'
+            elif config['ntlm_domain']:
+                self.logger.warning(
+                    'The ability to use NTLM auth without explicitly setting auth_type to '
+                    '`ntlm` is deprecated and will be removed in Agent 8'
                 )
+                auth_type = 'ntlm'
+
+        auth = AUTH_TYPES[auth_type](config)
 
         # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         verify = True
@@ -411,28 +379,6 @@ def handle_kerberos_cache(cache_file_path):
         os.environ['KRB5CCNAME'] = old_cache_path
 
 
-def ensure_kerberos():
-    global requests_kerberos
-    if requests_kerberos is None:
-        import requests_kerberos
-
-        KERBEROS_STRATEGIES['required'] = requests_kerberos.REQUIRED
-        KERBEROS_STRATEGIES['optional'] = requests_kerberos.OPTIONAL
-        KERBEROS_STRATEGIES['disabled'] = requests_kerberos.DISABLED
-
-
-def ensure_ntlm():
-    global requests_ntlm
-    if requests_ntlm is None:
-        import requests_ntlm
-
-
-def ensure_aws():
-    global requests_aws
-    if requests_aws is None:
-        from aws_requests_auth import boto_utils as requests_aws
-
-
 def should_bypass_proxy(url, no_proxy_uris):
     # Accepts a URL and a list of no_proxy URIs
     # Returns True if URL should bypass the proxy.
@@ -456,3 +402,73 @@ def should_bypass_proxy(url, no_proxy_uris):
             if no_proxy_uri == parsed_uri or parsed_uri.endswith(dot_no_proxy_uri):
                 return True
     return False
+
+
+def create_basic_auth(config):
+    # Since this is the default case, only activate when all fields are explicitly set
+    if config['username'] and config['password']:
+        return (config['username'], config['password'])
+
+
+def create_digest_auth(config):
+    return requests_auth.HTTPDigestAuth(config['username'], config['password'])
+
+
+def create_ntlm_auth(config):
+    global requests_ntlm
+    if requests_ntlm is None:
+        import requests_ntlm
+
+    return requests_ntlm.HttpNtlmAuth(config['ntlm_domain'], config['password'])
+
+
+def create_kerberos_auth(config):
+    global requests_kerberos
+    if requests_kerberos is None:
+        import requests_kerberos
+
+        KERBEROS_STRATEGIES['required'] = requests_kerberos.REQUIRED
+        KERBEROS_STRATEGIES['optional'] = requests_kerberos.OPTIONAL
+        KERBEROS_STRATEGIES['disabled'] = requests_kerberos.DISABLED
+
+    # For convenience
+    if config['kerberos_auth'] is None or is_affirmative(config['kerberos_auth']):
+        config['kerberos_auth'] = 'required'
+
+    if config['kerberos_auth'] not in KERBEROS_STRATEGIES:
+        raise ConfigurationError(
+            'Invalid Kerberos strategy `{}`, must be one of: {}'.format(
+                config['kerberos_auth'], ' | '.join(KERBEROS_STRATEGIES)
+            )
+        )
+
+    return requests_kerberos.HTTPKerberosAuth(
+        mutual_authentication=KERBEROS_STRATEGIES[config['kerberos_auth']],
+        delegate=is_affirmative(config['kerberos_delegate']),
+        force_preemptive=is_affirmative(config['kerberos_force_initiate']),
+        hostname_override=config['kerberos_hostname'],
+        principal=config['kerberos_principal'],
+    )
+
+
+def create_aws_auth(config):
+    global requests_aws
+    if requests_aws is None:
+        from aws_requests_auth import boto_utils as requests_aws
+
+    for setting in ('aws_host', 'aws_region', 'aws_service'):
+        if not config[setting]:
+            raise ConfigurationError('AWS auth requires the setting `{}`'.format(setting))
+
+    return requests_aws.BotoAWSRequestsAuth(
+        aws_host=config['aws_host'], aws_region=config['aws_region'], aws_service=config['aws_service']
+    )
+
+
+AUTH_TYPES = {
+    'basic': create_basic_auth,
+    'digest': create_digest_auth,
+    'ntlm': create_ntlm_auth,
+    'kerberos': create_kerberos_auth,
+    'aws': create_aws_auth,
+}

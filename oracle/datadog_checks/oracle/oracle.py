@@ -98,11 +98,11 @@ class Oracle(AgentCheck):
         except cx_Oracle.DatabaseError as e:
             # Fallback to JDBC
             use_oracle_client = False
-            self.log.debug('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
+            self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
             connect_string = self.JDBC_CONNECT_STRING.format(server, service)
         else:
             use_oracle_client = True
-            self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
+            self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
             connect_string = self.CX_CONNECT_STRING.format(user, password, server, service)
 
         try:
@@ -150,12 +150,12 @@ class Oracle(AgentCheck):
 
             query = custom_query.get('query')
             if not query:
-                self.log.error('custom query field `query` is required for metric_prefix `{}`'.format(metric_prefix))
+                self.log.error('custom query field `query` is required for metric_prefix `%s`', metric_prefix)
                 continue
 
             columns = custom_query.get('columns')
             if not columns:
-                self.log.error('custom query field `columns` is required for metric_prefix `{}`'.format(metric_prefix))
+                self.log.error('custom query field `columns` is required for metric_prefix `%s`', metric_prefix)
                 continue
 
             with closing(con.cursor()) as cursor:
@@ -163,9 +163,10 @@ class Oracle(AgentCheck):
                 for row in cursor.fetchall():
                     if len(columns) != len(row):
                         self.log.error(
-                            'query result for metric_prefix {}: expected {} columns, got {}'.format(
-                                metric_prefix, len(columns), len(row)
-                            )
+                            'query result for metric_prefix %s: expected %s columns, got %s',
+                            metric_prefix,
+                            len(columns),
+                            len(row),
                         )
                         break
 
@@ -179,9 +180,7 @@ class Oracle(AgentCheck):
                         if column:
                             name = column.get('name')
                             if not name:
-                                self.log.error(
-                                    'column field `name` is required for metric_prefix `{}`'.format(metric_prefix)
-                                )
+                                self.log.error('column field `name` is required for metric_prefix `%s`', metric_prefix)
                                 break
 
                             column_type = column.get('type')

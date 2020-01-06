@@ -13,7 +13,7 @@ instances:
     ## @param port - integer - required
     ## ActiveMQ port to connect to.
     #
-    port: 1099
+    port: 1616
 
     ## @param auth_type - string - optional
     ## The type of authentication to use.

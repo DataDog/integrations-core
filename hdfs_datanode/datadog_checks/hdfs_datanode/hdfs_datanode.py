@@ -86,7 +86,7 @@ class HDFSDataNode(AgentCheck):
         bean = next(iter(beans))
         bean_name = bean.get('name')
 
-        self.log.debug("Bean name retrieved: {}".format(bean_name))
+        self.log.debug("Bean name retrieved: %s", bean_name)
 
         for metric, (metric_name, metric_type) in iteritems(self.HDFS_METRICS):
             metric_value = bean.get(metric)
@@ -100,7 +100,7 @@ class HDFSDataNode(AgentCheck):
         if metric_type == self.GAUGE:
             self.gauge(metric_name, value, tags=tags)
         else:
-            self.log.error('Metric type "{}" unknown'.format(metric_type))
+            self.log.error('Metric type "%s" unknown', metric_type)
 
     def _rest_request_to_json(self, url, object_path, query_params, tags):
         """
@@ -114,7 +114,7 @@ class HDFSDataNode(AgentCheck):
             query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(query_params)])
             url = urljoin(url, '?' + query)
 
-        self.log.debug('Attempting to connect to "{}"'.format(url))
+        self.log.debug('Attempting to connect to "%s"', url)
 
         try:
             response = self.http.get(url)

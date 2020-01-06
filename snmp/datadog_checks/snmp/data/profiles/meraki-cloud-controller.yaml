@@ -1,0 +1,30 @@
+# Profile for Meraki Cloud devices
+#
+sysobjectid: 1.3.6.1.4.1.29671.*
+metrics:
+  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
+    table: devTable
+    forced_type: gauge
+    symbols:
+      - devStatus # 0 or 1 values
+      - devClientCount
+    metric_tags:
+      - tag: device
+        column: devName
+      - tag: product
+        column: devProductCode
+      - tag: network
+        column: devNetworkName
+  - MIB: MERAKI-CLOUD-CONTROLLER-MIB
+    table: devInterfaceTable
+    forced_type: gauge
+    symbols:
+      - devInterfaceSentPkts
+      - devInterfaceRecvPkts
+      - devInterfaceSentBytes
+      - devInterfaceRecvBytes
+    metric_tags:
+      - tag: interface
+        column: devInterfaceName
+      - tag: index
+        column: devInterfaceIndex

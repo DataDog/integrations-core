@@ -48,7 +48,13 @@ DEFAULT_CONFIG = OrderedDict(
                 (
                     (
                         'default',
-                        OrderedDict((('api_key', os.getenv('DD_API_KEY')), ('app_key', os.getenv('DD_APP_KEY')))),
+                        OrderedDict(
+                            (
+                                ('api_key', os.getenv('DD_API_KEY')),
+                                ('app_key', os.getenv('DD_APP_KEY')),
+                                ('site', os.getenv('DD_SITE')),
+                            )
+                        ),
                     ),
                 )
             ),

@@ -100,7 +100,7 @@ class HAProxy(AgentCheck):
 
     def check(self, instance):
         url = instance.get('url')
-        self.log.debug('Processing HAProxy data for %s' % url)
+        self.log.debug('Processing HAProxy data for %s', url)
         parsed_url = urlparse(url)
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
@@ -162,7 +162,7 @@ class HAProxy(AgentCheck):
         # Try to fetch data from the stats URL
         url = "%s%s" % (url, STATS_URL)
 
-        self.log.debug("Fetching haproxy stats from url: %s" % url)
+        self.log.debug("Fetching haproxy stats from url: %s", url)
 
         response = self.http.get(url)
         response.raise_for_status()
@@ -186,7 +186,7 @@ class HAProxy(AgentCheck):
 
     def _collect_version_from_http(self, url):
         # the csv format does not offer version info, therefore we need to get the HTML page
-        self.log.debug("collecting version info for HAProxy from {}".format(url))
+        self.log.debug("collecting version info for HAProxy from %s", url)
 
         r = self.http.get(url)
         r.raise_for_status()
@@ -206,7 +206,7 @@ class HAProxy(AgentCheck):
     def _fetch_socket_data(self, parsed_url):
         ''' Hit a given stats socket and return the stats lines '''
 
-        self.log.debug("Fetching haproxy stats from socket: %s" % parsed_url.geturl())
+        self.log.debug("Fetching haproxy stats from socket: %s", parsed_url.geturl())
 
         if parsed_url.scheme == 'tcp':
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -241,7 +241,7 @@ class HAProxy(AgentCheck):
         if version == '':
             self.log.debug("unable to collect version info from socket")
         else:
-            self.log.debug("HAProxy version is {}".format(version))
+            self.log.debug("HAProxy version is %s", version)
             self.set_metadata('version', version)
 
     def _process_data(

@@ -4,7 +4,8 @@
   ],
   "categories": [
     "web",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "description": "Track requests per second, bytes served, worker threads, uptime, and more.",
@@ -32,6 +33,9 @@
   "type": "check",
   "integration_id": "apache",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

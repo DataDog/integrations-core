@@ -110,21 +110,21 @@ def test__get_custom_metrics_misconfigured(check):
 
     # No query for metric_prefix
     check._get_custom_metrics(None, custom_queries, [])
-    log.error.assert_called_once_with('custom query field `query` is required for metric_prefix `foo`')
+    log.error.assert_called_once_with('custom query field `query` is required for metric_prefix `%s`', 'foo')
     log.reset_mock()
 
     query["query"] = "bar"
 
     # No columns for metric_prefix
     check._get_custom_metrics(None, custom_queries, [])
-    log.error.assert_called_once_with('custom query field `columns` is required for metric_prefix `foo`')
+    log.error.assert_called_once_with('custom query field `columns` is required for metric_prefix `%s`', 'foo')
     log.reset_mock()
 
     query["columns"] = [{}]
 
     # Wrong number of columns
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('query result for metric_prefix foo: expected 1 columns, got 2')
+    log.error.assert_called_once_with('query result for metric_prefix %s: expected %s columns, got %s', 'foo', 1, 2)
     log.reset_mock()
 
     col1 = {"name": "baz", "type": "tag"}
@@ -134,7 +134,7 @@ def test__get_custom_metrics_misconfigured(check):
 
     # No name in column
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('column field `name` is required for metric_prefix `foo`')
+    log.error.assert_called_once_with('column field `name` is required for metric_prefix `%s`', 'foo')
     log.reset_mock()
 
     del col2["foo"]

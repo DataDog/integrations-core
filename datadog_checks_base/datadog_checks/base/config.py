@@ -16,5 +16,5 @@ def is_affirmative(value):
     return not not value
 
 
-# Compatibility layer for Agent5
+# Deprecated compatibility layer for Agent 5, will be removed in Agent 8
 _is_affirmative = is_affirmative

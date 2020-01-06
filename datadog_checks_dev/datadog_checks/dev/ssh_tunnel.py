@@ -4,8 +4,7 @@
 from __future__ import absolute_import
 
 import os
-import socket
-from contextlib import closing, contextmanager
+from contextlib import contextmanager
 
 import psutil
 from six import PY3
@@ -13,7 +12,7 @@ from six import PY3
 from .conditions import WaitForPortListening
 from .env import environment_run
 from .structures import LazyFunction, TempDir
-from .utils import ON_WINDOWS
+from .utils import ON_WINDOWS, find_free_port, get_ip
 
 if PY3:
     import subprocess
@@ -21,22 +20,6 @@ else:
     import subprocess32 as subprocess
 
 PID_FILE = 'ssh.pid'
-
-
-def find_free_port(ip):
-    """Return a port available for listening on the given `ip`."""
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind((ip, 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
-
-
-def get_ip():
-    """Return the IP address used to connect to external networks."""
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
-        # doesn't even have to be reachable
-        s.connect(('10.255.255.255', 1))
-        return s.getsockname()[0]
 
 
 def run_background_command(command, pid_filename, env=None):

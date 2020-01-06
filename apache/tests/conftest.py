@@ -25,6 +25,7 @@ def dd_environment():
         compose_file=os.path.join(HERE, 'compose', 'apache.yaml'),
         env_vars=env,
         conditions=[CheckEndpoints([STATUS_URL]), generate_metrics],
+        mount_logs=True,
         sleep=20,
     ):
         yield STATUS_CONFIG
