@@ -40,16 +40,16 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
 
 ### Configuration
 
-#### Create a Datadog User
+#### Create a Datadog user
 
-1. Create a datadog user with read-only rights to the Cacti database
+1. Create a Datadog user with read-only rights to the Cacti database.
 
     ```shell
     sudo mysql -e "create user 'datadog'@'localhost' identified by '<MYSQL_PASSWORD>';"
     sudo mysql -e "grant select on cacti.* to 'datadog'@'localhost';"
     ```
 
-2. Check user and rights:
+2. Check the user and rights:
 
     ```shell
     mysql -u datadog --password=<MYSQL_PASSWORD> -e "show status" | \
@@ -61,7 +61,7 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
     echo -e "\033[0;31mMissing SELECT grant\033[0m"
     ```
 
-3. Give the datadog-agent user access to the RRD files:
+3. Give the `datadog-agent` user access to the RRD files:
 
     ```shell
     sudo gpasswd -a dd-agent www-data
@@ -124,11 +124,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][4]
 |----------------------|--------------------------------------------------------------------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `cacti`                                                                                                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                            |
-| `<INSTANCE_CONFIG>`  | `{"mysql_host": "%%host%%", "mysql_user":"datadog", "mysql_password":"<MYSQL_PASSWORD>", "rrd_path":"<CACTI_RRA_PATH>"}` |
+| `<INSTANCE_CONFIG>`  | `{"mysql_host": "%%host%%", "mysql_user":"<MYSQL_USER>", "mysql_password":"<MYSQL_PASSWORD>", "rrd_path":"<CACTI_RRA_PATH>"}` |
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `cacti` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `cacti` under the Checks section.
 
 ## Data Collected
 
