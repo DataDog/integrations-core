@@ -142,21 +142,27 @@ def test__get_custom_metrics_misconfigured(check):
 
     # No type in column
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('column field `type` is required for column `foo` of metric_prefix `foo`')
+    log.error.assert_called_once_with(
+        'column field `type` is required for column `%s` of metric_prefix `%s`', 'foo', 'foo'
+    )
     log.reset_mock()
 
     col2["type"] = "invalid"
 
     # Invalid type column
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('invalid submission method `invalid` for column `foo` of metric_prefix `foo`')
+    log.error.assert_called_once_with(
+        'invalid submission method `%s` for column `%s` of metric_prefix `%s`', 'invalid', 'foo', 'foo'
+    )
     log.reset_mock()
 
     col2["type"] = "gauge"
 
     # Non numeric value
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('non-numeric value `bar` for metric column `foo` of metric_prefix `foo`')
+    log.error.assert_called_once_with(
+        'non-numeric value `%s` for metric column `%s` of metric_prefix `%s`', 'bar', 'foo', 'foo'
+    )
 
     # No metric sent if errors
     gauge.assert_not_called()
