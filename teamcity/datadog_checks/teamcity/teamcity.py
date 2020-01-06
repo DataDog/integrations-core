@@ -63,7 +63,7 @@ class TeamCityCheck(AgentCheck):
         self.last_build_ids[instance_name] = last_build_id
 
     def _build_and_send_event(self, new_build, instance_name, is_deployment, host, tags):
-        self.log.debug("Found new build with id {}, saving and alerting.".format(new_build["id"]))
+        self.log.debug("Found new build with id %s, saving and alerting.", new_build["id"])
         self.last_build_ids[instance_name] = new_build["id"]
 
         event_dict = {"timestamp": int(time.time()), "source_type_name": "teamcity", "host": host, "tags": []}
