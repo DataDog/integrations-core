@@ -14,7 +14,6 @@
     "aggregations": [
       { "metric": "count", "type": "count" }
     ],
-    "step_ms": "30000",
     "limit": "50",
     "widget": "toplist"
   }

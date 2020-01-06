@@ -14,7 +14,7 @@
     "aggregations": [
       { "metric": "count", "type": "count" }
     ],
-    "step_ms": "30000",
+    "step_ms": "500",
     "limit": "50",
     "widget": "timeseries"
   }
