@@ -55,6 +55,13 @@ def test_linkerd_v2(aggregator):
     )
 
 
+def test_openmetrics_error(monkeypatch):
+    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://fake.tld/prometheus', exc="Exception")
+        with pytest.raises(Exception):
+            check.check(MOCK_INSTANCE)
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
