@@ -200,7 +200,7 @@ class HAProxy(AgentCheck):
             self.log.debug("unable to find HAProxy version info")
         else:
             version = re.search(r"HAProxy version ([^,]+)", raw_version).group(1)
-            self.log.debug(u"HAProxy version is {}".format(version))
+            self.log.debug("HAProxy version is %s", version)
             self.set_metadata('version', version)
 
     def _fetch_socket_data(self, parsed_url):
@@ -577,14 +577,13 @@ class HAProxy(AgentCheck):
             try:
                 service, _, hostname, status = host_status
             except Exception:
+                service, _, status = host_status
                 if collect_status_metrics_by_host:
                     self.warning(
-                        '`collect_status_metrics_by_host` is enabled but no host info\
-                                 could be extracted from HAProxy stats endpoint for {0}'.format(
-                            service
-                        )
+                        '`collect_status_metrics_by_host` is enabled but no host info could be extracted from HAProxy '
+                        'stats endpoint for %s',
+                        service,
                     )
-                service, _, status = host_status
 
             if self._is_service_excl_filtered(service, services_incl_filter, services_excl_filter):
                 continue
