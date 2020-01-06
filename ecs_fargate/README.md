@@ -151,7 +151,7 @@ Example for the Agent container:
 ```json
 {
   "name": "DD_DOCKER_LABELS_AS_TAGS",
-  "value": "{"com.docker.compose.service":"service_name"}"
+  "value": "{\"com.docker.compose.service\":\"service_name\"}"
 }
 ```
 
