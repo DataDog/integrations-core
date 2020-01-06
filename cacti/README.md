@@ -72,9 +72,7 @@ sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install rrdtool
     fi'
     ```
 
-#### Host
-
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+#### Configure the Agent
 
 1. Configure the Agent to connect to MySQL, edit your `cacti.d/conf.yaml` file. See the [sample cacti.d/conf.yaml][2] for all available configuration options:
 
@@ -116,25 +114,15 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][3].
 
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][4] for guidance on applying the parameters below:
-
-| Parameter            | Value                                                                                                                         |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `cacti`                                                                                                                       |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                 |
-| `<INSTANCE_CONFIG>`  | `{"mysql_host": "%%host%%", "mysql_user":"<MYSQL_USER>", "mysql_password":"<MYSQL_PASSWORD>", "rrd_path":"<CACTI_RRA_PATH>"}` |
-
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `cacti` under the Checks section.
+[Run the Agent's status subcommand][4] and look for `cacti` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -148,18 +136,17 @@ The Cacti check does not include any service checks.
 
 ### Known issues
 
-The Python library used by this integration leaks memory under certain circumstances. If you experience this, one workaround is to install the [python-rrdtool][7] package instead of rrdtool. This older package is not maintained and is not officially supported by this integration but it has helped others resolve the memory issues.
+The Python library used by this integration leaks memory under certain circumstances. If you experience this, one workaround is to install the [python-rrdtool][6] package instead of rrdtool. This older package is not maintained and is not officially supported by this integration but it has helped others resolve the memory issues.
 
-A [Github issue][8] has been opened to track this memory leak.
+A [Github issue][7] has been opened to track this memory leak.
 
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][8].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://github.com/DataDog/integrations-core/blob/master/cacti/datadog_checks/cacti/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[4]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
-[7]: https://github.com/pbanaszkiewicz/python-rrdtool
-[8]: https://github.com/commx/python-rrdtool/issues/25
-[9]: https://docs.datadoghq.com/help
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
+[6]: https://github.com/pbanaszkiewicz/python-rrdtool
+[7]: https://github.com/commx/python-rrdtool/issues/25
+[8]: https://docs.datadoghq.com/help
