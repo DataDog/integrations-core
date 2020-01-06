@@ -480,7 +480,7 @@ class IbmDb2Check(AgentCheck):
                     column_type = column.get('type')
                     if not column_type:  # no cov
                         self.log.error(
-                            'Column field `type` is required for column `%s` ' 'of metric_prefix `%s`',
+                            'Column field `type` is required for column `%s` of metric_prefix `%s`',
                             name,
                             metric_prefix,
                         )
@@ -491,7 +491,7 @@ class IbmDb2Check(AgentCheck):
                     else:
                         if not hasattr(self, column_type):
                             self.log.error(
-                                'Invalid submission method `%s` for metric column `%s` of ' 'metric_prefix `%s`',
+                                'Invalid submission method `%s` for metric column `%s` of metric_prefix `%s`',
                                 column_type,
                                 name,
                                 metric_prefix,
@@ -501,7 +501,7 @@ class IbmDb2Check(AgentCheck):
                             metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
                         except (ValueError, TypeError):  # no cov
                             self.log.error(
-                                'Non-numeric value `%s` for metric column `%s` of ' 'metric_prefix `%s`',
+                                'Non-numeric value `%s` for metric column `%s` of metric_prefix `%s`',
                                 value,
                                 name,
                                 metric_prefix,
