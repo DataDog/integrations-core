@@ -263,25 +263,25 @@ class Disk(AgentCheck):
         device_blacklist_extras = []
         mount_point_blacklist_extras = []
 
-        deprecation_message = '`{old}` is deprecated and will be removed in 6.9. Please use `{new}` instead.'
+        deprecation_message = '`%s` is deprecated and will be removed in 6.9. Please use `%s` instead.'
 
         if 'excluded_filesystems' in instance:
             file_system_blacklist_extras.extend(
                 '{}$'.format(pattern) for pattern in instance['excluded_filesystems'] if pattern
             )
-            self.warning(deprecation_message.format(old='excluded_filesystems', new='file_system_blacklist'))
+            self.warning(deprecation_message, 'excluded_filesystems', 'file_system_blacklist')
 
         if 'excluded_disks' in instance:
             device_blacklist_extras.extend('{}$'.format(pattern) for pattern in instance['excluded_disks'] if pattern)
-            self.warning(deprecation_message.format(old='excluded_disks', new='device_blacklist'))
+            self.warning(deprecation_message, 'excluded_disks', 'device_blacklist')
 
         if 'excluded_disk_re' in instance:
             device_blacklist_extras.append(instance['excluded_disk_re'])
-            self.warning(deprecation_message.format(old='excluded_disk_re', new='device_blacklist'))
+            self.warning(deprecation_message, 'excluded_disk_re', 'device_blacklist')
 
         if 'excluded_mountpoint_re' in instance:
             mount_point_blacklist_extras.append(instance['excluded_mountpoint_re'])
-            self.warning(deprecation_message.format(old='excluded_mountpoint_re', new='mount_point_blacklist'))
+            self.warning(deprecation_message, 'excluded_mountpoint_re', 'mount_point_blacklist')
 
         # Any without valid patterns will become None
         self._file_system_whitelist = self._compile_valid_patterns(self._file_system_whitelist, casing=re.I)
