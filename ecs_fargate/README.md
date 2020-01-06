@@ -142,7 +142,7 @@ Format for the Agent container:
 ```json
 {
   "name": "DD_DOCKER_LABELS_AS_TAGS",
-  "value": "{<LABEL_NAME_TO_COLLECT>:<TAG_KEY_FOR_DATADOG>}"
+  "value": "{\"<LABEL_NAME_TO_COLLECT>\":\"<TAG_KEY_FOR_DATADOG>\"}"
 }
 ```
 
