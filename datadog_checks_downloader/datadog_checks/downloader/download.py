@@ -104,7 +104,7 @@ class TUFDownloader:
 
         # Either the target has not been updated...
         if not len(updated_targets):
-            logger.debug('{} has not been updated'.format(target_relpath))
+            logger.debug('%s has not been updated', target_relpath)
         # or, it has been updated, in which case...
         else:
             # First, we use TUF to download and verify the target.
@@ -113,7 +113,7 @@ class TUFDownloader:
             assert updated_target == target
             self.__updater.download_target(updated_target, self.__targets_dir)
 
-        logger.info('TUF verified {}'.format(target_relpath))
+        logger.info('TUF verified %s', target_relpath)
 
         target_abspath = os.path.join(self.__targets_dir, target_relpath)
         return target_abspath, target
@@ -185,7 +185,7 @@ class TUFDownloader:
         return root_layout, root_layout_pubkeys, root_layout_params
 
     def __handle_in_toto_verification_exception(self, target_relpath, e):
-        logger.exception('in-toto failed to verify {}'.format(target_relpath))
+        logger.exception('in-toto failed to verify %s', target_relpath)
 
         if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloper.MSG:
             raise RevokedDeveloper(target_relpath, IN_TOTO_ROOT_LAYOUT)
@@ -211,7 +211,7 @@ class TUFDownloader:
         except Exception as e:
             self.__handle_in_toto_verification_exception(target_relpath, e)
         else:
-            logger.info('in-toto verified {}'.format(target_relpath))
+            logger.info('in-toto verified %s', target_relpath)
         finally:
             # Switch back to a parent directory we control, so that we can
             # safely delete temp dir.

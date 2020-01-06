@@ -59,7 +59,7 @@ class IbmMqCheck(AgentCheck):
         config.check_properly_configured()
 
         if not pymqi:
-            log.error("You need to install pymqi: {}".format(pymqiException))
+            log.error("You need to install pymqi: %s", pymqiException)
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
 
         try:

@@ -300,7 +300,7 @@ class SimpleApi(AbstractApi):
             else:
                 raise e
         except Exception:
-            self.logger.exception("Unexpected error contacting openstack endpoint {}".format(url))
+            self.logger.exception("Unexpected error contacting openstack endpoint %s", url)
             raise
         jresp = resp.json()
         self.logger.debug("url: %s || response: %s", url, jresp)
@@ -405,7 +405,7 @@ class SimpleApi(AbstractApi):
             networks = self._make_request(url)
             return networks.get('networks')
         except Exception as e:
-            self.logger.warning('Unable to get the list of all network ids: {}'.format(e))
+            self.logger.warning('Unable to get the list of all network ids: %s', e)
             raise e
 
     def get_projects(self):
@@ -418,7 +418,7 @@ class SimpleApi(AbstractApi):
             return r.get('projects', [])
 
         except Exception as e:
-            self.logger.warning('Unable to get projects: {}'.format(e))
+            self.logger.warning('Unable to get projects: %s', e)
             raise e
 
 
