@@ -18,48 +18,12 @@ from pysnmp.smi.error import MibNotFoundError
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
+from .resolver import OIDResolver
+
 
 def to_oid_tuple(oid_string):
     """Return a OID tuple from a OID string."""
     return tuple(map(int, oid_string.lstrip('.').split('.')))
-
-
-class OIDTreeNode(object):
-
-    __slots__ = ('value', 'children')
-
-    def __init__(self):
-        self.value = None
-        self.children = defaultdict(OIDTreeNode)
-
-
-class OIDTrie(object):
-    """A trie implementation to store OIDs and efficiently match prefixes.
-
-    We use it to do basic MIB-like resolution.
-    """
-
-    def __init__(self):
-        self._root = OIDTreeNode()
-
-    def set(self, oid, name):
-        node = self._root
-        for part in oid:
-            node = node.children[part]
-        node.value = name
-
-    def match(self, oid):
-        node = self._root
-        matched = []
-        value = None
-        for part in oid:
-            node = node.children.get(part)
-            if node is None:
-                break
-            matched.append(part)
-            if node.value is not None:
-                value = node.value
-        return tuple(matched), value
 
 
 class ParsedMetric(object):
@@ -139,8 +103,8 @@ class InstanceConfig:
 
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
-        self._resolver = OIDTrie()
-        self._index_resolver = defaultdict(dict)
+        self._resolver = OIDResolver(self.mib_view_controller, self.enforce_constraints)
+        self.resolve_oid = self._resolver.resolve_oid
 
         self._auth_data = self.get_auth_data(instance)
 
@@ -234,38 +198,6 @@ class InstanceConfig:
 
         return context_engine_id, context_name
 
-    def resolve_oid(self, oid):
-        """Resolve an OID to a name and its indexes.
-
-        This first tries to do manual resolution using `self._resolver`, then
-        falls back to MIB resolution if that fails.  In the first case it also
-        tries to resolve indexes to name if that applies, using
-        `self._index_resolver`.
-        """
-        oid_tuple = oid.asTuple()
-        prefix, resolved = self._resolver.match(oid_tuple)
-        if resolved is not None:
-            index_resolver = self._index_resolver.get(resolved)
-            indexes = oid_tuple[len(prefix) :]
-            if index_resolver:
-                new_indexes = []
-                for i, index in enumerate(indexes, 1):
-                    if i in index_resolver:
-                        new_indexes.append(index_resolver[i][index])
-                    else:
-                        new_indexes.append(index)
-                indexes = tuple(new_indexes)
-            return resolved, indexes
-        result_oid = oid
-        if not self.enforce_constraints:
-            # if enforce_constraints is false, then MIB resolution has not been done yet
-            # so we need to do it manually. We have to specify the mibs that we will need
-            # to resolve the name.
-            oid_to_resolve = hlapi.ObjectIdentity(oid_tuple)
-            result_oid = oid_to_resolve.resolveWithMib(self.mib_view_controller)
-        _, metric, indexes = result_oid.getMibSymbol()
-        return metric, tuple(index.prettyPrint() for index in indexes)
-
     def parse_metrics(self, metrics, warning, log):
         """Parse configuration and returns data to be used for SNMP queries.
 
@@ -306,7 +238,7 @@ class InstanceConfig:
                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                     else:
                         if isinstance(to_query, dict):
-                            self._resolver.set(to_oid_tuple(to_query['OID']), to_query['name'])
+                            self._resolver.register(to_oid_tuple(to_query['OID']), to_query['name'])
                             parsed_metric_name = to_query['name']
                         else:
                             parsed_metric_name = to_query
@@ -333,7 +265,7 @@ class InstanceConfig:
                             column_name = column['name']
                             column = column['OID']
                             identity = hlapi.ObjectIdentity(column)
-                            self._resolver.set(to_oid_tuple(column), column_name)
+                            self._resolver.register(to_oid_tuple(column), column_name)
                             column_tags.append((tag_key, column_name))
                         else:
                             identity = hlapi.ObjectIdentity(mib, column)
@@ -357,10 +289,12 @@ class InstanceConfig:
                         if 'mapping' in metric_tag:
                             # Need to do manual resolution
                             for symbol in metric['symbols']:
-                                self._index_resolver[symbol['name']][metric_tag['index']] = metric_tag['mapping']
+                                self._resolver.register_index(
+                                    symbol['name'], metric_tag['index'], metric_tag['mapping']
+                                )
                 for symbol in metric['symbols']:
                     if isinstance(symbol, dict):
-                        self._resolver.set(to_oid_tuple(symbol['OID']), symbol['name'])
+                        self._resolver.register(to_oid_tuple(symbol['OID']), symbol['name'])
                         identity = hlapi.ObjectIdentity(symbol['OID'])
                         parsed_metric_name = symbol['name']
                     else:
@@ -375,7 +309,7 @@ class InstanceConfig:
             elif 'OID' in metric:
                 oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID']))
                 table_oids[metric['OID']] = (oid_object, [])
-                self._resolver.set(to_oid_tuple(metric['OID']), metric['name'])
+                self._resolver.register(to_oid_tuple(metric['OID']), metric['name'])
                 parsed_metric = ParsedMetric(metric['name'], metric_tags, forced_type, enforce_scalar=False)
                 parsed_metrics.append(parsed_metric)
             else:

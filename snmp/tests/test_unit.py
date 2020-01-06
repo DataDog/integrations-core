@@ -11,7 +11,8 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.snmp.config import InstanceConfig, OIDTrie
+from datadog_checks.snmp.config import InstanceConfig
+from datadog_checks.snmp.resolver import OIDTrie
 
 from . import common
 
