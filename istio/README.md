@@ -121,4 +121,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/agent/kubernetes
 [11]: https://istio.io/docs/tasks/telemetry/logs/collecting-logs/
 [12]: https://docs.datadoghq.com/integrations/envoy/#log-collection
-[13]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#start-stop-and-restart-the-agent
+[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
