@@ -61,7 +61,7 @@ The instructions below show you how to configure the task using the [AWS CLI too
 3. Add your other containers such as your app. For details on collecting integration metrics, see [Integration Setup for ECS Fargate][7].
 4. Execute the following command to register the ECS task definition:
 
-```text
+```bash
 aws ecs register-task-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-ecs-fargate.json
 ```
 
@@ -87,13 +87,13 @@ Run the following commands using the [AWS CLI tools][3].
 
 If needed, create a cluster:
 
-```text
+```bash
 aws ecs create-cluster --cluster-name "<CLUSTER_NAME>"
 ```
 
 Run the task as a service for your cluster:
 
-```text
+```bash
 aws ecs run-task --cluster <CLUSTER_NAME> \
 --network-configuration "awsvpcConfiguration={subnets=["<PRIVATE_SUBNET>"],securityGroups=["<SECURITY_GROUP>"]}" \
 --task-definition arn:aws:ecs:us-east-1:<AWS_ACCOUNT_NUMBER>:task-definition/<TASK_NAME>:1 \
@@ -139,7 +139,7 @@ For global tagging, it is recommended to use `DD_DOCKER_LABELS_AS_TAGS`. With th
 
 Format for the Agent container:
 
-```text
+```json
 {
   "name": "DD_DOCKER_LABELS_AS_TAGS",
   "value": "{<LABEL_NAME_TO_COLLECT>:<TAG_KEY_FOR_DATADOG>}"
@@ -148,7 +148,7 @@ Format for the Agent container:
 
 Example for the Agent container:
 
-```text
+```json
 {
   "name": "DD_DOCKER_LABELS_AS_TAGS",
   "value": "{"com.docker.compose.service":"service_name"}"
