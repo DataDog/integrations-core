@@ -30,7 +30,7 @@ On RHEL/CentOS:
 sudo yum install rrdtool-devel
 ```
 
-#### Python bindinges
+#### Python bindings
 
 Now add the `rrdtool` Python package to the Agent with the following command:
 
