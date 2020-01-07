@@ -143,6 +143,34 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 Use the default configuration of your `airflow.d/conf.yaml` file to activate the collection of your Airflow service checks. See the sample [airflow.d/conf.yaml][3] for all available configuration options.
 
+#### Log collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your datadog.yaml file:
+
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Uncomment and edit this configuration block at the bottom of your `airflow.d/conf.yaml`:
+
+    ```yaml
+      logs:
+        - type: file
+          path: <PATH_TO_AIRFLOW>/logs/**/*.log
+          source: airflow
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment.
+
+3. [Restart the Agent][7].
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `airflow` under the Checks section.
