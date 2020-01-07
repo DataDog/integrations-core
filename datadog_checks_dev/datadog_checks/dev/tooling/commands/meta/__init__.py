@@ -7,8 +7,9 @@ from ..console import CONTEXT_SETTINGS
 from .changes import changes
 from .dashboard import dash
 from .prometheus import prom
+from .snmp import snmp
 
-ALL_COMMANDS = (changes, dash, prom)
+ALL_COMMANDS = (changes, dash, prom, snmp)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Collection of useful utilities')
