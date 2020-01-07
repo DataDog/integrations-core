@@ -35,7 +35,7 @@ def fetch_mib(mib):
 @snmp.command(context_settings=CONTEXT_SETTINGS, short_help='Translate MIB name to OIDs in SNMP profiles')
 @click.argument('profile_path')
 @click.pass_context
-def translate_profile(ctx, profile):
+def translate_profile(ctx, profile_path):
     """
     Do OID translation in a SNMP profile. This isn't a plain replacement, as it
     doesn't preserve comments and indent, but it should automate most of the
@@ -53,7 +53,7 @@ def translate_profile(ctx, profile):
 
     mib_view_controller = view.MibViewController(mib_builder)
 
-    with open(profile) as f:
+    with open(profile_path) as f:
         data = yaml.safe_load(f.read())
 
     output = []
