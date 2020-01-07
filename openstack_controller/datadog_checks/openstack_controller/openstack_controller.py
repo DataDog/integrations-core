@@ -289,7 +289,7 @@ class OpenStackControllerCheck(AgentCheck):
             try:
                 load_averages = self.get_loads_for_single_hypervisor(hyp['id'])
             except Exception as e:
-                self.warning('Unable to get loads averages for hypervisor {}: {}'.format(hyp['id'], e))
+                self.warning('Unable to get loads averages for hypervisor %s: %s', hyp['id'], e)
                 load_averages = []
             if load_averages and len(load_averages) == 3:
                 for i, avg in enumerate([1, 5, 15]):
@@ -466,7 +466,7 @@ class OpenStackControllerCheck(AgentCheck):
         project_name = project.get('name')
         project_id = project.get('id')
 
-        self.log.debug("Collecting metrics for project. name: {} id: {}".format(project_name, project['id']))
+        self.log.debug("Collecting metrics for project. name: %s id: %s", project_name, project['id'])
         server_stats = self.get_project_limits(project['id'])
         server_tags.append('tenant_id:{}'.format(project_id))
 
@@ -479,7 +479,7 @@ class OpenStackControllerCheck(AgentCheck):
                     metric_key = PROJECT_METRICS[st]
                     self.gauge("openstack.nova.limits.{}".format(metric_key), server_stats[st], tags=server_tags)
         except KeyError:
-            self.warning("Unexpected response, not submitting limits metrics for project id {}".format(project['id']))
+            self.warning("Unexpected response, not submitting limits metrics for project id %s", project['id'])
 
     def get_flavors(self):
         query_params = {}
@@ -612,8 +612,9 @@ class OpenStackControllerCheck(AgentCheck):
                 )
             except KeystoneUnreachable as e:
                 self.warning(
-                    "The agent could not contact the specified identity server at {} . "
-                    "Are you sure it is up at that address?".format(keystone_server_url)
+                    "The agent could not contact the specified identity server at `%s`. "
+                    "Are you sure it is up at that address?",
+                    keystone_server_url,
                 )
                 self.log.debug("Problem grabbing auth token: %s", e)
                 self.service_check(
@@ -748,9 +749,9 @@ class OpenStackControllerCheck(AgentCheck):
             if isinstance(e, IncompleteIdentity):
                 self.warning(
                     "Please specify the user via the `user` variable in your init_config.\n"
-                    + "This is the user you would use to authenticate with Keystone v3 via password auth.\n"
-                    + "The user should look like:"
-                    + "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
+                    "This is the user you would use to authenticate with Keystone v3 via password auth.\n"
+                    "The user should look like: "
+                    "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
                 )
             else:
                 self.warning("Configuration Incomplete: %s! Check your openstack.yaml file", e)

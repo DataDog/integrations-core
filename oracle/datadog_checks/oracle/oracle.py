@@ -186,8 +186,9 @@ class Oracle(AgentCheck):
                             column_type = column.get('type')
                             if not column_type:
                                 self.log.error(
-                                    'column field `type` is required for column `{}` '
-                                    'of metric_prefix `{}`'.format(name, metric_prefix)
+                                    'column field `type` is required for column `%s` of metric_prefix `%s`',
+                                    name,
+                                    metric_prefix,
                                 )
                                 break
 
@@ -196,16 +197,20 @@ class Oracle(AgentCheck):
                             else:
                                 if not hasattr(self, column_type):
                                     self.log.error(
-                                        'invalid submission method `{}` for column `{}` of '
-                                        'metric_prefix `{}`'.format(column_type, name, metric_prefix)
+                                        'invalid submission method `%s` for column `%s` of metric_prefix `%s`',
+                                        column_type,
+                                        name,
+                                        metric_prefix,
                                     )
                                     break
                                 try:
                                     metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
                                 except (ValueError, TypeError):
                                     self.log.error(
-                                        'non-numeric value `{}` for metric column `{}` of '
-                                        'metric_prefix `{}`'.format(value, name, metric_prefix)
+                                        'non-numeric value `%s` for metric column `%s` of metric_prefix `%s`',
+                                        value,
+                                        name,
+                                        metric_prefix,
                                     )
                                     break
 

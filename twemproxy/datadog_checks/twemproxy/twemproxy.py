@@ -84,10 +84,10 @@ class Twemproxy(AgentCheck):
         tags = instance.get('tags', [])
 
         response = self._get_data(instance)
-        self.log.debug(u"Twemproxy `response`: {0}".format(response))
+        self.log.debug("Twemproxy `response`: %s", response)
 
         if not response:
-            self.log.warning(u"No response received from twemproxy.")
+            self.log.warning("No response received from twemproxy.")
             return
 
         metrics = Twemproxy.parse_json(response, tags)
@@ -99,7 +99,7 @@ class Twemproxy(AgentCheck):
                 else:
                     self.rate(name, value, tags)
             except Exception as e:
-                self.log.error(u'Could not submit metric: %s: %s', repr(row), str(e))
+                self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
     def _get_data(self, instance):
         host = instance.get('host')
@@ -114,7 +114,7 @@ class Twemproxy(AgentCheck):
         try:
             addrs = socket.getaddrinfo(host, port, 0, 0, socket.IPPROTO_TCP)
         except socket.gaierror as e:
-            self.log.warning("unable to retrieve address info for %s:%s - %s", host, port, e)
+            self.log.warning("Unable to retrieve address info for %s:%s - %s", host, port, e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
             return None
 
@@ -125,7 +125,7 @@ class Twemproxy(AgentCheck):
                     client = socket.socket(*addr[0:3])
                     client.connect(addr[-1])
 
-                    self.log.debug(u"Querying: {0}:{1}".format(host, port))
+                    self.log.debug("Querying: %s:%s", host, port)
                     while 1:
                         data = ensure_unicode(client.recv(1024))
                         if not data:
@@ -135,7 +135,7 @@ class Twemproxy(AgentCheck):
                 client.close()
                 break
             except socket.error as e:
-                self.log.warning("unable to connect to %s - %s", addr[-1], e)
+                self.log.warning("Unable to connect to %s - %s", addr[-1], e)
 
         status = AgentCheck.OK if response else AgentCheck.CRITICAL
         self.service_check(self.SERVICE_CHECK_NAME, status, tags=service_check_tags)

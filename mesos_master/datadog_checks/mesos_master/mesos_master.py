@@ -178,7 +178,7 @@ class MesosMaster(AgentCheck):
             msg = str(e)
             status = AgentCheck.CRITICAL
         finally:
-            self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
+            self.log.debug('Request to url : %s, timeout: %s, message: %s', url, timeout, msg)
             self._send_service_check(url, status, failure_expected=failure_expected, tags=tags, message=msg)
 
         if response.encoding is None:
@@ -210,9 +210,7 @@ class MesosMaster(AgentCheck):
             # Mesos version < 0.25
             old_endpoint = endpoint + '.json'
             self.log.info(
-                'Unable to fetch state from {0}. Retrying with the deprecated endpoint: {1}.'.format(
-                    endpoint, old_endpoint
-                )
+                'Unable to fetch state from %s. Retrying with the deprecated endpoint: %s.', endpoint, old_endpoint
             )
             master_state = self._get_json(old_endpoint, tags=tags)
         return master_state

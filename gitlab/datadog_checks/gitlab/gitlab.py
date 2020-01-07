@@ -110,7 +110,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
 
         if url is None:
             # Simply ignore this service check if not configured
-            self.log.debug("gitlab_url not configured, service check {} skipped".format(check_type))
+            self.log.debug("gitlab_url not configured, service check %s skipped", check_type)
             return
 
         service_check_tags = self._service_check_tags(url)
@@ -121,7 +121,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
         check_url = '{}/-/{}'.format(url, check_type)
 
         try:
-            self.log.debug("checking {} against {}".format(check_type, check_url))
+            self.log.debug("checking %s against %s", check_type, check_url)
             r = self.http.get(check_url)
             if r.status_code != 200:
                 self.service_check(
@@ -153,4 +153,4 @@ class GitlabCheck(OpenMetricsBaseCheck):
             raise
         else:
             self.service_check(service_check_name, OpenMetricsBaseCheck.OK, tags=service_check_tags)
-        self.log.debug("gitlab check {} succeeded".format(check_type))
+        self.log.debug("gitlab check %s succeeded", check_type)

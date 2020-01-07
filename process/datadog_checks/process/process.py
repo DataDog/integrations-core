@@ -361,7 +361,8 @@ class ProcessCheck(AgentCheck):
             self.warning(
                 'The `procfs_path` defined in `process.yaml is different from the one defined in '
                 '`datadog.conf` This is currently not supported by the Agent. Defaulting to the '
-                'value defined in `datadog.conf`:{}'.format(psutil.PROCFS_PATH)
+                'value defined in `datadog.conf`: %s',
+                psutil.PROCFS_PATH,
             )
         elif self._deprecated_init_procfs:
             self.warning(

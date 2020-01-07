@@ -197,8 +197,8 @@ class YarnCheck(AgentCheck):
         cluster_name = instance.get('cluster_name')
         if cluster_name is None:
             self.warning(
-                "The cluster_name must be specified in the instance configuration, "
-                "defaulting to '{}'".format(DEFAULT_CLUSTER_NAME)
+                "The cluster_name must be specified in the instance configuration, defaulting to '%s'",
+                DEFAULT_CLUSTER_NAME,
             )
             cluster_name = DEFAULT_CLUSTER_NAME
 

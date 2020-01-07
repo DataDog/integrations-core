@@ -698,7 +698,7 @@ class OpenStackCheck(AgentCheck):
         if not network_ids:
             self.warning(
                 "Your check is not configured to monitor any networks.\n"
-                + "Please list `network_ids` under your init_config"
+                "Please list `network_ids` under your init_config"
             )
 
         for nid in network_ids:
@@ -779,7 +779,7 @@ class OpenStackCheck(AgentCheck):
             if not self.init_config.get("hypervisor_ids"):
                 self.warning(
                     "Nova API v2 requires admin privileges to index hypervisors. "
-                    + "Please specify the hypervisor you wish to monitor under the `hypervisor_ids` section"
+                    "Please specify the hypervisor you wish to monitor under the `hypervisor_ids` section"
                 )
                 return []
             return self.init_config.get("hypervisor_ids")
@@ -832,7 +832,7 @@ class OpenStackCheck(AgentCheck):
         try:
             uptime = self.get_uptime_for_single_hypervisor(hyp['id'])
         except Exception as e:
-            self.warning('Unable to get uptime for hypervisor {0}: {1}'.format(hyp['id'], str(e)))
+            self.warning('Unable to get uptime for hypervisor %s: %s', hyp['id'], e)
             uptime = {}
 
         hyp_state = hyp.get('state', None)
@@ -1008,7 +1008,7 @@ class OpenStackCheck(AgentCheck):
 
         project_name = project.get('name')
 
-        self.log.debug("Collecting metrics for project. name: {0} id: {1}".format(project_name, project['id']))
+        self.log.debug("Collecting metrics for project. name: %s id: %s", project_name, project['id'])
 
         url = '{0}/limits'.format(self.get_nova_endpoint())
         headers = {'X-Auth-Token': self.get_auth_token()}
@@ -1124,9 +1124,9 @@ class OpenStackCheck(AgentCheck):
                 )
             except KeystoneUnreachable as e:
                 self.warning(
-                    "The agent could not contact the specified identity server at %s . \
-                    Are you sure it is up at that address?"
-                    % self.init_config.get("keystone_server_url")
+                    "The agent could not contact the specified identity server at %s . "
+                    "Are you sure it is up at that address?",
+                    self.init_config.get("keystone_server_url"),
                 )
                 self.log.debug("Problem grabbing auth token: %s", e)
                 self.service_check(
@@ -1250,8 +1250,8 @@ class OpenStackCheck(AgentCheck):
                     self.get_stats_for_single_hypervisor(hyp, instance, host_tags=host_tags, custom_tags=custom_tags)
                 else:
                     self.warning(
-                        "Couldn't get hypervisor to monitor for host: %s"
-                        % self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period)
+                        "Couldn't get hypervisor to monitor for host: %s",
+                        self.get_my_hostname(split_hostname_on_first_period=split_hostname_on_first_period),
                     )
 
             if projects:
@@ -1276,9 +1276,9 @@ class OpenStackCheck(AgentCheck):
             elif isinstance(e, IncompleteIdentity):
                 self.warning(
                     "Please specify the user via the `user` variable in your init_config.\n"
-                    + "This is the user you would use to authenticate with Keystone v3 via password auth.\n"
-                    + "The user should look like:"
-                    + "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
+                    "This is the user you would use to authenticate with Keystone v3 via password auth.\n"
+                    "The user should look like: "
+                    "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
                 )
             else:
                 self.warning("Configuration Incomplete! Check your openstack.yaml file")

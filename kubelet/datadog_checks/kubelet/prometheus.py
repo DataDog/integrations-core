@@ -439,8 +439,9 @@ class CadvisorPrometheusScraperMixin(object):
                     self.gauge(pct_m_name, float(usage / float(limit)), tags)
                 else:
                     self.log.debug(
-                        "No corresponding usage found for metric %s and "
-                        "container %s, skipping usage_pct for now." % (pct_m_name, c_name)
+                        "No corresponding usage found for metric %s and container %s, skipping usage_pct for now.",
+                        pct_m_name,
+                        c_name,
                     )
 
     def container_cpu_usage_seconds_total(self, metric, scraper_config):

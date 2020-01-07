@@ -85,8 +85,8 @@ class Nginx(AgentCheck):
             # for unpaid versions
             self._set_version_metadata(version)
 
-            self.log.debug(u"Nginx status `response`: {}".format(response))
-            self.log.debug(u"Nginx status `content_type`: {}".format(content_type))
+            self.log.debug("Nginx status `response`: %s", response)
+            self.log.debug("Nginx status `content_type`: %s", content_type)
 
             if content_type.startswith('application/json'):
                 metrics = self.parse_json(response, tags)
@@ -100,7 +100,7 @@ class Nginx(AgentCheck):
             # since we can't get everything in one place anymore.
             for endpoint, nest in chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS)):
                 response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
-                self.log.debug(u"Nginx Plus API version {} `response`: {}".format(plus_api_version, response))
+                self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
                 metrics.extend(self.parse_json(response, tags))
 
         funcs = {'gauge': self.gauge, 'rate': self.rate, 'count': self.monotonic_count}
@@ -141,7 +141,7 @@ class Nginx(AgentCheck):
                     self._set_version_metadata(value)
 
             except Exception as e:
-                self.log.error(u'Could not submit metric: %s: %s' % (repr(row), str(e)))
+                self.log.error('Could not submit metric: %s: %s', repr(row), e)
 
     @classmethod
     def _get_instance_params(cls, instance):
@@ -176,7 +176,7 @@ class Nginx(AgentCheck):
         service_check_name = 'nginx.can_connect'
         service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + custom_tags
         try:
-            self.log.debug(u"Querying URL: {}".format(url))
+            self.log.debug("Querying URL: %s", url)
             r = self._perform_request(url)
         except Exception:
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
@@ -201,7 +201,7 @@ class Nginx(AgentCheck):
         url = "/".join([api_url, plus_api_version, endpoint])
         payload = {}
         try:
-            self.log.debug(u"Querying URL: {}".format(url))
+            self.log.debug("Querying URL: %s", url)
             r = self._perform_request(url)
             payload = self._nest_payload(nest, r.json())
         except Exception as e:
@@ -220,7 +220,7 @@ class Nginx(AgentCheck):
                 version = version.split('/')[1]
             self.set_metadata('version', version)
 
-            self.log.debug(u"Nginx version `server`: {}".format(version))
+            self.log.debug("Nginx version `server`: %s", version)
         else:
             self.log.warning(u"could not retrieve nginx version info")
 

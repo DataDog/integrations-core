@@ -245,8 +245,8 @@ class SparkCheck(AgentCheck):
         cluster_mode = instance.get(SPARK_CLUSTER_MODE)
         if cluster_mode is None:
             self.log.warning(
-                'The value for `spark_cluster_mode` was not set in the configuration. '
-                'Defaulting to "%s"' % SPARK_YARN_MODE
+                'The value for `spark_cluster_mode` was not set in the configuration. Defaulting to "%s"',
+                SPARK_YARN_MODE,
             )
             cluster_mode = SPARK_YARN_MODE
 

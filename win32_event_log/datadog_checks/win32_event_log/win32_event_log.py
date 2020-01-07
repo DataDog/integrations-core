@@ -132,11 +132,11 @@ class Win32EventLogWMI(WinWMICheck):
             wmi_sampler.sample()
         except TimeoutException:
             self.log.warning(
-                u"[Win32EventLog] WMI query timed out."
-                u" class={wmi_class} - properties={wmi_properties} -"
-                u" filters={filters} - tags={tags}".format(
-                    wmi_class=self.EVENT_CLASS, wmi_properties=event_properties, filters=filters, tags=instance_tags
-                )
+                "[Win32EventLog] WMI query timed out. class=%s - properties=%s - filters=%s - tags=%s",
+                self.EVENT_CLASS,
+                event_properties,
+                filters,
+                instance_tags,
             )
         else:
             for ev in wmi_sampler:

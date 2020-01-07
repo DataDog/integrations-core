@@ -107,7 +107,7 @@ class CadvisorScraper(object):
             try:
                 self._update_container_metrics(instance, subcontainer, pod_list, pod_list_utils)
             except Exception as e:
-                self.log.error("Unable to collect metrics for container: {0} ({1})".format(c_id, e))
+                self.log.error("Unable to collect metrics for container: %s (%s)", c_id, e)
 
     def _publish_raw_metrics(self, metric, dat, tags, is_pod, depth=0):
         """
@@ -180,7 +180,7 @@ class CadvisorScraper(object):
                 )
             )
             if pod_list_utils.is_excluded(cid):
-                self.log.debug("Filtering out " + cid)
+                self.log.debug("Filtering out %s", cid)
                 return
             tags = tagger.tag(replace_container_rt_prefix(cid), tagger.HIGH) or []
 

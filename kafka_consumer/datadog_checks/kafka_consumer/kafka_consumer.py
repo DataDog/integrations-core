@@ -102,11 +102,11 @@ class KafkaCheck(AgentCheck):
         total_contexts = len(self._consumer_offsets) + len(self._highwater_offsets)
         if total_contexts > self._context_limit:
             self.warning(
-                """Discovered {} metric contexts - this exceeds the maximum number of {} contexts permitted by the
+                """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
-                and partitions you wish to monitor.""".format(
-                    total_contexts, self._context_limit
-                )
+                and partitions you wish to monitor.""",
+                total_contexts,
+                self._context_limit,
             )
 
         # Report the metics
@@ -145,7 +145,7 @@ class KafkaCheck(AgentCheck):
             ssl_crlfile=self.instance.get('ssl_crlfile'),
             ssl_password=self.instance.get('ssl_password'),
         )
-        self.log.debug("KafkaAdminClient api_version: {}".format(kafka_admin_client.config['api_version']))
+        self.log.debug("KafkaAdminClient api_version: %s", kafka_admin_client.config['api_version'])
         # Force initial population of the local cluster metadata cache
         kafka_admin_client._client.poll(future=kafka_admin_client._client.cluster.request_update())
         if kafka_admin_client._client.cluster.topics(exclude_internal_topics=False) is None:
