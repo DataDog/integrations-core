@@ -30,13 +30,14 @@ def test_metadata(instance, datadog_agent):
 
     check.check(instance)
 
-    major, minor, patch = MESOS_MASTER_VERSION.split('-')[0].split('.')
+    raw_version = MESOS_MASTER_VERSION.split('-')[0]
+    major, minor, patch = raw_version.split('.')
     version_metadata = {
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,
-        'version.raw': MESOS_MASTER_VERSION,
+        'version.raw': raw_version,
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
