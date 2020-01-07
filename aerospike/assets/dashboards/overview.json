@@ -20,7 +20,7 @@
     "id": 932434,
     "isIntegration": false,
     "isShared": false,
-    "modified": "2019-12-25T00:51:13.359243+00:00",
+    "modified": "2020-01-07T18:52:16.071628+00:00",
     "new_id": "4iq-sen-4xc",
     "originalHeight": 80,
     "originalWidth": "calc(100% - 32px)",
@@ -29,7 +29,7 @@
         {
             "default": "*",
             "name": "scope",
-            "prefix": ""
+            "prefix": null
         }
     ],
     "widgets": [
@@ -85,8 +85,8 @@
             "title_text": "HWM Breached Status",
             "type": "hostmap",
             "width": 39,
-            "x": 41,
-            "y": 0
+            "x": 0,
+            "y": 60
         },
         {
             "add_timeframe": true,
@@ -123,8 +123,8 @@
             "title_text": "Client Connections Per Node",
             "type": "timeseries",
             "width": 39,
-            "x": 82,
-            "y": -1
+            "x": 0,
+            "y": 40
         },
         {
             "add_timeframe": true,
@@ -158,8 +158,8 @@
             "title_text": "Master Record 24hr Change",
             "type": "change",
             "width": 39,
-            "x": 123,
-            "y": 0
+            "x": 122,
+            "y": 10
         },
         {
             "add_timeframe": true,
@@ -251,43 +251,7 @@
             "type": "toplist",
             "width": 39,
             "x": 41,
-            "y": 20
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "requests": [
-                    {
-                        "conditional_formats": [],
-                        "q": "top(sum:aerospike.namespace.master_objects{$scope} by {namespace}, 10, 'max', 'desc')",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
-                    }
-                ],
-                "viz": "toplist"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Master Records",
-            "type": "toplist",
-            "width": 39,
-            "x": 82,
-            "y": 20
+            "y": 10
         },
         {
             "add_timeframe": true,
@@ -323,9 +287,9 @@
             "title_size": 16,
             "title_text": "Read TPS",
             "type": "timeseries",
-            "width": 39,
-            "x": 123,
-            "y": 20
+            "width": 38,
+            "x": 82,
+            "y": 59
         },
         {
             "add_timeframe": true,
@@ -362,8 +326,8 @@
             "title_text": "Write TPS",
             "type": "timeseries",
             "width": 39,
-            "x": 0,
-            "y": 40
+            "x": 41,
+            "y": 59
         },
         {
             "add_timeframe": true,
@@ -398,93 +362,8 @@
             "title_text": "Set Object Count with Replication",
             "type": "toplist",
             "width": 39,
-            "x": 41,
-            "y": 40
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:system.load.1{$scope} by {host}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "System load per node (1 minute)",
-            "type": "timeseries",
-            "width": 39,
-            "x": 82,
-            "y": 40
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "markers": [
-                    {
-                        "dim": "y",
-                        "label": "75 %",
-                        "type": "error dashed",
-                        "val": 75,
-                        "value": "y = 75"
-                    }
-                ],
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:system.cpu.user{$scope}, avg:system.cpu.guest{$scope}, avg:system.cpu.iowait{$scope}, avg:system.cpu.stolen{$scope}, avg:system.cpu.system{$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "CPU usage",
-            "type": "timeseries",
-            "width": 39,
-            "x": 123,
-            "y": 40
+            "x": 0,
+            "y": 80
         },
         {
             "add_timeframe": true,
@@ -520,9 +399,9 @@
             "title_size": 16,
             "title_text": "Record Growth Over Time",
             "type": "timeseries",
-            "width": 39,
-            "x": 0,
-            "y": 60
+            "width": 38,
+            "x": 82,
+            "y": 10
         },
         {
             "add_timeframe": true,
@@ -562,47 +441,7 @@
             "type": "query_value",
             "width": 39,
             "x": 41,
-            "y": 60
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": null,
-            "legend_size": null,
-            "query": "avg:system.load.1{*} by {host}",
-            "scaleFactor": 1,
-            "tile_def": {
-                "group": null,
-                "noGroupHosts": true,
-                "noMetricHosts": true,
-                "notes": null,
-                "requests": [
-                    {
-                        "q": "avg:aerospike.namespace.stop_writes{$scope} by {host}",
-                        "type": "fill"
-                    }
-                ],
-                "scope": [
-                    "$scope"
-                ],
-                "style": {
-                    "fillMax": null,
-                    "fillMin": null,
-                    "palette": "green_to_orange",
-                    "paletteFlip": false
-                },
-                "viz": "hostmap"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Stop Writes",
-            "type": "hostmap",
-            "width": 39,
-            "x": 82,
-            "y": 60
+            "y": 29
         },
         {
             "add_timeframe": true,
@@ -652,9 +491,9 @@
             "title_size": 16,
             "title_text": "Memory Free %",
             "type": "toplist",
-            "width": 39,
-            "x": 123,
-            "y": 60
+            "width": 59,
+            "x": 102,
+            "y": 139
         },
         {
             "add_timeframe": true,
@@ -704,9 +543,9 @@
             "title_size": 16,
             "title_text": "Disk Free %",
             "type": "toplist",
-            "width": 39,
-            "x": 0,
-            "y": 80
+            "width": 59,
+            "x": 102,
+            "y": 89
         },
         {
             "add_timeframe": true,
@@ -756,9 +595,9 @@
             "title_size": 16,
             "title_text": "Disk Space Available % (with fragmentation)",
             "type": "toplist",
-            "width": 39,
+            "width": 59,
             "x": 41,
-            "y": 80
+            "y": 109
         },
         {
             "add_timeframe": true,
@@ -792,47 +631,9 @@
             "title_size": 16,
             "title_text": "Disk/Device Used Bytes",
             "type": "toplist",
-            "width": 39,
-            "x": 82,
-            "y": 80
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "max:system.io.await{$scope} by {host,device}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Disk latency",
-            "type": "timeseries",
-            "width": 39,
-            "x": 123,
-            "y": 80
+            "width": 59,
+            "x": 41,
+            "y": 89
         },
         {
             "add_timeframe": true,
@@ -868,9 +669,9 @@
             "title_size": 16,
             "title_text": "Disk Space Growth Over Time",
             "type": "timeseries",
-            "width": 39,
-            "x": 0,
-            "y": 100
+            "width": 59,
+            "x": 102,
+            "y": 109
         },
         {
             "add_timeframe": true,
@@ -907,8 +708,8 @@
             "title_text": "Cache Reads",
             "type": "timeseries",
             "width": 39,
-            "x": 41,
-            "y": 100
+            "x": 122,
+            "y": 59
         },
         {
             "add_timeframe": true,
@@ -945,8 +746,8 @@
             "title_text": "Record Too Big failures since restart",
             "type": "timeseries",
             "width": 39,
-            "x": 82,
-            "y": 100
+            "x": 122,
+            "y": 29
         },
         {
             "add_timeframe": true,
@@ -980,8 +781,8 @@
             "title_text": "Fail Key Busy last hour",
             "type": "change",
             "width": 39,
-            "x": 123,
-            "y": 100
+            "x": 0,
+            "y": 180
         },
         {
             "add_timeframe": true,
@@ -1015,9 +816,9 @@
             "title_size": 16,
             "title_text": "Memory used per namespace",
             "type": "toplist",
-            "width": 39,
-            "x": 0,
-            "y": 120
+            "width": 59,
+            "x": 41,
+            "y": 139
         },
         {
             "add_timeframe": true,
@@ -1051,9 +852,9 @@
             "title_size": 16,
             "title_text": "Records (Master and Replicas)",
             "type": "toplist",
-            "width": 39,
-            "x": 41,
-            "y": 120
+            "width": 38,
+            "x": 82,
+            "y": 29
         },
         {
             "add_timeframe": true,
@@ -1088,55 +889,8 @@
             "title_text": "Expired objects",
             "type": "toplist",
             "width": 39,
-            "x": 82,
-            "y": 120
-        },
-        {
-            "add_timeframe": true,
-            "error": null,
-            "height": 16,
-            "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
-            "tile_def": {
-                "autoscale": true,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "avg:system.mem.total{$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    },
-                    {
-                        "q": "avg:system.mem.total{$scope}-avg:system.mem.usable{$scope}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    }
-                ],
-                "viz": "timeseries"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "System memory",
-            "type": "timeseries",
-            "width": 39,
-            "x": 123,
-            "y": 120
+            "x": 0,
+            "y": 140
         },
         {
             "add_timeframe": true,
@@ -1190,7 +944,7 @@
             "type": "timeseries",
             "width": 39,
             "x": 0,
-            "y": 140
+            "y": 100
         },
         {
             "add_timeframe": true,
@@ -1226,9 +980,9 @@
             "title_size": 16,
             "title_text": "XDR Timelag (Time from Write to Ship)",
             "type": "timeseries",
-            "width": 39,
+            "width": 59,
             "x": 41,
-            "y": 140
+            "y": 189
         },
         {
             "add_timeframe": true,
@@ -1264,9 +1018,9 @@
             "title_size": 16,
             "title_text": "XDR Avg Outstanding Objects",
             "type": "timeseries",
-            "width": 39,
-            "x": 82,
-            "y": 140
+            "width": 59,
+            "x": 102,
+            "y": 189
         },
         {
             "add_timeframe": true,
@@ -1302,9 +1056,9 @@
             "title_size": 16,
             "title_text": "XDR Throughput per second",
             "type": "timeseries",
-            "width": 39,
-            "x": 123,
-            "y": 140
+            "width": 59,
+            "x": 41,
+            "y": 169
         },
         {
             "add_timeframe": true,
@@ -1340,9 +1094,9 @@
             "title_size": 16,
             "title_text": "XDR Ship Latency in ms",
             "type": "timeseries",
-            "width": 39,
-            "x": -1,
-            "y": 160
+            "width": 59,
+            "x": 102,
+            "y": 169
         },
         {
             "add_timeframe": true,
@@ -1379,8 +1133,8 @@
             "title_text": "dlog free percent",
             "type": "timeseries",
             "width": 39,
-            "x": 41,
-            "y": 160
+            "x": 0,
+            "y": 120
         },
         {
             "add_timeframe": true,
@@ -1417,8 +1171,113 @@
             "title_text": "Client Proxies",
             "type": "timeseries",
             "width": 39,
-            "x": 82,
+            "x": 0,
             "y": 160
+        },
+        {
+            "add_timeframe": true,
+            "auto_refresh": false,
+            "bgcolor": "gray",
+            "board_id": "4iq-sen-4xc",
+            "font_size": "18",
+            "height": 8,
+            "html": "Records",
+            "isShared": false,
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "title": false,
+            "type": "note",
+            "width": 120,
+            "x": 41,
+            "y": 0
+        },
+        {
+            "add_timeframe": true,
+            "auto_refresh": false,
+            "bgcolor": "gray",
+            "board_id": "4iq-sen-4xc",
+            "font_size": "18",
+            "height": 8,
+            "html": "IO",
+            "isShared": false,
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "title": false,
+            "type": "note",
+            "width": 120,
+            "x": 41,
+            "y": 49
+        },
+        {
+            "add_timeframe": true,
+            "auto_refresh": false,
+            "bgcolor": "gray",
+            "board_id": "4iq-sen-4xc",
+            "font_size": "18",
+            "height": 8,
+            "html": "Disk",
+            "isShared": false,
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "title": false,
+            "type": "note",
+            "width": 120,
+            "x": 41,
+            "y": 79
+        },
+        {
+            "add_timeframe": true,
+            "auto_refresh": false,
+            "bgcolor": "gray",
+            "board_id": "4iq-sen-4xc",
+            "font_size": "18",
+            "height": 8,
+            "html": "Memory",
+            "isShared": false,
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "title": false,
+            "type": "note",
+            "width": 120,
+            "x": 41,
+            "y": 129
+        },
+        {
+            "add_timeframe": true,
+            "auto_refresh": false,
+            "bgcolor": "gray",
+            "board_id": "4iq-sen-4xc",
+            "font_size": "18",
+            "height": 8,
+            "html": "XDR",
+            "isShared": false,
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "title": false,
+            "type": "note",
+            "width": 120,
+            "x": 41,
+            "y": 159
         }
     ]
 }
