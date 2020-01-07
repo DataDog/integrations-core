@@ -33,7 +33,7 @@ def fetch_mib(mib):
 
 
 @snmp.command(context_settings=CONTEXT_SETTINGS, short_help='Translate MIB name to OIDs in SNMP profiles')
-@click.argument('profile')
+@click.argument('profile_path')
 @click.pass_context
 def translate_profile(ctx, profile):
     """
