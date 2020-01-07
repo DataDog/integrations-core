@@ -28,7 +28,8 @@
     },
     "saved_views": {
       "Ambari Patterns": "assets/saved_views/patterns_saved_view.json",
-      "Ambari Analytics Toplist": "assets/saved_views/analytics_toplist_saved_view.json"
+      "Ambari Analytics Toplist": "assets/saved_views/analytics_toplist_saved_view.json",
+      "Ambari Analytics Partial": "assets/saved_views/partial_saved_view.json"
     },
     "service_checks": "assets/service_checks.json"
   }

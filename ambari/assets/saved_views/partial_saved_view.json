@@ -1,0 +1,5 @@
+{ 
+  "name": "Ambari partial",
+  "type": "logs",
+  "query": "partial"
+}
