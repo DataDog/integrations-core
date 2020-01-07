@@ -235,6 +235,7 @@ class MesosMaster(AgentCheck):
 
         if state_metrics is not None:
             self.version = [int(i) for i in state_metrics['version'].split('.')]
+            self.set_metadata('version', state_metrics['version'])
             if state_metrics['leader'] == state_metrics['pid']:
                 self.leader = True
 
