@@ -23,7 +23,7 @@ CHECK_NAME = "mesos_master"
 
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
-MESOS_MASTER_RAW_VERSION = os.getenv('MESOS_MASTER_RAW_VERSION')
+MESOS_MASTER_VERSION = os.getenv('MESOS_MASTER_VERSION')
 
 BASIC_METRICS = [
     'mesos.registrar.queued_operations',

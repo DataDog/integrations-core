@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_master import MesosMaster
 
-from .common import MESOS_MASTER_RAW_VERSION, not_windows_ci
+from .common import MESOS_MASTER_VERSION, not_windows_ci
 
 pytestmark = not_windows_ci
 
@@ -30,13 +30,13 @@ def test_metadata(instance, datadog_agent):
 
     check.check(instance)
 
-    major, minor, patch = MESOS_MASTER_RAW_VERSION.split('.')
+    major, minor, patch = MESOS_MASTER_VERSION.split('-')[0].split('.')
     version_metadata = {
         'version.scheme': 'semver',
         'version.major': major,
         'version.minor': minor,
         'version.patch': patch,
-        'version.raw': MESOS_MASTER_RAW_VERSION,
+        'version.raw': MESOS_MASTER_VERSION,
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
