@@ -23,7 +23,7 @@ PRIV_KEY = 'doggiePRIVkey'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
-SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public', 'autofetch': True}
+SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
 
 SNMP_V3_CONF = {
     'name': 'snmp_v3_conf',
