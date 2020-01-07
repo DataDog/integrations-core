@@ -40,6 +40,8 @@ class CiliumCheck(OpenMetricsBaseCheck):
                 'namespace': 'cilium',
                 'metrics': metrics,
                 'prometheus_timeout': instance.get('timeout', 10),
+                'metadata_metric_name': 'cilium_version',
+                'metadata_label_map': {'version': 'version'},
             }
         )
 
