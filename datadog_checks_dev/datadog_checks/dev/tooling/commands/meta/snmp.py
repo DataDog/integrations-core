@@ -41,7 +41,7 @@ def translate_profile(ctx, profile):
     doesn't preserve comments and indent, but it should automate most of the
     work.
 
-    You'll need to install pysnmp manually beforehand.
+    You'll need to install pysnmp and pysnmp-mibs manually beforehand.
     """
     # Leave imports in function to not add the dependencies
     from pysnmp import hlapi
