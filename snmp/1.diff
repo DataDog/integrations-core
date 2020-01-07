@@ -1,0 +1,1865 @@
+diff --git a/snmp/datadog_checks/snmp/config.py b/snmp/datadog_checks/snmp/config.py
+index 165e4d577..a2c451175 100644
+--- a/snmp/datadog_checks/snmp/config.py
++++ b/snmp/datadog_checks/snmp/config.py
+@@ -2,30 +2,65 @@
+ # All rights reserved
+ # Licensed under Simplified BSD License (see LICENSE)
+ import ipaddress
+-import os
+ from collections import defaultdict
+ 
+-import pysnmp_mibs
+ from pyasn1.type.univ import OctetString
+-from pysmi.codegen import PySnmpCodeGen
+-from pysmi.compiler import MibCompiler
+-from pysmi.parser import SmiStarParser
+-from pysmi.reader import HttpReader
+-from pysmi.writer import PyFileWriter
+ from pysnmp import hlapi
+ from pysnmp.smi import builder, view
+-from pysnmp.smi.error import MibNotFoundError
+ 
+ from datadog_checks.base import ConfigurationError, is_affirmative
+ 
+ 
++def to_oid_tuple(oid_string):
++    """Return a OID tuple from a OID string."""
++    return tuple(map(int, oid_string.lstrip('.').split('.')))
++
++
++class OIDTreeNode(object):
++
++    __slots__ = ('value', 'children')
++
++    def __init__(self):
++        self.value = None
++        self.children = defaultdict(OIDTreeNode)
++
++
++class OIDTrie(object):
++    """A trie implementation to store OIDs and efficiently match prefixes.
++
++    We use it to do basic MIB-like resolution.
++    """
++
++    def __init__(self):
++        self._root = OIDTreeNode()
++
++    def set(self, oid, name):
++        node = self._root
++        for part in oid:
++            node = node.children[part]
++        node.value = name
++
++    def match(self, oid):
++        node = self._root
++        matched = []
++        value = None
++        for part in oid:
++            node = node.children.get(part)
++            if node is None:
++                break
++            matched.append(part)
++            if node.value is not None:
++                value = node.value
++        return tuple(matched), value
++
++
+ class InstanceConfig:
+     """Parse and hold configuration about a single instance."""
+ 
+     DEFAULT_RETRIES = 5
+     DEFAULT_TIMEOUT = 1
+     DEFAULT_ALLOWED_FAILURES = 3
+-    DEFAULT_BULK_THRESHOLD = 5
++    DEFAULT_BULK_THRESHOLD = 0
+ 
+     def __init__(self, instance, warning, log, global_metrics, mibs_path, profiles, profiles_by_oid):
+         self.instance = instance
+@@ -39,15 +74,13 @@ class InstanceConfig:
+                 raise ConfigurationError("Unknown profile '{}'".format(profile))
+             self.metrics.extend(profiles[profile]['definition']['metrics'])
+         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
+-        self.snmp_engine, self.mib_view_controller = self.create_snmp_engine(mibs_path)
++        self._snmp_engine, self.mib_view_controller = self.create_snmp_engine(mibs_path)
+         self.ip_address = None
+         self.ip_network = None
+         self.discovered_instances = {}
+         self.failing_instances = defaultdict(int)
+         self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
+         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
+-        # Temporary flag until we secure the content
+-        self.autofetch = is_affirmative(instance.get('autofetch', False))
+ 
+         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
+         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
+@@ -62,7 +95,7 @@ class InstanceConfig:
+             raise ConfigurationError('Only one of IP address and network address must be specified')
+ 
+         if ip_address:
+-            self.transport = self.get_transport_target(instance, timeout, retries)
++            self._transport = self.get_transport_target(instance, timeout, retries)
+ 
+             self.ip_address = ip_address
+             self.tags.append('snmp_device:{}'.format(self.ip_address))
+@@ -74,18 +107,21 @@ class InstanceConfig:
+ 
+         if not self.metrics and not profiles_by_oid:
+             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
++        self._resolver = OIDTrie()
++        self._index_resolver = defaultdict(dict)
++
++        self._auth_data = self.get_auth_data(instance)
+ 
+-        self.table_oids, self.raw_oids = self.parse_metrics(self.metrics, warning, log)
++        self.all_oids, self.bulk_oids = self.parse_metrics(self.metrics, warning, log)
+ 
+-        self.auth_data = self.get_auth_data(instance)
+-        self.context_data = hlapi.ContextData(*self.get_context_data(instance))
++        self._context_data = hlapi.ContextData(*self.get_context_data(instance))
+ 
+     def refresh_with_profile(self, profile, warning, log):
+         self.metrics.extend(profile['definition']['metrics'])
+-        self.table_oids, self.raw_oids = self.parse_metrics(self.metrics, warning, log)
++        self.all_oids, self.bulk_oids = self.parse_metrics(self.metrics, warning, log)
+ 
+     def call_cmd(self, cmd, *args, **kwargs):
+-        return cmd(self.snmp_engine, self.auth_data, self.transport, self.context_data, *args, **kwargs)
++        return cmd(self._snmp_engine, self._auth_data, self._transport, self._context_data, *args, **kwargs)
+ 
+     @staticmethod
+     def create_snmp_engine(mibs_path):
+@@ -117,17 +153,15 @@ class InstanceConfig:
+         """
+         Generate a Security Parameters object based on the instance's
+         configuration.
+-        See http://pysnmp.sourceforge.net/docs/current/security-configuration.html
+         """
+         if 'community_string' in instance:
+             # SNMP v1 - SNMP v2
+-
+-            # See http://pysnmp.sourceforge.net/docs/current/security-configuration.html
++            # See http://snmplabs.com/pysnmp/docs/api-reference.html#pysnmp.hlapi.CommunityData
+             if int(instance.get('snmp_version', 2)) == 1:
+                 return hlapi.CommunityData(instance['community_string'], mpModel=0)
+             return hlapi.CommunityData(instance['community_string'], mpModel=1)
+ 
+-        elif 'user' in instance:
++        if 'user' in instance:
+             # SNMP v3
+             user = instance['user']
+             auth_key = None
+@@ -146,8 +180,8 @@ class InstanceConfig:
+             if 'privProtocol' in instance:
+                 priv_protocol = getattr(hlapi, instance['privProtocol'])
+             return hlapi.UsmUserData(user, auth_key, priv_key, auth_protocol, priv_protocol)
+-        else:
+-            raise ConfigurationError('An authentication method needs to be provided')
++
++        raise ConfigurationError('An authentication method needs to be provided')
+ 
+     @staticmethod
+     def get_context_data(instance):
+@@ -168,22 +202,49 @@ class InstanceConfig:
+ 
+         return context_engine_id, context_name
+ 
++    def resolve_oid(self, oid):
++        oid_tuple = oid.asTuple()
++        prefix, resolved = self._resolver.match(oid_tuple)
++        if resolved is not None:
++            index_resolver = self._index_resolver.get(resolved)
++            indexes = oid_tuple[len(prefix) :]
++            if index_resolver:
++                new_indexes = []
++                for i, index in enumerate(indexes, 1):
++                    if i in index_resolver:
++                        new_indexes.append(index_resolver[i][index])
++                    else:
++                        new_indexes.append(index)
++                indexes = tuple(new_indexes)
++            return resolved, indexes
++        result_oid = oid
++        if not self.enforce_constraints:
++            # if enforce_constraints is false, then MIB resolution has not been done yet
++            # so we need to do it manually. We have to specify the mibs that we will need
++            # to resolve the name.
++            oid_to_resolve = hlapi.ObjectIdentity(oid_tuple)
++            result_oid = oid_to_resolve.resolveWithMib(self.mib_view_controller)
++        _, metric, indexes = result_oid.getMibSymbol()
++        return metric, tuple(index.prettyPrint() for index in indexes)
++
+     def parse_metrics(self, metrics, warning, log):
+         """Parse configuration and returns data to be used for SNMP queries.
+ 
+-        `raw_oids` is a list of SNMP numerical OIDs to query.
+-        `table_oids` is a dictionnary of SNMP tables to symbols to query.
++        `oids` is a dictionnary of SNMP tables to symbols to query.
+         """
+-        raw_oids = []
+         table_oids = {}
+-        mibs_to_load = set()
+ 
+         def get_table_symbols(mib, table):
++            if isinstance(table, dict):
++                table = table['OID']
++                identity = hlapi.ObjectIdentity(table)
++            else:
++                identity = hlapi.ObjectIdentity(mib, table)
+             key = (mib, table)
+             if key in table_oids:
+                 return table_oids[key][1]
+ 
+-            table_object = hlapi.ObjectType(hlapi.ObjectIdentity(mib, table))
++            table_object = hlapi.ObjectType(identity)
+             symbols = []
+             table_oids[key] = (table_object, symbols)
+             return symbols
+@@ -193,20 +254,27 @@ class InstanceConfig:
+             if 'MIB' in metric:
+                 if not ('table' in metric or 'symbol' in metric):
+                     raise ConfigurationError('When specifying a MIB, you must specify either table or symbol')
+-                mibs_to_load.add(metric['MIB'])
+                 if 'symbol' in metric:
+                     to_query = metric['symbol']
+                     try:
+                         get_table_symbols(metric['MIB'], to_query)
+                     except Exception as e:
+                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
++                    else:
++                        if isinstance(to_query, dict):
++                            self._resolver.set(to_oid_tuple(to_query['OID']), to_query['name'])
+                 elif 'symbols' not in metric:
+                     raise ConfigurationError('When specifying a table, you must specify a list of symbols')
+                 else:
+                     symbols = get_table_symbols(metric['MIB'], metric['table'])
+                     for symbol in metric['symbols']:
++                        if isinstance(symbol, dict):
++                            self._resolver.set(to_oid_tuple(symbol['OID']), symbol['name'])
++                            identity = hlapi.ObjectIdentity(symbol['OID'])
++                        else:
++                            identity = hlapi.ObjectIdentity(metric['MIB'], symbol)
+                         try:
+-                            symbols.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['MIB'], symbol)))
++                            symbols.append(hlapi.ObjectType(identity))
+                         except Exception as e:
+                             warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+                     if 'metric_tags' in metric:
+@@ -218,8 +286,16 @@ class InstanceConfig:
+                             if 'column' in metric_tag:
+                                 # In case it's a column, we need to query it as well
+                                 mib = metric_tag.get('MIB', metric['MIB'])
++                                column = metric_tag['column']
++                                if isinstance(column, dict):
++                                    column_name = column['name']
++                                    column = column['OID']
++                                    identity = hlapi.ObjectIdentity(column)
++                                    self._resolver.set(to_oid_tuple(column), column_name)
++                                else:
++                                    identity = hlapi.ObjectIdentity(mib, column)
+                                 try:
+-                                    object_type = hlapi.ObjectType(hlapi.ObjectIdentity(mib, metric_tag['column']))
++                                    object_type = hlapi.ObjectType(identity)
+                                 except Exception as e:
+                                     warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+                                 else:
+@@ -232,29 +308,32 @@ class InstanceConfig:
+                                         )
+                                     else:
+                                         symbols.append(object_type)
+-
++                            elif 'index' in metric_tag and 'mapping' in metric_tag:
++                                # Need to do manual resolution
++                                for symbol in metric['symbols']:
++                                    self._index_resolver[symbol['name']][metric_tag['index']] = metric_tag['mapping']
+             elif 'OID' in metric:
+-                raw_oids.append(hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID'])))
++                oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID']))
++                table_oids[metric['OID']] = (oid_object, [])
++                self._resolver.set(to_oid_tuple(metric['OID']), metric['name'])
+             else:
+                 raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
+ 
+-        for mib in mibs_to_load:
+-            try:
+-                self.mib_view_controller.mibBuilder.loadModule(mib)
+-            except MibNotFoundError:
+-                if self.autofetch:
+-                    log.debug("Couldn't found mib %s, trying to fetch it", mib)
+-                    self.fetch_mib(mib)
+-
+-        return dict(table_oids.values()), raw_oids
+-
+-    @staticmethod
+-    def fetch_mib(mib):
+-        target_directory = os.path.dirname(pysnmp_mibs.__file__)
+-
+-        reader = HttpReader('mibs.snmplabs.com', 80, '/asn1/@mib@')
+-        mibCompiler = MibCompiler(SmiStarParser(), PySnmpCodeGen(), PyFileWriter(target_directory))
++        oids = []
++        all_oids = []
++        bulk_oids = []
++        # Use bulk for SNMP version > 1 and there are enough symbols
++        bulk_limit = self.bulk_threshold if self._auth_data.mpModel else 0
++        for table, symbols in table_oids.values():
++            if not symbols:
++                # No table to browse, just one symbol
++                oids.append(table)
++            elif bulk_limit and len(symbols) > bulk_limit:
++                bulk_oids.append(table)
++            else:
++                all_oids.append(symbols)
+ 
+-        mibCompiler.addSources(reader)
++        if oids:
++            all_oids.insert(0, oids)
+ 
+-        mibCompiler.compile(mib)
++        return all_oids, bulk_oids
+diff --git a/snmp/datadog_checks/snmp/data/profiles/cisco-3850.yaml b/snmp/datadog_checks/snmp/data/profiles/cisco-3850.yaml
+index 2f2b112fd..a0f9068fd 100644
+--- a/snmp/datadog_checks/snmp/data/profiles/cisco-3850.yaml
++++ b/snmp/datadog_checks/snmp/data/profiles/cisco-3850.yaml
+@@ -3,127 +3,209 @@
+ sysobjectid: 1.3.6.1.4.1.9.1.1745
+ metrics:
+   - MIB: CISCO-ENTITY-SENSOR-MIB
+-    table: entSensorValueTable
++    table:
++      OID: 1.3.6.1.4.1.9.9.91.1.1.1
++      name: entSensorValueTable
+     symbols:
+-      - entSensorValue
++      - OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.4
++        name: entSensorValue
+     metric_tags:
+-      - tag: sensor_type
+-        column: entSensorType
+-      - tag: sensor_id
+-        index: 1
++      - column:
++          OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.1
++          name: entSensorType
++        tag: sensor_type
++      - index: 1
++        tag: sensor_id
+   - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+-    table: cefcFRUPowerStatusTable
++    table:
++      OID: 1.3.6.1.4.1.9.9.117.1.1.2
++      name: cefcFRUPowerStatusTable
+     symbols:
+-      - cefcFRUPowerAdminStatus
+-      - cefcFRUPowerOperStatus
+-      - cefcFRUCurrent
++      - OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.1
++        name: cefcFRUPowerAdminStatus
++      - OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.2
++        name: cefcFRUPowerOperStatus
++      - OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.3
++        name: cefcFRUCurrent
+     metric_tags:
+-      - tag: fru
+-        index: 1
++      - index: 1
++        tag: fru
+   - MIB: CISCO-PROCESS-MIB
+-    table: cpmCPUTotalTable
++    table:
++      OID: 1.3.6.1.4.1.9.9.109.1.1.1
++      name: cpmCPUTotalTable
+     symbols:
+-      - cpmCPUTotalMonIntervalValue
+-      - cpmCPUMemoryUsed
+-      - cpmCPUMemoryFree
++      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.10
++        name: cpmCPUTotalMonIntervalValue
++      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
++        name: cpmCPUMemoryUsed
++      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.13
++        name: cpmCPUMemoryFree
+     metric_tags:
+-      - tag: cpu
+-        index: 1
++      - index: 1
++        tag: cpu
+   - MIB: CISCO-IF-EXTENSION-MIB
+-    table: cieIfPacketStatsTable
++    table:
++      OID: 1.3.6.1.4.1.9.9.276.1.1.1
++      name: cieIfPacketStatsTable
+     forced_type: gauge
+     symbols:
+-      - cieIfLastInTime
+-      - cieIfLastOutTime
+-      - cieIfInputQueueDrops
+-      - cieIfOutputQueueDrops
++      - OID: 1.3.6.1.4.1.9.9.276.1.1.1.1.1
++        name: cieIfLastInTime
++      - OID: 1.3.6.1.4.1.9.9.276.1.1.1.1.2
++        name: cieIfLastOutTime
++      - OID: 1.3.6.1.4.1.9.9.276.1.1.1.1.10
++        name: cieIfInputQueueDrops
++      - OID: 1.3.6.1.4.1.9.9.276.1.1.1.1.11
++        name: cieIfOutputQueueDrops
+     metric_tags:
+-      - tag: interface
+-        column: ifName
+-        MIB: IF-MIB
++      - MIB: IF-MIB
++        column:
++          OID: 1.3.6.1.2.1.31.1.1.1.1
++          name: ifName
+         table: ifXTable
++        tag: interface
+   - MIB: CISCO-IF-EXTENSION-MIB
+-    table: cieIfInterfaceTable
++    table:
++      OID: 1.3.6.1.4.1.9.9.276.1.1.2
++      name: cieIfInterfaceTable
+     forced_type: monotonic_count
+     symbols:
+-      - cieIfResetCount
++      - OID: 1.3.6.1.4.1.9.9.276.1.1.2.1.1
++        name: cieIfResetCount
+     metric_tags:
+-      - tag: interface
+-        column: ifName
+-        MIB: IF-MIB
++      - MIB: IF-MIB
++        column:
++          OID: 1.3.6.1.2.1.31.1.1.1.1
++          name: ifName
+         table: ifXTable
++        tag: interface
+   - MIB: IF-MIB
+-    table: ifTable
++    table:
++      OID: 1.3.6.1.2.1.2.2
++      name: ifTable
+     forced_type: monotonic_count
+     symbols:
+-      - ifInErrors
+-      - ifInDiscards
+-      - ifOutErrors
+-      - ifOutDiscards
++      - OID: 1.3.6.1.2.1.2.2.1.14
++        name: ifInErrors
++      - OID: 1.3.6.1.2.1.2.2.1.13
++        name: ifInDiscards
++      - OID: 1.3.6.1.2.1.2.2.1.20
++        name: ifOutErrors
++      - OID: 1.3.6.1.2.1.2.2.1.19
++        name: ifOutDiscards
+     metric_tags:
+-      - tag: interface
+-        column: ifDescr
++      - column:
++          OID: 1.3.6.1.2.1.2.2.1.2
++          name: ifDescr
++        tag: interface
+   - MIB: IF-MIB
+-    table: ifTable
++    table:
++      OID: 1.3.6.1.2.1.2.2
++      name: ifTable
+     symbols:
+-      - ifAdminStatus
+-      - ifOperStatus
++    - OID: 1.3.6.1.2.1.2.2.1.7
++      name: ifAdminStatus
++    - OID: 1.3.6.1.2.1.2.2.1.8
++      name: ifOperStatus
+     metric_tags:
+-      - tag: interface
+-        column: ifDescr
++    - column:
++        OID: 1.3.6.1.2.1.2.2.1.2
++        name: ifDescr
++      tag: interface
+   - MIB: IF-MIB
+-    table: ifXTable
++    table:
++      OID: 1.3.6.1.2.1.31.1.1
++      name: ifXTable
+     forced_type: monotonic_count
+     symbols:
+-      - ifHCInOctets
+-      - ifHCInUcastPkts
+-      - ifHCInMulticastPkts
+-      - ifHCInBroadcastPkts
+-      - ifHCOutOctets
+-      - ifHCOutUcastPkts
+-      - ifHCOutMulticastPkts
+-      - ifHCOutBroadcastPkts
++      - OID: 1.3.6.1.2.1.31.1.1.1.6
++        name: ifHCInOctets
++      - OID: 1.3.6.1.2.1.31.1.1.1.7
++        name: ifHCInUcastPkts
++      - OID: 1.3.6.1.2.1.31.1.1.1.8
++        name: ifHCInMulticastPkts
++      - OID: 1.3.6.1.2.1.31.1.1.1.9
++        name: ifHCInBroadcastPkts
++      - OID: 1.3.6.1.2.1.31.1.1.1.10
++        name: ifHCOutOctets
++      - OID: 1.3.6.1.2.1.31.1.1.1.11
++        name: ifHCOutUcastPkts
++      - OID: 1.3.6.1.2.1.31.1.1.1.12
++        name: ifHCOutMulticastPkts
++      - OID: 1.3.6.1.2.1.31.1.1.1.13
++        name: ifHCOutBroadcastPkts
+     metric_tags:
+-      - tag: interface
+-        column: ifName
++      - column:
++          OID: 1.3.6.1.2.1.31.1.1.1.1
++          name: ifName
++        tag: interface
+   - MIB: TCP-MIB
+-    symbol: tcpActiveOpens
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.6.5
++      name: tcpActiveOpens
+   - MIB: TCP-MIB
+-    symbol: tcpPassiveOpens
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.6.6
++      name: tcpPassiveOpens
+   - MIB: TCP-MIB
+-    symbol: tcpAttemptFails
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.6.7
++      name: tcpAttemptFails
+   - MIB: TCP-MIB
+-    symbol: tcpEstabResets
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.6.8
++      name: tcpEstabResets
+   - MIB: TCP-MIB
+-    symbol: tcpCurrEstab
++    symbol:
++      OID: 1.3.6.1.2.1.6.9
++      name: tcpCurrEstab
+   - MIB: TCP-MIB
+-    symbol: tcpHCInSegs
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.6.17
++      name: tcpHCInSegs
+   - MIB: TCP-MIB
+-    symbol: tcpHCOutSegs
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.6.18
++      name: tcpHCOutSegs
+   - MIB: TCP-MIB
+-    symbol: tcpRetransSegs
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.6.12
++      name: tcpRetransSegs
+   - MIB: TCP-MIB
+-    symbol: tcpInErrs
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.6.14
++      name: tcpInErrs
+   - MIB: TCP-MIB
+-    symbol: tcpOutRsts
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.6.15
++      name: tcpOutRsts
+   - MIB: UDP-MIB
+-    symbol: udpHCInDatagrams
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.7.8
++      name: udpHCInDatagrams
+   - MIB: UDP-MIB
+-    symbol: udpNoPorts
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.7.2
++      name: udpNoPorts
+   - MIB: UDP-MIB
+-    symbol: udpInErrors
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.7.3
++      name: udpInErrors
+   - MIB: UDP-MIB
+-    symbol: udpHCOutDatagrams
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.2.1.7.9
++      name: udpHCOutDatagrams
+diff --git a/snmp/datadog_checks/snmp/data/profiles/f5-big-ip.yaml b/snmp/datadog_checks/snmp/data/profiles/f5-big-ip.yaml
+index 56e532789..ecef3a85b 100644
+--- a/snmp/datadog_checks/snmp/data/profiles/f5-big-ip.yaml
++++ b/snmp/datadog_checks/snmp/data/profiles/f5-big-ip.yaml
+@@ -4,122 +4,200 @@ sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*
+ # Memory stats
+ metrics:
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysStatMemoryTotal
+     forced_type: gauge
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.1.44
++      name: sysStatMemoryTotal
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysStatMemoryUsed
+     forced_type: gauge
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.1.45
++      name: sysStatMemoryUsed
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysGlobalTmmStatMemoryTotal
+     forced_type: gauge
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.21.28
++      name: sysGlobalTmmStatMemoryTotal
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysGlobalTmmStatMemoryUsed
+     forced_type: gauge
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.21.29
++      name: sysGlobalTmmStatMemoryUsed
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysGlobalHostOtherMemoryTotal
+     forced_type: gauge
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.44
++      name: sysGlobalHostOtherMemoryTotal
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysGlobalHostOtherMemoryUsed
+     forced_type: gauge
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.45
++      name: sysGlobalHostOtherMemoryUsed
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysGlobalHostSwapTotal
+     forced_type: gauge
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.46
++      name: sysGlobalHostSwapTotal
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysGlobalHostSwapUsed
+     forced_type: gauge
+-  # CPU stats
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.47
++      name: sysGlobalHostSwapUsed
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    table: sysMultiHostCpuTable
+     forced_type: percent
+-    symbols:
+-      - sysMultiHostCpuUser
+-      - sysMultiHostCpuNice
+-      - sysMultiHostCpuSystem
+-      - sysMultiHostCpuIdle
+-      - sysMultiHostCpuIrq
+-      - sysMultiHostCpuSoftirq
+-      - sysMultiHostCpuIowait
+     metric_tags:
+-      - tag: cpu
+-        column: sysMultiHostCpuId
+-  # Basic interface stats
++    - column:
++        OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.3
++        name: sysMultiHostCpuId
++      tag: cpu
++    symbols:
++    - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.4
++      name: sysMultiHostCpuUser
++    - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.5
++      name: sysMultiHostCpuNice
++    - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.6
++      name: sysMultiHostCpuSystem
++    - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.7
++      name: sysMultiHostCpuIdle
++    - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.8
++      name: sysMultiHostCpuIrq
++    - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.9
++      name: sysMultiHostCpuSoftirq
++    - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.10
++      name: sysMultiHostCpuIowait
++    table:
++      OID: 1.3.6.1.4.1.3375.2.1.7.5.2
++      name: sysMultiHostCpuTable
+   - MIB: IF-MIB
+-    table: ifTable
+     forced_type: monotonic_count
+-    symbols:
+-      - ifInErrors
+-      - ifOutErrors
+     metric_tags:
+-      - tag: interface
+-        column: ifDescr
+-  - MIB: IF-MIB
+-    table: ifTable
++    - column:
++        OID: 1.3.6.1.2.1.2.2.1.2
++        name: ifDescr
++      tag: interface
+     symbols:
+-      - ifAdminStatus
+-      - ifOperStatus
++    - OID: 1.3.6.1.2.1.2.2.1.14
++      name: ifInErrors
++    - OID: 1.3.6.1.2.1.2.2.1.20
++      name: ifOutErrors
++    table:
++      OID: 1.3.6.1.2.1.2.2
++      name: ifTable
++  - MIB: IF-MIB
+     metric_tags:
+-      - tag: interface
+-        column: ifDescr
++    - column:
++        OID: 1.3.6.1.2.1.2.2.1.2
++        name: ifDescr
++      tag: interface
++    symbols:
++    - OID: 1.3.6.1.2.1.2.2.1.7
++      name: ifAdminStatus
++    - OID: 1.3.6.1.2.1.2.2.1.8
++      name: ifOperStatus
++    table:
++      OID: 1.3.6.1.2.1.2.2
++      name: ifTable
+   - MIB: IF-MIB
+-    table: ifXTable
+     forced_type: monotonic_count
+-    symbols:
+-      - ifHCInOctets
+-      - ifHCOutOctets
+     metric_tags:
+-      - tag: interface
+-        column: ifName
+-  # TCP stats
+-  - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysTcpStatOpen
+-  - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysTcpStatCloseWait
+-  - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysTcpStatFinWait
+-  - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysTcpStatTimeWait
++    - column:
++        OID: 1.3.6.1.2.1.31.1.1.1.1
++        name: ifName
++      tag: interface
++    symbols:
++    - OID: 1.3.6.1.2.1.31.1.1.1.6
++      name: ifHCInOctets
++    - OID: 1.3.6.1.2.1.31.1.1.1.10
++      name: ifHCOutOctets
++    table:
++      OID: 1.3.6.1.2.1.31.1.1
++      name: ifXTable
++  - MIB: F5-BIGIP-SYSTEM-MIB
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.2
++      name: sysTcpStatOpen
++  - MIB: F5-BIGIP-SYSTEM-MIB
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.3
++      name: sysTcpStatCloseWait
++  - MIB: F5-BIGIP-SYSTEM-MIB
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.4
++      name: sysTcpStatFinWait
++  - MIB: F5-BIGIP-SYSTEM-MIB
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.5
++      name: sysTcpStatTimeWait
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysTcpStatAccepts
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.6
++      name: sysTcpStatAccepts
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysTcpStatAcceptfails
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.7
++      name: sysTcpStatAcceptfails
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysTcpStatConnects
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.8
++      name: sysTcpStatConnects
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysTcpStatConnfails
+     forced_type: monotonic_count
+-  # UDP stats
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.9
++      name: sysTcpStatConnfails
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysUdpStatOpen
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.2
++      name: sysUdpStatOpen
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysUdpStatAccepts
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.3
++      name: sysUdpStatAccepts
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysUdpStatAcceptfails
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.4
++      name: sysUdpStatAcceptfails
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysUdpStatConnects
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.5
++      name: sysUdpStatConnects
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysUdpStatConnfails
+     forced_type: monotonic_count
+-  # SSL stats
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.6
++      name: sysUdpStatConnfails
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysClientsslStatCurConns
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.2
++      name: sysClientsslStatCurConns
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysClientsslStatEncryptedBytesIn
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.10
++      name: sysClientsslStatEncryptedBytesIn
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysClientsslStatEncryptedBytesOut
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.11
++      name: sysClientsslStatEncryptedBytesOut
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysClientsslStatDecryptedBytesIn
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.12
++      name: sysClientsslStatDecryptedBytesIn
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysClientsslStatDecryptedBytesOut
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.13
++      name: sysClientsslStatDecryptedBytesOut
+   - MIB: F5-BIGIP-SYSTEM-MIB
+-    symbol: sysClientsslStatHandshakeFailures
+     forced_type: monotonic_count
++    symbol:
++      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.29
++      name: sysClientsslStatHandshakeFailures
+diff --git a/snmp/datadog_checks/snmp/data/profiles/generic-router.yaml b/snmp/datadog_checks/snmp/data/profiles/generic-router.yaml
+index 30f6fd2ef..978fd4c7d 100644
+--- a/snmp/datadog_checks/snmp/data/profiles/generic-router.yaml
++++ b/snmp/datadog_checks/snmp/data/profiles/generic-router.yaml
+@@ -2,150 +2,270 @@
+ #
+ sysobjectid: 1.3.6.1.4.*
+ metrics:
+-  - MIB: IF-MIB
+-    table: ifTable
+-    forced_type: monotonic_count
+-    symbols:
+-      - ifInErrors
+-      - ifInDiscards
+-      - ifOutErrors
+-      - ifOutDiscards
+-    metric_tags:
+-      - tag: interface
+-        column: ifDescr
+-  - MIB: IF-MIB
+-    table: ifTable
+-    symbols:
+-      - ifAdminStatus
+-      - ifOperStatus
+-    metric_tags:
+-      - tag: interface
+-        column: ifDescr
+-  - MIB: IF-MIB
+-    table: ifXTable
+-    forced_type: monotonic_count
+-    symbols:
+-      - ifHCInOctets
+-      - ifHCInUcastPkts
+-      - ifHCInMulticastPkts
+-      - ifHCInBroadcastPkts
+-      - ifHCOutOctets
+-      - ifHCOutUcastPkts
+-      - ifHCOutMulticastPkts
+-      - ifHCOutBroadcastPkts
+-    metric_tags:
+-      - tag: interface
+-        column: ifName
+-  - MIB: IP-MIB
+-    table: ipSystemStatsTable
+-    forced_type: monotonic_count
+-    symbols:
+-      - ipSystemStatsHCInReceives
+-      - ipSystemStatsHCInOctets
+-      - ipSystemStatsInHdrErrors
+-      - ipSystemStatsInNoRoutes
+-      - ipSystemStatsInAddrErrors
+-      - ipSystemStatsInUnknownProtos
+-      - ipSystemStatsInTruncatedPkts
+-      - ipSystemStatsHCInForwDatagrams
+-      - ipSystemStatsReasmReqds
+-      - ipSystemStatsReasmOKs
+-      - ipSystemStatsReasmFails
+-      - ipSystemStatsInDiscards
+-      - ipSystemStatsHCInDelivers
+-      - ipSystemStatsHCOutRequests
+-      - ipSystemStatsOutNoRoutes
+-      - ipSystemStatsHCOutForwDatagrams
+-      - ipSystemStatsOutDiscards
+-      - ipSystemStatsOutFragReqds
+-      - ipSystemStatsOutFragOKs
+-      - ipSystemStatsOutFragFails
+-      - ipSystemStatsOutFragCreates
+-      - ipSystemStatsHCOutTransmits
+-      - ipSystemStatsHCOutOctets
+-      - ipSystemStatsHCInMcastPkts
+-      - ipSystemStatsHCInMcastOctets
+-      - ipSystemStatsHCOutMcastPkts
+-      - ipSystemStatsHCOutMcastOctets
+-      - ipSystemStatsHCInBcastPkts
+-      - ipSystemStatsHCOutBcastPkts
+-    metric_tags:
+-      - tag: ipversion
+-        index: 1
+-  - MIB: IP-MIB
+-    table: ipIfStatsTable
+-    forced_type: monotonic_count
+-    symbols:
+-      - ipIfStatsHCInOctets
+-      - ipIfStatsInHdrErrors
+-      - ipIfStatsInNoRoutes
+-      - ipIfStatsInAddrErrors
+-      - ipIfStatsInUnknownProtos
+-      - ipIfStatsInTruncatedPkts
+-      - ipIfStatsHCInForwDatagrams
+-      - ipIfStatsReasmReqds
+-      - ipIfStatsReasmOKs
+-      - ipIfStatsReasmFails
+-      - ipIfStatsInDiscards
+-      - ipIfStatsHCInDelivers
+-      - ipIfStatsHCOutRequests
+-      - ipIfStatsHCOutForwDatagrams
+-      - ipIfStatsOutDiscards
+-      - ipIfStatsOutFragReqds
+-      - ipIfStatsOutFragOKs
+-      - ipIfStatsOutFragFails
+-      - ipIfStatsOutFragCreates
+-      - ipIfStatsHCOutTransmits
+-      - ipIfStatsHCOutOctets
+-      - ipIfStatsHCInMcastPkts
+-      - ipIfStatsHCInMcastOctets
+-      - ipIfStatsHCOutMcastPkts
+-      - ipIfStatsHCOutMcastOctets
+-      - ipIfStatsHCInBcastPkts
+-      - ipIfStatsHCOutBcastPkts
+-    metric_tags:
+-      - tag: ipversion
+-        index: 1
+-      - tag: interface
+-        index: 2
+-  - MIB: TCP-MIB
+-    symbol: tcpActiveOpens
+-    forced_type: monotonic_count
+-  - MIB: TCP-MIB
+-    symbol: tcpPassiveOpens
+-    forced_type: monotonic_count
+-  - MIB: TCP-MIB
+-    symbol: tcpAttemptFails
+-    forced_type: monotonic_count
+-  - MIB: TCP-MIB
+-    symbol: tcpEstabResets
+-    forced_type: monotonic_count
+-  - MIB: TCP-MIB
+-    symbol: tcpCurrEstab
+-  - MIB: TCP-MIB
+-    symbol: tcpHCInSegs
+-    forced_type: monotonic_count
+-  - MIB: TCP-MIB
+-    symbol: tcpHCOutSegs
+-    forced_type: monotonic_count
+-  - MIB: TCP-MIB
+-    symbol: tcpRetransSegs
+-    forced_type: monotonic_count
+-  - MIB: TCP-MIB
+-    symbol: tcpInErrs
+-    forced_type: monotonic_count
+-  - MIB: TCP-MIB
+-    symbol: tcpOutRsts
+-    forced_type: monotonic_count
+-  - MIB: UDP-MIB
+-    symbol: udpHCInDatagrams
+-    forced_type: monotonic_count
+-  - MIB: UDP-MIB
+-    symbol: udpNoPorts
+-    forced_type: monotonic_count
+-  - MIB: UDP-MIB
+-    symbol: udpInErrors
+-    forced_type: monotonic_count
+-  - MIB: UDP-MIB
+-    symbol: udpHCOutDatagrams
+-    forced_type: monotonic_count
++- MIB: IF-MIB
++  forced_type: monotonic_count
++  table:
++    OID: 1.3.6.1.2.1.2.2
++    name: ifTable
++  symbols:
++    - OID: 1.3.6.1.2.1.2.2.1.14
++      name: ifInErrors
++    - OID: 1.3.6.1.2.1.2.2.1.13
++      name: ifInDiscards
++    - OID: 1.3.6.1.2.1.2.2.1.20
++      name: ifOutErrors
++    - OID: 1.3.6.1.2.1.2.2.1.19
++      name: ifOutDiscards
++  metric_tags:
++    - column:
++        OID: 1.3.6.1.2.1.2.2.1.2
++        name: ifDescr
++      tag: interface
++- MIB: IF-MIB
++  table:
++    OID: 1.3.6.1.2.1.2.2
++    name: ifTable
++  symbols:
++    - OID: 1.3.6.1.2.1.2.2.1.7
++      name: ifAdminStatus
++    - OID: 1.3.6.1.2.1.2.2.1.8
++      name: ifOperStatus
++  metric_tags:
++    - column:
++        OID: 1.3.6.1.2.1.2.2.1.2
++        name: ifDescr
++      tag: interface
++- MIB: IF-MIB
++  forced_type: monotonic_count
++  table:
++    OID: 1.3.6.1.2.1.31.1.1
++    name: ifXTable
++  symbols:
++    - OID: 1.3.6.1.2.1.31.1.1.1.6
++      name: ifHCInOctets
++    - OID: 1.3.6.1.2.1.31.1.1.1.7
++      name: ifHCInUcastPkts
++    - OID: 1.3.6.1.2.1.31.1.1.1.8
++      name: ifHCInMulticastPkts
++    - OID: 1.3.6.1.2.1.31.1.1.1.9
++      name: ifHCInBroadcastPkts
++    - OID: 1.3.6.1.2.1.31.1.1.1.10
++      name: ifHCOutOctets
++    - OID: 1.3.6.1.2.1.31.1.1.1.11
++      name: ifHCOutUcastPkts
++    - OID: 1.3.6.1.2.1.31.1.1.1.12
++      name: ifHCOutMulticastPkts
++    - OID: 1.3.6.1.2.1.31.1.1.1.13
++      name: ifHCOutBroadcastPkts
++  metric_tags:
++    - column:
++        OID: 1.3.6.1.2.1.31.1.1.1.1
++        name: ifName
++      tag: interface
++- MIB: IP-MIB
++  forced_type: monotonic_count
++  table:
++    OID: 1.3.6.1.2.1.4.31.1
++    name: ipSystemStatsTable
++  symbols:
++    - OID: 1.3.6.1.2.1.4.31.1.1.4
++      name: ipSystemStatsHCInReceives
++    - OID: 1.3.6.1.2.1.4.31.1.1.6
++      name: ipSystemStatsHCInOctets
++    - OID: 1.3.6.1.2.1.4.31.1.1.7
++      name: ipSystemStatsInHdrErrors
++    - OID: 1.3.6.1.2.1.4.31.1.1.8
++      name: ipSystemStatsInNoRoutes
++    - OID: 1.3.6.1.2.1.4.31.1.1.9
++      name: ipSystemStatsInAddrErrors
++    - OID: 1.3.6.1.2.1.4.31.1.1.10
++      name: ipSystemStatsInUnknownProtos
++    - OID: 1.3.6.1.2.1.4.31.1.1.11
++      name: ipSystemStatsInTruncatedPkts
++    - OID: 1.3.6.1.2.1.4.31.1.1.13
++      name: ipSystemStatsHCInForwDatagrams
++    - OID: 1.3.6.1.2.1.4.31.1.1.14
++      name: ipSystemStatsReasmReqds
++    - OID: 1.3.6.1.2.1.4.31.1.1.15
++      name: ipSystemStatsReasmOKs
++    - OID: 1.3.6.1.2.1.4.31.1.1.16
++      name: ipSystemStatsReasmFails
++    - OID: 1.3.6.1.2.1.4.31.1.1.17
++      name: ipSystemStatsInDiscards
++    - OID: 1.3.6.1.2.1.4.31.1.1.19
++      name: ipSystemStatsHCInDelivers
++    - OID: 1.3.6.1.2.1.4.31.1.1.21
++      name: ipSystemStatsHCOutRequests
++    - OID: 1.3.6.1.2.1.4.31.1.1.22
++      name: ipSystemStatsOutNoRoutes
++    - OID: 1.3.6.1.2.1.4.31.1.1.24
++      name: ipSystemStatsHCOutForwDatagrams
++    - OID: 1.3.6.1.2.1.4.31.1.1.25
++      name: ipSystemStatsOutDiscards
++    - OID: 1.3.6.1.2.1.4.31.1.1.26
++      name: ipSystemStatsOutFragReqds
++    - OID: 1.3.6.1.2.1.4.31.1.1.27
++      name: ipSystemStatsOutFragOKs
++    - OID: 1.3.6.1.2.1.4.31.1.1.28
++      name: ipSystemStatsOutFragFails
++    - OID: 1.3.6.1.2.1.4.31.1.1.29
++      name: ipSystemStatsOutFragCreates
++    - OID: 1.3.6.1.2.1.4.31.1.1.31
++      name: ipSystemStatsHCOutTransmits
++    - OID: 1.3.6.1.2.1.4.31.1.1.33
++      name: ipSystemStatsHCOutOctets
++    - OID: 1.3.6.1.2.1.4.31.1.1.35
++      name: ipSystemStatsHCInMcastPkts
++    - OID: 1.3.6.1.2.1.4.31.1.1.37
++      name: ipSystemStatsHCInMcastOctets
++    - OID: 1.3.6.1.2.1.4.31.1.1.39
++      name: ipSystemStatsHCOutMcastPkts
++    - OID: 1.3.6.1.2.1.4.31.1.1.41
++      name: ipSystemStatsHCOutMcastOctets
++    - OID: 1.3.6.1.2.1.4.31.1.1.43
++      name: ipSystemStatsHCInBcastPkts
++    - OID: 1.3.6.1.2.1.4.31.1.1.45
++      name: ipSystemStatsHCOutBcastPkts
++  metric_tags:
++    - index: 1
++      tag: ipversion
++      mapping:
++        1: ipv4
++        2: ipv6
++- MIB: IP-MIB
++  forced_type: monotonic_count
++  table:
++    OID: 1.3.6.1.2.1.4.31.3
++    name: ipIfStatsTable
++  symbols:
++    - OID: 1.3.6.1.2.1.4.31.3.1.6
++      name: ipIfStatsHCInOctets
++    - OID: 1.3.6.1.2.1.4.31.3.1.7
++      name: ipIfStatsInHdrErrors
++    - OID: 1.3.6.1.2.1.4.31.3.1.8
++      name: ipIfStatsInNoRoutes
++    - OID: 1.3.6.1.2.1.4.31.3.1.9
++      name: ipIfStatsInAddrErrors
++    - OID: 1.3.6.1.2.1.4.31.3.1.10
++      name: ipIfStatsInUnknownProtos
++    - OID: 1.3.6.1.2.1.4.31.3.1.11
++      name: ipIfStatsInTruncatedPkts
++    - OID: 1.3.6.1.2.1.4.31.3.1.13
++      name: ipIfStatsHCInForwDatagrams
++    - OID: 1.3.6.1.2.1.4.31.3.1.14
++      name: ipIfStatsReasmReqds
++    - OID: 1.3.6.1.2.1.4.31.3.1.15
++      name: ipIfStatsReasmOKs
++    - OID: 1.3.6.1.2.1.4.31.3.1.16
++      name: ipIfStatsReasmFails
++    - OID: 1.3.6.1.2.1.4.31.3.1.17
++      name: ipIfStatsInDiscards
++    - OID: 1.3.6.1.2.1.4.31.3.1.19
++      name: ipIfStatsHCInDelivers
++    - OID: 1.3.6.1.2.1.4.31.3.1.21
++      name: ipIfStatsHCOutRequests
++    - OID: 1.3.6.1.2.1.4.31.3.1.24
++      name: ipIfStatsHCOutForwDatagrams
++    - OID: 1.3.6.1.2.1.4.31.3.1.25
++      name: ipIfStatsOutDiscards
++    - OID: 1.3.6.1.2.1.4.31.3.1.26
++      name: ipIfStatsOutFragReqds
++    - OID: 1.3.6.1.2.1.4.31.3.1.27
++      name: ipIfStatsOutFragOKs
++    - OID: 1.3.6.1.2.1.4.31.3.1.28
++      name: ipIfStatsOutFragFails
++    - OID: 1.3.6.1.2.1.4.31.3.1.29
++      name: ipIfStatsOutFragCreates
++    - OID: 1.3.6.1.2.1.4.31.3.1.31
++      name: ipIfStatsHCOutTransmits
++    - OID: 1.3.6.1.2.1.4.31.3.1.33
++      name: ipIfStatsHCOutOctets
++    - OID: 1.3.6.1.2.1.4.31.3.1.35
++      name: ipIfStatsHCInMcastPkts
++    - OID: 1.3.6.1.2.1.4.31.3.1.37
++      name: ipIfStatsHCInMcastOctets
++    - OID: 1.3.6.1.2.1.4.31.3.1.39
++      name: ipIfStatsHCOutMcastPkts
++    - OID: 1.3.6.1.2.1.4.31.3.1.41
++      name: ipIfStatsHCOutMcastOctets
++    - OID: 1.3.6.1.2.1.4.31.3.1.43
++      name: ipIfStatsHCInBcastPkts
++    - OID: 1.3.6.1.2.1.4.31.3.1.45
++      name: ipIfStatsHCOutBcastPkts
++  metric_tags:
++    - index: 1
++      tag: ipversion
++      mapping:
++        1: ipv4
++        2: ipv6
++    - index: 2
++      tag: interface
++- MIB: TCP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.6.5
++    name: tcpActiveOpens
++- MIB: TCP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.6.6
++    name: tcpPassiveOpens
++- MIB: TCP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.6.7
++    name: tcpAttemptFails
++- MIB: TCP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.6.8
++    name: tcpEstabResets
++- MIB: TCP-MIB
++  symbol:
++    OID: 1.3.6.1.2.1.6.9
++    name: tcpCurrEstab
++- MIB: TCP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.6.17
++    name: tcpHCInSegs
++- MIB: TCP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.6.18
++    name: tcpHCOutSegs
++- MIB: TCP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.6.12
++    name: tcpRetransSegs
++- MIB: TCP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.6.14
++    name: tcpInErrs
++- MIB: TCP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.6.15
++    name: tcpOutRsts
++- MIB: UDP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.7.8
++    name: udpHCInDatagrams
++- MIB: UDP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.7.2
++    name: udpNoPorts
++- MIB: UDP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.7.3
++    name: udpInErrors
++- MIB: UDP-MIB
++  forced_type: monotonic_count
++  symbol:
++    OID: 1.3.6.1.2.1.7.9
++    name: udpHCOutDatagrams
+diff --git a/snmp/datadog_checks/snmp/snmp.py b/snmp/datadog_checks/snmp/snmp.py
+index 3edc19c5d..6f1fa23e0 100644
+--- a/snmp/datadog_checks/snmp/snmp.py
++++ b/snmp/datadog_checks/snmp/snmp.py
+@@ -15,7 +15,7 @@ from pyasn1.codec.ber import decoder
+ from pysnmp import hlapi
+ from pysnmp.error import PySnmpError
+ from pysnmp.smi import builder
+-from pysnmp.smi.exval import noSuchInstance, noSuchObject
++from pysnmp.smi.exval import endOfMibView, noSuchInstance, noSuchObject
+ from six import iteritems
+ 
+ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+@@ -68,7 +68,7 @@ DEFAULT_OID_BATCH_SIZE = 10
+ 
+ 
+ def reply_invalid(oid):
+-    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
++    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid) or endOfMibView.isSameTypeWith(oid)
+ 
+ 
+ class SnmpCheck(AgentCheck):
+@@ -158,7 +158,7 @@ class SnmpCheck(AgentCheck):
+                 try:
+                     profile = self._profile_for_sysobject_oid(sys_object_oid)
+                 except ConfigurationError:
+-                    if not (host_config.table_oids or host_config.raw_oids):
++                    if not (host_config.all_oids or host_config.bulk_oids):
+                         self.log.warn("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
+                         continue
+                 else:
+@@ -176,7 +176,7 @@ class SnmpCheck(AgentCheck):
+             message = '{} for instance {}'.format(error_indication, ip_address)
+             raise CheckException(message)
+ 
+-    def check_table(self, config, table_oids):
++    def fetch_results(self, config, all_oids, bulk_oids):
+         """
+         Perform a snmpwalk on the domain specified by the oids, on the device
+         configured in instance.
+@@ -187,30 +187,13 @@ class SnmpCheck(AgentCheck):
+         """
+         results = defaultdict(dict)
+         enforce_constraints = config.enforce_constraints
+-        oids = []
+-        all_oids = []
+-        bulk_oids = []
+-        # Use bulk for SNMP version > 1 and there are enough symbols
+-        bulk_limit = config.bulk_threshold if config.auth_data.mpModel else 0
+-        for table, symbols in table_oids.items():
+-            if not symbols:
+-                # No table to browse, just one symbol
+-                oids.append(table)
+-            elif len(symbols) < bulk_limit:
+-                all_oids.append(symbols)
+-            else:
+-                bulk_oids.append(table)
+-
+-        if oids:
+-            all_oids.insert(0, oids)
+ 
+         all_binds = []
+         error = None
+         for to_fetch in all_oids:
+             binds, current_error = self.fetch_oids(config, to_fetch, enforce_constraints=enforce_constraints)
+             all_binds.extend(binds)
+-            if not error:
+-                error = current_error
++            error = current_error if not error else error
+ 
+         for oid in bulk_oids:
+             try:
+@@ -226,8 +209,7 @@ class SnmpCheck(AgentCheck):
+                 )
+                 binds, current_error = self._consume_binds_iterator(binds_iterator, config)
+                 all_binds.extend(binds)
+-                if not error:
+-                    error = current_error
++                error = current_error if not error else error
+ 
+             except PySnmpError as e:
+                 message = 'Failed to collect some metrics: {}'.format(e)
+@@ -236,38 +218,13 @@ class SnmpCheck(AgentCheck):
+                 self.warning(message)
+ 
+         for result_oid, value in all_binds:
+-            if not enforce_constraints:
+-                # if enforce_constraints is false, then MIB resolution has not been done yet
+-                # so we need to do it manually. We have to specify the mibs that we will need
+-                # to resolve the name.
+-                oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple())
+-                result_oid = oid_to_resolve.resolveWithMib(config.mib_view_controller)
+-            _, metric, indexes = result_oid.getMibSymbol()
+-            results[metric][indexes] = value
++            metric, index = config.resolve_oid(result_oid)
++            results[metric][index] = value
+         self.log.debug('Raw results: %s', results)
+         # Freeze the result
+         results.default_factory = None
+         return results, error
+ 
+-    def check_raw(self, config, oids):
+-        """
+-        Perform a snmpwalk on the domain specified by the oids, on the device
+-        configured in instance.
+-
+-        Returns a dictionary:
+-        dict[oid/metric_name] = value
+-        In case of scalar objects, the row index is just 0
+-        """
+-        all_binds, error = self.fetch_oids(config, oids, enforce_constraints=False)
+-        results = {}
+-
+-        for result_oid, value in all_binds:
+-            oid = result_oid.asTuple()
+-            matching = '.'.join(str(i) for i in oid)
+-            results[matching] = value
+-        self.log.debug('Raw results: %s', results)
+-        return results, error
+-
+     def fetch_oids(self, config, oids, enforce_constraints):
+         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
+         # It returns the wrong value when the OID passeed is referring to a specific leaf.
+@@ -389,12 +346,8 @@ class SnmpCheck(AgentCheck):
+         self._thread.start()
+ 
+     def check(self, instance):
+-        """
+-        Perform two series of SNMP requests, one for all that have MIB associated
+-        and should be looked up and one for those specified by oids.
+-        """
+         config = self._config
+-        if self._config.ip_network:
++        if config.ip_network:
+             if self._thread is None:
+                 self._start_discovery()
+             for host, discovered in list(config.discovered_instances.items()):
+@@ -408,7 +361,7 @@ class SnmpCheck(AgentCheck):
+                 else:
+                     # Reset the counter if not's failing
+                     config.failing_instances.pop(host, None)
+-            tags = ['network:{}'.format(self._config.ip_network)]
++            tags = ['network:{}'.format(config.ip_network)]
+             tags.extend(config.tags)
+             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
+         else:
+@@ -417,22 +370,17 @@ class SnmpCheck(AgentCheck):
+     def _check_with_config(self, config):
+         # Reset errors
+         instance = config.instance
+-        error = table_results = raw_results = None
++        error = results = None
+         try:
+-            if not (config.table_oids or config.raw_oids):
++            if not (config.all_oids or config.bulk_oids):
+                 sys_object_oid = self.fetch_sysobject_oid(config)
+                 profile = self._profile_for_sysobject_oid(sys_object_oid)
+                 config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+ 
+-            if config.table_oids:
+-                self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.table_oids))
+-                table_results, error = self.check_table(config, config.table_oids)
+-                self.report_table_metrics(config.metrics, table_results, config.tags)
+-
+-            if config.raw_oids:
+-                self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.raw_oids))
+-                raw_results, error = self.check_raw(config, config.raw_oids)
+-                self.report_raw_metrics(config.metrics, raw_results, config.tags)
++            if config.all_oids or config.bulk_oids:
++                self.log.debug('Querying device %s', config.ip_address)
++                results, error = self.fetch_results(config, config.all_oids, config.bulk_oids)
++                self.report_metrics(config.metrics, results, config.tags)
+         except CheckException as e:
+             error = str(e)
+             self.warning(error)
+@@ -447,43 +395,15 @@ class SnmpCheck(AgentCheck):
+             status = self.OK
+             if error:
+                 status = self.CRITICAL
+-                if raw_results or table_results:
++                if results:
+                     status = self.WARNING
+             self.service_check(self.SC_STATUS, status, tags=sc_tags, message=error)
+         return error
+ 
+-    def report_raw_metrics(self, metrics, results, tags):
++    def report_metrics(self, metrics, results, tags):
+         """
+-        For all the metrics that are specified as oid,
+-        the conf oid is going to exactly match or be a prefix of the oid sent back by the device
+-        Use the instance configuration to find the name to give to the metric
+-
+-        Submit the results to the aggregator.
+-        """
+-        for metric in metrics:
+-            if 'OID' in metric:
+-                forced_type = metric.get('forced_type')
+-                queried_oid = metric['OID'].lstrip('.')
+-                if queried_oid in results:
+-                    value = results[queried_oid]
+-                else:
+-                    for oid in results:
+-                        if oid.startswith(queried_oid):
+-                            value = results[oid]
+-                            break
+-                    else:
+-                        self.log.warning('No matching results found for oid %s', queried_oid)
+-                        continue
+-                name = metric.get('name', 'unnamed_metric')
+-                metric_tags = tags
+-                if metric.get('metric_tags'):
+-                    metric_tags = metric_tags + metric.get('metric_tags')
+-                self.submit_metric(name, value, forced_type, metric_tags)
+-
+-    def report_table_metrics(self, metrics, results, tags):
+-        """
+-        For each of the metrics specified as needing to be resolved with mib,
+-        gather the tags requested in the instance conf for each row.
++        For each of the metrics specified gather the tags requested in the
++        instance conf for each row.
+ 
+         Submit the results to the aggregator.
+         """
+@@ -497,11 +417,16 @@ class SnmpCheck(AgentCheck):
+                     if 'index' in metric_tag:
+                         index_based_tags.append((tag_key, metric_tag.get('index')))
+                     elif 'column' in metric_tag:
+-                        column_based_tags.append((tag_key, metric_tag.get('column')))
++                        column = metric_tag['column']
++                        if isinstance(column, dict):
++                            column = column['name']
++                        column_based_tags.append((tag_key, column))
+                     else:
+                         self.log.warning('No indication on what value to use for this tag')
+ 
+                 for value_to_collect in metric.get('symbols', []):
++                    if isinstance(value_to_collect, dict):
++                        value_to_collect = value_to_collect['name']
+                     if value_to_collect not in results:
+                         self.log.debug('Ignoring metric %s from table %s', value_to_collect, metric['table'])
+                         continue
+@@ -511,6 +436,8 @@ class SnmpCheck(AgentCheck):
+ 
+             elif 'symbol' in metric:
+                 name = metric['symbol']
++                if isinstance(name, dict):
++                    name = name['name']
+                 if name not in results:
+                     self.log.debug('Ignoring metric %s', name)
+                     continue
+@@ -521,10 +448,19 @@ class SnmpCheck(AgentCheck):
+                 val = result[0][1]
+                 metric_tags = tags + metric.get('metric_tags', [])
+                 self.submit_metric(name, val, forced_type, metric_tags)
++
+             elif 'OID' in metric:
+-                pass  # This one is already handled by the other batch of requests
+-            else:
+-                raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
++                name = metric['name']
++                if name not in results:
++                    self.log.debug('Ignoring metric %s', name)
++                    continue
++                result = list(results[name].items())
++                if len(result) > 1:
++                    self.log.warning('Several rows corresponding while the metric is supposed to be a scalar')
++                    # For backward compatibility reason, we publish the first value here.
++                val = result[0][1]
++                metric_tags = tags + metric.get('metric_tags', [])
++                self.submit_metric(name, val, forced_type, metric_tags)
+ 
+     def get_index_tags(self, index, results, index_tags, column_tags):
+         """
+@@ -542,7 +478,7 @@ class SnmpCheck(AgentCheck):
+         for idx_tag in index_tags:
+             tag_group = idx_tag[0]
+             try:
+-                tag_value = index[idx_tag[1] - 1].prettyPrint()
++                tag_value = index[idx_tag[1] - 1]
+             except IndexError:
+                 self.log.warning('Not enough indexes, skipping this tag')
+                 continue
+@@ -561,12 +497,11 @@ class SnmpCheck(AgentCheck):
+             tags.append('{}:{}'.format(tag_group, tag_value))
+         return tags
+ 
+-    def submit_metric(self, name, snmp_value, forced_type, tags=None):
++    def submit_metric(self, name, snmp_value, forced_type, tags):
+         """
+         Convert the values reported as pysnmp-Managed Objects to values and
+         report them to the aggregator.
+         """
+-        tags = [] if tags is None else tags
+         if reply_invalid(snmp_value):
+             # Metrics not present in the queried object
+             self.log.warning('No such Mib available: %s', name)
+@@ -575,16 +510,17 @@ class SnmpCheck(AgentCheck):
+         metric_name = self.normalize(name, prefix='snmp')
+ 
+         if forced_type:
+-            if forced_type.lower() == 'gauge':
++            forced_type = forced_type.lower()
++            if forced_type == 'gauge':
+                 value = int(snmp_value)
+                 self.gauge(metric_name, value, tags)
+-            elif forced_type.lower() == 'percent':
++            elif forced_type == 'percent':
+                 value = total_time_to_temporal_percent(int(snmp_value), scale=1)
+                 self.rate(metric_name, value, tags)
+-            elif forced_type.lower() == 'counter':
++            elif forced_type == 'counter':
+                 value = int(snmp_value)
+                 self.rate(metric_name, value, tags)
+-            elif forced_type.lower() == 'monotonic_count':
++            elif forced_type == 'monotonic_count':
+                 value = int(snmp_value)
+                 self.monotonic_count(metric_name, value, tags)
+             else:
+diff --git a/snmp/tests/common.py b/snmp/tests/common.py
+index d23a8be29..ba80cc653 100644
+--- a/snmp/tests/common.py
++++ b/snmp/tests/common.py
+@@ -23,7 +23,7 @@ PRIV_KEY = 'doggiePRIVkey'
+ 
+ CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
+ 
+-SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public', 'autofetch': True}
++SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
+ 
+ SNMP_V3_CONF = {
+     'name': 'snmp_v3_conf',
+diff --git a/snmp/tests/conftest.py b/snmp/tests/conftest.py
+index 4f87cb23e..c52f260ce 100644
+--- a/snmp/tests/conftest.py
++++ b/snmp/tests/conftest.py
+@@ -12,10 +12,7 @@ from datadog_checks.dev import TempDir, docker_run
+ 
+ from .common import COMPOSE_DIR, SCALAR_OBJECTS, SCALAR_OBJECTS_WITH_TAGS, TABULAR_OBJECTS, generate_instance_config
+ 
+-FILES = [
+-    "https://ddintegrations.blob.core.windows.net/snmp/f5.snmprec",
+-    "https://ddintegrations.blob.core.windows.net/snmp/3850.snmprec",
+-]
++FILES = []
+ 
+ 
+ @pytest.fixture(scope='session')
+diff --git a/snmp/tests/test_bench.py b/snmp/tests/test_bench.py
+index c776b53ae..80168c3bb 100644
+--- a/snmp/tests/test_bench.py
++++ b/snmp/tests/test_bench.py
+@@ -26,6 +26,7 @@ def test_tabular_no_enforce(benchmark):
+ 
+ def test_tabular_bulk(benchmark):
+     instance = generate_instance_config(BULK_TABULAR_OBJECTS)
++    instance['bulk_threshold'] = 5
+     check = create_check(instance)
+ 
+     benchmark(check.check, instance)
+diff --git a/snmp/tests/test_check.py b/snmp/tests/test_check.py
+index b1304c206..0382fb19d 100644
+--- a/snmp/tests/test_check.py
++++ b/snmp/tests/test_check.py
+@@ -8,7 +8,6 @@ import socket
+ import time
+ 
+ import mock
+-import pysnmp_mibs
+ import pytest
+ import yaml
+ 
+@@ -31,7 +30,7 @@ def test_command_generator():
+     config = check._config
+ 
+     # Test command generator MIB source
+-    mib_folders = config.snmp_engine.getMibBuilder().getMibSources()
++    mib_folders = config._snmp_engine.getMibBuilder().getMibSources()
+     full_path_mib_folders = [f.fullPath() for f in mib_folders]
+     assert check.ignore_nonincreasing_oid is False  # Default value
+ 
+@@ -616,23 +615,6 @@ def test_discovery(aggregator):
+     aggregator.assert_all_metrics_covered()
+ 
+ 
+-def test_fetch_mib():
+-    instance = common.generate_instance_config(common.DUMMY_MIB_OID)
+-    # Try a small MIB
+-    instance['metrics'][0]['MIB'] = 'A3COM-AUDL-R1-MIB'
+-    instance['enforce_mib_constraints'] = False
+-    # Remove it
+-    path = os.path.join(os.path.dirname(pysnmp_mibs.__file__), 'A3COM-AUDL-R1-MIB.py')
+-    # Make sure it doesn't exist
+-    if os.path.exists(path):
+-        os.unlink(path)
+-    pyc = '{}c'.format(path)
+-    if os.path.exists(pyc):
+-        os.unlink(pyc)
+-    SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
+-    assert os.path.exists(path)
+-
+-
+ def test_different_mibs(aggregator):
+     metrics = [
+         {
+diff --git a/snmp/tests/test_unit.py b/snmp/tests/test_unit.py
+index 13a17d45d..542c4e4d9 100644
+--- a/snmp/tests/test_unit.py
++++ b/snmp/tests/test_unit.py
+@@ -11,7 +11,7 @@ import pytest
+ from datadog_checks.base import ConfigurationError
+ from datadog_checks.dev import temp_dir
+ from datadog_checks.snmp import SnmpCheck
+-from datadog_checks.snmp.config import InstanceConfig
++from datadog_checks.snmp.config import InstanceConfig, OIDTrie
+ 
+ from . import common
+ 
+@@ -25,7 +25,7 @@ def test_parse_metrics(hlapi_mock):
+     # Unsupported metric
+     metrics = [{"foo": "bar"}]
+     config = InstanceConfig(
+-        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3"}]},
++        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]},
+         check.warning,
+         check.log,
+         [],
+@@ -38,10 +38,9 @@ def test_parse_metrics(hlapi_mock):
+         config.parse_metrics(metrics, check.warning, check.log)
+ 
+     # Simple OID
+-    metrics = [{"OID": "1.2.3"}]
+-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
+-    assert table == {}
+-    assert len(raw) == 1
++    metrics = [{"OID": "1.2.3", "name": "foo"}]
++    table, _ = config.parse_metrics(metrics, check.warning, check.log)
++    assert len(table) == 1
+     hlapi_mock.ObjectIdentity.assert_called_once_with("1.2.3")
+     hlapi_mock.reset_mock()
+ 
+@@ -52,8 +51,7 @@ def test_parse_metrics(hlapi_mock):
+ 
+     # MIB with symbol
+     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
+-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
+-    assert raw == []
++    table, _ = config.parse_metrics(metrics, check.warning, check.log)
+     assert len(table) == 1
+     hlapi_mock.ObjectIdentity.assert_called_once_with("foo_mib", "foo")
+     hlapi_mock.reset_mock()
+@@ -65,10 +63,9 @@ def test_parse_metrics(hlapi_mock):
+ 
+     # MIB with table and symbols
+     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
+-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
+-    assert raw == []
++    table, _ = config.parse_metrics(metrics, check.warning, check.log)
+     assert len(table) == 1
+-    assert len(list(table.values())[0]) == 2
++    assert len(table[0]) == 2
+     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
+     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
+     hlapi_mock.reset_mock()
+@@ -87,10 +84,9 @@ def test_parse_metrics(hlapi_mock):
+     metrics = [
+         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
+     ]
+-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
+-    assert raw == []
++    table, _ = config.parse_metrics(metrics, check.warning, check.log)
+     assert len(table) == 1
+-    assert len(list(table.values())[0]) == 2
++    assert len(table[0]) == 2
+     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
+     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
+     hlapi_mock.reset_mock()
+@@ -99,10 +95,9 @@ def test_parse_metrics(hlapi_mock):
+     metrics = [
+         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
+     ]
+-    table, raw = config.parse_metrics(metrics, check.warning, check.log)
+-    assert raw == []
++    table, _ = config.parse_metrics(metrics, check.warning, check.log)
+     assert len(table) == 1
+-    assert len(list(table.values())[0]) == 3
++    assert len(table[0]) == 3
+     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
+     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
+     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "baz")
+@@ -228,3 +223,14 @@ def test_cache_building(write_mock, read_mock):
+         check._running = False
+ 
+     write_mock.assert_called_once_with('', '["192.168.0.1"]')
++
++
++def test_trie():
++    trie = OIDTrie()
++    trie.set((1, 2), 'bar')
++    trie.set((1, 2, 3), 'foo')
++    assert trie.match((1,)) == ((1,), None)
++    assert trie.match((1, 2)) == ((1, 2), 'bar')
++    assert trie.match((1, 2, 3)) == ((1, 2, 3), 'foo')
++    assert trie.match((1, 2, 3, 4)) == ((1, 2, 3), 'foo')
++    assert trie.match((2, 3, 4)) == ((), None)
+diff --git a/snmp/transform.py b/snmp/transform.py
+new file mode 100644
+index 000000000..58665337b
+--- /dev/null
++++ b/snmp/transform.py
+@@ -0,0 +1,62 @@
++import sys
++
++import yaml
++from pysnmp import hlapi
++from pysnmp.smi import view
++
++
++def main(yaml_file):
++
++    snmp_engine = hlapi.SnmpEngine()
++    mib_builder = snmp_engine.getMibBuilder()
++
++    mib_view_controller = view.MibViewController(mib_builder)
++
++    output = []
++    with open(yaml_file) as f:
++        data = yaml.safe_load(f.read())
++
++        for metric in data['metrics']:
++            mib = metric['MIB']
++            mib_view_controller.mibBuilder.loadModule(mib)
++            if 'table' in metric:
++                table = metric['table']
++                node = mib_view_controller.mibBuilder.importSymbols(mib, table)[0]
++                value = ".".join([str(i) for i in node.getName()])
++                table = {'name': table, 'OID': value}
++                symbols = []
++                for symbol in metric['symbols']:
++                    node = mib_view_controller.mibBuilder.importSymbols(mib, symbol)[0]
++                    value = ".".join([str(i) for i in node.getName()])
++                    symbols.append({'name': symbol, 'OID': value})
++                tags = []
++                for tag in metric['metric_tags']:
++                    if 'column' in tag:
++                        tag_mib = tag.get('MIB', mib)
++                        key = tag['column']
++                        node = mib_view_controller.mibBuilder.importSymbols(tag_mib, key)[0]
++                        value = ".".join([str(i) for i in node.getName()])
++                        tag = tag.copy()
++                        tag['column'] = {'name': key, 'OID': value}
++                        tags.append(tag)
++                    else:
++                        tags.append(tag)
++                element = {'MIB': mib, 'table': table, 'symbols': symbols, 'metric_tags': tags}
++                if 'forced_type' in metric:
++                    element['forced_type'] = metric['forced_type']
++                output.append(element)
++
++            elif 'symbol' in metric:
++                key = metric['symbol']
++
++                node = mib_view_controller.mibBuilder.importSymbols(mib, key)[0]
++                value = ".".join([str(i) for i in node.getName()])
++                element = {'MIB': mib, 'symbol': {'name': key, 'OID': value}}
++                if 'forced_type' in metric:
++                    element['forced_type'] = metric['forced_type']
++                output.append(element)
++        print(yaml.dump({'metrics': output}))
++
++
++if __name__ == '__main__':
++    main(sys.argv[1])

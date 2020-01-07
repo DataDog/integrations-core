@@ -1,0 +1,263 @@
+metrics:
+- MIB: IF-MIB
+  forced_type: monotonic_count
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.2.1.2.2.1.2
+      name: ifDescr
+    tag: interface
+  symbols:
+  - OID: 1.3.6.1.2.1.2.2.1.14
+    name: ifInErrors
+  - OID: 1.3.6.1.2.1.2.2.1.13
+    name: ifInDiscards
+  - OID: 1.3.6.1.2.1.2.2.1.20
+    name: ifOutErrors
+  - OID: 1.3.6.1.2.1.2.2.1.19
+    name: ifOutDiscards
+  table:
+    OID: 1.3.6.1.2.1.2.2
+    name: ifTable
+- MIB: IF-MIB
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.2.1.2.2.1.2
+      name: ifDescr
+    tag: interface
+  symbols:
+  - OID: 1.3.6.1.2.1.2.2.1.7
+    name: ifAdminStatus
+  - OID: 1.3.6.1.2.1.2.2.1.8
+    name: ifOperStatus
+  table:
+    OID: 1.3.6.1.2.1.2.2
+    name: ifTable
+- MIB: IF-MIB
+  forced_type: monotonic_count
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.2.1.31.1.1.1.1
+      name: ifName
+    tag: interface
+  symbols:
+  - OID: 1.3.6.1.2.1.31.1.1.1.6
+    name: ifHCInOctets
+  - OID: 1.3.6.1.2.1.31.1.1.1.7
+    name: ifHCInUcastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.8
+    name: ifHCInMulticastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.9
+    name: ifHCInBroadcastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.10
+    name: ifHCOutOctets
+  - OID: 1.3.6.1.2.1.31.1.1.1.11
+    name: ifHCOutUcastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.12
+    name: ifHCOutMulticastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.13
+    name: ifHCOutBroadcastPkts
+  table:
+    OID: 1.3.6.1.2.1.31.1.1
+    name: ifXTable
+- MIB: IP-MIB
+  forced_type: monotonic_count
+  metric_tags:
+  - index: 1
+    tag: ipversion
+  symbols:
+  - OID: 1.3.6.1.2.1.4.31.1.1.4
+    name: ipSystemStatsHCInReceives
+  - OID: 1.3.6.1.2.1.4.31.1.1.6
+    name: ipSystemStatsHCInOctets
+  - OID: 1.3.6.1.2.1.4.31.1.1.7
+    name: ipSystemStatsInHdrErrors
+  - OID: 1.3.6.1.2.1.4.31.1.1.8
+    name: ipSystemStatsInNoRoutes
+  - OID: 1.3.6.1.2.1.4.31.1.1.9
+    name: ipSystemStatsInAddrErrors
+  - OID: 1.3.6.1.2.1.4.31.1.1.10
+    name: ipSystemStatsInUnknownProtos
+  - OID: 1.3.6.1.2.1.4.31.1.1.11
+    name: ipSystemStatsInTruncatedPkts
+  - OID: 1.3.6.1.2.1.4.31.1.1.13
+    name: ipSystemStatsHCInForwDatagrams
+  - OID: 1.3.6.1.2.1.4.31.1.1.14
+    name: ipSystemStatsReasmReqds
+  - OID: 1.3.6.1.2.1.4.31.1.1.15
+    name: ipSystemStatsReasmOKs
+  - OID: 1.3.6.1.2.1.4.31.1.1.16
+    name: ipSystemStatsReasmFails
+  - OID: 1.3.6.1.2.1.4.31.1.1.17
+    name: ipSystemStatsInDiscards
+  - OID: 1.3.6.1.2.1.4.31.1.1.19
+    name: ipSystemStatsHCInDelivers
+  - OID: 1.3.6.1.2.1.4.31.1.1.21
+    name: ipSystemStatsHCOutRequests
+  - OID: 1.3.6.1.2.1.4.31.1.1.22
+    name: ipSystemStatsOutNoRoutes
+  - OID: 1.3.6.1.2.1.4.31.1.1.24
+    name: ipSystemStatsHCOutForwDatagrams
+  - OID: 1.3.6.1.2.1.4.31.1.1.25
+    name: ipSystemStatsOutDiscards
+  - OID: 1.3.6.1.2.1.4.31.1.1.26
+    name: ipSystemStatsOutFragReqds
+  - OID: 1.3.6.1.2.1.4.31.1.1.27
+    name: ipSystemStatsOutFragOKs
+  - OID: 1.3.6.1.2.1.4.31.1.1.28
+    name: ipSystemStatsOutFragFails
+  - OID: 1.3.6.1.2.1.4.31.1.1.29
+    name: ipSystemStatsOutFragCreates
+  - OID: 1.3.6.1.2.1.4.31.1.1.31
+    name: ipSystemStatsHCOutTransmits
+  - OID: 1.3.6.1.2.1.4.31.1.1.33
+    name: ipSystemStatsHCOutOctets
+  - OID: 1.3.6.1.2.1.4.31.1.1.35
+    name: ipSystemStatsHCInMcastPkts
+  - OID: 1.3.6.1.2.1.4.31.1.1.37
+    name: ipSystemStatsHCInMcastOctets
+  - OID: 1.3.6.1.2.1.4.31.1.1.39
+    name: ipSystemStatsHCOutMcastPkts
+  - OID: 1.3.6.1.2.1.4.31.1.1.41
+    name: ipSystemStatsHCOutMcastOctets
+  - OID: 1.3.6.1.2.1.4.31.1.1.43
+    name: ipSystemStatsHCInBcastPkts
+  - OID: 1.3.6.1.2.1.4.31.1.1.45
+    name: ipSystemStatsHCOutBcastPkts
+  table:
+    OID: 1.3.6.1.2.1.4.31.1
+    name: ipSystemStatsTable
+- MIB: IP-MIB
+  forced_type: monotonic_count
+  metric_tags:
+  - index: 1
+    tag: ipversion
+  - index: 2
+    tag: interface
+  symbols:
+  - OID: 1.3.6.1.2.1.4.31.3.1.6
+    name: ipIfStatsHCInOctets
+  - OID: 1.3.6.1.2.1.4.31.3.1.7
+    name: ipIfStatsInHdrErrors
+  - OID: 1.3.6.1.2.1.4.31.3.1.8
+    name: ipIfStatsInNoRoutes
+  - OID: 1.3.6.1.2.1.4.31.3.1.9
+    name: ipIfStatsInAddrErrors
+  - OID: 1.3.6.1.2.1.4.31.3.1.10
+    name: ipIfStatsInUnknownProtos
+  - OID: 1.3.6.1.2.1.4.31.3.1.11
+    name: ipIfStatsInTruncatedPkts
+  - OID: 1.3.6.1.2.1.4.31.3.1.13
+    name: ipIfStatsHCInForwDatagrams
+  - OID: 1.3.6.1.2.1.4.31.3.1.14
+    name: ipIfStatsReasmReqds
+  - OID: 1.3.6.1.2.1.4.31.3.1.15
+    name: ipIfStatsReasmOKs
+  - OID: 1.3.6.1.2.1.4.31.3.1.16
+    name: ipIfStatsReasmFails
+  - OID: 1.3.6.1.2.1.4.31.3.1.17
+    name: ipIfStatsInDiscards
+  - OID: 1.3.6.1.2.1.4.31.3.1.19
+    name: ipIfStatsHCInDelivers
+  - OID: 1.3.6.1.2.1.4.31.3.1.21
+    name: ipIfStatsHCOutRequests
+  - OID: 1.3.6.1.2.1.4.31.3.1.24
+    name: ipIfStatsHCOutForwDatagrams
+  - OID: 1.3.6.1.2.1.4.31.3.1.25
+    name: ipIfStatsOutDiscards
+  - OID: 1.3.6.1.2.1.4.31.3.1.26
+    name: ipIfStatsOutFragReqds
+  - OID: 1.3.6.1.2.1.4.31.3.1.27
+    name: ipIfStatsOutFragOKs
+  - OID: 1.3.6.1.2.1.4.31.3.1.28
+    name: ipIfStatsOutFragFails
+  - OID: 1.3.6.1.2.1.4.31.3.1.29
+    name: ipIfStatsOutFragCreates
+  - OID: 1.3.6.1.2.1.4.31.3.1.31
+    name: ipIfStatsHCOutTransmits
+  - OID: 1.3.6.1.2.1.4.31.3.1.33
+    name: ipIfStatsHCOutOctets
+  - OID: 1.3.6.1.2.1.4.31.3.1.35
+    name: ipIfStatsHCInMcastPkts
+  - OID: 1.3.6.1.2.1.4.31.3.1.37
+    name: ipIfStatsHCInMcastOctets
+  - OID: 1.3.6.1.2.1.4.31.3.1.39
+    name: ipIfStatsHCOutMcastPkts
+  - OID: 1.3.6.1.2.1.4.31.3.1.41
+    name: ipIfStatsHCOutMcastOctets
+  - OID: 1.3.6.1.2.1.4.31.3.1.43
+    name: ipIfStatsHCInBcastPkts
+  - OID: 1.3.6.1.2.1.4.31.3.1.45
+    name: ipIfStatsHCOutBcastPkts
+  table:
+    OID: 1.3.6.1.2.1.4.31.3
+    name: ipIfStatsTable
+- MIB: TCP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.6.5
+    name: tcpActiveOpens
+- MIB: TCP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.6.6
+    name: tcpPassiveOpens
+- MIB: TCP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.6.7
+    name: tcpAttemptFails
+- MIB: TCP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.6.8
+    name: tcpEstabResets
+- MIB: TCP-MIB
+  symbol:
+    OID: 1.3.6.1.2.1.6.9
+    name: tcpCurrEstab
+- MIB: TCP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.6.17
+    name: tcpHCInSegs
+- MIB: TCP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.6.18
+    name: tcpHCOutSegs
+- MIB: TCP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.6.12
+    name: tcpRetransSegs
+- MIB: TCP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.6.14
+    name: tcpInErrs
+- MIB: TCP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.6.15
+    name: tcpOutRsts
+- MIB: UDP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.7.8
+    name: udpHCInDatagrams
+- MIB: UDP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.7.2
+    name: udpNoPorts
+- MIB: UDP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.7.3
+    name: udpInErrors
+- MIB: UDP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.7.9
+    name: udpHCOutDatagrams
+

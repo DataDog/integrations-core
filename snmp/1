@@ -1,0 +1,48 @@
+metrics:
+- MIB: MERAKI-CLOUD-CONTROLLER-MIB
+  forced_type: gauge
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.4.1.29671.1.1.4.1.2
+      name: devName
+    tag: device
+  - column:
+      OID: 1.3.6.1.4.1.29671.1.1.4.1.9
+      name: devProductCode
+    tag: product
+  - column:
+      OID: 1.3.6.1.4.1.29671.1.1.4.1.11
+      name: devNetworkName
+    tag: network
+  symbols:
+  - OID: 1.3.6.1.4.1.29671.1.1.4.1.3
+    name: devStatus
+  - OID: 1.3.6.1.4.1.29671.1.1.4.1.5
+    name: devClientCount
+  table:
+    OID: 1.3.6.1.4.1.29671.1.1.4
+    name: devTable
+- MIB: MERAKI-CLOUD-CONTROLLER-MIB
+  forced_type: gauge
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.4.1.29671.1.1.5.1.3
+      name: devInterfaceName
+    tag: interface
+  - column:
+      OID: 1.3.6.1.4.1.29671.1.1.5.1.2
+      name: devInterfaceIndex
+    tag: index
+  symbols:
+  - OID: 1.3.6.1.4.1.29671.1.1.5.1.4
+    name: devInterfaceSentPkts
+  - OID: 1.3.6.1.4.1.29671.1.1.5.1.5
+    name: devInterfaceRecvPkts
+  - OID: 1.3.6.1.4.1.29671.1.1.5.1.6
+    name: devInterfaceSentBytes
+  - OID: 1.3.6.1.4.1.29671.1.1.5.1.7
+    name: devInterfaceRecvBytes
+  table:
+    OID: 1.3.6.1.4.1.29671.1.1.5
+    name: devInterfaceTable
+

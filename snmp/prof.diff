@@ -1,0 +1,17 @@
+diff --git a/snmp/tests/test_check.py b/snmp/tests/test_check.py
+index e9f0420e0..1289d0e1c 100644
+--- a/snmp/tests/test_check.py
++++ b/snmp/tests/test_check.py
+@@ -976,7 +976,12 @@ def test_3850(aggregator):
+     init_config = {'profiles': {'cisco-3850': {'definition_file': path}}}
+     check = SnmpCheck('snmp', init_config, [instance])
+ 
++    #import cProfile
++    #pr = cProfile.Profile()
++    #pr.enable()
+     check.check(instance)
++    #pr.create_stats()
++    #pr.dump_stats("/tmp/1.prof")
+ 
+     tcp_counts = [
+         'tcpActiveOpens',
