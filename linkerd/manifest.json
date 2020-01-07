@@ -25,7 +25,7 @@
   "assets": {
     "monitors": {},
     "dashboards": {
-      "Linkerd - Overview": "assets/dashboards/-_overview.json"
+      "Linkerd - Overview": "assets/dashboards/overview.json"
     },
     "service_checks": "assets/service_checks.json"
   }
