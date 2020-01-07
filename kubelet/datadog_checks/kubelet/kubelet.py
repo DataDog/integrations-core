@@ -84,6 +84,7 @@ DEPRECATED_GAUGES = {
 NEW_1_14_GAUGES = {
     'kubelet_runtime_operations_total': 'kubelet.runtime.operations',
     'kubelet_runtime_operations_errors_total': 'kubelet.runtime.errors',
+    'kubelet_container_log_filesystem_used_bytes': 'kubelet.container.log_filesystem.used_bytes',
 }
 
 DEFAULT_HISTOGRAMS = {
