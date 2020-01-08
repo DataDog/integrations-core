@@ -265,7 +265,7 @@ class SnmpCheck(AgentCheck):
                         *missing_results,
                         lookupMib=enforce_constraints,
                         ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
-                        lexicographicMode=False
+                        lexicographicMode=False,
                     )
                     binds, error = self._consume_binds_iterator(binds_iterator, config)
                     all_binds.extend(binds)
