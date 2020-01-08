@@ -158,7 +158,7 @@ class SnmpCheck(AgentCheck):
                 try:
                     profile = self._profile_for_sysobject_oid(sys_object_oid)
                 except ConfigurationError:
-                    if not (host_config.table_oids or host_config.raw_oids):
+                    if not (host_config.all_oids or host_config.bulk_oids):
                         self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
