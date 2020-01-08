@@ -584,6 +584,7 @@ def test_profile_sys_object_prefix(aggregator):
 def test_profile_sys_object_unknown(aggregator, caplog):
     """If the fetched sysObjectID is not referenced by any profiles, check fails."""
     caplog.set_level(logging.WARNING)
+    initial_num_of_log_records = len(caplog.records)
 
     unknown_sysobjectid = '1.2.3.4.5'
     init_config = {
@@ -600,7 +601,7 @@ def test_profile_sys_object_unknown(aggregator, caplog):
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
     aggregator.all_metrics_asserted()
-    assert len(caplog.records) == 1
+    assert len(caplog.records) == initial_num_of_log_records + 1
 
     # Via network discovery...
 
@@ -618,7 +619,7 @@ def test_profile_sys_object_unknown(aggregator, caplog):
     time.sleep(2)  # Give discovery a chance to fail finding a matching profile.
     check.check(instance)
 
-    assert len(caplog.records) == 2
+    assert len(caplog.records) == initial_num_of_log_records + 2
     record = caplog.records[-1]
     assert "Host {} didn't match a profile".format(host) in record.message
 
