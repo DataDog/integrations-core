@@ -79,8 +79,6 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             for instance in instances:
                 self.get_scraper_config(instance)
 
-        self.check_initializations.append(self.set_up_http_handlers)
-
     def check(self, instance):
         # Get the configuration for this specific instance
         scraper_config = self.get_scraper_config(instance)
@@ -106,26 +104,24 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         # Otherwise, we create the scraper configuration
         config = self.create_scraper_configuration(instance)
 
+        # Set up the HTTP wrapper for this endpoint
+        self.http_handlers[endpoint] = RequestsWrapper(
+            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
+
+        headers = self.http_handlers[endpoint].options['headers']
+
+        bearer_token = config['_bearer_token']
+        if bearer_token is not None:
+            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
+
+        # TODO: Determine if we really need this
+        headers.setdefault('accept-encoding', 'gzip')
+
         # Add this configuration to the config_map
         self.config_map[endpoint] = config
 
         return config
-
-    def set_up_http_handlers(self):
-        for endpoint, config in self.config_map.items():
-            self.http_handlers[endpoint] = RequestsWrapper(
-                config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
-            )
-
-            headers = self.http_handlers[endpoint].options['headers']
-
-            # TODO: Determine if we really need this
-            if 'accept-encoding' not in headers:
-                headers['accept-encoding'] = 'gzip'
-
-            bearer_token = config['_bearer_token']
-            if bearer_token is not None:
-                headers['Authorization'] = 'Bearer {}'.format(bearer_token)
 
     def _finalize_tags_to_submit(self, _tags, metric_name, val, metric, custom_tags=None, hostname=None):
         """
