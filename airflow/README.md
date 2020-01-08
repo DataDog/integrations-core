@@ -158,7 +158,15 @@ Use the default configuration of your `airflow.d/conf.yaml` file to activate the
     ```yaml
       logs:
         - type: file
-          path: <PATH_TO_AIRFLOW>/logs/**/*.log
+          path: <PATH_TO_AIRFLOW>/logs/*/*.log
+          source: airflow
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+        - type: file
+          path: <PATH_TO_AIRFLOW>/logs/*/*/*.log
           source: airflow
           service: <SERVICE_NAME>
           log_processing_rules:
