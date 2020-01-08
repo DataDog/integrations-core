@@ -8,6 +8,7 @@ import pytest
 import requests
 
 from datadog_checks.vault import Vault
+from datadog_checks.vault.errors import ApiUnreachable
 
 from .common import INSTANCES, MockResponse
 from .utils import run_check
@@ -99,6 +100,18 @@ class TestVault:
         with mock.patch('requests.get', return_value=MockResponse('', status_code=500)):
             with pytest.raises(
                 Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url'])),
+            ):
+                run_check(c, extract_message=True)
+
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=global_tags, count=1)
+
+    def test_api_unreachable(self, aggregator, global_tags):
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+
+        with mock.patch('requests.get', return_value=MockResponse('', exception=requests.exceptions.RequestException)):
+            with pytest.raises(
+                ApiUnreachable, match=r'^Error accessing Vault endpoint `{}`: {}'.format(re.escape(instance['api_url'], ), requests.exceptions.RequestException),
             ):
                 run_check(c, extract_message=True)
 

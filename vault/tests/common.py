@@ -7,6 +7,8 @@ import requests
 
 from datadog_checks.dev import get_docker_hostname, get_here
 
+from datadog_checks.vault.errors import ApiUnreachable
+
 HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 HOST = get_docker_hostname()
@@ -26,9 +28,10 @@ HEALTH_ENDPOINT = '{}/sys/health'.format(INSTANCES['main']['api_url'])
 
 
 class MockResponse:
-    def __init__(self, j, status_code=200):
+    def __init__(self, j, status_code=200, exception=None):
         self.j = j
         self.status_code = status_code
+        self.exception = exception
 
     def json(self):
         return self.j
@@ -36,3 +39,7 @@ class MockResponse:
     def raise_for_status(self):
         if self.status_code >= 300:
             raise requests.exceptions.HTTPError
+    
+    def raise_for_api_unreachable(self):
+        if self.exception in (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
+            raise ApiUnreachable
