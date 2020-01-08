@@ -949,30 +949,30 @@ class TestLogger:
 
 
 class TestContexts:
-    def test_restore(self):
+    def test_creation(self):
         instance = {}
         init_config = {}
         http = RequestsWrapper(instance, init_config)
+        http.create_context('test1', instance, init_config)
+        http.create_context('test2', instance, init_config)
 
-        with http.context('test'):
-            http.log_requests = True
-            http.options['headers'] = {'foo': 'bar'}
+        assert isinstance(http.contexts['test1'], RequestsWrapper)
+        assert isinstance(http.contexts['test2'], RequestsWrapper)
+
+    def test_separation(self):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        http.create_context('test1', instance, init_config)
+        http.create_context('test2', instance, init_config)
+
+        http.contexts['test1'].options['headers'] = {'foo': 'bar'}
+        http.contexts['test2'].options['headers'] = {'foo': 'baz'}
 
         assert http.log_requests is False
         assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0'}
-
-    def test_persist(self):
-        instance = {}
-        init_config = {}
-        http = RequestsWrapper(instance, init_config)
-
-        with http.context('test'):
-            http.log_requests = True
-            http.options['headers'] = {'foo': 'bar'}
-
-        with http.context('test'):
-            assert http.log_requests is True
-            assert http.options['headers'] == {'foo': 'bar'}
+        assert http.contexts['test1'].options['headers'] == {'foo': 'bar'}
+        assert http.contexts['test2'].options['headers'] == {'foo': 'baz'}
 
 
 class TestAPI:

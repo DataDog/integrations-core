@@ -275,7 +275,7 @@ class RequestsWrapper(object):
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
         # For managing state if desired
-        self.contexts = {}
+        self.contexts = None
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -331,28 +331,11 @@ class RequestsWrapper(object):
         with disable_warnings_ctx(InsecureRequestWarning, disable=True):
             yield
 
-    @contextmanager
-    def context(self, ctx):
-        original_properties = {prop: getattr(self, prop) for prop in self.CONTEXT_PROPERTIES}
-        options = original_properties['options']
-        original_properties['options'] = options.copy()
-        headers = options['headers']
-        if headers:
-            options['headers'] = headers.copy()
+    def create_context(self, ctx, *args, **kwargs):
+        if self.contexts is None:
+            self.contexts = {}
 
-        if ctx in self.contexts:
-            current_context = self.contexts[ctx]
-            for prop in self.CONTEXT_PROPERTIES:
-                setattr(self, prop, current_context[prop])
-        else:
-            current_context = self.contexts.setdefault(ctx, {})
-
-        try:
-            yield self
-        finally:
-            for prop in self.CONTEXT_PROPERTIES:
-                current_context[prop] = getattr(self, prop)
-                setattr(self, prop, original_properties[prop])
+        self.contexts[ctx] = RequestsWrapper(*args, **kwargs)
 
     @property
     def session(self):
