@@ -289,7 +289,7 @@ class OpenMetricsScraperMixin(object):
 
         # Set up the HTTP wrapper for this endpoint
 
-        # TODO: Deprecate this behavior
+        # TODO: Deprecate this behavior in Agent 8
         if config['ssl_verify'] is False:
             config.setdefault('tls_ignore_warning', True)
 
