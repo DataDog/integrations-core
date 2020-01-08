@@ -120,9 +120,9 @@ def test_credentials_empty():
     assert creds.cert_pair() is None
     assert creds.headers("https://dummy") is None
 
-    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
-    scraper_config = scraper.create_scraper_configuration()
-    scraper_config['prometheus_url'] = "https://dummy"
+    instance = {'prometheus_url': 'https://dummy', 'namespace': 'foo'}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, [instance])
+    scraper_config = scraper.create_scraper_configuration(instance)
     creds.configure_scraper(scraper_config)
     assert scraper_config['ssl_ca_cert'] is None
     assert scraper_config['ssl_cert'] is None
@@ -138,9 +138,9 @@ def test_credentials_certificates():
     assert creds.cert_pair() == ("crt", "key")
     assert creds.headers("https://dummy") is None
 
-    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
-    scraper_config = scraper.create_scraper_configuration({})
-    scraper_config['prometheus_url'] = "https://dummy"
+    instance = {'prometheus_url': 'https://dummy', 'namespace': 'foo'}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, [instance])
+    scraper_config = scraper.create_scraper_configuration(instance)
     creds.configure_scraper(scraper_config)
     assert scraper_config['ssl_ca_cert'] == "ca_cert"
     assert scraper_config['ssl_cert'] == "crt"
@@ -159,9 +159,9 @@ def test_credentials_token_noverify():
     # Make sure we don't leak the token over http
     assert creds.headers("http://dummy") is None
 
-    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
-    scraper_config = scraper.create_scraper_configuration()
-    scraper_config['prometheus_url'] = 'https://dummy'
+    instance = {'prometheus_url': 'https://dummy', 'namespace': 'foo'}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, [instance])
+    scraper_config = scraper.create_scraper_configuration(instance)
     creds.configure_scraper(scraper_config)
     assert scraper_config['ssl_ca_cert'] is False
     assert scraper_config['ssl_cert'] is None
