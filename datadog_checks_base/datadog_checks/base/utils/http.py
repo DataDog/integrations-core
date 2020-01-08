@@ -91,6 +91,7 @@ KERBEROS_STRATEGIES = {}
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        'contexts',
         'ignore_tls_warning',
         'log_requests',
         'logger',
@@ -99,6 +100,9 @@ class RequestsWrapper(object):
         'persist_connections',
         'request_hooks',
     )
+
+    # Properties that are allowed to differ depending on the context
+    CONTEXT_PROPERTIES = tuple(prop for prop in __slots__ if prop not in ('contexts', 'logger', 'request_hooks'))
 
     def __init__(self, instance, init_config, remapper=None, logger=None):
         self.logger = logger or LOGGER
@@ -270,6 +274,9 @@ class RequestsWrapper(object):
         if config['kerberos_cache']:
             self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
 
+        # For managing state if desired
+        self.contexts = {}
+
     def get(self, url, **options):
         return self._request('get', url, options)
 
@@ -323,6 +330,29 @@ class RequestsWrapper(object):
     def handle_tls_warning(self):
         with disable_warnings_ctx(InsecureRequestWarning, disable=True):
             yield
+
+    @contextmanager
+    def context(self, ctx):
+        original_properties = {prop: getattr(self, prop) for prop in self.CONTEXT_PROPERTIES}
+        options = original_properties['options']
+        original_properties['options'] = options.copy()
+        headers = options['headers']
+        if headers:
+            options['headers'] = headers.copy()
+
+        if ctx in self.contexts:
+            current_context = self.contexts[ctx]
+            for prop in self.CONTEXT_PROPERTIES:
+                setattr(self, prop, current_context[prop])
+        else:
+            current_context = self.contexts.setdefault(ctx, {})
+
+        try:
+            yield self
+        finally:
+            for prop in self.CONTEXT_PROPERTIES:
+                current_context[prop] = getattr(self, prop)
+                setattr(self, prop, original_properties[prop])
 
     @property
     def session(self):

@@ -948,6 +948,33 @@ class TestLogger:
             assert message != expected_message
 
 
+class TestContexts:
+    def test_restore(self):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        with http.context('test'):
+            http.log_requests = True
+            http.options['headers'] = {'foo': 'bar'}
+
+        assert http.log_requests is False
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0'}
+
+    def test_persist(self):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        with http.context('test'):
+            http.log_requests = True
+            http.options['headers'] = {'foo': 'bar'}
+
+        with http.context('test'):
+            assert http.log_requests is True
+            assert http.options['headers'] == {'foo': 'bar'}
+
+
 class TestAPI:
     def test_get(self):
         http = RequestsWrapper({}, {})
