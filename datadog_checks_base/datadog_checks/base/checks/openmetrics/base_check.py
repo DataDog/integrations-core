@@ -66,7 +66,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             instances = None
 
         if instances is not None:
-            for instance in instances:
+            for instance in instances[:1]:
                 self.get_scraper_config(instance)
 
     def check(self, instance):
