@@ -14,6 +14,7 @@ from six import PY3, iteritems, itervalues, string_types
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_string
+from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 
 if PY3:
@@ -285,6 +286,25 @@ class OpenMetricsScraperMixin(object):
         config['_default_metric_transformers'] = {}
         if config['metadata_metric_name'] and config['metadata_label_map']:
             config['_default_metric_transformers'][config['metadata_metric_name']] = self.transform_metadata
+
+        # Set up the HTTP wrapper for this endpoint
+
+        # TODO: Deprecate this behavior
+        if config['ssl_verify'] is False:
+            config.setdefault('tls_ignore_warning', True)
+
+        http_handler = self.http_handlers[endpoint] = RequestsWrapper(
+            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
+
+        headers = http_handler.options['headers']
+
+        bearer_token = config['_bearer_token']
+        if bearer_token is not None:
+            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
+
+        # TODO: Determine if we really need this
+        headers.setdefault('accept-encoding', 'gzip')
 
         return config
 

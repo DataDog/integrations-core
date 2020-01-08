@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from ...errors import CheckException
-from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
 
@@ -103,20 +102,6 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         # Otherwise, we create the scraper configuration
         config = self.create_scraper_configuration(instance)
-
-        # Set up the HTTP wrapper for this endpoint
-        self.http_handlers[endpoint] = RequestsWrapper(
-            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
-        )
-
-        headers = self.http_handlers[endpoint].options['headers']
-
-        bearer_token = config['_bearer_token']
-        if bearer_token is not None:
-            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
-
-        # TODO: Determine if we really need this
-        headers.setdefault('accept-encoding', 'gzip')
 
         # Add this configuration to the config_map
         self.config_map[endpoint] = config
