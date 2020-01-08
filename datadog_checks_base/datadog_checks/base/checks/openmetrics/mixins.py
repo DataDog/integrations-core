@@ -10,12 +10,10 @@ from os.path import isfile
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, itervalues, string_types
-from urllib3.exceptions import InsecureRequestWarning
 
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_string
-from ...utils.warnings_util import disable_warnings_ctx
 from .. import AgentCheck
 
 if PY3:
@@ -556,53 +554,12 @@ class OpenMetricsScraperMixin(object):
             raise
 
     def send_request(self, endpoint, scraper_config, headers=None):
-        # Determine the headers
-        if headers is None:
-            headers = {}
-        if 'accept-encoding' not in headers:
-            headers['accept-encoding'] = 'gzip'
-        headers.update(scraper_config['extra_headers'])
+        # We set this up at the first run, but check it again just
+        # in case a subclass alters the expected order of calls.
+        if not self.http_handlers:
+            self.set_up_http_handlers()
 
-        # Add the bearer token to headers
-        bearer_token = scraper_config['_bearer_token']
-        if bearer_token is not None:
-            auth_header = {'Authorization': 'Bearer {}'.format(bearer_token)}
-            headers.update(auth_header)
-
-        # Determine the SSL verification settings
-        cert = None
-        if isinstance(scraper_config['ssl_cert'], string_types):
-            if isinstance(scraper_config['ssl_private_key'], string_types):
-                cert = (scraper_config['ssl_cert'], scraper_config['ssl_private_key'])
-            else:
-                cert = scraper_config['ssl_cert']
-
-        verify = scraper_config['ssl_verify']
-        # TODO: deprecate use as `ssl_verify` boolean
-        if scraper_config['ssl_ca_cert'] is False:
-            verify = False
-
-        disable_insecure_warnings = False
-        if isinstance(scraper_config['ssl_ca_cert'], string_types):
-            verify = scraper_config['ssl_ca_cert']
-        elif verify is False:
-            disable_insecure_warnings = True
-
-        # Determine the authentication settings
-        username = scraper_config['username']
-        password = scraper_config['password']
-        auth = (username, password) if username is not None and password is not None else None
-
-        with disable_warnings_ctx(InsecureRequestWarning, disable=disable_insecure_warnings):
-            return requests.get(
-                endpoint,
-                headers=headers,
-                stream=True,
-                timeout=scraper_config['prometheus_timeout'],
-                cert=cert,
-                verify=verify,
-                auth=auth,
-            )
+        return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, stream=True)
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """

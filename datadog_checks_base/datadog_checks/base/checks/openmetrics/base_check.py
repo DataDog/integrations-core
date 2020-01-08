@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from ...errors import CheckException
+from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
 
@@ -34,6 +35,14 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_verify': {'name': 'tls_verify'},
+        'ssl_cert': {'name': 'tls_cert'},
+        'ssl_private_key': {'name': 'tls_private_key'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
+        'prometheus_timeout': {'name': 'timeout'},
+    }
+
     def __init__(self, *args, **kwargs):
         args = list(args)
         default_instances = kwargs.pop('default_instances', None) or {}
@@ -49,6 +58,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
         self.config_map = {}
+        self.http_handlers = {}
         self.default_instances = default_instances
         self.default_namespace = default_namespace
 
@@ -68,6 +78,8 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         if instances is not None:
             for instance in instances:
                 self.get_scraper_config(instance)
+
+        self.check_initializations.append(self.set_up_http_handlers)
 
     def check(self, instance):
         # Get the configuration for this specific instance
@@ -98,6 +110,22 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.config_map[endpoint] = config
 
         return config
+
+    def set_up_http_handlers(self):
+        for endpoint, config in self.config_map.items():
+            self.http_handlers[endpoint] = RequestsWrapper(
+                config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+            )
+
+            headers = self.http_handlers[endpoint].options['headers']
+
+            # TODO: Determine if we really need this
+            if 'accept-encoding' not in headers:
+                headers['accept-encoding'] = 'gzip'
+
+            bearer_token = config['_bearer_token']
+            if bearer_token is not None:
+                headers['Authorization'] = 'Bearer {}'.format(bearer_token)
 
     def _finalize_tags_to_submit(self, _tags, metric_name, val, metric, custom_tags=None, hostname=None):
         """
