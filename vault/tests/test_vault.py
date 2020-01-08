@@ -8,7 +8,6 @@ import pytest
 import requests
 
 from datadog_checks.vault import Vault
-from datadog_checks.vault.errors import ApiUnreachable
 
 from .common import INSTANCES, MockResponse
 from .utils import run_check
@@ -105,18 +104,14 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=global_tags, count=1)
 
-    def test_api_unreachable(self, aggregator, global_tags):
+    def test_api_unreachable(self):
         instance = INSTANCES['main']
-        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with mock.patch('requests.get', side_effect=requests.exceptions.RequestException):
-            with pytest.raises(
-                ApiUnreachable,
-                match=r'^Error accessing Vault endpoint `{}`'.format(re.escape(instance['api_url']), requests.exceptions.RequestException),
-            ):
-                run_check(c, extract_message=True)
+        with pytest.raises(requests.exceptions.RequestException):
+            c = Vault(Vault.CHECK_NAME, {}, [instance])
+            c.access_api(instance['api_url'], ignore_status_codes=None)
 
-        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=global_tags, count=1)
+        assert c.access_api.msg is not None
 
     def test_service_check_unsealed_ok(self, aggregator):
         instance = INSTANCES['main']
