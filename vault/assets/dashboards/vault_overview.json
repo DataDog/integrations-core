@@ -21,7 +21,7 @@
     "id": 939379,
     "isIntegration": false,
     "isShared": false,
-    "modified": "2020-01-08T17:54:35.219480+00:00",
+    "modified": "2020-01-08T19:42:53.971775+00:00",
     "new_id": "dn8-p7u-4eb",
     "originalHeight": 80,
     "originalWidth": "calc(100% - 32px)",
@@ -34,6 +34,7 @@
             "id": 0,
             "isShared": false,
             "margin": "",
+            "scaleFactor": 1,
             "sizing": "zoom",
             "title": false,
             "type": "image",
@@ -46,19 +47,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 17,
+            "id": 1,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "avg:vault.vault.core.handle.request.sum{*}/avg:vault.vault.core.handle.request.count{*}",
                         "style": {
                             "palette": "orange",
@@ -68,14 +66,12 @@
                         "type": "line"
                     }
                 ],
-                "title_align": "center",
-                "title_size": "16",
                 "viz": "timeseries"
             },
             "time": {},
             "title": true,
             "title_align": "center",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Average Request Latency",
             "type": "timeseries",
             "width": 43,
@@ -86,19 +82,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 17,
+            "id": 2,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "max:vault.vault.runtime.alloc.bytes{*}",
                         "style": {
                             "palette": "dog_classic",
@@ -117,14 +110,12 @@
                         "type": "line"
                     }
                 ],
-                "title_align": "left",
-                "title_size": "16",
                 "viz": "timeseries"
             },
             "time": {},
             "title": true,
-            "title_align": "center",
-            "title_size": 16,
+            "title_align": "left",
+            "title_size": "16",
             "title_text": "Allocated Memory",
             "type": "timeseries",
             "width": 42,
@@ -135,19 +126,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 17,
+            "id": 3,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "diff(max:vault.vault.runtime.total.gc.pause_ns{*} by {host})",
                         "style": {
                             "palette": "dog_classic",
@@ -157,14 +145,12 @@
                         "type": "line"
                     }
                 ],
-                "title_align": "left",
-                "title_size": "16",
                 "viz": "timeseries"
             },
             "time": {},
             "title": true,
-            "title_align": "center",
-            "title_size": 16,
+            "title_align": "left",
+            "title_size": "16",
             "title_text": "GC Time",
             "type": "timeseries",
             "width": 43,
@@ -175,19 +161,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 17,
+            "id": 4,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "max:vault.vault.core.handle.login_request.sum{*}, max:vault.vault.core.handle.login_request.count{*}, max:vault.vault.core.handle.login_request.sum{*}/max:vault.vault.core.handle.login_request.count{*}",
                         "style": {
                             "palette": "orange",
@@ -197,14 +180,12 @@
                         "type": "line"
                     }
                 ],
-                "title_align": "center",
-                "title_size": "16",
                 "viz": "timeseries"
             },
             "time": {},
             "title": true,
             "title_align": "center",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Average Login Latency",
             "type": "timeseries",
             "width": 42,
@@ -215,19 +196,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 17,
+            "id": 5,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "per_second(max:vault.vault.core.handle.login_request.count{*})",
                         "style": {
                             "palette": "dog_classic",
@@ -237,14 +215,12 @@
                         "type": "line"
                     }
                 ],
-                "title_align": "center",
-                "title_size": "16",
                 "viz": "timeseries"
             },
             "time": {},
             "title": true,
             "title_align": "center",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Logins Per Second",
             "type": "timeseries",
             "width": 42,
@@ -255,19 +231,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 17,
+            "id": 6,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "per_second(max:vault.vault.core.handle.request.count{*} by {instance})",
                         "style": {
                             "palette": "dog_classic",
@@ -277,14 +250,12 @@
                         "type": "line"
                     }
                 ],
-                "title_align": "center",
-                "title_size": "16",
                 "viz": "timeseries"
             },
             "time": {},
             "title": true,
             "title_align": "center",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Request Handled Per Second",
             "type": "timeseries",
             "width": 43,
@@ -295,13 +266,12 @@
             "add_timeframe": true,
             "auto_refresh": false,
             "bgcolor": "gray",
-            "board_id": "dn8-p7u-4eb",
             "font_size": "24",
             "height": 7,
             "html": "Runtime",
+            "id": 7,
             "isShared": false,
             "refresh_every": 30000,
-            "scaleFactor": 1,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -315,24 +285,19 @@
         {
             "add_timeframe": true,
             "auto_refresh": false,
-            "background_color": "gray",
             "bgcolor": "gray",
-            "content": "Runtime",
             "font_size": "24",
             "height": 6,
             "html": "Performance",
+            "id": 8,
             "isShared": false,
-            "legend": false,
-            "legend_size": "0",
             "refresh_every": 30000,
-            "scaleFactor": 1,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
             "tick_pos": "50%",
             "title": false,
             "type": "note",
-            "viz": "note",
             "width": 86,
             "x": -9,
             "y": 30
@@ -340,47 +305,37 @@
         {
             "add_timeframe": true,
             "auto_refresh": false,
-            "background_color": "gray",
             "bgcolor": "gray",
-            "content": "Runtime",
             "font_size": "24",
             "height": 7,
-            "html": "Token",
+            "html": "Tokens",
+            "id": 9,
             "isShared": false,
-            "legend": false,
-            "legend_size": "0",
             "refresh_every": 30000,
-            "scaleFactor": 1,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
             "tick_pos": "50%",
             "title": false,
             "type": "note",
-            "viz": "note",
             "width": 63,
             "x": 88,
             "y": 1
         },
         {
             "add_timeframe": true,
-            "board_id": "dn8-p7u-4eb",
             "error": null,
-            "generated_title": "Timeseries",
             "height": 17,
+            "id": 10,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "avg:vault.vault.core.check.token.sum{*}/avg:vault.vault.core.check.token.count{*}",
                         "style": {
                             "palette": "dog_classic",
@@ -394,8 +349,8 @@
             },
             "time": {},
             "title": true,
-            "title_align": "left",
-            "title_size": 16,
+            "title_align": "center",
+            "title_size": "16",
             "title_text": "Average Time of Token Checks",
             "type": "timeseries",
             "width": 63,
@@ -404,23 +359,18 @@
         },
         {
             "add_timeframe": true,
-            "board_id": "dn8-p7u-4eb",
             "error": null,
-            "generated_title": "Timeseries",
             "height": 17,
+            "id": 11,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "avg:vault.vault.token.lookup.count{*}",
                         "style": {
                             "palette": "dog_classic",
@@ -434,9 +384,9 @@
             },
             "time": {},
             "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Token Lookups",
+            "title_align": "center",
+            "title_size": "16",
+            "title_text": "Token Lookups Count",
             "type": "timeseries",
             "width": 47,
             "x": 104,
@@ -445,30 +395,20 @@
         {
             "add_timeframe": true,
             "autoscale": true,
-            "board_id": "dn8-p7u-4eb",
             "error": null,
-            "generated_title": "Timeseries",
             "height": 7,
+            "id": 12,
             "isShared": false,
-            "legend": false,
-            "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
                 "autoscale": true,
+                "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [],
-                        "q": "sum:vault.vault.expire.renew_token.count{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": null
+                        "q": "sum:vault.vault.expire.renew_token.count{*}"
                     }
                 ],
                 "viz": "query_value"
@@ -476,7 +416,7 @@
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Total token renewals",
             "type": "query_value",
             "width": 14,
@@ -487,19 +427,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 16,
+            "id": 13,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "sum:vault.vault.expire.num_leases{*}",
                         "style": {
                             "palette": "dog_classic",
@@ -513,8 +450,8 @@
             },
             "time": {},
             "title": true,
-            "title_align": "left",
-            "title_size": 16,
+            "title_align": "center",
+            "title_size": "16",
             "title_text": "Number of leases",
             "type": "timeseries",
             "width": 63,
@@ -524,24 +461,19 @@
         {
             "add_timeframe": true,
             "auto_refresh": false,
-            "background_color": "gray",
             "bgcolor": "gray",
-            "content": "Token",
             "font_size": "24",
             "height": 7,
             "html": "Leases",
+            "id": 14,
             "isShared": false,
-            "legend": false,
-            "legend_size": "0",
             "refresh_every": 30000,
-            "scaleFactor": 1,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
             "tick_pos": "50%",
             "title": false,
             "type": "note",
-            "viz": "note",
             "width": 63,
             "x": 88,
             "y": 50
@@ -551,9 +483,8 @@
             "autoscale": true,
             "error": null,
             "height": 7,
+            "id": 15,
             "isShared": false,
-            "legend": false,
-            "legend_size": "0",
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
@@ -563,18 +494,15 @@
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "preTemplateQuery": "avg:vault.vault.token.create.count{*}",
                         "q": "avg:vault.vault.token.create.count{*}"
                     }
                 ],
-                "title_align": "left",
-                "title_size": "16",
                 "viz": "query_value"
             },
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Tokens Created",
             "type": "query_value",
             "width": 14,
@@ -584,24 +512,19 @@
         {
             "add_timeframe": true,
             "auto_refresh": false,
-            "background_color": "gray",
             "bgcolor": "gray",
-            "content": "Performance",
             "font_size": "24",
             "height": 6,
             "html": "Storage Backend",
+            "id": 16,
             "isShared": false,
-            "legend": false,
-            "legend_size": "0",
             "refresh_every": 30000,
-            "scaleFactor": 1,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
             "tick_pos": "50%",
             "title": false,
             "type": "note",
-            "viz": "note",
             "width": 86,
             "x": -8,
             "y": 78
@@ -610,13 +533,12 @@
             "add_timeframe": true,
             "auto_refresh": false,
             "bgcolor": "yellow",
-            "board_id": "dn8-p7u-4eb",
             "font_size": "14",
-            "height": 24,
+            "height": 11,
             "html": "Default storage backend on this dashboard is Consul. Vault supports the following [storage backend providers](https://www.vaultproject.io/docs/internals/telemetry.html#storage-backend-metrics)",
+            "id": 17,
             "isShared": false,
             "refresh_every": 30000,
-            "scaleFactor": 1,
             "text_align": "left",
             "tick": true,
             "tick_edge": "left",
@@ -629,23 +551,18 @@
         },
         {
             "add_timeframe": true,
-            "board_id": "dn8-p7u-4eb",
             "error": null,
-            "generated_title": "Timeseries",
             "height": 13,
+            "id": 18,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "avg:vault.vault.consul.get.sum{*}",
                         "style": {
                             "palette": "dog_classic",
@@ -659,8 +576,8 @@
             },
             "time": {},
             "title": true,
-            "title_align": "left",
-            "title_size": 16,
+            "title_align": "center",
+            "title_size": "16",
             "title_text": "Consul GET",
             "type": "timeseries",
             "width": 43,
@@ -671,19 +588,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 13,
+            "id": 19,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "avg:vault.vault.consul.put.sum{*}",
                         "style": {
                             "palette": "dog_classic",
@@ -693,14 +607,12 @@
                         "type": "line"
                     }
                 ],
-                "title_align": "left",
-                "title_size": "16",
                 "viz": "timeseries"
             },
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Consul PUT",
             "type": "timeseries",
             "width": 42,
@@ -711,19 +623,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 13,
+            "id": 20,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "avg:vault.vault.consul.list.sum{*}",
                         "style": {
                             "palette": "dog_classic",
@@ -733,14 +642,12 @@
                         "type": "line"
                     }
                 ],
-                "title_align": "left",
-                "title_size": "16",
                 "viz": "timeseries"
             },
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Consul LIST",
             "type": "timeseries",
             "width": 43,
@@ -751,19 +658,16 @@
             "add_timeframe": true,
             "error": null,
             "height": 13,
+            "id": 21,
             "isShared": false,
             "legend": false,
             "legend_size": "0",
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
             "tile_def": {
-                "autoscale": true,
                 "requests": [
                     {
-                        "aggregator": "avg",
-                        "conditional_formats": [],
                         "q": "avg:vault.vault.consul.delete.sum{*}",
                         "style": {
                             "palette": "dog_classic",
@@ -773,14 +677,12 @@
                         "type": "line"
                     }
                 ],
-                "title_align": "left",
-                "title_size": "16",
                 "viz": "timeseries"
             },
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Consul DELETE",
             "type": "timeseries",
             "width": 42,
@@ -789,15 +691,17 @@
         },
         {
             "add_timeframe": true,
-            "board_id": "dn8-p7u-4eb",
             "check": "vault.prometheus.health",
             "error": null,
             "group": null,
             "group_by": [],
             "grouping": "cluster",
             "height": 7,
+            "id": 22,
             "isShared": false,
-            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
             "tags": [
                 "*"
             ],
@@ -806,7 +710,7 @@
             "time": {},
             "title": true,
             "title_align": "center",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Check Health",
             "type": "check_status",
             "width": 14,
