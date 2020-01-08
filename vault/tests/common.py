@@ -38,7 +38,3 @@ class MockResponse:
     def raise_for_status(self):
         if self.status_code >= 300:
             raise requests.exceptions.HTTPError
-
-    def raise_for_api_unreachable(self):
-        if self.exception in (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
-            raise ApiUnreachable
