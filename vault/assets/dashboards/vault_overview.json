@@ -764,7 +764,7 @@
                     {
                         "aggregator": "avg",
                         "conditional_formats": [],
-                        "q": "avg:vault.vault.consul.list.sum{*}",
+                        "q": "avg:vault.vault.consul.delete.sum{*}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
