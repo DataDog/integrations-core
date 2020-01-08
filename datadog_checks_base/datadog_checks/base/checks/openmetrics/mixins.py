@@ -574,12 +574,10 @@ class OpenMetricsScraperMixin(object):
             raise
 
     def send_request(self, endpoint, scraper_config, headers=None):
-        # We set this up at the first run, but check it again just
-        # in case a subclass alters the expected order of calls.
-        if not self.http_handlers:
-            self.set_up_http_handlers()
-
-        return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, stream=True)
+        if headers:
+            return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, stream=True)
+        else:
+            return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, headers=headers, stream=True)
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """

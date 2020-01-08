@@ -226,10 +226,7 @@ class Vault(OpenMetricsBaseCheck):
         methods = {method: getattr(self, '{}_v{}'.format(method, api_version)) for method in self.API_METHODS}
         self._api = Api(**methods)
 
-        if self._client_token_path:
-            self.renew_client_token()
-
-        if self._client_token:
+        if self._client_token_path or self._client_token:
             instance = self.instance.copy()
             instance['prometheus_url'] = '{}/sys/metrics?format=prometheus'.format(self._api_url)
 
@@ -240,17 +237,25 @@ class Vault(OpenMetricsBaseCheck):
             instance['ssl_ca_cert'] = instance.pop('tls_ca_cert', None)
 
             self._scraper_config = self.create_scraper_configuration(instance)
-            self.set_client_token(self._client_token)
 
             # Global static tags
             self._scraper_config['custom_tags'] = self._tags
 
+            # https://www.vaultproject.io/api/overview#the-x-vault-request-header
+            self._set_header(self.http_handlers[instance['prometheus_url']], 'X-Vault-Request', 'true')
+
+            if self._client_token_path:
+                self.renew_client_token()
+            else:
+                self.set_client_token(self._client_token)
+
         # https://www.vaultproject.io/api/overview#the-x-vault-request-header
-        self.http.options['headers']['X-Vault-Request'] = 'true'
+        self._set_header(self.http, 'X-Vault-Request', 'true')
 
     def set_client_token(self, client_token):
         self._client_token = client_token
-        self.http.options['headers']['X-Vault-Token'] = client_token
+        self._set_header(self.http, 'X-Vault-Token', client_token)
+        self._set_header(self.http_handlers[self._scraper_config['prometheus_url']], 'X-Vault-Token', client_token)
 
     def renew_client_token(self):
         with open(self._client_token_path, 'rb') as f:
@@ -263,6 +268,9 @@ class Vault(OpenMetricsBaseCheck):
             headers['X-Vault-Token'] = self._client_token
 
         return super(Vault, self).poll(scraper_config, headers=headers)
+
+    def _set_header(self, http_wrapper, header, value):
+        http_wrapper.options['headers'][header] = value
 
     def get_scraper_config(self, instance):
         # This validation is called during `__init__` but we don't need it
