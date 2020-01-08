@@ -196,16 +196,16 @@ class Vault(OpenMetricsBaseCheck):
                 self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
                 raise ApiUnreachable(msg)
             json_data = response.json()
-        except JSONDecodeError as je:
-            msg = 'The Vault endpoint `{}` returned invalid json data: {}.'.format(url, je)
+        except JSONDecodeError as e:
+            msg = 'The Vault endpoint `{}` returned invalid json data: {}.'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
         except requests.exceptions.Timeout:
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'][0])
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
-        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError) as re:
-            msg = 'Error accessing Vault endpoint `{}`: {}'.format(url, re)
+        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError) as e:
+            msg = 'Error accessing Vault endpoint `{}`: {}'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
 

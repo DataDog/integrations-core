@@ -27,10 +27,9 @@ HEALTH_ENDPOINT = '{}/sys/health'.format(INSTANCES['main']['api_url'])
 
 
 class MockResponse:
-    def __init__(self, j, status_code=200, exception=None):
+    def __init__(self, j, status_code=200):
         self.j = j
         self.status_code = status_code
-        self.exception = exception
 
     def json(self):
         return self.j
