@@ -58,7 +58,7 @@ def ddev(ctx, core, extras, agent, here, color, quiet, debug):
     set_root(root)
     set_color(config['color'])
 
-    if debug:
+    if debug and not quiet:
         set_debug()
 
     if not ctx.invoked_subcommand:

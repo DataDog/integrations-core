@@ -68,13 +68,15 @@ def echo_waiting(text, nl=True, err=False, indent=None):
 
 
 def echo_debug(text, nl=True, cr=False, err=False, indent=None):
-    if DEBUG_OUTPUT:
-        text = 'DEBUG: %s' % text
-        if indent:
-            text = indent_text(text, indent)
-        if cr:
-            text = '\n%s' % text
-        click.secho(text, bold=True, nl=nl, err=err, color=DISPLAY_COLOR)
+    if not DEBUG_OUTPUT:
+        return
+
+    text = 'DEBUG: %s' % text
+    if indent:
+        text = indent_text(text, indent)
+    if cr:
+        text = '\n%s' % text
+    click.secho(text, bold=True, nl=nl, err=err, color=DISPLAY_COLOR)
 
 
 def abort(text=None, code=1, out=False):
