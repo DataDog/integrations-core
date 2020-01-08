@@ -41,7 +41,6 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         'ssl_private_key': {'name': 'tls_private_key'},
         'ssl_ca_cert': {'name': 'tls_ca_cert'},
         'prometheus_timeout': {'name': 'timeout'},
-        'tls_verify': {'name': 'tls_ignore_warning'},
     }
 
     def __init__(self, *args, **kwargs):
