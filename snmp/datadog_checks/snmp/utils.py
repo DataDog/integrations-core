@@ -1,4 +1,5 @@
 import os
+
 import yaml
 
 from .compat import get_config
