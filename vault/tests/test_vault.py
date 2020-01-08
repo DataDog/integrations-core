@@ -111,7 +111,10 @@ class TestVault:
 
         with mock.patch('requests.get', return_value=MockResponse('', exception=requests.exceptions.RequestException)):
             with pytest.raises(
-                ApiUnreachable, match=r'^Error accessing Vault endpoint `{}`: {}'.format(re.escape(instance['api_url'], ), requests.exceptions.RequestException),
+                ApiUnreachable,
+                match=r'^Error accessing Vault endpoint `{}`: {}'.format(
+                    re.escape(instance['api_url'],), requests.exceptions.RequestException
+                ),
             ):
                 run_check(c, extract_message=True)
 

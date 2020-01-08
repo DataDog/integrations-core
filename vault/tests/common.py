@@ -6,7 +6,6 @@ import os
 import requests
 
 from datadog_checks.dev import get_docker_hostname, get_here
-
 from datadog_checks.vault.errors import ApiUnreachable
 
 HERE = get_here()
@@ -39,7 +38,7 @@ class MockResponse:
     def raise_for_status(self):
         if self.status_code >= 300:
             raise requests.exceptions.HTTPError
-    
+
     def raise_for_api_unreachable(self):
         if self.exception in (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
             raise ApiUnreachable
