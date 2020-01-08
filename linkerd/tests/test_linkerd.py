@@ -22,7 +22,7 @@ def test_linkerd(aggregator):
     """
     Test the full check
     """
-    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
         metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd.txt'))
         check.check(MOCK_INSTANCE)
@@ -40,7 +40,7 @@ def test_linkerd(aggregator):
 
 
 def test_linkerd_v2(aggregator):
-    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
         metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd_v2.txt'))
         check.check(MOCK_INSTANCE)
@@ -56,7 +56,7 @@ def test_linkerd_v2(aggregator):
 
 
 def test_openmetrics_error(monkeypatch):
-    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
         metric_request.get('http://fake.tld/prometheus', exc="Exception")
         with pytest.raises(Exception):

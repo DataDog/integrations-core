@@ -15,13 +15,15 @@ class LinkerdCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
     HEALTH_METRIC = 'linkerd.prometheus.health'
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         labels_mapper = {'rt': 'linkerd_router', 'client': 'linkerd_client', 'service': 'linkerd_service'}
 
         default_config = {
             'linkerd': {'labels_mapper': labels_mapper, 'metrics': [METRIC_MAP], 'type_overrides': TYPE_OVERRIDES}
         }
-        super(LinkerdCheck, self).__init__(name, init_config, agentConfig, instances, default_config, 'linkerd')
+        super(LinkerdCheck, self).__init__(
+            name, init_config, instances, default_instances=default_config, default_namespace='linkerd'
+        )
 
     def process(self, scraper_config, metric_transformers=None):
         # Override the process method to send the health metric, as service checks can be disabled.
