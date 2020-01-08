@@ -1,11 +1,11 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import functools
 import ssl
 
 from pyVim import connect
-from pyVmomi import vim, vmodl  # pylint: disable=E0611
+from pyVmomi import vim, vmodl
 
 from datadog_checks.base import ensure_unicode, is_affirmative
 from datadog_checks.vsphere.constants import (
