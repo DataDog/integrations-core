@@ -9,7 +9,7 @@ import mock
 import pytest
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.kubelet import KubeletCredentials, PodListUtils, get_pod_by_uid, is_static_pending_pod
+from datadog_checks.kubelet import KubeletCredentials, PodListUtils, get_pod_by_uid, is_static_pending_pod, urljoin
 
 from .test_kubelet import mock_from_file
 
@@ -98,6 +98,17 @@ def test_pod_by_uid():
 
     pod = get_pod_by_uid("unknown", podlist)
     assert pod is None
+
+
+def test_url_join():
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy", "/pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy", "pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/", "pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/", "/pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
 
 
 def test_is_static_pod():

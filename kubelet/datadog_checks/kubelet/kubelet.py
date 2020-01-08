@@ -13,7 +13,6 @@ from datetime import datetime, timedelta
 import requests
 from kubeutil import get_connection_info
 from six import iteritems
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.base.utils.tagging import tagger
@@ -22,7 +21,7 @@ from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
 from .cadvisor import CadvisorScraper
-from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix
+from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix, urljoin
 from .prometheus import CadvisorPrometheusScraperMixin
 
 try:
