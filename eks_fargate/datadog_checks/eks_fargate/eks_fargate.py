@@ -6,11 +6,11 @@ import os
 
 class EksFargateCheck(AgentCheck):
     def check(self, instance):
-    	virtual_node = os.getenv("DD_KUBERNETES_KUBELET_NODENAME")
-    	pod_name = os.getenv("HOSTNAME")
-    	# Only submit the heartbeat metric for fargate virtual nodes.
-    	if "fargate" in virtual_node:
-	    	tags = [] 
-	    	tags.append("pod_name:" + pod_name)
-	    	tags.append("virtual_node:"+ virtual_node)
-	    	self.gauge("eks.fargate.pod.running", 1, tags)
+        virtual_node = os.getenv("DD_KUBERNETES_KUBELET_NODENAME")
+        pod_name = os.getenv("HOSTNAME")
+        # Only submit the heartbeat metric for fargate virtual nodes.
+        if "fargate" in virtual_node:
+            tags = [] 
+            tags.append("pod_name:" + pod_name)
+            tags.append("virtual_node:"+ virtual_node)
+            self.gauge("eks.fargate.pods.running", 1, tags)
