@@ -100,9 +100,9 @@ See [MSDN][8] for more information.
   It translates to a WMI query:
   `SELECT '<TARGET_PROPERTY>' FROM '<TARGET_CLASS>' WHERE '<LINK_TARGET_CLASS_PROPERTY>' = '<LINK_SOURCE_PROPERTY>'`
 
-<div class="alert alert-info">
-Setting this causes any instance number to be removed from tag_by values i.e. name:process#1 => name:process
-</div>
+  ##### Example
+  The setting `[IDProcess, Win32_Process, Handle, CommandLine]` tags each process with its command line. Any instance number will be removed from tag_by values i.e. name:process#1 => name:process. NB: The agent must be running under an **Administrator** account for this to work as the `CommandLine` property is not accessible to non-admins.
+
 
 #### Metrics collection
 The WMI check can potentially emit [custom metrics][9], which may impact your [billing][10].
