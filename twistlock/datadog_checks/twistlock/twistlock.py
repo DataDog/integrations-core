@@ -198,11 +198,10 @@ class TwistlockCheck(AgentCheck):
                 continue
 
             container_tags = []
-            container_info = container
-            name = container_info.get('name')
+            name = container.get('name')
             if name:
                 container_tags += ["container_name:{}".format(name)]
-            image_name = container_info.get('imageName')
+            image_name = container.get('imageName')
             if image_name:
                 container_tags += ["image_name:{}".format(image_name)]
             container_tags += self.config.tags
@@ -321,15 +320,15 @@ class TwistlockCheck(AgentCheck):
         qparams = {'project': project} if project else None
         response = self.http.get(url, params=qparams)
         try:
-            j = response.json()
             # it's possible to get a null response from the server
             # {} is a bit easier to deal with
+            j = response.json() or {}
             if 'err' in j:
                 err_msg = "Error in response: {}".format(j.get("err"))
                 self.log.error(err_msg)
                 raise Exception(err_msg)
             normalize_api_data_inplace(j)
-            return j or {}
+            return j
         except Exception as e:
             self.log.debug("cannot get a response: %s response is: %s", e, response.text)
             raise e
