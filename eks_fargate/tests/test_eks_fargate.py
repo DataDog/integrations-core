@@ -2,10 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.eks_fargate import EksFargateCheck
+import os
 
+def test_eksfargate(aggregator, instance):
+    os.environ["DD_KUBERNETES_KUBELET_NODENAME"] = "fargate-foo"
+    os.environ["HOSTNAME"] = "bar"
+    check = EksFargateCheck('eks_fargate', {}, [{}])
 
-def test_check(aggregator, instance):
-    check = EksFargateCheck('eks_fargate', {}, {})
     check.check(instance)
+    aggregator.assert_metric("eks.fargate.pod.running", value=1, tags=["virtual_node:fargate-foo","pod_name:bar"])
 
-    aggregator.assert_all_metrics_covered()
+def test_not_eksfargate(aggregator, instance):
+    os.environ["DD_KUBERNETES_KUBELET_NODENAME"] = "foo"
+    check = EksFargateCheck('eks_fargate', {}, [{}])
+    check.check(instance)
+    assert "eks.fargate.pod.running" not in aggregator._metrics
