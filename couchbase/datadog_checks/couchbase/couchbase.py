@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # (C) Justin Slattery <Justin.Slattery@fzysqr.com> 2013
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -191,10 +191,10 @@ class Couchbase(AgentCheck):
             tags = list(set(tags))
         tags.append('instance:{}'.format(server))
         data = self.get_data(server, instance)
-        self.collect_version(data)
+        self._collect_version(data)
         self._create_metrics(data, instance_state, server, tags=list(set(tags)))
 
-    def collect_version(self, data):
+    def _collect_version(self, data):
         nodes = data['stats']['nodes']
 
         if nodes:

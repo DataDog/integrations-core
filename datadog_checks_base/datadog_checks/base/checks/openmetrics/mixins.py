@@ -1,6 +1,7 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import division
 
 from fnmatch import fnmatchcase
 from math import isinf, isnan
@@ -9,12 +10,11 @@ from os.path import isfile
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, itervalues, string_types
-from urllib3.exceptions import InsecureRequestWarning
 
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_string
-from ...utils.warnings_util import disable_warnings_ctx
+from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 
 if PY3:
@@ -31,6 +31,8 @@ class OpenMetricsScraperMixin(object):
     SAMPLE_NAME = 0
     SAMPLE_LABELS = 1
     SAMPLE_VALUE = 2
+
+    MICROS_IN_S = 1000000
 
     MINUS_INF = float("-inf")
 
@@ -285,7 +287,28 @@ class OpenMetricsScraperMixin(object):
         if config['metadata_metric_name'] and config['metadata_label_map']:
             config['_default_metric_transformers'][config['metadata_metric_name']] = self.transform_metadata
 
+        # Set up the HTTP wrapper for this endpoint
+        self._set_up_http_handler(endpoint, config)
+
         return config
+
+    def _set_up_http_handler(self, endpoint, scraper_config):
+        # TODO: Deprecate this behavior in Agent 8
+        if scraper_config['ssl_verify'] is False:
+            scraper_config.setdefault('tls_ignore_warning', True)
+
+        http_handler = self.http_handlers[endpoint] = RequestsWrapper(
+            scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
+
+        headers = http_handler.options['headers']
+
+        bearer_token = scraper_config['_bearer_token']
+        if bearer_token is not None:
+            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
+
+        # TODO: Determine if we really need this
+        headers.setdefault('accept-encoding', 'gzip')
 
     def parse_metric_family(self, response, scraper_config):
         """
@@ -553,53 +576,11 @@ class OpenMetricsScraperMixin(object):
             raise
 
     def send_request(self, endpoint, scraper_config, headers=None):
-        # Determine the headers
-        if headers is None:
-            headers = {}
-        if 'accept-encoding' not in headers:
-            headers['accept-encoding'] = 'gzip'
-        headers.update(scraper_config['extra_headers'])
+        kwargs = {}
+        if headers:
+            kwargs['headers'] = headers
 
-        # Add the bearer token to headers
-        bearer_token = scraper_config['_bearer_token']
-        if bearer_token is not None:
-            auth_header = {'Authorization': 'Bearer {}'.format(bearer_token)}
-            headers.update(auth_header)
-
-        # Determine the SSL verification settings
-        cert = None
-        if isinstance(scraper_config['ssl_cert'], string_types):
-            if isinstance(scraper_config['ssl_private_key'], string_types):
-                cert = (scraper_config['ssl_cert'], scraper_config['ssl_private_key'])
-            else:
-                cert = scraper_config['ssl_cert']
-
-        verify = scraper_config['ssl_verify']
-        # TODO: deprecate use as `ssl_verify` boolean
-        if scraper_config['ssl_ca_cert'] is False:
-            verify = False
-
-        disable_insecure_warnings = False
-        if isinstance(scraper_config['ssl_ca_cert'], string_types):
-            verify = scraper_config['ssl_ca_cert']
-        elif verify is False:
-            disable_insecure_warnings = True
-
-        # Determine the authentication settings
-        username = scraper_config['username']
-        password = scraper_config['password']
-        auth = (username, password) if username is not None and password is not None else None
-
-        with disable_warnings_ctx(InsecureRequestWarning, disable=disable_insecure_warnings):
-            return requests.get(
-                endpoint,
-                headers=headers,
-                stream=True,
-                timeout=scraper_config['prometheus_timeout'],
-                cert=cert,
-                verify=verify,
-                auth=auth,
-            )
+        return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, stream=True, **kwargs)
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """
@@ -880,3 +861,49 @@ class OpenMetricsScraperMixin(object):
         except Exception as err:
             self.log.error("Cannot get bearer token from path: %s - error: %s", path, err)
             raise
+
+    def _histogram_convert_values(self, metric_name, converter):
+        def _convert(metric, scraper_config=None):
+            for index, sample in enumerate(metric.samples):
+                val = sample[self.SAMPLE_VALUE]
+                if not self._is_value_valid(val):
+                    self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
+                    continue
+                if sample[self.SAMPLE_NAME].endswith("_sum"):
+                    lst = list(sample)
+                    lst[self.SAMPLE_VALUE] = converter(val)
+                    metric.samples[index] = tuple(lst)
+                elif sample[self.SAMPLE_NAME].endswith("_bucket") and "Inf" not in sample[self.SAMPLE_LABELS]["le"]:
+                    sample[self.SAMPLE_LABELS]["le"] = str(converter(float(sample[self.SAMPLE_LABELS]["le"])))
+            self.submit_openmetric(metric_name, metric, scraper_config)
+
+        return _convert
+
+    def _histogram_from_microseconds_to_seconds(self, metric_name):
+        return self._histogram_convert_values(metric_name, lambda v: v / self.MICROS_IN_S)
+
+    def _histogram_from_seconds_to_microseconds(self, metric_name):
+        return self._histogram_convert_values(metric_name, lambda v: v * self.MICROS_IN_S)
+
+    def _summary_convert_values(self, metric_name, converter):
+        def _convert(metric, scraper_config=None):
+            for index, sample in enumerate(metric.samples):
+                val = sample[self.SAMPLE_VALUE]
+                if not self._is_value_valid(val):
+                    self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
+                    continue
+                if sample[self.SAMPLE_NAME].endswith("_count"):
+                    continue
+                else:
+                    lst = list(sample)
+                    lst[self.SAMPLE_VALUE] = converter(val)
+                    metric.samples[index] = tuple(lst)
+            self.submit_openmetric(metric_name, metric, scraper_config)
+
+        return _convert
+
+    def _summary_from_microseconds_to_seconds(self, metric_name):
+        return self._summary_convert_values(metric_name, lambda v: v / self.MICROS_IN_S)
+
+    def _summary_from_seconds_to_microseconds(self, metric_name):
+        return self._summary_convert_values(metric_name, lambda v: v * self.MICROS_IN_S)

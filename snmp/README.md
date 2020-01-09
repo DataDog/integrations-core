@@ -6,6 +6,7 @@ Simple Network Management Protocol (SNMP) is a standard for monitoring network-c
 
 SNMP uses sysOIDs (System Object Identifiers) to uniquely identify devices, and OIDs (Object Identifiers) to uniquely identify managed objects. OIDs follow a hierarchical tree pattern: under the root is ISO, which is numbered 1. The next level is ORG and numbered 3 and so on, with each level being separated by a `.`.
 
+
 A MIB (Management Information Base) acts as a translator between OIDs and human readable names, and organizes a subset of the hierarchy. Because of the way the tree is structured, most SNMP values start with the same set of objects:
 
 * `1.3.6.1.1`: (MIB-II) A standard that holds system information like uptime, interfaces, and network stack.
@@ -101,7 +102,8 @@ instances:
 
 Profiles allow the SNMP check to reuse metric definitions across several device types or instances. Profiles define metrics the same way as instances, either inline in the configuration file or in separate files. Each instance can only match a single profile. For example, you can define a profile in the `init_config` section:
 
-```yaml
+```
+yaml
 init_config:
   profiles:
     my-profile:

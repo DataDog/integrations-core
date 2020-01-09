@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -456,7 +456,7 @@ class SapHanaCheck(AgentCheck):
             try:
                 first_row = next(rows)
             except Exception as e:  # no cov
-                self.log.error('Error executing custom query: {}'.format(e))
+                self.log.error('Error executing custom query: %s', e)
                 continue
 
             for row in chain((first_row,), rows):
@@ -465,7 +465,7 @@ class SapHanaCheck(AgentCheck):
                     continue
 
                 if len(columns) != len(row):
-                    self.log.error('Custom query result expected {} column(s), got {}'.format(len(columns), len(row)))
+                    self.log.error('Custom query result expected %s column(s), got %s', len(columns), len(row))
                     continue
 
                 metric_info = []
@@ -484,21 +484,19 @@ class SapHanaCheck(AgentCheck):
 
                     column_type = column.get('type')
                     if not column_type:
-                        self.log.error('Column field `type` is required for column `{}`'.format(name))
+                        self.log.error('Column field `type` is required for column `%s`', name)
                         break
 
                     if column_type == 'tag':
                         query_tags.append('{}:{}'.format(name, value))
                     else:
                         if not hasattr(self, column_type):
-                            self.log.error(
-                                'Invalid submission method `{}` for metric column `{}`'.format(column_type, name)
-                            )
+                            self.log.error('Invalid submission method `%s` for metric column `%s`', column_type, name)
                             break
                         try:
                             metric_info.append((name, float(value), column_type))
                         except (ValueError, TypeError):
-                            self.log.error('Non-numeric value `{}` for metric column `{}`'.format(value, name))
+                            self.log.error('Non-numeric value `%s` for metric column `%s`', value, name)
                             break
 
                 # Only submit metrics if there were absolutely no errors - all or nothing.
@@ -551,7 +549,7 @@ class SapHanaCheck(AgentCheck):
             connection.connect()
         except Exception as e:
             error = str(e).replace(self._password, '**********')
-            self.log.error('Unable to connect to SAP HANA: {}'.format(error))
+            self.log.error('Unable to connect to SAP HANA: %s', error)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=error, tags=self._tags)
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -8,7 +8,7 @@ import click
 from ..compat import PermissionError
 from ..utils import dir_exists
 from .commands import ALL_COMMANDS
-from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning, set_color
+from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning, set_color, set_debug
 from .config import CONFIG_FILE, config_file_exists, load_config, restore_config
 from .constants import set_root
 
@@ -20,16 +20,19 @@ from .constants import set_root
 @click.option('--here', '-x', is_flag=True, help='Work on the current location.')
 @click.option('--color/--no-color', default=None, help='Whether or not to display colored output (default true).')
 @click.option('--quiet', '-q', is_flag=True)
+@click.option('--debug', '-d', is_flag=True)
 @click.version_option()
 @click.pass_context
-def ddev(ctx, core, extras, agent, here, color, quiet):
+def ddev(ctx, core, extras, agent, here, color, quiet, debug):
     if not quiet and not config_file_exists():
         echo_waiting('No config file found, creating one with default settings now...')
 
         try:
             restore_config()
             echo_success('Success! Please see `ddev config`.')
-        except (IOError, OSError, PermissionError):
+        # TODO: Remove IOError (and noqa: B014) when Python 2 is removed
+        # In Python 3, IOError have been merged into OSError
+        except (IOError, OSError, PermissionError):  # noqa: B014
             echo_warning(
                 'Unable to create config file located at `{}`. ' 'Please check your permissions.'.format(CONFIG_FILE)
             )
@@ -56,6 +59,9 @@ def ddev(ctx, core, extras, agent, here, color, quiet):
 
     set_root(root)
     set_color(config['color'])
+
+    if debug and not quiet:
+        set_debug()
 
     if not ctx.invoked_subcommand:
         click.echo(ctx.get_help())

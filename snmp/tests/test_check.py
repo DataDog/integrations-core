@@ -1,14 +1,14 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
 import ipaddress
+import logging
 import os
 import socket
 import time
 
 import mock
-import pysnmp_mibs
 import pytest
 import yaml
 
@@ -31,7 +31,7 @@ def test_command_generator():
     config = check._config
 
     # Test command generator MIB source
-    mib_folders = config.snmp_engine.getMibBuilder().getMibSources()
+    mib_folders = config._snmp_engine.getMibBuilder().getMibSources()
     full_path_mib_folders = [f.fullPath() for f in mib_folders]
     assert check.ignore_nonincreasing_oid is False  # Default value
 
@@ -218,6 +218,26 @@ def test_table(aggregator):
     aggregator.all_metrics_asserted()
 
 
+def test_resolved_table(aggregator):
+    instance = common.generate_instance_config(common.RESOLVED_TABULAR_OBJECTS)
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    for symbol in common.TABULAR_OBJECTS[0]['symbols']:
+        metric_name = "snmp." + symbol
+        aggregator.assert_metric(metric_name, at_least=1)
+        aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
+
+        for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
+            tag = mtag['tag']
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
 def test_table_v3_MD5_DES(aggregator):
     """
     Support SNMP V3 priv modes: MD5 + DES
@@ -370,6 +390,7 @@ def test_table_v3_SHA_AES(aggregator):
 
 def test_bulk_table(aggregator):
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
+    instance['bulk_threshold'] = 5
     check = common.create_check(instance)
 
     check.check(instance)
@@ -560,18 +581,47 @@ def test_profile_sys_object_prefix(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_profile_sys_object_unknown(aggregator):
+def test_profile_sys_object_unknown(aggregator, caplog):
     """If the fetched sysObjectID is not referenced by any profiles, check fails."""
-    instance = common.generate_instance_config([])
+    caplog.set_level(logging.WARNING)
+
+    unknown_sysobjectid = '1.2.3.4.5'
     init_config = {
-        'profiles': {'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.2.3.4.5'}}}
+        'profiles': {
+            'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': unknown_sysobjectid}}
+        }
     }
+
+    # Via config...
+
+    instance = common.generate_instance_config([])
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
-
     aggregator.all_metrics_asserted()
+
+    # Via network discovery...
+
+    host = socket.gethostbyname(common.HOST)
+    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    instance = {
+        'name': 'snmp_conf',
+        'network_address': network,
+        'port': common.PORT,
+        'community_string': 'public',
+    }
+
+    check = SnmpCheck('snmp', init_config, [instance])
+    check._start_discovery()
+    time.sleep(2)  # Give discovery a chance to fail finding a matching profile.
+    check.check(instance)
+
+    for record in caplog.records:
+        if "Host {} didn't match a profile".format(host) in record.message:
+            break
+    else:
+        pytest.fail()
 
 
 def test_profile_sys_object_no_metrics():
@@ -614,23 +664,6 @@ def test_discovery(aggregator):
 
     aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
     aggregator.assert_all_metrics_covered()
-
-
-def test_fetch_mib():
-    instance = common.generate_instance_config(common.DUMMY_MIB_OID)
-    # Try a small MIB
-    instance['metrics'][0]['MIB'] = 'A3COM-AUDL-R1-MIB'
-    instance['enforce_mib_constraints'] = False
-    # Remove it
-    path = os.path.join(os.path.dirname(pysnmp_mibs.__file__), 'A3COM-AUDL-R1-MIB.py')
-    # Make sure it doesn't exist
-    if os.path.exists(path):
-        os.unlink(path)
-    pyc = '{}c'.format(path)
-    if os.path.exists(pyc):
-        os.unlink(pyc)
-    SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
-    assert os.path.exists(path)
 
 
 def test_different_mibs(aggregator):
@@ -1052,5 +1085,196 @@ def test_3850(aggregator):
         for metric in cie_metrics:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_meraki_cloud_controller(aggregator):
+    instance = common.generate_instance_config([])
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'meraki-cloud-controller.yaml')
+    instance['community_string'] = 'meraki-cloud-controller'
+    instance['profile'] = 'meraki'
+    instance['enforce_mib_constraints'] = False
+    init_config = {'profiles': {'meraki': {'definition_file': path}}}
+
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
+
+    dev_metrics = ['devStatus', 'devClientCount']
+    dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK'] + common.CHECK_TAGS
+    for metric in dev_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=dev_tags, count=1)
+
+    if_tags = ['interface:wifi0', 'index:4'] + common.CHECK_TAGS
+    if_metrics = ['devInterfaceSentPkts', 'devInterfaceRecvPkts', 'devInterfaceSentBytes', 'devInterfaceSentBytes']
+    for metric in if_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+
+
+def test_idrac(aggregator):
+    instance = common.generate_instance_config([])
+    # We need the full path as we're not in installed mode
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'idrac.yaml')
+    instance['community_string'] = 'idrac'
+    instance['profile'] = 'idrac'
+    instance['enforce_mib_constraints'] = False
+
+    init_config = {'profiles': {'idrac': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    if_counts = [
+        'adapterRxPackets',
+        'adapterTxPackets',
+        'adapterRxBytes',
+        'adapterTxBytes',
+        'adapterRxErrors',
+        'adapterTxErrors',
+        'adapterRxDropped',
+        'adapterTxDropped',
+        'adapterRxMulticast',
+        'adapterCollisions',
+    ]
+    status_gauges = [
+        'systemStateChassisStatus',
+        'systemStatePowerUnitStatusRedundancy',
+        'systemStatePowerSupplyStatusCombined',
+        'systemStateAmperageStatusCombined',
+        'systemStateCoolingUnitStatusRedundancy',
+        'systemStateCoolingDeviceStatusCombined',
+        'systemStateTemperatureStatusCombined',
+        'systemStateMemoryDeviceStatusCombined',
+        'systemStateChassisIntrusionStatusCombined',
+        'systemStatePowerUnitStatusCombined',
+        'systemStateCoolingUnitStatusCombined',
+        'systemStateProcessorDeviceStatusCombined',
+        'systemStateTemperatureStatisticsStatusCombined',
+    ]
+    disk_gauges = [
+        'physicalDiskState',
+        'physicalDiskCapacityInMB',
+        'physicalDiskUsedSpaceInMB',
+        'physicalDiskFreeSpaceInMB',
+    ]
+    interfaces = ['eth0', 'en1']
+    for interface in interfaces:
+        tags = ['adapter:{}'.format(interface)] + common.CHECK_TAGS
+        for count in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+    indexes = ['26', '29']
+    for index in indexes:
+        tags = ['chassis_index:{}'.format(index)] + common.CHECK_TAGS
+        for gauge in status_gauges:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    powers = ['supply1', 'supply2']
+    for power in powers:
+        tags = ['supply_name:{}'.format(power)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags, count=1)
+    disks = ['disk1', 'disk2']
+    for disk in disks:
+        tags = ['disk_name:{}'.format(disk)] + common.CHECK_TAGS
+        for gauge in disk_gauges:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_cisco_nexus(aggregator):
+    instance = common.generate_instance_config([])
+    instance['community_string'] = 'cisco_nexus'
+    instance['profile'] = 'cisco-nexus'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    definition_file_path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'cisco-nexus.yaml')
+    init_config = {'profiles': {'cisco-nexus': {'definition_file': definition_file_path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    tcp_counts = [
+        'tcpActiveOpens',
+        'tcpPassiveOpens',
+        'tcpAttemptFails',
+        'tcpEstabResets',
+        'tcpHCInSegs',
+        'tcpHCOutSegs',
+        'tcpRetransSegs',
+        'tcpInErrs',
+        'tcpOutRsts',
+    ]
+    tcp_gauges = ['tcpCurrEstab']
+    udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
+    if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
+    ifx_counts = [
+        'ifHCInOctets',
+        'ifHCInUcastPkts',
+        'ifHCInMulticastPkts',
+        'ifHCInBroadcastPkts',
+        'ifHCOutOctets',
+        'ifHCOutUcastPkts',
+        'ifHCOutMulticastPkts',
+        'ifHCOutBroadcastPkts',
+    ]
+    if_gauges = ['ifAdminStatus', 'ifOperStatus']
+
+    interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        for metric in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in if_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        for metric in ifx_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+
+    for metric in tcp_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in tcp_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in udp_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
+        )
+
+    sensors = [1, 9, 11, 12, 12, 14, 17, 26, 29, 31]
+    for sensor in sensors:
+        tags = ['sensor_id:{}'.format(sensor), 'sensor_type:8'] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.entSensorValue', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    fru_metrics = ["cefcFRUPowerAdminStatus", "cefcFRUPowerOperStatus", "cefcFRUCurrent"]
+    frus = [6, 7, 15, 16, 19, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common.CHECK_TAGS
+        for metric in fru_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    cpus = [3173, 6692, 11571, 19529, 30674, 38253, 52063, 54474, 55946, 63960]
+    cpu_metrics = ["cpmCPUTotalMonIntervalValue", "cpmCPUMemoryUsed", "cpmCPUMemoryFree"]
+    for cpu in cpus:
+        tags = ['cpu:{}'.format(cpu)] + common.CHECK_TAGS
+        for metric in cpu_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()

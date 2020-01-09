@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -13,6 +13,7 @@ PORT = '50000'
 DB = 'datadog'
 USERNAME = 'db2inst1'
 PASSWORD = 'db2inst1-pwd'
+DB2_VERSION = os.getenv('DB2_VERSION')
 
 CONFIG = {
     'db': DB,

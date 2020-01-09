@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
@@ -7,7 +7,7 @@ from .... import EnvVars
 from ...e2e import create_interface, get_configured_envs
 from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import get_tox_envs
-from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
+from ..console import CONTEXT_SETTINGS, DEBUG_OUTPUT, echo_info, echo_warning
 from ..test import test as test_command
 from .start import start
 from .stop import stop
@@ -98,6 +98,7 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memor
                     ctx.invoke(
                         test_command,
                         checks=['{}:{}'.format(check, env)],
+                        debug=DEBUG_OUTPUT,
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
                         junit=junit,

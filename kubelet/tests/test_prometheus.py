@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -33,7 +33,7 @@ def mock_from_file(fname):
 
 @pytest.fixture
 def check():
-    return KubeletCheck('kubelet', None, {}, [{}])
+    return KubeletCheck('kubelet', {}, [{}])
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def cadvisor_scraper(check):
 
 
 def test_cadvisor_default_options():
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     cadvisor_scraper_config = check.cadvisor_scraper_config
     assert check.fs_usage_bytes == {}
     assert check.mem_usage_bytes == {}

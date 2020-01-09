@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2015-2017
+# (C) Datadog, Inc. 2015-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -143,7 +143,7 @@ class MesosMaster(AgentCheck):
             parsed_url = urlparse(url)
 
             if not self.http.options['verify'] and parsed_url.scheme == 'https':
-                self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
+                self.log.warning('Skipping TLS cert validation for %s based on configuration.', url)
             if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
                 # `default_timeout` config option will be removed with Agent 5
                 timeout = (
@@ -178,7 +178,7 @@ class MesosMaster(AgentCheck):
             msg = str(e)
             status = AgentCheck.CRITICAL
         finally:
-            self.log.debug('Request to url : {0}, timeout: {1}, message: {2}'.format(url, timeout, msg))
+            self.log.debug('Request to url : %s, timeout: %s, message: %s', url, timeout, msg)
             self._send_service_check(url, status, failure_expected=failure_expected, tags=tags, message=msg)
 
         if response.encoding is None:
@@ -210,9 +210,7 @@ class MesosMaster(AgentCheck):
             # Mesos version < 0.25
             old_endpoint = endpoint + '.json'
             self.log.info(
-                'Unable to fetch state from {0}. Retrying with the deprecated endpoint: {1}.'.format(
-                    endpoint, old_endpoint
-                )
+                'Unable to fetch state from %s. Retrying with the deprecated endpoint: %s.', endpoint, old_endpoint
             )
             master_state = self._get_json(old_endpoint, tags=tags)
         return master_state
@@ -237,6 +235,7 @@ class MesosMaster(AgentCheck):
 
         if state_metrics is not None:
             self.version = [int(i) for i in state_metrics['version'].split('.')]
+            self.set_metadata('version', state_metrics['version'])
             if state_metrics['leader'] == state_metrics['pid']:
                 self.leader = True
 

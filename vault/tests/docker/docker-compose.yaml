@@ -12,9 +12,18 @@ services:
       - "8200:8200"
     depends_on:
       - consul
-    command: server
+      - vault-provider
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "vault server -config=/vault/config -dev-root-token-id= -dev-listen-address=0.0.0.0:8200 > /var/log/vault.log 2>&1"]
     volumes:
-      - ./vault_config.json:/vault/config/config.json
+      - ./vault_server_config.json:/vault/config/config.json
+      - ./vault_agent_config.hcl:/home/agent_config.hcl
+      - ./metrics_policy.hcl:/home/metrics_policy.hcl
+      - ./pub.pem:/home/pub.pem
+      - ${JWT_DIR}:/home/jwt
+      - ${SINK_DIR}:/home/sink
+      - ${DD_LOG_1}:/vault/vault-audit.log
+      - ${DD_LOG_2}:/var/log/vault.log
 
   vault-replica:
     container_name: vault-replica
@@ -32,7 +41,7 @@ services:
       - vault-leader
     command: server
     volumes:
-      - ./vault_config.json:/vault/config/config.json
+      - ./vault_server_config.json:/vault/config/config.json
 
   consul:
     image: 'consul'
@@ -51,3 +60,11 @@ services:
       - ./consul_config.json:/consul/config/config.json
     depends_on:
       - consul
+
+  vault-provider:
+    container_name: vault-provider
+    build:
+      context: ./provider
+    volumes:
+      - ./provider/run:/home/run
+      - ${JWT_DIR}:/home/jwt

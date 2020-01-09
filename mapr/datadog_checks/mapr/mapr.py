@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -56,7 +56,9 @@ class MaprCheck(AgentCheck):
         if auth_ticket:
             os.environ['MAPR_TICKETFILE_LOCATION'] = auth_ticket
         elif not os.environ.get('MAPR_TICKETFILE_LOCATION'):
-            self.log.warn("MAPR_TICKETFILE_LOCATION environment variable not set, this may cause authentication issues")
+            self.log.warning(
+                "MAPR_TICKETFILE_LOCATION environment variable not set, this may cause authentication issues"
+            )
 
     def check(self, _):
         if ck is None:

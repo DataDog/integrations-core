@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
@@ -110,21 +110,21 @@ def test__get_custom_metrics_misconfigured(check):
 
     # No query for metric_prefix
     check._get_custom_metrics(None, custom_queries, [])
-    log.error.assert_called_once_with('custom query field `query` is required for metric_prefix `foo`')
+    log.error.assert_called_once_with('custom query field `query` is required for metric_prefix `%s`', 'foo')
     log.reset_mock()
 
     query["query"] = "bar"
 
     # No columns for metric_prefix
     check._get_custom_metrics(None, custom_queries, [])
-    log.error.assert_called_once_with('custom query field `columns` is required for metric_prefix `foo`')
+    log.error.assert_called_once_with('custom query field `columns` is required for metric_prefix `%s`', 'foo')
     log.reset_mock()
 
     query["columns"] = [{}]
 
     # Wrong number of columns
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('query result for metric_prefix foo: expected 1 columns, got 2')
+    log.error.assert_called_once_with('query result for metric_prefix %s: expected %s columns, got %s', 'foo', 1, 2)
     log.reset_mock()
 
     col1 = {"name": "baz", "type": "tag"}
@@ -134,7 +134,7 @@ def test__get_custom_metrics_misconfigured(check):
 
     # No name in column
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('column field `name` is required for metric_prefix `foo`')
+    log.error.assert_called_once_with('column field `name` is required for metric_prefix `%s`', 'foo')
     log.reset_mock()
 
     del col2["foo"]
@@ -142,21 +142,27 @@ def test__get_custom_metrics_misconfigured(check):
 
     # No type in column
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('column field `type` is required for column `foo` of metric_prefix `foo`')
+    log.error.assert_called_once_with(
+        'column field `type` is required for column `%s` of metric_prefix `%s`', 'foo', 'foo'
+    )
     log.reset_mock()
 
     col2["type"] = "invalid"
 
     # Invalid type column
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('invalid submission method `invalid` for column `foo` of metric_prefix `foo`')
+    log.error.assert_called_once_with(
+        'invalid submission method `%s` for column `%s` of metric_prefix `%s`', 'invalid', 'foo', 'foo'
+    )
     log.reset_mock()
 
     col2["type"] = "gauge"
 
     # Non numeric value
     check._get_custom_metrics(con, custom_queries, [])
-    log.error.assert_called_once_with('non-numeric value `bar` for metric column `foo` of metric_prefix `foo`')
+    log.error.assert_called_once_with(
+        'non-numeric value `%s` for metric column `%s` of metric_prefix `%s`', 'bar', 'foo', 'foo'
+    )
 
     # No metric sent if errors
     gauge.assert_not_called()

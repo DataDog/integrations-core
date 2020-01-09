@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import requests
@@ -38,9 +38,9 @@ class Kong(AgentCheck):
         service_check_tags = ['kong_host:%s' % host, 'kong_port:%s' % port] + tags
 
         try:
-            self.log.debug(u"Querying URL: {0}".format(url))
+            self.log.debug("Querying URL: %s", url)
             response = requests.get(url, headers=headers(self.agentConfig), verify=ssl_validation)
-            self.log.debug(u"Kong status `response`: {0}".format(response))
+            self.log.debug("Kong status `response`: %s", response)
             response.raise_for_status()
         except Exception:
             self.service_check(service_check_name, Kong.CRITICAL, tags=service_check_tags)

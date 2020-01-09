@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2019
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
@@ -19,7 +19,7 @@ class TCPCheck(AgentCheck):
         self.instance_name = self.normalize_tag(instance['name'])
         port = instance.get('port', None)
         self.timeout = float(instance.get('timeout', 10))
-        self.response_time = instance.get('collect_response_time', False)
+        self.collect_response_time = instance.get('collect_response_time', False)
         self.custom_tags = instance.get('tags', [])
         self.socket_type = None
 
@@ -53,13 +53,15 @@ class TCPCheck(AgentCheck):
                 raise ConfigurationError(msg)
 
     def check(self, instance):
-        start = time.time()
+        response_time = None
         try:
             self.log.debug("Connecting to %s %d", self.addr, self.port)
             sock = socket.socket(self.socket_type)
             try:
                 sock.settimeout(self.timeout)
+                start = time.time()
                 sock.connect((self.addr, self.port))
+                response_time = time.time() - start
             finally:
                 sock.close()
         except socket.timeout as e:
@@ -103,10 +105,10 @@ class TCPCheck(AgentCheck):
             self.log.debug("%s:%d is UP", self.addr, self.port)
             self.report_as_service_check(AgentCheck.OK, 'UP')
 
-        if self.response_time:
+        if self.collect_response_time and response_time is not None:
             self.gauge(
                 'network.tcp.response_time',
-                time.time() - start,
+                response_time,
                 tags=[
                     'url:{}:{}'.format(instance.get('host', None), self.port),
                     'instance:{}'.format(instance.get('name')),

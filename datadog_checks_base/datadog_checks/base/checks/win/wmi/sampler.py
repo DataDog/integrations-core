@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -154,7 +154,7 @@ class WMISampler(object):
         try:
             pythoncom.CoInitialize()
         except Exception as e:
-            self.logger.info("exception in CoInitialize {}".format(e))
+            self.logger.info("exception in CoInitialize: %s", e)
             raise
 
         while True:
@@ -298,8 +298,7 @@ class WMISampler(object):
             calculator = get_calculator(counter_type)
         except UndefinedCalculator:
             self.logger.warning(
-                u"Undefined WMI calculator for counter_type {counter_type}."
-                " Values are reported as RAW.".format(counter_type=counter_type)
+                u"Undefined WMI calculator for counter_type %s. Values are reported as RAW.", counter_type,
             )
 
         return calculator
@@ -329,10 +328,11 @@ class WMISampler(object):
         Create a new WMI connection
         """
         self.logger.debug(
-            u"Connecting to WMI server "
-            u"(host={host}, namespace={namespace}, provider={provider}, username={username}).".format(
-                host=self.host, namespace=self.namespace, provider=self.provider, username=self.username
-            )
+            u"Connecting to WMI server (host=%s, namespace=%s, provider=%s, username=%s).",
+            self.host,
+            self.namespace,
+            self.provider,
+            self.username,
         )
 
         # Initialize COM for the current thread
@@ -444,7 +444,7 @@ class WMISampler(object):
         wql = "Select {property_names} from {class_name}{filters}".format(
             property_names=formated_property_names, class_name=self.class_name, filters=self.formatted_filters
         )
-        self.logger.debug(u"Querying WMI: {0}".format(wql))
+        self.logger.debug(u"Querying WMI: %s", wql)
 
         try:
             # From: https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx
@@ -519,16 +519,14 @@ class WMISampler(object):
                         self._property_counter_types[wmi_property.Name] = counter_type
 
                         self.logger.debug(
-                            u"Caching property qualifier CounterType: "
-                            "{class_name}.{property_names} = {counter_type}".format(
-                                class_name=self.class_name, property_names=wmi_property.Name, counter_type=counter_type
-                            )
+                            u"Caching property qualifier CounterType: %s.%s = %s",
+                            self.class_name,
+                            wmi_property.Name,
+                            counter_type,
                         )
                     else:
                         self.logger.debug(
-                            u"CounterType qualifier not found for {class_name}.{property_names}".format(
-                                class_name=self.class_name, property_names=wmi_property.Name
-                            )
+                            u"CounterType qualifier not found for %s.%s", self.class_name, wmi_property.Name,
                         )
 
                 try:

@@ -10,9 +10,6 @@ Get metrics from Btrfs service in real time to:
 * Be notified about Btrfs failovers and events.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The Btrfs check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your servers that use at least one Btrfs filesystem.

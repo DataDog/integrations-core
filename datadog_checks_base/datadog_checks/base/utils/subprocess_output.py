@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
@@ -8,18 +8,12 @@ from six import string_types
 from .. import ensure_unicode
 
 try:
-    # Agent6
     from _util import get_subprocess_output as subprocess_output
     from _util import SubprocessOutputEmptyError  # noqa
 except ImportError:
-    try:
-        # Agent5 (these paths may also exist in Agent6, so import them only if Agent6-specific ones aren't found)
-        from utils.subprocess_output import subprocess_output
-        from utils.subprocess_output import SubprocessOutputEmptyError  # noqa
-    except ImportError:
-        # No agent
-        from ..stubs._util import subprocess_output
-        from ..stubs._util import SubprocessOutputEmptyError  # noqa
+    # No agent
+    from ..stubs._util import subprocess_output
+    from ..stubs._util import SubprocessOutputEmptyError  # noqa
 
 
 log = logging.getLogger(__name__)

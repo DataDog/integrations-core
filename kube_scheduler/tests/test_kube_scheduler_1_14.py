@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -46,7 +46,7 @@ def mock_leader():
 
 
 def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
-    c = KubeSchedulerCheck(CHECK_NAME, None, {}, [instance])
+    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
     def assert_metric(name, **kwargs):
@@ -59,7 +59,7 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     assert_metric('.binding_duration.sum', value=0.16221686500000002, tags=[])
     assert_metric('.scheduling.scheduling_duration.count', value=14.0, tags=['operation:binding'])
     assert_metric('.scheduling.scheduling_duration.sum', value=0.16236949099999998, tags=['operation:binding'])
-    assert_metric('.scheduling.algorithm.predicate_duration.sum', value=0.01379, tags=[])
+    assert_metric('.scheduling.algorithm.predicate_duration.sum', value=0.001379, tags=[])
     assert_metric('.scheduling.e2e_scheduling_duration.count', value=0.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.algorithm_duration.count', value=14.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.e2e_scheduling_duration.sum', value=0.166793941, tags=[])
@@ -68,7 +68,7 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader):
     )
     assert_metric('.scheduling.algorithm.priority_duration.sum', value=0.0, tags=[])
     assert_metric('.scheduling.algorithm.priority_duration.count', value=14.0, tags=['upper_bound:0.004'])
-    assert_metric('.scheduling.algorithm.preemption_duration.sum', value=0.5524, tags=[])
+    assert_metric('.scheduling.algorithm.preemption_duration.sum', value=0.05524, tags=[])
     assert_metric('.scheduling.algorithm.predicate_duration.count', value=14.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.algorithm.preemption_duration.count', value=0.0, tags=['upper_bound:0.001'])
     assert_metric('.schedule_attempts', value=14.0, tags=['result:scheduled'])

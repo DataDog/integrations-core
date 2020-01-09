@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -108,7 +108,7 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         service_check_tags.extend(tags)
 
         try:
-            self.log.debug("checking connectivity against {}".format(url))
+            self.log.debug("checking connectivity against %s", url)
             r = self.http.get(url)
             if r.status_code != 200:
                 self.service_check(

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2015-2017
+# (C) Datadog, Inc. 2015-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -102,7 +102,7 @@ class MesosSlave(AgentCheck):
         url = self.instance.get('url', '')
         parsed_url = urlparse(url)
         if self.http.options['verify'] and parsed_url.scheme == 'https':
-            self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
+            self.log.warning('Skipping TLS cert validation for %s based on configuration.', url)
         if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
             # `default_timeout` config option will be removed with Agent 5
             timeout = (
@@ -196,7 +196,7 @@ class MesosSlave(AgentCheck):
             self.warning("Couldn't connect to URL: %s with exception: %s", url, e)
             raise
 
-        self.log.debug("Request to url {} returned: {}".format(url, resp))
+        self.log.debug("Request to url %s returned: %s", url, resp)
         return resp.json()
 
     def _set_version(self, state_metrics):

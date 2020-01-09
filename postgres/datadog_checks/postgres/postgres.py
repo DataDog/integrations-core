@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
@@ -512,6 +512,10 @@ class PostgreSql(AgentCheck):
 
     def _connect(self, host, port, user, password, dbname, ssl, tags):
         """Get and memoize connections to instances"""
+        if self.db and self.db.closed:
+            # Reset the connection object to retry to connect
+            self.db = None
+
         if self.db:
             if self.db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -372,12 +372,10 @@ class ZookeeperCheck(AgentCheck):
                 metrics.append(ZKMetric(metric_name, metric_value, metric_type))
 
             except ValueError:
-                self.log.warning(u"Cannot format `mntr` value. key={key}, value{value}".format(key=key, value=value))
+                self.log.warning("Cannot format `mntr` value. key=%s, value=%s", key, value)
                 continue
             except Exception:
-                self.log.exception(
-                    u"Unexpected exception occurred while parsing `mntr` command content:\n{buf}".format(buf=buf)
-                )
+                self.log.exception("Unexpected exception occurred while parsing `mntr` command content:\n%s", buf)
 
         return (metrics, mode)
 

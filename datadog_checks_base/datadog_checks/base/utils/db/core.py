@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from itertools import chain
@@ -6,7 +6,7 @@ from itertools import chain
 from ...config import is_affirmative
 from ..containers import iter_unique
 from .query import Query
-from .transform import TRANSFORMERS
+from .transform import COLUMN_TRANSFORMERS, EXTRA_TRANSFORMERS
 from .utils import SUBMISSION_METHODS, create_submission_transformer
 
 
@@ -38,15 +38,15 @@ class QueryManager(object):
             self.queries.append(query)
 
     def compile_queries(self):
-        transformers = TRANSFORMERS.copy()
+        column_transformers = COLUMN_TRANSFORMERS.copy()
 
-        for submission_method in SUBMISSION_METHODS:
+        for submission_method, transformer_name in SUBMISSION_METHODS.items():
             method = getattr(self.check, submission_method)
             # Save each method in the initializer -> callable format
-            transformers[submission_method] = create_submission_transformer(method)
+            column_transformers[transformer_name] = create_submission_transformer(method)
 
         for query in self.queries:
-            query.compile(transformers)
+            query.compile(column_transformers, EXTRA_TRANSFORMERS.copy())
 
     def execute(self):
         logger = self.check.log
@@ -55,6 +55,7 @@ class QueryManager(object):
         for query in self.queries:
             query_name = query.name
             query_columns = query.columns
+            query_extras = query.extras
             query_tags = query.tags
             num_columns = len(query_columns)
 
@@ -83,7 +84,7 @@ class QueryManager(object):
                     )
                     continue
 
-                row_values = {}
+                sources = {}
                 submission_queue = []
 
                 tags = list(global_tags)
@@ -94,7 +95,7 @@ class QueryManager(object):
                     if not column_name:
                         continue
 
-                    row_values[column_name] = value
+                    sources[column_name] = value
 
                     column_type, transformer = transformer
 
@@ -103,12 +104,22 @@ class QueryManager(object):
                     if transformer is None:
                         continue
                     elif column_type == 'tag':
-                        tags.append(transformer(value, None))
+                        tags.append(transformer(None, value))
                     else:
                         submission_queue.append((transformer, value))
 
                 for transformer, value in submission_queue:
-                    transformer(value, row_values, tags=tags)
+                    transformer(sources, value, tags=tags)
+
+                for name, transformer in query_extras:
+                    try:
+                        result = transformer(sources, tags=tags)
+                    except Exception as e:
+                        logger.error('Error transforming %s: %s', name, e)
+                        continue
+                    else:
+                        if result is not None:
+                            sources[name] = result
 
     def execute_query(self, query):
         rows = self.executor(query)

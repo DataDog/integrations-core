@@ -62,7 +62,7 @@ mysql> GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-For mySQL 8.0+ set `max_user_connections` with:
+For MySQL 8.0+ set `max_user_connections` with:
 
 ```
 mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
@@ -133,15 +133,16 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
     - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
     - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error, and slow query logs:
 
-      ```
+      ```conf
         [mysqld_safe]
-        log_error=/var/log/mysql/mysql_error.log
+        log_error = /var/log/mysql/mysql_error.log
+
         [mysqld]
         general_log = on
         general_log_file = /var/log/mysql/mysql.log
-        log_error=/var/log/mysql/mysql_error.log
+        log_error = /var/log/mysql/mysql_error.log
         slow_query_log = on
-        slow_query_log_file = /var/log/mysql/mysql-slow.log
+        slow_query_log_file = /var/log/mysql/mysql_slow.log
         long_query_time = 2
       ```
 
@@ -151,7 +152,7 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
     - In `/etc/logrotate.d/mysql-server` there should be something similar to:
 
       ```
-        /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql-slow.log {
+        /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql_slow.log {
                 daily
                 rotate 7
                 missingok
@@ -171,22 +172,28 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
     ```yaml
       logs:
           - type: file
-            path: /var/log/mysql/mysql_error.log
+            path: "<ERROR_LOG_FILE_PATH>"
             source: mysql
             sourcecategory: database
-            service: myapplication
+            service: "<SERVICE_NAME>"
 
           - type: file
-            path: /var/log/mysql/mysql-slow.log
+            path: "<SLOW_QUERY_LOG_FILE_PATH>"
             source: mysql
             sourcecategory: database
-            service: myapplication
+            service: "<SERVICE_NAME>"
+            log_processing_rules:
+              - type: multi_line
+                name: new_slow_query_log_entry
+                pattern: "# Time:"
+                # If mysqld was started with `--log-short-format`, use:
+                # pattern: "# Query_time:"
 
           - type: file
-            path: /var/log/mysql/mysql.log
+            path: "<GENERAL_LOG_FILE_PATH>"
             source: mysql
             sourcecategory: database
-            service: myapplication
+            service: "<SERVICE_NAME>"
             # For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
             # log_processing_rules:
             #   - type: multi_line

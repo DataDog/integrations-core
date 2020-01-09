@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -122,7 +122,7 @@ class Kubernetes(AgentCheck):
                 try:
                     self.k8s_namespace_regexp = re.compile(regexp)
                 except re.error as e:
-                    self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s' % str(e))
+                    self.log.warning('Invalid regexp for "namespace_name_regexp" in configuration (ignoring regexp): %s', e)
 
             self.event_retriever = None
             self._configure_event_collection(inst)
@@ -151,7 +151,7 @@ class Kubernetes(AgentCheck):
                     is_ok = False
 
         except Exception as e:
-            self.log.warning('kubelet check %s failed: %s' % (url, str(e)))
+            self.log.warning('kubelet check %s failed: %s', url, e)
             self.service_check(service_check_base, AgentCheck.CRITICAL,
                                message='Kubelet check %s failed: %s' % (url, str(e)), tags=instance.get('tags', []))
         else:
@@ -226,7 +226,7 @@ class Kubernetes(AgentCheck):
                              ''' your kubelet with the --cadvisor-port=4194 option, or set port to 0'''
                              ''' in this check's configuration to disable cAdvisor lookup.''')
             except Exception as err:
-                self.log.warning("Error while getting performance metrics: %s" % str(err))
+                self.log.warning("Error while getting performance metrics: %s", str(err))
 
         # kubernetes events
         if self.event_retriever is not None:
@@ -238,11 +238,11 @@ class Kubernetes(AgentCheck):
                 if events and self._collect_events:
                     self._update_kube_events(instance, pods_list, events)
             except Exception as ex:
-                self.log.error("Event collection failed: %s" % str(ex))
+                self.log.error("Event collection failed: %s", str(ex))
 
     def _publish_raw_metrics(self, metric, dat, tags, depth=0):
         if depth >= self.max_depth:
-            self.log.warning('Reached max depth on metric=%s' % metric)
+            self.log.warning('Reached max depth on metric=%s', metric)
             return
 
         if isinstance(dat, numbers.Number):
@@ -445,7 +445,7 @@ class Kubernetes(AgentCheck):
                 c_id = name2id.get(c_name)
 
                 if c_id in self._filtered_containers:
-                    self.log.debug('Container {} is excluded'.format(c_name))
+                    self.log.debug('Container %s is excluded', c_name)
                     continue
 
                 _tags = container_tags.get(c_id, [])
@@ -518,7 +518,7 @@ class Kubernetes(AgentCheck):
         to avoid interfering with service discovery
         """
         node_ip, node_name = self.kubeutil.get_node_info()
-        self.log.debug('Processing events on {} [{}]'.format(node_name, node_ip))
+        self.log.debug('Processing events on %s [%s]', node_name, node_ip)
 
         k8s_namespaces = instance.get('namespaces', DEFAULT_NAMESPACES)
         if not isinstance(k8s_namespaces, list):
@@ -533,7 +533,7 @@ class Kubernetes(AgentCheck):
 
         if self.k8s_namespace_regexp:
             namespaces_endpoint = '{}/namespaces'.format(self.kubeutil.kubernetes_api_url)
-            self.log.debug('Kubernetes API endpoint to query namespaces: %s' % namespaces_endpoint)
+            self.log.debug('Kubernetes API endpoint to query namespaces: %s', namespaces_endpoint)
 
             namespaces = self.kubeutil.retrieve_json_auth(namespaces_endpoint).json()
             for namespace in namespaces.get('items', []):

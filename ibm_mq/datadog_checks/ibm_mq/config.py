@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -117,7 +117,7 @@ class IBMMQConfig:
             try:
                 queue_tag_list.append([re.compile(regex_str), [t.strip() for t in tags.split(',')]])
             except TypeError:
-                log.warning('{} is not a valid regular expression and will be ignored'.format(regex_str))
+                log.warning('%s is not a valid regular expression and will be ignored', regex_str)
         return queue_tag_list
 
     @property

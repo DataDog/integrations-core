@@ -1,0 +1,15 @@
+- name: min_collection_interval
+  value:
+    example: 15
+    type: number
+  description: |
+    This changes the collection interval of the check. For more information, see:
+    https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+- name: empty_default_hostname
+  value:
+    example: false
+    type: boolean
+  description: |
+    This forces the check to send metrics with no hostname.
+
+    This is useful for cluster-level checks.

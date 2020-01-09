@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -134,7 +134,7 @@ class HDFSNameNode(AgentCheck):
         if metric_type == self.GAUGE:
             self.gauge(metric_name, value, tags=tags)
         else:
-            self.log.error('Metric type "{}" unknown'.format(metric_type))
+            self.log.error('Metric type "%s" unknown', metric_type)
 
     def _rest_request_to_json(self, url, object_path, query_params, tags=None):
         """
@@ -148,7 +148,7 @@ class HDFSNameNode(AgentCheck):
             query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(query_params)])
             url = urljoin(url, '?' + query)
 
-        self.log.debug('Attempting to connect to "{}"'.format(url))
+        self.log.debug('Attempting to connect to "%s"', url)
 
         try:
             response = self.http.get(url)

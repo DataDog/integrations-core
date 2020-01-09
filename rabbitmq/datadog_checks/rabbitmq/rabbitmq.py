@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2017
+# (C) Datadog, Inc. 2013-present
 # (C) Brett Langdon <brett@blangdon.com> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -174,7 +174,7 @@ class RabbitMQ(AgentCheck):
         if not self.http.options['verify'] and parsed_url.scheme == 'https':
             # Only allow suppressing the warning if not ssl_verify
             suppress_warning = self.http.ignore_tls_warning
-            self.log.warning('Skipping TLS cert validation for %s based on configuration.' % (base_url))
+            self.log.warning('Skipping TLS cert validation for %s based on configuration.', base_url)
 
         # Limit of queues/nodes to collect metrics from
         max_detailed = {
@@ -210,9 +210,9 @@ class RabbitMQ(AgentCheck):
         version = str(overview_response['rabbitmq_version'])
         if version:
             self.set_metadata('version', version)
-            self.log.debug(u"found rabbitmq version {}".format(version))
+            self.log.debug("found rabbitmq version %s", version)
         else:
-            self.log.warning(u"could not retrieve rabbitmq version information")
+            self.log.warning("could not retrieve rabbitmq version information")
 
     def _get_vhosts(self, instance, base_url):
         vhosts = instance.get('vhosts')
@@ -480,7 +480,7 @@ class RabbitMQ(AgentCheck):
                 try:
                     data += self._get_data(urljoin(base_url, url))
                 except Exception as e:
-                    self.log.debug("Couldn't grab queue data from vhost, {}: {}".format(vhost, e))
+                    self.log.debug("Couldn't grab queue data from vhost, %s: %s", vhost, e)
         else:
             data = self._get_data(urljoin(base_url, object_type))
         return data
@@ -562,9 +562,11 @@ class RabbitMQ(AgentCheck):
                     metrics_sent += 1
                 except ValueError:
                     self.log.debug(
-                        "Caught ValueError for {} {} = {}  with tags: {}".format(
-                            METRIC_SUFFIX[object_type], attribute, value, tags
-                        )
+                        "Caught ValueError for %s %s = %s  with tags: %s",
+                        METRIC_SUFFIX[object_type],
+                        attribute,
+                        value,
+                        tags,
                     )
         return metrics_sent
 
@@ -592,7 +594,7 @@ class RabbitMQ(AgentCheck):
                     data += self._get_data(urljoin(base_url, url))
                 except Exception as e:
                     # This will happen if there is no connection data to grab
-                    self.log.debug("Couldn't grab connection data from vhost, {}: {}".format(vhost, e))
+                    self.log.debug("Couldn't grab connection data from vhost, %s: %s", vhost, e)
 
         # sometimes it seems to need to fall back to this
         if grab_all_data or not len(data):

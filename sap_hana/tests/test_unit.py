@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
@@ -89,7 +89,7 @@ def test_custom_query_configuration(instance):
     query['columns'] = [{}]
 
     check.query_custom()
-    log.error.assert_any_call('Custom query result expected 1 column(s), got 2')
+    log.error.assert_any_call('Custom query result expected %s column(s), got %s', 1, 2)
     assert log.error.call_count == 2
     log.reset_mock()
     cursor.fetchmany = rows_generator()
@@ -110,7 +110,7 @@ def test_custom_query_configuration(instance):
     column_2['name'] = 'foo'
 
     check.query_custom()
-    log.error.assert_any_call('Column field `type` is required for column `foo`')
+    log.error.assert_any_call('Column field `type` is required for column `%s`', 'foo')
     log.reset_mock()
     cursor.fetchmany = rows_generator()
 
@@ -118,7 +118,7 @@ def test_custom_query_configuration(instance):
     column_2['type'] = 'unknown'
 
     check.query_custom()
-    log.error.assert_any_call('Invalid submission method `unknown` for metric column `foo`')
+    log.error.assert_any_call('Invalid submission method `%s` for metric column `%s`', 'unknown', 'foo')
     log.reset_mock()
     cursor.fetchmany = rows_generator()
 
@@ -126,7 +126,7 @@ def test_custom_query_configuration(instance):
     column_2['type'] = 'gauge'
 
     check.query_custom()
-    log.error.assert_any_call('Non-numeric value `bar` for metric column `foo`')
+    log.error.assert_any_call('Non-numeric value `%s` for metric column `%s`', 'bar', 'foo')
     log.reset_mock()
     cursor.fetchmany = rows_generator()
 

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from codecs import open  # To use a consistent encoding
@@ -58,5 +58,4 @@ setup(
         ]
     },
     include_package_data=True,
-    entry_points={'console_scripts': ['datadog-checks-downloader=datadog_checks.downloader.cli:download']},
 )

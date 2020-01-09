@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
@@ -111,11 +111,6 @@ class __AgentCheck(object):
         When overriding `__init__` you have to remember that, depending on the configuration,
         the Agent might create several different Check instances and the method would be
         called as many times.
-
-        Agent 5 signature:
-
-            AgentCheck(name, init_config, agentConfig, instances=None)
-            AgentCheck.check(instance)
 
         Agent 6,7 signature:
 

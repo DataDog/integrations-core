@@ -13,6 +13,7 @@ log = logging.getLogger('test_cisco_aci')
 
 CHECK_NAME = 'cisco_aci'
 
+CERTIFICATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certificate')
 FIXTURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 CAPACITY_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'capacity')
 FABRIC_FIXTURES_DIR = os.path.join(FIXTURES_DIR, 'fabric')

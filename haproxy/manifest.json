@@ -1,7 +1,8 @@
 {
   "categories": [
     "web",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": true,
   "description": "The HAProxy integration helps to collect performance and availability metrics from HAProxy instances.",

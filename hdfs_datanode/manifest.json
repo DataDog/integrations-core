@@ -1,7 +1,8 @@
 {
   "categories": [
     "processing",
-    "os & system"
+    "os & system",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "HDFS Datanode",

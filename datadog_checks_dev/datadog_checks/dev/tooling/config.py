@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -48,7 +48,13 @@ DEFAULT_CONFIG = OrderedDict(
                 (
                     (
                         'default',
-                        OrderedDict((('api_key', os.getenv('DD_API_KEY')), ('app_key', os.getenv('DD_APP_KEY')))),
+                        OrderedDict(
+                            (
+                                ('api_key', os.getenv('DD_API_KEY')),
+                                ('app_key', os.getenv('DD_APP_KEY')),
+                                ('site', os.getenv('DD_SITE')),
+                            )
+                        ),
                     ),
                 )
             ),

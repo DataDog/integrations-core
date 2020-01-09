@@ -14,36 +14,6 @@ Follow the instructions below to install and configure this check for an Agent r
 2. Ensure the client machine has been [granted][4] the permission policy [arn:aws:iam::aws:policy/AmazonMSKReadOnlyAccess][5] or equivalent [credentials][6] are available
 3. Install the [Datadog Agent][7]
 
-#### Manual Installation Steps
-
-**Note**: This step will not be necessary in Agent versions 6.16.0+.
-
-[Install][13] the 1.0 release (`datadog-amazon-msk==1.0.0`).
-
-#### Dependencies
-
-**Note**: This step will not be necessary in Agent versions 6.16.0+.
-
-The [boto3][14] client library is required. To install it, run:
-
-##### Unix:
-
-```
-/opt/datadog-agent/embedded/bin/pip install boto3==1.10.27
-```
-
-##### Windows:
-
-For Agent versions <= 6.11:
-```
-"C:\Program Files\Datadog\Datadog Agent\embedded\Scripts\python.exe" -m pip install boto3==1.10.27
-```
-
-For Agent versions >= 6.12:
-```
-"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\Scripts\python.exe" -m pip install boto3==1.10.27
-```
-
 ### Configuration
 
 1. Edit the `amazon_msk.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Amazon MSK performance data. See the [sample amazon_msk.d/conf.yaml][8] for all available configuration options.
@@ -88,5 +58,3 @@ Need help? Contact [Datadog support][12].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/metadata.csv
 [12]: https://docs.datadoghq.com/help
-[13]: https://docs.datadoghq.com/agent/guide/integration-management/#install
-[14]: https://aws.amazon.com/sdk-for-python/

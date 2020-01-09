@@ -11,7 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "gitlab_runner.",
-  "metric_to_check": "go_gc_duration_seconds",
+  "metric_to_check": "gitlab_runner.process_max_fds",
   "name": "gitlab_runner",
   "public_title": "Datadog-Gitlab Runners Integration",
   "short_description": "Track all the metrics from your Gitlab runners with Datadog",

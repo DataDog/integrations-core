@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -55,7 +55,7 @@ def download(package):
     # -vvv:   WARNING
     # -vvvv:  INFO
     # -vvvvv: DEBUG
-    cmd = ['datadog-checks-downloader', '-vvvv', package]
+    cmd = ['python', '-m', 'datadog_checks.downloader', '-vvvv', package]
     out = subprocess.check_output(cmd)
     log.debug(' '.join(cmd))
     log.debug(out)

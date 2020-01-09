@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -238,7 +238,7 @@ class CouchDB2:
                             self.gauge("{0}.{1}.size".format(prefix, key), val['count'], queue_tags)
                         else:
                             self.agent_check.log.debug(
-                                "Queue %s does not have a key 'count'. It will be ignored." % queue
+                                "Queue %s does not have a key 'count'. It will be ignored.", queue
                             )
                     else:
                         self.gauge("{0}.{1}.size".format(prefix, key), val, queue_tags)

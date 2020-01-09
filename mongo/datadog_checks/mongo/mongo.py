@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018-2019
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -726,7 +726,7 @@ class MongoDb(AgentCheck):
             if result['ok'] == 0:
                 raise pymongo.errors.PyMongoError(result['errmsg'])
         except pymongo.errors.PyMongoError:
-            self.log.error("Failed to run custom query for metric {}".format(metric_prefix))
+            self.log.error("Failed to run custom query for metric %s", metric_prefix)
             raise
 
         if mongo_command == 'count':
@@ -1082,7 +1082,7 @@ class MongoDb(AgentCheck):
                         if metric_name_alias.endswith('countps'):
                             GAUGE(self, metric_name_alias[:-2], value, tags=ns_tags)
             except Exception as e:
-                self.log.warning('Failed to record `top` metrics %s' % str(e))
+                self.log.warning('Failed to record `top` metrics %s', e)
 
         if 'local' in dbnames:  # it might not be if we are connectiing through mongos
             # Fetch information analogous to Mongo's db.getReplicationInfo()

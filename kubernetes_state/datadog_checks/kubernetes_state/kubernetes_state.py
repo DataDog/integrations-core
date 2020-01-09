@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2016-2017
+# (C) Datadog, Inc. 2016-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -351,7 +351,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 ksm_instance['label_to_hostname_suffix'] = "-" + clustername
 
         if 'labels_mapper' in ksm_instance and not isinstance(ksm_instance['labels_mapper'], dict):
-            self.log.warning("Option labels_mapper should be a dictionary for {}".format(endpoint))
+            self.log.warning("Option labels_mapper should be a dictionary for %s", endpoint)
 
         return ksm_instance
 
@@ -378,7 +378,7 @@ class KubernetesState(OpenMetricsBaseCheck):
             if condition in mapping:
                 self.service_check(sc_name, mapping[condition], tags=tags)
             else:
-                self.log.debug("Unable to handle %s - unknown condition %s" % (sc_name, condition))
+                self.log.debug("Unable to handle %s - unknown condition %s", sc_name, condition)
 
     def _condition_to_tag_check(self, sample, base_sc_name, mapping, scraper_config, tags=None):
         """
@@ -408,7 +408,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         message = "{} is currently reporting {} = {}".format(node, condition, label_value)
 
         if condition_map['service_check_name'] is None:
-            self.log.debug("Unable to handle {} - unknown condition {}".format(service_check_name, label_value))
+            self.log.debug("Unable to handle %s - unknown condition %s", service_check_name, label_value)
         else:
             self.service_check(service_check_name, mapping[label_value], tags=tags, message=message)
 
@@ -735,7 +735,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 tags += self._build_tags('status', status, scraper_config)
                 self.gauge(metric_name, 1, tags)  # metric value is always one, value is on the tags
         else:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def kube_resourcequota(self, metric, scraper_config):
         """ Quota and current usage by resource type. """
@@ -752,7 +752,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 )
                 self.gauge(metric_base_name.format(resource, suffixes[mtype]), sample[self.SAMPLE_VALUE], tags)
         else:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def kube_limitrange(self, metric, scraper_config):
         """ Resource limits by consumer type. """
@@ -774,7 +774,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 if constraint in constraints:
                     constraint = constraints[constraint]
                 else:
-                    self.error("Constraint %s unsupported for metric %s" % (constraint, metric.name))
+                    self.log.error("Constraint %s unsupported for metric %s", constraint, metric.name)
                     continue
                 resource = sample[self.SAMPLE_LABELS].get("resource")
                 tags = (
@@ -786,7 +786,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                 )
                 self.gauge(metric_base_name.format(resource, constraint), sample[self.SAMPLE_VALUE], tags)
         else:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
 
     def count_objects_by_tags(self, metric, scraper_config):
         """ Count objects by whitelisted tags and submit counts as gauges. """

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -26,6 +26,13 @@ def ensure_unicode(s):
 
 
 to_string = ensure_unicode if PY3 else ensure_bytes
+
+
+def compute_percent(part, total):
+    if total:
+        return part / total * 100
+
+    return 0
 
 
 def total_time_to_temporal_percent(total_time, scale=MILLISECOND):

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
@@ -173,6 +173,9 @@ def construct_pytest_options(
 ):
     # Prevent no verbosity
     pytest_options = '--verbosity={}'.format(verbose or 1)
+
+    if not verbose:
+        pytest_options += ' --tb=short'
 
     if color is not None:
         pytest_options += ' --color=yes' if color else ' --color=no'

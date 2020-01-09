@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -103,11 +103,10 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         "record_namespace": "kube-system",
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         super(KubeSchedulerCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 "kube_scheduler": {
@@ -132,10 +131,10 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         scraper_config = self.get_scraper_config(instance)
         # Set up metric_transformers
         transformers = {}
-        for metric in TRANSFORM_VALUE_HISTOGRAMS:
-            transformers[metric] = self._histogram_from_microseconds_to_second
-        for metric in TRANSFORM_VALUE_SUMMARIES:
-            transformers[metric] = self._summary_from_microseconds_to_second
+        for metric_from, metric_to in TRANSFORM_VALUE_HISTOGRAMS.items():
+            transformers[metric_from] = self._histogram_from_microseconds_to_seconds(metric_to)
+        for metric_from, metric_to in TRANSFORM_VALUE_SUMMARIES.items():
+            transformers[metric_from] = self._summary_from_microseconds_to_seconds(metric_to)
 
         self.process(scraper_config, metric_transformers=transformers)
         # Check the leader-election status
@@ -143,31 +142,3 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
             leader_config = self.LEADER_ELECTION_CONFIG
             leader_config["tags"] = instance.get("tags", [])
             self.check_election_status(leader_config)
-
-    def _histogram_from_microseconds_to_second(self, metric, scraper_config):
-        for index, sample in enumerate(metric.samples):
-            val = sample[self.SAMPLE_VALUE]
-            if not self._is_value_valid(val):
-                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
-                continue
-            if sample[self.SAMPLE_NAME].endswith("_sum"):
-                lst = list(sample)
-                lst[self.SAMPLE_VALUE] = float(val) / 100000
-                metric.samples[index] = tuple(lst)
-            elif sample[self.SAMPLE_NAME].endswith("_bucket") and "Inf" not in sample[self.SAMPLE_LABELS]["le"]:
-                sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]) / 1000000)
-        self.submit_openmetric(TRANSFORM_VALUE_HISTOGRAMS[metric.name], metric, scraper_config)
-
-    def _summary_from_microseconds_to_second(self, metric, scraper_config):
-        for index, sample in enumerate(metric.samples):
-            val = sample[self.SAMPLE_VALUE]
-            if not self._is_value_valid(val):
-                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
-                continue
-            if sample[self.SAMPLE_NAME].endswith("_count"):
-                continue
-            else:
-                lst = list(sample)
-                lst[self.SAMPLE_VALUE] = float(val) / 100000
-                metric.samples[index] = tuple(lst)
-        self.submit_openmetric(TRANSFORM_VALUE_SUMMARIES[metric.name], metric, scraper_config)
