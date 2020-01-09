@@ -180,7 +180,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
     for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id:
-            api_response = get_pr(commit_id, user_config, repo=repo, raw=True)
+            api_response = get_pr(commit_id, user_config, raw=True)
             if api_response.status_code == 401:
                 abort('Access denied. Please ensure your GitHub token has correct permissions.')
             elif api_response.status_code == 403:
