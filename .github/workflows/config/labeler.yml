@@ -1,9 +1,9 @@
 # Configuration for labeler - https://github.com/actions/labeler
 
 documentation:
-- "**/*.md"
 - "*/manifest.json"
 - "*/assets/configuration/**"
+- (?!CHANGELOG)\.md$
 - docs/**
 
 dev/testing:
