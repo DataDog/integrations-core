@@ -3,13 +3,13 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 
-from datadog_checks.mapreduce.metrics import MAPREDUCE_JOB_METRICS, MAPREDUCE_JOB_COUNTER_METRICS, HISTOGRAM, INCREMENT
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.mapreduce.metrics import HISTOGRAM, INCREMENT, MAPREDUCE_JOB_COUNTER_METRICS, MAPREDUCE_JOB_METRICS
 
 
 class MapReduceCheck(AgentCheck):
