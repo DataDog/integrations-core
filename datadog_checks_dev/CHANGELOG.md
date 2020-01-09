@@ -1,6 +1,5 @@
 # CHANGELOG - Datadog Checks Dev
 
-
 ## 1.3.0 / 2020-01-09
 
 * [Added] Add debug option to base ddev command. See [#5386](https://github.com/DataDog/integrations-core/pull/5386).
