@@ -10,12 +10,11 @@ from os.path import isfile
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, itervalues, string_types
-from urllib3.exceptions import InsecureRequestWarning
 
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_string
-from ...utils.warnings_util import disable_warnings_ctx
+from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 
 if PY3:
@@ -288,7 +287,28 @@ class OpenMetricsScraperMixin(object):
         if config['metadata_metric_name'] and config['metadata_label_map']:
             config['_default_metric_transformers'][config['metadata_metric_name']] = self.transform_metadata
 
+        # Set up the HTTP wrapper for this endpoint
+        self._set_up_http_handler(endpoint, config)
+
         return config
+
+    def _set_up_http_handler(self, endpoint, scraper_config):
+        # TODO: Deprecate this behavior in Agent 8
+        if scraper_config['ssl_verify'] is False:
+            scraper_config.setdefault('tls_ignore_warning', True)
+
+        http_handler = self.http_handlers[endpoint] = RequestsWrapper(
+            scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
+
+        headers = http_handler.options['headers']
+
+        bearer_token = scraper_config['_bearer_token']
+        if bearer_token is not None:
+            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
+
+        # TODO: Determine if we really need this
+        headers.setdefault('accept-encoding', 'gzip')
 
     def parse_metric_family(self, response, scraper_config):
         """
@@ -556,53 +576,11 @@ class OpenMetricsScraperMixin(object):
             raise
 
     def send_request(self, endpoint, scraper_config, headers=None):
-        # Determine the headers
-        if headers is None:
-            headers = {}
-        if 'accept-encoding' not in headers:
-            headers['accept-encoding'] = 'gzip'
-        headers.update(scraper_config['extra_headers'])
+        kwargs = {}
+        if headers:
+            kwargs['headers'] = headers
 
-        # Add the bearer token to headers
-        bearer_token = scraper_config['_bearer_token']
-        if bearer_token is not None:
-            auth_header = {'Authorization': 'Bearer {}'.format(bearer_token)}
-            headers.update(auth_header)
-
-        # Determine the SSL verification settings
-        cert = None
-        if isinstance(scraper_config['ssl_cert'], string_types):
-            if isinstance(scraper_config['ssl_private_key'], string_types):
-                cert = (scraper_config['ssl_cert'], scraper_config['ssl_private_key'])
-            else:
-                cert = scraper_config['ssl_cert']
-
-        verify = scraper_config['ssl_verify']
-        # TODO: deprecate use as `ssl_verify` boolean
-        if scraper_config['ssl_ca_cert'] is False:
-            verify = False
-
-        disable_insecure_warnings = False
-        if isinstance(scraper_config['ssl_ca_cert'], string_types):
-            verify = scraper_config['ssl_ca_cert']
-        elif verify is False:
-            disable_insecure_warnings = True
-
-        # Determine the authentication settings
-        username = scraper_config['username']
-        password = scraper_config['password']
-        auth = (username, password) if username is not None and password is not None else None
-
-        with disable_warnings_ctx(InsecureRequestWarning, disable=disable_insecure_warnings):
-            return requests.get(
-                endpoint,
-                headers=headers,
-                stream=True,
-                timeout=scraper_config['prometheus_timeout'],
-                cert=cert,
-                verify=verify,
-                auth=auth,
-            )
+        return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, stream=True, **kwargs)
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """
