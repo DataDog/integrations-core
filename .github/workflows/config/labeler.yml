@@ -3,7 +3,7 @@
 documentation:
 - "*/manifest.json"
 - "*/assets/configuration/**"
-- (?!CHANGELOG).+\.md$
+- (?<!CHANGELOG)\.md$
 - docs/**
 
 dev/testing:
