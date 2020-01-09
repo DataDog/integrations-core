@@ -29,6 +29,7 @@ def test_normalize_api_data_inplace():
                 "cveVulnerabilityDistribution": 64,
                 "pkgDistro": "debian",
                 "pkgDistroRelease": "stretch",
+                "version": "18.11.103",
             },
         },
     ]
@@ -53,6 +54,7 @@ def test_normalize_api_data_inplace():
             "vulnerabilityDistribution": 64,
             "osDistro": "debian",
             "osDistroRelease": "stretch",
+            "scanVersion": "18.11.103",
         },
     ]
 

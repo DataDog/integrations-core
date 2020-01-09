@@ -19,18 +19,14 @@ def normalize_api_data_inplace(data):
     Normalization based on https://docs.paloaltonetworks.com/prisma/prisma-cloud/19-11/prisma-cloud-compute-edition-admin/api/porting_guide.html
     """  # noqa: E501
     for elem in data:
-        if 'info' in elem and 'version' in elem['info']:
-            elem['info']['scanVersion'] = elem['info']['version']
-            del elem['info']['version']
-
         if 'info' in elem:
-            if 'data' in elem['info']:
-                elem.update(elem['info']['data'])
-                del elem['info']['data']
-            elem.update(elem['info'])
-            del elem['info']
+            info = elem.pop('info')
+            if 'version' in info:
+                info['scanVersion'] = info.pop('version')
+            if 'data' in info:
+                elem.update(info.pop('data'))
+            elem.update(info)
 
-        for prev, new in NORMALIZATION_FIELDS.items():
-            if prev in elem:
-                elem[new] = elem[prev]
-                del elem[prev]
+        for old, new in NORMALIZATION_FIELDS.items():
+            if old in elem:
+                elem[new] = elem.pop(old)
