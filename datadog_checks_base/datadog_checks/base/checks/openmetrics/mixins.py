@@ -288,25 +288,27 @@ class OpenMetricsScraperMixin(object):
             config['_default_metric_transformers'][config['metadata_metric_name']] = self.transform_metadata
 
         # Set up the HTTP wrapper for this endpoint
+        self._set_up_http_handler(endpoint, config)
 
+        return config
+
+    def _set_up_http_handler(self, endpoint, scraper_config):
         # TODO: Deprecate this behavior in Agent 8
-        if config['ssl_verify'] is False:
-            config.setdefault('tls_ignore_warning', True)
+        if scraper_config['ssl_verify'] is False:
+            scraper_config.setdefault('tls_ignore_warning', True)
 
         http_handler = self.http_handlers[endpoint] = RequestsWrapper(
-            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+            scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
         )
 
         headers = http_handler.options['headers']
 
-        bearer_token = config['_bearer_token']
+        bearer_token = scraper_config['_bearer_token']
         if bearer_token is not None:
             headers['Authorization'] = 'Bearer {}'.format(bearer_token)
 
         # TODO: Determine if we really need this
         headers.setdefault('accept-encoding', 'gzip')
-
-        return config
 
     def parse_metric_family(self, response, scraper_config):
         """
@@ -574,10 +576,11 @@ class OpenMetricsScraperMixin(object):
             raise
 
     def send_request(self, endpoint, scraper_config, headers=None):
+        kwargs = {}
         if headers:
-            return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, stream=True)
-        else:
-            return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, headers=headers, stream=True)
+            kwargs['headers'] = headers
+
+        return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, stream=True, **kwargs)
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """
