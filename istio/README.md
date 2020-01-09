@@ -108,6 +108,7 @@ Need help? Contact [Datadog support][8].
 Additional helpful documentation, links, and articles:
 
 - [Monitor your Istio service mesh with Datadog][9]
+- [Learn how Datadog collects key metrics to monitor Istio][13]
 
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -121,4 +122,8 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/agent/kubernetes
 [11]: https://istio.io/docs/tasks/telemetry/logs/collecting-logs/
 [12]: https://docs.datadoghq.com/integrations/envoy/#log-collection
+<<<<<<< Updated upstream
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+=======
+[13]: https://www.datadoghq.com/blog/istio-metrics/
+>>>>>>> Stashed changes
