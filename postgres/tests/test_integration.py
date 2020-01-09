@@ -62,17 +62,25 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_schema_metrics(aggregator, integration_check, pg_instance):
-    pg_instance['table_count_limit'] = 1
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
+    expected_public_tags = pg_instance['tags'] + [
         'db:{}'.format(DB_NAME),
         'server:{}'.format(HOST),
         'port:{}'.format(PORT),
         'schema:public',
     ]
-    aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
+
+    expected_custom_schema_tags = pg_instance['tags'] + [
+        'db:{}'.format(DB_NAME),
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'schema:doghouse',
+    ]
+
+    aggregator.assert_metric('postgresql.table.count', value=3, count=1, tags=expected_public_tags)
+    aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_custom_schema_tags)
     aggregator.assert_metric('postgresql.db.count', value=2, count=1)
 
 

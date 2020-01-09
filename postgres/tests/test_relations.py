@@ -72,42 +72,36 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
 @pytest.mark.usefixtures('dd_environment')
 def test_relations_metrics2(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = [
-        {'relation_regex': '.*', 'schemas': ['hello', 'hello2']},
+        {'relation_regex': r'.*', 'schemas': ['doghouse']},
         # Empty schemas means all schemas, even though the first relation matches first.
         {'relation_regex': r'[pP]ersons[-_]?(dup\d)?'},
     ]
-    relations = ['persons', 'personsdup1', 'Personsdup2']
+    relations = ['persons', 'personsdup1', 'Personsdup2', 'doghouse.dog']
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
 
-    expected_tags = {}
-    expected_size_tags = {}
     for relation in relations:
-        expected_tags[relation] = pg_instance['tags'] + [
+        schema, _, table = relation.lower().rpartition('.')
+        if not schema:
+            schema = 'public'
+
+        expected_tags = pg_instance['tags'] + [
             'server:{}'.format(pg_instance['host']),
             'port:{}'.format(pg_instance['port']),
             'db:%s' % pg_instance['dbname'],
-            'table:{}'.format(relation.lower()),
-            'schema:public',
-        ]
-        expected_size_tags[relation] = pg_instance['tags'] + [
-            'server:{}'.format(pg_instance['host']),
-            'port:{}'.format(pg_instance['port']),
-            'db:%s' % pg_instance['dbname'],
-            'table:{}'.format(relation.lower()),
-            'schema:public',
+            'table:{}'.format(table),
+            'schema:{}'.format(schema),
         ]
 
-    for relation in relations:
         for name in RELATION_METRICS:
-            aggregator.assert_metric(name, count=1, tags=expected_tags[relation])
+            aggregator.assert_metric(name, count=1, tags=expected_tags)
 
-        # 'persons' db don't have any indexes
+        # None of the tables have indexes.
         for name in RELATION_INDEX_METRICS:
-            aggregator.assert_metric(name, count=0, tags=expected_tags[relation])
+            aggregator.assert_metric(name, count=0, tags=expected_tags)
 
         for name in RELATION_SIZE_METRICS:
-            aggregator.assert_metric(name, count=1, tags=expected_size_tags[relation])
+            aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
 @pytest.mark.integration

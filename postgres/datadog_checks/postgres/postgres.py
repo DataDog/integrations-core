@@ -330,6 +330,8 @@ class PostgreSql(AgentCheck):
                 config[name] = element.copy()
                 if len(schemas) == 0:
                     config[name]['schemas'] = [ALL_SCHEMAS]
+                else:
+                    config[name]['schemas'] = schemas
             else:
                 self.log.warning('Unhandled relations config type: %s', element)
         return config
@@ -353,7 +355,12 @@ class PostgreSql(AgentCheck):
             if scope['relation'] and len(relations_config) > 0:
                 rel_names = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_name' in v)
                 rel_regex = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_regex' in v)
-                self.log.debug("Running query: %s with relations matching: %s", query, rel_names + rel_regex)
+                self.log.debug(
+                    "Running query: %s with relations matching: relations_names=%s, relations_regexes=%s",
+                    query,
+                    rel_names,
+                    rel_regex,
+                )
                 cursor.execute(query.format(relations_names=rel_names, relations_regexes=rel_regex))
             else:
                 self.log.debug("Running query: %s", query)
@@ -419,6 +426,8 @@ class PostgreSql(AgentCheck):
                     elif row_schema not in config_schemas:
                         self.log.debug("Skipping non matched schema %s for table %s", desc_map['schema'], row_table)
                         continue
+                    else:
+                        self.log.debug('Using schema %s for table %s', row_schema, row_table)
 
             # Build tags
             # descriptors are: (pg_name, dd_tag_name): value
@@ -432,15 +441,14 @@ class PostgreSql(AgentCheck):
 
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
-            # [(metric-map, value), (metric-map, value), ...]
-            # metric-map is: (dd_name, "rate"|"gauge")
-            # shift the results since the first columns will be the "descriptors"
-            # To submit simply call the function for each value v
-            # v[0] == (metric_name, submit_function)
-            # v[1] == the actual value
-            # tags are
-            for v in zip([scope['metrics'][c] for c in cols], row[len(desc) :]):
-                v[0][1](self, v[0][0], v[1], tags=tags)
+            # Submit metrics to the Agent.
+            # NOTE: `scope['metrics']`` is a mapping of `column: (metric_name, metric_function)`
+            # (See also util.py.)
+            metrics = [scope['metrics'][column] for column in cols]
+            values = row[len(desc) :]
+            for ((name, submit_metric), value) in zip(metrics, values):
+                submit_metric(self, name, value, tags=tags)
+
             valid_results_size += 1
 
         return valid_results_size
