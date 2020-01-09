@@ -48,6 +48,11 @@ Follow the instructions below to configure this check for an Agent running on a 
           source: cassandra
           sourcecategory: database
           service: myapplication
+          log_processing_rules:
+             - type: multi_line
+               name: log_start_with_date
+               # pattern to match: DEBUG [ScheduledTasks:1] 2019-12-30
+               pattern: [A-Z]+ +\[[^\]]+\] +\d{4}-\d{2}-\d{2}
     ```
 
     Change the `path` and `service` parameter values and configure them for your environment.
