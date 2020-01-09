@@ -1,5 +1,10 @@
 # CHANGELOG - Vault
 
+## 2.1.0 / 2020-01-09
+
+* [Added] Add support for metric collection without a token. See [#5424](https://github.com/DataDog/integrations-core/pull/5424).
+* [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
+
 ## 2.0.0 / 2019-12-21
 
 * [Changed] Collect prometheus metrics if a client token is available. See [#5177](https://github.com/DataDog/integrations-core/pull/5177).
