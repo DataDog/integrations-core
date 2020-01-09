@@ -27,7 +27,6 @@
     "originalHeight": 80,
     "originalWidth": "calc(100% - 32px)",
     "read_only": false,
-    "source_type_id": 10019,
     "template_variables": [],
     "widgets": [
         {
