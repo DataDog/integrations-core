@@ -224,6 +224,47 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         )
         return kubelet_instance
 
+    def _create_sts_by_pvc(self, pods):
+        """
+        Return a map, e.g.
+            {
+                "<persistentvolumeclaim>|<kube_namespace>": "<statefulset_name>",
+                "<persistentvolumeclaim1>|<kube_namespace1>": "<statefulset_name1>",
+            }
+        that can be used to add a statefulset tag to volume metrics
+        """
+        sts_by_pvc = {}
+        for pod in pods['items']:
+            # find a statefulset pod owner, if any
+            pod_owners = pod.get('metadata', {}).get('ownerReferences')
+            if not pod_owners:
+                continue
+            sts_name = None
+            for owner in pod_owners:
+                if owner['kind'] == 'StatefulSet':
+                    sts_name = owner['name']
+            if sts_name is None:
+                continue
+
+            # get persistentvolumeclaim
+            volumes = pod.get('spec', {}).get('volumes')
+            if not volumes:
+                continue
+            for v in volumes:
+                pvc_name = v.get('persistentVolumeClaim', {}).get('claimName')
+                if pvc_name:
+                    break
+            if not pvc_name:
+                continue
+
+            # get kubernetes namespace of pvc
+            kube_ns = pod.get('metadata', {}).get('namespace')
+            if not kube_ns:
+                continue
+
+            sts_by_pvc[pvc_name + '|' + kube_ns] = sts_name
+        return sts_by_pvc
+
     def check(self, instance):
         kubelet_conn_info = get_connection_info()
         endpoint = kubelet_conn_info.get('url')
@@ -269,6 +310,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.pod_list = self.retrieve_pod_list()
         self.pod_list_utils = PodListUtils(self.pod_list)
 
+        self.sts_by_pvc = self._create_sts_by_pvc(self.pod_list)
+
         self._report_node_metrics(self.instance_tags)
         self._report_pods_running(self.pod_list, self.instance_tags)
         self._report_container_spec_metrics(self.pod_list, self.instance_tags)
@@ -287,7 +330,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
-            self.process(self.kubelet_scraper_config, metric_transformers=self.transformers)
+            self.process(self.kubelet_scraper_config, metric_transformers=self.transformers, sts_by_pvc=self.sts_by_pvc)
 
         # Free up memory
         self.pod_list = None

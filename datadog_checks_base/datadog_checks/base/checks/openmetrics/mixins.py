@@ -25,7 +25,7 @@ if PY3:
 class OpenMetricsScraperMixin(object):
     # pylint: disable=E1101
     # This class is not supposed to be used by itself, it provides scraping behavior but
-    # need to be within a check in the end
+    # needs to be within a check in the end
 
     REQUESTS_CHUNK_SIZE = 1024 * 10  # use 10kb as chunk size when using the Stream feature in requests.get
     # indexes in the sample tuple of core.Metric
@@ -46,6 +46,8 @@ class OpenMetricsScraperMixin(object):
     METRIC_TYPES = ['counter', 'gauge', 'summary', 'histogram']
 
     KUBERNETES_TOKEN_PATH = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+
+    VOLUME_METRIC_PREFIX = 'kubelet.volume.stats'
 
     def __init__(self, *args, **kwargs):
         # Initialize AgentCheck's base class
@@ -366,7 +368,7 @@ class OpenMetricsScraperMixin(object):
         finally:
             response.close()
 
-    def process(self, scraper_config, metric_transformers=None):
+    def process(self, scraper_config, metric_transformers=None, sts_by_pvc=None):
         """
         Polls the data from prometheus and pushes them as gauges
         `endpoint` is the metrics endpoint to use to poll metrics from Prometheus
@@ -379,7 +381,7 @@ class OpenMetricsScraperMixin(object):
             transformers.update(metric_transformers)
 
         for metric in self.scrape_metrics(scraper_config):
-            self.process_metric(metric, scraper_config, metric_transformers=transformers)
+            self.process_metric(metric, scraper_config, metric_transformers=transformers, sts_by_pvc=sts_by_pvc)
 
     def transform_metadata(self, metric, scraper_config):
         labels = metric.samples[0][self.SAMPLE_LABELS]
@@ -456,7 +458,7 @@ class OpenMetricsScraperMixin(object):
                     except KeyError:
                         pass
 
-    def process_metric(self, metric, scraper_config, metric_transformers=None):
+    def process_metric(self, metric, scraper_config, metric_transformers=None, sts_by_pvc=None):
         """
         Handle a prometheus metric according to the following flow:
             - search scraper_config['metrics_mapper'] for a prometheus.metric <--> datadog.metric mapping
@@ -486,7 +488,7 @@ class OpenMetricsScraperMixin(object):
             return
 
         try:
-            self.submit_openmetric(scraper_config['metrics_mapper'][metric.name], metric, scraper_config)
+            self.submit_openmetric(scraper_config['metrics_mapper'][metric.name], metric, scraper_config, sts_by_pvc=sts_by_pvc)
         except KeyError:
             if metric_transformers is not None and metric.name in metric_transformers:
                 try:
@@ -610,7 +612,7 @@ class OpenMetricsScraperMixin(object):
         """
         return self._get_hostname(None, sample, scraper_config)
 
-    def submit_openmetric(self, metric_name, metric, scraper_config, hostname=None):
+    def submit_openmetric(self, metric_name, metric, scraper_config, hostname=None, sts_by_pvc=None):
         """
         For each sample in the metric, report it as a gauge with all labels as tags
         except if a labels dict is passed, in which case keys are label names we'll extract
@@ -632,7 +634,7 @@ class OpenMetricsScraperMixin(object):
                     continue
                 custom_hostname = self._get_hostname(hostname, sample, scraper_config)
                 # Determine the tags to send
-                tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
+                tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname, sts_by_pvc=sts_by_pvc)
                 if metric.type == "counter" and scraper_config['send_monotonic_counter']:
                     self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
                 elif metric.type == "rate":
@@ -845,7 +847,8 @@ class OpenMetricsScraperMixin(object):
         else:
             self.gauge(metric_name, value, tags=tags, hostname=hostname)
 
-    def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None):
+    def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None, sts_by_pvc=None):
+        pvc_name, kube_ns = None, None
         custom_tags = scraper_config['custom_tags']
         _tags = list(custom_tags)
         _tags.extend(scraper_config['_metric_tags'])
@@ -853,6 +856,16 @@ class OpenMetricsScraperMixin(object):
             if label_name not in scraper_config['exclude_labels']:
                 tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
                 _tags.append('{}:{}'.format(to_string(tag_name), to_string(label_value)))
+            if label_name == "persistentvolumeclaim":
+                pvc_name = label_value
+            if label_name == "namespace":
+                kube_ns = label_value
+        # if it is a volume metric, add statefulset tag
+        if metric_name.startswith(self.VOLUME_METRIC_PREFIX) and sts_by_pvc is not None /
+            and pvc_name is not None and kube_ns is not None:
+            sts = sts_by_pvc.get(pvc_name + "|" + kube_ns)
+            if sts:
+                _tags.append('{}:{}'.format('kube_stateful_set', sts))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, sample, custom_tags=custom_tags, hostname=hostname
         )
