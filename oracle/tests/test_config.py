@@ -11,7 +11,7 @@ def test__get_config(check, instance):
     """
     Test the _get_config method
     """
-    server, user, password, service, jdbc_driver, tags, custom_queries, skip_default_metrics = check._get_config(
+    server, user, password, service, jdbc_driver, tags, custom_queries, only_custom_queries = check._get_config(
         instance
     )
     assert user == 'system'
@@ -20,7 +20,7 @@ def test__get_config(check, instance):
     assert jdbc_driver is None
     assert tags == ['optional:tag1']
     assert custom_queries == []
-    assert skip_default_metrics is None
+    assert only_custom_queries is None
 
 
 def test_check_misconfig(check, instance):
