@@ -51,7 +51,7 @@ class MockResponse:
         return json.loads(self._json)
 
 
-def get_mock_get(fixture_group):
+def mock_get_factory(fixture_group):
     def mock_get(url, *args, **kwargs):
         split_url = url.split('/')
         path = split_url[-1]
@@ -68,7 +68,7 @@ def test_check(aggregator, fixture_group):
 
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=get_mock_get(fixture_group), autospec=True):
+    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True):
         check.check(instance)
         check.check(instance)
 
@@ -88,7 +88,7 @@ def test_config_project(aggregator):
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=get_mock_get('prisma_cloud'), autospec=True) as r:
+    with mock.patch('requests.get', side_effect=mock_get_factory('prisma_cloud'), autospec=True) as r:
         check.check(instance)
 
         r.assert_called_with(
