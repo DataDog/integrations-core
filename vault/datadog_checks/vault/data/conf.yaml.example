@@ -59,6 +59,11 @@ instances:
     #
     # client_token_path: <CLIENT_TOKEN_PATH>
 
+    ## @param no_token - boolean - optional - default: false
+    ## Attempt metric collection without a token.
+    #
+    # no_token: false
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

@@ -62,6 +62,7 @@ class Vault(OpenMetricsBaseCheck):
         self._api_url = self.instance.get('api_url', '')
         self._client_token = self.instance.get('client_token')
         self._client_token_path = self.instance.get('client_token_path')
+        self._no_token = is_affirmative(self.instance.get('no_token', False))
         self._tags = list(self.instance.get('tags', []))
         self._tags.append('api_url:{}'.format(self._api_url))
 
@@ -98,7 +99,7 @@ class Vault(OpenMetricsBaseCheck):
             for submit_function in submission_queue:
                 submit_function(tags=tags)
 
-        if self._client_token:
+        if self._client_token or self._no_token:
             self._scraper_config['_metric_tags'] = dynamic_tags
             try:
                 self.process(self._scraper_config)
@@ -226,7 +227,7 @@ class Vault(OpenMetricsBaseCheck):
         methods = {method: getattr(self, '{}_v{}'.format(method, api_version)) for method in self.API_METHODS}
         self._api = Api(**methods)
 
-        if self._client_token_path or self._client_token:
+        if self._client_token_path or self._client_token or self._no_token:
             instance = self.instance.copy()
             instance['prometheus_url'] = '{}/sys/metrics?format=prometheus'.format(self._api_url)
 
@@ -244,10 +245,11 @@ class Vault(OpenMetricsBaseCheck):
             # https://www.vaultproject.io/api/overview#the-x-vault-request-header
             self._set_header(self.http_handlers[instance['prometheus_url']], 'X-Vault-Request', 'true')
 
-            if self._client_token_path:
-                self.renew_client_token()
-            else:
-                self.set_client_token(self._client_token)
+            if not self._no_token:
+                if self._client_token_path:
+                    self.renew_client_token()
+                else:
+                    self.set_client_token(self._client_token)
 
         # https://www.vaultproject.io/api/overview#the-x-vault-request-header
         self._set_header(self.http, 'X-Vault-Request', 'true')
