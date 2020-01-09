@@ -3,8 +3,9 @@
 ## 1.3.0 / 2020-01-09
 
 * [Added] Add debug option to base ddev command. See [#5386](https://github.com/DataDog/integrations-core/pull/5386).
-* [Added] Remove MIB requirement in profiles. See [#5397](https://github.com/DataDog/integrations-core/pull/5397).
-* [Fixed] Noqa except-clause for IOError/OSError. See [#5389](https://github.com/DataDog/integrations-core/pull/5389).
+* [Added] Add meta command to translate MIB names to OIDs in SNMP profiles. See [#5397](https://github.com/DataDog/integrations-core/pull/5397).
+* [Added] Update license years in integration templates. See [#5384](https://github.com/DataDog/integrations-core/pull/5384).
+* [Fixed] Fix a few style lints to handle Python 2. See [#5389](https://github.com/DataDog/integrations-core/pull/5389).
 
 ## 1.2.0 / 2019-12-31
 
