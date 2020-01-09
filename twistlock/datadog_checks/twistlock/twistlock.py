@@ -12,6 +12,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 
 from .config import Config
+from .utils import normalize_api_data_inplace
 
 DOCKERIO_PREFIX = "docker.io/"
 
@@ -27,16 +28,6 @@ SEVERITY_TAGS = {
         "min_severity:high",
         "min_severity:critical",
     ],
-}
-
-NORMALIZATION_FIELDS = {
-    "complianceVulnerabilities": "complianceIssues",
-    "complianceVulnerabilitiesCnt": "complianceIssuesCount",
-    "cveVulnerabilities": "vulnerabilities",
-    "cveVulnerabilitiesCnt": "vulnerabilitiesCount",
-    "cveVulnerabilityDistribution": "vulnerabilityDistribution",
-    "pkgDistro": "osDistro",
-    "pkgDistroRelease": "osDistroRelease",
 }
 
 
@@ -337,29 +328,8 @@ class TwistlockCheck(AgentCheck):
                 err_msg = "Error in response: {}".format(j.get("err"))
                 self.log.error(err_msg)
                 raise Exception(err_msg)
-            self._normalize_api_data_inplace(j)
+            normalize_api_data_inplace(j)
             return j or {}
         except Exception as e:
             self.log.debug("cannot get a response: %s response is: %s", e, response.text)
             raise e
-
-    @staticmethod
-    def _normalize_api_data_inplace(data):
-        """
-        Normalize api data to make it compatible with both standalone Twistlock and Prisma Cloud Twistlock.
-        Normalization based on https://docs.paloaltonetworks.com/prisma/prisma-cloud/19-11/prisma-cloud-compute-edition-admin/api/porting_guide.html
-        """
-        for elem in data:
-            if 'info' in elem and 'version' in elem['info']:
-                elem['info']['scanVersion'] = elem['info']['version']
-                del elem['info']['version']
-
-            if 'info' in elem:
-                elem.update(elem['info'])
-                if 'data' in elem['info']:
-                    elem.update(elem['info']['data'])
-
-            for prev, new in NORMALIZATION_FIELDS.items():
-                if prev in elem:
-                    elem[new] = elem[prev]
-                    del elem[prev]

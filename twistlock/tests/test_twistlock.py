@@ -63,10 +63,7 @@ def get_mock_get(fixture_group):
     return mock_get
 
 
-@pytest.mark.parametrize('fixture_group', [
-    'twistlock',
-    'prisma_cloud',
-])
+@pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
 def test_check(aggregator, fixture_group):
 
     check = TwistlockCheck('twistlock', {}, [instance])
