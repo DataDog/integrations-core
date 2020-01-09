@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -95,6 +95,8 @@ def test(
         'TOX_TESTENV_PASSENV': (
             # Used in .coveragerc for whether or not to show missing line numbers for coverage
             'DDEV_COV_MISSING '
+            # Necessary for getting the user on Windows https://docs.python.org/3/library/getpass.html#getpass.getuser
+            'USERNAME '
             # Space-separated list of pytest options
             'PYTEST_ADDOPTS '
             # https://docs.docker.com/compose/reference/envvars/

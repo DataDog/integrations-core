@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.10.1 / 2019-12-06
+
+* [Fixed] Remove reference to Kubernetes in the service check message for `spark_driver_mode`. See [#5159](https://github.com/DataDog/integrations-core/pull/5159).
+
 ## 1.10.0 / 2019-12-02
 
 * [Added] Add Spark driver support. See [#4631](https://github.com/DataDog/integrations-core/pull/4631). Thanks [mrmuggymuggy](https://github.com/mrmuggymuggy).

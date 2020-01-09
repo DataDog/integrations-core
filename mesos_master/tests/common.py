@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -22,6 +22,8 @@ BAD_INSTANCE = {'url': 'http://localhost:9999', 'tasks': ['hello']}
 CHECK_NAME = "mesos_master"
 
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
+
+MESOS_MASTER_VERSION = os.getenv('MESOS_MASTER_VERSION')
 
 BASIC_METRICS = [
     'mesos.registrar.queued_operations',

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
@@ -203,7 +203,7 @@ class Memcache(AgentCheck):
                         arg,
                     )
                 except Exception as e:
-                    self.log.exception("Unable to retrieve optional stats from memcache instance: {}".format(e))
+                    self.log.exception("Unable to retrieve optional stats from memcache instance: %s", e)
 
     @staticmethod
     def get_items_stats(key, value):

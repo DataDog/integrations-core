@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2019
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
@@ -20,6 +20,8 @@ STATUS_CONFIG = {'apache_status_url': STATUS_URL, 'tags': ['instance:first']}
 AUTO_CONFIG = {'apache_status_url': AUTO_STATUS_URL, 'tags': ['instance:second']}
 
 BAD_CONFIG = {'apache_status_url': 'http://localhost:1234/server-status'}
+
+NO_METRIC_CONFIG = {'apache_status_url': BASE_URL}
 
 APACHE_GAUGES = [
     'apache.performance.idle_workers',

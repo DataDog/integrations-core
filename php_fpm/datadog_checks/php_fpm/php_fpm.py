@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import json
@@ -92,7 +92,7 @@ class PHPFPMCheck(AgentCheck):
             try:
                 pool = self._process_status(status_url, tags, http_host, use_fastcgi)
             except Exception as e:
-                self.log.error("Error running php_fpm check: {}".format(e))
+                self.log.error("Error running php_fpm check: %s", e)
 
         if ping_url is not None:
             self._process_ping(ping_url, ping_reply, tags, pool, http_host, use_fastcgi)
@@ -123,7 +123,7 @@ class PHPFPMCheck(AgentCheck):
                     # successfully got a response, exit the backoff system
                     break
         except Exception as e:
-            self.log.error("Failed to get metrics from {}: {}".format(status_url, e))
+            self.log.error("Failed to get metrics from %s: %s", status_url, e)
             raise
 
         pool_name = data.get('pool', 'default')
@@ -133,13 +133,13 @@ class PHPFPMCheck(AgentCheck):
 
         for key, mname in iteritems(self.GAUGES):
             if key not in data:
-                self.log.warn("Gauge metric {0} is missing from FPM status".format(key))
+                self.log.warning("Gauge metric %s is missing from FPM status", key)
                 continue
             self.gauge(mname, int(data[key]), tags=metric_tags)
 
         for key, mname in iteritems(self.MONOTONIC_COUNTS):
             if key not in data:
-                self.log.warn("Counter metric {0} is missing from FPM status".format(key))
+                self.log.warning("Counter metric %s is missing from FPM status", key)
                 continue
             self.monotonic_count(mname, int(data[key]), tags=metric_tags)
 
@@ -168,7 +168,7 @@ class PHPFPMCheck(AgentCheck):
                 raise Exception("Received unexpected reply to ping: {}".format(response))
 
         except Exception as e:
-            self.log.error("Failed to ping FPM pool {} on URL {}: {}".format(pool_name, ping_url, e))
+            self.log.error("Failed to ping FPM pool %s on URL %s: %s", pool_name, ping_url, e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=sc_tags, message=str(e))
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=sc_tags)

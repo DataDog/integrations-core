@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -60,7 +60,7 @@ class Network(AgentCheck):
         self._exclude_iface_re = None
         exclude_re = instance.get('excluded_interface_re', None)
         if exclude_re:
-            self.log.debug("Excluding network devices matching: %s" % exclude_re)
+            self.log.debug("Excluding network devices matching: %s", exclude_re)
             self._exclude_iface_re = re.compile(exclude_re)
 
         if Platform.is_linux():
@@ -237,7 +237,7 @@ class Network(AgentCheck):
         for metric, val in iteritems(vals_by_metric):
             self.rate('system.net.%s' % metric, val, tags=metric_tags)
             count += 1
-        self.log.debug("tracked %s network metrics for interface %s" % (count, iface))
+        self.log.debug("tracked %s network metrics for interface %s", count, iface)
 
     def _parse_value(self, v):
         try:
@@ -265,7 +265,7 @@ class Network(AgentCheck):
             return False
 
         if proc_location != "/proc":
-            self.warning("Cannot collect connection state: currently with a custom /proc path: %s" % proc_location)
+            self.warning("Cannot collect connection state: currently with a custom /proc path: %s", proc_location)
             return False
 
         return True
@@ -333,15 +333,21 @@ class Network(AgentCheck):
                 self.log.exception("Error collecting connection stats.")
 
         proc_dev_path = "{}/net/dev".format(net_proc_base_location)
-        with open(proc_dev_path, 'r') as proc:
-            lines = proc.readlines()
+        try:
+            with open(proc_dev_path, 'r') as proc:
+                lines = proc.readlines()
+        except IOError:
+            # On Openshift, /proc/net/snmp is only readable by root
+            self.log.debug("Unable to read %s.", proc_dev_path)
+            lines = []
+
         # Inter-|   Receive                                                 |  Transmit
         #  face |bytes     packets errs drop fifo frame compressed multicast|bytes       packets errs drop fifo colls carrier compressed # noqa: E501
         #     lo:45890956   112797   0    0    0     0          0         0    45890956   112797    0    0    0     0       0          0 # noqa: E501
         #   eth0:631947052 1042233   0   19    0   184          0      1206  1208625538  1320529    0    0    0     0       0          0 # noqa: E501
         #   eth1:       0        0   0    0    0     0          0         0           0        0    0    0    0     0       0          0 # noqa: E501
-        for l in lines[2:]:
-            cols = l.split(':', 1)
+        for line in lines[2:]:
+            cols = line.split(':', 1)
             x = cols[1].split()
             # Filter inactive interfaces
             if self._parse_value(x[0]) or self._parse_value(x[8]):
@@ -435,7 +441,7 @@ class Network(AgentCheck):
                 ):
                     available_files.append(metric_file[len('nf_conntrack_') :])
         except Exception as e:
-            self.log.debug("Unable to list the files in {}. {}".format(conntrack_files_location, e))
+            self.log.debug("Unable to list the files in %s. %s", conntrack_files_location, e)
 
         filtered_available_files = pattern_filter(
             available_files, whitelist=whitelisted_files, blacklist=blacklisted_files
@@ -450,9 +456,9 @@ class Network(AgentCheck):
                         value = int(conntrack_file.read().rstrip())
                         self.gauge('system.net.conntrack.{}'.format(metric_name), value, tags=custom_tags)
                     except ValueError:
-                        self.log.debug("{} is not an integer".format(metric_name))
+                        self.log.debug("%s is not an integer", metric_name)
             except IOError as e:
-                self.log.debug("Unable to read {}, skipping {}.".format(metric_file_location, e))
+                self.log.debug("Unable to read %s, skipping %s.", metric_file_location, e)
 
     @staticmethod
     def _get_net_proc_base_location(proc_location):
@@ -490,7 +496,7 @@ class Network(AgentCheck):
                     metric, value = cell.split('=')
                     self.monotonic_count('system.net.conntrack.{}'.format(metric), int(value), tags=tags + cpu_tag)
         except SubprocessOutputEmptyError:
-            self.log.debug("Couldn't use {} to get conntrack stats".format(conntrack_path))
+            self.log.debug("Couldn't use %s to get conntrack stats", conntrack_path)
 
     def _get_metrics(self):
         return {val: 0 for val in itervalues(self.cx_state_gauge)}
@@ -561,7 +567,7 @@ class Network(AgentCheck):
             #          -7       -6       -5        -4       -3       -2        -1
             for h in ("Ipkts", "Ierrs", "Ibytes", "Opkts", "Oerrs", "Obytes", "Coll"):
                 if h not in headers:
-                    self.log.error("%s not found in %s; cannot parse" % (h, headers))
+                    self.log.error("%s not found in %s; cannot parse", h, headers)
                     return False
 
             current = None

@@ -1,11 +1,15 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import threading
 
 from datadog_checks.ssh_check import CheckSSH
 
 THREAD_TIMEOUT = 10
+
+SSH_SERVER_IMAGE = os.environ['SSH_SERVER_IMAGE']
+SSH_SERVER_VERSION = os.environ.get('SSH_SERVER_VERSION')
 
 INSTANCES = {
     'main': {

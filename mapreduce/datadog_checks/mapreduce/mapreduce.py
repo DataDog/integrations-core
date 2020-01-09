@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -130,8 +130,8 @@ class MapReduceCheck(AgentCheck):
         cluster_name = instance.get('cluster_name')
         if cluster_name is None:
             self.warning(
-                "The cluster_name must be specified in the instance configuration, "
-                "defaulting to '{}'".format(self.DEFAULT_CLUSTER_NAME)
+                "The cluster_name must be specified in the instance configuration, defaulting to '%s'",
+                self.DEFAULT_CLUSTER_NAME,
             )
             cluster_name = self.DEFAULT_CLUSTER_NAME
 
@@ -447,7 +447,7 @@ class MapReduceCheck(AgentCheck):
         elif metric_type == self.INCREMENT:
             self.increment(metric_name, value, tags=tags, device_name=device_name)
         else:
-            self.log.error('Metric type "{}" unknown'.format(metric_type))
+            self.log.error('Metric type "%s" unknown', metric_type)
 
     def _rest_request_to_json(self, address, object_path, service_name, tags=None, *args, **kwargs):
         """
@@ -467,7 +467,7 @@ class MapReduceCheck(AgentCheck):
             for directory in args:
                 url = self._join_url_dir(url, directory)
 
-        self.log.debug('Attempting to connect to "{}"'.format(url))
+        self.log.debug('Attempting to connect to "%s"', url)
 
         # Add kwargs as arguments
         if kwargs:

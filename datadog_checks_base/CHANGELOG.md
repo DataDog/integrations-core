@@ -1,5 +1,28 @@
 # CHANGELOG - datadog_checks_base
 
+## 10.1.0 / 2020-01-03
+
+* [Fixed] Ensure logs are lazily formatted. See [#5378](https://github.com/DataDog/integrations-core/pull/5378).
+* [Fixed] Remove Agent 5 conditional imports. See [#5322](https://github.com/DataDog/integrations-core/pull/5322).
+* [Added] Move unit conversion helpers to openmetrics mixin. See [#5364](https://github.com/DataDog/integrations-core/pull/5364).
+* [Fixed] Only ship `contextlib2` on Python 2. See [#5348](https://github.com/DataDog/integrations-core/pull/5348).
+* [Added] Support metadata and service checks for DB utility. See [#5317](https://github.com/DataDog/integrations-core/pull/5317).
+* [Added] Add and prefer configuring an `auth_type` explicitly on RequestsWrapper. See [#5263](https://github.com/DataDog/integrations-core/pull/5263).
+* [Fixed] Lower metadata transformer log level. See [#5282](https://github.com/DataDog/integrations-core/pull/5282).
+* [Added] Add support for AWS Signature Version 4 Signing to the RequestsWrapper. See [#5249](https://github.com/DataDog/integrations-core/pull/5249).
+* [Added] Add extra metrics to DB utility. See [#5225](https://github.com/DataDog/integrations-core/pull/5225).
+* [Added] Upgrade `redis` to 3.3.11. See [#5150](https://github.com/DataDog/integrations-core/pull/5150).
+* [Fixed] Update SNMP requirements. See [#5234](https://github.com/DataDog/integrations-core/pull/5234).
+* [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
+
+## 10.0.2 / 2019-12-09
+
+* [Fixed] Fix normalize for invalid chars and underscore. See [#5172](https://github.com/DataDog/integrations-core/pull/5172).
+
+## 10.0.1 / 2019-12-04
+
+* [Fixed] Ensure metadata is submitted as strings. See [#5139](https://github.com/DataDog/integrations-core/pull/5139).
+
 ## 10.0.0 / 2019-12-02
 
 * [Changed] Aligns `no_proxy` behavior to general convention. See [#5081](https://github.com/DataDog/integrations-core/pull/5081).

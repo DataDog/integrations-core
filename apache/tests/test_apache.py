@@ -1,12 +1,22 @@
-# (C) Datadog, Inc. 2010-2018
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
+import mock
 import pytest
 
 from datadog_checks.apache import Apache
 
-from .common import APACHE_GAUGES, APACHE_RATES, APACHE_VERSION, AUTO_CONFIG, BAD_CONFIG, HOST, PORT, STATUS_CONFIG
+from .common import (
+    APACHE_GAUGES,
+    APACHE_RATES,
+    APACHE_VERSION,
+    AUTO_CONFIG,
+    BAD_CONFIG,
+    HOST,
+    NO_METRIC_CONFIG,
+    PORT,
+    STATUS_CONFIG,
+)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -21,8 +31,27 @@ def test_connection_failure(aggregator, check):
 
 
 @pytest.mark.usefixtures("dd_environment")
+def test_no_metrics_failure(aggregator, check):
+    check = check(NO_METRIC_CONFIG)
+    with pytest.raises(Exception) as excinfo:
+        check.check(NO_METRIC_CONFIG)
+
+    assert str(excinfo.value) == (
+        "No metrics were fetched for this instance. Make sure that http://localhost:18180 " "is the proper url."
+    )
+
+    sc_tags = ['host:localhost', 'port:18180']
+    aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
+    assert len(aggregator._metrics) == 0
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator, check):
+    """
+    This test will try and fail with `/server-status` url first then fallback on `/server-status??auto`
+    """
     check = check(STATUS_CONFIG)
+    check._submit_metadata = mock.MagicMock()
     check.check(STATUS_CONFIG)
 
     tags = STATUS_CONFIG['tags']
@@ -33,6 +62,8 @@ def test_check(aggregator, check):
     aggregator.assert_service_check('apache.can_connect', Apache.OK, tags=sc_tags)
 
     aggregator.assert_all_metrics_covered()
+
+    check._submit_metadata.assert_called_once()
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -65,8 +96,8 @@ def test_e2e(dd_agent_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_metadata(check, datadog_agent):
-    check = check(STATUS_CONFIG)
+def test_metadata_in_content(check, datadog_agent):
+    check = check(AUTO_CONFIG)
     check.check_id = 'test:123'
     major, minor, patch = APACHE_VERSION.split('.')
     version_metadata = {
@@ -77,6 +108,35 @@ def test_metadata(check, datadog_agent):
         'version.raw': APACHE_VERSION,
     }
 
-    check.check(STATUS_CONFIG)
+    check.check(AUTO_CONFIG)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_metadata_in_header(check, datadog_agent, mock_hide_server_version):
+    """For older Apache versions, the version is not in the output. This test asserts that
+    the check can fallback to the headers."""
+    check = check(AUTO_CONFIG)
+    check.check_id = 'test:123'
+    major, minor, patch = APACHE_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': APACHE_VERSION,
+    }
+
+    check.check(AUTO_CONFIG)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+def test_invalid_version(check):
+    check = check({})
+    check.log = mock.MagicMock()
+
+    check._submit_metadata("invalid_version")
+
+    check.log.info.assert_called_once_with("Cannot parse the complete Apache version from %s.", "invalid_version")

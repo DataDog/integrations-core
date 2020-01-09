@@ -6,7 +6,7 @@
 *                   @DataDog/agent-integrations
 
 # Documentation
-/docs/                @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+/docs/                @DataDog/baklava @DataDog/agent-integrations
 *.md                  @DataDog/baklava @DataDog/agent-integrations
 conf.yaml.example     @DataDog/baklava @DataDog/agent-integrations
 conf.yaml.default     @DataDog/baklava @DataDog/agent-integrations @DataDog/agent-core
@@ -77,8 +77,8 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 requirements.in                                           @DataDog/prodsec
 requirements.txt                                          @DataDog/prodsec
 # As well as the signing tool.
-datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec @DataDog/integrations-tools-and-libraries
+datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec
 # As well as the secure downloader.
-/datadog_checks_downloader/                               @DataDog/prodsec @DataDog/integrations-tools-and-libraries
+/datadog_checks_downloader/                               @DataDog/prodsec
 # As well as the wheel building process
-.gitlab-ci.yml                                            @DataDog/prodsec @DataDog/integrations-tools-and-libraries
+.gitlab-ci.yml                                            @DataDog/prodsec

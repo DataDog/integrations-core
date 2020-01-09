@@ -7,3 +7,4 @@ steps:
   displayName: 'Set up integration requirements'
   env:
     DOCKER_PASSWORD: $(DOCKER_PASSWORD)
+    ORACLE_DOCKER_PASSWORD: $(ORACLE_DOCKER_PASSWORD)

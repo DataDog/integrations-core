@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
@@ -146,7 +146,7 @@ class FargateCheck(AgentCheck):
     def submit_perf_metrics(self, instance, container_tags, container_id, container_stats):
         try:
             if container_stats is None:
-                self.log.debug("Empty stats for container {}".format(container_id))
+                self.log.debug("Empty stats for container %s", container_id)
                 return
 
             tags = container_tags[container_id]
@@ -217,4 +217,4 @@ class FargateCheck(AgentCheck):
                 self.rate(metric_name + 'write', write_counter, tags)
 
         except Exception as e:
-            self.warning("Cannot retrieve metrics for {}: {}".format(container_id, e))
+            self.warning("Cannot retrieve metrics for %s: %s", container_id, e)

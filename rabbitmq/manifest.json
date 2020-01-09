@@ -1,7 +1,8 @@
 {
   "categories": [
     "processing",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "RabbitMQ",

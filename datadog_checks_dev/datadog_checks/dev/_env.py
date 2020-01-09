@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -50,6 +50,18 @@ def get_env_vars(raw=False):
                 env_vars[ev.lower()] = value
 
         return env_vars
+
+
+def get_state(key, default=None):
+    value = get_env_vars().get(key.lower())
+    if value is None:
+        return default
+
+    return deserialize_data(value)
+
+
+def save_state(key, value):
+    set_env_vars({key.lower(): serialize_data(value)})
 
 
 def set_up_env():

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2015-2017
+# (C) Datadog, Inc. 2015-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -12,7 +12,7 @@ from six import iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import CheckException, ConfigurationError
+from datadog_checks.errors import ConfigurationError
 
 DEFAULT_MASTER_PORT = 5050
 
@@ -21,7 +21,6 @@ class MesosSlave(AgentCheck):
     GAUGE = AgentCheck.gauge
     MONOTONIC_COUNT = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = "mesos_slave.can_connect"
-    service_check_needed = True
     DEFAULT_TIMEOUT = 5
 
     TASK_STATUS = {
@@ -103,7 +102,7 @@ class MesosSlave(AgentCheck):
         url = self.instance.get('url', '')
         parsed_url = urlparse(url)
         if self.http.options['verify'] and parsed_url.scheme == 'https':
-            self.log.warning('Skipping TLS cert validation for %s based on configuration.' % url)
+            self.log.warning('Skipping TLS cert validation for %s based on configuration.', url)
         if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
             # `default_timeout` config option will be removed with Agent 5
             timeout = (
@@ -120,37 +119,36 @@ class MesosSlave(AgentCheck):
             raise ConfigurationError('Mesos instance missing "url" value.')
 
         url = instance['url']
-        tags = instance.get('tags', [])
+        tags = list(instance.get('tags', []))
         tasks = instance.get('tasks', [])
         master_port = instance.get("master_port", DEFAULT_MASTER_PORT)
 
-        try:
-            self._process_state_info(url, tasks, master_port, tags)
-            self._process_stats_info(url, tags)
-        except CheckException as e:
-            self.log.error("Error running check mesos_slave with exception %s", e)
-            raise
+        self._process_state_info(url, tasks, master_port, tags)
+        self._process_stats_info(url, tags)
 
     def _process_state_info(self, url, tasks, master_port, tags):
-        tags = set(tags)
+        state_tags = list(tags)
         try:
-            state_metrics = self._get_state_metrics(url, tags)
+            state_metrics = self._get_state_metrics(url, state_tags)
             if state_metrics:
                 if 'pid' in state_metrics:
-                    tags.update({'mesos_pid:{0}'.format(state_metrics['pid']), 'mesos_node:slave'})
+                    add_tags = ['mesos_pid:{}'.format(state_metrics['pid']), 'mesos_node:slave']
+                    # Modify the global tags
+                    tags.extend(add_tags)
+                    state_tags.extend(add_tags)
                 self._set_version(state_metrics)
-                self._set_cluster_name(url, master_port, state_metrics, tags)
-                self._process_tasks(tasks, state_metrics, tags)
+                self._set_cluster_name(url, master_port, state_metrics, state_tags)
+                self._process_tasks(tasks, state_metrics, state_tags)
 
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=list(tags))
-        except CheckException:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=list(tags))
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=state_tags)
+        except Exception:
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=state_tags)
             raise
 
     def _process_stats_info(self, url, tags):
-        tags = set(tags)
+        stats_tags = list(tags)
         try:
-            stats_metrics = self._get_stats_metrics(url, tags)
+            stats_metrics = self._get_stats_metrics(url, stats_tags)
             if stats_metrics:
                 metrics = [
                     self.SLAVE_TASKS_METRICS,
@@ -162,10 +160,10 @@ class MesosSlave(AgentCheck):
                 for m in metrics:
                     for key_name, (metric_name, metric_func) in iteritems(m):
                         if key_name in stats_metrics:
-                            metric_func(self, metric_name, stats_metrics[key_name], tags=list(tags))
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=list(tags))
-        except CheckException:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=list(tags))
+                            metric_func(self, metric_name, stats_metrics[key_name], tags=stats_tags)
+                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=stats_tags)
+        except Exception:
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=stats_tags)
             raise
 
     def _get_state_metrics(self, url, tags):
@@ -173,18 +171,18 @@ class MesosSlave(AgentCheck):
         endpoint = url + '/state'
         try:
             state_metrics = self._get_json(endpoint)
-            tags.add("url:{}".format(endpoint))
-        except CheckException:
+            tags.append("url:{}".format(endpoint))
+        except Exception:
             # Mesos version < 0.25
             old_endpoint = endpoint + '.json'
-            tags.add("url:{}".format(old_endpoint))
+            tags.append("url:{}".format(old_endpoint))
             self.log.info('Unable to fetch state from %s, retrying with deprecated endpoint %s', endpoint, old_endpoint)
             state_metrics = self._get_json(old_endpoint)
         return state_metrics
 
     def _get_stats_metrics(self, url, tags):
         endpoint = url + '/metrics/snapshot' if self.version >= [0, 22, 0] else url + '/stats.json'
-        tags.add("url:{}".format(endpoint))
+        tags.append("url:{}".format(endpoint))
         return self._get_json(endpoint)
 
     def _get_json(self, url):
@@ -193,13 +191,12 @@ class MesosSlave(AgentCheck):
             resp.raise_for_status()
         except Timeout:
             self.warning("Timeout for %s seconds when connecting to URL: %s", self.http.options['timeout'], url)
-            raise CheckException
+            raise
         except Exception as e:
             self.warning("Couldn't connect to URL: %s with exception: %s", url, e)
-            # bubble up the exception
-            raise CheckException
+            raise
 
-        self.log.debug("request to url {} returned: {}".format(url, resp))
+        self.log.debug("Request to url %s returned: %s", url, resp)
         return resp.json()
 
     def _set_version(self, state_metrics):
@@ -210,12 +207,12 @@ class MesosSlave(AgentCheck):
 
     def _set_cluster_name(self, url, master_port, state_metrics, tags):
         if 'master_hostname' in state_metrics:
-            master_url = '{0}://{1}:{2}'.format(urlparse(url).scheme, state_metrics['master_hostname'], master_port)
-            master_state = self._get_state_metrics(master_url, tags)
+            master_url = '{}://{}:{}'.format(urlparse(url).scheme, state_metrics['master_hostname'], master_port)
+            master_state = self._get_state_metrics(master_url, [])
             if master_state:
-                self.cluster_name = master_state.get('cluster', None)
+                self.cluster_name = master_state.get('cluster')
                 if self.cluster_name:
-                    tags.add('mesos_cluster:{0}'.format(self.cluster_name))
+                    tags.append('mesos_cluster:{}'.format(self.cluster_name))
 
     def _process_tasks(self, tasks, state_metrics, tags):
         for task in tasks:
@@ -223,7 +220,8 @@ class MesosSlave(AgentCheck):
                 for executor in framework['executors']:
                     for t in executor['tasks']:
                         if task.lower() in t['name'].lower() and t['slave_id'] == state_metrics['id']:
-                            task_tags = ['task_name:' + t['name']] + list(tags)
+                            task_tags = ['task_name:' + t['name']]
+                            task_tags.extend(tags)
                             self.service_check(t['name'] + '.ok', self.TASK_STATUS[t['state']], tags=task_tags)
                             for key_name, (metric_name, metric_func) in iteritems(self.TASK_METRICS):
                                 metric_func(self, metric_name, t['resources'][key_name], tags=task_tags)

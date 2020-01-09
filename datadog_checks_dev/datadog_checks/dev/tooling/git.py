@@ -1,8 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+
+from semver import parse_version_info
 
 from ..subprocess import run_command
 from ..utils import chdir
@@ -36,7 +38,10 @@ def get_commits_since(check_name, target_tag=None):
     Get the list of commits from `target_tag` to `HEAD` for the given check
     """
     root = get_root()
-    target_path = os.path.join(root, check_name)
+    if check_name:
+        target_path = os.path.join(root, check_name)
+    else:
+        target_path = root
     command = 'git log --pretty=%s {}{}'.format('' if target_tag is None else '{}... '.format(target_tag), target_path)
 
     with chdir(root):
@@ -102,11 +107,32 @@ def git_tag_list(pattern=None):
     return list(filter(regex.search, result))
 
 
-def git_ls_files(filename):
+def get_latest_tag(pattern=None):
+    """
+    Return the highest numbered tag (most recent)
+    Filters on pattern first, otherwise based off all tags
+    Removes prefixed `v` if applicable
+    """
+    all_tags = sorted((parse_version_info(t.lstrip('v')), t) for t in git_tag_list(r'^v?\d+\.\d+\.\d+$'))
+
+    # reverse so we have descendant order
+    return list(reversed(all_tags))[0][1]
+
+
+def tracked_by_git(filename):
     """
     Return a boolean value for whether the given file is tracked by git.
     """
     with chdir(get_root()):
         # https://stackoverflow.com/a/2406813
         result = run_command('git ls-files --error-unmatch {}'.format(filename), capture=True)
+        return result.code == 0
+
+
+def ignored_by_git(filename):
+    """
+    Return a boolean value for whether the given file is ignored by git.
+    """
+    with chdir(get_root()):
+        result = run_command('git check-ignore -q {}'.format(filename), capture=True)
         return result.code == 0

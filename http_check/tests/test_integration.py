@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -177,7 +177,7 @@ def test_service_check_instance_name_normalization(aggregator, http_check):
     http_check.check(CONFIG_UNORMALIZED_INSTANCE_NAME['instances'][0])
 
     # Assess instance name normalization
-    normalized_tags = ['url:https://github.com', 'instance:need-to__be_normalized-']
+    normalized_tags = ['url:https://github.com', 'instance:need_to_be_normalized']
     aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=normalized_tags, count=1)
     aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.OK, tags=normalized_tags, count=1)
 

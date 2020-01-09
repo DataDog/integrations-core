@@ -1,5 +1,9 @@
 # CHANGELOG - mesos_slave
 
+## 2.0.1 / 2019-12-04
+
+* [Fixed] Propagate tags properly to stats metrics. See [#5140](https://github.com/DataDog/integrations-core/pull/5140).
+
 ## 2.0.0 / 2019-12-02
 
 * [Changed] Refactor code and properly send a service check for each endpoint. See [#4891](https://github.com/DataDog/integrations-core/pull/4891).

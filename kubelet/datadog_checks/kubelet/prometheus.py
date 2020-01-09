@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
@@ -293,7 +293,7 @@ class CadvisorPrometheusScraperMixin(object):
             labels = []
 
         if metric.type not in METRIC_TYPES:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
             return
 
         samples = self._sum_values_by_context(metric, self._get_entity_id_if_container_metric)
@@ -339,7 +339,7 @@ class CadvisorPrometheusScraperMixin(object):
             labels = []
 
         if metric.type not in METRIC_TYPES:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
             return
 
         samples = self._sum_values_by_context(metric, self._get_pod_uid_if_pod_metric)
@@ -439,8 +439,9 @@ class CadvisorPrometheusScraperMixin(object):
                     self.gauge(pct_m_name, float(usage / float(limit)), tags)
                 else:
                     self.log.debug(
-                        "No corresponding usage found for metric %s and "
-                        "container %s, skipping usage_pct for now." % (pct_m_name, c_name)
+                        "No corresponding usage found for metric %s and container %s, skipping usage_pct for now.",
+                        pct_m_name,
+                        c_name,
                     )
 
     def container_cpu_usage_seconds_total(self, metric, scraper_config):
@@ -521,7 +522,7 @@ class CadvisorPrometheusScraperMixin(object):
         """
         metric_name = scraper_config['namespace'] + '.filesystem.usage'
         if metric.type not in METRIC_TYPES:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
             return
         labels = ['device']
         self._process_usage_metric(metric_name, metric, self.fs_usage_bytes, scraper_config, labels=labels)
@@ -533,14 +534,14 @@ class CadvisorPrometheusScraperMixin(object):
         """
         pct_m_name = scraper_config['namespace'] + '.filesystem.usage_pct'
         if metric.type not in METRIC_TYPES:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
             return
         self._process_limit_metric('', metric, self.fs_usage_bytes, scraper_config, pct_m_name)
 
     def container_memory_usage_bytes(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.memory.usage'
         if metric.type not in METRIC_TYPES:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
             return
         self._process_usage_metric(metric_name, metric, self.mem_usage_bytes, scraper_config)
 
@@ -559,7 +560,7 @@ class CadvisorPrometheusScraperMixin(object):
     def container_memory_swap(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.memory.swap'
         if metric.type not in METRIC_TYPES:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
             return
         self._process_usage_metric(metric_name, metric, self.swap_usage_bytes, scraper_config)
 
@@ -567,7 +568,7 @@ class CadvisorPrometheusScraperMixin(object):
         metric_name = scraper_config['namespace'] + '.memory.limits'
         pct_m_name = scraper_config['namespace'] + '.memory.usage_pct'
         if metric.type not in METRIC_TYPES:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
             return
         self._process_limit_metric(metric_name, metric, self.mem_usage_bytes, scraper_config, pct_m_name=pct_m_name)
 
@@ -575,6 +576,6 @@ class CadvisorPrometheusScraperMixin(object):
         metric_name = scraper_config['namespace'] + '.memory.sw_limit'
         pct_m_name = scraper_config['namespace'] + '.memory.sw_in_use'
         if metric.type not in METRIC_TYPES:
-            self.log.error("Metric type %s unsupported for metric %s" % (metric.type, metric.name))
+            self.log.error("Metric type %s unsupported for metric %s", metric.type, metric.name)
             return
         self._process_limit_metric(metric_name, metric, self.swap_usage_bytes, scraper_config, pct_m_name=pct_m_name)

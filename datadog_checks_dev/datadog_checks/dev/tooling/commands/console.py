@@ -1,9 +1,12 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import sys
 
 import click
+
+from ...tooling.constants import INTEGRATION_REPOS, set_root
 
 try:
     from textwrap import indent as __indent_text
@@ -62,3 +65,14 @@ def abort(text=None, code=1, out=False):
     if text is not None:
         click.secho(text, fg='red', bold=True, err=not out, color=DISPLAY_COLOR)
     sys.exit(code)
+
+
+def validate_check_arg(ctx, param, value):
+    # Treat '.' as a special value, meaning run the command against a repository, not an individual check
+    if value == '.':
+        if os.getcwd() in INTEGRATION_REPOS:
+            raise click.BadParameter('Needs to be the name of a real check or `.` for other repositories')
+        else:
+            set_root(os.getcwd())
+            return
+    return value

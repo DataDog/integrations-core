@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
@@ -199,7 +199,7 @@ def test_self_signed_ok(aggregator, instance_remote_self_signed_ok):
     aggregator.assert_service_check(c.SERVICE_CHECK_CAN_CONNECT, status=c.OK, tags=c._tags, count=1)
     aggregator.assert_service_check(c.SERVICE_CHECK_VERSION, status=c.OK, tags=c._tags, count=1)
     aggregator.assert_service_check(c.SERVICE_CHECK_VALIDATION, status=c.OK, tags=c._tags, count=1)
-    aggregator.assert_service_check(c.SERVICE_CHECK_EXPIRATION, status=c.OK, tags=c._tags, count=1)
+    aggregator.assert_service_check(c.SERVICE_CHECK_EXPIRATION, tags=c._tags, count=1)
 
     aggregator.assert_metric('tls.days_left', count=1)
     aggregator.assert_metric('tls.seconds_left', count=1)

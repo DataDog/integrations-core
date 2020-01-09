@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -7,7 +7,7 @@ import mock
 import pymysql
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from . import common, tags
@@ -18,28 +18,65 @@ COMPOSE_FILE = os.getenv('COMPOSE_FILE')
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance_basic):
-    with docker_run(
-        os.path.join(common.HERE, 'compose', COMPOSE_FILE),
-        env_vars={
-            'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
-            'MYSQL_PORT': str(common.PORT),
-            'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
-            'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
-        },
-        conditions=[
-            WaitFor(init_master, wait=2),
-            WaitFor(init_slave, wait=2),
-            CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
-            populate_database,
+def config_e2e():
+    logs_path = _mysql_logs_path()
+
+    return {
+        'init_config': {},
+        'instances': [{'server': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
+        'logs': [
+            {
+                'type': 'file',
+                'path': '{}/mysql.log'.format(logs_path),
+                'source': 'mysql',
+                'sourcecategory': 'database',
+                'service': 'local_mysql',
+            },
+            {
+                'type': 'file',
+                'path': '{}/mysql_slow.log'.format(logs_path),
+                'source': 'mysql',
+                'sourcecategory': 'database',
+                'service': 'local_mysql',
+                'log_processing_rules': [
+                    {'type': 'multi_line', 'name': 'log_starts_with_time', 'pattern': '# Time: '},
+                ],
+            },
         ],
-    ):
-        yield instance_basic
+    }
 
 
 @pytest.fixture(scope='session')
-def instance_basic():
-    return {'server': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}
+def dd_environment(config_e2e):
+    logs_path = _mysql_logs_path()
+
+    with TempDir('logs') as logs_host_path:
+        e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
+
+        with docker_run(
+            os.path.join(common.HERE, 'compose', COMPOSE_FILE),
+            env_vars={
+                'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
+                'MYSQL_PORT': str(common.PORT),
+                'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
+                'MYSQL_CONF_PATH': _mysql_conf_path(),
+                'MYSQL_LOGS_HOST_PATH': logs_host_path,
+                'MYSQL_LOGS_PATH': logs_path,
+                'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
+            },
+            conditions=[
+                WaitFor(init_master, wait=2),
+                WaitFor(init_slave, wait=2),
+                CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
+                populate_database,
+            ],
+        ):
+            yield config_e2e, e2e_metadata
+
+
+@pytest.fixture(scope='session')
+def instance_basic(config_e2e):
+    return config_e2e['instances'][0]
 
 
 @pytest.fixture
@@ -143,6 +180,39 @@ def _wait_for_it_script():
     return os.path.abspath(script)
 
 
+def _mysql_conf_path():
+    """
+    Return the path to a local MySQL configuration file suited for the current environment.
+    """
+    if MYSQL_FLAVOR == 'mysql':
+        filename = 'mysql.conf'
+    elif MYSQL_FLAVOR == 'mariadb':
+        filename = 'mariadb.conf'
+    else:
+        raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
+
+    conf = os.path.join(common.HERE, 'compose', filename)
+    return os.path.abspath(conf)
+
+
+def _mysql_logs_path():
+    """
+    Return the path to the MySQL logs directory in the MySQL container.
+
+    Should be kept in sync with the log paths set in the local MySQL configuration files
+    (which don't support interpolation of environment variables).
+    """
+    if MYSQL_FLAVOR == 'mysql':
+        if MYSQL_VERSION == '8.0':
+            return '/opt/bitnami/mysql/logs'
+        else:
+            return '/var/log/mysql'
+    elif MYSQL_FLAVOR == 'mariadb':
+        return '/opt/bitnami/mariadb/logs'
+    else:
+        raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
+
+
 def _mysql_docker_repo():
     if MYSQL_FLAVOR == 'mysql':
         # The image for testing Mysql 5.5 is located at `jfullaondo/mysql-replication` or `bergerx/mysql-replication`
@@ -154,3 +224,5 @@ def _mysql_docker_repo():
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'
+    else:
+        raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))

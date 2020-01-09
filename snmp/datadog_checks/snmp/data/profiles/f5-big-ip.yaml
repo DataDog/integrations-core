@@ -1,129 +1,206 @@
 # Profile for F5 BIG-IP devices
 #
-# You need the MIB compiled to get the data. The check will fetch it
-# automatically for you, but otherwise you can run the following command:
-# $ /opt/datadog-agent/embedded/bin/python /opt/datadog-agent/embedded/bin/mibdump.py  --destination-directory=/opt/datadog-agent/embedded/lib/python2.7/site-packages/pysnmp_mibs F5-BIGIP-SYSTEM-MIB
-#
 sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*
-# Memory stats
 metrics:
+  # Memory stats
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysStatMemoryTotal
     forced_type: gauge
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.1.44
+      name: sysStatMemoryTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysStatMemoryUsed
     forced_type: gauge
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.1.45
+      name: sysStatMemoryUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysGlobalTmmStatMemoryTotal
     forced_type: gauge
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.21.28
+      name: sysGlobalTmmStatMemoryTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysGlobalTmmStatMemoryUsed
     forced_type: gauge
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.21.29
+      name: sysGlobalTmmStatMemoryUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysGlobalHostOtherMemoryTotal
     forced_type: gauge
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.44
+      name: sysGlobalHostOtherMemoryTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysGlobalHostOtherMemoryUsed
     forced_type: gauge
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.45
+      name: sysGlobalHostOtherMemoryUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysGlobalHostSwapTotal
     forced_type: gauge
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.46
+      name: sysGlobalHostSwapTotal
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysGlobalHostSwapUsed
     forced_type: gauge
-  # CPU stats
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.20.47
+      name: sysGlobalHostSwapUsed
   - MIB: F5-BIGIP-SYSTEM-MIB
-    table: sysMultiHostCpuTable
+    table:
+      OID: 1.3.6.1.4.1.3375.2.1.7.5.2
+      name: sysMultiHostCpuTable
     forced_type: percent
     symbols:
-      - sysMultiHostCpuUser
-      - sysMultiHostCpuNice
-      - sysMultiHostCpuSystem
-      - sysMultiHostCpuIdle
-      - sysMultiHostCpuIrq
-      - sysMultiHostCpuSoftirq
-      - sysMultiHostCpuIowait
+      - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.4
+        name: sysMultiHostCpuUser
+      - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.5
+        name: sysMultiHostCpuNice
+      - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.6
+        name: sysMultiHostCpuSystem
+      - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.7
+        name: sysMultiHostCpuIdle
+      - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.8
+        name: sysMultiHostCpuIrq
+      - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.9
+        name: sysMultiHostCpuSoftirq
+      - OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.10
+        name: sysMultiHostCpuIowait
     metric_tags:
-      - tag: cpu
-        column: sysMultiHostCpuId
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.3
+          name: sysMultiHostCpuId
+        tag: cpu
   # Basic interface stats
   - MIB: IF-MIB
-    table: ifTable
     forced_type: monotonic_count
+    table:
+      OID: 1.3.6.1.2.1.2.2
+      name: ifTable
     symbols:
-      - ifInErrors
-      - ifOutErrors
+      - OID: 1.3.6.1.2.1.2.2.1.14
+        name: ifInErrors
+      - OID: 1.3.6.1.2.1.2.2.1.20
+        name: ifOutErrors
     metric_tags:
-      - tag: interface
-        column: ifDescr
+      - column:
+          OID: 1.3.6.1.2.1.2.2.1.2
+          name: ifDescr
+        tag: interface
   - MIB: IF-MIB
-    table: ifTable
+    table:
+      OID: 1.3.6.1.2.1.2.2
+      name: ifTable
     symbols:
-      - ifAdminStatus
-      - ifOperStatus
+      - OID: 1.3.6.1.2.1.2.2.1.7
+        name: ifAdminStatus
+      - OID: 1.3.6.1.2.1.2.2.1.8
+        name: ifOperStatus
     metric_tags:
-      - tag: interface
-        column: ifDescr
+      - column:
+          OID: 1.3.6.1.2.1.2.2.1.2
+          name: ifDescr
+        tag: interface
   - MIB: IF-MIB
-    table: ifXTable
+    table:
+      OID: 1.3.6.1.2.1.31.1.1
+      name: ifXTable
     forced_type: monotonic_count
-    symbols:
-      - ifHCInOctets
-      - ifHCOutOctets
     metric_tags:
-      - tag: interface
-        column: ifName
+      - column:
+          OID: 1.3.6.1.2.1.31.1.1.1.1
+          name: ifName
+        tag: interface
+    symbols:
+      - OID: 1.3.6.1.2.1.31.1.1.1.6
+        name: ifHCInOctets
+      - OID: 1.3.6.1.2.1.31.1.1.1.10
+        name: ifHCOutOctets
   # TCP stats
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysTcpStatOpen
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.2
+      name: sysTcpStatOpen
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysTcpStatCloseWait
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.3
+      name: sysTcpStatCloseWait
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysTcpStatFinWait
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.4
+      name: sysTcpStatFinWait
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysTcpStatTimeWait
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.5
+      name: sysTcpStatTimeWait
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysTcpStatAccepts
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.6
+      name: sysTcpStatAccepts
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysTcpStatAcceptfails
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.7
+      name: sysTcpStatAcceptfails
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysTcpStatConnects
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.8
+      name: sysTcpStatConnects
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysTcpStatConnfails
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.12.9
+      name: sysTcpStatConnfails
   # UDP stats
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysUdpStatOpen
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.2
+      name: sysUdpStatOpen
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysUdpStatAccepts
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.3
+      name: sysUdpStatAccepts
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysUdpStatAcceptfails
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.4
+      name: sysUdpStatAcceptfails
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysUdpStatConnects
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.5
+      name: sysUdpStatConnects
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysUdpStatConnfails
     forced_type: monotonic_count
-  # SSL stats
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.13.6
+      name: sysUdpStatConnfails
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysClientsslStatCurConns
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.2
+      name: sysClientsslStatCurConns
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysClientsslStatEncryptedBytesIn
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.10
+      name: sysClientsslStatEncryptedBytesIn
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysClientsslStatEncryptedBytesOut
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.11
+      name: sysClientsslStatEncryptedBytesOut
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysClientsslStatDecryptedBytesIn
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.12
+      name: sysClientsslStatDecryptedBytesIn
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysClientsslStatDecryptedBytesOut
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.13
+      name: sysClientsslStatDecryptedBytesOut
   - MIB: F5-BIGIP-SYSTEM-MIB
-    symbol: sysClientsslStatHandshakeFailures
     forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.1.2.9.29
+      name: sysClientsslStatHandshakeFailures

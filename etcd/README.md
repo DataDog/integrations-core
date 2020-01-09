@@ -12,25 +12,27 @@ Collect Etcd metrics to:
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
-The etcd check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Etcd instance(s).
+The etcd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Etcd instance(s).
 
 ### Configuration
+#### Host
 
-1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your Etcd performance data.
-    See the [sample etcd.d/conf.yaml][5] for all available configuration options.
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-    ```yaml
-	init_config:
+1. Edit the `etcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Etcd performance data. See the [sample etcd.d/conf.yaml][4] for all available configuration options.
+2. [Restart the Agent][5]
 
-	instances:
-		- url: "https://server:port" # API endpoint of your Etcd instance
-    ```
+#### Containerized
 
-2. [Restart the Agent][6]
+For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+
+| Parameter            | Value                             |
+|----------------------|-----------------------------------|
+| `<INTEGRATION_NAME>` | `etcd`                            |
+| `<INIT_CONFIG>`      | blank or `{}`                     |
+| `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%:2379"}` |
 
 ### Validation
 
@@ -64,12 +66,12 @@ To get a better idea of how (or why) to integrate etcd with Datadog, check out o
 
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/etcd/images/etcd_dashboard.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/etcd/datadog_checks/etcd/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/etcd/datadog_checks/etcd/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/monitor-etcd-performance

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -6,6 +6,7 @@ import json
 import os
 
 import mock
+import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.twistlock import TwistlockCheck
@@ -53,7 +54,7 @@ class MockResponse:
 def mock_get(url, *args, **kwargs):
     split_url = url.split('/')
     path = split_url[-1]
-    f_name = os.path.join(HERE, 'fixtures', path)
+    f_name = os.path.join(HERE, 'fixtures', "{}.json".format(path))
     with open(f_name, 'r') as f:
         text_data = f.read()
         return MockResponse(text_data)
@@ -99,3 +100,13 @@ def test_config_project(aggregator):
     # Check if metrics are tagged with the project.
     for metric in METRICS:
         aggregator.assert_metric_has_tag(metric, project_tag)
+
+
+def test_err_response(aggregator):
+
+    check = TwistlockCheck('twistlock', {}, [instance])
+
+    with pytest.raises(Exception, match='^Error in response'):
+        with mock.patch('requests.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):
+
+            check.check(instance)

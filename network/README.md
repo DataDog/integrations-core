@@ -34,17 +34,25 @@ sudo modprobe nf_conntrack_ipv6
 
         ## @param collect_connection_state - boolean - required
         ## Set to true to collect connection states for your interfaces
+        ## Note: this will require either the command `ss` from system package `iproute2` or
+        ## the command `netstat` from the system package `net-tools` to be installed
         #
         - collect_connection_state: false
     ```
 
 2. [Restart the Agent][5] to effect any configuration changes.
 
-**Note**: Some conntrack metrics require running conntrack with privileged access to be retrieved. Configure the following sudoers rule for this to work:
+**Note**: 
+
+Some conntrack metrics require running conntrack with privileged access to be retrieved. 
+
+Linux: Configure the following sudoers rule for this to work:
 
 ```
 dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ```
+
+Kubernetes: Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+. 
 
 ### Validation
 
@@ -73,10 +81,10 @@ The Network check does not include any service checks.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/network/datadog_checks/network/data/conf.yaml.default
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md#1110--2019-05-14
 [9]: https://docs.datadoghq.com/integrations/faq/how-to-send-tcp-udp-host-metrics-via-the-datadog-api

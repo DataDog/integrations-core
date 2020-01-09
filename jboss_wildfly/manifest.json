@@ -17,7 +17,8 @@
   "public_title": "Datadog-JBoss/WildFly Integration",
   "categories": [
     "web",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "type": "check",
   "integration_id": "jboss-wildfly",

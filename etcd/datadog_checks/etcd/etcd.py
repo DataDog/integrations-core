@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import requests
@@ -116,7 +116,7 @@ class Etcd(OpenMetricsBaseCheck):
             r = self.http.post(endpoint, data=data)
             response.update(r.json())
         except Exception as e:
-            self.log.debug('Error accessing GRPC gateway: {}'.format(e))
+            self.log.debug('Error accessing GRPC gateway: %s', e)
 
         return response
 
@@ -203,13 +203,13 @@ class Etcd(OpenMetricsBaseCheck):
                 if key in self_response:
                     self.rate(self.SELF_RATES[key], self_response[key], tags=instance_tags)
                 else:
-                    self.log.warn('Missing key {} in stats.'.format(key))
+                    self.log.warning('Missing key %s in stats.', key)
 
             for key in gauges:
                 if key in self_response:
                     self.gauge(gauges[key], self_response[key], tags=instance_tags)
                 else:
-                    self.log.warn('Missing key {} in stats.'.format(key))
+                    self.log.warning('Missing key %s in stats.', key)
 
         # Gather store metrics
         store_response = self._get_store_metrics(url, critical_tags)
@@ -218,13 +218,13 @@ class Etcd(OpenMetricsBaseCheck):
                 if key in store_response:
                     self.rate(self.STORE_RATES[key], store_response[key], tags=instance_tags)
                 else:
-                    self.log.warn('Missing key {} in stats.'.format(key))
+                    self.log.warning('Missing key %s in stats.', key)
 
             for key in self.STORE_GAUGES:
                 if key in store_response:
                     self.gauge(self.STORE_GAUGES[key], store_response[key], tags=instance_tags)
                 else:
-                    self.log.warn('Missing key {} in stats.'.format(key))
+                    self.log.warning('Missing key %s in stats.', key)
 
         # Gather leader metrics
         if is_leader:
@@ -264,7 +264,7 @@ class Etcd(OpenMetricsBaseCheck):
             # we don't use get() here so we can report a KeyError
             return r.json()[self.HEALTH_KEY]
         except Exception as e:
-            self.log.debug("Can't determine health status: {}".format(e))
+            self.log.debug("Can't determine health status: %s", e)
 
     def _get_self_metrics(self, url, tags):
         return self._get_json(url, "/v2/stats/self", tags)

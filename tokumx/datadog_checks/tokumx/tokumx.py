@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2014-2017
+# (C) Datadog, Inc. 2014-present
 # (C) Leif Walsh <leif.walsh@gmail.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -297,7 +297,7 @@ class TokuMX(AgentCheck):
 
         do_auth = True
         if username is None or password is None:
-            self.log.debug("TokuMX: cannot extract username and password from config %s" % server)
+            self.log.debug("TokuMX: cannot extract username and password from config %s", server)
             do_auth = False
         try:
             if read_preference:
@@ -424,7 +424,7 @@ class TokuMX(AgentCheck):
             try:
                 stats = db.command('dbstats')
             except errors.OperationFailure:
-                self.log.warning("Cannot access dbstats on database %s" % dbname)
+                self.log.warning("Cannot access dbstats on database %s", dbname)
                 continue
             for m, v in stats.items():
                 if m in ['db', 'ok']:

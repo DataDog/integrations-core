@@ -15,14 +15,17 @@
   ],
   "public_title": "Datadog-Aerospike Integration",
   "categories": [
-    "data store"
+    "data store",
+    "autodiscovery"
   ],
   "type": "check",
   "is_public": true,
   "integration_id": "aerospike",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Aerospike Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

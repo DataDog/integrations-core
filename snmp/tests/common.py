@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -23,7 +23,7 @@ PRIV_KEY = 'doggiePRIVkey'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
-SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public', 'autofetch': True}
+SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
 
 SNMP_V3_CONF = {
     'name': 'snmp_v3_conf',
@@ -151,6 +151,21 @@ INVALID_METRICS = [{'MIB': "IF-MIB", 'table': "noIdeaWhatIAmDoingHere", 'symbols
 PLAY_WITH_GET_NEXT_METRICS = [
     {"OID": "1.3.6.1.2.1.4.31.3.1.3.2", "name": "needFallback"},
     {"OID": "1.3.6.1.2.1.4.31.3.1.3.2.1", "name": "noFallbackAndSameResult"},
+]
+
+RESOLVED_TABULAR_OBJECTS = [
+    {
+        "MIB": "IF-MIB",
+        "table": "ifTable",
+        "symbols": [
+            {"name": "ifInOctets", "OID": "1.3.6.1.2.1.2.2.1.10"},
+            {"name": "ifOutOctets", "OID": "1.3.6.1.2.1.2.2.1.16"},
+        ],
+        "metric_tags": [
+            {"tag": "interface", "column": {"name": "ifDescr", "OID": "1.3.6.1.2.1.2.2.1.2"}},
+            {"tag": "dumbindex", "index": 1, "mapping": {1: "one", 2: "two", 3: "three", 90: "other"}},
+        ],
+    }
 ]
 
 

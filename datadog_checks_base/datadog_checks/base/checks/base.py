@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
@@ -97,7 +97,9 @@ class __AgentCheck(object):
 
     FIRST_CAP_RE = re.compile(br'(.)([A-Z][a-z]+)')
     ALL_CAP_RE = re.compile(br'([a-z0-9])([A-Z])')
-    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)|__+')
+    METRIC_REPLACEMENT = re.compile(br'([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)')
+    TAG_REPLACEMENT = re.compile(br'[,\+\*\-/()\[\]{}\s]')
+    MULTIPLE_UNDERSCORE_CLEANUP = re.compile(br'__+')
     DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
     DEFAULT_METRIC_LIMIT = 0
 
@@ -109,11 +111,6 @@ class __AgentCheck(object):
         When overriding `__init__` you have to remember that, depending on the configuration,
         the Agent might create several different Check instances and the method would be
         called as many times.
-
-        Agent 5 signature:
-
-            AgentCheck(name, init_config, agentConfig, instances=None)
-            AgentCheck.check(instance)
 
         Agent 6,7 signature:
 
@@ -620,6 +617,8 @@ class __AgentCheck(object):
             name = self.METRIC_REPLACEMENT.sub(br'_', metric)
             name = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', name).strip(b'_')
 
+        name = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', name)
+
         if prefix is not None:
             name = ensure_bytes(prefix) + b"." + name
 
@@ -628,11 +627,14 @@ class __AgentCheck(object):
     def normalize_tag(self, tag):
         """Normalize tag values.
 
-        It doesn't entirely duplicate backend logic, as the cleanup will happen
-        here. It just removes leading underscores for consistency, and replaces
-        spaces for testing.
+        This happens for legacy reasons, when we cleaned up some characters (like '-')
+        which are allowed in tags.
         """
-        tag = tag.replace(' ', '_').strip('_')
+        if isinstance(tag, text_type):
+            tag = tag.encode('utf-8', 'ignore')
+        tag = self.TAG_REPLACEMENT.sub(br'_', tag)
+        tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', tag)
+        tag = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', tag).strip(b'_')
         return to_string(tag)
 
     def check(self, instance):

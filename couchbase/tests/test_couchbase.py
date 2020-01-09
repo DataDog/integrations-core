@@ -1,8 +1,7 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# stdlib
 import mock
 import pytest
 
@@ -128,7 +127,7 @@ def test_query_monitoring_metrics(aggregator, instance_query, couchbase_containe
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_metadata(aggregator, instance_query, datadog_agent):
+def test_metadata(instance_query, datadog_agent):
     check = Couchbase('couchbase', {}, instances=[instance_query])
     check.check_id = 'test:123'
     check.check(instance_query)
@@ -153,7 +152,8 @@ def test_metadata(aggregator, instance_query, datadog_agent):
         'version.minor': minor,
         'version.patch': patch,
         'version.release': mock.ANY,
-        'version.raw': raw_version,
+        'version.build': 'enterprise',
+        'version.raw': raw_version.replace('-enterprise', '+enterprise'),
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)

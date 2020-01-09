@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # (C)  graemej <graeme.johnson@jadedpixel.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -235,7 +235,7 @@ class Marathon(AgentCheck):
                                 val = float(_attr)
                                 self.gauge(metric_name, val, tags=q_tags)
                         except (KeyError, TypeError):
-                            self.log.warn("Metric unavailable skipping: {}".format(metric_name))
+                            self.log.warning("Metric unavailable skipping: %s", metric_name)
 
                 else:
                     try:
@@ -245,7 +245,7 @@ class Marathon(AgentCheck):
                         val = float(_attr)
                         self.gauge(metric_name, val, tags=q_tags)
                     except (KeyError, TypeError):
-                        self.log.warn("Metric unavailable skipping: {}".format(metric_name))
+                        self.log.warning("Metric unavailable skipping: %s", metric_name)
 
         self.ensure_queue_count(queued, url, acs_url, tags, label_tags, group)
 

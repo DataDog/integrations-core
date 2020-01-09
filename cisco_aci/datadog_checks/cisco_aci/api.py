@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -9,7 +9,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import ConfigurationError, ensure_bytes
 
 from .exceptions import APIAuthException, APIConnectionException, APIParsingException
 
@@ -58,7 +58,7 @@ class SessionWrapper:
             cookie = self.apic_cookie
         elif self.cert_key:
             payload = 'GET{}'.format(path)
-            signature = self.cert_key.sign(payload, padding.PKCS1v15(), hashes.SHA256())
+            signature = self.cert_key.sign(ensure_bytes(payload), padding.PKCS1v15(), hashes.SHA256())
 
             signature = base64.b64encode(signature)
             cookie = (
@@ -128,49 +128,55 @@ class Api:
             msg = "You need to have either a password or a cert"
             raise ConfigurationError(msg)
 
-        self.sessions = []
+        self.sessions = {}
 
     def close(self):
         self.http.session.close()
 
-    def setup_cert_login(self):
-        for aci_url in self.aci_urls:
-            session_wrapper = self.wrapper_factory(
-                aci_url,
-                self.http,
-                cert_name=self.cert_name,
-                cert_key=self.cert_key,
-                appcenter=self.appcenter,
-                username=self.username,
-                cert_key_password=self.cert_key_password,
-                log=self.log,
-            )
-            self.sessions.append(session_wrapper)
+    def setup_cert_login(self, aci_url):
+        session_wrapper = self.wrapper_factory(
+            aci_url,
+            self.http,
+            cert_name=self.cert_name,
+            cert_key=self.cert_key,
+            appcenter=self.appcenter,
+            username=self.username,
+            cert_key_password=self.cert_key_password,
+            log=self.log,
+        )
+        return session_wrapper
 
-    def password_login(self):
-        for aci_url in self.aci_urls:
-            session_wrapper = self.wrapper_factory(aci_url, self.http, username=self.username, log=self.log)
-            session_wrapper.login(self.password)
-            self.sessions.append(session_wrapper)
+    def password_login(self, aci_url):
+        session_wrapper = self.wrapper_factory(aci_url, self.http, username=self.username, log=self.log)
+        session_wrapper.login(self.password)
+        return session_wrapper
+
+    def login_for_url(self, aci_url):
+        if self.password:
+            session_wrapper = self.password_login(aci_url)
+        elif self.cert_key:
+            session_wrapper = self.setup_cert_login(aci_url)
+        else:
+            # Either a password or a cert should be present since we validated that in __init__
+            raise ConfigurationError('Expect either a password or a cert to be present')
+        return session_wrapper
 
     def login(self):
-        if self.password:
-            self.password_login()
-        elif self.cert_key:
-            self.setup_cert_login()
+        for aci_url in self.aci_urls:
+            self.sessions[aci_url] = self.login_for_url(aci_url)
 
     def make_request(self, path):
         # allow for multiple APICs in a cluster to be included in one check so that the check
         # does not bombard a single APIC with dozens of requests and cause it to slow down
-        session = random.choice(self.sessions)
+        aci_url = random.choice(tuple(self.sessions))
         try:
-            return session.make_request(path)
-        except APIAuthException:
+            return self.sessions[aci_url].make_request(path)
+        except APIAuthException as e:
+            self.log.debug('Token expired for url `%s` (will be automatically renewed): %s', aci_url, e)
             # If we get a 403 answer this may mean that the token expired. Let's refresh the token
             # by login again and retry the request. If it fails again, the integration should exit.
-            self.login()
-            session = random.choice(self.sessions)
-            return session.make_request(path)
+            self.sessions[aci_url] = self.login_for_url(aci_url)  # refresh session for url
+            return self.sessions[aci_url].make_request(path)
 
     def get_apps(self, tenant):
         path = "/api/mo/uni/tn-{}.json?query-target=subtree&target-subtree-class=fvAp".format(tenant)

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
@@ -8,7 +8,6 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.errors import CheckException
 from datadog_checks.mesos_slave import MesosSlave
 
 from .common import MESOS_SLAVE_VERSION, PARAMETERS
@@ -176,9 +175,10 @@ def test_can_connect_service_check_state(
         r.get.side_effect = request_mock_effects
         try:
             check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
-            assert expect_exception is False
-        except CheckException:
-            assert expect_exception is True
+            assert not expect_exception
+        except Exception:
+            if not expect_exception:
+                raise
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)
 
@@ -193,8 +193,9 @@ def test_can_connect_service_check_stats(
         r.get.side_effect = request_mock_effects
         try:
             check._process_stats_info('http://hello.com', instance['tags'])
-            assert expect_exception is False
-        except CheckException:
-            assert expect_exception is True
+            assert not expect_exception
+        except Exception:
+            if not expect_exception:
+                raise
 
     aggregator.assert_service_check('mesos_slave.can_connect', count=1, status=expected_status, tags=expected_tags)

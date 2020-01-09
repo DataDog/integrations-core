@@ -7,27 +7,33 @@
 This check lets you track node, vnode and ring performance metrics from RiakKV or RiakTS.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
-The Riak check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Riak servers.
+The Riak check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Riak servers.
 
 ### Configuration
+#### Host
 
-1. Edit the `riak.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample riak.yaml][5] for all available configuration options:
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+##### Metric collection
+
+1. Edit the `riak.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample riak.yaml][4] for all available configuration options:
 
     ```yaml
-    init_config:
+      init_config:
 
-    instances:
-      	- url: http://127.0.0.1:8098/stats # or whatever your stats endpoint is
+      instances:
+
+          ## @param url - string - required
+          ## Riak stats url to connect to.
+          #
+        - url: http://127.0.0.1:8098/stats
     ```
 
-2. [Restart the Agent][6] to start sending Riak metrics to Datadog.
+2. [Restart the Agent][5] to start sending Riak metrics to Datadog.
 
-#### Log collection
+##### Log collection
 
 **Available for Agent >6.0**
 
@@ -65,16 +71,38 @@ The Riak check is included in the [Datadog Agent][3] package, so you don't need 
               pattern: \d{4}\-\d{2}\-\d{2}
     ```
 
-3. [Restart the Agent][6].
+3. [Restart the Agent][5].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                           |
+| -------------------- | ------------------------------- |
+| `<INTEGRATION_NAME>` | `riak`                          |
+| `<INIT_CONFIG>`      | blank or `{}`                   |
+| `<INSTANCE_CONFIG>`  | `{"url":"http://%%host%%:8098/stats"}` |
+
+##### Log collection
+
+**Available for Agent v6.5+**
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][7].
+
+| Parameter      | Value                                                                                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `<LOG_CONFIG>` | `{"source": "riak", "service": "riak", "log_processing_rules": {"type": "multi_line", "name": "new_log_Start_with_date", "pattern": "\d{4}\-\d{2}\-\d{2}"}}` |
 
 ### Validation
 
-[Run the Agent's status subcommand][7] and look for `riak` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `riak` under the Checks section.
 
 ## Data Collected
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
 The Riak check does not include any events.
@@ -85,14 +113,15 @@ The Riak check does not include any events.
 Returns `CRITICAL` if the Agent cannot connect to the Riak stats endpoint to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][9].
+Need help? Contact [Datadog support][10].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/riak/images/riak_graph.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[5]: https://github.com/DataDog/integrations-core/blob/master/riak/datadog_checks/riak/data/conf.yaml.example
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv
-[9]: https://docs.datadoghq.com/help
+[2]: https://app.datadoghq.com/account/settings#agent
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[4]: https://github.com/DataDog/integrations-core/blob/master/riak/datadog_checks/riak/data/conf.yaml.example
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
+[7]: https://docs.datadoghq.com/agent/docker/log/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/riak/metadata.csv
+[10]: https://docs.datadoghq.com/help

@@ -1,13 +1,15 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 
 from ..console import CONTEXT_SETTINGS
 from .changes import changes
+from .dashboard import dash
 from .prometheus import prom
+from .snmp import snmp
 
-ALL_COMMANDS = (changes, prom)
+ALL_COMMANDS = (changes, dash, prom, snmp)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Collection of useful utilities')

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheck
@@ -18,7 +18,7 @@ class ExternalDNSCheck(OpenMetricsBaseCheck):
             instances,
             default_instances={
                 'external_dns': {
-                    'prometheus_url': 'http://external-dns:7979/metrics',
+                    'prometheus_url': 'http://localhost:7979/metrics',
                     'namespace': 'external_dns',
                     'metrics': [DEFAULT_METRICS],
                     'send_histograms_buckets': True,

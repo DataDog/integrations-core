@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 3.5.0 / 2019-12-30
+
+* [Fixed] Handle connection closed. See [#5350](https://github.com/DataDog/integrations-core/pull/5350).
+* [Added] Add version metadata. See [#4874](https://github.com/DataDog/integrations-core/pull/4874).
+
 ## 3.4.0 / 2019-12-02
 
 * [Added] Add lock_type tag to lock metric. See [#5006](https://github.com/DataDog/integrations-core/pull/5006). Thanks [tjwp](https://github.com/tjwp).

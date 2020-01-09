@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -32,5 +32,6 @@ class LinkerdCheck(OpenMetricsBaseCheck):
             super(LinkerdCheck, self).process(scraper_config, metric_transformers=metric_transformers)
         except Exception:
             self.gauge(self.HEALTH_METRIC, 1, tags=tags)
+            raise
         else:
             self.gauge(self.HEALTH_METRIC, 0, tags=tags)

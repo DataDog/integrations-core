@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -8,6 +8,11 @@ import semver
 
 CHANGELOG_LABEL_PREFIX = 'changelog/'
 CHANGELOG_TYPE_NONE = 'no-changelog'
+INTEGRATION_REPOS = [
+    'integrations-core',
+    'integrations-extras',
+    'integrations-internal',
+]
 VERSION_BUMP = OrderedDict(
     [
         ('Added', semver.bump_minor),

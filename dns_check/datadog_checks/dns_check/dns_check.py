@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -74,7 +74,7 @@ class DNSCheck(AgentCheck):
         t0 = time_func()
 
         try:
-            self.log.debug('Querying "{}" record for hostname "{}"...'.format(record_type, hostname))
+            self.log.debug('Querying "%s" record for hostname "%s"...', record_type, hostname)
             if record_type == "NXDOMAIN":
                 try:
                     resolver.query(hostname)
@@ -91,13 +91,13 @@ class DNSCheck(AgentCheck):
             response_time = time_func() - t0
 
         except dns.exception.Timeout:
-            self.log.error('DNS resolution of {} timed out'.format(hostname))
+            self.log.error('DNS resolution of %s timed out', hostname)
             self.report_as_service_check(
                 AgentCheck.CRITICAL, instance, 'DNS resolution of {} timed out'.format(hostname)
             )
 
         except Exception:
-            self.log.exception('DNS resolution of {} has failed.'.format(hostname))
+            self.log.exception('DNS resolution of %s has failed.', hostname)
             self.report_as_service_check(
                 AgentCheck.CRITICAL, instance, 'DNS resolution of {} has failed'.format(hostname)
             )
@@ -106,7 +106,7 @@ class DNSCheck(AgentCheck):
             tags = self._get_tags(instance)
             if response_time > 0:
                 self.gauge('dns.response_time', response_time, tags=tags)
-            self.log.debug('Resolved hostname: {}'.format(hostname))
+            self.log.debug('Resolved hostname: %s', hostname)
             self.report_as_service_check(AgentCheck.OK, instance)
 
     def _check_answer(self, answer, resolves_as):

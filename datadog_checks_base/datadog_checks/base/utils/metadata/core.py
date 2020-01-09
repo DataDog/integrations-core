@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -7,6 +7,7 @@ import re
 
 from six import iteritems
 
+from ..common import to_string
 from .constants import DEFAULT_BLACKLIST
 from .utils import is_primitive
 from .version import parse_version
@@ -32,7 +33,7 @@ class MetadataManager(object):
             self.metadata_transformers.update(metadata_transformers)
 
     def submit_raw(self, name, value):
-        datadog_agent.set_check_metadata(self.check_id, name, value)
+        datadog_agent.set_check_metadata(self.check_id, to_string(name), to_string(value))
 
     def submit(self, name, value, options):
         transformer = self.metadata_transformers.get(name)
@@ -41,9 +42,9 @@ class MetadataManager(object):
                 transformed = transformer(value, options)
             except Exception as e:
                 if is_primitive(value):
-                    self.logger.error('Unable to transform `%s` metadata value `%s`: %s', name, value, e)
+                    self.logger.warning('Unable to transform `%s` metadata value `%s`: %s', name, value, e)
                 else:
-                    self.logger.error('Unable to transform `%s` metadata: %s', name, e)
+                    self.logger.warning('Unable to transform `%s` metadata: %s', name, e)
 
                 return
 

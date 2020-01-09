@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -25,6 +25,9 @@ class HDFSNameNode(AgentCheck):
 
     # Namesystem bean
     HDFS_NAME_SYSTEM_BEAN = 'Hadoop:service=NameNode,name=FSNamesystem'
+
+    # Namesystem info bean
+    HDFS_NAME_SYSTEM_METADATA_BEAN = 'Hadoop:service=NameNode,name=NameNodeInfo'
 
     # Metric types
     GAUGE = 'gauge'
@@ -71,6 +74,7 @@ class HDFSNameNode(AgentCheck):
 
         hdfs_system_state_beans = self._get_jmx_data(jmx_address, self.HDFS_NAME_SYSTEM_STATE_BEAN, tags)
         hdfs_system_beans = self._get_jmx_data(jmx_address, self.HDFS_NAME_SYSTEM_BEAN, tags)
+        hdfs_metadata_beans = self._get_jmx_data(jmx_address, self.HDFS_NAME_SYSTEM_METADATA_BEAN, tags)
 
         # Process the JMX data and send out metrics
         if hdfs_system_state_beans:
@@ -78,6 +82,9 @@ class HDFSNameNode(AgentCheck):
 
         if hdfs_system_beans:
             self._hdfs_namenode_metrics(hdfs_system_beans, self.HDFS_NAME_SYSTEM_METRICS, tags)
+
+        if hdfs_metadata_beans:
+            self._collect_metadata(hdfs_metadata_beans)
 
         # Send an OK service check
         self.service_check(
@@ -127,7 +134,7 @@ class HDFSNameNode(AgentCheck):
         if metric_type == self.GAUGE:
             self.gauge(metric_name, value, tags=tags)
         else:
-            self.log.error('Metric type "{}" unknown'.format(metric_type))
+            self.log.error('Metric type "%s" unknown', metric_type)
 
     def _rest_request_to_json(self, url, object_path, query_params, tags=None):
         """
@@ -141,7 +148,7 @@ class HDFSNameNode(AgentCheck):
             query = '&'.join(['{}={}'.format(key, value) for key, value in iteritems(query_params)])
             url = urljoin(url, '?' + query)
 
-        self.log.debug('Attempting to connect to "{}"'.format(url))
+        self.log.debug('Attempting to connect to "%s"', url)
 
         try:
             response = self.http.get(url)
@@ -187,3 +194,15 @@ class HDFSNameNode(AgentCheck):
             url = urljoin(url, path.lstrip('/'))
 
         return url
+
+    def _collect_metadata(self, value):
+        # only get first info block
+        data = next(iter(value), {})
+
+        version = data.get('SoftwareVersion', None)
+
+        if version is not None:
+            self.set_metadata('version', version)
+            self.log.debug('found hadoop version %s', version)
+        else:
+            self.log.warning('could not retrieve hadoop version information, this was data retrieved: %s', data)

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -18,7 +18,7 @@ from ..utils import (
 )
 from .utils import normalize_package_name
 
-TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+TEMPLATES_DIR = path_join(os.path.dirname(os.path.abspath(__file__)), 'templates', 'integration')
 BINARY_EXTENSIONS = ('.png',)
 SIMPLE_NAME = r'^\w+$'
 
@@ -40,7 +40,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
             'No additional installation is needed on your server.'.format(integration_name=integration_name)
         )
         license_header = (
-            '# (C) Datadog, Inc. {year}\n'
+            '# (C) Datadog, Inc. {year}-present\n'
             '# All rights reserved\n'
             '# Licensed under a 3-clause BSD style license (see LICENSE)\n'.format(year=str(datetime.utcnow().year))
         )

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import OrderedDict
@@ -98,11 +98,11 @@ class Oracle(AgentCheck):
         except cx_Oracle.DatabaseError as e:
             # Fallback to JDBC
             use_oracle_client = False
-            self.log.debug('Oracle instant client unavailable, falling back to JDBC: {}'.format(e))
+            self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
             connect_string = self.JDBC_CONNECT_STRING.format(server, service)
         else:
             use_oracle_client = True
-            self.log.debug('Running cx_Oracle version {0}'.format(cx_Oracle.version))
+            self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
             connect_string = self.CX_CONNECT_STRING.format(user, password, server, service)
 
         try:
@@ -116,7 +116,7 @@ class Oracle(AgentCheck):
                             jpype.java.lang.ClassLoader.getSystemClassLoader()
                         )
                     con = jdb.connect(self.ORACLE_DRIVER_CLASS, connect_string, [user, password], jdbc_driver)
-                except jpype.JException(jpype.java.lang.RuntimeException) as e:
+                except Exception as e:
                     if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                         msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
                         is available.
@@ -150,12 +150,12 @@ class Oracle(AgentCheck):
 
             query = custom_query.get('query')
             if not query:
-                self.log.error('custom query field `query` is required for metric_prefix `{}`'.format(metric_prefix))
+                self.log.error('custom query field `query` is required for metric_prefix `%s`', metric_prefix)
                 continue
 
             columns = custom_query.get('columns')
             if not columns:
-                self.log.error('custom query field `columns` is required for metric_prefix `{}`'.format(metric_prefix))
+                self.log.error('custom query field `columns` is required for metric_prefix `%s`', metric_prefix)
                 continue
 
             with closing(con.cursor()) as cursor:
@@ -163,9 +163,10 @@ class Oracle(AgentCheck):
                 for row in cursor.fetchall():
                     if len(columns) != len(row):
                         self.log.error(
-                            'query result for metric_prefix {}: expected {} columns, got {}'.format(
-                                metric_prefix, len(columns), len(row)
-                            )
+                            'query result for metric_prefix %s: expected %s columns, got %s',
+                            metric_prefix,
+                            len(columns),
+                            len(row),
                         )
                         break
 
@@ -179,16 +180,15 @@ class Oracle(AgentCheck):
                         if column:
                             name = column.get('name')
                             if not name:
-                                self.log.error(
-                                    'column field `name` is required for metric_prefix `{}`'.format(metric_prefix)
-                                )
+                                self.log.error('column field `name` is required for metric_prefix `%s`', metric_prefix)
                                 break
 
                             column_type = column.get('type')
                             if not column_type:
                                 self.log.error(
-                                    'column field `type` is required for column `{}` '
-                                    'of metric_prefix `{}`'.format(name, metric_prefix)
+                                    'column field `type` is required for column `%s` of metric_prefix `%s`',
+                                    name,
+                                    metric_prefix,
                                 )
                                 break
 
@@ -197,16 +197,20 @@ class Oracle(AgentCheck):
                             else:
                                 if not hasattr(self, column_type):
                                     self.log.error(
-                                        'invalid submission method `{}` for column `{}` of '
-                                        'metric_prefix `{}`'.format(column_type, name, metric_prefix)
+                                        'invalid submission method `%s` for column `%s` of metric_prefix `%s`',
+                                        column_type,
+                                        name,
+                                        metric_prefix,
                                     )
                                     break
                                 try:
                                     metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
                                 except (ValueError, TypeError):
                                     self.log.error(
-                                        'non-numeric value `{}` for metric column `{}` of '
-                                        'metric_prefix `{}`'.format(value, name, metric_prefix)
+                                        'non-numeric value `%s` for metric column `%s` of metric_prefix `%s`',
+                                        value,
+                                        name,
+                                        metric_prefix,
                                     )
                                     break
 

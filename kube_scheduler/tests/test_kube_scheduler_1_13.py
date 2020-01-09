@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -56,19 +56,19 @@ def test_check_metrics_1_13(aggregator, mock_metrics, mock_leader):
     assert_metric('.pod_preemption.victims', value=0.0, tags=[])
     assert_metric('.pod_preemption.attempts', value=10.0, tags=[])
     assert_metric('.binding_duration.count', value=0.0, tags=['upper_bound:0.001'])
-    assert_metric('.binding_duration.sum', value=4.08376, tags=[])
+    assert_metric('.binding_duration.sum', value=0.408376, tags=[])
     assert_metric('.scheduling.scheduling_duration.count', value=15.0, tags=['operation:binding'])
     assert_metric('.scheduling.scheduling_duration.sum', value=0.40872890000000006, tags=['operation:binding'])
-    assert_metric('.scheduling.algorithm.predicate_duration.sum', value=0.0278, tags=[])
+    assert_metric('.scheduling.algorithm.predicate_duration.sum', value=0.00278, tags=[])
     assert_metric('.scheduling.e2e_scheduling_duration.count', value=0.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.algorithm_duration.count', value=14.0, tags=['upper_bound:0.001'])
-    assert_metric('.scheduling.e2e_scheduling_duration.sum', value=4.32862, tags=[])
+    assert_metric('.scheduling.e2e_scheduling_duration.sum', value=0.432862, tags=[])
     assert_metric(
         '.scheduling.scheduling_duration.quantile', value=0.0225032, tags=['operation:binding', 'quantile:0.5']
     )
-    assert_metric('.scheduling.algorithm.priority_duration.sum', value=0.00237, tags=[])
+    assert_metric('.scheduling.algorithm.priority_duration.sum', value=0.000237, tags=[])
     assert_metric('.scheduling.algorithm.priority_duration.count', value=15.0, tags=['upper_bound:0.004'])
-    assert_metric('.scheduling.algorithm.preemption_duration.sum', value=0.51777, tags=[])
+    assert_metric('.scheduling.algorithm.preemption_duration.sum', value=0.051777, tags=[])
     assert_metric('.scheduling.algorithm.predicate_duration.count', value=15.0, tags=['upper_bound:0.001'])
     assert_metric('.scheduling.algorithm.preemption_duration.count', value=0.0, tags=['upper_bound:0.001'])
     assert_metric('.schedule_attempts', value=15.0, tags=['result:scheduled'])
@@ -95,7 +95,7 @@ def test_check_metrics_1_13(aggregator, mock_metrics, mock_leader):
         '.volume_scheduling_duration.count', value=15.0, tags=['operation:predicate', 'upper_bound:1024000.0']
     )
     # check historgram transformation from microsecond to second
-    assert_metric('.scheduling.algorithm_duration.sum', value=0.06377, tags=[])
+    assert_metric('.scheduling.algorithm_duration.sum', value=0.006377, tags=[])
     # Leader election mixin
     expected_le_tags = ["record_kind:endpoints", "record_name:kube-scheduler", "record_namespace:kube-system"]
     assert_metric('.leader_election.transitions', value=3, tags=expected_le_tags)

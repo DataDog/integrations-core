@@ -1,14 +1,10 @@
-# (C) Datadog, Inc. 2010-2019
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
 import time
 
-from datadog_checks.base import AgentCheck
-
-
-class BadConfException(Exception):
-    pass
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 
 class TCPCheck(AgentCheck):
@@ -23,26 +19,26 @@ class TCPCheck(AgentCheck):
         self.instance_name = self.normalize_tag(instance['name'])
         port = instance.get('port', None)
         self.timeout = float(instance.get('timeout', 10))
-        self.response_time = instance.get('collect_response_time', False)
+        self.collect_response_time = instance.get('collect_response_time', False)
         self.custom_tags = instance.get('tags', [])
         self.socket_type = None
 
         try:
             self.port = int(port)
         except Exception:
-            raise BadConfException("{} is not a correct port.".format(str(port)))
+            raise ConfigurationError("{} is not a correct port.".format(str(port)))
 
         try:
             self.url = instance.get('host', None)
             split = self.url.split(":")
         except Exception:  # Would be raised if url is not a string
-            raise BadConfException("A valid url must be specified")
+            raise ConfigurationError("A valid url must be specified")
 
         # IPv6 address format: 2001:db8:85a3:8d3:1319:8a2e:370:7348
         if len(split) == 8:  # It may then be a IP V6 address, we check that
             for block in split:
                 if len(block) != 4:
-                    raise BadConfException("{} is not a correct IPv6 address.".format(self.url))
+                    raise ConfigurationError("{} is not a correct IPv6 address.".format(self.url))
 
             self.addr = self.url
             # It's a correct IP V6 address
@@ -54,34 +50,32 @@ class TCPCheck(AgentCheck):
                 self.socket_type = socket.AF_INET
             except Exception:
                 msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(self.url)
-                raise BadConfException(msg)
+                raise ConfigurationError(msg)
 
     def check(self, instance):
-        start = time.time()
+        response_time = None
         try:
-            self.log.debug("Connecting to {} {}".format(self.addr, self.port))
+            self.log.debug("Connecting to %s %d", self.addr, self.port)
             sock = socket.socket(self.socket_type)
             try:
                 sock.settimeout(self.timeout)
+                start = time.time()
                 sock.connect((self.addr, self.port))
+                response_time = time.time() - start
             finally:
                 sock.close()
-
         except socket.timeout as e:
             # The connection timed out because it took more time than the specified value in the yaml config file
             length = int((time.time() - start) * 1000)
-            self.log.info(
-                "{}:{} is DOWN ({}). Connection failed after {} ms".format(self.addr, self.port, str(e), length)
-            )
+            self.log.info("%s:%d is DOWN (%s). Connection failed after %d ms", self.addr, self.port, str(e), length)
             self.report_as_service_check(
                 AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
             )
-
         except socket.error as e:
             length = int((time.time() - start) * 1000)
             if "timed out" in str(e):
 
-                # The connection timed out becase it took more time than the system tcp stack allows
+                # The connection timed out because it took more time than the system tcp stack allows
                 self.log.warning(
                     'The connection timed out because it took more time '
                     'than the system tcp stack allows. You might want to '
@@ -96,37 +90,31 @@ class TCPCheck(AgentCheck):
                         str(e), length
                     ),
                 )
-
             else:
-                self.log.info(
-                    "{}:{} is DOWN ({}). Connection failed after {} ms".format(self.addr, self.port, str(e), length)
-                )
+                self.log.info("%s:%d is DOWN (%s). Connection failed after %d ms", self.addr, self.port, str(e), length)
                 self.report_as_service_check(
                     AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
                 )
-
         except Exception as e:
             length = int((time.time() - start) * 1000)
-            self.log.info(
-                "{}:{} is DOWN ({}). Connection failed after {} ms".format(self.addr, self.port, str(e), length)
-            )
+            self.log.info("%s:%d is DOWN (%s). Connection failed after %d ms", self.addr, self.port, str(e), length)
             self.report_as_service_check(
                 AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length)
             )
+        else:
+            self.log.debug("%s:%d is UP", self.addr, self.port)
+            self.report_as_service_check(AgentCheck.OK, 'UP')
 
-        if self.response_time:
+        if self.collect_response_time and response_time is not None:
             self.gauge(
                 'network.tcp.response_time',
-                time.time() - start,
+                response_time,
                 tags=[
                     'url:{}:{}'.format(instance.get('host', None), self.port),
                     'instance:{}'.format(instance.get('name')),
                 ]
                 + self.custom_tags,
             )
-
-        self.log.debug("{}:{} is UP".format(self.addr, self.port))
-        self.report_as_service_check(AgentCheck.OK, 'UP')
 
     def report_as_service_check(self, status, msg=None):
         if status == AgentCheck.OK:
