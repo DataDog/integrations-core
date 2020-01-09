@@ -136,6 +136,14 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 
 **Note**: Profiles require a local version of the MIBs to be referenced.
 
+* [Generic router](#generic-router-profile)
+* [F5 Big IP](#f5-big--ip-profile)
+* [Dell iDRAC](#dell-idrac-profile)
+* [Cisco Nexus](#cisco-nexus-profile)
+* [Cisco c3850](#cisco-c3850-profile)
+* [Cisco Meraki](#cisco-meraki)
+
+
 ##### Generic router profile
 
 The [generic router profile][20] collects the following metrics.
@@ -328,6 +336,68 @@ MIBs needed for local reference: CISCO-ENTITY-SENSOR-MIB, CISCO-ENTITY-FRU-CONTR
 | `snmp.ifHCOutBroadcastPkts`        | The total number of packets that higher-level protocols requested be transmitted addressed to a broadcast address at this sub-layer including those discarded or not sent.                  | `interface`                |
 
 
+#### Cisco Nexus Profile
+
+The Cisco Nexus Profile collects the following metrics.
+
+MIBs needed for local reference: CISCO-ENTITY-SENSOR-MIB, CISCO-ENTITY-FRU-CONTROL-MIB, CISCO-PROCESS-MIB, CISCO-IF-EXTENSION-MIB, IF-MIB, TCP-MIB, UDP-MIB.
+
+| Metric | Description | Tags |
+| --- | --- | --- |
+| `snmp.entSensorValue` | The most recent measurement seen by the sensor. | `sensor_type`,`sensor_id` |
+| `snmp.cefcFRUPowerAdminStatus` | Administratively desired FRU power state. | `fru` |
+| `snmp.cefcFRUPowerOperStatus` | Operational FRU power state. | `fru` |
+| `snmp.cefcFRUCurrent` | Current supplied by the FRU (positive values) or current required to operate the FRU (negative values). | `fru` |
+| `snmp.cpmCPUTotalMonIntervalValue` | The overall CPU busy percentage in the last cpmCPUMonInterval period. | `cpu` |
+| `snmp.cpmCPUMemoryUsed` | The overall CPU wide system memory which is currently
+under use. | `cpu` |
+| `snmp.cpmCPUMemoryFree` | The overall CPU wide system memory which is currently
+free. | `cpu` |
+| `snmp.cieIfResetCount` | The number of times the interface was internally reset and brought up. | `interface` |
+| ` snmp.ifInErrors`                 | The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.                                                                                                 | `interface`                |
+| `snmp.ifOutErrors`                 | The number of outbound packets that could not be transmitted because of errors.                                                                                                                                        | `interface`                |
+| `snmp.ifInDiscards`                | The number of inbound packets which were chosen to be discarded even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.                                                 | `interface`                |
+| `snmp.ifOutDiscards`               | The number of outbound packets chosen to be discarded even though no errors had been detected to prevent their being transmitted.                                                                           | `interface`                |
+| `snmp.ifAdminStatus`               | The desired state of the interface.                                                                                                                                                                                    | `interface`                |
+| `snmp.ifOperStatus`                | The current operational state of the interface.                                                                                                                                                                        | `interface`                |
+| `snmp.ifHCInOctets`                | The total number of octets received on the interface including framing characters.                                                                                                                                    | `interface`                |
+| `snmp.ifHCInUcastPkts`             | The number of packets delivered by this sub-layer to a higher (sub-)layer not addressed to a multicast or broadcast address at this sub-layer.                                                            | `interface`                |
+| `snmp.ifHCInBroadcastPkts`         | The number of packets delivered by this sub-layer to a higher (sub-)layer addressed to a broadcast address at this sub-layer.                                                                             | `interface`                |
+| `snmp.ifHCOutOctets`               | The total number of octets transmitted out of the interface including framing characters.                                                                                                                             | `interface`                |
+| `snmp.ifHCOutUcastPkts`            | The total number of packets that higher-level protocols requested be transmitted that were not addressed to a multicast or broadcast address at this sub-layer including those discarded or not sent. | `interface`                |
+| `snmp.ifHCOutMulticastPkts`        | The total number of packets that higher-level protocols requested be transmitted that were addressed to a multicast address at this sub-layer including those discarded or not sent.                  | `interface`                |
+| `snmp.ifHCOutBroadcastPkts`        | The total number of packets that higher-level protocols requested be transmitted addressed to a broadcast address at this sub-layer including those discarded or not sent.                  | `interface`                |
+| `snmp.tcpActiveOpens`                  | The number of times that TCP connections have made a direct transition to the SYN-SENT state from the CLOSED state.                                                                                                                                                       |                          |
+| `snmp.tcpPassiveOpens`                 | The number of times TCP connections have made a direct transition to the SYN-RCVD state from the LISTEN state.                                                                                                                                                            |                          |
+| `snmp.tcpAttemptFails`                 | The number of times that TCP connections have made a direct transition to the CLOSED state from either the SYN-SENT state or the SYN-RCVD state, plus the number of times that TCP connections have made a direct transition to the LISTEN state from the SYN-RCVD state. |                          |
+| `snmp.tcpEstabResets`                  | The number of times that TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.                                                                                                                     |                          |
+| `snmp.tcpCurrEstab`                    | The number of TCP connections for which the current state is either ESTABLISHED or CLOSE-WAIT.                                                                                                                                                                            |                          |
+| `snmp.tcpHCInSegs`                     | The total number of segments received, including those received in error.                                                                                                                                                                                                 |                          |
+| `snmp.tcpHCOutSegs`                    | The total number of segments sent, including those on current connections but excluding those containing only retransmitted octets.                                                                                                                                       |                          |
+| `snmp.tcpRetransSegs`                  | The total number of segments retransmitted; that is, the number of TCP segments transmitted containing one or more previously transmitted octets.                                                                                                                         |                          |
+| `snmp.tcpInErrs`                       | The total number of segments received in error (e.g., bad TCP checksums).                                                                                                                                                                                                 |                          |
+| `snmp.tcpOutRsts`                      | The number of TCP segments sent containing the RST flag.                                                                                                                                                                                                                  |                          |
+| `snmp.udpHCInDatagrams`                | The total number of UDP datagrams delivered to UDP users, for devices that can receive more than 1 million UDP datagrams per second.                                                                                                                                      |                          |
+| `snmp.udpNoPorts`                      | The total number of received UDP datagrams for which there was no application at the destination port.                                                                                                                                                                    |                          |
+| `snmp.udpInErrors`                     | The number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.                                                                                                                               |                          |
+| `snmp.udpHCOutDatagrams`               | The total number of UDP datagrams sent from this entity, for devices that can transmit more than 1 million UDP datagrams per second.
+
+#### Cisco Meraki Profile
+The Cisco Meraki device profile collects the following metrics.
+
+MIBs needed for local reference: MERAKI-CLOUD-CONTROLLER-MIB.
+
+| Metric | Description | Tags |
+| --- | --- | --- |
+| `snmp.devStatus` | The status of the device's connection to the Meraki Cloud Controller | `device`, `product`, `network` |
+| `snmp.devClientCount` | The number of clients currently associated with the device. | `device`, `product`, `network` |
+| `snmp.devInterfaceSentPkts` | The number of packets sent on this interface.| `interface` |
+| `snmp.devInterfaceRecvPkts` | The number of packets received on this interface. | `interface` |
+| `snmp.devInterfaceSentBytes` | The number of bytes sent on this interface. | `interface` |
+| `snmp.devInterfaceRecvBytes` | The number of bytes received on this interface. | `interface` |
+
+
+
 ##### Dell iDRAC Profile
 The Dell iDRAC device profile collects the following metrics.
 
@@ -335,35 +405,37 @@ MIBs needed for local reference: IDRAC-MIB-SMIv2, INTEL-LAN-ADAPTERS-MIB/
 
 | Metric | Description | Tags |
 | --- | --- | --- |
-| `systemStateChassisStatus` | The status of this system chassis. | `chassis_index` |
-| `systemStatePowerUnitStatusRedundancy` | The combined redundancy status of all power units of this system. |`chassis_index`  |
-| `systemStatePowerSupplyStatusCombined` | The combined status of all power supplies of this system. | `chassis_index` |
-| `systemStateAmperageStatusCombined` | The combined status of all amperage probes of this system. |`chassis_index`  |
-| `systemStatePowerSupplyStatusCombined` | The combined status of all power supplies of this system.  |`chassis_index`  |
-| `systemStateCoolingUnitStatusRedundancy` | The combined redundancy status of all cooling units of this system.| `chassis_index` |
-| `systemStateCoolingDeviceStatusCombined` | The combined status of all cooling devices of this system. |`chassis_index`  |
-| `systemStateTemperatureStatusCombined` | The combined status of all temperature probes of this system.|`chassis_index`  |
-| `systemStateMemoryDeviceStatusCombined` | The combined status of all memory devices of this system. | `chassis_index` |
-| `systemStateChassisIntrusionStatusCombined` | The combined status of all intrusion detection devices of this system chassis. | `chassis_index` |
-| `systemStatePowerUnitStatusCombined` | The combined status of all power units of this chassis. | `chassis_index` |
-| `systemStateCoolingUnitStatusCombined` | The combined status of all cooling units of this system.  | `chassis_index` |
-| `systemStateProcessorDeviceStatusCombined` | The combined status of all processor devices of this system. |`chassis_index`  |
-| `systemStateTemperatureStatisticsStatusCombined` | The combined status of all temperature statistics objects of this system. | `chassis_index` |
-| `physicalDiskState`| The current state of this physical disk. Possible states: 1 - The current state could not be determined., 2 - The physical disk is available for use, but no RAID configuration has been assigned. 3- A RAID configuration has been assigned to the physical disk. 4- The physical disk has been moved from another controller and contains all or some portion of a virtual disk. 5 - The physical disk is not available to the RAID controller. 6 - The physical disk is currently blocked by controller. 7 - The physical disk is not operational. 8 - The physical disk is not a RAID capable disk. 9 - The physical disk has been removed. 10 - The physical disk media has been placed in read only mode.| `disk_name`|
-| `physicalDiskCapacityInMB`| The size of the physical disk in megabytes. |`disk_name`  |
-| `physicalDiskUsedSpaceInMB`| The amount of used space in megabytes on the physical disk. |`disk_name`  |
-| `physicalDiskFreeSpaceInMB`| The amount of free space in megabytes on the physical disk.  |`disk_name` |
-| `enclosurePowerSupplyState`| The current state of this power supply unit. Possible states: 1- The current state could not be determined. 2- The power supply unit is operating normally. 3- The power supply unit has encountered a hardware problem or is not responding. 4- The power supply unit is no longer connected to the enclosure or there exists a problem communicating to it. 5- The power supply unit is unstable. |`supply_name`|
-| `adapterRxPackets`| Total packets received. |`adapter` |
-| `adapterTxPackets`| Total packets transmitted. | `adapter`|
-| `adapterRxBytes`| Total number of bytes received. |`adapter`|
-| `adapterTxBytes`| Total number of bytes transmitted. | `adapter`|
-| `adapterRxErrors`| Total number of packets received with errors (packets that failed to reach the protocol). |`adapter`|
-| `adapterTxErrors`| Total number of packets that failed to transmit. |`adapter`|
-| `adapterRxDropped`| Total number of receive packets dropped due to overrun. |`adapter`|
-| `adapterTxDropped`| Total number of transmit packets dropped due to successive collisions. |`adapter`|
-| `adapterRxMulticast`| Total number of Multicast packets received. |`adapter`|
-| `adapterCollisions`| Total number of single collisions. |`adapter`|
+| `snmp.systemStateChassisStatus` | The status of this system chassis. | `chassis_index` |
+| `snmp.systemStatePowerUnitStatusRedundancy` | The combined redundancy status of all power units of this system. |`chassis_index`  |
+| `snmp.systemStatePowerSupplyStatusCombined` | The combined status of all power supplies of this system. | `chassis_index` |
+| `snmp.systemStateAmperageStatusCombined` | The combined status of all amperage probes of this system. |`chassis_index`  |
+| `snmp.systemStatePowerSupplyStatusCombined` | The combined status of all power supplies of this system.  |`chassis_index`  |
+| `snmp.systemStateCoolingUnitStatusRedundancy` | The combined redundancy status of all cooling units of this system.| `chassis_index` |
+| `snmp.systemStateCoolingDeviceStatusCombined` | The combined status of all cooling devices of this system. |`chassis_index`  |
+| `snmp.systemStateTemperatureStatusCombined` | The combined status of all temperature probes of this system.|`chassis_index`  |
+| `snmp.systemStateMemoryDeviceStatusCombined` | The combined status of all memory devices of this system. | `chassis_index` |
+| `snmp.systemStateChassisIntrusionStatusCombined` | The combined status of all intrusion detection devices of this system chassis. | `chassis_index` |
+| `snmp.systemStatePowerUnitStatusCombined` | The combined status of all power units of this chassis. | `chassis_index` |
+| `snmp.systemStateCoolingUnitStatusCombined` | The combined status of all cooling units of this system.  | `chassis_index` |
+| `snmp.systemStateProcessorDeviceStatusCombined` | The combined status of all processor devices of this system. |`chassis_index`  |
+| `snmp.systemStateTemperatureStatisticsStatusCombined` | The combined status of all temperature statistics objects of this system. | `chassis_index` |
+| `snmp.physicalDiskState`| The current state of this physical disk. Possible states: 1 - The current state could not be determined., 2 - The physical disk is available for use, but no RAID configuration has been assigned. 3- A RAID configuration has been assigned to the physical disk. 4- The physical disk has been moved from another controller and contains all or some portion of a virtual disk. 5 - The physical disk is not available to the RAID controller. 6 - The physical disk is currently blocked by controller. 7 - The physical disk is not operational. 8 - The physical disk is not a RAID capable disk. 9 - The physical disk has been removed. 10 - The physical disk media has been placed in read only mode.| `disk_name`|
+| `snmp.physicalDiskCapacityInMB`| The size of the physical disk in megabytes. |`snmp.disk_name`  |
+| `snmp.physicalDiskUsedSpaceInMB`| The amount of used space in megabytes on the physical disk. |`disk_name`  |
+| `snmp.physicalDiskFreeSpaceInMB`| The amount of free space in megabytes on the physical disk.  |`disk_name` |
+| `snmp.enclosurePowerSupplyState`| The current state of this power supply unit. Possible states: 1- The current state could not be determined. 2- The power supply unit is operating normally. 3- The power supply unit has encountered a hardware problem or is not responding. 4- The power supply unit is no longer connected to the enclosure or there exists a problem communicating to it. 5- The power supply unit is unstable. |`supply_name`|
+| `snmp.adapterRxPackets`| Total packets received. |`adapter` |
+| `snmp.adapterTxPackets`| Total packets transmitted. | `adapter`|
+| `snmp.adapterRxBytes`| Total number of bytes received. |`adapter`|
+| `snmp.adapterTxBytes`| Total number of bytes transmitted. | `adapter`|
+| `snmp.adapterRxErrors`| Total number of packets received with errors (packets that failed to reach the protocol). |`adapter`|
+| `snmp.adapterTxErrors`| Total number of packets that failed to transmit. |`adapter`|
+| `snmp.adapterRxDropped`| Total number of receive packets dropped due to overrun. |`snmp.adapter`|
+| `snmp.adapterTxDropped`| Total number of transmit packets dropped due to successive collisions. |`adapter`|
+| `snmp.adapterRxMulticast`| Total number of Multicast packets received. |`adapter`|
+| `snmp.adapterCollisions`| Total number of single collisions. |`adapter`|
+
+
 
 ### Validation
 
