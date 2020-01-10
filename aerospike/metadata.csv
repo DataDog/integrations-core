@@ -352,7 +352,7 @@ aerospike.namespace.total_bytes_disk,gauge,,byte,,Total bytes of disk space allo
 aerospike.namespace.total_bytes_memory,gauge,,byte,,Total bytes of memory allocated to this namespace on this node. Deprecated since 3.9,0,aerospike,
 aerospike.namespace.used_bytes_disk,gauge,,byte,,Total bytes of disk space used by this namespace on this node. Deprecated since 3.9,0,aerospike,
 aerospike.namespace.used_bytes_memory,gauge,,byte,,Total bytes of memory used by this namespace on this node. Deprecated since 3.9,0,aerospike,
-aerospike.namespace.hwm_breached,gauge,,,,If true Aerospike has breached 'high-water-[disk|memory]-pct' for this namespace. Deprecated since 3.9,0,aerospike,
+aerospike.namespace.hwm_breached,gauge,,,,If true Aerospike has breached 'high-water-[disk/memory]-pct' for this namespace. Deprecated since 3.9,0,aerospike,
 aerospike.namespace.stop_writes,gauge,,,,If true this namespace is currently not allowing writes.,0,aerospike,
 aerospike.namespace.available_pct,gauge,,percent,,Measures the minimum contiguous disk space for all disks in a namespace. Deprecated since 3.9,0,aerospike,
 aerospike.namespace.cache_read_pct,gauge,,percent,,Percentage of read transactions that are hitting the post write queue and will save an io to the underlying storage device. Deprecated since 3.9,0,aerospike,
