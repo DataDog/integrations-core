@@ -18,7 +18,6 @@
     "description": "## Linkerd\n\nThis dashboard provides a high-level overview of your Linkerd cluster so you can monitor its performance and route, control, and connection metrics.\n\nFor further reading on monitoring Envoy, see:\n\n- [Official Linkerd integration docs](https://docs.datadoghq.com/integrations/linkerd/)\n\nClone this template to make changes and add your own graphs and widgets.",
     "disableCog": false,
     "disableEditing": false,
-    "icon": "/static/images/saas_logos/small/linkerd@2x.png",
     "id": 938369,
     "isIntegration": false,
     "isShared": false,
