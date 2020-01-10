@@ -30,7 +30,7 @@ def validate_version(ctx, param, value):
 
 
 def create_jira_issue(client, teams, pr_title, pr_url, pr_body, dry_run):
-    body = f'Pull request: {pr_url}\n\n{pr_body}'
+    body = u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
 
     for team in teams:
         if dry_run:
@@ -48,6 +48,7 @@ def create_jira_issue(client, teams, pr_title, pr_url, pr_body, dry_run):
                 )
                 time.sleep(wait_time)
             elif error:
+                print(error)
                 if attempt + 1 == creation_attempts:
                     echo_failure(f'Error: {error}')
                     break
@@ -80,10 +81,14 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
     `github.user`/`github.token` in your config file or use the
     `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
     \b
+
     To use Jira:
     1. Go to `https://id.atlassian.com/manage/api-tokens` and create an API token.
-    2. Run `ddev config set jira.user` and enter your jira email.
-    3. Run `ddev config set jira.token` and paste your API token.
+
+    2. Run `ddev config set jira.token` and paste your API token.
+
+    3. Run `ddev config set jira.user` and enter your jira email.
+
     """
     root = get_root()
     repo = basepath(root)
@@ -243,10 +248,6 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         pr_title = pr_data.get('title', commit_subject)
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
-
-        jira_config = user_config['jira']
-        if not (jira_config['user'] and jira_config['token']):
-            abort('Error: You are not authenticated for Jira. Please set your jira ddev config')
 
         teams = [jira.label_team_map[label] for label in pr_labels if label in jira.label_team_map]
         if teams:

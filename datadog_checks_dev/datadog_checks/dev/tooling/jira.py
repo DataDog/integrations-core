@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2020-present
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -12,38 +12,31 @@ class JiraClient:
     CREATE_ENDPOINT = API_URL + '/3/issue'
 
     def __init__(self, config):
-        jira_email = config['jira']['user']
-        jira_token = config['jira']['token']
-
-        self.auth = HTTPBasicAuth(jira_email, jira_token)
+        self.auth = HTTPBasicAuth(config['jira']['user'] or None, config['jira']['token'] or None)
         self.team_list_map = {
             'Containers': '21',
             'Core': '31',
             'Integrations': '41',
             'Logs': '71',
             'Platform': '51',
-            'Networks': '171',
-            'Processes': '181',
+            'Process': '81',
             'Trace': '61',
         }
         self.label_team_map = {
             'team/agent-apm': 'Trace',
             'team/agent-core': 'Core',
             'team/agent-platform': 'Platform',
-            'team/networks': 'Networks',
-            'team/processes': 'Processes',
+            'team/burrito': 'Process',
             'team/containers': 'Containers',
             'team/integrations': 'Integrations',
             'team/logs': 'Logs',
         }
 
-    # We will need two API calls until this is added: https://jira.atlassian.com/browse/JRACLOUD-69559?_ga=2.62950895.1343692979.1578939312-1018831208.1578519746 # noqa
     def move_column(self, team, issue_key):
         rate_limited = False
         error = None
-        url = f'{self.CREATE_ENDPOINT}/{issue_key}/transitions'
+        url = '{}/{}/transitions'.format(self.CREATE_ENDPOINT, issue_key)
 
-        # Documentation to transition an issue's status/column: https://developer.atlassian.com/cloud/jira/platform/rest/v3/?_ga=2.39263651.1896629564.1578666825-1018831208.1578519746#api-rest-api-3-issue-issueIdOrKey-transitions-post # noqa
         data = json.dumps({'transition': {'id': self.team_list_map[team]}})
 
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
@@ -69,7 +62,6 @@ class JiraClient:
         error = None
         response = None
 
-        # documentation to create a Jira issue: https://developer.atlassian.com/cloud/jira/platform/rest/v3/?_ga=2.39263651.1896629564.1578666825-1018831208.1578519746#api-rest-api-3-issue-post # noqa
         data = json.dumps(
             {
                 'fields': {
@@ -88,8 +80,9 @@ class JiraClient:
 
         try:
             response = requests.post(self.CREATE_ENDPOINT, data=data, auth=self.auth, headers=headers)
-            issue_key = response.json().get('key')
-            rate_limited, error, resp = self.move_column(team, issue_key)
+            issue_key = json.loads(response.content).get('key')
+            self.move_column(team, issue_key)
+
         except Exception as e:
             error = str(e)
         else:
