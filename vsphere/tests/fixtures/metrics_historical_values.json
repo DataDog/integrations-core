@@ -1558,6 +1558,18 @@
         ]
     },
     {
+        "name": "vsphere.datastore.count",
+        "value": 6
+    },
+    {
+        "name": "vsphere.cluster.count",
+        "value": 3
+    },
+    {
+        "name": "vsphere.datacenter.count",
+        "value": 2
+    },
+    {
         "name": "datadog.vsphere.query_metrics.time"
     },
     {

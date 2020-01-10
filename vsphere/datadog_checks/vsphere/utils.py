@@ -26,10 +26,8 @@ def match_any_regex(string, regexes):
 def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
     resource_type = MOR_TYPE_AS_STRING[type(mor)]
 
-    for f in resource_filters:
-        if f[0] == resource_type:
-            break
-    else:
+    if not [f for f in resource_filters if f[0] == resource_type]:
+        # No filter for this resource, collect everything
         return False
 
     name_filter = resource_filters.get((resource_type, 'name'))

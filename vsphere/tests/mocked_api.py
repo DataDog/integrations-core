@@ -20,7 +20,7 @@ class MockedCounter(object):
 
 
 class MockedAPI(object):
-    def __init__(self, instance):
+    def __init__(self, instance, _=None):
         self.instance = instance
         self.infrastructure_data = {}
         self.metrics_data = []

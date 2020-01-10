@@ -15,7 +15,7 @@ def test_connect_success(realtime_instance):
         smart_connect.return_value = connection
         current_time = connection.CurrentTime
 
-        api = VSphereAPI(realtime_instance)
+        api = VSphereAPI(realtime_instance, MagicMock())
         smart_connect.assert_called_once_with(
             host=realtime_instance['host'],
             user=realtime_instance['username'],
@@ -36,7 +36,7 @@ def test_connect_failure(realtime_instance):
         current_time.side_effect = Exception('foo')
 
         with pytest.raises(APIConnectionError):
-            VSphereAPI(realtime_instance)
+            VSphereAPI(realtime_instance, MagicMock())
 
         smart_connect.assert_called_once_with(
             host=realtime_instance['host'],
@@ -49,7 +49,7 @@ def test_connect_failure(realtime_instance):
 
 def test_get_infrastructure(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect'):
-        api = VSphereAPI(realtime_instance)
+        api = VSphereAPI(realtime_instance, MagicMock())
 
         container_view = api._conn.content.viewManager.CreateContainerView.return_value
         container_view.__class__ = vim.ManagedObject
@@ -71,18 +71,17 @@ def test_get_infrastructure(realtime_instance):
 def test_smart_retry(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect') as connect:
         smart_connect = connect.SmartConnect
-        api = VSphereAPI(realtime_instance)
+        api = VSphereAPI(realtime_instance, MagicMock())
         query_perf_counter = api._conn.content.perfManager.QueryPerfCounterByLevel
         query_perf_counter.side_effect = [Exception('error'), 'success']
         api.get_perf_counter_by_level(None)
-
         assert query_perf_counter.call_count == 2
         assert smart_connect.call_count == 2
 
 
 def test_get_max_query_metrics(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect'):
-        api = VSphereAPI(realtime_instance)
+        api = VSphereAPI(realtime_instance, MagicMock())
         values = [12, -1]
         expected = [12, float('inf')]
 

@@ -101,4 +101,4 @@ def test_is_realtime_resource_excluded_by_filters(realtime_instance):
     for resource in resources:
         is_excluded = infra.get(resource).get('name') in excluded_resources
         if not is_resource_excluded_by_filters(resource, infra, formatted_filters) == is_excluded:
-            is_resource_excluded_by_filters(resource, infra, formatted_filters)
+            assert is_resource_excluded_by_filters(resource, infra, formatted_filters)

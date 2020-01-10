@@ -49,7 +49,9 @@ def mock_type():
 
 @pytest.fixture
 def mock_threadpool():
-    with patch('datadog_checks.vsphere.vsphere.ThreadPoolExecutor') as pool:
+    with patch('datadog_checks.vsphere.vsphere.ThreadPoolExecutor') as pool, patch(
+        'datadog_checks.vsphere.vsphere.as_completed', side_effect=lambda x: x
+    ):
         pool.return_value.submit = lambda f, args: MagicMock(
             done=MagicMock(return_value=True), result=MagicMock(return_value=f(args))
         )

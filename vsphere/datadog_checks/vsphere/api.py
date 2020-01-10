@@ -22,13 +22,17 @@ def smart_retry(f):
     This is useful when the integration keeps a semi-healthy connection to the vSphere API"""
 
     @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        api_instance = args[0]
+    def wrapper(api_instance, *args, **kwargs):
         try:
-            return f(*args, **kwargs)
-        except Exception:
+            return f(api_instance, *args, **kwargs)
+        except Exception as e:
+            api_instance.log.debug(
+                "An exception occurred when executing %s: %s. Refreshing the connection to vCenter and retrying",
+                f.__name__,
+                e,
+            )
             api_instance.smart_connect()
-            return f(*args, **kwargs)
+            return f(api_instance, *args, **kwargs)
 
     return wrapper
 
@@ -40,13 +44,16 @@ class APIConnectionError(Exception):
 class VSphereAPI(object):
     """Abstraction class over the vSphere SOAP api using the pyvmomi library"""
 
-    def __init__(self, instance):
+    def __init__(self, instance, log):
         self.host = instance['host']
         self.username = instance['username']
         self.password = instance['password']
         self.ssl_verify = is_affirmative(instance.get('ssl_verify', True))
         self.ssl_capath = instance.get('ssl_capath')
         self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
+
+        self.log = log
+
         self._conn = None
         self.smart_connect()
 
@@ -66,6 +73,7 @@ class VSphereAPI(object):
             # Object returned by SmartConnect is a ServerInstance
             # https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
             conn = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
+            # Next line tries a simple API call to check the health of the connection.
             conn.CurrentTime()
         except Exception as e:
             err_msg = "Connection to {} failed: {}".format(ensure_unicode(self.host), e)

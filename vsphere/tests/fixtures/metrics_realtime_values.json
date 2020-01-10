@@ -17424,6 +17424,10 @@
         "value": 23
     },
     {
+        "name": "vsphere.host.count",
+        "value": 4
+    },
+    {
         "name": "datadog.vsphere.query_metrics.time"
     },
     {

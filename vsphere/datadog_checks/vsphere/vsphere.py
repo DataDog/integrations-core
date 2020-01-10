@@ -4,13 +4,13 @@
 from __future__ import division
 
 import re
-import time
 from collections import defaultdict
+from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from itertools import chain
 
-from pyVmomi import vim  # pylint: disable=E0611
+from pyVmomi import vim
 from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
@@ -85,6 +85,7 @@ class VSphereCheck(AgentCheck):
         )
         self.validate_and_format_config()
         self.api = None
+        self.thread_pool = ThreadPoolExecutor(max_workers=self.threads_count)
         self.check_initializations.append(self.initiate_connection)
 
         self.base_tags.append("vcenter_server:{}".format(self.instance['host']))
@@ -111,52 +112,56 @@ class VSphereCheck(AgentCheck):
         formatted_resource_filters = {}
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
 
-        for f in self.resource_filters:
+        for resource_filter in self.resource_filters:
             for (field, field_type) in iteritems(
                 {'resource': string_types, 'property': string_types, 'patterns': list}
             ):
-                if field not in f:
-                    self.log.warning("Ignoring filter %r because it doesn't contain a %s field.", f, field)
+                if field not in resource_filter:
+                    self.log.warning(
+                        "Ignoring filter %r because it doesn't contain a %s field.", resource_filter, field
+                    )
                     continue
-                if not isinstance(f[field], field_type):
-                    self.log.warning("Ignoring filter %r because field %s should have type %s.", f, field, field_type)
+                if not isinstance(resource_filter[field], field_type):
+                    self.log.warning(
+                        "Ignoring filter %r because field %s should have type %s.", resource_filter, field, field_type
+                    )
                     continue
 
-            if f['resource'] not in allowed_resource_types:
+            if resource_filter['resource'] not in allowed_resource_types:
                 self.log.warning(
                     u"Ignoring filter %r because resource %s is not collected when collection_type is %s.",
-                    f,
-                    f['resource'],
+                    resource_filter,
+                    resource_filter['resource'],
                     self.collection_type,
                 )
                 continue
 
             allowed_prop_names = ALLOWED_FILTER_PROPERTIES
-            if f['resource'] == MOR_TYPE_AS_STRING[vim.VirtualMachine]:
+            if resource_filter['resource'] == MOR_TYPE_AS_STRING[vim.VirtualMachine]:
                 allowed_prop_names += EXTRA_FILTER_PROPERTIES_FOR_VMS
 
-            if f['property'] not in allowed_prop_names:
+            if resource_filter['property'] not in allowed_prop_names:
                 self.log.warning(
                     u"Ignoring filter %r because property '%s' is not valid "
                     u"for resource type %s. Should be one of %r.",
-                    f,
-                    f['property'],
-                    f['resource'],
+                    resource_filter,
+                    resource_filter['property'],
+                    resource_filter['resource'],
                     allowed_prop_names,
                 )
                 continue
 
-            filter_key = (f['resource'], f['property'])
+            filter_key = (resource_filter['resource'], resource_filter['property'])
             if filter_key in formatted_resource_filters:
                 self.log.warning(
                     u"Ignoring filter %r because you already have a filter for resource type %s and property %s.",
-                    f,
-                    f['resource'],
-                    f['property'],
+                    resource_filter,
+                    resource_filter['resource'],
+                    resource_filter['property'],
                 )
                 continue
 
-            formatted_resource_filters[filter_key] = [re.compile(r) for r in f['patterns']]
+            formatted_resource_filters[filter_key] = [re.compile(r) for r in resource_filter['patterns']]
 
         self.resource_filters = formatted_resource_filters
 
@@ -165,8 +170,8 @@ class VSphereCheck(AgentCheck):
 
     def initiate_connection(self):
         try:
-            self.log.info("Connecting to the vCenter API...")
-            self.api = VSphereAPI(self.instance)
+            self.log.info("Connecting to the vCenter API %s with username %s...")
+            self.api = VSphereAPI(self.instance, self.log)
             self.log.info("Connected")
         except APIConnectionError:
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
@@ -304,7 +309,7 @@ class VSphereCheck(AgentCheck):
                 value = valid_values[-1]
                 if metric_name in PERCENT_METRICS:
                     # Convert the percentage to a float.
-                    value /= 100
+                    value /= 100.0
 
                 tags = []
                 if should_collect_per_instance_values(metric_name, resource_type):
@@ -337,9 +342,7 @@ class VSphereCheck(AgentCheck):
         self.histogram('datadog.vsphere.query_metrics.time', t0.total(), tags=self.base_tags, raw=True)
         return metrics_values
 
-    def collect_metrics(self, thread_pool):
-        """Creates a pool of threads and run the query_metrics calls in parallel."""
-        tasks = []
+    def make_query_specs(self):
         for resource_type in self.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
             counters = self.metrics_metadata_cache.get_metadata(resource_type)
@@ -365,23 +368,26 @@ class VSphereCheck(AgentCheck):
                         query_spec.startTime = datetime.now() - timedelta(hours=2)
                     query_specs.append(query_spec)
                 if query_specs:
-                    tasks.append(thread_pool.submit(lambda q: self.query_metrics_wrapper(q), query_specs))
+                    yield query_specs
 
-        self.log.info("Queued all %d tasks, waiting for completion.", len(tasks))
-        while tasks:
-            finished_tasks = [t for t in tasks if t.done()]
-            if not finished_tasks:
-                time.sleep(0.1)
-                continue
-            for task in finished_tasks:
+    def collect_metrics_async(self):
+        """Run queries in multiple threads and wait for completion."""
+        tasks = []
+        try:
+            for query_specs in self.make_query_specs():
+                tasks.append(self.thread_pool.submit(self.query_metrics_wrapper, query_specs))
+        finally:
+            self.log.info("Queued all %d tasks, waiting for completion.", len(tasks))
+            for future in as_completed(tasks):
                 try:
-                    self.submit_metrics_callback(task)
-                except Exception:
+                    # Callback is called in the main thread
+                    self.submit_metrics_callback(future)
+                except Exception as e:
                     self.log.exception(
-                        "Exception raised during the submit_metrics_callback. "
-                        "Ignoring the error and continuing execution."
+                        "Exception '%s' raised during the submit_metrics_callback. "
+                        "Ignoring the error and continuing execution.",
+                        e,
                     )
-                tasks.remove(task)
 
     def make_batch(self, mors, metric_ids, resource_type):
         """Iterates over mor and generate batches with a fixed number of metrics to query.
@@ -515,13 +521,11 @@ class VSphereCheck(AgentCheck):
         # Submit the number of VMs that are monitored
         for resource in self.collected_resource_types:
             resource_count = len(self.infrastructure_cache.get_mors(resource))
-            self.gauge('{}.count'.format(MOR_TYPE_AS_STRING[resource]), resource_count, tags=self.base_tags, hostname=None)
+            self.gauge(
+                '{}.count'.format(MOR_TYPE_AS_STRING[resource]), resource_count, tags=self.base_tags, hostname=None
+            )
 
         # Creating a thread pool and starting metric collection
-        pool_executor = ThreadPoolExecutor(max_workers=self.threads_count)
-        self.log.info("Starting metric collection in %d threads." % self.threads_count)
-        try:
-            self.collect_metrics(pool_executor)
-            self.log.info("All tasks completed, shutting down the thread pool.")
-        finally:
-            pool_executor.shutdown()
+        self.log.info("Starting metric collection in %d threads.", self.threads_count)
+        self.collect_metrics_async()
+        self.log.info("Metric collection completed.")

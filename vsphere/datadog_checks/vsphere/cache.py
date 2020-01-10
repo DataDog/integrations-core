@@ -11,11 +11,10 @@ class VSphereCache(object):
     VSphereCache is *not* threadsafe.
     """
 
-    def __init__(self, interval_sec, log=None):
+    def __init__(self, interval_sec):
         self._last_ts = 0
         self._interval = interval_sec
         self._content = {}
-        self.log = log
 
     @contextmanager
     def update(self):
