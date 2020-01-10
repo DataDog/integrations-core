@@ -79,7 +79,8 @@ def test_check(aggregator, fixture_group):
     aggregator.assert_all_metrics_covered()
 
 
-def test_config_project(aggregator):
+@pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
+def test_config_project(aggregator, fixture_group):
 
     project = 'foo'
     project_tag = 'project:{}'.format(project)
@@ -88,7 +89,7 @@ def test_config_project(aggregator):
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get_factory('prisma_cloud'), autospec=True) as r:
+    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True) as r:
         check.check(instance)
 
         r.assert_called_with(
