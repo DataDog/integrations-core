@@ -57,7 +57,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
         self.config_map = {}
-        self.http_handlers = {}
+        self._http_handlers = {}
         self.default_instances = default_instances
         self.default_namespace = default_namespace
 

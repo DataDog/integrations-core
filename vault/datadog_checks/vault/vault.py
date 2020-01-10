@@ -243,7 +243,7 @@ class Vault(OpenMetricsBaseCheck):
             self._scraper_config['custom_tags'] = self._tags
 
             # https://www.vaultproject.io/api/overview#the-x-vault-request-header
-            self._set_header(self.http_handlers[instance['prometheus_url']], 'X-Vault-Request', 'true')
+            self._set_header(self.get_http_handler(self._scraper_config), 'X-Vault-Request', 'true')
 
             if not self._no_token:
                 if self._client_token_path:
@@ -257,7 +257,7 @@ class Vault(OpenMetricsBaseCheck):
     def set_client_token(self, client_token):
         self._client_token = client_token
         self._set_header(self.http, 'X-Vault-Token', client_token)
-        self._set_header(self.http_handlers[self._scraper_config['prometheus_url']], 'X-Vault-Token', client_token)
+        self._set_header(self.get_http_handler(self._scraper_config), 'X-Vault-Token', client_token)
 
     def renew_client_token(self):
         with open(self._client_token_path, 'rb') as f:
