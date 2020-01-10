@@ -173,6 +173,7 @@ METRIC_DOTUNDERSCORE_CLEANUP = re.compile(r"_*\._*")
 
 def normalize_metric_name(metric_name):
     """Copy pasted from the backend normalization code.
+    Extracted from dogweb/datalayer/metrics/query/metadata.py:normalize_metric_name
     Metrics in metadata.csv need to be formatted this way otherwise, syncing metadata will fail.
     Function not exported as a util, as this is different than AgentCheck.normalize. This function just makes sure
     that whatever is in the metadata.csv is understandable by the backend.
