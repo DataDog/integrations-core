@@ -243,7 +243,7 @@ class Vault(OpenMetricsBaseCheck):
             self._scraper_config['custom_tags'] = self._tags
 
             # https://www.vaultproject.io/api/overview#the-x-vault-request-header
-            self._set_header(self.get_http_handler(instance), 'X-Vault-Request', 'true')
+            self._set_header(self.get_http_handler(self._scraper_config), 'X-Vault-Request', 'true')
 
             if not self._no_token:
                 if self._client_token_path:
