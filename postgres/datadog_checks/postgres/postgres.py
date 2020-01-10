@@ -382,19 +382,23 @@ class PostgreSql(AgentCheck):
             )
             results = results[:MAX_CUSTOM_RESULTS]
 
-        desc = scope['descriptors']
+        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
+        # to a tag name (e.g. 'schema').
+        descriptors = scope['descriptors']
 
         # parse & submit results
-        # A row should look like this
-        # (descriptor, descriptor, ..., value, value, value, value, ...)
-        # with descriptor a PG relation or index name, which we use to create the tags
         valid_results_size = 0
         for row in results:
             # Check that all columns will be processed
-            assert len(row) == len(cols) + len(desc)
+            assert len(row) == len(descriptors) + len(cols)
+
+            # A row contains descriptor values on the left (used for tagging), and
+            # metric values on the right (used as values for metrics).
+            # E.g.: (descriptor, descriptor, ..., value, value, value, value, ...)
+            descriptor_values, column_values = row[: len(descriptors)], row[len(descriptors) :]
 
             # build a map of descriptors and their values
-            desc_map = dict(zip([x[1] for x in desc], row[0 : len(desc)]))
+            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
 
             # if relations *and* schemas are set, filter out table not
             # matching the schema in the configuration
@@ -433,7 +437,6 @@ class PostgreSql(AgentCheck):
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
             # Submit metrics to the Agent.
-            column_values = row[len(desc) :]
             for column, value in zip(cols, column_values):
                 name, submit_metric = scope['metrics'][column]
                 submit_metric(self, name, value, tags=tags)
