@@ -386,8 +386,10 @@ class PostgreSql(AgentCheck):
         # to a tag name (e.g. 'schema').
         descriptors = scope['descriptors']
 
-        # parse & submit results
-        valid_results_size = 0
+        # Parse and submit results.
+
+        num_results = 0
+
         for row in results:
             # Check that all columns will be processed
             assert len(row) == len(descriptors) + len(cols)
@@ -441,9 +443,9 @@ class PostgreSql(AgentCheck):
                 name, submit_metric = scope['metrics'][column]
                 submit_metric(self, name, value, tags=tags)
 
-            valid_results_size += 1
+            num_results += 1
 
-        return valid_results_size
+        return num_results
 
     def _collect_stats(
         self,
