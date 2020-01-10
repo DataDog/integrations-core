@@ -104,7 +104,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         Format the finalized tags
         This is generally a noop, but it can be used to change the tags before sending metrics
         """
-        return _tags
+        return list(set(_tags))
 
     def _filter_metric(self, metric, scraper_config):
         """
