@@ -93,7 +93,7 @@ def test_is_realtime_resource_excluded_by_filters(realtime_instance):
     ]
 
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    formatted_filters = check.resource_filters
+    formatted_filters = check.config.resource_filters
 
     infra = MockedAPI(realtime_instance).get_infrastructure()
     resources = [m for m in infra if m.__class__ in (vim.VirtualMachine, vim.HostSystem)]

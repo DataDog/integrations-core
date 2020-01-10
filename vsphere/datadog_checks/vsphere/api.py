@@ -7,13 +7,8 @@ import ssl
 from pyVim import connect
 from pyVmomi import vim, vmodl
 
-from datadog_checks.base import ensure_unicode, is_affirmative
-from datadog_checks.vsphere.constants import (
-    ALL_RESOURCES,
-    DEFAULT_BATCH_COLLECTOR_SIZE,
-    MAX_QUERY_METRICS_OPTION,
-    UNLIMITED_HIST_METRICS_PER_QUERY,
-)
+from datadog_checks.base import ensure_unicode
+from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 
 
 def smart_retry(f):
@@ -44,14 +39,8 @@ class APIConnectionError(Exception):
 class VSphereAPI(object):
     """Abstraction class over the vSphere SOAP api using the pyvmomi library"""
 
-    def __init__(self, instance, log):
-        self.host = instance['host']
-        self.username = instance['username']
-        self.password = instance['password']
-        self.ssl_verify = is_affirmative(instance.get('ssl_verify', True))
-        self.ssl_capath = instance.get('ssl_capath')
-        self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
-
+    def __init__(self, config, log):
+        self.config = config
         self.log = log
 
         self._conn = None
@@ -61,22 +50,24 @@ class VSphereAPI(object):
         """Creates the connection object to the vSphere API using parameters supplied from the configuration.
         """
         context = None
-        if not self.ssl_verify:
+        if not self.config.ssl_verify:
             context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
             context.verify_mode = ssl.CERT_NONE
-        elif self.ssl_capath:
+        elif self.config.ssl_capath:
             context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
             context.verify_mode = ssl.CERT_REQUIRED
-            context.load_verify_locations(capath=self.ssl_capath)
+            context.load_verify_locations(capath=self.config.ssl_capath)
 
         try:
             # Object returned by SmartConnect is a ServerInstance
             # https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html
-            conn = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
+            conn = connect.SmartConnect(
+                host=self.config.hostname, user=self.config.username, pwd=self.config.password, sslContext=context
+            )
             # Next line tries a simple API call to check the health of the connection.
             conn.CurrentTime()
         except Exception as e:
-            err_msg = "Connection to {} failed: {}".format(ensure_unicode(self.host), e)
+            err_msg = "Connection to {} failed: {}".format(ensure_unicode(self.config.hostname), e)
             raise APIConnectionError(err_msg)
 
         self._conn = conn
@@ -125,7 +116,7 @@ class VSphereAPI(object):
         retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
         # To limit the number of objects retrieved per call.
         # If batch_collector_size is 0, collect maximum number of objects.
-        retr_opts.maxObjects = self.batch_collector_size
+        retr_opts.maxObjects = self.config.batch_collector_size
 
         # Specify the root object from where we collect the rest of the objects
         obj_spec = vmodl.query.PropertyCollector.ObjectSpec()

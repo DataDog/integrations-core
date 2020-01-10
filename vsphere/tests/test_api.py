@@ -6,6 +6,7 @@ from mock import ANY, MagicMock, patch
 from pyVmomi import vim
 
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
+from datadog_checks.vsphere.config import VSphereConfig
 
 
 def test_connect_success(realtime_instance):
@@ -15,7 +16,8 @@ def test_connect_success(realtime_instance):
         smart_connect.return_value = connection
         current_time = connection.CurrentTime
 
-        api = VSphereAPI(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, MagicMock())
+        api = VSphereAPI(config, MagicMock())
         smart_connect.assert_called_once_with(
             host=realtime_instance['host'],
             user=realtime_instance['username'],
@@ -35,8 +37,9 @@ def test_connect_failure(realtime_instance):
         current_time = connection.CurrentTime
         current_time.side_effect = Exception('foo')
 
+        config = VSphereConfig(realtime_instance, MagicMock())
         with pytest.raises(APIConnectionError):
-            VSphereAPI(realtime_instance, MagicMock())
+            VSphereAPI(config, MagicMock())
 
         smart_connect.assert_called_once_with(
             host=realtime_instance['host'],
@@ -49,7 +52,8 @@ def test_connect_failure(realtime_instance):
 
 def test_get_infrastructure(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect'):
-        api = VSphereAPI(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, MagicMock())
+        api = VSphereAPI(config, MagicMock())
 
         container_view = api._conn.content.viewManager.CreateContainerView.return_value
         container_view.__class__ = vim.ManagedObject
@@ -70,8 +74,10 @@ def test_get_infrastructure(realtime_instance):
 
 def test_smart_retry(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect') as connect:
+        config = VSphereConfig(realtime_instance, MagicMock())
+        api = VSphereAPI(config, MagicMock())
+
         smart_connect = connect.SmartConnect
-        api = VSphereAPI(realtime_instance, MagicMock())
         query_perf_counter = api._conn.content.perfManager.QueryPerfCounterByLevel
         query_perf_counter.side_effect = [Exception('error'), 'success']
         api.get_perf_counter_by_level(None)
@@ -81,7 +87,8 @@ def test_smart_retry(realtime_instance):
 
 def test_get_max_query_metrics(realtime_instance):
     with patch('datadog_checks.vsphere.api.connect'):
-        api = VSphereAPI(realtime_instance, MagicMock())
+        config = VSphereConfig(realtime_instance, MagicMock())
+        api = VSphereAPI(config, MagicMock())
         values = [12, -1]
         expected = [12, float('inf')]
 

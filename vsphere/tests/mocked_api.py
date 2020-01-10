@@ -20,8 +20,8 @@ class MockedCounter(object):
 
 
 class MockedAPI(object):
-    def __init__(self, instance, _=None):
-        self.instance = instance
+    def __init__(self, config, _=None):
+        self.config = config
         self.infrastructure_data = {}
         self.metrics_data = []
 
@@ -66,7 +66,7 @@ class MockedAPI(object):
 
     def query_metrics(self, query_specs):
         if not self.metrics_data:
-            metrics_filename = 'metrics_{}.json'.format(self.instance.get('collection_type', 'realtime'))
+            metrics_filename = 'metrics_{}.json'.format(self.config.collection_type)
             with open(os.path.join(HERE, 'fixtures', metrics_filename)) as f:
                 file_data = json.load(f)
                 for el in file_data:

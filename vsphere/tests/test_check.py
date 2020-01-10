@@ -10,6 +10,7 @@ from tests.common import HERE
 from tests.mocked_api import MockedAPI
 
 from datadog_checks.vsphere import VSphereCheck
+from datadog_checks.vsphere.config import VSphereConfig
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
@@ -45,7 +46,8 @@ def test_historical_metrics(aggregator, dd_run_check, historical_instance):
 @pytest.mark.usefixtures("mock_type")
 def test_external_host_tags(aggregator, realtime_instance):
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    check.api = MockedAPI(realtime_instance)
+    config = VSphereConfig(realtime_instance, MagicMock())
+    check.api = MockedAPI(config)
     with check.infrastructure_cache.update():
         check.refresh_infrastructure_cache()
 
@@ -63,7 +65,7 @@ def test_external_host_tags(aggregator, realtime_instance):
         assert ex_host == sub_host
         assert ex_tags == sub_tags
 
-    check.excluded_host_tags = ['vsphere_host']
+    check.config.excluded_host_tags = ['vsphere_host']
     check.set_external_tags = MagicMock()
     check.submit_external_host_tags()
     submitted_tags = check.set_external_tags.mock_calls[0].args[0]
