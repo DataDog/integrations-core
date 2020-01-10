@@ -74,7 +74,7 @@ aerospike.free_pct_disk,gauge,,percent,,Percentage of disk capacity free for thi
 aerospike.free_pct_memory,gauge,,percent,,Percentage of memory capacity free for this namespace. Deprecated since 3.9.,1,aerospike,
 aerospike.free_dlog_pct,gauge,,percent,,Percentage of the digest log free and available for use. Deprecated since 3.9,1,aerospike,
 aerospike.heap_efficiency_pct,gauge,,percent,, This represents the heap_allocated_kbytes / heap_mapped_kbytes ratio. A lower number indicates a higher fragmentation rate.,0,aerospike,
-aerospike.read_threads_avg_processing_time_pct ,gauge,,percent,,,0,aerospike,
+aerospike.read_threads_avg_processing_time_pct,gauge,,percent,,,0,aerospike,
 aerospike.read_threads_avg_waiting_time_pct,gauge,,percent,,,0,aerospike,
 aerospike.system_free_mem_pct,gauge,,percent,,Percentage of free system memory.,1,aerospike,
 aerospike.transaction_queue_used_pct,gauge,,percent,,,0,aerospike,
