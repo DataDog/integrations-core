@@ -290,6 +290,10 @@ class OpenMetricsScraperMixin(object):
         return config
 
     def get_http_handler(self, scraper_config):
+        """
+        Get http handler for a specific scrapper config.
+        The http handler is cached using `prometheus_url` as key.
+        """
         prometheus_url = scraper_config['prometheus_url']
         if prometheus_url in self._http_handlers:
             return self._http_handlers[prometheus_url]
