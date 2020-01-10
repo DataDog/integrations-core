@@ -1,12 +1,12 @@
 {
-  "display_name": "eks_fargate",
+  "display_name": "EKS Fargate",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "eks_fargate",
-  "metric_prefix": "eks_fargate.",
-  "metric_to_check": "",
+  "metric_prefix": "eks.fargate.",
+  "metric_to_check": "eks.fargate.pods.running",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "submits a heartbeat metric for Amazon EKS on AWS Fargate workloads",
   "guid": "e9e58fb9-696b-4e3c-9058-c144a1d9a737",
   "support": "core",
   "supported_os": [

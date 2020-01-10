@@ -29,9 +29,11 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 /docker_daemon/*.md                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /docker_daemon/manifest.json              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /ecs_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
-/eks_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
 /ecs_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /ecs_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/eks_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
+/eks_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/eks_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /kube_apiserver_metrics/                  @DataDog/container-integrations @DataDog/agent-integrations
 /kube_apiserver_metrics/*.md              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /kube_apiserver_metrics/manifest.json     @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava

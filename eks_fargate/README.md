@@ -13,8 +13,8 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-Given the nature of AWS EKS Fargate, this check will only run in containerized infrstructures.
-To enable it, use the environment variable `DD_EKS_FARGATE=true` in the manifest to deploy your Datadog Agent side care.
+Given the nature of Amazon EKS on AWS Fargate, this check will only run in containerized infrastructures.
+To enable it, use the environment variable `DD_EKS_FARGATE=true` in the manifest to deploy your Datadog Agent sidecar.
 
 ### Validation
 
@@ -24,7 +24,7 @@ To enable it, use the environment variable `DD_EKS_FARGATE=true` in the manifest
 
 ### Metrics
 
-The eks_fargate check submits a heartbeat metric `eks.fargate.pod.running` that is tagged by `pod_name` and `virtual_node` so you can keep track of how many pods are running.
+The eks_fargate check submits a heartbeat metric `eks.fargate.pods.running` that is tagged by `pod_name` and `virtual_node` so you can keep track of how many pods are running.
 
 ### Service Checks
 
