@@ -1,7 +1,7 @@
 parameters:
   test_run: ''
   check: ''
-  agent: '6'
+  agent: ''
   test: false
   test_e2e: false
   benchmark: false

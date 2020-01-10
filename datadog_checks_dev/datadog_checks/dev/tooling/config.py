@@ -37,6 +37,7 @@ DEFAULT_CONFIG = OrderedDict(
         ('dd_api_key', os.getenv('DD_API_KEY')),
         ('dd_app_key', os.getenv('DD_APP_KEY')),
         ('org', 'default'),
+        # agent7: replace image with `datadog/agent-dev:7` when available
         ('agent7', OrderedDict((('docker', 'datadog/agent:7'), ('local', 'latest')))),
         ('agent6', OrderedDict((('docker', 'datadog/agent-dev:master'), ('local', 'latest')))),
         ('agent5', OrderedDict((('docker', 'datadog/dev-dd-agent:master'), ('local', 'latest')))),
