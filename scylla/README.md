@@ -16,6 +16,8 @@ No additional installation is needed on your server.
 ### Configuration
 
 1. Edit the `scylla.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your scylla performance data. See the [sample scylla.d/conf.yaml][3] for all available configuration options.
+    * To collect `scylla` metrics, enable the `instance_endpoint` option.
+    * To collect `scylla-manager` metrics, enable the `manager_endpoint` option.
 
 2. [Restart the Agent][4].
 
@@ -31,7 +33,8 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 
-Scylla does not include any service checks.
+# TODO
+`scylla.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ### Events
 
@@ -41,7 +44,7 @@ Scylla does not include any events.
 
 Need help? Contact [Datadog support][7].
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://scylla.io
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://github.com/DataDog/integrations-core/blob/master/scylla/datadog_checks/scylla/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

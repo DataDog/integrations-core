@@ -1,0 +1,48 @@
+version: '3'
+
+# dc up then wait for scylla to get synced with its db
+# then dexec into scylla-manager and run following command:
+    # sctool cluster add --host scylla-db
+
+services:
+  scylla-manager:
+    image: scylladb/scylla-manager
+    container_name: scylla-manager
+    depends_on:
+      - scylla-manager-db
+    ports:
+      - "56080:56080"
+      - "56443:56443"
+      - "56090:56090"
+      - "56112:56112"
+    networks:
+      - scylla-network
+    volumes:
+      - ./configs/scylla-manager.yaml:/etc/scylla-manager/scylla-manager.yaml
+
+  scylla-manager-db:
+    image: scylladb/scylla
+    container_name: scylla-manager-db
+#    ports:
+#      - "9100:9100"
+#      - "9180:9180"
+#      - "10000:10000"
+    networks:
+      - scylla-network
+    volumes:
+      - ./configs/scylla.yaml:/etc/scylla/scylla.yaml
+
+  scylla-db:
+    image: scylladb/scylla
+    container_name: scylla-db
+    ports:
+      - "9100:9100"
+      - "9180:9180"
+      - "10000:10000"
+    networks:
+      - scylla-network
+    volumes:
+      - ./configs/scylla.yaml:/etc/scylla/scylla.yaml
+
+networks:
+  scylla-network: {}

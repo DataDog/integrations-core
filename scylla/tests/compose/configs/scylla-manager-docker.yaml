@@ -1,0 +1,9 @@
+http: ':56080'
+https: ':56443'
+
+logger:
+  mode: stderr
+
+database:
+  hosts:
+    - scylla-manager-db

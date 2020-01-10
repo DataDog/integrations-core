@@ -6,7 +6,7 @@
   "metric_prefix": "scylla.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Collect per instance metrics and cluster-wide manager metrics",
   "guid": "875e4d62-831b-4929-bea1-57e5c7016d65",
   "support": "core",
   "supported_os": [
@@ -16,7 +16,9 @@
   ],
   "public_title": "Datadog-Scylla Integration",
   "categories": [
-    ""
+    "data store",
+    "log collection",
+    "autodiscovery"
   ],
   "type": "check",
   "is_public": false,
