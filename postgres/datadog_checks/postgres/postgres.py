@@ -432,15 +432,12 @@ class PostgreSql(AgentCheck):
 
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
-            # [(metric-map, value), (metric-map, value), ...]
-            # metric-map is: (dd_name, "rate"|"gauge")
-            # shift the results since the first columns will be the "descriptors"
-            # To submit simply call the function for each value v
-            # v[0] == (metric_name, submit_function)
-            # v[1] == the actual value
-            # tags are
-            for v in zip([scope['metrics'][c] for c in cols], row[len(desc) :]):
-                v[0][1](self, v[0][0], v[1], tags=tags)
+            # Submit metrics to the Agent.
+            column_values = row[len(desc) :]
+            for column, value in zip(cols, column_values):
+                name, submit_metric = scope['metrics'][column]
+                submit_metric(self, name, value, tags=tags)
+
             valid_results_size += 1
 
         return valid_results_size
