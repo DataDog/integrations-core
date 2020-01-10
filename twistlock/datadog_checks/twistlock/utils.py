@@ -16,8 +16,9 @@ NORMALIZATION_FIELDS = {
 def normalize_api_data_inplace(data):
     """
     Normalize api data to make it compatible with both standalone Twistlock and Prisma Cloud Twistlock.
-    Normalization based on https://docs.paloaltonetworks.com/prisma/prisma-cloud/19-11/prisma-cloud-compute-edition-admin/api/porting_guide.html
-    """  # noqa: E501
+    Normalization based on:
+    https://docs.paloaltonetworks.com/prisma/prisma-cloud/19-11/prisma-cloud-compute-edition-admin/api/porting_guide.html
+    """
     for elem in data:
         if 'info' in elem:
             info = elem.pop('info')
