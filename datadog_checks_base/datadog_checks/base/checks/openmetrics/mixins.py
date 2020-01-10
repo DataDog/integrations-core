@@ -861,7 +861,7 @@ class OpenMetricsScraperMixin(object):
             if label_name == "namespace":
                 kube_ns = label_value
         # if it is a volume metric, add statefulset tag
-        if metric_name.startswith(self.VOLUME_METRIC_PREFIX) and pod_tags_by_pvc is not None and pvc_name is not None and kube_ns is not None:
+        if metric_name.startswith(self.VOLUME_METRIC_PREFIX) and pod_tags_by_pvc and pvc_name and kube_ns:
             pod_tags = pod_tags_by_pvc.get(pvc_name + "|" + kube_ns)
             if pod_tags:
                 _tags.extend(pod_tags)
