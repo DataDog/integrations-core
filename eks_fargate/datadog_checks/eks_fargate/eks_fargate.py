@@ -15,17 +15,19 @@ class EksFargateCheck(AgentCheck):
         super(EksFargateCheck, self).__init__(
             name, init_config, instances,
         )
-        self.pod_name = os.getenv("HOSTNAME")
-        self.virtual_node = os.getenv("DD_KUBERNETES_KUBELET_NODENAME")
+        pod_name = os.getenv("HOSTNAME")
+        virtual_node = os.getenv("DD_KUBERNETES_KUBELET_NODENAME")
+
+        self.fargate_mode = 'fargate' in virtual_node
+
+        if pod_name is not None and self.fargate_mode:
+            self.tags = []
+            self.tags.append("pod_name:" + pod_name)
+            self.tags.append("virtual_node:" + virtual_node)
 
     def check(self, instance):
 
         # Only submit the heartbeat metric for fargate virtual nodes.
-        if "fargate" in self.virtual_node:
-            tags = []
-
-            tags.append("pod_name:" + self.pod_name)
-            tags.append("virtual_node:" + self.virtual_node)
-            tags = tags + instance.get('tags', [])
-
-            self.gauge("eks.fargate.pods.running", 1, tags)
+        if self.fargate_mode:
+            self.tags = self.tags + instance.get('tags', [])
+            self.gauge("eks.fargate.pods.running", 1, self.tags)
