@@ -513,9 +513,9 @@ class VSphereCheck(AgentCheck):
             self.collect_events()
 
         # Submit the number of VMs that are monitored
-        if vim.VirtualMachine in self.collected_resource_types:
-            vm_count = len(self.infrastructure_cache.get_mors(vim.VirtualMachine))
-            self.gauge('vm.count', vm_count, tags=self.base_tags, hostname=None)
+        for resource in self.collected_resource_types:
+            resource_count = len(self.infrastructure_cache.get_mors(resource))
+            self.gauge('{}.count'.format(MOR_TYPE_AS_STRING[resource]), resource_count, tags=self.base_tags, hostname=None)
 
         # Creating a thread pool and starting metric collection
         pool_executor = ThreadPoolExecutor(max_workers=self.threads_count)
