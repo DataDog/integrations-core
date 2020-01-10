@@ -35,8 +35,9 @@ instances:
     ## Should be either 'realtime' or 'historical'
     ## Use 'realtime' to collect metrics about Hosts and VMs.
     ## Use 'historical' to collect metrics about Datastores, Datacenters and Clusters.
-    ## If you want both, please create an additional instance connecting to the same vCenter
-    ## in this configuration file.
+    ## If you want both, we suggest creating an additional instance connecting to the same vCenter
+    ## in this configuration file, but you can also set this field to 'both'. This is not recommended
+    ## as the collection of historical metrics will negatively impact the collection of your realtime metrics.
     #
     # collection_type: realtime
 
@@ -65,12 +66,12 @@ instances:
     ## 'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter
     ## 'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
     ## 'property' is the kind of property on which to apply the filter and must be one of those values:
-    ##    - 'property: name' (default) to filter on the resource name (defined by vCenter)
-    ##    - 'property: inventory_path' to filter on the full inventory path
-    ##       (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
-    ##    - 'property: hostname' to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
-    ##    - 'property: guest_hostname' to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
-    ##       if VMware tools are installed)
+    ##    - name (default) to filter on the resource name (defined by vCenter)
+    ##    - inventory_path to filter on the full inventory path
+    ##      (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
+    ##    - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
+    ##    - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
+    ##      if VMware tools are installed)
     ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
     ##         resources do not have realtime metrics
     ## Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do not have
@@ -99,8 +100,8 @@ instances:
     ## For each resource type (vm, host, datastore, datacenter, cluster) collected,
     ## you can choose which metric you want to collect using a list of regex.
     ## If you do not specify a regex for the resource, all metrics will be collected.
-    ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
-    ## for the list of collected metrics.
+    ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
+    ## for the list of collected metrics (do not prefix then with `vsphere`)
     ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
     ##         resources do not have realtime metrics
     ## Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no

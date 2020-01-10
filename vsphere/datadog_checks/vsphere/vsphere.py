@@ -385,7 +385,7 @@ class VSphereCheck(AgentCheck):
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.base_tags, hostname=None)
 
         # Update the value of `max_query_metrics` if needed
-        if self.config.collection_type == 'historical':
+        if self.config.is_historical():
             try:
                 vcenter_max_hist_metrics = self.api.get_max_query_metrics()
                 if vcenter_max_hist_metrics < self.config.max_historical_metrics:

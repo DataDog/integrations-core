@@ -51,15 +51,21 @@ class VSphereConfig(object):
         )
 
         # Utility
-        self.collected_resource_types = (
-            REALTIME_RESOURCES if self.collection_type == 'realtime' else HISTORICAL_RESOURCES
-        )
+        if self.collection_type == 'both':
+            self.collected_resource_types = REALTIME_RESOURCES + HISTORICAL_RESOURCES
+        elif self.collection_type == 'historical':
+            self.collected_resource_types = HISTORICAL_RESOURCES
+        else:
+            self.collected_resource_types = REALTIME_RESOURCES
 
         # Filters
         self.resource_filters = self.parse_resource_filters(instance.get("resource_filters", {}))
         self.metric_filters = self.parse_metric_filters(instance.get("metric_filters", {}))
 
         self.validate_config()
+
+    def is_historical(self):
+        return self.collection_type in ('historical', 'both')
 
     def validate_config(self):
         if not self.ssl_verify and self.ssl_capath:
@@ -70,11 +76,11 @@ class VSphereConfig(object):
                 "disabling ssl verification."
             )
 
-        if self.collection_type not in ('realtime', 'historical'):
+        if self.collection_type not in ('realtime', 'historical', 'both'):
             raise ConfigurationError(
                 "Your configuration is incorrectly attempting to "
                 "set the `collection_type` to {}. It should be either "
-                "'realtime' or 'historical'.".format(self.collection_type)
+                "'realtime', 'historical' or 'both'.".format(self.collection_type)
             )
 
         if self.collection_level not in (1, 2, 3, 4):
