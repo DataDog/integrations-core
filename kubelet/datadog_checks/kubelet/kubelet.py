@@ -68,12 +68,6 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
 
 DEFAULT_GAUGES = {
     'rest_client_requests_total': 'rest.client.requests',
-    'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
-    'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
-    'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
-    'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
-    'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
-    'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
 }
 
 DEPRECATED_GAUGES = {
@@ -163,6 +157,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     COUNTER_METRICS = {'kubelet_evictions': 'kubelet.evictions'}
 
+    VOLUME_METRICS = {
+        'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
+        'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
+        'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
+        'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
+        'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
+        'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
+    }
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         self.NAMESPACE = 'kubernetes'
         if instances is not None and len(instances) > 1:
@@ -189,8 +192,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             k: self._histogram_from_seconds_to_microseconds(v) for k, v in TRANSFORM_VALUE_HISTOGRAMS.items()
         }
 
+        volume_metric_transformers = {k: self.append_pod_tags_to_volume_metrics for k in self.VOLUME_METRICS}
+
         self.transformers = {}
-        for d in [self.CADVISOR_METRIC_TRANSFORMERS, counter_transformers, histogram_transformers]:
+        for d in [
+            self.CADVISOR_METRIC_TRANSFORMERS,
+            counter_transformers,
+            histogram_transformers,
+            volume_metric_transformers
+        ]:
             self.transformers.update(d)
 
     def _create_kubelet_prometheus_instance(self, instance):
@@ -327,7 +337,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
         if self.kubelet_scraper_config['prometheus_url']:  # Prometheus
             self.log.debug('processing kubelet metrics')
-            self.process(self.kubelet_scraper_config, metric_transformers=self.transformers, pod_tags_by_pvc=self.pod_tags_by_pvc)
+            self.process(self.kubelet_scraper_config, metric_transformers=self.transformers)
 
         # Free up memory
         self.pod_list = None
@@ -680,3 +690,25 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             # Determine the tags to send
             tags = self._metric_tags(metric.name, val, sample, scraper_config, hostname=custom_hostname)
             self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
+
+    def append_pod_tags_to_volume_metrics(self, metric, scraper_config, hostname=None):
+        metric_name_with_namespace = '{}.{}'.format(scraper_config['namespace'], self.VOLUME_METRICS[metric.name])
+        for sample in metric.samples:
+            val = sample[self.SAMPLE_VALUE]
+            if not self._is_value_valid(val):
+                self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
+                continue
+            custom_hostname = self._get_hostname(hostname, sample, scraper_config)
+            # Determine the tags to send
+            tags = self._metric_tags(metric.name, val, sample, scraper_config, hostname=custom_hostname)
+            pvc_name, kube_ns = None, None
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                if label_name == "persistentvolumeclaim":
+                    pvc_name = label_value
+                elif label_name == "namespace":
+                    kube_ns = label_value
+                if pvc_name and kube_ns:
+                    break
+            pod_tags = self.pod_tags_by_pvc.get(pvc_name + "|" + kube_ns, [])
+            tags.extend(pod_tags)
+            self.gauge(metric_name_with_namespace, val, tags=list(set(tags)), hostname=custom_hostname)
