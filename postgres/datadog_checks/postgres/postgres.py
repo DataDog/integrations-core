@@ -426,8 +426,9 @@ class PostgreSql(AgentCheck):
                         self.log.debug("Skipping non matched schema %s for table %s", schema, table)
                         continue
 
-            # Build tags
-            # descriptors are: (pg_name, dd_tag_name): value
+            # Build tags.
+
+            # Add tags from the instance.
             # Special-case the "db" tag, which overrides the one that is passed as instance_tag
             # The reason is that pg_stat_database returns all databases regardless of the
             # connection.
@@ -436,6 +437,7 @@ class PostgreSql(AgentCheck):
             else:
                 tags = [t for t in instance_tags]
 
+            # Add tags from descriptors.
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
             # Submit metrics to the Agent.
