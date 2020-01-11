@@ -6,15 +6,10 @@ import os
 import mock
 import pytest
 
-from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.dev import docker_run
+from datadog_checks.utils.common import get_docker_hostname
 
 from .common import INSTANCE_DEFAULT_METRICS, MANAGER_DEFAULT_METRICS
-
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -27,19 +22,13 @@ MANAGER_URL = "http://{}:{}/metrics".format(HOST, MANAGER_PORT)
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
-            os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-            log_patterns=['JMX is enabled to receive remote connections'],
+        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+        log_patterns=['JMX is enabled to receive remote connections'],
     ):
         instances = {
             'instances': [
-                {
-                    'instance_endpoint': INSTANCE_URL,
-                    'metrics': INSTANCE_DEFAULT_METRICS,
-                },
-                {
-                    'manager_endpoint': MANAGER_URL,
-                    'metrics': MANAGER_DEFAULT_METRICS,
-                },
+                {'instance_endpoint': INSTANCE_URL, 'metrics': INSTANCE_DEFAULT_METRICS},
+                {'manager_endpoint': MANAGER_URL, 'metrics': MANAGER_DEFAULT_METRICS},
             ]
         }
 
@@ -62,12 +51,10 @@ def mock_db_data():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-            'requests.get',
-            return_value=mock.MagicMock(
-                status_code=200,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"}
-            ),
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+        ),
     ):
         yield
 
@@ -78,11 +65,9 @@ def mock_manager_data():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-            'requests.get',
-            return_value=mock.MagicMock(
-                status_code=200,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"}
-            ),
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+        ),
     ):
         yield

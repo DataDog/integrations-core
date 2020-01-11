@@ -289,11 +289,13 @@ INSTANCE_DEFAULT_METRICS = [
     'scylla.transport.requests_blocked_memory',
     'scylla.transport.requests_blocked_memory_current',
     'scylla.transport.requests_served',
-    'scylla.transport.requests_serving'
+    'scylla.transport.requests_serving',
 ]
 
 MANAGER_DEFAULT_METRICS = [
-    'scylla.manager.go.gc.duration_seconds',
+    'scylla.manager.go.gc.duration_seconds.count',
+    'scylla.manager.go.gc.duration_seconds.quantile',
+    'scylla.manager.go.gc.duration_seconds.sum',
     'scylla.manager.go.goroutines',
     'scylla.manager.go.memstats.alloc_bytes',
     'scylla.manager.go.memstats.alloc_bytes_total',
@@ -318,14 +320,14 @@ MANAGER_DEFAULT_METRICS = [
     'scylla.manager.go.memstats.stack_inuse_bytes',
     'scylla.manager.go.memstats.stack_sys_bytes',
     'scylla.manager.go.memstats.sys_bytes',
+    'scylla.manager.healthcheck_cql_rtt_ms',
+    'scylla.manager.healthcheck_cql_status',
     'scylla.manager.process.cpu_seconds_total',
     'scylla.manager.process.max_fds',
     'scylla.manager.process.open_fds',
     'scylla.manager.process.resident_memory_bytes',
     'scylla.manager.process.start_time_seconds',
     'scylla.manager.process.virtual_memory_bytes',
-    'scylla.manager.healthcheck_cql_rtt_ms',
-    'scylla.manager.healthcheck_cql_status',
     'scylla.manager.task_active_count',
     'scylla.manager.task_run_total',
 ]
