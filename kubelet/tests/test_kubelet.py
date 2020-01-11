@@ -143,6 +143,14 @@ COMMON_TAGS = {
         'kube_container_name:datadog-agent'
     ],
     "container_id://6d8c6a05731b52195998c438fdca271b967b171f6c894f11ba59aa2f4deff10c": ['pod_name:cassandra-0'],
+    "kubernetes_pod_uid://639980e5-2e6c-11ea-8bb1-42010a800074": [
+        'kube_namespace:default',
+        'kube_service:nginx',
+        'kube_stateful_set:web',
+        'namespace:default',
+        'persistentvolumeclaim:www-web-2',
+        'pod_phase:running',
+    ],
 }
 
 METRICS_WITH_DEVICE_TAG = {
@@ -827,3 +835,22 @@ def test_system_container_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_metric('kubernetes.runtime.cpu.usage', 19442853.0, tags)
     aggregator.assert_metric('kubernetes.runtime.memory.rss', 101273600.0, tags)
     aggregator.assert_metric('kubernetes.kubelet.memory.rss', 88477696.0, tags)
+
+
+def test_create_pod_tags_by_pvc(monkeypatch, tagger):
+    check = KubeletCheck('kubelet', None, {}, [{}])
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+    pod_list = check.retrieve_pod_list()
+
+    pod_tags_by_pvc = check._create_pod_tags_by_pvc(pod_list)
+
+    expected_result = {
+        'www-web-2|default': [
+            'kube_namespace:default',
+            'kube_service:nginx',
+            'kube_stateful_set:web',
+            'namespace:default',
+            'persistentvolumeclaim:www-web-2',
+            'pod_phase:running',
+    ]}
+    assert pod_tags_by_pvc == expected_result

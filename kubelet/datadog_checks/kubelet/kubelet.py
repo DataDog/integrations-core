@@ -241,7 +241,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 "<persistentvolumeclaim>|<kube_namespace>": [<list_of_pod_tags>],
                 "<persistentvolumeclaim1>|<kube_namespace1>": [<list_of_pod_tags1>],
             }
-        that can be used to add a statefulset tag to volume metrics
+        that can be used to add pod tags to associated volume metrics
         """
         pod_tags_by_pvc = {}
         for pod in pods['items']:
