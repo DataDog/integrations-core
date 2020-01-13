@@ -1,5 +1,9 @@
 # CHANGELOG - tokumx
 
+## 2.2.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 2.1.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3576](https://github.com/DataDog/integrations-core/pull/3576).

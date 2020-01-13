@@ -1,5 +1,9 @@
 # CHANGELOG - couch
 
+## 3.7.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
 ## 3.6.0 / 2019-12-02
 
 * [Added] Standardize logging format. See [#4904](https://github.com/DataDog/integrations-core/pull/4904).

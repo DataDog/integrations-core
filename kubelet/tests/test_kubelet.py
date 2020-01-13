@@ -206,7 +206,7 @@ def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_sum
     Returns a check that uses mocked data for responses from prometheus endpoints, pod list,
     and node spec.
     """
-    check = KubeletCheck('kubelet', None, {}, instances)
+    check = KubeletCheck('kubelet', {}, instances)
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
     if stats_summary_fail:
@@ -278,7 +278,7 @@ def mock_from_file(fname):
 
 def test_bad_config():
     with pytest.raises(Exception):
-        KubeletCheck('kubelet', None, {}, [{}, {}])
+        KubeletCheck('kubelet', {}, [{}, {}])
 
 
 def test_parse_quantity():
@@ -287,7 +287,7 @@ def test_parse_quantity():
 
 
 def test_kubelet_default_options():
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     assert check.cadvisor_scraper_config['namespace'] == 'kubernetes'
     assert check.kubelet_scraper_config['namespace'] == 'kubernetes'
 
@@ -481,7 +481,7 @@ def test_kubelet_check_instance_config(monkeypatch):
 
 
 def test_report_pods_running(monkeypatch, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     pod_list = check.retrieve_pod_list()
@@ -520,7 +520,7 @@ def test_report_pods_running_none_ids(monkeypatch, tagger):
     podlist["items"][0]['metadata']['uid'] = None
     podlist["items"][1]['status']['containerStatuses'][0]['containerID'] = None
 
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=podlist))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     pod_list = check.retrieve_pod_list()
@@ -539,7 +539,7 @@ def test_report_pods_running_none_ids(monkeypatch, tagger):
 
 
 def test_report_container_spec_metrics(monkeypatch, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
@@ -579,7 +579,7 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
 
 
 def test_report_container_state_metrics(monkeypatch, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(check, 'perform_kubelet_query', mock.Mock(return_value=MockStreamResponse('pods_crashed.json')))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
@@ -651,7 +651,7 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
 
 
 def test_pod_expiration(monkeypatch, aggregator, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
 
     # Fixtures contains four pods:
@@ -691,7 +691,7 @@ class MockResponse(mock.Mock):
 
 
 def test_perform_kubelet_check(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.kube_health_url = "http://127.0.0.1:10255/healthz"
     check.kubelet_credentials = KubeletCredentials({})
     monkeypatch.setattr(check, 'service_check', mock.Mock())
@@ -719,7 +719,7 @@ def test_perform_kubelet_check(monkeypatch):
 
 
 def test_report_node_metrics(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value={'num_cores': 4, 'memory_capacity': 512}))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     check._report_node_metrics(['foo:bar'])
@@ -731,7 +731,7 @@ def test_report_node_metrics(monkeypatch):
 
 
 def test_retrieve_pod_list_success(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(check, 'perform_kubelet_query', mock.Mock(return_value=MockStreamResponse('pod_list_raw.dat')))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
@@ -745,7 +745,7 @@ def test_retrieved_pod_list_failure(monkeypatch):
     def mock_perform_kubelet_query(s, stream=False):
         raise Exception("network error")
 
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(check, 'perform_kubelet_query', mock_perform_kubelet_query)
 
@@ -788,7 +788,7 @@ def test_add_labels_to_tags(monkeypatch, aggregator):
 
 
 def test_report_container_requests_limits(monkeypatch, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(
         check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_requests_limits.json')))
     )
@@ -822,7 +822,7 @@ def test_kubelet_stats_summary_not_available(monkeypatch, aggregator, tagger):
 
 
 def test_system_container_metrics(monkeypatch, aggregator, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(
         check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
     )

@@ -1,5 +1,11 @@
 # CHANGELOG - kafka_consumer
 
+## 2.2.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Fix `kafka_client_api_version`. See [#5007](https://github.com/DataDog/integrations-core/pull/5007).
+
 ## 2.1.1 / 2019-11-27
 
 * [Fixed] Handle missing partitions. See [#5035](https://github.com/DataDog/integrations-core/pull/5035).

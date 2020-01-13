@@ -1,5 +1,9 @@
 # CHANGELOG - riakcs
 
+## 2.2.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
 ## 2.1.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3564](https://github.com/DataDog/integrations-core/pull/3564).

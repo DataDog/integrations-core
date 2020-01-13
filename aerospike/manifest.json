@@ -23,7 +23,9 @@
   "integration_id": "aerospike",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Aerospike Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

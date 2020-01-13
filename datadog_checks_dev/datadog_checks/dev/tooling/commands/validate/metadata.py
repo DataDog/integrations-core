@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import csv
+import re
 from collections import defaultdict
 from io import open
 
 import click
-from six import PY2, iteritems
+from six import PY2, iteritems, string_types
 
 from ...utils import get_metadata_file, get_metric_sources, load_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
@@ -166,6 +167,22 @@ PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
 
 MAX_DESCRIPTION_LENGTH = 400
 
+METRIC_REPLACEMENT = re.compile(r"([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)")
+METRIC_DOTUNDERSCORE_CLEANUP = re.compile(r"_*\._*")
+
+
+def normalize_metric_name(metric_name):
+    """Copy pasted from the backend normalization code.
+    Extracted from dogweb/datalayer/metrics/query/metadata.py:normalize_metric_name
+    Metrics in metadata.csv need to be formatted this way otherwise, syncing metadata will fail.
+    Function not exported as a util, as this is different than AgentCheck.normalize. This function just makes sure
+    that whatever is in the metadata.csv is understandable by the backend.
+    """
+    if not isinstance(metric_name, string_types):
+        metric_name = str(metric_name)
+    metric_name = METRIC_REPLACEMENT.sub("_", metric_name)
+    return METRIC_DOTUNDERSCORE_CLEANUP.sub(".", metric_name).strip("_")
+
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
 @click.argument('check', required=False)
@@ -252,6 +269,15 @@ def metadata(check):
                     errors = True
                     echo_failure(
                         '{}:{} `{}` is a duplicate metric_name'.format(current_check, line, row['metric_name'])
+                    )
+
+                normalized_metric_name = normalize_metric_name(row['metric_name'])
+                if row['metric_name'] != normalized_metric_name:
+                    errors = True
+                    echo_failure(
+                        "Metric name '{}' is not valid, it should be normalized as {}".format(
+                            row['metric_name'], normalized_metric_name
+                        )
                     )
 
                 # metric_name header

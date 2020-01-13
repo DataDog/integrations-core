@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 2.2.0 / 2020-01-10
+
+* [Added] Update TUF dependency. See [#5441](https://github.com/DataDog/integrations-core/pull/5441).
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
 ## 2.1.0 / 2020-01-02
 
 * [Changed] Don't provide a CLI entry point. See [#5374](https://github.com/DataDog/integrations-core/pull/5374).

@@ -57,7 +57,7 @@ def test_detect_cadvisor_port_zero():
 def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
     instance_with_tag = {"tags": ["instance:tag"], "cadvisor_port": 4194}
     cadvisor_url = "http://valid:port/url"
-    check = KubeletCheck('kubelet', None, {}, [instance_with_tag])
+    check = KubeletCheck('kubelet', {}, [instance_with_tag])
     monkeypatch.setattr(
         check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_list_1.2.json')))
     )

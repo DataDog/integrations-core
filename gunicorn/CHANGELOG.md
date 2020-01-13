@@ -1,5 +1,9 @@
 # CHANGELOG - gunicorn
 
+## 1.9.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.8.1 / 2019-12-13
 
 * [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).

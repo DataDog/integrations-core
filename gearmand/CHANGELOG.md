@@ -1,5 +1,9 @@
 # CHANGELOG - gearmand
 
+## 1.4.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.3.1 / 2019-10-11
 
 * [Fixed] Fix misleading gearman.workers metric (#4515). See [#4520](https://github.com/DataDog/integrations-core/pull/4520). Thanks [orgito](https://github.com/orgito).

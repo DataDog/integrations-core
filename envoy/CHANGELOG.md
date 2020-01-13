@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.12.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.11.0 / 2019-12-02
 
 * [Added] Add new metrics for Redis. See [#4946](https://github.com/DataDog/integrations-core/pull/4946). Thanks [tony612](https://github.com/tony612).

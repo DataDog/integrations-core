@@ -1,5 +1,17 @@
 # CHANGELOG - snmp
 
+## 2.3.1 / 2020-01-13
+
+* [Fixed] Fix usage of old OID list attributes on InstanceConfig. See [#5412](https://github.com/DataDog/integrations-core/pull/5412).
+
+## 2.3.0 / 2020-01-07
+
+* [Added] Remove MIB requirement in profiles. See [#5397](https://github.com/DataDog/integrations-core/pull/5397).
+* [Added] Implement table browsing with OIDs. See [#5368](https://github.com/DataDog/integrations-core/pull/5368).
+* [Added] Update license years. See [#5384](https://github.com/DataDog/integrations-core/pull/5384).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Add a profile for Meraki cloud devices. See [#5215](https://github.com/DataDog/integrations-core/pull/5215).
+
 ## 2.2.0 / 2020-01-02
 
 * [Added] Add profile for Cisco Nexus switches. See [#5363](https://github.com/DataDog/integrations-core/pull/5363).

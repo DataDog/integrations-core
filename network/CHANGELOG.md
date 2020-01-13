@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 1.14.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.13.0 / 2020-01-02
 
 * [Added] Gracefully handle /proc errors in network check. See [#5245](https://github.com/DataDog/integrations-core/pull/5245).
