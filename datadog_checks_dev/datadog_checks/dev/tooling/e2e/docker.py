@@ -197,6 +197,10 @@ class DockerInterface(object):
         cmd2 += 'ls -la /opt/datadog-agent/embedded/lib/python2.7/site-packages/datadog_checks/base'.split()
         run_command(cmd2, capture=False, check=False)
 
+        cmd4 = ['docker', 'exec', self.container_name]
+        cmd4 += 'rm -rfv /opt/datadog-agent/embedded/lib/python2.7/site-packages/datadog_checks/base'.split()
+        run_command(cmd4, capture=False, check=False)
+
     def update_agent(self):
         if self.agent_build and '/' in self.agent_build:
             run_command(['docker', 'pull', self.agent_build], capture=True, check=True)
