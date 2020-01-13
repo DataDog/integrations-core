@@ -1,5 +1,10 @@
 # CHANGELOG - Twistlock
 
+## 1.5.0 / 2020-01-13
+
+* [Added] Add Prisma Cloud compatibility. See [#5360](https://github.com/DataDog/integrations-core/pull/5360).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.4.1 / 2020-01-02
 
 * [Fixed] Fix possible TypeError due to NoneType in parser.isoparse. See [#5265](https://github.com/DataDog/integrations-core/pull/5265).

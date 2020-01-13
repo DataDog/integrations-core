@@ -1,5 +1,9 @@
 # CHANGELOG - OpenMetrics
 
+## 1.4.0 / 2020-01-13
+
+* [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
+
 ## 1.3.0 / 2019-10-11
 
 * [Added] Add an option to send histograms/summary counts as monotonic counters. See [#4629](https://github.com/DataDog/integrations-core/pull/4629).

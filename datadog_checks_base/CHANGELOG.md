@@ -1,5 +1,14 @@
 # CHANGELOG - datadog_checks_base
 
+## 10.2.0 / 2020-01-13
+
+* [Added] Update TUF dependency. See [#5441](https://github.com/DataDog/integrations-core/pull/5441).
+* [Fixed] Fix http handler. See [#5434](https://github.com/DataDog/integrations-core/pull/5434).
+* [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Upgrade vertica to stop logging to /dev/null. See [#5352](https://github.com/DataDog/integrations-core/pull/5352).
+
 ## 10.1.0 / 2020-01-03
 
 * [Fixed] Ensure logs are lazily formatted. See [#5378](https://github.com/DataDog/integrations-core/pull/5378).

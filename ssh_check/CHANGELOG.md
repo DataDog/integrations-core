@@ -1,5 +1,10 @@
 # CHANGELOG - ssh_check
 
+## 1.10.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Add version metadata. See [#5016](https://github.com/DataDog/integrations-core/pull/5016).
+
 ## 1.9.0 / 2019-10-09
 
 * [Added] Upgrade Paramiko to version 2.6.0. See [#4685](https://github.com/DataDog/integrations-core/pull/4685). Thanks [daniel-savo](https://github.com/daniel-savo).

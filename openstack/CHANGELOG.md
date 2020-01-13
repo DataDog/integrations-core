@@ -1,5 +1,10 @@
 # CHANGELOG - openstack
 
+## 1.9.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.8.3 / 2019-10-11
 
 * [Fixed] Fix documented default for `use_agent_proxy`. See [#4517](https://github.com/DataDog/integrations-core/pull/4517).
