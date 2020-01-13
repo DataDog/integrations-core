@@ -114,7 +114,7 @@ datadog-system-swap==1.6.3
 datadog-tcp-check==2.3.3
 datadog-teamcity==1.7.0
 datadog-tls==1.4.0
-datadog-tokumx==2.1.0
+datadog-tokumx==2.2.0
 datadog-tomcat==1.2.0
 datadog-twemproxy==1.4.0
 datadog-twistlock==1.4.1
