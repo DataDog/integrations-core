@@ -54,7 +54,7 @@ DEFAULT_CONFIG = OrderedDict(
                                 ('app_key', os.getenv('DD_APP_KEY')),
                                 ('site', os.getenv('DD_SITE')),
                                 ('dd_url', os.getenv('DD_DD_URL')),
-                                ('dd_log_url', os.getenv('DD_LOGS_CONFIG_DD_URL'))
+                                ('dd_log_url', os.getenv('DD_LOGS_CONFIG_DD_URL')),
                             )
                         ),
                     ),

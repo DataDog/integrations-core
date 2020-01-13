@@ -184,7 +184,18 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
                 )
 
     environment = interface(
-        check, env, base_package, config, env_vars, metadata, agent_build, api_key, dd_url, dd_log_url, python, not bool(agent)
+        check,
+        env,
+        base_package,
+        config,
+        env_vars,
+        metadata,
+        agent_build,
+        api_key,
+        dd_url,
+        dd_log_url,
+        python,
+        not bool(agent),
     )
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)

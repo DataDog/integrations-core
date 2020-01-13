@@ -11,7 +11,9 @@ from ...subprocess import run_command
 from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS, file_exists, path_join
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
+    DEFAULT_AGENT_INTAKE,
     DEFAULT_AGENT_VERSION,
+    DEFAULT_LOG_INTAKE,
     DEFAULT_PYTHON_VERSION,
     FAKE_API_KEY,
     MANIFEST_VERSION_PATTERN,
@@ -21,7 +23,7 @@ from .agent import (
     get_agent_version_manifest,
     get_pip_exe,
     get_rate_flag,
-    DEFAULT_AGENT_INTAKE, DEFAULT_LOG_INTAKE)
+)
 from .config import config_file_name, locate_config_dir, locate_config_file, remove_env_data, write_env_data
 from .platform import LINUX, MAC, WINDOWS
 
