@@ -10,7 +10,7 @@ SCYLLA_ALIEN = {
 }
 
 SCYLLA_BATCHLOG = {
-    'scylla_batchlog_manager_total_write_replay_attempts': 'batchlog.manager_total_write_replay_attempts',
+    'scylla_batchlog_manager_total_write_replay_attempts': 'batchlog_manager.total_write_replay_attempts',
 }
 
 SCYLLA_CACHE = {
@@ -62,7 +62,7 @@ SCYLLA_COMMITLOG = {
 }
 
 SCYLLA_COMPACTION = {
-    'scylla_compaction_manager_compactions': 'compaction.manager_compactions',
+    'scylla_compaction_manager_compactions': 'compaction_manager.compactions',
 }
 
 SCYLLA_CQL = {
@@ -139,10 +139,10 @@ SCYLLA_DATABASE = {
 }
 
 SCYLLA_EXECUTION = {
-    'scylla_execution_stages_function_calls_enqueued': 'execution.stages_function_calls_enqueued',
-    'scylla_execution_stages_function_calls_executed': 'execution.stages_function_calls_executed',
-    'scylla_execution_stages_tasks_preempted': 'execution.stages_tasks_preempted',
-    'scylla_execution_stages_tasks_scheduled': 'execution.stages_tasks_scheduled',
+    'scylla_execution_stages_function_calls_enqueued': 'execution_stages.function_calls_enqueued',
+    'scylla_execution_stages_function_calls_executed': 'execution_stages.function_calls_executed',
+    'scylla_execution_stages_tasks_preempted': 'execution_stages.tasks_preempted',
+    'scylla_execution_stages_tasks_scheduled': 'execution_stages.tasks_scheduled',
 }
 
 SCYLLA_GOSSIP = {
@@ -175,11 +175,11 @@ SCYLLA_HTTPD = {
 }
 
 SCYLLA_IO = {
-    'scylla_io_queue_delay': 'io.queue_delay',
-    'scylla_io_queue_queue_length': 'io.queue_queue_length',
-    'scylla_io_queue_shares': 'io.queue_shares',
-    'scylla_io_queue_total_bytes': 'io.queue_total_bytes',
-    'scylla_io_queue_total_operations': 'io.queue_total_operations',
+    'scylla_io_queue_delay': 'io_queue.delay',
+    'scylla_io_queue_queue_length': 'io_queue.queue_length',
+    'scylla_io_queue_shares': 'io_queue.shares',
+    'scylla_io_queue_total_bytes': 'io_queue.total_bytes',
+    'scylla_io_queue_total_operations': 'io_queue.total_operations',
 }
 
 SCYLLA_LSA = {
@@ -226,8 +226,8 @@ SCYLLA_NODE = {
 }
 
 SCYLLA_QUERY = {
-    'scylla_query_processor_queries': 'query.processor_queries',
-    'scylla_query_processor_statements_prepared': 'query.processor_statements_prepared',
+    'scylla_query_processor_queries': 'query_processor.queries',
+    'scylla_query_processor_statements_prepared': 'query_processor.statements_prepared',
 }
 
 SCYLLA_REACTOR = {
@@ -364,14 +364,7 @@ SCYLLA_TRANSPORT = {
 }
 
 
-def merge_dicts(*dicts):
-    result = {}
-    for d in dicts:
-        result.update(d)
-    return result
-
-
-INSTANCE_METRICS = merge_dicts(
+INSTANCE_METRICS = [
     SCYLLA_ALIEN,
     SCYLLA_BATCHLOG,
     SCYLLA_CACHE,
@@ -398,7 +391,7 @@ INSTANCE_METRICS = merge_dicts(
     SCYLLA_THRIFT,
     SCYLLA_TRACING,
     SCYLLA_TRANSPORT,
-)
+]
 
 
 # metrics namespaced under 'scylla.manager'

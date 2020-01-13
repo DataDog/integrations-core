@@ -23,7 +23,7 @@ class ScyllaCheck(OpenMetricsBaseCheck):
                     {
                         'prometheus_url': endpoint,
                         'namespace': 'scylla',
-                        'metrics': [INSTANCE_METRICS],
+                        'metrics': INSTANCE_METRICS,
                         'prometheus_timeout': instance.get('timeout', 10),
                     }
                 )
