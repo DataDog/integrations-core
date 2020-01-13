@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import random
 import time
 
 import click
 from semver import parse_version_info
 from six import iteritems
-import random
+
 from ....subprocess import run_command
 from ....utils import basepath, chdir, get_next
 from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
