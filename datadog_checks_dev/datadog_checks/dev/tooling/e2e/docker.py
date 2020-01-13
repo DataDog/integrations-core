@@ -210,17 +210,21 @@ class DockerInterface(object):
             'DD_CMD_PORT': find_free_port(get_ip()),
             # Disable trace agent
             'DD_APM_ENABLED': 'false',
-            # Set custom agent intake
-            'DD_DD_URL': self.dd_url,
-            'DD_LOGS_CONFIG_DD_URL': self.dd_log_url,
             # Don't write .pyc, needed to fix this issue (only Python 2):
             # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
             # in the first place.
             # More info: https://github.com/DataDog/integrations-core/pull/5454
             # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
-            'PYTHONDONTWRITEBYTECODE': "1"
+            'PYTHONDONTWRITEBYTECODE': "1",
         }
+        if self.dd_url:
+            # Set custom agent intake
+            env_vars['DD_DD_URL'] = self.dd_url
+        if self.dd_log_url:
+            # Set custom agent log intake
+            env_vars['DD_LOGS_CONFIG_DD_URL'] = self.dd_log_url
         env_vars.update(self.env_vars)
+
         volumes = [
             # Mount the config directory, not the file, to ensure updates are propagated
             # https://github.com/moby/moby/issues/15793#issuecomment-135411504
