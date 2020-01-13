@@ -211,6 +211,13 @@ class DockerInterface(object):
                 # Agent 6 will simply fail without an API key
                 '-e',
                 'DD_API_KEY={}'.format(self.api_key),
+                # Don't write .pyc, needed to fix this issue (only Python 2):
+                # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
+                # in the first place.
+                # More info: https://github.com/DataDog/integrations-core/pull/5454
+                # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
+                '-e',
+                'PYTHONDONTWRITEBYTECODE=1',
                 # Run expvar on a random port
                 '-e',
                 'DD_EXPVAR_PORT=0',
