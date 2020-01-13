@@ -57,29 +57,31 @@ class JiraClient:
 
         return rate_limited, error, response
 
-    def create_issue(self, team, name, body):
+    def create_issue(self, team, name, body, member=None):
         rate_limited = False
         error = None
         response = None
 
-        data = json.dumps(
-            {
-                'fields': {
-                    'project': {'key': 'AR'},
-                    'summary': name,
-                    'description': {
-                        'type': 'doc',
-                        'version': 1,
-                        'content': [{'type': 'paragraph', 'content': [{'type': 'text', 'text': body}]}],
-                    },
-                    'issuetype': {'name': 'Task'},
-                }
+        data = {
+            'fields': {
+                'project': {'key': 'AR'},
+                'summary': name,
+                'description': {
+                    'type': 'doc',
+                    'version': 1,
+                    'content': [{'type': 'paragraph', 'content': [{'type': 'text', 'text': body}]}],
+                },
+                'issuetype': {'name': 'Task'},
             }
-        )
+        }
+
+        if member:
+            data['fields']['assignee'] = {"id": member}
+
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
 
         try:
-            response = requests.post(self.CREATE_ENDPOINT, data=data, auth=self.auth, headers=headers)
+            response = requests.post(self.CREATE_ENDPOINT, data=json.dumps(data), auth=self.auth, headers=headers)
             issue_key = response.json().get('key')
             rate_limited, error, resp = self.move_column(team, issue_key)
         except Exception as e:
