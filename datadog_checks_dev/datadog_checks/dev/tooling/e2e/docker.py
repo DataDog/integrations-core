@@ -213,6 +213,12 @@ class DockerInterface(object):
             # Set custom agent intake
             'DD_DD_URL': self.dd_url,
             'DD_LOGS_CONFIG_DD_URL': self.dd_log_url,
+            # Don't write .pyc, needed to fix this issue (only Python 2):
+            # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
+            # in the first place.
+            # More info: https://github.com/DataDog/integrations-core/pull/5454
+            # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
+            'PYTHONDONTWRITEBYTECODE': "1"
         }
         env_vars.update(self.env_vars)
         volumes = [

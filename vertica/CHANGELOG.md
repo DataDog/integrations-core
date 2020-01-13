@@ -1,5 +1,10 @@
 # CHANGELOG - Vertica
 
+## 1.4.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Upgrade vertica to stop logging to /dev/null. See [#5352](https://github.com/DataDog/integrations-core/pull/5352).
+
 ## 1.3.1 / 2019-11-14
 
 * [Fixed] Fix client log. See [#5011](https://github.com/DataDog/integrations-core/pull/5011).

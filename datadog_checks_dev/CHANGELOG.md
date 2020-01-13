@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 1.4.0 / 2020-01-13
+
+* [Added] Validate metric names normalization in metadata.csv. See [#5437](https://github.com/DataDog/integrations-core/pull/5437).
+* [Fixed] Fix function call for `release testable`. See [#5432](https://github.com/DataDog/integrations-core/pull/5432).
+
 ## 1.3.0 / 2020-01-09
 
 * [Added] Add debug option to base ddev command. See [#5386](https://github.com/DataDog/integrations-core/pull/5386).

@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab_runner
 
+## 2.7.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
 ## 2.6.0 / 2019-11-06
 
 * [Added] update gitlab_runner metrics. See [#4799](https://github.com/DataDog/integrations-core/pull/4799).

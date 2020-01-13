@@ -1,5 +1,9 @@
 # CHANGELOG - riak
 
+## 1.7.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
 ## 1.6.0 / 2019-07-12
 
 * [Added] Add logs section. See [#3995](https://github.com/DataDog/integrations-core/pull/3995).
