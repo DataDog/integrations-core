@@ -46,9 +46,10 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
         'Ex: -e DD_URL=app.datadoghq.com -e DD_API_KEY=123456'
     ),
 )
+@click.option('--org-name', '-o', help='The org to use for data submission.')
 @click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
 @click.pass_context
-def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
+def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort('`{}` is not a testable check.'.format(check))
@@ -86,17 +87,27 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
             'To influence the Agent Python version, use the `-py/--python` option.'.format(env, python)
         )
 
+    if not org_name:
+        org_name = ctx.obj['org']
+    if org_name not in ctx.obj['orgs']:
+        echo_failure('Org `{}` is not defined in your config.'.format(org_name))
+        abort()
+
+    org = ctx.obj['orgs'].get(org_name, {})
+
     if profile_memory and python < 3:
         profile_memory = False
         echo_warning('Collecting metrics about memory usage is only supported on Python 3+.')
 
-    api_key = ctx.obj['orgs'].get(ctx.obj['org'], {}).get('api_key') or ctx.obj['dd_api_key']
+    api_key = org.get('api_key') or ctx.obj['dd_api_key']
     if api_key is None:
         echo_warning(
             'Environment variable DD_API_KEY does not exist; a well-formatted '
             'fake API key will be used instead. You can also set the API key '
             'by doing `ddev config set dd_api_key`.'
         )
+
+    dd_url = org.get('dd_url')
 
     if profile_memory and not api_key:
         profile_memory = False
@@ -172,7 +183,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, profile_memory):
                 )
 
     environment = interface(
-        check, env, base_package, config, env_vars, metadata, agent_build, api_key, python, not bool(agent)
+        check, env, base_package, config, env_vars, metadata, agent_build, api_key, dd_url, python, not bool(agent)
     )
 
     echo_waiting('Updating `{}`... '.format(agent_build), nl=False)

@@ -17,7 +17,7 @@ from .agent import (
     get_agent_version_manifest,
     get_pip_exe,
     get_rate_flag,
-)
+    DEFAULT_AGENT_INTAKE, DEFAULT_LOG_INTAKE)
 from .config import config_file_name, env_exists, locate_config_dir, locate_config_file, remove_env_data, write_env_data
 
 
@@ -34,6 +34,8 @@ class DockerInterface(object):
         metadata=None,
         agent_build=None,
         api_key=None,
+        dd_url=None,
+        dd_log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
         default_agent=False,
     ):
@@ -45,6 +47,8 @@ class DockerInterface(object):
         self.metadata = metadata or {}
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY
+        self.dd_url = dd_url or DEFAULT_AGENT_INTAKE
+        self.dd_log_url = dd_log_url or DEFAULT_LOG_INTAKE
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
 
         self._agent_version = self.metadata.get('agent_version')
@@ -220,6 +224,11 @@ class DockerInterface(object):
                 # Disable trace agent
                 '-e',
                 'DD_APM_ENABLED=false',
+                # Set custom agent intake
+                '-e',
+                'DD_DD_URL={}'.format(self.dd_url),
+                '-e',
+                'DD_LOGS_CONFIG_DD_URL={}'.format(self.dd_log_url),
                 # Mount the config directory, not the file, to ensure updates are propagated
                 # https://github.com/moby/moby/issues/15793#issuecomment-135411504
                 '-v',

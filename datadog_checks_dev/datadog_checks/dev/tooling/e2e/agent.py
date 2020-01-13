@@ -21,6 +21,9 @@ DEFAULT_SAMPLING_WAIT_TIME = 15
 # Must be a certain length
 FAKE_API_KEY = 'a' * 32
 
+DEFAULT_AGENT_INTAKE = "https://app.datadoghq.com/"
+DEFAULT_LOG_INTAKE = "https://agent-intake.logs.datadoghq.com/"
+
 MANIFEST_VERSION_PATTERN = r'agent (\d)'
 
 
