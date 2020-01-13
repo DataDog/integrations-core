@@ -100,7 +100,7 @@ class MapReduceCheck(AgentCheck):
                 tags=['url:{}'.format(am_address)] + self.custom_tags,
                 message='Connection to ApplicationManager "{}" was successful'.format(am_address),
             )
-        self._get_hadoop_version(instance.get('resourcemanager_uri'))
+        self._get_hadoop_version()
 
     def _parse_general_counters(self, init_config):
         """
@@ -197,12 +197,14 @@ class MapReduceCheck(AgentCheck):
         return job_counter
 
     def _get_hadoop_version(self):
-        aegnt_config = self.get_agent_config()
-        cluster_info = self._rest_request_to_json(
-            self.rm_address,
-            self.CLUSTER_INFO,
-        )
-        print(cluster_info)
+        if self.agentConfig.get('enable_metadata_collection', True):
+            cluster_info = self._rest_request_to_json(
+                self.rm_address,
+                self.CLUSTER_INFO,
+            )
+            hadoop_version = cluster_info.get('clusterInfo', {}).get('hadoopVersion', '')
+            if hadoop_version:
+                self.set_metadata('version', hadoop_version)
 
     def _get_running_app_ids(self):
         """
@@ -432,7 +434,7 @@ class MapReduceCheck(AgentCheck):
             raise
 
         except ValueError as e:
-            self.service_check(service_name, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
+            self._critical_service(service_name, service_check_tags, str(e))
             raise
 
         return response_json
