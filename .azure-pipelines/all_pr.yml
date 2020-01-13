@@ -2,6 +2,7 @@ pr:
   branches:
     include:
     - master
+    - alex/before_import_issue
   paths:
     include:
     - datadog_checks_base/datadog_checks/*
