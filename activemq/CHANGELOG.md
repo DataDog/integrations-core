@@ -1,9 +1,5 @@
 # CHANGELOG - activemq
 
-## 1.4.0 / 2020-01-13
-
-* [Added] Add test environment for activemq. See [#5204](https://github.com/DataDog/integrations-core/pull/5204).
-
 ## 1.3.0 / 2019-12-02
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
