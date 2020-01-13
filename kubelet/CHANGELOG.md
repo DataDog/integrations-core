@@ -1,15 +1,5 @@
 # CHANGELOG - kubelet
 
-## 4.0.0 / 2020-01-13
-
-* [Fixed] Improve url join to not mutate the base url when proxying a call. See [#5416](https://github.com/DataDog/integrations-core/pull/5416).
-* [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
-* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
-* [Added] Add log filesystem container metric. See [#5383](https://github.com/DataDog/integrations-core/pull/5383).
-* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
-* [Added] Add kubelet and runtime cpu and mem metrics. See [#5370](https://github.com/DataDog/integrations-core/pull/5370).
-* [Changed] Update metrics for >= 1.14. See [#5336](https://github.com/DataDog/integrations-core/pull/5336).
-
 ## 3.4.0 / 2019-12-02
 
 * [Added] Collect a new metric: kubelet.evictions. See [#5076](https://github.com/DataDog/integrations-core/pull/5076).
