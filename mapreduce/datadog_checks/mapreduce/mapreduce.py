@@ -9,7 +9,14 @@ from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.mapreduce.metrics import HISTOGRAM, INCREMENT, MAPREDUCE_JOB_COUNTER_METRICS, MAPREDUCE_JOB_METRICS
+from datadog_checks.mapreduce.metrics import (
+    HISTOGRAM,
+    INCREMENT,
+    MAPREDUCE_JOB_COUNTER_METRICS,
+    MAPREDUCE_JOB_METRICS,
+    MAPREDUCE_MAP_TASK_METRICS,
+    MAPREDUCE_REDUCE_TASK_METRICS,
+)
 
 
 class MapReduceCheck(AgentCheck):
@@ -349,10 +356,10 @@ class MapReduceCheck(AgentCheck):
                             tags.extend(addl_tags)
 
                             if task_type == 'MAP':
-                                self._set_metrics_from_json(task, self.MAPREDUCE_MAP_TASK_METRICS, tags)
+                                self._set_metrics_from_json(task, MAPREDUCE_MAP_TASK_METRICS, tags)
 
                             elif task_type == 'REDUCE':
-                                self._set_metrics_from_json(task, self.MAPREDUCE_REDUCE_TASK_METRICS, tags)
+                                self._set_metrics_from_json(task, MAPREDUCE_REDUCE_TASK_METRICS, tags)
 
     def _set_metrics_from_json(self, metrics_json, metrics, tags):
         """
