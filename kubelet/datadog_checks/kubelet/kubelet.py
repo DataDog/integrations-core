@@ -258,6 +258,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         # Kubelet credentials handling
         self.kubelet_credentials.configure_scraper(self.cadvisor_scraper_config)
         self.kubelet_credentials.configure_scraper(self.kubelet_scraper_config)
+        self.get_http_handler(self.cadvisor_scraper_config, recreate=True)
+        self.get_http_handler(self.kubelet_scraper_config, recreate=True)
 
         # Legacy cadvisor support
         try:
