@@ -20,10 +20,10 @@ SECRET_KEYS = {
     'orgs.*.api_key',
     'orgs.*.app_key',
     'github.token',
+    'jira.token',
     'pypi.pass',
     'trello.key',
     'trello.token',
-    'jira.token',
 }
 
 DEFAULT_CONFIG = OrderedDict(
@@ -39,9 +39,9 @@ DEFAULT_CONFIG = OrderedDict(
         ('agent6', OrderedDict((('docker', 'datadog/agent-dev:master'), ('local', 'latest')))),
         ('agent5', OrderedDict((('docker', 'datadog/dev-dd-agent:master'), ('local', 'latest')))),
         ('github', OrderedDict((('user', ''), ('token', '')))),
+        ('jira', OrderedDict((('user', ''), ('token', '')))),
         ('pypi', OrderedDict((('user', ''), ('pass', '')))),
         ('trello', OrderedDict((('key', ''), ('token', '')))),
-        ('jira', OrderedDict((('user', ''), ('token', '')))),
         (
             'orgs',
             OrderedDict(
