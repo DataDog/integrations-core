@@ -8,7 +8,7 @@ from simplejson import JSONDecodeError
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.mapreduce.metrics import (
     HISTOGRAM,
     INCREMENT,
@@ -47,49 +47,46 @@ class MapReduceCheck(AgentCheck):
         # Parse job specific counters
         self.job_specific_counters = self._parse_job_specific_counters(init_config)
 
-    def check(self, instance):
         # Get properties from conf file
-        rm_address = instance.get('resourcemanager_uri')
-        if rm_address is None:
-            raise Exception("The ResourceManager URL must be specified in the instance configuration")
-
-        collect_task_metrics = is_affirmative(instance.get('collect_task_metrics', False))
+        self.rm_address = self.instance.get('resourcemanager_uri')
+        if self.rm_address is None:
+            raise ConfigurationError("The ResourceManager URL must be specified in the instance configuration")
+        self.collect_task_metrics = is_affirmative(self.instance.get('collect_task_metrics', False))
 
         # Get additional tags from the conf file
-        custom_tags = instance.get("tags", [])
-        tags = list(set(custom_tags))
+        self.custom_tags = list(set(self.instance.get("tags", [])))
 
         # Get the cluster name from the conf file
-        cluster_name = instance.get('cluster_name')
+        cluster_name = self.instance.get('cluster_name')
         if cluster_name is None:
             self.warning(
                 "The cluster_name must be specified in the instance configuration, defaulting to '%s'",
                 self.DEFAULT_CLUSTER_NAME,
             )
             cluster_name = self.DEFAULT_CLUSTER_NAME
+        self.metric_tags = self.custom_tags + ['cluster_name:{}'.format(cluster_name)]
 
-        tags.append('cluster_name:{}'.format(cluster_name))
-
+    def check(self, instance):
         # Get the running MR applications from YARN
-        running_apps = self._get_running_app_ids(rm_address)
+        running_apps = self._get_running_app_ids()
 
         # Report success after gathering all metrics from ResourceManaager
         self.service_check(
             self.YARN_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:{}'.format(rm_address)] + custom_tags,
-            message='Connection to ResourceManager "{}" was successful'.format(rm_address),
+            tags=['url:{}'.format(self.rm_address)] + self.custom_tags,
+            message='Connection to ResourceManager "{}" was successful'.format(self.rm_address),
         )
 
         # Get the applications from the application master
-        running_jobs = self._mapreduce_job_metrics(running_apps, tags)
+        running_jobs = self._mapreduce_job_metrics(running_apps, self.metric_tags)
 
         # # Get job counter metrics
-        self._mapreduce_job_counters_metrics(running_jobs, tags)
+        self._mapreduce_job_counters_metrics(running_jobs, self.metric_tags)
 
         # Get task metrics
-        if collect_task_metrics:
-            self._mapreduce_task_metrics(running_jobs, tags)
+        if self.collect_task_metrics:
+            self._mapreduce_task_metrics(running_jobs, self.metric_tags)
 
         # Report success after gathering all metrics from Application Master
         if running_jobs:
@@ -99,7 +96,7 @@ class MapReduceCheck(AgentCheck):
             self.service_check(
                 self.MAPREDUCE_SERVICE_CHECK,
                 AgentCheck.OK,
-                tags=['url:{}'.format(am_address)] + custom_tags,
+                tags=['url:{}'.format(am_address)] + self.custom_tags,
                 message='Connection to ApplicationManager "{}" was successful'.format(am_address),
             )
 
@@ -197,12 +194,12 @@ class MapReduceCheck(AgentCheck):
 
         return job_counter
 
-    def _get_running_app_ids(self, rm_address):
+    def _get_running_app_ids(self):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running MapReduce applications
         """
         metrics_json = self._rest_request_to_json(
-            rm_address,
+            self.rm_address,
             self.YARN_APPS_PATH,
             self.YARN_SERVICE_CHECK,
             states=self.YARN_APPLICATION_STATES,
