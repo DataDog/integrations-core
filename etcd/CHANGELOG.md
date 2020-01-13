@@ -1,5 +1,9 @@
 # CHANGELOG - etcd
 
+## 2.2.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 2.1.0 / 2019-11-06
 
 * [Fixed] Add ssl config options necessary for Openmetrics base. See [#4951](https://github.com/DataDog/integrations-core/pull/4951).
