@@ -17,6 +17,7 @@ steps:
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
+      PYTHONDONTWRITEBYTECODE: 1
 
 - ${{ if eq(parameters.benchmark, 'true') }}:
   - script: ddev test --bench --junit ${{ parameters.check }}
