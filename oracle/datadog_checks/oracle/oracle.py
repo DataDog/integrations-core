@@ -89,7 +89,7 @@ class Oracle(AgentCheck):
         jdbc_driver = instance.get('jdbc_driver_path')
         tags = instance.get('tags') or []
         custom_queries = instance.get('custom_queries', [])
-        only_custom_queries = instance.get('only_custom_queries')
+        only_custom_queries = instance.get('only_custom_queries', False)
         if is_affirmative(instance.get('use_global_custom_queries', True)):
             custom_queries.extend(self.init_config.get('global_custom_queries', []))
 
