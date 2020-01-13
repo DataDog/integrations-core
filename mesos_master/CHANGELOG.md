@@ -1,5 +1,11 @@
 # CHANGELOG - mesos_master
 
+## 1.7.0 / 2020-01-13
+
+* [Added] Submit version metadata. See [#5216](https://github.com/DataDog/integrations-core/pull/5216).
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.6.0 / 2019-10-11
 
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
