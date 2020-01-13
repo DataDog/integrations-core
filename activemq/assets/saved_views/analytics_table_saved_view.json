@@ -9,12 +9,12 @@
   "visible_facets": ["status", "@http.referer_details.path", "@duration"],
   "options": {
     "group_bys": [
-      { "facet": "@http.referer_details.path" },
-      { "facet": "status" }
+      { "facet": "status" },
+      { "facet": "@http.referer_details.path" }
     ],
     "aggregations": [
-      { "metric": "@http.referer_details.path", "type": "count" },
-      { "metric": "status", "type": "avg" }
+      { "metric": "@http.referer_details.path", "type": "cardinality" },
+      { "metric": "status", "type": "cardinality" }
     ],
     "limit": "5",
     "order": "top",
