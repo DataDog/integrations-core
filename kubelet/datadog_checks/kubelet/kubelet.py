@@ -198,7 +198,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             self.CADVISOR_METRIC_TRANSFORMERS,
             counter_transformers,
             histogram_transformers,
-            volume_metric_transformers
+            volume_metric_transformers,
         ]:
             self.transformers.update(d)
 

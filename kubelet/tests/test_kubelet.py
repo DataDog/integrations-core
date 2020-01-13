@@ -838,7 +838,7 @@ def test_system_container_metrics(monkeypatch, aggregator, tagger):
 
 
 def test_create_pod_tags_by_pvc(monkeypatch, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     pod_list = check.retrieve_pod_list()
 
@@ -852,5 +852,6 @@ def test_create_pod_tags_by_pvc(monkeypatch, tagger):
             'namespace:default',
             'persistentvolumeclaim:www-web-2',
             'pod_phase:running',
-    ]}
+        ]
+    }
     assert pod_tags_by_pvc == expected_result
