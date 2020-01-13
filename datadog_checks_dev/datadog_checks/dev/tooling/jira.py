@@ -80,9 +80,8 @@ class JiraClient:
 
         try:
             response = requests.post(self.CREATE_ENDPOINT, data=data, auth=self.auth, headers=headers)
-            issue_key = json.loads(response.content).get('key')
-            self.move_column(team, issue_key)
-
+            issue_key = response.json().get('key')
+            rate_limited, error, resp = self.move_column(team, issue_key)
         except Exception as e:
             error = str(e)
         else:
