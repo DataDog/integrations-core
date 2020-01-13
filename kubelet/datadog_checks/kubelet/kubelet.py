@@ -224,6 +224,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         return kubelet_instance
 
     def check(self, instance):
+        # Kubelet credential defaults are determined dynamically during every
+        # check run so we must make sure that configuration is always reset
+        self._http_handlers.clear()
+
         kubelet_conn_info = get_connection_info()
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
@@ -258,8 +262,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         # Kubelet credentials handling
         self.kubelet_credentials.configure_scraper(self.cadvisor_scraper_config)
         self.kubelet_credentials.configure_scraper(self.kubelet_scraper_config)
-        self.get_http_handler(self.cadvisor_scraper_config, recreate=True)
-        self.get_http_handler(self.kubelet_scraper_config, recreate=True)
 
         # Legacy cadvisor support
         try:
