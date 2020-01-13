@@ -14,6 +14,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.checks.libs.timer import Timer
+from datadog_checks.stubs import datadog_agent
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
 from datadog_checks.vsphere.config import VSphereConfig
@@ -62,6 +63,8 @@ class VSphereCheck(AgentCheck):
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
         )
         self.api = None
+        # Do not override `AgentCheck.hostname`
+        self._hostname = None
         self.thread_pool = ThreadPoolExecutor(max_workers=self.config.threads_count)
         self.check_initializations.append(self.initiate_api_connection)
 
@@ -86,7 +89,11 @@ class VSphereCheck(AgentCheck):
         t0 = Timer()
         counters = self.api.get_perf_counter_by_level(self.config.collection_level)
         self.gauge(
-            "datadog.vsphere.refresh_metrics_metadata_cache.time", t0.total(), tags=self.config.base_tags, raw=True
+            "datadog.vsphere.refresh_metrics_metadata_cache.time",
+            t0.total(),
+            tags=self.config.base_tags,
+            raw=True,
+            hostname=self._hostname,
         )
         self.log.info("Collected %d counters metadata in %.3f seconds.", len(counters), t0.total())
 
@@ -113,7 +120,11 @@ class VSphereCheck(AgentCheck):
         t0 = Timer()
         infrastructure_data = self.api.get_infrastructure()
         self.gauge(
-            "datadog.vsphere.refresh_infrastructure_cache.time", t0.total(), tags=self.config.base_tags, raw=True
+            "datadog.vsphere.refresh_infrastructure_cache.time",
+            t0.total(),
+            tags=self.config.base_tags,
+            raw=True,
+            hostname=self._hostname,
         )
         self.log.info("Infrastructure cache refreshed in %.3f seconds.", t0.total())
 
@@ -357,7 +368,13 @@ class VSphereCheck(AgentCheck):
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
-            self.gauge('datadog.vsphere.collect_events.time', t0.total(), tags=self.config.base_tags, raw=True)
+            self.gauge(
+                'datadog.vsphere.collect_events.time',
+                t0.total(),
+                tags=self.config.base_tags,
+                raw=True,
+                hostname=self._hostname,
+            )
             self.log.info("Got %s new events from the vCenter event manager", len(new_events))
             event_config = {'collect_vcenter_alarms': True}
             for event in new_events:
@@ -374,10 +391,12 @@ class VSphereCheck(AgentCheck):
         self.latest_event_query = self.api.get_latest_event_timestamp() + timedelta(seconds=1)
 
     def check(self, _):
+        self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API and submit the service_check accordingly
         try:
             self.api.check_health()
         except Exception:
+            # Explicitly do not attach any host to the service checks.
             self.log.error("The vCenter API is not responding. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
             raise
@@ -425,6 +444,7 @@ class VSphereCheck(AgentCheck):
 
         # Submit the number of VMs that are monitored
         for resource in self.config.collected_resource_types:
+            # Explicitly do not attach any host to those metrics.
             resource_count = len(self.infrastructure_cache.get_mors(resource))
             self.gauge(
                 '{}.count'.format(MOR_TYPE_AS_STRING[resource]),
