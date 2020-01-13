@@ -371,3 +371,11 @@ vsphere.vmop.numSuspend.latest,gauge,,operation,,Number of virtual machine suspe
 vsphere.vmop.numUnregister.latest,gauge,,operation,,Number of virtual machine unregister operations,0,vsphere,vmop numUnregister
 vsphere.vmop.numVMotion.latest,gauge,,operation,,Number of migrations with vMotion (host change operations for powered-on VMs),0,vsphere,vmop numVMotion
 vsphere.vmop.numXVMotion.latest,gauge,,operation,,Number of host and datastore change operations for powered-on and suspended virtual machines,0,vsphere,vmop numXVMotion
+datadog.vsphere.query_metrics.time.avg,gauge,,second,,"Time required to run a query_metrics operation (avg)",-1,vsphere,dd querymetrics avg
+datadog.vsphere.query_metrics.time.max,gauge,,second,,"Time required to run a query_metrics operation (max)",-1,vsphere,dd querymetrics max
+datadog.vsphere.query_metrics.time.count,gauge,,second,,"Time required to run a query_metrics operation (count)",-1,vsphere,dd querymetrics count
+datadog.vsphere.query_metrics.time.median,gauge,,second,,"Time required to run a query_metrics operation (med)",-1,vsphere,dd querymetrics med
+datadog.vsphere.query_metrics.time.95percentile,gauge,,second,,"Time required to run a query_metrics operation (95th)",-1,vsphere,dd querymetrics 95th
+datadog.vsphere.collect_events.time,gauge,,second,,"Time required to collect events",-1,vsphere,dd collectevents
+datadog.vsphere.refresh_infrastructure_cache.time,gauge,,second,,"Time required to refresh the infra cache",-1,vsphere,dd refresh infra cache
+datadog.vsphere.refresh_metrics_metadata_cache.time,gauge,,second,,"Time required to refresh the metrics metadata cache",-1,vsphere,dd refresh metadata cache
