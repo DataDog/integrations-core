@@ -54,7 +54,7 @@ datadog-ibm-was==1.5.0
 datadog-iis==2.8.0; sys_platform == 'win32'
 datadog-istio==2.4.2
 datadog-jboss-wildfly==1.1.1
-datadog-kafka-consumer==2.1.1; sys_platform != 'win32'
+datadog-kafka-consumer==2.2.0; sys_platform != 'win32'
 datadog-kafka==2.0.2
 datadog-kong==1.5.0
 datadog-kube-apiserver-metrics==1.2.1; sys_platform == 'linux2'
