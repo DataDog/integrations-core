@@ -1,5 +1,9 @@
 # CHANGELOG - mesos_slave
 
+## 2.1.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 2.0.1 / 2019-12-04
 
 * [Fixed] Propagate tags properly to stats metrics. See [#5140](https://github.com/DataDog/integrations-core/pull/5140).
