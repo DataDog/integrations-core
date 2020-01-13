@@ -189,6 +189,14 @@ class DockerInterface(object):
         command.extend(('-r', '{}/{}'.format(self.base_mount_dir, REQUIREMENTS_IN)))
         run_command(command, capture=False, check=True)
 
+        cmd3 = ['docker', 'exec', self.container_name]
+        cmd3 += 'find /opt/datadog-agent/embedded/lib/python2.7/site-packages/datadog_checks'.split()
+        run_command(cmd3, capture=False, check=False)
+
+        cmd2 = ['docker', 'exec', self.container_name]
+        cmd2 += 'ls -la /opt/datadog-agent/embedded/lib/python2.7/site-packages/datadog_checks/base'.split()
+        run_command(cmd2, capture=False, check=False)
+
     def update_agent(self):
         if self.agent_build and '/' in self.agent_build:
             run_command(['docker', 'pull', self.agent_build], capture=True, check=True)
