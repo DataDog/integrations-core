@@ -61,6 +61,7 @@ class MapReduceCheck(AgentCheck):
     MAPREDUCE_SERVICE_CHECK = 'mapreduce.application_master.can_connect'
 
     # URL Paths
+    CLUSTER_INFO = 'ws/v1/cluster'
     YARN_APPS_PATH = 'ws/v1/cluster/apps'
     MAPREDUCE_JOBS_PATH = 'ws/v1/mapreduce/jobs'
 
@@ -169,6 +170,7 @@ class MapReduceCheck(AgentCheck):
                 tags=['url:{}'.format(am_address)] + custom_tags,
                 message='Connection to ApplicationManager "{}" was successful'.format(am_address),
             )
+        self._get_hadoop_version(instance.get('resourcemanager_uri'))
 
     def _parse_general_counters(self, init_config):
         """
@@ -263,6 +265,14 @@ class MapReduceCheck(AgentCheck):
                         job_counter[job_name][counter_group_name].append(counter_name)
 
         return job_counter
+
+    def _get_hadoop_version(self, rm_address):
+        aegnt_config = self.get_agent_config()
+        cluster_info = self._rest_request_to_json(
+            rm_address,
+            self.CLUSTER_INFO,
+        )
+        print(cluster_info)
 
     def _get_running_app_ids(self, rm_address):
         """
@@ -449,7 +459,7 @@ class MapReduceCheck(AgentCheck):
         else:
             self.log.error('Metric type "%s" unknown', metric_type)
 
-    def _rest_request_to_json(self, address, object_path, service_name, tags=None, *args, **kwargs):
+    def _rest_request_to_json(self, address, object_path, service_name=None, tags=None, *args, **kwargs):
         """
         Query the given URL and return the JSON response
         """
@@ -480,30 +490,15 @@ class MapReduceCheck(AgentCheck):
             response_json = response.json()
 
         except Timeout as e:
-            self.service_check(
-                service_name,
-                AgentCheck.CRITICAL,
-                tags=service_check_tags,
-                message="Request timeout: {}, {}".format(url, e),
-            )
+            self._critical_service(service_name, service_check_tags, "Request timeout: {}, {}".format(url, e))
             raise
 
         except (HTTPError, InvalidURL, ConnectionError) as e:
-            self.service_check(
-                service_name,
-                AgentCheck.CRITICAL,
-                tags=service_check_tags,
-                message="Request failed: {}, {}".format(url, e),
-            )
+            self._critical_service(service_name, service_check_tags, "Request failed: {}, {}".format(url, e))
             raise
 
         except JSONDecodeError as e:
-            self.service_check(
-                service_name,
-                AgentCheck.CRITICAL,
-                tags=service_check_tags,
-                message="JSON Parse failed: {}, {}".format(url, e),
-            )
+            self._critical_service(service_name, service_check_tags, "JSON Parse failed: {}, {}".format(url, e))
             raise
 
         except ValueError as e:
@@ -511,6 +506,15 @@ class MapReduceCheck(AgentCheck):
             raise
 
         return response_json
+
+    def _critical_service(self, service_name, tags, message):
+        if service_name:
+            self.service_check(
+                service_name,
+                AgentCheck.CRITICAL,
+                tags=tags,
+                message=message,
+            )
 
     def _join_url_dir(self, url, *args):
         """
