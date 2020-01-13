@@ -187,7 +187,7 @@ class DockerInterface(object):
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.base_mount_dir))
         command.extend(('-r', '{}/{}'.format(self.base_mount_dir, REQUIREMENTS_IN)))
-        run_command(command, capture=True, check=True)
+        run_command(command, capture=False, check=True)
 
     def update_agent(self):
         if self.agent_build and '/' in self.agent_build:
