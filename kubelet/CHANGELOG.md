@@ -8,7 +8,7 @@
 * [Added] Add log filesystem container metric. See [#5383](https://github.com/DataDog/integrations-core/pull/5383).
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
 * [Added] Add kubelet and runtime cpu and mem metrics. See [#5370](https://github.com/DataDog/integrations-core/pull/5370).
-* [Changed] Kubelet metrics in >= 1.14. See [#5336](https://github.com/DataDog/integrations-core/pull/5336).
+* [Changed] Update metrics for >= 1.14. See [#5336](https://github.com/DataDog/integrations-core/pull/5336).
 
 ## 3.4.0 / 2019-12-02
 

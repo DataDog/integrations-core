@@ -3,7 +3,7 @@
 ## 1.2.0 / 2020-01-13
 
 * [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
-* [Added] Move unit conversion helpers to openmetrics mixin. See [#5364](https://github.com/DataDog/integrations-core/pull/5364).
+* [Fixed] Move unit conversion helpers to openmetrics mixin. See [#5364](https://github.com/DataDog/integrations-core/pull/5364).
 * [Fixed] Correct conversions from microseconds to seconds. See [#5354](https://github.com/DataDog/integrations-core/pull/5354).
 
 ## 1.1.0 / 2019-05-14

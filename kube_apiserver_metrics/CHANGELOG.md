@@ -2,7 +2,7 @@
 
 ## 1.2.2 / 2020-01-13
 
-* [Fixed] [Fix] Update Kube_apiserver_metrics annotations documentation. See [#5199](https://github.com/DataDog/integrations-core/pull/5199).
+* [Fixed] Update Kube_apiserver_metrics annotations documentation. See [#5199](https://github.com/DataDog/integrations-core/pull/5199).
 
 ## 1.2.1 / 2019-12-13
 
