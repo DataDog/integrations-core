@@ -11,9 +11,7 @@ from ...subprocess import run_command
 from ...utils import ON_LINUX, ON_MACOS, ON_WINDOWS, file_exists, path_join
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
-    DEFAULT_AGENT_INTAKE,
     DEFAULT_AGENT_VERSION,
-    DEFAULT_LOG_INTAKE,
     DEFAULT_PYTHON_VERSION,
     FAKE_API_KEY,
     MANIFEST_VERSION_PATTERN,
@@ -55,8 +53,8 @@ class LocalAgentInterface(object):
         self.metadata = metadata or {}
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY
-        self.dd_url = dd_url or DEFAULT_AGENT_INTAKE
-        self.dd_log_url = dd_log_url or DEFAULT_LOG_INTAKE
+        self.dd_url = dd_url
+        self.dd_log_url = dd_log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
 
         self._agent_version = self.metadata.get('agent_version')
@@ -65,8 +63,10 @@ class LocalAgentInterface(object):
         self.config_file_name = config_file_name(self.check)
 
         self.env_vars['DD_PYTHON_VERSION'] = str(self.python_version)
-        self.env_vars['DD_DD_URL'] = str(self.dd_url)
-        self.env_vars['DD_LOGS_CONFIG_DD_URL'] = str(self.dd_log_url)
+        if self.dd_url:
+            self.env_vars['DD_DD_URL'] = str(self.dd_url)
+        if self.dd_log_url:
+            self.env_vars['DD_LOGS_CONFIG_DD_URL'] = str(self.dd_log_url)
 
     @property
     def platform(self):

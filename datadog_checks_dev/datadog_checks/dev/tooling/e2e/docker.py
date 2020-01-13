@@ -8,9 +8,7 @@ from ...subprocess import run_command
 from ...utils import file_exists, find_free_port, get_ip, path_join
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
-    DEFAULT_AGENT_INTAKE,
     DEFAULT_AGENT_VERSION,
-    DEFAULT_LOG_INTAKE,
     DEFAULT_PYTHON_VERSION,
     FAKE_API_KEY,
     MANIFEST_VERSION_PATTERN,
@@ -49,8 +47,8 @@ class DockerInterface(object):
         self.metadata = metadata or {}
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY
-        self.dd_url = dd_url or DEFAULT_AGENT_INTAKE
-        self.dd_log_url = dd_log_url or DEFAULT_LOG_INTAKE
+        self.dd_url = dd_url
+        self.dd_log_url = dd_log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
 
         self._agent_version = self.metadata.get('agent_version')
@@ -200,70 +198,69 @@ class DockerInterface(object):
             run_command(['docker', 'pull', self.agent_build], capture=True, check=True)
 
     def start_agent(self):
-        if self.agent_build:
-            ip = get_ip()
-            free_port = find_free_port(ip)
-            command = [
-                'docker',
-                'run',
-                # Keep it up
-                '-d',
-                # Ensure consistent naming
-                '--name',
-                self.container_name,
-                # Ensure access to host network
-                '--network',
-                'host',
-                # Agent 6 will simply fail without an API key
-                '-e',
-                'DD_API_KEY={}'.format(self.api_key),
-                # Run expvar on a random port
-                '-e',
-                'DD_EXPVAR_PORT=0',
-                # Run API on a random port
-                '-e',
-                'DD_CMD_PORT={}'.format(free_port),
-                # Disable trace agent
-                '-e',
-                'DD_APM_ENABLED=false',
-                # Set custom agent intake
-                '-e',
-                'DD_DD_URL={}'.format(self.dd_url),
-                '-e',
-                'DD_LOGS_CONFIG_DD_URL={}'.format(self.dd_log_url),
-                # Mount the config directory, not the file, to ensure updates are propagated
-                # https://github.com/moby/moby/issues/15793#issuecomment-135411504
-                '-v',
-                '{}:{}'.format(self.config_dir, get_agent_conf_dir(self.check, self.agent_version)),
-                # Mount the check directory
-                '-v',
-                '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
-                # Mount the /proc directory
-                '-v',
-                '/proc:/host/proc',
-            ]
-            for volume in self.metadata.get('docker_volumes', []):
-                command.extend(['-v', volume])
+        if not self.agent_build:
+            return
 
-            # Any environment variables passed to the start command
-            for key, value in sorted(self.env_vars.items()):
-                command.extend(['-e', '{}={}'.format(key, value)])
+        env_vars = {
+            # Agent 6 will simply fail without an API key
+            'DD_API_KEY': self.api_key,
+            # Run expvar on a random port
+            'DD_EXPVAR_PORT': 0,
+            # Run API on a random port
+            'DD_CMD_PORT': find_free_port(get_ip()),
+            # Disable trace agent
+            'DD_APM_ENABLED': 'false',
+            # Set custom agent intake
+            'DD_DD_URL': self.dd_url,
+            'DD_LOGS_CONFIG_DD_URL': self.dd_log_url,
+        }
+        env_vars.update(self.env_vars)
+        volumes = [
+            # Mount the config directory, not the file, to ensure updates are propagated
+            # https://github.com/moby/moby/issues/15793#issuecomment-135411504
+            '{}:{}'.format(self.config_dir, get_agent_conf_dir(self.check, self.agent_version)),
+            # Mount the check directory
+            '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
+            # Mount the /proc directory
+            '/proc:/host/proc',
+            # Mount the docker socket
+            '/var/run/docker.sock:/var/run/docker.sock',
+        ]
+        volumes.extend(self.metadata.get('docker_volumes', []))
+        command = [
+            'docker',
+            'run',
+            # Keep it up
+            '-d',
+            # Ensure consistent naming
+            '--name',
+            self.container_name,
+            # Ensure access to host network
+            '--network',
+            'host',
+        ]
+        for volume in volumes:
+            command.extend(['-v', volume])
 
-            if 'proxy' in self.metadata:
-                if 'http' in self.metadata['proxy']:
-                    command.extend(['-e', 'DD_PROXY_HTTP={}'.format(self.metadata['proxy']['http'])])
-                if 'https' in self.metadata['proxy']:
-                    command.extend(['-e', 'DD_PROXY_HTTPS={}'.format(self.metadata['proxy']['https'])])
+        # Any environment variables passed to the start command
+        for key, value in sorted(env_vars.items()):
+            command.extend(['-e', '{}={}'.format(key, value)])
 
-            if self.base_package:
-                # Mount the check directory
-                command.append('-v')
-                command.append('{}:{}'.format(self.base_package, self.base_mount_dir))
+        if 'proxy' in self.metadata:
+            if 'http' in self.metadata['proxy']:
+                command.extend(['-e', 'DD_PROXY_HTTP={}'.format(self.metadata['proxy']['http'])])
+            if 'https' in self.metadata['proxy']:
+                command.extend(['-e', 'DD_PROXY_HTTPS={}'.format(self.metadata['proxy']['https'])])
 
-            # The chosen tag
-            command.append(self.agent_build)
+        if self.base_package:
+            # Mount the check directory
+            command.append('-v')
+            command.append('{}:{}'.format(self.base_package, self.base_mount_dir))
 
-            return run_command(command, capture=True)
+        # The chosen tag
+        command.append(self.agent_build)
+
+        return run_command(command, capture=True)
 
     def stop_agent(self):
         # Only error for exit code if config actually exists
