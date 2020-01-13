@@ -211,7 +211,7 @@ class DockerInterface(object):
                 # Agent 6 will simply fail without an API key
                 '-e',
                 'DD_API_KEY={}'.format(self.api_key),
-                # Don't write pyc
+                # Don't write .pyc, needed to fix this issue: https://github.com/DataDog/integrations-core/pull/5454
                 '-e',
                 'PYTHONDONTWRITEBYTECODE=1',
                 # Run expvar on a random port
