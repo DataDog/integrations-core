@@ -10,6 +10,9 @@ from pyVmomi import vim, vmodl
 from datadog_checks.base import ensure_unicode
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 
+# Python 3 only
+PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
+
 
 def smart_retry(f):
     """A function decorated with this `@smart_retry` will trigger a new authentication if it fails. The function
@@ -54,7 +57,7 @@ class VSphereAPI(object):
             context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
             context.verify_mode = ssl.CERT_NONE
         elif self.config.ssl_capath:
-            context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             context.verify_mode = ssl.CERT_REQUIRED
             context.load_verify_locations(capath=self.config.ssl_capath)
 
