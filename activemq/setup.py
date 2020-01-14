@@ -8,7 +8,6 @@ from setuptools import setup
 
 HERE = path.dirname(path.abspath(__file__))
 
-# Get version info
 ABOUT = {}
 with open(path.join(HERE, 'datadog_checks', 'activemq', '__about__.py')) as f:
     exec(f.read(), ABOUT)
