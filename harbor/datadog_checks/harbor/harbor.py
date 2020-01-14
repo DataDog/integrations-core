@@ -107,7 +107,7 @@ class HarborCheck(AgentCheck):
             self._submit_project_metrics(api, tags)
             self._submit_disk_metrics(api, tags)
         except Exception:
-            self.log.exception("Harbor API is not reachable")
+            self.log.exception("An error occured when collecting Harbor metrics")
             self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
             raise
         else:
