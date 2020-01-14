@@ -11,7 +11,7 @@ except ImportError:
 
 # Metric types
 GAUGE = 'gauge'
-RATE = 'rate'
+COUNT = 'count'
 
 
 def queue_metrics():
@@ -58,9 +58,9 @@ def pcf_metrics():
 def pcf_status_reset_metrics():
     return {
         'high_q_depth': (pymqi.CMQC.MQIA_HIGH_Q_DEPTH, GAUGE),
-        'msg_deq_count': (pymqi.CMQC.MQIA_MSG_DEQ_COUNT, RATE),
-        'msg_enq_count': (pymqi.CMQC.MQIA_MSG_ENQ_COUNT, RATE),
-        'time_since_reset': (pymqi.CMQC.MQIA_TIME_SINCE_RESET, RATE),
+        'msg_deq_count': (pymqi.CMQC.MQIA_MSG_DEQ_COUNT, COUNT),
+        'msg_enq_count': (pymqi.CMQC.MQIA_MSG_ENQ_COUNT, COUNT),
+        'time_since_reset': (pymqi.CMQC.MQIA_TIME_SINCE_RESET, COUNT),
     }
 
 
