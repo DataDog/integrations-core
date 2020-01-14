@@ -299,6 +299,10 @@ class OpenMetricsScraperMixin(object):
             return self._http_handlers[prometheus_url]
 
         # TODO: Deprecate this behavior in Agent 8
+        if scraper_config['ssl_ca_cert'] is False:
+            scraper_config['ssl_verify'] = False
+
+        # TODO: Deprecate this behavior in Agent 8
         if scraper_config['ssl_verify'] is False:
             scraper_config.setdefault('tls_ignore_warning', True)
 
