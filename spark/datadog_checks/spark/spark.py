@@ -270,8 +270,8 @@ class SparkCheck(AgentCheck):
             raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, cluster_mode))
 
     def _collect_version(self, base_url):
-        response = self.http.get(self._join_url_dir(base_url, SPARK_VERSION_PATH))
         try:
+            response = self.http.get(self._join_url_dir(base_url, SPARK_VERSION_PATH))
             response.raise_for_status()
             version_json = response.json()
             version = version_json['spark']
