@@ -60,3 +60,24 @@ def test__get_connection_failure(check, instance):
     with pytest.raises(Exception):
         check._get_connection(server, user, password, service, jdbc_driver, expected_tags)
     service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.CRITICAL, tags=expected_tags)
+
+def test__check_only_custom_queries(check, instance):
+    """
+    Test the right cursor calls are made when only custom custom queries is invoked
+    """
+    expected_tags = ['server:localhost:1521', 'optional:tag1']
+    get_sys_metrics = mock.MagicMock()
+    check._get_sys_metrics = get_sys_metrics
+    get_process_metrics = mock.MagicMock()
+    check._get_process_metrics = get_process_metrics
+    get_tablespace_metrics = mock.MagicMock()
+    check._get_tablespace_metrics = get_tablespace_metrics
+    get_custom_metrics= mock.MagicMock()
+    check._get_custom_metrics = get_custom_metrics
+    instance['only_custom_queries']=True
+    check.check(instance)
+
+    assert get_sys_metrics.call_count is 0
+    assert get_process_metrics.call_count is 0
+    assert get_tablespace_metrics.call_count is 0
+    assert get_custom_metrics.call_count is 1
