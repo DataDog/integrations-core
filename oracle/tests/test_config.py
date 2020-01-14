@@ -20,7 +20,7 @@ def test__get_config(check, instance):
     assert jdbc_driver is None
     assert tags == ['optional:tag1']
     assert custom_queries == []
-    assert only_custom_queries is None
+    assert only_custom_queries is False
 
 
 def test_check_misconfig(check, instance):
