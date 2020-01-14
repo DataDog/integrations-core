@@ -39,7 +39,6 @@ from .common import (
     REGISTRIES_PRE_1_8_FIXTURE,
     SYSTEM_INFO_FIXTURE,
     URL,
-    USERS_URL,
     VERSION_1_6,
     VERSION_1_8,
     VOLUME_INFO_FIXTURE,
@@ -73,18 +72,16 @@ def dd_environment(instance):
 
 class CreateSimpleUser(LazyFunction):
     def __call__(self, *args, **kwargs):
-        with requests.session() as session:
-            harbor_api = HarborAPI(URL, session)
-            harbor_api.authenticate('admin', 'Harbor12345')
-            harbor_api._make_post_request(
-                USERS_URL,
-                json={
-                    "username": "NotAnAdmin",
-                    "email": "NotAnAdmin@goharbor.io",
-                    "password": "Str0ngPassw0rd",
-                    "realname": "Not An Admin",
-                },
-            )
+        requests.post(
+            URL + '/api/users',
+            auth=("admin", "Harbor12345"),
+            json={
+                "username": "NotAnAdmin",
+                "email": "NotAnAdmin@goharbor.io",
+                "password": "Str0ngPassw0rd",
+                "realname": "Not An Admin",
+            },
+        )
 
 
 @pytest.fixture(scope='session')
@@ -110,7 +107,7 @@ def harbor_api(harbor_check, admin_instance, patch_requests):
 
 @pytest.fixture
 def patch_requests():
-    with patch.object(requests.Session, 'request', side_effect=mocked_requests):
+    with patch("requests.api.request", side_effect=mocked_requests):
         yield
 
 
