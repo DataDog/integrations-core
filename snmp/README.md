@@ -23,7 +23,7 @@ The SNMP check is included in the [Datadog Agent][1] package. No additional inst
 <b>Note</b>: The following features are in beta.
 </div>
 
-The Datadog SNMP check scans a provided subnet, Autodiscovers network devices, and collects metrics using Datadog's sysOID mapped device profiles.
+The Datadog SNMP check auto-discovers network devices on a provided subnet, and collects metrics using Datadog's sysOID mapped device profiles.
 
 Edit the subnet, SNMP version, and profiles in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
 
@@ -53,7 +53,6 @@ To use Autodiscovery with the SNMP check:
 
 ```yaml
 init_config:
-  @param profiles - object - optional
   profiles:
     f5-big-ip:
       definition_file: f5-big-ip.yaml
@@ -62,39 +61,40 @@ init_config:
 
 instances:
    ## @param network_address - string - optional
-   network_address: "<NETWORK_ADDRESS>"
+   -  
+    network_address: "<NETWORK_ADDRESS>"
 
    ## @param port - integer - optional - default: 161
-   port: 161
+    port: 161
 
    ## @param community_string - string - optional
-   community_string: public
+    community_string: public
 
    ## @param snmp_version - integer - optional - default: 2
-   snmp_version: 2
+    snmp_version: 2
 
    ## @param timeout - integer - optional - default: 1
-   timeout: 1
+    timeout: 1
 
    ## @param retries - integer - optional - default: 5
-   retries: 5
+    retries: 5
 
    ## @param discovery_interval - integer - optional - default: 3600
-   discovery_interval: 3600
+    discovery_interval: 3600
 
    ## @param discovery_allowed_failures - integer - optional - default: 3
-   discovery_allowed_failures: 3
+    discovery_allowed_failures: 3
 
    ## @param enforce_mib_constraints - boolean - optional - default: true
-   enforce_mib_constraints: true
+    enforce_mib_constraints: true
 
    ## @param bulk_threshold - integer - optional - default: 5
-   bulk_threshold: 5
+    bulk_threshold: 5
 
    ## @param tags - list of key:value element - optional
-   tags:
-      - "<KEY_1>:<VALUE_1>"
-      - "<KEY_2>:<VALUE_2>"
+    tags:
+       - "<KEY_1>:<VALUE_1>"
+       - "<KEY_2>:<VALUE_2>"
 ```
 
 ##### sysOID mapped device profiles
@@ -145,8 +145,6 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 ##### Generic router profile
 
 The [generic router profile][7] collects the following metrics.
-
-MIBs needed for local reference: IF-MIB, IP-MIB, TCP-MIB, UDP-MIB.
 
 | Metric                                 | Description                                                                                                                                                                                                                                                               | Tags                     |
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|
@@ -238,7 +236,6 @@ MIBs needed for local reference: IF-MIB, IP-MIB, TCP-MIB, UDP-MIB.
 
 The [F5 BIG-IP profile][8] collects the following metrics.
 
-MIBs needed for local reference: F5-BIGIP-SYSTEM-MIB, IF-MIB.
 
 | Metric                                   | Description                                                                                                                                                                                                                                                          | Tags        |
 |------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
@@ -300,7 +297,6 @@ MIBs needed for local reference: F5-BIGIP-SYSTEM-MIB, IF-MIB.
 
 The [Cisco c3850 device profile][9] collects the following metrics.
 
-MIBs needed for local reference: CISCO-ENTITY-SENSOR-MIB, CISCO-ENTITY-FRU-CONTROL-MIB, CISCO-PROCESS-MIB, CISCO-IF-EXTENSION-MIB, IF-MIB, TCP-MIB, UDP-MIB.
 
 | Metric                             | Description                                                                                                                                                                                           | Tags                       |
 |------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
@@ -335,8 +331,6 @@ MIBs needed for local reference: CISCO-ENTITY-SENSOR-MIB, CISCO-ENTITY-FRU-CONTR
 ##### Cisco Nexus Profile
 
 The Cisco Nexus Profile collects the following metrics.
-
-MIBs needed for local reference: CISCO-ENTITY-SENSOR-MIB, CISCO-ENTITY-FRU-CONTROL-MIB, CISCO-PROCESS-MIB, CISCO-IF-EXTENSION-MIB, IF-MIB, TCP-MIB, UDP-MIB.
 
 | Metric                             | Description                                                                                                                                                                                                                                                               | Tags                      |
 |------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
@@ -394,8 +388,6 @@ MIBs needed for local reference: MERAKI-CLOUD-CONTROLLER-MIB.
 ##### Dell iDRAC Profile
 
 The Dell iDRAC device profile collects the following metrics.
-
-MIBs needed for local reference: IDRAC-MIB-SMIv2, INTEL-LAN-ADAPTERS-MIB/
 
 | Metric                                                | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Tags             |
 |-------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|
