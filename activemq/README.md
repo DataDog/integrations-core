@@ -2,8 +2,6 @@
 
 ## Overview
 
-The ActiveMQ check collects metrics for brokers and queues, producers and consumers, and more.
-
 **Note**: If you are running a ActiveMQ version older than 5.8.0, see the [Agent 5.10.x released sample files][1].
 
 ## Setup
