@@ -75,7 +75,7 @@ class Oracle(AgentCheck):
         service_check_tags.extend(tags)
 
         with closing(self._get_connection(server, user, password, service, jdbc_driver, service_check_tags)) as con:
-            if only_custom_queries is None:
+            if not only_custom_queries:
                 self._get_sys_metrics(con, tags)
                 self._get_process_metrics(con, tags)
                 self._get_tablespace_metrics(con, tags)
