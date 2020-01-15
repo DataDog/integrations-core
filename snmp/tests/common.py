@@ -11,7 +11,7 @@ from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger(__name__)
 
-HOST = get_docker_hostname()
+HOST = os.getenv('DD_SNMP_HOST', get_docker_hostname())
 PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
