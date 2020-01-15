@@ -17,18 +17,22 @@ from .common import METRICS, OPTIONAL_METRICS, QUEUE_METRICS
 log = logging.getLogger(__file__)
 
 
-@pytest.mark.usefixtures("dd_environment")
-def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
-    check = IbmMqCheck('ibm_mq', {}, {})
-    check.check(instance)
-
-    for metric in METRICS:
-        aggregator.assert_metric(metric)
+def _assert_all_metrics(aggregator):
+    for metric, metric_type in METRICS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
 
     for metric in OPTIONAL_METRICS:
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
+    check = IbmMqCheck('ibm_mq', {}, {})
+    check.check(instance)
+
+    _assert_all_metrics(aggregator)
 
     tags = [
         'queue_manager:{}'.format(common.QUEUE_MANAGER),
@@ -147,13 +151,7 @@ def test_check_queue_pattern(aggregator, instance_queue_pattern, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance_queue_pattern)
 
-    for metric in METRICS:
-        aggregator.assert_metric(metric)
-
-    for metric in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
-
-    aggregator.assert_all_metrics_covered()
+    _assert_all_metrics(aggregator)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -161,13 +159,7 @@ def test_check_queue_regex(aggregator, instance_queue_regex, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance_queue_regex)
 
-    for metric in METRICS:
-        aggregator.assert_metric(metric)
-
-    for metric in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
-
-    aggregator.assert_all_metrics_covered()
+    _assert_all_metrics(aggregator)
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -175,13 +167,7 @@ def test_check_all(aggregator, instance_collect_all, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance_collect_all)
 
-    for metric in METRICS:
-        aggregator.assert_metric(metric)
-
-    for metric in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
-
-    aggregator.assert_all_metrics_covered()
+    _assert_all_metrics(aggregator)
 
 
 def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
@@ -197,7 +183,7 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
         'foo:bar',
     ]
 
-    for metric in QUEUE_METRICS:
+    for metric, _ in QUEUE_METRICS:
         aggregator.assert_metric(metric, tags=tags)
 
 
@@ -253,3 +239,10 @@ def test_check_channel_count_status_unknown(aggregator, instance_queue_regex_tag
         aggregator.assert_metric(
             'ibm_mq.channel.count', expected_value, tags=["channel:my_channel", "status:" + status]
         )
+
+
+@pytest.mark.e2e
+def test_e2e_check_all(dd_agent_check, instance_collect_all):
+    aggregator = dd_agent_check(instance_collect_all, rate=True)
+
+    _assert_all_metrics(aggregator)
