@@ -14,15 +14,6 @@ STATUS = 'harbor.status'
 
 
 class HarborCheck(AgentCheck):
-    def __init__(self, name, init_config, instances):
-        super(HarborCheck, self).__init__(name, init_config, instances)
-
-        # Prevent the use of Basic Auth using `username` and `password` from the config file.
-        del self.http.options['auth']
-
-        # Keep a single session in order to submit the session id cookie for each request.
-        self.http.persist_connections = True
-
     def _check_health(self, api, base_tags):
         """Submits service checks for Harbor individual components."""
         if api.harbor_version >= VERSION_1_8:
@@ -108,18 +99,16 @@ class HarborCheck(AgentCheck):
 
     def check(self, instance):
         harbor_url = instance["url"]
-        username = instance["username"]
-        password = instance['password']
         tags = instance.get("tags", [])
         try:
             api = HarborAPI(harbor_url, self.http)
-            api.authenticate(username, password)
+            self._check_health(api, tags)
+            self._check_registries_health(api, tags)
+            self._submit_project_metrics(api, tags)
+            self._submit_disk_metrics(api, tags)
         except Exception:
-            self.log.exception("Harbor API is not reachable")
+            self.log.exception("An error occured when collecting Harbor metrics")
             self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
             raise
-        self.service_check(CAN_CONNECT, AgentCheck.OK)
-        self._check_health(api, tags)
-        self._check_registries_health(api, tags)
-        self._submit_project_metrics(api, tags)
-        self._submit_disk_metrics(api, tags)
+        else:
+            self.service_check(CAN_CONNECT, AgentCheck.OK)
