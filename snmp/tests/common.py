@@ -7,7 +7,6 @@ import logging
 import os
 
 from datadog_checks.dev.utils import get_ip
-
 from datadog_checks.snmp import SnmpCheck
 
 log = logging.getLogger(__name__)
