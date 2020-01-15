@@ -60,38 +60,38 @@ init_config:
       definition_file: generic-router.yaml
 
 instances:
-   ## @param network_address - string - optional
-   -  
+  -  
+    ## @param network_address - string - optional
     network_address: "<NETWORK_ADDRESS>"
 
-   ## @param port - integer - optional - default: 161
+    ## @param port - integer - optional - default: 161
     port: 161
 
-   ## @param community_string - string - optional
+    ## @param community_string - string - optional
     community_string: public
 
-   ## @param snmp_version - integer - optional - default: 2
+    ## @param snmp_version - integer - optional - default: 2
     snmp_version: 2
 
-   ## @param timeout - integer - optional - default: 1
+    ## @param timeout - integer - optional - default: 1
     timeout: 1
 
-   ## @param retries - integer - optional - default: 5
+    ## @param retries - integer - optional - default: 5
     retries: 5
 
-   ## @param discovery_interval - integer - optional - default: 3600
+    ## @param discovery_interval - integer - optional - default: 3600
     discovery_interval: 3600
 
-   ## @param discovery_allowed_failures - integer - optional - default: 3
+    ## @param discovery_allowed_failures - integer - optional - default: 3
     discovery_allowed_failures: 3
 
-   ## @param enforce_mib_constraints - boolean - optional - default: true
+    ## @param enforce_mib_constraints - boolean - optional - default: true
     enforce_mib_constraints: true
 
-   ## @param bulk_threshold - integer - optional - default: 5
+    ## @param bulk_threshold - integer - optional - default: 5
     bulk_threshold: 5
 
-   ## @param tags - list of key:value element - optional
+    ## @param tags - list of key:value element - optional
     tags:
        - "<KEY_1>:<VALUE_1>"
        - "<KEY_2>:<VALUE_2>"
