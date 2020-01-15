@@ -24,7 +24,9 @@
   "is_public": false,
   "integration_id": "amazon-kafka",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "Amazon MSK Overview": "assets/dashboards/overview.json"
+    },
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json"
