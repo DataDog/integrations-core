@@ -6,12 +6,13 @@ import copy
 import logging
 import os
 
+from datadog_checks.dev.utils import get_ip
+
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger(__name__)
 
-HOST = get_docker_hostname()
+HOST = get_ip()
 PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
