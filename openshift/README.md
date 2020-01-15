@@ -3,9 +3,10 @@
 Red Hat OpenShift is an open source container application platform based on the Kubernetes container orchestrator for enterprise application development and deployment.
 
 ## Setup
+
 ### Installation
 
-To install the Agent, refer to the [Agent installation instructions][1] for kubernetes. The default configuration targets OpenShift 3.7.0 and later, as it relies on features and endpoints introduced in this version.
+To install the Agent, refer to the [Agent installation instructions][1] for kubernetes. The default configuration targets OpenShift 3.7.0+ and OpenShift 4.0+, as it relies on features and endpoints introduced in this version.
 
 ### Configuration
 
@@ -65,17 +66,21 @@ If SELinux is in enforcing mode, it is recommend to grant [the `spc_t` type][6] 
 Run the [Agent’s status subcommand][8] and look for openshift under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
+
 The OpenShift check does not include any events.
 
 ### Service Checks
+
 The OpenShift check does not include any Service Checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][10].
 
 
