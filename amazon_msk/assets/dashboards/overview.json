@@ -549,7 +549,7 @@
             "isShared": false,
             "margin": "",
             "scaleFactor": 1,
-            "sizing": "center",
+            "sizing": "zoom",
             "title": false,
             "type": "image",
             "url": "/static/images/saas_logos/bot/amazon_msk@2x.png",
