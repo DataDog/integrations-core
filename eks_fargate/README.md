@@ -103,13 +103,11 @@ spec:
      labels:
        app: "<APPLICATION_NAME>"
      name: "<POD_NAME>"
-​
    spec:
      serviceAccountName: datadog-agent
      containers:
      - name: "<APPLICATION_NAME>"
        image: "<APPLICATION_IMAGE>"
-​
      ## Running the Agent as a side-car
      - image: datadog/agent
        name: datadog-agent
@@ -140,8 +138,7 @@ spec:
 
 ## Metrics Collection
 
-{{< tabs >}}
-{{% tab "Integration metrics" %}}
+### Integration metrics
 ​
 Use [Autodiscovery labels with your application container][1] to start collecting its metrics for the [supported Agent integrations][2].
 ​
@@ -162,13 +159,11 @@ spec:
       ad.datadoghq.com/<CONTAINER_NAME>.check_names: '[<CHECK_NAME>]'
       ad.datadoghq.com/<CONTAINER_IDENTIFIER>.init_configs: '[<INIT_CONFIG>]'
       ad.datadoghq.com/<CONTAINER_IDENTIFIER>.instances: '[<INSTANCE_CONFIG>]'
-​
    spec:
      serviceAccountName: datadog-agent
      containers:
      - name: "<APPLICATION_NAME>"
        image: "<APPLICATION_IMAGE>"
-​
      ## Running the Agent as a side-car
      - image: datadog/agent
        name: datadog-agent
@@ -200,12 +195,11 @@ spec:
 [1]: /agent/autodiscovery/integrations
 [2]: /integrations/#cat-autodiscovery
 [3]: https://app.datadoghq.com/account/settings#api
-{{% /tab %}}
-{{% tab "DogStatsD" %}}
+
+### DogStatsD
 
 Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][1] from your application container to Datadog.
 
-​
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -219,13 +213,11 @@ spec:
      labels:
        app: "<APPLICATION_NAME>"
      name: "<POD_NAME>"
-​
    spec:
      serviceAccountName: datadog-agent
      containers:
      - name: "<APPLICATION_NAME>"
        image: "<APPLICATION_IMAGE>"
-​
      ## Running the Agent as a side-car
      - image: datadog/agent
        name: datadog-agent
@@ -261,8 +253,6 @@ spec:
 
 [1]: /developers/dogstatsd
 [2]: https://app.datadoghq.com/account/settings#api
-{{% /tab %}}
-{{< /tabs >}}
 
 ## Traces Collection
 
@@ -281,13 +271,11 @@ spec:
      labels:
        app: "<APPLICATION_NAME>"
      name: "<POD_NAME>"
-​
    spec:
      serviceAccountName: datadog-agent
      containers:
      - name: "<APPLICATION_NAME>"
        image: "<APPLICATION_IMAGE>"
-​
      ## Running the Agent as a side-car
      - image: datadog/agent
        name: datadog-agent
