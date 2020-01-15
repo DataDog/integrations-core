@@ -103,7 +103,7 @@ datadog-riakcs==2.2.0
 datadog-sap-hana==1.1.0
 datadog-snmp==2.3.2
 datadog-solr==1.2.0
-datadog-spark==1.11.0
+datadog-spark==1.11.1
 datadog-sqlserver==1.16.0; sys_platform != 'darwin'
 datadog-squid==1.4.1
 datadog-ssh-check==1.10.0
