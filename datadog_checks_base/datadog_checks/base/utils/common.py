@@ -7,6 +7,7 @@ import os
 import re
 from decimal import ROUND_HALF_UP, Decimal
 
+from datadog_checks.dev.utils import get_ip
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
 
@@ -62,7 +63,7 @@ def round_value(value, precision=0, rounding_method=ROUND_HALF_UP):
 
 
 def get_docker_hostname():
-    return urlparse(os.getenv('DOCKER_HOST', '')).hostname or 'localhost'
+    return urlparse(os.getenv('DOCKER_HOST', '')).hostname or get_ip()
 
 
 def pattern_filter(items, whitelist=None, blacklist=None, key=None):
