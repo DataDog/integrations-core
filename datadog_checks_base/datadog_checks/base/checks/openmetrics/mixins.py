@@ -321,6 +321,13 @@ class OpenMetricsScraperMixin(object):
 
         return http_handler
 
+    def reset_http_config(self):
+        """
+        You may need to use this when configuration is determined dynamically during every
+        check run, such as when polling an external resource like the Kubelet.
+        """
+        self._http_handlers.clear()
+
     def parse_metric_family(self, response, scraper_config):
         """
         Parse the MetricFamily from a valid requests.Response object to provide a MetricFamily object (see [0])
