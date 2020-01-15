@@ -8,7 +8,7 @@ import click
 import pyperclip
 
 from ....utils import read_metric_data_file
-from ...console import CONTEXT_SETTINGS, abort
+from ...console import CONTEXT_SETTINGS, abort, echo_success
 
 VALID_FIELDS = {
     'metric_name',
@@ -59,12 +59,14 @@ def metrics2md(check, fields):
     reader = csv.DictReader(StringIO(metric_data), delimiter=',')
 
     rows = []
-    for row in reader:
-        rows.append(' | '.join(row[field] or 'N/A' for field in fields))
+    for csv_row in reader:
+        rows.append(' | '.join(csv_row[field] or 'N/A' for field in fields))
 
     rows.sort()
+    num_metrics = len(rows)
 
     md_table_rows = [' | '.join(fields), ' | '.join('---' for _ in fields)]
     md_table_rows.extend(rows)
 
     pyperclip.copy('\n'.join(md_table_rows))
+    echo_success('Successfully copied table with {} metric{}'.format(num_metrics, 's' if num_metrics > 1 else ''))
