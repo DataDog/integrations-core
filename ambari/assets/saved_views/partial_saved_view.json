@@ -1,5 +1,6 @@
 { 
   "name": "Ambari partial",
   "type": "logs",
-  "query": "partial"
+  "query": "partial",
+  "page": "patterns"
 }
