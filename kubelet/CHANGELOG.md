@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 3.5.1 / 2020-01-15
+
+* [Fixed] Fix Kubelet credentials handling. See [#5455](https://github.com/DataDog/integrations-core/pull/5455).
+
 ## 3.5.0 / 2020-01-13
 
 * [Fixed] Improve url join to not mutate the base url when proxying a call. See [#5416](https://github.com/DataDog/integrations-core/pull/5416).
