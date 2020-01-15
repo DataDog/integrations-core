@@ -8,6 +8,7 @@ from six import iteritems
 
 from datadog_checks.base import ensure_bytes, ensure_unicode
 from datadog_checks.checks import AgentCheck
+from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors, metrics
 from .config import IBMMQConfig
@@ -224,7 +225,7 @@ class IbmMqCheck(AgentCheck):
                     self._send_metric(metric_type, metric_full_name, metric_value, tags)
 
     def _send_metric(self, metric_type, metric_name, metric_value, tags):
-        if metric_type in ['gauge', 'rate']:
+        if metric_type in [GAUGE, COUNT]:
             getattr(self, metric_type)(metric_name, metric_value, tags=tags)
         else:
             self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
