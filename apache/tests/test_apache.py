@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
 import pytest
+import re
 
 from datadog_checks.apache import Apache
 
@@ -17,6 +18,9 @@ from .common import (
     PORT,
     STATUS_CONFIG,
 )
+
+
+VERSION_REGEX = re.compile(r'^Apache/(\d+(?:\.\d+)*)')
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -140,3 +144,46 @@ def test_invalid_version(check):
     check._submit_metadata("invalid_version")
 
     check.log.info.assert_called_once_with("Cannot parse the complete Apache version from %s.", "invalid_version")
+
+@pytest.mark.parametrize(
+        'version, pattern, expected_parts',
+        [
+            (
+                'Apache/2.4.2 (Unix) PHP/4.2.2 MyMod/1.2',
+                VERSION_REGEX,
+                {'major': '2', 'minor': '4', 'patch': '2'},
+            ),
+            (
+                'Apache',
+                VERSION_REGEX,
+                None,
+            ),
+            (
+                'Apache/2.4.2',
+                VERSION_REGEX,
+                {'major': '2', 'minor': '4', 'patch': '2'},
+            )
+        ],
+        ids=['full_version', 'prod_version', 'min_version'],
+)
+def test_version_regex(check, version, pattern, expected_parts, datadog_agent):
+    # TODO: test other invalid versions
+    """
+    major_version = 'Apache/2'
+    minor_version = "Apache/2.4"
+    os_version = "Apache/2.4.2 (Unix)"
+    """
+    check = check({})
+    check.check_id = 'test:123'
+    
+    check._submit_metadata(version)
+
+    if len(expected_parts) == 3:
+        version_metadata = {
+            'version.scheme': 'semver',
+            'version.major': expected_parts['major'],
+            'version.minor': expected_parts['minor'],
+            'version.patch': expected_parts['patch'],
+        }
+
+        datadog_agent.assert_metadata('test:123', version_metadata)
