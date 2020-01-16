@@ -155,26 +155,10 @@ def test_invalid_version(check):
             {'major': '2', 'minor': '4', 'patch': '6'},
             id='redhat_version',
         ),
-        pytest.param(
-            'Apache/2.14.27',
-            {'major': '2', 'minor': '14', 'patch': '27'},
-            id='min_version',
-        ),
-        pytest.param(
-            'Apache/2.4',
-            {'major': '2', 'minor': '4'},
-            id='only_minor',
-        ),
-        pytest.param(
-            'Apache/2',
-            {'major': '2'},
-            id='only_major',
-        ),
-        pytest.param(
-            'Apache',
-            {},
-            id='only_apache',
-        ),
+        pytest.param('Apache/2.14.27', {'major': '2', 'minor': '14', 'patch': '27'}, id='min_version'),
+        pytest.param('Apache/2.4', {'major': '2', 'minor': '4'}, id='only_minor'),
+        pytest.param('Apache/2', {'major': '2'}, id='only_major'),
+        pytest.param('Apache', {}, id='only_apache'),
     ],
 )
 def test_full_version_regex(check, version, expected_parts, datadog_agent):
