@@ -37,7 +37,7 @@ class Apache(AgentCheck):
         'connect_timeout': {'name': 'connect_timeout', 'default': 5},
     }
 
-    VERSION_REGEX = re.compile(r'^Apache/(\d+(?:\.\d+)*)')
+    VERSION_REGEX = re.compile(r'Apache/(\d+(?:\.\d+)*)')
 
     def __init__(self, name, init_config, instances):
         super(Apache, self).__init__(name, init_config, instances)
@@ -123,7 +123,7 @@ class Apache(AgentCheck):
             # Can't get it from the mod_status output, try to get it from the server header even though
             # it may not be exposed with some configurations.
             server_version = r.headers.get("Server")
-            if server_version.startswith('Apache'):
+            if server_version:
                 self._submit_metadata(server_version)
 
     def _submit_metadata(self, value):
