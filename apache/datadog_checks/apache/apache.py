@@ -140,6 +140,6 @@ class Apache(AgentCheck):
             return
 
         version = match.groups()[0]
-        version_parts = {name: part for name, part in zip(), version.split('.')}
+        version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version.split('.'))}
         self.set_metadata('version', version, scheme='parts', final_scheme='semver', part_map=version_parts)
         self.log.debug("found apache version %s", version)
