@@ -154,9 +154,9 @@ def test_invalid_version(check):
                 {'major': '2', 'minor': '4', 'patch': '2'},
             ),
             (
-                'Apache',
+                'Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.2k-fips',
                 VERSION_REGEX,
-                None,
+                {'major': '2', 'minor': '4', 'patch': '6',
             ),
             (
                 'Apache/2.4.2',
@@ -164,15 +164,10 @@ def test_invalid_version(check):
                 {'major': '2', 'minor': '4', 'patch': '2'},
             )
         ],
-        ids=['full_version', 'prod_version', 'min_version'],
+        ids=['unix_full_version', 'redhat_version', 'min_version'],
 )
 def test_version_regex(check, version, pattern, expected_parts, datadog_agent):
-    # TODO: test other invalid versions
-    """
-    major_version = 'Apache/2'
-    minor_version = "Apache/2.4"
-    os_version = "Apache/2.4.2 (Unix)"
-    """
+
     check = check({})
     check.check_id = 'test:123'
     
