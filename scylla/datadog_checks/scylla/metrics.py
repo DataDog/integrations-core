@@ -363,35 +363,38 @@ SCYLLA_TRANSPORT = {
     'scylla_transport_requests_serving': 'transport.requests_serving',
 }
 
-
-INSTANCE_METRICS = [
-    SCYLLA_ALIEN,
-    SCYLLA_BATCHLOG,
+INSTANCE_DEFAULT_METRICS = [
     SCYLLA_CACHE,
-    SCYLLA_COMMITLOG,
-    SCYLLA_COMPACTION,
-    SCYLLA_CQL,
-    SCYLLA_DATABASE,
-    SCYLLA_EXECUTION,
     SCYLLA_GOSSIP,
-    SCYLLA_HINTS,
-    SCYLLA_HTTPD,
-    SCYLLA_IO,
-    SCYLLA_LSA,
-    SCYLLA_MEMORY,
-    SCYLLA_MEMTABLES,
     SCYLLA_NODE,
-    SCYLLA_QUERY,
     SCYLLA_REACTOR,
-    SCYLLA_SCHEDULER,
     SCYLLA_SCYLLADB,
-    SCYLLA_SSTABLES,
     SCYLLA_STORAGE,
     SCYLLA_STREAMING,
-    SCYLLA_THRIFT,
-    SCYLLA_TRACING,
     SCYLLA_TRANSPORT,
 ]
+
+
+ADDITIONAL_METRICS_MAP = {
+    'scylla.alien': SCYLLA_ALIEN,
+    'scylla.batchlog': SCYLLA_BATCHLOG,
+    'scylla.commitlog': SCYLLA_COMMITLOG,
+    'scylla.compaction': SCYLLA_COMPACTION,
+    'scylla.cql': SCYLLA_CQL,
+    'scylla.database': SCYLLA_DATABASE,
+    'scylla.execution': SCYLLA_EXECUTION,
+    'scylla.hints': SCYLLA_HINTS,
+    'scylla.httpd': SCYLLA_HTTPD,
+    'scylla.io': SCYLLA_IO,
+    'scylla.lsa': SCYLLA_LSA,
+    'scylla.memory': SCYLLA_MEMORY,
+    'scylla.memtables': SCYLLA_MEMTABLES,
+    'scylla.query': SCYLLA_QUERY,
+    'scylla.scheduler': SCYLLA_SCHEDULER,
+    'scylla.sstables': SCYLLA_SSTABLES,
+    'scylla.thrift': SCYLLA_THRIFT,
+    'scylla.tracing': SCYLLA_TRACING,
+}
 
 
 # metrics namespaced under 'scylla.manager'

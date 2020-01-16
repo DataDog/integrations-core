@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckCommandOutput
 from datadog_checks.utils.common import get_docker_hostname
 
 from .common import INSTANCE_DEFAULT_METRICS, MANAGER_DEFAULT_METRICS
@@ -25,6 +26,13 @@ def dd_environment():
         os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         log_patterns=['JMX is enabled to receive remote connections'],
     ):
+
+        init = CheckCommandOutput(
+            'docker exec -u 0 scylla-manager sctool cluster add --host scylla-db', '.*-.*-.*-.*-.*'
+        )
+        if init():
+            pass
+
         instances = {
             'instances': [
                 {'instance_endpoint': INSTANCE_URL, 'metrics': INSTANCE_DEFAULT_METRICS},
