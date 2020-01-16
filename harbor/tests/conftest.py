@@ -46,7 +46,7 @@ from .common import (
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
+def dd_environment(e2e_instance):
     compose_file = get_docker_compose_file()
     expected_log = "http server Running on" if HARBOR_VERSION < [1, 10, 0] else "API server is serving at"
     conditions = [
@@ -55,7 +55,7 @@ def dd_environment(instance):
         CreateSimpleUser(),
     ]
     with docker_run(compose_file, conditions=conditions):
-        yield instance
+        yield e2e_instance
 
 
 class CreateSimpleUser(LazyFunction):
