@@ -55,6 +55,13 @@ instances:
     #   - active_directory.dra.inbound.bytes.total,int
     #   - active_directory.ldap.bind_time,float
 
+    ## @param admin_share - string - optional - default: c$
+    ## The administrative share to connect to.
+    ## Note that to be able to connect to remote hosts the administrative share needs to be enabled and the
+    ## dd-agent user needs network administrator permissions
+    #
+    # admin_share: c$
+
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
