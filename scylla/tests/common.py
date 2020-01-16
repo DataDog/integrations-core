@@ -199,7 +199,7 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.memory.virtual_dirty_bytes',
     ],
     'scylla.memtables': ['scylla.memtables.pending_flushes', 'scylla.memtables.pending_flushes_bytes'],
-    'scylla.node': ['scylla.node.operation_mode',],
+    'scylla.node': ['scylla.node.operation_mode'],
     'scylla.query_processor': ['scylla.query_processor.queries', 'scylla.query_processor.statements_prepared'],
     'scylla.reactor': [
         'scylla.reactor.aio_bytes_read',

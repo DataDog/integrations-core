@@ -41,7 +41,7 @@ def test_instance_invalid_group_check(aggregator, db_instance, mock_db_data):
     db_instance['metric_groups'] = additional_metrics
 
     with pytest.raises(CheckException):
-        c = ScyllaCheck('scylla', {}, [db_instance])
+        ScyllaCheck('scylla', {}, [db_instance])
 
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
 
