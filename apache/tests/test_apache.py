@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
+
 import mock
 import pytest
-import re
 
 from datadog_checks.apache import Apache
 
@@ -145,40 +146,34 @@ def test_invalid_version(check):
 
     check.log.info.assert_called_once_with("Cannot parse the complete Apache version from %s.", "invalid_version")
 
-@pytest.mark.parametrize(
-        'version, pattern, expected_parts',
-        [
-            (
-                'Apache/2.4.2 (Unix) PHP/4.2.2 MyMod/1.2',
-                VERSION_REGEX,
-                {'major': '2', 'minor': '4', 'patch': '2'},
-            ),
-            (
-                'Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.2k-fips',
-                VERSION_REGEX,
-                {'major': '2', 'minor': '4', 'patch': '6',
-            ),
-            (
-                'Apache/2.4.2',
-                VERSION_REGEX,
-                {'major': '2', 'minor': '4', 'patch': '2'},
-            )
-        ],
-        ids=['unix_full_version', 'redhat_version', 'min_version'],
-)
-def test_version_regex(check, version, pattern, expected_parts, datadog_agent):
 
+@pytest.mark.parametrize(
+    'version, pattern, expected_parts',
+    [
+        ('Apache/2.4.2 (Unix) PHP/4.2.2 MyMod/1.2', VERSION_REGEX, {'major': '2', 'minor': '4', 'patch': '2'}),
+        (
+            'Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.2k-fips',
+            VERSION_REGEX,
+            {'major': '2', 'minor': '4', 'patch': '6'},
+        ),
+        ('Apache/2.14.27', VERSION_REGEX, {'major': '2', 'minor': '14', 'patch': '27'}),
+    ],
+    ids=['unix_full_version', 'redhat_version', 'min_version'],
+)
+def test_full_version_regex(check, version, pattern, expected_parts, datadog_agent):
+    """The default server token is Full. Full results in server info that can include
+    multiple non-Apache version specific information.
+    """
     check = check({})
     check.check_id = 'test:123'
-    
+
     check._submit_metadata(version)
 
-    if len(expected_parts) == 3:
-        version_metadata = {
-            'version.scheme': 'semver',
-            'version.major': expected_parts['major'],
-            'version.minor': expected_parts['minor'],
-            'version.patch': expected_parts['patch'],
-        }
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': expected_parts['major'],
+        'version.minor': expected_parts['minor'],
+        'version.patch': expected_parts['patch'],
+    }
 
-        datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata('test:123', version_metadata)
