@@ -13,13 +13,13 @@ def test_check_with_aws_auth_type(aggregator):
 
     instance = {
         'name': 'aws_s3_content_match',
-        'url': 'https://s3.amazonaws.com/my-bucket-abcd',
+        'url': 'https://s3.amazonaws.com/my-bucket-abcd',   # link to your bucket link
         'timeout': 1,
         'auth_type': 'aws',
         'aws_host': 's3.amazonaws.com',
         'aws_region': 'us-east-1',
         'aws_service': 's3',
-        'content_match': 'my-folder-007',  # something present in your s3 bucket
+        'content_match': 'my-folder-007',                   # something present in your s3 bucket
     }
     with patch('datadog_checks.http_check.http_check.get_ca_certs_path'):
         http_check = HTTPCheck('http_check', {}, [instance])
