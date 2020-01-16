@@ -95,15 +95,17 @@ def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
 
 @requires_windows
 def test_default_admin_share():
-    c = PDHBaseCheck("testcheck", {}, {}, [DEFAULT_INSTANCE], PARTIAL_COUNTER_LIST)
+    initialize_pdh_tests()
+    c = PDHBaseCheck("testcheck", {}, {}, [DEFAULT_INSTANCE], SINGLE_INSTANCE_COUNTER)
     nr = c._get_netresource('1.1.1.1')
     assert nr.lpRemoteName == '\\\\1.1.1.1\\c$'
 
 
 @requires_windows
 def test_custom_admin_share():
+    initialize_pdh_tests()
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance['admin_share'] = 'ipc$'
-    c = PDHBaseCheck("testcheck", {}, {}, [instance], PARTIAL_COUNTER_LIST)
+    c = PDHBaseCheck("testcheck", {}, {}, [instance], SINGLE_INSTANCE_COUNTER)
     nr = c._get_netresource('1.2.3.4')
     assert nr.lpRemoteName == '\\\\1.2.3.4\\ipc$'
