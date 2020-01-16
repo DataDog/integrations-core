@@ -102,8 +102,8 @@ class PDHBaseCheck(AgentCheck):
             self.log.debug("Exception in PDH init: %s", str(e))
             raise
 
-        # if key is None or not self._metrics.get(key):
-        #    raise AttributeError('No valid counters to collect')
+        if key is None or not self._metrics.get(key):
+            raise AttributeError('No valid counters to collect')
 
     def _get_netresource(self, remote_machine):
         # To connect you have to use the name of the server followed by an administrative share.

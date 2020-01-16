@@ -97,7 +97,7 @@ def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
 def test_default_admin_share():
     c = PDHBaseCheck("testcheck", {}, {}, [DEFAULT_INSTANCE], PARTIAL_COUNTER_LIST)
     nr = c._get_netresource('1.1.1.1')
-    assert nr.IpRemoteName == '\\\\1.1.1.1\\c$'
+    assert nr.lpRemoteName == '\\\\1.1.1.1\\c$'
 
 
 @requires_windows
@@ -106,4 +106,4 @@ def test_custom_admin_share():
     instance['admin_share'] = 'ipc$'
     c = PDHBaseCheck("testcheck", {}, {}, [instance], PARTIAL_COUNTER_LIST)
     nr = c._get_netresource('1.2.3.4')
-    assert nr.IpRemoteName == '\\\\1.2.3.4\\ipc$'
+    assert nr.lpRemoteName == '\\\\1.2.3.4\\ipc$'
