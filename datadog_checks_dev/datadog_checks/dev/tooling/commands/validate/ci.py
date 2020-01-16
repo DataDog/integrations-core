@@ -28,7 +28,12 @@ REPOS = {
     },
     'extras': {
         'jobs_definition_relative_path': '.azure-pipelines/all.yml',
-        'display_name_overrides': {},
+        'display_name_overrides': {
+            'contrastsecurity': 'Contrast Security',
+            'gnatsd_streaming': 'Gnatsd Streaming',
+            'reboot_required': 'Reboot Required',
+            'storm': 'Storm',
+        },
         'ignored_missing_jobs': set(),
     },
 }
