@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import re
-
 import mock
 import pytest
 
@@ -162,6 +160,21 @@ def test_invalid_version(check):
             {'major': '2', 'minor': '14', 'patch': '27'},
             id='min_version',
         ),
+        pytest.param(
+            'Apache/2.4',
+            {'major': '2', 'minor': '4'},
+            id='only_minor',
+        ),
+        pytest.param(
+            'Apache/2',
+            {'major': '2'},
+            id='only_major',
+        ),
+        pytest.param(
+            'Apache',
+            {},
+            id='only_apache',
+        ),
     ],
 )
 def test_full_version_regex(check, version, expected_parts, datadog_agent):
@@ -173,11 +186,8 @@ def test_full_version_regex(check, version, expected_parts, datadog_agent):
 
     check._submit_metadata(version)
 
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': expected_parts['major'],
-        'version.minor': expected_parts['minor'],
-        'version.patch': expected_parts['patch'],
-    }
+    version_metadata = {'version.{}'.format(k): v for k, v in list(expected_parts.items())}
+    if expected_parts:
+        version_metadata['version.scheme'] = 'semver'
 
     datadog_agent.assert_metadata('test:123', version_metadata)

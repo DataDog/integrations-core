@@ -130,8 +130,6 @@ class Apache(AgentCheck):
         """Possible formats:
             Apache | Apache/X | Apache/X.Y | Apache/X.Y.Z | Apache/X.Y.Z (<OS>) | Apache/X.Y.Z (<OS>) <not specified>
             https://httpd.apache.org/docs/2.4/mod/core.html#servertokens
-
-            Incomplete versions are ignored.
         """
         match = self.VERSION_REGEX.match(value)
 
