@@ -65,7 +65,8 @@ def test__check_only_custom_queries(check, instance):
     """
     Test the right cursor calls are made when only custom custom queries is invoked
     """
-    expected_tags = ['server:localhost:1521', 'optional:tag1']
+    instance['only_custom_queries']=True
+
     get_sys_metrics = mock.MagicMock()
     check._get_sys_metrics = get_sys_metrics
     get_process_metrics = mock.MagicMock()
@@ -74,7 +75,8 @@ def test__check_only_custom_queries(check, instance):
     check._get_tablespace_metrics = get_tablespace_metrics
     get_custom_metrics= mock.MagicMock()
     check._get_custom_metrics = get_custom_metrics
-    instance['only_custom_queries']=True
+    get_connection = mock.MagicMock()
+    check._get_connection = get_connection
     check.check(instance)
 
     assert get_sys_metrics.call_count is 0
