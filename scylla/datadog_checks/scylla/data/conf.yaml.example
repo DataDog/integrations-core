@@ -19,6 +19,7 @@ instances:
     ## @param metric_groups - list of strings - optional
     ## List of additional scylla metric groups to collect in addition to the default
     ## These are only applicable to instance_endpoints, manager_endpoints collect all metrics
+    #
     # metric_groups:
     #   - scylla.alien
     #   - scylla.batchlog

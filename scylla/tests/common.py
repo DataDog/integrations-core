@@ -10,12 +10,7 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.alien.total_received_messages',
         'scylla.alien.total_sent_messages',
     ],
-
-
-    'scylla.batchlog_manager': [
-        'scylla.batchlog_manager.total_write_replay_attempts',
-    ],
-
+    'scylla.batchlog_manager': ['scylla.batchlog_manager.total_write_replay_attempts'],
     'scylla.cache': [
         'scylla.cache.active_reads',
         'scylla.cache.bytes_total',
@@ -46,7 +41,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.cache.sstable_row_skips',
         'scylla.cache.static_row_insertions',
     ],
-
     'scylla.commitlog': [
         'scylla.commitlog.alloc',
         'scylla.commitlog.allocating_segments',
@@ -63,11 +57,7 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.commitlog.slack',
         'scylla.commitlog.unused_segments',
     ],
-
-    'scylla.compaction_manager': [
-        'scylla.compaction_manager.compactions',
-    ],
-
+    'scylla.compaction_manager': ['scylla.compaction_manager.compactions'],
     'scylla.cql': [
         'scylla.cql.authorized_prepared_statements_cache_evictions',
         'scylla.cql.authorized_prepared_statements_cache_size',
@@ -96,7 +86,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.cql.updates',
         'scylla.cql.user_prepared_auth_cache_footprint',
     ],
-
     'scylla.database': [
         'scylla.database.active_reads',
         'scylla.database.active_reads_memory_consumption',
@@ -140,18 +129,13 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.database.view_building_paused',
         'scylla.database.view_update_backlog',
     ],
-
     'scylla.execution_stages': [
         'scylla.execution_stages.function_calls_enqueued',
         'scylla.execution_stages.function_calls_executed',
         'scylla.execution_stages.tasks_preempted',
         'scylla.execution_stages.tasks_scheduled',
     ],
-
-    'scylla.gossip': [
-        'scylla.gossip.heart_beat',
-    ],
-
+    'scylla.gossip': ['scylla.gossip.heart_beat'],
     'scylla.hints': [
         'scylla.hints.for_views_manager_corrupted_files',
         'scylla.hints.for_views_manager_discarded',
@@ -168,7 +152,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.hints.manager_size_of_hints_in_progress',
         'scylla.hints.manager_written',
     ],
-
     'scylla.httpd': [
         'scylla.httpd.connections_current',
         'scylla.httpd.connections_total',
@@ -176,7 +159,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.httpd.reply_errors',
         'scylla.httpd.requests_served',
     ],
-
     'scylla.io_queue': [
         'scylla.io_queue.delay',
         'scylla.io_queue.queue_length',
@@ -184,7 +166,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.io_queue.total_bytes',
         'scylla.io_queue.total_operations',
     ],
-
     'scylla.lsa': [
         'scylla.lsa.free_space',
         'scylla.lsa.large_objects_total_space_bytes',
@@ -199,7 +180,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.lsa.total_space_bytes',
         'scylla.lsa.used_space_bytes',
     ],
-
     'scylla.memory': [
         'scylla.memory.allocated_memory',
         'scylla.memory.cross_cpu_free_operations',
@@ -218,21 +198,9 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.memory.total_memory',
         'scylla.memory.virtual_dirty_bytes',
     ],
-
-    'scylla.memtables': [
-        'scylla.memtables.pending_flushes',
-        'scylla.memtables.pending_flushes_bytes',
-    ],
-
-    'scylla.node': [
-        'scylla.node.operation_mode',
-    ],
-
-    'scylla.query_processor': [
-        'scylla.query_processor.queries',
-        'scylla.query_processor.statements_prepared',
-    ],
-
+    'scylla.memtables': ['scylla.memtables.pending_flushes', 'scylla.memtables.pending_flushes_bytes'],
+    'scylla.node': ['scylla.node.operation_mode',],
+    'scylla.query_processor': ['scylla.query_processor.queries', 'scylla.query_processor.statements_prepared'],
     'scylla.reactor': [
         'scylla.reactor.aio_bytes_read',
         'scylla.reactor.aio_bytes_write',
@@ -258,7 +226,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.reactor.timers_pending',
         'scylla.reactor.utilization',
     ],
-
     'scylla.scheduler': [
         'scylla.scheduler.queue_length',
         'scylla.scheduler.runtime_ms',
@@ -266,11 +233,7 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.scheduler.tasks_processed',
         'scylla.scheduler.time_spent_on_task_quota_violations_ms',
     ],
-
-    'scylla.scylladb': [
-        'scylla.scylladb.current_version',
-    ],
-
+    'scylla.scylladb': ['scylla.scylladb.current_version'],
     'scylla.sstables': [
         'scylla.sstables.capped_local_deletion_time',
         'scylla.sstables.capped_tombstone_deletion_time',
@@ -291,7 +254,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.sstables.static_row_writes',
         'scylla.sstables.tombstone_writes',
     ],
-
     'scylla.storage': [
         'scylla.storage.proxy_coordinator_background_read_repairs',
         'scylla.storage.proxy_coordinator_background_reads',
@@ -334,18 +296,8 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.storage.proxy_replica_received_counter_updates',
         'scylla.storage.proxy_replica_received_mutations',
     ],
-
-    'scylla.streaming': [
-        'scylla.streaming.total_incoming_bytes',
-        'scylla.streaming.total_outgoing_bytes',
-    ],
-
-    'scylla.thrift': [
-        'scylla.thrift.current_connections',
-        'scylla.thrift.served',
-        'scylla.thrift.thrift_connections',
-    ],
-
+    'scylla.streaming': ['scylla.streaming.total_incoming_bytes', 'scylla.streaming.total_outgoing_bytes'],
+    'scylla.thrift': ['scylla.thrift.current_connections', 'scylla.thrift.served', 'scylla.thrift.thrift_connections'],
     'scylla.tracing': [
         'scylla.tracing.active_sessions',
         'scylla.tracing.cached_records',
@@ -358,7 +310,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.tracing.trace_errors',
         'scylla.tracing.trace_records_count',
     ],
-
     'scylla.transport': [
         'scylla.transport.cql_connections',
         'scylla.transport.current_connections',
@@ -385,9 +336,7 @@ INSTANCE_DEFAULT_GROUPS = [
 # expand the lists into a single list of metrics
 def get_metrics(metric_groups):
     """Given a list of metric groups, return single consolidated list"""
-    return sorted(
-        m for g in metric_groups for m in INSTANCE_METRIC_GROUP_MAP[g]
-    )
+    return sorted(m for g in metric_groups for m in INSTANCE_METRIC_GROUP_MAP[g])
 
 
 INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)

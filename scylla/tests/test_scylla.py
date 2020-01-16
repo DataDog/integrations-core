@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.scylla import ScyllaCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.scylla import ScyllaCheck
 
-from .common import get_metrics, INSTANCE_DEFAULT_METRICS, MANAGER_DEFAULT_METRICS, INSTANCE_DEFAULT_GROUPS
+from .common import INSTANCE_DEFAULT_GROUPS, INSTANCE_DEFAULT_METRICS, MANAGER_DEFAULT_METRICS, get_metrics
 
 
 def test_instance_default_check(aggregator, db_instance, mock_db_data):
