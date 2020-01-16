@@ -1,7 +1,5 @@
-import getpass
 import logging
 import os
-import subprocess
 from copy import deepcopy
 
 import mock
@@ -10,7 +8,6 @@ import requests
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.haproxy import HAProxy
-
 from .common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
@@ -55,6 +52,7 @@ def dd_environment():
                 if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '7']:
                     env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_7.cfg')
                 env['HAPROXY_SOCKET_DIR'] = temp_dir
+                env['CURRENT_UID_GID'] = '{}:{}'.format(os.getuid(), os.getgid())
 
                 with docker_run(
                     compose_file=os.path.join(HERE, 'compose', 'haproxy.yaml'),
@@ -62,19 +60,6 @@ def dd_environment():
                     service_name="haproxy",
                     conditions=[WaitFor(wait_for_haproxy)],
                 ):
-                    try:
-                        # on linux this needs access to the socket
-                        # it won't work without access
-                        chown_args = []
-                        user = getpass.getuser()
-
-                        if user != 'root':
-                            chown_args += ['sudo']
-                        chown_args += ["chown", user, host_socket_path]
-                        subprocess.check_call(chown_args, env=env)
-                    except subprocess.CalledProcessError:
-                        # it's not always bad if this fails
-                        pass
                     config = deepcopy(CHECK_CONFIG)
                     unixsocket_url = 'unix://{0}'.format(host_socket_path)
                     config['unixsocket_url'] = unixsocket_url

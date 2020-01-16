@@ -2,6 +2,7 @@ version: '3.5'
 
 services:
   haproxy:
+    user: ${CURRENT_UID_GID} # Needed so that the socket created by haproxy is own by current host user
     image: "haproxy:${HAPROXY_VERSION}"
     volumes:
       - ${HAPROXY_CONFIG}:/usr/local/etc/haproxy/haproxy.cfg
