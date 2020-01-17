@@ -71,10 +71,11 @@ def service_checks(sync):
             echo_failure('  invalid json: {}'.format(e))
             continue
 
+        expected_display_name = CHECK_TO_NAME.get(check_name, manifest['display_name'])
+
         if sync:
             for service_check in service_checks_data:
-                new_name = CHECK_TO_NAME.get(check_name, manifest['display_name'])
-                service_check['integration'] = new_name
+                service_check['integration'] = expected_display_name
             write_file(service_checks_file, json.dumps(service_checks_data, indent=4) + '\n')
 
         unique_names = set()
@@ -131,11 +132,11 @@ def service_checks(sync):
             if integration is None or not isinstance(integration, string_types):
                 file_failed = True
                 display_queue.append((echo_failure, '  required non-null string: integration'))
-            expected_integration_name = CHECK_TO_NAME.get(check_name, manifest['display_name'])
-            if integration != expected_integration_name:
+
+            if integration != expected_display_name:
                 file_failed = True
-                message = '  integration name `{}` must match manifest display_name `{}`'.format(
-                    integration, expected_integration_name
+                message = '  {}: integration name `{}` must match manifest display_name `{}`'.format(
+                    check, integration, expected_display_name
                 )
                 display_queue.append((echo_failure, message))
 
