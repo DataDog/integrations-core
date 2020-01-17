@@ -134,7 +134,7 @@ def service_checks(sync):
             expected_integration_name = CHECK_TO_NAME.get(check_name, manifest['display_name'])
             if integration != expected_integration_name:
                 file_failed = True
-                message = '  integration name `{}` must match with manifest display_name `{}`'.format(
+                message = '  integration name `{}` must match manifest display_name `{}`'.format(
                     integration, expected_integration_name
                 )
                 display_queue.append((echo_failure, message))
