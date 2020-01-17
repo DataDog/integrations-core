@@ -51,10 +51,6 @@ class HTTPCheck(AgentCheck):
 
         self.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = self.ca_certs
 
-        if is_affirmative(self.instance.get('disable_ssl_validation', True)):
-            # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
-            self.http.options['verify'] = False
-
     def check(self, instance):
         (
             addr,
