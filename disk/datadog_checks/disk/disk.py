@@ -45,10 +45,12 @@ class Disk(AgentCheck):
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
         self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
+        self._blkid_cache_file = instance.get('blkid_cache_file', '')
 
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
+        self._blkid_device_re = re.compile('>(.*?)</device>', re.I)
 
         self.devices_label = {}
 
@@ -339,8 +341,13 @@ class Disk(AgentCheck):
 
     def _get_devices_label(self):
         """
-        Get every label to create tags
+        Get every label to create tags and returns a map of device name to label:value
         """
+        if not self._blkid_cache_file:
+            return self._get_devices_label_from_blkid()
+        return self._get_devices_label_from_blkid_cache()
+
+    def _get_devices_label_from_blkid(self):
         devices_label = {}
         try:
             blkid_out, _, _ = get_subprocess_output(['blkid'], self.log)
@@ -355,5 +362,22 @@ class Disk(AgentCheck):
 
         except SubprocessOutputEmptyError:
             self.log.debug("Couldn't use blkid to have device labels")
+
+        return devices_label
+
+    def _get_devices_label_from_blkid_cache(self):
+        devices_label = {}
+        try:
+            with open(self._blkid_cache_file, 'r') as blkid_cache_file_handler:
+                # Line sample
+                # <device DEVNO="0x0801" LABEL="MYLABEL" UUID="..." TYPE="ext4">/dev/sda1</device>
+                for line in blkid_cache_file_handler:
+                    device = self._blkid_device_re.findall(line)
+                    label = self._blkid_label_re.findall(line)
+                    if label and device:
+                        devices_label[device[0]] = 'label:{}'.format(label[0])
+
+        except IOError as e:
+            self.log.debug("Couldn't read the blkid cache file {}: {}".format(self._blkid_cache_file, str(e)))
 
         return devices_label

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import mock
 import pytest
 
@@ -23,6 +25,11 @@ def psutil_mocks():
         yield
 
 
+@pytest.fixture
+def blkid_cache_file():
+    return os.path.join(os.path.dirname(__file__), 'fixtures', 'blkid_cache_file')
+
+
 @pytest.fixture(scope='session')
 def dd_environment(instance_basic_volume):
     yield instance_basic_volume
@@ -36,6 +43,11 @@ def instance_basic_volume():
 @pytest.fixture(scope='session')
 def instance_basic_mount():
     return {'use_mount': 'true', 'tag_by_label': False}
+
+
+@pytest.fixture(scope='session')
+def instance_blkid_cache_file(blkid_cache_file):
+    return {'blkid_cache_file': blkid_cache_file}
 
 
 @pytest.fixture(scope='session')

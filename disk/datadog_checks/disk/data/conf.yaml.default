@@ -120,6 +120,13 @@ instances:
     #
     # tag_by_label: true
 
+    ## @param blkid_cache_file - string - optional
+    ## Instruct the check to read the labels from the blkid cache file instead.
+    ## This parameter is used only if `tag_by_label` is true.
+    ## Works on Linux only.
+    #
+    # blkid_cache_file: /run/blkid/blkid.tab
+
     ## @param device_tag_re - list of regex:tags string - optional
     ## Instruct the check to apply additional tags to matching
     ## devices (or mount points if `use_mount` is true).
