@@ -15,6 +15,7 @@ from ...utils import get_valid_integrations, load_manifest, parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
+SERVICE_CHECK_NAMES = ['ok', 'warning', 'critical', 'unknown']
 
 root = get_root()
 
@@ -157,6 +158,12 @@ def service_checks(sync):
             if not statuses or not isinstance(statuses, list):
                 file_failed = True
                 display_queue.append((echo_failure, '  required non empty list: statuses'))
+            if isinstance(statuses, list):
+                for status in statuses:
+                    if status not in SERVICE_CHECK_NAMES:
+                        file_failed = True
+                        message = '  {}: invalid status `{}`, must be one of `{}`'.format(check, status, SERVICE_CHECK_NAMES)
+                        display_queue.append((echo_failure, message))
 
         if file_failed:
             failed_checks += 1
