@@ -33,7 +33,7 @@ Follow the instructions below to configure this check for an Agent running on a 
         init_config:
 
         instances:
-          - spark_url: http://localhost:8088 # Spark master web UI
+          - spark_url: http://localhost:8080 # Spark master web UI
         #   spark_url: http://<Mesos_master>:5050 # Mesos master web UI
         #   spark_url: http://<YARN_ResourceManager_address>:8088 # YARN ResourceManager address
 
