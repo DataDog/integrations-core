@@ -56,6 +56,7 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
@@ -63,7 +64,8 @@ setup(
     ],
     packages=['datadog_checks', 'datadog_checks.dev'],
     install_requires=REQUIRES,
-    python_requires='>=3.7',
+    # TODO: Uncomment when we fully drop Python 2
+    # python_requires='>=3.7',
     include_package_data=True,
     extras_require={
         'cli': [
