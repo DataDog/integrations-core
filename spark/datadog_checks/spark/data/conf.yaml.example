@@ -50,7 +50,7 @@ instances:
     ## "http://<driver_ip>:4040" by default, where `<driver_ip>` is the IP
     ## address or resolvable spark driver service name.
     #
-  - spark_url: http://localhost:8088
+  - spark_url: http://localhost:8080
 
     ## @param cluster_name - string - required
     ## A friendly name for the cluster.
