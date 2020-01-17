@@ -162,7 +162,7 @@ class ProcessCheck(AgentCheck):
 
         if not matching_pids:
             self.log.debug(
-                "Unable to find process named '%s' from among processes:\n%s",
+                "Unable to find process named %s among processes: %s",
                 search_string,
                 ', '.join(sorted(encountered_process_names)),
             )
