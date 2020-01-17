@@ -8,6 +8,7 @@ import socket
 import ssl
 import time
 from datetime import datetime
+import copy
 
 import _strptime  # noqa
 import requests
@@ -34,7 +35,7 @@ class HTTPCheck(AgentCheck):
     SC_STATUS = 'http.can_connect'
     SC_SSL_CERT = 'http.ssl_cert'
 
-    HTTP_CONFIG_REMAPPER = {
+    DEFAULT_HTTP_CONFIG_REMAPPER = {
         'client_cert': {'name': 'tls_cert'},
         'client_key': {'name': 'tls_private_key'},
         'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': True},
@@ -44,6 +45,8 @@ class HTTPCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(HTTPCheck, self).__init__(name, init_config, instances)
+
+        self.HTTP_CONFIG_REMAPPER = copy.deepcopy(self.DEFAULT_HTTP_CONFIG_REMAPPER)
 
         self.ca_certs = init_config.get('ca_certs')
         if not self.ca_certs:
