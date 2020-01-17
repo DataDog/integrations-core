@@ -122,7 +122,7 @@ class PostfixCheck(AgentCheck):
         if '=' in pc_output:
             authorized_mailq_users = pc_output.strip('\n').split('=')[1].strip()
 
-            self.log.debug('authorized_mailq_users : {}'.format(authorized_mailq_users))
+            self.log.debug('authorized_mailq_users : %s', authorized_mailq_users)
 
         output, _, _ = get_subprocess_output(['postqueue', '-c', postfix_config_dir, '-p'], self.log, False)
 
@@ -211,5 +211,5 @@ class PostfixCheck(AgentCheck):
 
         if '=' in pc_output:
             postfix_version = pc_output.strip('\n').split('=')[1].strip()
-            self.log.debug('Postfix Version: {}'.format(postfix_version))
+            self.log.debug('Postfix Version: %s', postfix_version)
             self.set_metadata('version', postfix_version)
