@@ -9,18 +9,41 @@ import click
 from six import string_types
 
 from ....compat import JSONDecodeError
-from ....utils import file_exists, read_file
+from ....utils import file_exists, read_file, write_file
 from ...constants import get_root
 from ...utils import get_valid_integrations, load_manifest, parse_version_parts
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
 
+root = get_root()
+
+# Some integration have custom display name
+# Mapping value must present in: source.SourceType.FROM_DISPLAY_NAME
+CHECK_TO_NAME = {
+    'cassandra_nodetool': 'Cassandra',
+    'disk': 'System',
+    'dns_check': 'System',
+    'hdfs_datanode': 'HDFS',
+    'hdfs_namenode': 'HDFS',
+    'http_check': 'System',
+    'kubelet': 'Kubernetes',
+    'kubernetes_state': 'Kubernetes',
+    'mesos_master': 'mesos',
+    'mesos_slave': 'Mesos',
+    'ntp': 'System',
+    'openstack_controller': 'OpenStack',
+    'process': 'System',
+    'riakcs': 'RiakCS',
+    'system_core': 'System',
+    'tcp_check': 'System',
+}
+
 
 @click.command('service-checks', context_settings=CONTEXT_SETTINGS, short_help='Validate `service_checks.json` files')
-def service_checks():
+@click.option('--sync', is_flag=True, help='Generate example configuration files based on specifications')
+def service_checks(sync):
     """Validate all `service_checks.json` files."""
-    root = get_root()
     echo_info("Validating all service_checks.json files...")
     failed_checks = 0
     ok_checks = 0
@@ -31,6 +54,7 @@ def service_checks():
         manifest = load_manifest(check_name)
         service_check_relative = manifest.get('assets', {}).get('service_checks', '')
         service_checks_file = os.path.join(root, check_name, *service_check_relative.split('/'))
+        manifest_file = os.path.join(root, check_name, 'manifest.json')
 
         if not file_exists(service_checks_file):
             echo_info('{}/service_checks.json... '.format(check_name), nl=False)
@@ -40,7 +64,7 @@ def service_checks():
             continue
 
         try:
-            decoded = json.loads(read_file(service_checks_file).strip(), object_pairs_hook=OrderedDict)
+            service_checks_data = json.loads(read_file(service_checks_file).strip(), object_pairs_hook=OrderedDict)
         except JSONDecodeError as e:
             failed_checks += 1
             echo_info('{}/service_checks.json... '.format(check_name), nl=False)
@@ -48,9 +72,21 @@ def service_checks():
             echo_failure('  invalid json: {}'.format(e))
             continue
 
+        try:
+            decoded_manifest = json.loads(read_file(manifest_file).strip())
+        except JSONDecodeError as e:
+            echo_failure('Failed to read manifest file: {}: {}'.format(manifest_file, e))
+            continue
+
+        if sync:
+            for service_check in service_checks_data:
+                new_name = CHECK_TO_NAME.get(check_name, decoded_manifest['display_name'])
+                service_check['integration'] = new_name
+            write_file(service_checks_file, json.dumps(service_checks_data, indent=4) + '\n')
+
         unique_names = set()
         unique_checks = set()
-        for service_check in decoded:
+        for service_check in service_checks_data:
             # attributes are valid
             attrs = set(service_check)
             for attr in sorted(attrs - REQUIRED_ATTRIBUTES):
@@ -102,6 +138,13 @@ def service_checks():
             if integration is None or not isinstance(integration, string_types):
                 file_failed = True
                 display_queue.append((echo_failure, '  required non-null string: integration'))
+            expected_integration_name = CHECK_TO_NAME.get(check_name, decoded_manifest['display_name'])
+            if integration != expected_integration_name:
+                file_failed = True
+                message = '  integration name `{}` must match with manifest display_name `{}`'.format(
+                    integration, expected_integration_name
+                )
+                display_queue.append((echo_failure, message))
 
             # name
             name = service_check.get('name')
