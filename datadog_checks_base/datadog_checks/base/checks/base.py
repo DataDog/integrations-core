@@ -511,8 +511,7 @@ class __AgentCheck(object):
                              raw ``value`` will be submitted and therefore it must be a ``str``
         :param options: keyword arguments to pass to any defined transformer
         """
-        if value and value.strip():
-            self.metadata_manager.submit(name, value.strip(), options)
+        self.metadata_manager.submit(name, value, options)
 
     def send_config_metadata(self):
         self.set_metadata('config', self.instance, section='instance', whitelist=self.METADATA_DEFAULT_CONFIG_INSTANCE)
