@@ -212,4 +212,5 @@ class PostfixCheck(AgentCheck):
         if '=' in pc_output:
             postfix_version = pc_output.strip('\n').split('=')[1].strip()
             self.log.debug('Postfix Version: %s', postfix_version)
-            self.set_metadata('version', postfix_version)
+            if postfix_version:
+                self.set_metadata('version', postfix_version)
