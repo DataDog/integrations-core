@@ -28,7 +28,7 @@ from .stop import stop
     '--python',
     '-py',
     type=click.INT,
-    help='The version of Python to use. Defaults to {} if no tox Python is specified.'.format(DEFAULT_PYTHON_VERSION),
+    help=f'The version of Python to use. Defaults to {DEFAULT_PYTHON_VERSION} if no tox Python is specified.',
 )
 @click.option('--dev/--prod', default=None, help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
@@ -65,7 +65,7 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memor
 
     for check, envs in check_envs:
         if not envs:
-            echo_warning('No end-to-end environments found for `{}`'.format(check))
+            echo_warning(f'No end-to-end environments found for `{check}`')
             continue
 
         config_envs = get_configured_envs(check)
@@ -97,7 +97,7 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memor
                 with EnvVars(persisted_env_vars):
                     ctx.invoke(
                         test_command,
-                        checks=['{}:{}'.format(check, env)],
+                        checks=[f'{check}:{env}'],
                         debug=DEBUG_OUTPUT,
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,

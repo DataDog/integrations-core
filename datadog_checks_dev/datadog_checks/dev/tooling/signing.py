@@ -17,13 +17,9 @@ from in_toto import runlib
 from in_toto.gpg.constants import GPG_COMMAND
 
 from .constants import get_root
-from .git import (
-    ignored_by_git, tracked_by_git
-)
+from .git import ignored_by_git, tracked_by_git
 from ..subprocess import run_command
-from ..utils import (
-    chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
-)
+from ..utils import chdir, ensure_dir_exists, path_join, stream_file_lines
 
 LINK_DIR = '.in-toto'
 STEP_NAME = 'tag'
@@ -39,7 +35,7 @@ class NeitherTrackedNorIgnoredFileException(Exception):
 
 
     def __str__(self):
-        return '{} has neither been tracked nor ignored by git and in-toto!'.format(self.filename)
+        return f'{self.filename} has neither been tracked nor ignored by git and in-toto!'
 
 
 class UntrackedButIgnoredFileException(Exception):
@@ -48,7 +44,7 @@ class UntrackedButIgnoredFileException(Exception):
 
 
     def __str__(self):
-        return '{} has not been tracked, but it should be ignored by git and in-toto!'.format(self.filename)
+        return f'{self.filename} has not been tracked, but it should be ignored by git and in-toto!'
 
 
 def read_gitignore_patterns():
@@ -63,7 +59,7 @@ def read_gitignore_patterns():
 
 
 def get_key_id(gpg_exe):
-    result = run_command('{} --card-status'.format(gpg_exe), capture='out', check=True)
+    result = run_command(f'{gpg_exe} --card-status', capture='out', check=True)
     lines = result.stdout.splitlines()
     for line in lines:
         if line.startswith('Signature key ....:'):
@@ -110,7 +106,7 @@ def update_link_metadata(checks):
     # Find this latest signed link metadata file on disk.
     # NOTE: in-toto currently uses the first 8 characters of the signing keyId.
     key_id_prefix = key_id[:8].lower()
-    tag_link = '{}.{}.link'.format(STEP_NAME, key_id_prefix)
+    tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
 
     # Final location of metadata file.
     metadata_file = path_join(LINK_DIR, tag_link)

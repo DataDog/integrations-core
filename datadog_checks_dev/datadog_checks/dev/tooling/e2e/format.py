@@ -12,10 +12,10 @@ CONFIG_MESSAGE_PATTERN = 'DDEV_E2E_START_MESSAGE (.+) DDEV_E2E_END_MESSAGE'
 
 def parse_config_from_result(env, result):
     if 'NO E2E FIXTURE AVAILABLE' in result.stdout:
-        return None, None, 'The environment fixture `{}` does not exist.'.format(E2E_FIXTURE_NAME)
+        return None, None, f'The environment fixture `{E2E_FIXTURE_NAME}` does not exist.'
 
-    if '{}: platform mismatch'.format(env) in result.stdout:
-        return None, None, 'The environment `{}` does not support this platform.'.format(env)
+    if f'{env}: platform mismatch' in result.stdout:
+        return None, None, f'The environment `{env}` does not support this platform.'
 
     decoded = parse_encoded_config_data(result.stdout)
     if decoded is None:
@@ -32,7 +32,7 @@ def parse_config_from_result(env, result):
     metadata = decoded['metadata']
 
     if config is None:
-        return None, None, 'The environment fixture `{}` did not yield any configuration.'.format(E2E_FIXTURE_NAME)
+        return None, None, f'The environment fixture `{E2E_FIXTURE_NAME}` did not yield any configuration.'
 
     return config, metadata, None
 

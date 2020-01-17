@@ -27,7 +27,7 @@ def construct_output_info(path, depth, last, is_dir=False):
         return u'', path, is_dir
     else:
         if depth == 1:
-            return (u'{}{} '.format(PIPE_END if last else PIPE_MIDDLE, HYPHEN), path, is_dir)
+            return (f'{PIPE_END if last else PIPE_MIDDLE}{HYPHEN} ', path, is_dir)
         else:
             return (
                 u'{}   {}{}'.format(
@@ -104,7 +104,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
 
     integration_dir = os.path.join(root, normalize_package_name(name))
     if os.path.exists(integration_dir):
-        abort('Path `{}` already exists!'.format(integration_dir))
+        abort(f'Path `{integration_dir}` already exists!')
 
     template_fields = {}
     if repo_choice != 'core' and not non_interactive and not dry_run:
@@ -116,7 +116,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     config = construct_template_fields(name, repo_choice, **template_fields)
 
     files = create_template_files(integration_type, root, config, read=not dry_run)
-    file_paths = [file.file_path.replace('{}{}'.format(root, path_sep), '', 1) for file in files]
+    file_paths = [file.file_path.replace(f'{root}{path_sep}', '', 1) for file in files]
 
     path_tree = tree()
     for file_path in file_paths:
@@ -127,9 +127,9 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
 
     if dry_run:
         if quiet:
-            echo_info('Will create `{}`'.format(integration_dir))
+            echo_info(f'Will create `{integration_dir}`')
         else:
-            echo_info('Will create in `{}`:'.format(root))
+            echo_info(f'Will create in `{root}`:')
             display_path_tree(path_tree)
         return
 
@@ -137,7 +137,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         file.write()
 
     if quiet:
-        echo_info('Created `{}`'.format(integration_dir))
+        echo_info(f'Created `{integration_dir}`')
     else:
-        echo_info('Created in `{}`:'.format(root))
+        echo_info(f'Created in `{root}`:')
         display_path_tree(path_tree)
