@@ -89,7 +89,7 @@ instances:
     # spark_proxy_enabled: false
 
     ## @param streaming_metrics - boolean - optional - default: true
-    ## Enable collection of streaming statistics.
+    ## Enable collection of streaming statistics. Spark Structured Streaming metrics are currently not supported.
     #
     # streaming_metrics: true
 
