@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 4.6.1 / 2020-01-17
+
+* [Fixed] Avoid cross instance data sharing. See [#5499](https://github.com/DataDog/integrations-core/pull/5499).
+
 ## 4.6.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
