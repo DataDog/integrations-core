@@ -227,7 +227,6 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
           "dd_message_key": "log",
           "dd_tags": "project:fluentbit",
           "TLS": "on",
-          "Host": "http-intake.logs.datadoghq.com",
           "provider": "ecs"
         }
       }
