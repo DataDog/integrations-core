@@ -346,6 +346,35 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version
     assert aggregator.metrics_asserted_pct == 100.0
 
 
+def test_kubelet_credentials_update(monkeypatch, aggregator):
+    instance = {
+        'kubelet_metrics_endpoint': 'http://10.8.0.1:10255/metrics',
+        'cadvisor_metrics_endpoint': 'http://10.8.0.1:10255/metrics/cadvisor',
+    }
+    check = mock_kubelet_check(monkeypatch, [instance], kube_version=None)
+
+    get = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
+    )
+    with mock.patch('requests.get', return_value=get):
+        check.check(instance)
+
+    assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is True
+    assert check._http_handlers[instance['cadvisor_metrics_endpoint']].options['verify'] is True
+
+    get = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
+    )
+    kubelet_conn_info = {'url': 'http://127.0.0.1:10255', 'ca_cert': False}
+    with mock.patch('requests.get', return_value=get), mock.patch(
+        'datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info
+    ):
+        check.check(instance)
+
+    assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is False
+    assert check._http_handlers[instance['cadvisor_metrics_endpoint']].options['verify'] is False
+
+
 def test_prometheus_cpu_summed(monkeypatch, aggregator, tagger):
     check = mock_kubelet_check(monkeypatch, [{}])
     monkeypatch.setattr(check, 'rate', mock.Mock())

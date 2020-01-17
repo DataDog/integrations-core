@@ -89,9 +89,17 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'black\nisort[pyproject]>=4.3.15',
+        'deps': 'flake8\nblack\nisort[pyproject]>=4.3.15',
         # Run formatter AFTER sorting imports
-        'commands': 'isort --recursive .\nblack .',
+        'commands': '\n'.join(
+            [
+                'isort --recursive .',
+                'black .',
+                'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
+                'these will need to be fixed manually.\')"',
+                'flake8 --config=../.flake8 .',
+            ]
+        ),
     }
 
     # Always add the environment configurations

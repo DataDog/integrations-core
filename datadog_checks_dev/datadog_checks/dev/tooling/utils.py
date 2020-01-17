@@ -148,6 +148,10 @@ def get_metric_sources():
     return {path for path in os.listdir(get_root()) if file_exists(get_metadata_file(path))}
 
 
+def read_metric_data_file(check_name):
+    return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
+
+
 def read_version_file(check_name):
     return read_file(get_version_file(check_name))
 
