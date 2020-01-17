@@ -49,8 +49,6 @@ class HTTPCheck(AgentCheck):
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
 
-        self.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = self.ca_certs
-
     def check(self, instance):
         (
             addr,
