@@ -48,7 +48,10 @@ class Network(AgentCheck):
         if instance is None:
             instance = {}
 
-        self._excluded_ifaces = instance.get('excluded_interfaces', [])
+        if type(instance.get('excluded_interfaces', [])) is list:
+            self._excluded_ifaces = instance.get('excluded_interfaces', [])
+        else:
+            self._excluded_ifaces = []
         self._collect_cx_state = instance.get('collect_connection_state', False)
         self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
         self._collect_count_metrics = instance.get('collect_count_metrics', False)
