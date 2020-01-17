@@ -26,7 +26,9 @@ def test__init__():
 
 def test_instances_do_not_share_data():
     http_check_1 = HTTPCheck('http_check', {'ca_certs': 'foo'}, [{}])
+    http_check_1.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = 'foo'
     http_check_2 = HTTPCheck('http_check', {'ca_certs': 'bar'}, [{}])
+    http_check_2.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = 'bar'
 
     assert http_check_1.HTTP_CONFIG_REMAPPER['ca_certs']['default'] == 'foo'
     assert http_check_2.HTTP_CONFIG_REMAPPER['ca_certs']['default'] == 'bar'

@@ -15,7 +15,7 @@ import requests
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+from datadog_checks.base import AgentCheck, ensure_unicode
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
