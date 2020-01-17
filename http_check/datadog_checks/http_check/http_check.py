@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
+import copy
 import re
 import socket
 import ssl
 import time
 from datetime import datetime
-import copy
 
 import _strptime  # noqa
 import requests
