@@ -24,6 +24,7 @@ E2E_METADATA = {
     ],
 }
 
+
 @pytest.fixture(scope='session')
 def dd_environment():
     with TempDir('snmprec', COMPOSE_DIR) as tmp_dir:
