@@ -128,8 +128,7 @@ class PDHBaseCheck(AgentCheck):
         nr = win32wnet.NETRESOURCE()
 
         # Specifies the network resource to connect to.
-        nr.lpRemoteName = r"\\%s\%s" % (remote_machine, administrative_share)
-        nr.rstrip('\\')
+        nr.lpRemoteName = r"\\{}\{}".format(remote_machine, administrative_share).rstrip('\\')
 
         # The type of network resource to connect to.
         #
