@@ -80,10 +80,10 @@ def test__check_only_custom_queries(check, instance):
     check._get_connection = get_connection
     check.check(instance)
 
-    assert get_sys_metrics.call_count is 0
-    assert get_process_metrics.call_count is 0
-    assert get_tablespace_metrics.call_count is 0
-    assert get_custom_metrics.call_count is 1
+    assert get_sys_metrics.call_count == 0
+    assert get_process_metrics.call_count == 0
+    assert get_tablespace_metrics.call_count == 0
+    assert get_custom_metrics.call_count == 1
 
 
 def test__check_only_custom_queries_not_set(check, instance):
@@ -104,10 +104,10 @@ def test__check_only_custom_queries_not_set(check, instance):
     check._get_connection = get_connection
     check.check(instance)
 
-    assert get_sys_metrics.call_count is 1
-    assert get_process_metrics.call_count is 1
-    assert get_tablespace_metrics.call_count is 1
-    assert get_custom_metrics.call_count is 1
+    assert get_sys_metrics.call_count == 1
+    assert get_process_metrics.call_count == 1
+    assert get_tablespace_metrics.call_count == 1
+    assert get_custom_metrics.call_count == 1
 
 
 def test__check_only_custom_queries_set_false(check, instance):
@@ -127,7 +127,7 @@ def test__check_only_custom_queries_set_false(check, instance):
     check._get_connection = get_connection
     check.check(instance)
 
-    assert get_sys_metrics.call_count is 1
-    assert get_process_metrics.call_count is 1
-    assert get_tablespace_metrics.call_count is 1
-    assert get_custom_metrics.call_count is 1
+    assert get_sys_metrics.call_count == 1
+    assert get_process_metrics.call_count == 1
+    assert get_tablespace_metrics.call_count == 1
+    assert get_custom_metrics.call_count == 1
