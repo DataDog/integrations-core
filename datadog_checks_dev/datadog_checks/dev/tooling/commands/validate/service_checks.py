@@ -162,7 +162,9 @@ def service_checks(sync):
                 for status in statuses:
                     if status not in SERVICE_CHECK_NAMES:
                         file_failed = True
-                        message = '  {}: invalid status `{}`, must be one of `{}`'.format(check, status, SERVICE_CHECK_NAMES)
+                        message = '  {}: invalid status `{}`, must be one of `{}`'.format(
+                            check, status, SERVICE_CHECK_NAMES
+                        )
                         display_queue.append((echo_failure, message))
 
         if file_failed:
