@@ -54,7 +54,6 @@ def service_checks(sync):
         manifest = load_manifest(check_name)
         service_check_relative = manifest.get('assets', {}).get('service_checks', '')
         service_checks_file = os.path.join(root, check_name, *service_check_relative.split('/'))
-        manifest_file = os.path.join(root, check_name, 'manifest.json')
 
         if not file_exists(service_checks_file):
             echo_info('{}/service_checks.json... '.format(check_name), nl=False)
@@ -72,15 +71,9 @@ def service_checks(sync):
             echo_failure('  invalid json: {}'.format(e))
             continue
 
-        try:
-            decoded_manifest = json.loads(read_file(manifest_file).strip())
-        except JSONDecodeError as e:
-            echo_failure('Failed to read manifest file: {}: {}'.format(manifest_file, e))
-            continue
-
         if sync:
             for service_check in service_checks_data:
-                new_name = CHECK_TO_NAME.get(check_name, decoded_manifest['display_name'])
+                new_name = CHECK_TO_NAME.get(check_name, manifest['display_name'])
                 service_check['integration'] = new_name
             write_file(service_checks_file, json.dumps(service_checks_data, indent=4) + '\n')
 
@@ -138,7 +131,7 @@ def service_checks(sync):
             if integration is None or not isinstance(integration, string_types):
                 file_failed = True
                 display_queue.append((echo_failure, '  required non-null string: integration'))
-            expected_integration_name = CHECK_TO_NAME.get(check_name, decoded_manifest['display_name'])
+            expected_integration_name = CHECK_TO_NAME.get(check_name, manifest['display_name'])
             if integration != expected_integration_name:
                 file_failed = True
                 message = '  integration name `{}` must match with manifest display_name `{}`'.format(
