@@ -10,7 +10,13 @@ import requests
 
 from datadog_checks.dev import TempDir, docker_run
 
-from .common import COMPOSE_DIR, SCALAR_OBJECTS, SCALAR_OBJECTS_WITH_TAGS, TABULAR_OBJECTS, generate_instance_config
+from .common import (
+    COMPOSE_DIR,
+    SCALAR_OBJECTS,
+    SCALAR_OBJECTS_WITH_TAGS,
+    TABULAR_OBJECTS,
+    generate_container_instance_config,
+)
 
 FILES = [
     "https://ddintegrations.blob.core.windows.net/snmp/f5.snmprec",
@@ -38,4 +44,6 @@ def dd_environment():
                     output.write(response.content)
 
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
-            yield generate_instance_config(SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS), E2E_METADATA
+            yield generate_container_instance_config(
+                SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
+            ), E2E_METADATA
