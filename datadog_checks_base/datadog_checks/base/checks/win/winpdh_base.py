@@ -106,7 +106,7 @@ class PDHBaseCheck(AgentCheck):
             raise AttributeError('No valid counters to collect')
 
     def _get_netresource(self, remote_machine):
-        # To connect you have to use the name of the server followed by an administrative share.
+        # To connect you have to use the name of the server followed by an optional administrative share.
         # Administrative shares are hidden network shares created that allow system administrators to have remote access
         # to every disk volume on a network-connected system.
         # These shares may not be permanently deleted but may be disabled.
@@ -121,13 +121,15 @@ class PDHBaseCheck(AgentCheck):
         # * ipc$: Area used for interprocess communication and is not part of the file system.
         # * print$: Virtual folder that contains a representation of the installed printers
         # * Domain controller shares: Windows creates two domain controller specific shares called sysvol and netlogon
-        # which do not have $ appended to their names.
+        #   which do not have $ appended to their names.
+        # * Empty string: No admin share specified
         administrative_share = self.instance.get('admin_share', DEFAULT_SHARE)
 
         nr = win32wnet.NETRESOURCE()
 
         # Specifies the network resource to connect to.
         nr.lpRemoteName = r"\\%s\%s" % (remote_machine, administrative_share)
+        nr.rstrip('\\')
 
         # The type of network resource to connect to.
         #

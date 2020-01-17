@@ -109,3 +109,13 @@ def test_custom_admin_share():
     c = PDHBaseCheck("testcheck", {}, {}, [instance], SINGLE_INSTANCE_COUNTER)
     nr = c._get_netresource('1.2.3.4')
     assert nr.lpRemoteName == '\\\\1.2.3.4\\ipc$'
+
+
+@requires_windows
+def test_no_admin_share():
+    initialize_pdh_tests()
+    instance = copy.deepcopy(DEFAULT_INSTANCE)
+    instance['admin_share'] = ''
+    c = PDHBaseCheck("testcheck", {}, {}, [instance], SINGLE_INSTANCE_COUNTER)
+    nr = c._get_netresource('1.2.3.4')
+    assert nr.lpRemoteName == '\\\\1.2.3.4'
