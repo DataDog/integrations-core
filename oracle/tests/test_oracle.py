@@ -86,7 +86,7 @@ def test__check_only_custom_queries(check, instance):
     assert get_custom_metrics.call_count is 1
 
 
-def test__check_custom_queries_not_set(check, instance):
+def test__check_only_custom_queries_not_set(check, instance):
     """
     Test the default metrics are called when only_custom queries is not set
     """
@@ -110,7 +110,7 @@ def test__check_custom_queries_not_set(check, instance):
     assert get_custom_metrics.call_count is 1
 
 
-def test__check_custom_queries_set_false(check, instance):
+def test__check_only_custom_queries_set_false(check, instance):
     """
     Test the default metrics are called when only_custom queries is set to False
     """
