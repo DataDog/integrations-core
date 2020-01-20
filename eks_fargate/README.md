@@ -347,7 +347,7 @@ Need help? Contact [Datadog support][20].
 [12]: http://docs.datadoghq.com/integrations/kubernetes
 [13]: https://app.datadoghq.com/account/settings#api
 [14]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[15]: https://docs.datadoghq.com//integrations/#cat-autodiscovery
+[15]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
 [16]: https://docs.datadoghq.com/developers/dogstatsd
 [17]: http://docs.datadoghq.com/tracing/setup
 [18]: http://docs.datadoghq.com/agent/cluster_agent/setup
