@@ -6,7 +6,8 @@
   "metric_prefix": "eks.fargate.",
   "metric_to_check": "eks.fargate.pods.running",
   "creates_events": false,
-  "short_description": "submits a heartbeat metric for Amazon EKS on AWS Fargate workloads",
+  "short_description": "Collect your Amazon EKS metrics, traces, and logs.",
+  "description": "Collect your Amazon EKS metrics, traces, and logs.",
   "guid": "e9e58fb9-696b-4e3c-9058-c144a1d9a737",
   "support": "core",
   "supported_os": [
@@ -14,7 +15,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-eks_fargate Integration",
+  "public_title": "Datadog-EKS fargate Integration",
   "categories": [
     "cloud",
     "aws",
@@ -24,7 +25,7 @@
     "/integrations/amazon_eks_fargate/"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "eks-fargate",
   "assets": {
     "dashboards": {},
