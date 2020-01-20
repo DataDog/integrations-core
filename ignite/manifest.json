@@ -1,0 +1,30 @@
+{
+  "display_name": "ignite",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "ignite",
+  "metric_prefix": "ignite.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "fd5a21d5-ddfe-4d04-855f-28492b4d270e",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-ignite Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "ignite",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
