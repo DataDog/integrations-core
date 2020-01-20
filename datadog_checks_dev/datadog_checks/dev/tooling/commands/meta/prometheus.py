@@ -9,7 +9,7 @@ import click
 import pyperclip
 import requests
 
-from ....utils import dir_exists, ensure_unicode, path_join, write_file_lines
+from ....utils import dir_exists, path_join, write_file_lines
 from ...constants import get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
@@ -170,16 +170,12 @@ def parse(ctx, endpoint, check, here):
             echo_waiting(options_prompt, nl=False)
 
             if num_options >= 9:
-                choice = ensure_unicode(input())
+                choice = input()
             else:
                 # Terminals are odd and sometimes produce an erroneous null byte
                 choice = '\x00'
                 while choice == '\x00':
                     choice = click.getchar().strip()
-                    try:
-                        choice = ensure_unicode(choice)
-                    except UnicodeDecodeError:
-                        choice = repr(choice)
 
             if not choice:
                 choice = default_option

@@ -7,7 +7,7 @@ import click
 from semver import parse_version_info
 
 from ....subprocess import run_command
-from ....utils import basepath, chdir, ensure_unicode, get_next
+from ....utils import basepath, chdir, get_next
 from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ...trello import TrelloClient
@@ -288,10 +288,6 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             choice = '\x00'
             while choice == '\x00':
                 choice = click.getchar().strip()
-                try:
-                    choice = ensure_unicode(choice)
-                except UnicodeDecodeError:
-                    choice = repr(choice)
 
             if not choice:
                 choice = default_option
