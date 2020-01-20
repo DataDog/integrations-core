@@ -1,10 +1,15 @@
 [
     {
         "agent_version": "6.0.0",
-        "integration":"crio",
+        "integration": "CRI-O",
         "check": "crio.prometheus.health",
-        "statuses": ["ok", "critical"],
-        "groups": ["endpoint"],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "endpoint"
+        ],
         "name": "CRI-O prometheus health",
         "description": "Returns `CRITICAL` if the check can't access the metrics endpoint."
     }
