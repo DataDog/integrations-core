@@ -2,7 +2,7 @@
   "display_name": "EKS Fargate",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "name": "EKS Fargate",
+  "name": "eks_fargate",
   "metric_prefix": "eks.fargate.",
   "metric_to_check": "eks.fargate.pods.running",
   "creates_events": false,
