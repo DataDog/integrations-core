@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import unicode_literals
-
 import re
 
 from ..._env import E2E_FIXTURE_NAME, deserialize_data

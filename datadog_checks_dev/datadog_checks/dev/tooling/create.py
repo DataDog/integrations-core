@@ -29,7 +29,7 @@ def get_valid_templates():
 
 def construct_template_fields(integration_name, repo_choice, **kwargs):
     normalized_integration_name = normalize_package_name(integration_name)
-    check_name_kebab = re.sub('_', '-', integration_name.lower())
+    check_name_kebab = re.sub('_| ', '-', integration_name.lower())
 
     if repo_choice == 'core':
         author = 'Datadog'
