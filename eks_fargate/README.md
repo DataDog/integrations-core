@@ -140,7 +140,7 @@ spec:
 
 ### Integration metrics
 ​
-Use [Autodiscovery labels with your application container][1] to start collecting its metrics for the [supported Agent integrations][2].
+Use [Autodiscovery labels with your application container][14] to start collecting its metrics for the [supported Agent integrations][15].
 ​
 ```yaml
 apiVersion: apps/v1
@@ -190,15 +190,11 @@ spec:
             cpu: "200m"
 ```
 
-**Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][3].
-
-[1]: /agent/autodiscovery/integrations
-[2]: /integrations/#cat-autodiscovery
-[3]: https://app.datadoghq.com/account/settings#api
+**Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
 ### DogStatsD
 
-Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][1] from your application container to Datadog.
+Set up the container port `8125` over your Agent container to forward [DogStatsD metrics][16] from your application container to Datadog.
 
 ```yaml
 apiVersion: apps/v1
@@ -249,14 +245,11 @@ spec:
             cpu: "200m"
 ```
 
-**Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][2].
-
-[1]: /developers/dogstatsd
-[2]: https://app.datadoghq.com/account/settings#api
+**Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
 ## Traces Collection
 
-Set up the container port `8126` over your Agent container to collect traces from your application container. [Read more about how to set up tracing][14].
+Set up the container port `8126` over your Agent container to collect traces from your application container. [Read more about how to set up tracing][17].
 
 ```yaml
 apiVersion: apps/v1
@@ -315,8 +308,8 @@ spec:
 
 To collect events from your AWS EKS Fargate API server, run a Datadog Cluster Agent over an AWS EKS EC2 pod within your Kubernetes cluster:
 
-1. [Setup the Datadog Cluster Agent][15].
-2. [Enable Event collection for your Cluster Agent][16].
+1. [Setup the Datadog Cluster Agent][18].
+2. [Enable Event collection for your Cluster Agent][19].
 
 Optionally, deploy cluster check runners in addition to setting up the Datadog Cluster Agent to enable cluster checks.
 
@@ -338,7 +331,7 @@ eks_fargate does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][17].
+Need help? Contact [Datadog support][20].
 
 [1]: http://docs.datadoghq.com//integrations/amazon_eks/
 [2]: http://docs.datadoghq.com//integrations/system
@@ -353,7 +346,10 @@ Need help? Contact [Datadog support][17].
 [11]: https://app.datadoghq.com/account/settings#integrations/amazon-ec2
 [12]: http://docs.datadoghq.com/integrations/kubernetes
 [13]: https://app.datadoghq.com/account/settings#api
-[14]: http://docs.datadoghq.com/tracing/setup
-[15]: http://docs.datadoghq.com/agent/cluster_agent/setup
-[16]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
-[17]: https://docs.datadoghq.com/help
+[14]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[15]: https://docs.datadoghq.com//integrations/#cat-autodiscovery
+[16]: https://docs.datadoghq.com/developers/dogstatsd
+[17]: http://docs.datadoghq.com/tracing/setup
+[18]: http://docs.datadoghq.com/agent/cluster_agent/setup
+[19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
+[20]: https://docs.datadoghq.com/help
