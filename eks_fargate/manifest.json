@@ -16,7 +16,12 @@
   ],
   "public_title": "Datadog-eks_fargate Integration",
   "categories": [
-    ""
+    "cloud",
+    "aws",
+    "log collection"
+  ],
+  "aliases": [
+    "/integrations/amazon_eks_fargate/"
   ],
   "type": "check",
   "is_public": false,
