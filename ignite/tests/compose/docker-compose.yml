@@ -1,0 +1,11 @@
+version: '3'
+services:
+  ignite:
+    container_name: dd-ignite
+    image: apacheignite/ignite
+    environment:
+     - CONFIG_URI=file:///config.xml
+    ports:
+     - 49112:49112
+    volumes:
+     - ${CONFIG_FILE}:/config.xml
