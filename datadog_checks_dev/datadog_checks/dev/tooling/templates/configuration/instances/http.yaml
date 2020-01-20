@@ -69,8 +69,8 @@
         |__ aws_host
         |__ aws_service
 
-    `aws` auth type relies on boto to automatically gather AWS credentials (e.g. from .aws/credentials), see details
-    here: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+    The `aws` auth type relies on boto3 to automatically gather AWS credentials (e.g. from `.aws/credentials`).
+    Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
 
 - name: username
   value:
