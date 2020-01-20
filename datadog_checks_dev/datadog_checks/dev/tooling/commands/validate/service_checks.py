@@ -17,8 +17,6 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 REQUIRED_ATTRIBUTES = {'agent_version', 'check', 'description', 'groups', 'integration', 'name', 'statuses'}
 SERVICE_CHECK_NAMES = ['ok', 'warning', 'critical', 'unknown']
 
-root = get_root()
-
 # Some integration have custom display name
 # Mapping value must present in: source.SourceType.FROM_DISPLAY_NAME
 CHECK_TO_NAME = {
@@ -45,6 +43,7 @@ CHECK_TO_NAME = {
 @click.option('--sync', is_flag=True, help='Generate example configuration files based on specifications')
 def service_checks(sync):
     """Validate all `service_checks.json` files."""
+    root = get_root()
     echo_info("Validating all service_checks.json files...")
     failed_checks = 0
     ok_checks = 0
