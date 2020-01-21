@@ -147,7 +147,7 @@ Use the default configuration of your `airflow.d/conf.yaml` file to activate the
 
 **Available for Agent >6.0**
 
-1. Collecting logs is disabled by default in the Datadog Agent, enable it in your datadog.yaml file:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
     ```yaml
       logs_enabled: true
