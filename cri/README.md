@@ -16,7 +16,7 @@ Note that if you're using the agent in a container, setting `DD_CRI_SOCKET_PATH`
 
 #### Installation on containers
 
-If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable to the CRI socket automatically enables the `CRI` Check with the default configuration.
+If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable to the CRI socket automatically enables the `CRI` integration with the default configuration.
 
 For example, to install the integration on Kubernetes, edit your daemonset to mount the CRI socket from the host node to the agent container and set the `DD_CRI_SOCKET_PATH` env var to the daemonset mountPath:
 
@@ -46,10 +46,10 @@ spec:
               name: crisocket
             - hostPath:
                 path: /var/run
-              type: DirectoryOrCreate
+              name: var-run
 ```
 
-Note: The `/var/run` directory needs to be mounted from the host or created, to run the integration without any issues.
+**Note:** The `/var/run` directory must be mounted from the host to run the integration without issues.
 
 ### Configuration
 
