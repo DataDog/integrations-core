@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
@@ -143,6 +144,8 @@ SPARK_STREAMING_STATISTICS_METRICS = {
     'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT),
 }
 
+PROXY_WITH_DIFFERENT_USER_WARNING = re.compile(r'<html>.*<a href="(.*)">.*</html>')
+
 
 class SparkCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
@@ -150,6 +153,15 @@ class SparkCheck(AgentCheck):
         'ssl_cert': {'name': 'tls_cert'},
         'ssl_key': {'name': 'tls_private_key'},
     }
+
+    def __init__(self, name, init_config, instances):
+        super(SparkCheck, self).__init__(name, init_config, instances)
+
+        # Spark proxy may display an html warning page, which redirects to the same url with the additional
+        # `proxyapproved=true` GET param.
+        # This flag is set to True the first time the spark proxy answers with the warning-redirect page
+        # to prevent making twice the number of queries.
+        self.follows_proxy_redirects = False
 
     def check(self, instance):
         # Get additional tags from the conf file
@@ -626,6 +638,10 @@ class SparkCheck(AgentCheck):
             for directory in args:
                 url = self._join_url_dir(url, directory)
 
+        # Add proxyenabled=True if self.follows_proxy_redirects
+        if self.follows_proxy_redirects:
+            kwargs["proxyapproved"] = 'true'
+
         # Add kwargs as arguments
         if kwargs:
             query = '&'.join(['{0}={1}'.format(key, value) for key, value in iteritems(kwargs)])
@@ -634,8 +650,24 @@ class SparkCheck(AgentCheck):
         try:
             self.log.debug('Spark check URL: %s', url)
             response = self.http.get(url)
-
             response.raise_for_status()
+
+            redirect_link = PROXY_WITH_DIFFERENT_USER_WARNING.match(response.text)
+            if redirect_link:
+                if not self.http.persist_connections:
+                    raise ConfigurationError(
+                        "The spark proxy answered with a warning page. To overcome the warning, the integration needs "
+                        "to store a cookie, which can only be done by setting `persist_connections: true` in your"
+                        "configuration. Please update this value to collect spark metrics."
+                    )
+                self.follows_proxy_redirects = True
+                # When using a proxy and the remote user is different that the current user
+                # spark will display an html warning page.
+                # This page displays a redirect link (which appends `proxyapproved=true`) and also
+                # sets a cookie to the current http session. Let's follow the link.
+                # https://github.com/apache/hadoop/blob/2064ca015d1584263aac0cc20c60b925a3aff612/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-web-proxy/src/main/java/org/apache/hadoop/yarn/server/webproxy/WebAppProxyServlet.java#L368
+                response = self.http.get(redirect_link)
+                response.raise_for_status()
 
         except Timeout as e:
             self.service_check(

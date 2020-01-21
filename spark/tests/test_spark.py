@@ -15,6 +15,7 @@ from six import iteritems
 from six.moves import BaseHTTPServer
 from six.moves.urllib.parse import parse_qsl, unquote_plus, urljoin, urlparse
 
+from datadog_checks.base import ensure_unicode
 from datadog_checks.spark import SparkCheck
 
 from .common import HOST, INSTANCE_DRIVER, INSTANCE_STANDALONE
@@ -157,6 +158,10 @@ def yarn_requests_get_mock(*args, **kwargs):
             self.json_data = json_data
             self.status_code = status_code
 
+        @property
+        def text(self):
+            return ensure_unicode(self.json_data)
+
         def json(self):
             return json.loads(self.json_data)
 
@@ -218,6 +223,10 @@ def mesos_requests_get_mock(*args, **kwargs):
             self.json_data = json_data
             self.status_code = status_code
 
+        @property
+        def text(self):
+            return ensure_unicode(self.json_data)
+
         def json(self):
             return json.loads(self.json_data)
 
@@ -267,6 +276,10 @@ def driver_requests_get_mock(*args, **kwargs):
         def __init__(self, json_data, status_code):
             self.json_data = json_data
             self.status_code = status_code
+
+        @property
+        def text(self):
+            return ensure_unicode(self.json_data)
 
         def json(self):
             return json.loads(self.json_data)
@@ -319,7 +332,10 @@ def standalone_requests_get_mock(*args, **kwargs):
         def __init__(self, json_data, status_code):
             self.json_data = json_data
             self.status_code = status_code
-            self.text = json_data
+
+        @property
+        def text(self):
+            return ensure_unicode(self.json_data)
 
         def json(self):
             return json.loads(self.json_data)
@@ -377,7 +393,10 @@ def standalone_requests_pre20_get_mock(*args, **kwargs):
         def __init__(self, json_data, status_code):
             self.json_data = json_data
             self.status_code = status_code
-            self.text = json_data
+
+        @property
+        def text(self):
+            return ensure_unicode(self.json_data)
 
         def json(self):
             return json.loads(self.json_data)
