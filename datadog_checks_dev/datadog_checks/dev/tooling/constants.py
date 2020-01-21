@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import OrderedDict
 
 import semver
 
@@ -13,23 +12,21 @@ INTEGRATION_REPOS = [
     'integrations-extras',
     'integrations-internal',
 ]
-VERSION_BUMP = OrderedDict(
-    [
-        ('Added', semver.bump_minor),
-        ('Changed', semver.bump_major),
-        ('Deprecated', semver.bump_minor),
-        ('Fixed', semver.bump_patch),
-        ('Removed', semver.bump_major),
-        ('Security', semver.bump_minor),
-        ('major', semver.bump_major),
-        ('minor', semver.bump_minor),
-        ('patch', semver.bump_patch),
-        ('fix', semver.bump_patch),
-        ('rc', lambda v: semver.bump_prerelease(v, 'rc')),
-        ('alpha', lambda v: semver.bump_prerelease(v, 'alpha')),
-        ('beta', lambda v: semver.bump_prerelease(v, 'beta')),
-    ]
-)
+VERSION_BUMP = {
+    'Added': semver.bump_minor,
+    'Changed': semver.bump_major,
+    'Deprecated': semver.bump_minor,
+    'Fixed': semver.bump_patch,
+    'Removed': semver.bump_major,
+    'Security': semver.bump_minor,
+    'major': semver.bump_major,
+    'minor': semver.bump_minor,
+    'patch': semver.bump_patch,
+    'fix': semver.bump_patch,
+    'rc': lambda v: semver.bump_prerelease(v, 'rc'),
+    'alpha': lambda v: semver.bump_prerelease(v, 'alpha'),
+    'beta': lambda v: semver.bump_prerelease(v, 'beta'),
+}
 
 AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'ntp'}
 

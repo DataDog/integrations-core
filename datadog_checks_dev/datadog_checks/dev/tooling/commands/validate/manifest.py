@@ -5,12 +5,9 @@ import json
 import os
 import re
 import uuid
-from collections import OrderedDict
 
 import click
-from six import string_types
 
-from ....compat import JSONDecodeError
 from ....utils import file_exists, read_file, write_file
 from ...constants import get_root
 from ...utils import parse_version_parts
@@ -76,44 +73,44 @@ def manifest(ctx, fix, include_extras):
             file_fixed = False
 
             try:
-                decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
-            except JSONDecodeError as e:
+                decoded = json.loads(read_file(manifest_file).strip())
+            except json.JSONDecodeError as e:
                 failed_checks += 1
-                echo_info("{}/manifest.json... ".format(check_name), nl=False)
+                echo_info(f"{check_name}/manifest.json... ", nl=False)
                 echo_failure("FAILED")
-                echo_failure('  invalid json: {}'.format(e))
+                echo_failure(f'  invalid json: {e}')
                 continue
 
             # attributes are valid
             attrs = set(decoded)
             for attr in sorted(attrs - ALL_ATTRIBUTES):
                 file_failures += 1
-                display_queue.append((echo_failure, '  Attribute `{}` is invalid'.format(attr)))
+                display_queue.append((echo_failure, f'  Attribute `{attr}` is invalid'))
             for attr in sorted(REQUIRED_ATTRIBUTES - attrs):
                 file_failures += 1
-                display_queue.append((echo_failure, '  Attribute `{}` is required'.format(attr)))
+                display_queue.append((echo_failure, f'  Attribute `{attr}` is required'))
             for attr in sorted(REQUIRED_ASSET_ATTRIBUTES - set(decoded.get('assets', {}))):
                 file_failures += 1
-                display_queue.append((echo_failure, ' Attribute `{}` under `assets` is required'.format(attr)))
+                display_queue.append((echo_failure, f' Attribute `{attr}` under `assets` is required'))
 
             # guid
             guid = decoded.get('guid')
             if guid in all_guids:
                 file_failures += 1
-                output = '  duplicate `guid`: `{}` from `{}`'.format(guid, all_guids[guid])
+                output = f'  duplicate `guid`: `{guid}` from `{all_guids[guid]}`'
                 if fix:
                     new_guid = uuid.uuid4()
                     all_guids[new_guid] = check_name
                     decoded['guid'] = new_guid
 
                     display_queue.append((echo_warning, output))
-                    display_queue.append((echo_success, '  new `guid`: {}'.format(new_guid)))
+                    display_queue.append((echo_success, f'  new `guid`: {new_guid}'))
 
                     file_failures -= 1
                     file_fixed = True
                 else:
                     display_queue.append((echo_failure, output))
-            elif not guid or not isinstance(guid, string_types):
+            elif not guid or not isinstance(guid, str):
                 file_failures += 1
                 output = '  required non-null string: guid'
                 if fix:
@@ -122,7 +119,7 @@ def manifest(ctx, fix, include_extras):
                     decoded['guid'] = new_guid
 
                     display_queue.append((echo_warning, output))
-                    display_queue.append((echo_success, '  new `guid`: {}'.format(new_guid)))
+                    display_queue.append((echo_success, f'  new `guid`: {new_guid}'))
 
                     file_failures -= 1
                     file_fixed = True
@@ -141,16 +138,14 @@ def manifest(ctx, fix, include_extras):
                 if not manifest_version:
                     output = '  required non-null string: manifest_version'
                 else:
-                    output = '  invalid `manifest_version`: {}'.format(manifest_version)
+                    output = f'  invalid `manifest_version`: {manifest_version}'
 
                 if fix:
                     version_parts = parse_version_parts(correct_manifest_version)
                     decoded['manifest_version'] = correct_manifest_version
 
                     display_queue.append((echo_warning, output))
-                    display_queue.append(
-                        (echo_success, '  new `manifest_version`: {}'.format(correct_manifest_version))
-                    )
+                    display_queue.append((echo_success, f'  new `manifest_version`: {correct_manifest_version}'))
 
                     file_failures -= 1
                     file_fixed = True
@@ -179,15 +174,13 @@ def manifest(ctx, fix, include_extras):
 
                 elif about_exists:
                     file_failures += 1
-                    output = '  outdated `manifest_version`: {}'.format(manifest_version)
+                    output = f'  outdated `manifest_version`: {manifest_version}'
 
                     if fix:
                         decoded['manifest_version'] = correct_manifest_version
 
                         display_queue.append((echo_warning, output))
-                        display_queue.append(
-                            (echo_success, '  new `manifest_version`: {}'.format(correct_manifest_version))
-                        )
+                        display_queue.append((echo_success, f'  new `manifest_version`: {correct_manifest_version}'))
 
                         if 'version' in decoded:
                             del decoded['version']
@@ -206,7 +199,7 @@ def manifest(ctx, fix, include_extras):
                         if not version:
                             display_queue.append((echo_failure, '  required non-null string: version'))
                         else:
-                            display_queue.append((echo_failure, '  invalid `version`: {}'.format(version)))
+                            display_queue.append((echo_failure, f'  invalid `version`: {version}'))
 
             # integration_id
             integration_id = decoded.get('integration_id')
@@ -221,13 +214,13 @@ def manifest(ctx, fix, include_extras):
                 maintainer = decoded.get('maintainer')
                 if maintainer != correct_maintainer:
                     file_failures += 1
-                    output = '  incorrect `maintainer`: {}'.format(maintainer)
+                    output = f'  incorrect `maintainer`: {maintainer}'
 
                     if fix:
                         decoded['maintainer'] = correct_maintainer
 
                         display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, '  new `maintainer`: {}'.format(correct_maintainer)))
+                        display_queue.append((echo_success, f'  new `maintainer`: {correct_maintainer}'))
 
                         file_failures -= 1
                         file_fixed = True
@@ -237,15 +230,15 @@ def manifest(ctx, fix, include_extras):
             # name
             correct_name = check_name
             name = decoded.get('name')
-            if not isinstance(name, string_types) or name.lower() != correct_name.lower():
+            if not isinstance(name, str) or name.lower() != correct_name.lower():
                 file_failures += 1
-                output = '  incorrect `name`: {}'.format(name)
+                output = f'  incorrect `name`: {name}'
 
                 if fix:
                     decoded['name'] = correct_name
 
                     display_queue.append((echo_warning, output))
-                    display_queue.append((echo_success, '  new `name`: {}'.format(correct_name)))
+                    display_queue.append((echo_success, f'  new `name`: {correct_name}'))
 
                     file_failures -= 1
                     file_fixed = True
@@ -254,7 +247,7 @@ def manifest(ctx, fix, include_extras):
 
             # short_description
             short_description = decoded.get('short_description')
-            if not short_description or not isinstance(short_description, string_types):
+            if not short_description or not isinstance(short_description, str):
                 file_failures += 1
                 display_queue.append((echo_failure, '  required non-null string: short_description'))
             if len(short_description) > 80:
@@ -266,13 +259,13 @@ def manifest(ctx, fix, include_extras):
             support = decoded.get('support')
             if support != correct_support:
                 file_failures += 1
-                output = '  incorrect `support`: {}'.format(support)
+                output = f'  incorrect `support`: {support}'
 
                 if fix:
                     decoded['support'] = correct_support
 
                     display_queue.append((echo_warning, output))
-                    display_queue.append((echo_success, '  new `support`: {}'.format(correct_support)))
+                    display_queue.append((echo_success, f'  new `support`: {correct_support}'))
 
                     file_failures -= 1
                     file_fixed = True
@@ -290,13 +283,11 @@ def manifest(ctx, fix, include_extras):
                     unknown_systems = sorted(set(supported_os) - known_systems)
                     if unknown_systems:
                         file_failures += 1
-                        display_queue.append(
-                            (echo_failure, '  unknown `supported_os`: {}'.format(', '.join(unknown_systems)))
-                        )
+                        display_queue.append((echo_failure, f"  unknown `supported_os`: {', '.join(unknown_systems)}"))
 
                 # public_title
                 public_title = decoded.get('public_title')
-                if not public_title or not isinstance(public_title, string_types):
+                if not public_title or not isinstance(public_title, str):
                     file_failures += 1
                     display_queue.append((echo_failure, '  required non-null string: public_title'))
                 else:
@@ -312,7 +303,7 @@ def manifest(ctx, fix, include_extras):
 
                     if not (correct_start and correct_end and overlap_enough):
                         file_failures += 1
-                        display_queue.append((echo_failure, '  invalid `public_title`: {}'.format(public_title)))
+                        display_queue.append((echo_failure, f'  invalid `public_title`: {public_title}'))
 
                 # categories
                 categories = decoded.get('categories')
@@ -323,13 +314,13 @@ def manifest(ctx, fix, include_extras):
                 # type
                 correct_integration_types = ['check', 'crawler']
                 integration_type = decoded.get('type')
-                if not integration_type or not isinstance(integration_type, string_types):
+                if not integration_type or not isinstance(integration_type, str):
                     file_failures += 1
                     output = '  required non-null string: type'
                     display_queue.append((echo_failure, output))
                 elif integration_type not in correct_integration_types:
                     file_failures += 1
-                    output = '  invalid `type`: {}'.format(integration_type)
+                    output = f'  invalid `type`: {integration_type}'
                     display_queue.append((echo_failure, output))
 
                 # is_public
@@ -343,7 +334,7 @@ def manifest(ctx, fix, include_extras):
                         decoded['is_public'] = correct_is_public
 
                         display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, '  new `is_public`: {}'.format(correct_is_public)))
+                        display_queue.append((echo_success, f'  new `is_public`: {correct_is_public}'))
 
                         file_failures -= 1
                         file_fixed = True
@@ -353,7 +344,7 @@ def manifest(ctx, fix, include_extras):
             if file_failures > 0:
                 failed_checks += 1
                 # Display detailed info if file invalid
-                echo_info("{}/manifest.json... ".format(check_name), nl=False)
+                echo_info(f"{check_name}/manifest.json... ", nl=False)
                 echo_failure("FAILED")
                 for display_func, message in display_queue:
                     display_func(message)
@@ -361,20 +352,20 @@ def manifest(ctx, fix, include_extras):
                 ok_checks += 1
 
             if fix and file_fixed:
-                new_manifest = '{}\n'.format(json.dumps(decoded, indent=2, separators=(',', ': ')))
+                new_manifest = f"{json.dumps(decoded, indent=2, separators=(',', ': '))}\n"
                 write_file(manifest_file, new_manifest)
                 # Display detailed info if file has been completely fixed
                 if file_failures == 0:
                     fixed_checks += 1
-                    echo_info("{}/manifest.json... ".format(check_name), nl=False)
+                    echo_info(f"{check_name}/manifest.json... ", nl=False)
                     echo_success("FIXED")
                     for display_func, message in display_queue:
                         display_func(message)
 
     if ok_checks:
-        echo_success("{} valid files".format(ok_checks))
+        echo_success(f"{ok_checks} valid files")
     if fixed_checks:
-        echo_info("{} fixed files".format(fixed_checks))
+        echo_info(f"{fixed_checks} fixed files")
     if failed_checks:
-        echo_failure("{} invalid files".format(failed_checks))
+        echo_failure(f"{failed_checks} invalid files")
         abort()

@@ -8,3 +8,4 @@ services:
     command: --args-from-file=/usr/snmpsim/data/args_list.txt
     volumes:
       - ${DATA_DIR}:/usr/snmpsim/data/
+    container_name: dd-snmp

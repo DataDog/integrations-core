@@ -68,8 +68,7 @@ def get_pr(pr_num, config=None, raw=False):
 
 def get_pr_from_hash(commit_hash, repo, config=None, raw=False):
     response = requests.get(
-        'https://api.github.com/search/issues?q=sha:{}+repo:DataDog/{}'.format(commit_hash, repo),
-        auth=get_auth_info(config),
+        f'https://api.github.com/search/issues?q=sha:{commit_hash}+repo:DataDog/{repo}', auth=get_auth_info(config),
     )
 
     if raw:

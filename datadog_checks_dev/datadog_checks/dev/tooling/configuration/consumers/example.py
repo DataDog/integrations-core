@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import OrderedDict
+from io import StringIO
 
 import yaml
-from six import StringIO
 
 DESCRIPTION_LINE_LENGTH_LIMIT = 120
 
@@ -47,7 +46,7 @@ def value_type_string(value):
         elif item_type == 'array':
             return 'list of lists'
         else:
-            return 'list of {}s'.format(item_type)
+            return f'list of {item_type}s'
     else:
         return value_type
 
@@ -58,7 +57,7 @@ def write_description(option, writer, indent, option_type):
     if deprecation:
         description += '\n\n<<< DEPRECATED >>>\n\n'
         for key, info in option['deprecation'].items():
-            key_part = '{}: '.format(key)
+            key_part = f'{key}: '
             info_pad = ' ' * len(key_part)
             description += key_part
 
@@ -66,11 +65,11 @@ def write_description(option, writer, indent, option_type):
                 if i > 0:
                     description += info_pad
 
-                description += '{}\n'.format(line)
+                description += f'{line}\n'
 
     for line in description.splitlines():
         if line:
-            line = '{}## {}'.format(indent, line)
+            line = f'{indent}## {line}'
             if len(line) > DESCRIPTION_LINE_LENGTH_LIMIT:
                 extra_characters = len(line) - DESCRIPTION_LINE_LENGTH_LIMIT
                 writer.new_error(
@@ -180,7 +179,7 @@ class ExampleConsumer(object):
         self.spec = spec
 
     def render(self):
-        files = OrderedDict()
+        files = {}
 
         for file in self.spec['files']:
             with OptionWriter() as writer:

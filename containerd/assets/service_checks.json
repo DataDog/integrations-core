@@ -1,10 +1,15 @@
 [
     {
         "agent_version": "6.9.0",
-        "integration":"containerd",
+        "integration": "Containerd",
         "check": "containerd.health",
-        "statuses": ["ok", "critical"],
-        "groups": ["host"],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host"
+        ],
         "name": "Health",
         "description": "Returns `CRITICAL` if the Agent check is unable to connect to the monitored containerd socket. Returns `OK` otherwise."
     }

@@ -4,7 +4,6 @@
 import os
 
 import click
-from six import itervalues
 
 from ...utils import write_file_lines
 from ..constants import REQUIREMENTS_IN, get_agent_requirements, get_root
@@ -30,22 +29,22 @@ def display_package_changes(pre_packages, post_packages, indent=''):
             changed.append((pre_package_names[package_name], post_package_names[package_name]))
 
     if not (added or removed or changed):
-        echo_info('{}No changes'.format(indent))
+        echo_info(f'{indent}No changes')
 
     if added:
-        echo_success('{}Added packages:'.format(indent))
+        echo_success(f'{indent}Added packages:')
         for package_name in sorted(added):
-            echo_info('{}    {}'.format(indent, post_package_names[package_name]))
+            echo_info(f'{indent}    {post_package_names[package_name]}')
 
     if removed:
-        echo_failure('{}Removed packages:'.format(indent))
+        echo_failure(f'{indent}Removed packages:')
         for package_name in sorted(removed):
-            echo_info('{}    {}'.format(indent, pre_package_names[package_name]))
+            echo_info(f'{indent}    {pre_package_names[package_name]}')
 
     if changed:
-        echo_warning('{}Changed packages:'.format(indent))
+        echo_warning(f'{indent}Changed packages:')
         for pre, post in changed:
-            echo_info('{}    {} -> {}'.format(indent, pre, post))
+            echo_info(f'{indent}    {pre} -> {post}')
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage dependencies')
@@ -71,7 +70,7 @@ def resolve(checks, lazy, quiet):
 
         if os.path.isfile(pinned_reqs_file):
             if not quiet:
-                echo_info('Check `{}`:'.format(check_name))
+                echo_info(f'Check `{check_name}`:')
 
             if not quiet:
                 echo_waiting('    Resolving dependencies...')
@@ -118,18 +117,18 @@ def pin(package, version, checks, marker, resolving, lazy, quiet):
             if resolving:
                 pre_packages = list(read_packages(resolved_reqs_file))
             else:
-                pre_packages = list(itervalues(pinned_packages))
+                pre_packages = list(pinned_packages.values())
 
             if not quiet:
-                echo_info('Check `{}`:'.format(check_name))
+                echo_info(f'Check `{check_name}`:')
 
             if version == 'none':
                 del pinned_packages[package_name]
             else:
                 pinned_packages[package_name] = Package(package_name, version, marker)
 
-            package_list = sorted(itervalues(pinned_packages))
-            write_file_lines(pinned_reqs_file, ('{}\n'.format(package) for package in package_list))
+            package_list = sorted(pinned_packages.values())
+            write_file_lines(pinned_reqs_file, (f'{package}\n' for package in package_list))
 
             if not quiet:
                 echo_waiting('    Resolving dependencies...')
@@ -158,7 +157,7 @@ def freeze():
 
     static_file = get_agent_requirements()
 
-    echo_info('Static file: {}'.format(static_file))
+    echo_info(f'Static file: {static_file}')
 
     pre_packages = list(read_packages(static_file))
 

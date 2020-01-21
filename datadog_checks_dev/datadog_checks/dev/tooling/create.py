@@ -70,7 +70,7 @@ def construct_template_fields(integration_name, repo_choice, **kwargs):
 
     config = {
         'author': author,
-        'check_class': '{}Check'.format(''.join(part.capitalize() for part in normalized_integration_name.split('_'))),
+        'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
         'check_name': normalized_integration_name,
         'integration_name': integration_name,
         'check_name_kebab': check_name_kebab,
@@ -102,7 +102,7 @@ def create_template_files(template_name, new_root, config, read=False):
                 template_path = path_join(root, template_file)
 
                 file_path = template_path.replace(template_root, '')
-                file_path = '{}{}'.format(new_root, file_path.format(**config))
+                file_path = f'{new_root}{file_path.format(**config)}'
 
                 files.append(File(file_path, template_path, config, read=read))
 

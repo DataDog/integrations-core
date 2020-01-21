@@ -6,39 +6,37 @@ from .utils import default_option_example, normalize_source_name
 
 def spec_validator(spec, loader):
     if not isinstance(spec, dict):
-        loader.errors.append('{}: Configuration specifications must be a mapping object'.format(loader.source))
+        loader.errors.append(f'{loader.source}: Configuration specifications must be a mapping object')
         return
 
     if 'name' not in spec:
-        loader.errors.append(
-            '{}: Configuration specifications must contain a top-level `name` attribute'.format(loader.source)
-        )
+        loader.errors.append(f'{loader.source}: Configuration specifications must contain a top-level `name` attribute')
         return
 
     name = spec['name']
     if not isinstance(name, str):
-        loader.errors.append('{}: The top-level `name` attribute must be a string'.format(loader.source))
+        loader.errors.append(f'{loader.source}: The top-level `name` attribute must be a string')
         return
 
     release_version = spec.setdefault('version', loader.version)
     if not release_version:
         loader.errors.append(
-            '{}: Configuration specifications must contain a top-level `version` attribute'.format(loader.source)
+            f'{loader.source}: Configuration specifications must contain a top-level `version` attribute'
         )
         return
     elif not isinstance(release_version, str):
-        loader.errors.append('{}: The top-level `version` attribute must be a string'.format(loader.source))
+        loader.errors.append(f'{loader.source}: The top-level `version` attribute must be a string')
         return
 
     if 'files' not in spec:
         loader.errors.append(
-            '{}: Configuration specifications must contain a top-level `files` attribute'.format(loader.source)
+            f'{loader.source}: Configuration specifications must contain a top-level `files` attribute'
         )
         return
 
     files = spec['files']
     if not isinstance(files, list):
-        loader.errors.append('{}: The top-level `files` attribute must be an array'.format(loader.source))
+        loader.errors.append(f'{loader.source}: The top-level `files` attribute must be an array')
         return
 
     files_validator(files, loader)
@@ -50,9 +48,7 @@ def files_validator(files, loader):
     example_file_names_origin = {}
     for file_index, config_file in enumerate(files, 1):
         if not isinstance(config_file, dict):
-            loader.errors.append(
-                '{}, file #{}: File attribute must be a mapping object'.format(loader.source, file_index)
-            )
+            loader.errors.append(f'{loader.source}, file #{file_index}: File attribute must be a mapping object')
             continue
 
         if 'name' not in config_file:
@@ -64,7 +60,7 @@ def files_validator(files, loader):
 
         file_name = config_file['name']
         if not isinstance(file_name, str):
-            loader.errors.append('{}, file #{}: Attribute `name` must be a string'.format(loader.source, file_index))
+            loader.errors.append(f'{loader.source}, file #{file_index}: Attribute `name` must be a string')
             continue
 
         if file_name in file_names_origin:
@@ -87,7 +83,7 @@ def files_validator(files, loader):
             example_file_name = config_file.setdefault('example_name', file_name)
         else:
             if num_files == 1:
-                expected_name = '{}.yaml'.format(normalize_source_name(loader.source or 'conf'))
+                expected_name = f"{normalize_source_name(loader.source or 'conf')}.yaml"
                 if file_name != expected_name:
                     loader.errors.append(
                         '{}, file #{}: File name `{}` should be `{}`'.format(
@@ -98,9 +94,7 @@ def files_validator(files, loader):
             example_file_name = config_file.setdefault('example_name', 'conf.yaml.example')
 
         if not isinstance(example_file_name, str):
-            loader.errors.append(
-                '{}, file #{}: Attribute `example_name` must be a string'.format(loader.source, file_index)
-            )
+            loader.errors.append(f'{loader.source}, file #{file_index}: Attribute `example_name` must be a string')
 
         if example_file_name in example_file_names_origin:
             loader.errors.append(
@@ -112,14 +106,12 @@ def files_validator(files, loader):
             example_file_names_origin[example_file_name] = file_index
 
         if 'options' not in config_file:
-            loader.errors.append(
-                '{}, {}: Every file must contain an `options` attribute'.format(loader.source, file_name)
-            )
+            loader.errors.append(f'{loader.source}, {file_name}: Every file must contain an `options` attribute')
             continue
 
         options = config_file['options']
         if not isinstance(options, list):
-            loader.errors.append('{}, {}: The `options` attribute must be an array'.format(loader.source, file_name))
+            loader.errors.append(f'{loader.source}, {file_name}: The `options` attribute must be an array')
             continue
 
         options_validator(options, loader, file_name)
@@ -148,9 +140,7 @@ def options_validator(options, loader, file_name, *sections):
             try:
                 template = loader.templates.load(option.pop('template'), parameters)
             except Exception as e:
-                loader.errors.append(
-                    '{}, {}, {}option #{}: {}'.format(loader.source, file_name, sections_display, option_index, e)
-                )
+                loader.errors.append(f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {e}')
                 continue
 
             if isinstance(template, dict):

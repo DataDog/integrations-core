@@ -14,7 +14,7 @@ class ValidatorError:
     def __repr__(self):
         if self.line_number is None:
             return self.error_str
-        return "(L{}) {}".format(self.line_number + 1, self.error_str)
+        return f"(L{self.line_number + 1}) {self.error_str}"
 
     def __str__(self):
         return self.__repr__()
