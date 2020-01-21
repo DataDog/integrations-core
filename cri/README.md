@@ -14,6 +14,43 @@ In `datadog.yaml` you will need to configure your `cri_socket_path` for the agen
 
 Note that if you're using the agent in a container, setting `DD_CRI_SOCKET_PATH` environment variable will automatically enable the `CRI` check with the default configuration.
 
+#### Installation on containers
+
+If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable to the CRI socket automatically enables the `CRI` Check with the default configuration.
+
+For example, to install the integration on Kubernetes, edit your daemonset to mount the CRI socket from the host node to the agent container and set the `DD_CRI_SOCKET_PATH` env var to the daemonset mountPath:
+
+```
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: datadog-agent
+spec:
+  template:
+    spec:
+      containers:
+        - name: datadog-agent
+          ...
+          env:
+            - name: DD_CRI_SOCKET_PATH
+              value: "/var/run/crio/crio.sock"
+          volumeMounts:
+            - name: crisocket
+              mountPath: /var/run/crio/crio.sock
+            - mountPath: /host/var/run
+              name: var-run
+              readOnly: true
+          volumes:
+            - hostPath:
+                path: /var/run/crio/crio.sock
+              name: crisocket
+            - hostPath:
+                path: /var/run
+              type: DirectoryOrCreate
+```
+
+Note: The `/var/run` directory needs to be mounted from the host or created, to run the integration without any issues.
+
 ### Configuration
 
 1. Edit the `cri.d/conf.yaml` file, in the `conf.d/` folder at the root of your
