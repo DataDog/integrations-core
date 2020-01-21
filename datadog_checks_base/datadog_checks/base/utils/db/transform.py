@@ -4,12 +4,13 @@
 from __future__ import division
 
 import re
+from datetime import datetime
 
 from ... import is_affirmative
 from ...constants import ServiceCheck
 from .. import constants
 from ..common import compute_percent, total_time_to_temporal_percent
-from .utils import create_extra_transformer
+from .utils import create_extra_transformer, normalize_datetime
 
 # Used for the user-defined `expression`s
 ALLOWED_GLOBALS = {
@@ -94,6 +95,28 @@ def get_service_check(transformers, column_name, **modifiers):
         service_check_method(_, status_map.get(value, ServiceCheck.UNKNOWN), **kwargs)
 
     return service_check
+
+
+def get_time_elapsed(transformers, column_name, **modifiers):
+    time_format = modifiers.pop('format', 'native')
+    if not isinstance(time_format, str):
+        raise ValueError('the `format` parameter must be a string')
+
+    gauge = transformers['gauge'](transformers, column_name, **modifiers)
+
+    if time_format == 'native':
+
+        def time_elapsed(_, value, **kwargs):
+            value = normalize_datetime(value)
+            gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
+
+    else:
+
+        def time_elapsed(_, value, **kwargs):
+            value = normalize_datetime(datetime.strptime(value, time_format))
+            gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
+
+    return time_elapsed
 
 
 def get_expression(transformers, name, **modifiers):
@@ -183,6 +206,7 @@ COLUMN_TRANSFORMERS = {
     'tag': get_tag,
     'match': get_match,
     'service_check': get_service_check,
+    'time_elapsed': get_time_elapsed,
 }
 
 EXTRA_TRANSFORMERS = {'expression': get_expression, 'percent': get_percent}
