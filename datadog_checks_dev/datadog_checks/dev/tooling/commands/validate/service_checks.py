@@ -132,9 +132,8 @@ def service_checks(sync):
 
             if integration != expected_display_name:
                 file_failed = True
-                message = '  {}: integration name `{}` must match manifest display_name `{}`'.format(
-                    check, integration, expected_display_name
-                )
+                message = f'  {check}: integration name `{integration}` must match \
+                            manifest display_name `{expected_display_name}` '
                 display_queue.append((echo_failure, message))
 
             # name
@@ -158,9 +157,7 @@ def service_checks(sync):
                 for status in statuses:
                     if status not in SERVICE_CHECK_NAMES:
                         file_failed = True
-                        message = '  {}: invalid status `{}`, must be one of `{}`'.format(
-                            check, status, SERVICE_CHECK_NAMES
-                        )
+                        message = f'  {check}: invalid status `{status}`, must be one of `{SERVICE_CHECK_NAMES}`'
                         display_queue.append((echo_failure, message))
 
         if file_failed:
