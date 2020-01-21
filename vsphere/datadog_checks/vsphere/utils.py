@@ -4,7 +4,7 @@
 from pyVmomi import vim
 
 from datadog_checks.base import ensure_unicode
-from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, SHORT_ROLLUP
+from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, SHORT_ROLLUP, REFERENCE_METRIC
 
 
 def format_metric_name(counter):
@@ -58,6 +58,9 @@ def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
 
 
 def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
+    if metric_name.startswith(REFERENCE_METRIC):
+        # Always collect at least one metric for reference
+        return False
     filters = metric_filters.get(MOR_TYPE_AS_STRING[mor_type])
     if not filters:
         # No filters means collect everything
