@@ -44,9 +44,7 @@ def ready(ctx, quiet):
                     cached_prs[pr_num] = changelog_labels
 
                     if not changelog_labels:
-                        echo_warning(
-                            'PR #{} has no changelog label attached, please add one! Skipping...'.format(pr_num)
-                        )
+                        echo_warning(f'PR #{pr_num} has no changelog label attached, please add one! Skipping...')
                         continue
 
                     if len(changelog_labels) > 1:
@@ -59,7 +57,7 @@ def ready(ctx, quiet):
                 if changelog_labels[0] != CHANGELOG_TYPE_NONE:
                     shippable_prs += 1
             except Exception as e:
-                echo_failure('Unable to fetch info for PR #{}: {}'.format(pr_num, e))
+                echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
                 continue
 
         if shippable_prs:

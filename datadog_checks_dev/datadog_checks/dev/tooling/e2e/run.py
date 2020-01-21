@@ -16,21 +16,21 @@ def _execute(check, command, env_vars):
         operation = 'stopping'
 
     with chdir(path_join(get_root(), check), env_vars=env_vars):
-        echo_debug('%s env with env_vars: %s' % (operation, env_vars), cr=True, indent=True)
-        echo_debug('%s env with command: %s' % (operation, command), indent=True)
+        echo_debug(f'{operation} env with env_vars: {env_vars}', cr=True, indent=True)
+        echo_debug(f'{operation} env with command: {command}', indent=True)
         result = run_command(command, capture=True)
-        echo_debug('command result stdout: %s' % result.stdout, indent=True)
-        echo_debug('command result stderr: %s' % result.stderr, indent=True)
+        echo_debug(f'command result stdout: {result.stdout}', indent=True)
+        echo_debug(f'command result stderr: {result.stderr}', indent=True)
 
     return result
 
 
 def start_environment(check, env):
-    command = 'tox --develop -e {}'.format(env)
+    command = f'tox --develop -e {env}'
     env_vars = {
         E2E_TEAR_DOWN: 'false',
         'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
-        'TOX_TESTENV_PASSENV': '{} USERNAME PYTEST_ADDOPTS {}'.format(E2E_TEAR_DOWN, ' '.join(get_ci_env_vars())),
+        'TOX_TESTENV_PASSENV': f"{E2E_TEAR_DOWN} USERNAME PYTEST_ADDOPTS {' '.join(get_ci_env_vars())}",
     }
 
     result = _execute(check, command, env_vars)
@@ -38,7 +38,7 @@ def start_environment(check, env):
 
 
 def stop_environment(check, env, metadata=None):
-    command = 'tox --develop -e {}'.format(env)
+    command = f'tox --develop -e {env}'
     env_vars = {
         E2E_SET_UP: 'false',
         'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',

@@ -120,7 +120,7 @@ class PackageCatalog:
         """
         Dump the packages in the catalog in a requirements file
         """
-        write_file_lines(reqs_file, ('{}\n'.format(package) for package in self.packages))
+        write_file_lines(reqs_file, (f'{package}\n' for package in self.packages))
 
     def add_package(self, check_name, package):
         """
@@ -183,7 +183,7 @@ def make_catalog(verify=False, checks=None):
     for check_name in sorted(checks):
         for package in read_packages(os.path.join(root, check_name, REQUIREMENTS_IN)):
             if not package.version:
-                errors.append('Unpinned dependency `{}` in the `{}` check'.format(package.name, check_name))
+                errors.append(f'Unpinned dependency `{package.name}` in the `{check_name}` check')
             catalog.add_package(check_name, package)
 
     return catalog, errors

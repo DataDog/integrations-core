@@ -107,20 +107,20 @@ class LocalAgentInterface(object):
 
     def copy_config_to_local_agent(self):
         conf_dir = get_agent_conf_dir(self.check, self.agent_version, self.platform)
-        check_conf_file = os.path.join(conf_dir, '{}.yaml'.format(self.check))
+        check_conf_file = os.path.join(conf_dir, f'{self.check}.yaml')
         if not os.path.exists(conf_dir):
             os.makedirs(conf_dir)
 
         if file_exists(check_conf_file):
-            copyfile(check_conf_file, '{}.bak'.format(check_conf_file))
+            copyfile(check_conf_file, f'{check_conf_file}.bak')
 
         copyfile(self.config_file, check_conf_file)
 
     def remove_config_from_local_agent(self):
         check_conf_file = os.path.join(
-            get_agent_conf_dir(self.check, self.agent_version, self.platform), '{}.yaml'.format(self.check)
+            get_agent_conf_dir(self.check, self.agent_version, self.platform), f'{self.check}.yaml'
         )
-        backup_conf_file = '{}.bak'.format(check_conf_file)
+        backup_conf_file = f'{check_conf_file}.bak'
         os.remove(check_conf_file)
         if file_exists(backup_conf_file):
             move(backup_conf_file, check_conf_file)
@@ -139,32 +139,32 @@ class LocalAgentInterface(object):
     ):
         # JMX check
         if jmx_list:
-            command = '{} jmx list {}'.format(self.agent_command, jmx_list)
+            command = f'{self.agent_command} jmx list {jmx_list}'
         # Classic check
         else:
-            command = '{} check {}'.format(self.agent_command, self.check)
+            command = f'{self.agent_command} check {self.check}'
 
             if rate:
-                command += ' {}'.format(get_rate_flag(self.agent_version))
+                command += f' {get_rate_flag(self.agent_version)}'
 
             # These are only available for Agent 6+
             if times is not None:
-                command += ' --check-times {}'.format(times)
+                command += f' --check-times {times}'
 
             if pause is not None:
-                command += ' --pause {}'.format(pause)
+                command += f' --pause {pause}'
 
             if delay is not None:
-                command += ' --delay {}'.format(delay)
+                command += f' --delay {delay}'
 
             if as_json:
-                command += ' --json {}'.format(as_json)
+                command += f' --json {as_json}'
 
             if break_point is not None:
-                command += ' --breakpoint {}'.format(break_point)
+                command += f' --breakpoint {break_point}'
 
         if log_level is not None:
-            command += ' --log-level {}'.format(log_level)
+            command += f' --log-level {log_level}'
 
         return run_command(command, capture=capture)
 

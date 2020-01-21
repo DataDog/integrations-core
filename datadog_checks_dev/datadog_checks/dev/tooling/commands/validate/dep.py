@@ -4,7 +4,6 @@
 import os
 
 import click
-from six import iteritems
 
 from ...constants import get_agent_requirements, get_root
 from ...requirements import make_catalog, read_packages
@@ -13,11 +12,11 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 def display_multiple_attributes(attributes, message):
     echo_failure(message)
-    for attribute, checks in sorted(iteritems(attributes)):
+    for attribute, checks in sorted(attributes.items()):
         if len(checks) == 1:
-            echo_info('    {}: {}'.format(attribute, checks[0]))
+            echo_info(f'    {attribute}: {checks[0]}')
         elif len(checks) == 2:
-            echo_info('    {}: {} and {}'.format(attribute, checks[0], checks[1]))
+            echo_info(f'    {attribute}: {checks[0]} and {checks[1]}')
         else:
             remaining = len(checks) - 2
             echo_info(
@@ -58,7 +57,7 @@ def dep():
 
             failed = True
             have_multiple_versions.add(package.name)
-            display_multiple_attributes(versions, 'Multiple versions found for package `{}`:'.format(package.name))
+            display_multiple_attributes(versions, f'Multiple versions found for package `{package.name}`:')
 
         markers = catalog.get_package_markers(package)
         if len(markers) > 1:
@@ -68,7 +67,7 @@ def dep():
 
             failed = True
             have_multiple_markers.add(package.name)
-            display_multiple_attributes(markers, 'Multiple markers found for package `{}`:'.format(package))
+            display_multiple_attributes(markers, f'Multiple markers found for package `{package}`:')
 
     # Check embedded env compatibility
     agent_req_file = get_agent_requirements()
@@ -89,8 +88,8 @@ def dep():
                         package.name, check_name
                     )
                 )
-                echo_info('    have: {}'.format(embedded_deps[package.name]))
-                echo_info('    want: {}'.format(package))
+                echo_info(f'    have: {embedded_deps[package.name]}')
+                echo_info(f'    want: {package}')
 
     if failed:
         abort()

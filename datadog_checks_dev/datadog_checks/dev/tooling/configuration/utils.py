@@ -4,7 +4,7 @@
 
 
 def default_option_example(option_name):
-    return '<{}>'.format(option_name.upper())
+    return f'<{option_name.upper()}>'
 
 
 def normalize_source_name(source_name):

@@ -39,7 +39,7 @@ def metrics2md(check, fields):
     else:
         chosen_fields = set(fields)
         if chosen_fields - VALID_FIELDS:
-            abort('You must select only from the following fields: {}'.format(', '.join(VALID_FIELDS)))
+            abort(f"You must select only from the following fields: {', '.join(VALID_FIELDS)}")
 
         # Deduplicate and retain order
         old_fields = fields
@@ -69,4 +69,4 @@ def metrics2md(check, fields):
     md_table_rows.extend(rows)
 
     pyperclip.copy('\n'.join(md_table_rows))
-    echo_success('Successfully copied table with {} metric{}'.format(num_metrics, 's' if num_metrics > 1 else ''))
+    echo_success(f"Successfully copied table with {num_metrics} metric{'s' if num_metrics > 1 else ''}")

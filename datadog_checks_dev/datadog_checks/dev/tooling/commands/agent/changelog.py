@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from collections import OrderedDict
+from io import StringIO
 
 import click
-from six import StringIO, iteritems
 
 from ....utils import read_file, write_file
 from ...constants import get_agent_changelog, get_agent_release_requirements, get_root
@@ -41,7 +40,7 @@ def changelog(since, to, write, force):
     agent_tags = get_agent_tags(since, to)
 
     # store the changes in a mapping {agent_version --> {check_name --> current_version}}
-    changes_per_agent = OrderedDict()
+    changes_per_agent = {}
 
     # to keep indexing easy, we run the loop off-by-one
     for i in range(1, len(agent_tags)):
@@ -54,9 +53,9 @@ def changelog(since, to, write, force):
         file_contents = git_show_file(req_file_name, agent_tags[i])
         catalog_prev = parse_agent_req_file(file_contents)
 
-        changes_per_agent[current_tag] = OrderedDict()
+        changes_per_agent[current_tag] = {}
 
-        for name, ver in iteritems(catalog_now):
+        for name, ver in catalog_now.items():
             # at some point in the git history, the requirements file erroneusly
             # contained the folder name instead of the package name for each check,
             # let's be resilient
@@ -86,27 +85,25 @@ def changelog(since, to, write, force):
     check_changelog_url = 'https://github.com/DataDog/integrations-core/blob/master/{}/CHANGELOG.md'
 
     # go through all the agent releases
-    for agent, version_changes in iteritems(changes_per_agent):
+    for agent, version_changes in changes_per_agent.items():
         url = agent_changelog_url.format(agent.replace('.', ''))  # Github removes dots from the anchor
-        changelog_contents.write('## Datadog Agent version [{}]({})\n\n'.format(agent, url))
+        changelog_contents.write(f'## Datadog Agent version [{agent}]({url})\n\n')
 
         if not version_changes:
             changelog_contents.write('* There were no integration updates for this version of the Agent.\n\n')
         else:
-            for name, ver in iteritems(version_changes):
+            for name, ver in version_changes.items():
                 # get the "display name" for the check
                 manifest_file = os.path.join(get_root(), name, 'manifest.json')
                 if os.path.exists(manifest_file):
-                    decoded = json.loads(read_file(manifest_file).strip(), object_pairs_hook=OrderedDict)
+                    decoded = json.loads(read_file(manifest_file).strip())
                     display_name = decoded.get('display_name')
                 else:
                     display_name = name
 
                 breaking_notice = " **BREAKING CHANGE**" if ver[1] else ""
                 changelog_url = check_changelog_url.format(name)
-                changelog_contents.write(
-                    '* {} [{}]({}){}\n'.format(display_name, ver[0], changelog_url, breaking_notice)
-                )
+                changelog_contents.write(f'* {display_name} [{ver[0]}]({changelog_url}){breaking_notice}\n')
             # add an extra line to separate the release block
             changelog_contents.write('\n')
 

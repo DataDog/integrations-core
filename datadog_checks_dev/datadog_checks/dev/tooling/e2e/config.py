@@ -14,7 +14,7 @@ ENV_DIR = path_join(APP_DIR, 'envs')
 
 
 def config_file_name(check):
-    return '{}.yaml'.format(check)
+    return f'{check}.yaml'
 
 
 def locate_env_dir(check, env):

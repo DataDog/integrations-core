@@ -5,7 +5,6 @@ import re
 from collections import defaultdict, deque
 
 import click
-from six import iteritems
 
 from ....subprocess import run_command
 from ....utils import chdir, write_file
@@ -50,7 +49,7 @@ def changes(since, out_file, eager):
                 continue
 
             result = run_command(
-                'git show "--pretty=format:%an%n" -U0 {} */CHANGELOG.md'.format(commit_hash), capture=True, check=True
+                f'git show "--pretty=format:%an%n" -U0 {commit_hash} */CHANGELOG.md', capture=True, check=True
             )
 
             # Example:
@@ -95,7 +94,7 @@ def changes(since, out_file, eager):
                         line = line[1:]
                         # Demote releases to h3
                         if line.startswith('##'):
-                            line = '#{}'.format(line)
+                            line = f'#{line}'
                         additions.append(line)
                     elif line.startswith('@@'):
                         break
@@ -115,12 +114,12 @@ def changes(since, out_file, eager):
                     history_data[integration]['lines'].appendleft('')
                     history_data[integration]['lines'].extendleft(additions)
 
-    output_lines = ['# Changes since {}'.format(since), '']
+    output_lines = [f'# Changes since {since}', '']
 
-    for integration, history in sorted(iteritems(history_data)):
+    for integration, history in sorted(history_data.items()):
         display_name = load_manifest(integration).get('display_name', integration)
-        output_lines.append('## {}'.format(display_name))
-        output_lines.append('released by: {}'.format(', '.join(sorted(history['releasers']))))
+        output_lines.append(f'## {display_name}')
+        output_lines.append(f"released by: {', '.join(sorted(history['releasers']))}")
 
         output_lines.append('')
         output_lines.extend(history['lines'])
