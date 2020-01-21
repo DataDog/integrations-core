@@ -133,8 +133,6 @@ If necessary, additional metrics can be defined in the instances. These metrics 
 
 Profiles can be used interchangeably, such that devices that share MIB dependencies can reuse the same profiles. For example, the Cisco c3850 profile can be used across many Cisco switches.
 
-**Note**: Profiles require a local version of the MIBs to be referenced.
-
 * [Generic router](#generic-router-profile)
 * [F5 Big IP](#f5-big-ip-profile)
 * [Dell iDRAC](#dell-idrac-profile)
@@ -374,7 +372,6 @@ The Cisco Nexus Profile collects the following metrics.
 
 The Cisco Meraki device profile collects the following metrics.
 
-MIBs needed for local reference: MERAKI-CLOUD-CONTROLLER-MIB.
 
 | Metric                       | Description                                                          | Tags                           |
 |------------------------------|----------------------------------------------------------------------|--------------------------------|
