@@ -8,7 +8,7 @@ Elastic Container Service for Kubernetes (EKS) is the latest addition to AWS, a 
 
 ## Setup
 
-Because Datadog already integrates with Kubernetes and AWS, it is ready-made to monitor EKS. If you're running the Agent in a Kubernetes cluster and plan to migrate to EKS, you can continue monitoring your cluster with Datadog. [AWS EKS Managed Node Groups][2] is also supported.
+Because Datadog already integrates with Kubernetes and AWS, it is ready-made to monitor EKS. If you're running the Agent in a Kubernetes cluster and plan to migrate to EKS, you can continue monitoring your cluster with Datadog. [AWS EKS Managed Node Groups][2] are also supported.
 
 ### Metric collection
 
