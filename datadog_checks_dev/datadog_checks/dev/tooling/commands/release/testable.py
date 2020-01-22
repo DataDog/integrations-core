@@ -2,14 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-from collections import OrderedDict
 
 import click
 from semver import parse_version_info
-from six import iteritems
 
 from ....subprocess import run_command
-from ....utils import basepath, chdir, ensure_unicode, get_next
+from ....utils import basepath, chdir, get_next
 from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ...trello import TrelloClient
@@ -26,17 +24,17 @@ def validate_version(ctx, param, value):
         if len(parts) == 2:
             parts.append('0')
         version_info = parse_version_info('.'.join(parts))
-        return '{}.{}'.format(version_info.major, version_info.minor)
+        return f'{version_info.major}.{version_info.minor}'
     except ValueError:
         raise click.BadParameter('needs to be in semver format x.y[.z]')
 
 
 def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
-    body = u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
+    body = f'Pull request: {pr_url}\n\n{pr_body}'
 
     for team in teams:
         if dry_run:
-            echo_success('Will create a card for team {}: '.format(team), nl=False)
+            echo_success(f'Will create a card for team {team}: ', nl=False)
             echo_info(pr_title)
             continue
         creation_attempts = 3
@@ -51,7 +49,7 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
                 time.sleep(wait_time)
             elif error:
                 if attempt + 1 == creation_attempts:
-                    echo_failure('Error: {}'.format(error))
+                    echo_failure(f'Error: {error}')
                     break
 
                 wait_time = 2
@@ -61,7 +59,7 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
                 )
                 time.sleep(wait_time)
             else:
-                echo_success('Created card for team {}: '.format(team), nl=False)
+                echo_success(f'Created card for team {team}: ', nl=False)
                 echo_info(response.json().get('url'))
                 break
 
@@ -95,7 +93,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
     root = get_root()
     repo = basepath(root)
     if repo not in ('integrations-core', 'datadog-agent'):
-        abort('Repo `{}` is unsupported.'.format(repo))
+        abort(f'Repo `{repo}` is unsupported.')
 
     if agent_version:
         current_agent_version = agent_version
@@ -104,9 +102,9 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         current_agent_version = get_current_agent_version()
         echo_success(current_agent_version)
 
-    current_release_branch = '{}.x'.format(current_agent_version)
+    current_release_branch = f'{current_agent_version}.x'
     diff_target_branch = 'origin/master'
-    echo_info('Branch `{}` will be compared to `{}`.'.format(current_release_branch, diff_target_branch))
+    echo_info(f'Branch `{current_release_branch}` will be compared to `{diff_target_branch}`.')
 
     echo_waiting('Getting diff... ', nl=False)
     diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..{}'
@@ -115,7 +113,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         fetch_command = 'git fetch --dry'
         result = run_command(fetch_command, capture=True)
         if result.code:
-            abort('Unable to run {}.'.format(fetch_command))
+            abort(f'Unable to run {fetch_command}.')
 
         if current_release_branch in result.stderr or diff_target_branch in result.stderr:
             abort(
@@ -125,11 +123,11 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             )
 
         # compare with the local tag first
-        reftag = '{}{}'.format('refs/tags/', current_release_branch)
+        reftag = f"{'refs/tags/'}{current_release_branch}"
         result = run_command(diff_command.format(reftag, diff_target_branch), capture=True)
         if result.code:
             # if it didn't work, compare with a branch.
-            origin_release_branch = 'origin/{}'.format(current_release_branch)
+            origin_release_branch = f'origin/{current_release_branch}'
             echo_failure('failed!')
             echo_waiting(
                 'Local branch `{}` might not exist, trying `{}`... '.format(
@@ -151,26 +149,22 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
     num_changes = len(diff_data)
 
     if repo == 'integrations-core':
-        options = OrderedDict(
-            (('1', 'Integrations'), ('2', 'Containers'), ('3', 'Core'), ('4', 'Platform'), ('s', 'Skip'), ('q', 'Quit'))
-        )
+        options = {'1': 'Integrations', '2': 'Containers', '3': 'Core', '4': 'Platform', 's': 'Skip', 'q': 'Quit'}
     else:
-        options = OrderedDict(
-            (
-                ('1', 'Core'),
-                ('2', 'Containers'),
-                ('3', 'Logs'),
-                ('4', 'Platform'),
-                ('5', 'Process'),
-                ('6', 'Trace'),
-                ('7', 'Integrations'),
-                ('s', 'Skip'),
-                ('q', 'Quit'),
-            )
-        )
+        options = {
+            '1': 'Core',
+            '2': 'Containers',
+            '3': 'Logs',
+            '4': 'Platform',
+            '5': 'Process',
+            '6': 'Trace',
+            '7': 'Integrations',
+            's': 'Skip',
+            'q': 'Quit',
+        }
     default_option = get_next(options)
-    options_prompt = 'Choose an option (default {}): '.format(options[default_option])
-    options_text = '\n' + '\n'.join('{} - {}'.format(key, value) for key, value in iteritems(options))
+    options_prompt = f'Choose an option (default {options[default_option]}): '
+    options_text = '\n' + '\n'.join('{} - {}'.format(key, value) for key, value in options.items())
 
     commit_ids = set()
     user_config = ctx.obj
@@ -180,7 +174,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
     for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id:
-            api_response = get_pr(commit_id, user_config, repo=repo, raw=True)
+            api_response = get_pr(commit_id, user_config, raw=True)
             if api_response.status_code == 401:
                 abort('Access denied. Please ensure your GitHub token has correct permissions.')
             elif api_response.status_code == 403:
@@ -190,7 +184,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 )
                 continue
             elif api_response.status_code == 404:
-                echo_info('Skipping #{}, not a pull request...'.format(commit_id))
+                echo_info(f'Skipping #{commit_id}, not a pull request...')
                 continue
 
             api_response.raise_for_status()
@@ -214,12 +208,12 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             except IndexError:
                 pr_data = {
                     'number': commit_hash,
-                    'html_url': 'https://github.com/DataDog/{}/commit/{}'.format(repo, commit_hash),
+                    'html_url': f'https://github.com/DataDog/{repo}/commit/{commit_hash}',
                 }
             commit_id = str(pr_data.get('number', ''))
 
         if commit_id and commit_id in commit_ids:
-            echo_info('Already seen PR #{}, skipping it.'.format(commit_id))
+            echo_info(f'Already seen PR #{commit_id}, skipping it.')
             continue
         commit_ids.add(commit_id)
 
@@ -227,9 +221,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             if start_id == commit_id or start_id == commit_hash:
                 found_start_id = True
             else:
-                echo_info(
-                    'Looking for {}, skipping {}.'.format(format_commit_id(start_id), format_commit_id(commit_id))
-                )
+                echo_info(f'Looking for {format_commit_id(start_id)}, skipping {format_commit_id(commit_id)}.')
                 continue
 
         pr_labels = sorted(get_pr_labels(pr_data))
@@ -243,15 +235,15 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 nochangelog_pr = False
 
         if documentation_pr and nochangelog_pr:
-            echo_info('Skipping documentation {}.'.format(format_commit_id(commit_id)))
+            echo_info(f'Skipping documentation {format_commit_id(commit_id)}.')
             continue
 
         pr_milestone = get_pr_milestone(pr_data)
         if milestone and pr_milestone != milestone:
-            echo_info('Looking for milestone {}, skipping {}.'.format(milestone, format_commit_id(commit_id)))
+            echo_info(f'Looking for milestone {milestone}, skipping {format_commit_id(commit_id)}.')
             continue
 
-        pr_url = pr_data.get('html_url', 'https://github.com/DataDog/{}/pull/{}'.format(repo, commit_id))
+        pr_url = pr_data.get('html_url', f'https://github.com/DataDog/{repo}/pull/{commit_id}')
         pr_title = pr_data.get('title', commit_subject)
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
@@ -263,11 +255,11 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
 
         finished = False
         choice_error = ''
-        progress_status = '({} of {}) '.format(i, num_changes)
+        progress_status = f'({i} of {num_changes}) '
         indent = ' ' * len(progress_status)
 
         while not finished:
-            echo_success('\n{}{}'.format(progress_status, pr_title))
+            echo_success(f'\n{progress_status}{pr_title}')
 
             echo_success('Url: ', nl=False, indent=indent)
             echo_info(pr_url)
@@ -296,17 +288,13 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             choice = '\x00'
             while choice == '\x00':
                 choice = click.getchar().strip()
-                try:
-                    choice = ensure_unicode(choice)
-                except UnicodeDecodeError:
-                    choice = repr(choice)
 
             if not choice:
                 choice = default_option
 
             if choice not in options:
                 echo_info(choice)
-                choice_error = u'`{}` is not a valid option.'.format(choice)
+                choice_error = f'`{choice}` is not a valid option.'
                 continue
             else:
                 choice_error = ''
@@ -315,10 +303,10 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             echo_info(value)
 
             if value == 'Skip':
-                echo_info('Skipped {}'.format(format_commit_id(commit_id)))
+                echo_info(f'Skipped {format_commit_id(commit_id)}')
                 break
             elif value == 'Quit':
-                echo_warning('Exited at {}'.format(format_commit_id(commit_id)))
+                echo_warning(f'Exited at {format_commit_id(commit_id)}')
                 return
             else:
                 create_trello_card(trello, [value], pr_title, pr_url, pr_body, dry_run)

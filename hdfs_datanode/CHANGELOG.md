@@ -1,5 +1,10 @@
 # CHANGELOG - hdfs_datanode
 
+## 1.11.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Collect version metadata for hdfs_datanode. See [#5088](https://github.com/DataDog/integrations-core/pull/5088).
+
 ## 1.10.0 / 2019-12-02
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).

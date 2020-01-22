@@ -1,9 +1,9 @@
 # Configuration for labeler - https://github.com/actions/labeler
 
 documentation:
-- "**/*.md"
 - "*/manifest.json"
 - "*/assets/configuration/**"
+- (?<!CHANGELOG)\.md$
 - docs/**
 
 dev/testing:
@@ -22,6 +22,7 @@ dependencies:
 
 release:
 - requirements-agent-release.txt
+- datadog_checks_dev/datadog_checks/dev/__about__.py
 
 changelog/no-changelog:
 - requirements-agent-release.txt

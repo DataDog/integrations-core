@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
+
 import pytest
 
 from .utils import requires_windows
@@ -24,6 +26,16 @@ MULTI_INSTANCE_COUNTER = [["Processor", None, "% Processor Time", "test.processo
 MULTI_INSTANCE_COUNTER_WITH_INSTANCES = [
     ["Processor", "0", "% Processor Time", "test.processor_time_0", "gauge"],
     ["Processor", "1", "% Processor Time", "test.processor_time_1", "gauge"],
+]
+
+PARTIAL_COUNTER_LIST = [
+    ["NTDS", None, "LDAP Client Sessions", "active_directory.ldap.client_sessions", "gauge"],
+    ["NTDS", None, "LDAP Bind Time", "active_directory.ldap.bind_time", "gauge"],
+    ["NTDS", None, "LDAP Successful Binds/sec", "active_directory.ldap.successful_binds_persec", "gauge"],
+    ["NTDS", None, "LDAP Searches/sec", "active_directory.ldap.searches_persec", "gauge"],
+    # these two don't exist
+    ["NTDS", None, "Kerberos Authentications/sec", "active_directory.kerberos.auths_persec", "gauge"],
+    ["NTDS", None, "NTLM Authentications/sec", "active_directory.ntlm.auths_persec", "gauge"],
 ]
 
 
@@ -69,18 +81,9 @@ def test_multi_instance_counter_specific_instances(aggregator, pdh_mocks_fixture
 
 @requires_windows
 def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
-    COUNTER_LIST = [
-        ["NTDS", None, "LDAP Client Sessions", "active_directory.ldap.client_sessions", "gauge"],
-        ["NTDS", None, "LDAP Bind Time", "active_directory.ldap.bind_time", "gauge"],
-        ["NTDS", None, "LDAP Successful Binds/sec", "active_directory.ldap.successful_binds_persec", "gauge"],
-        ["NTDS", None, "LDAP Searches/sec", "active_directory.ldap.searches_persec", "gauge"],
-        # these two don't exist
-        ["NTDS", None, "Kerberos Authentications/sec", "active_directory.kerberos.auths_persec", "gauge"],
-        ["NTDS", None, "NTLM Authentications/sec", "active_directory.ntlm.auths_persec", "gauge"],
-    ]
     initialize_pdh_tests()
     instance = DEFAULT_INSTANCE
-    c = PDHBaseCheck("testcheck", {}, {}, [instance], COUNTER_LIST)
+    c = PDHBaseCheck("testcheck", {}, {}, [instance], PARTIAL_COUNTER_LIST)
     c.check(instance)
 
     aggregator.assert_metric("active_directory.ldap.client_sessions", tags=None, count=1)
@@ -88,3 +91,31 @@ def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
     aggregator.assert_metric("active_directory.ldap.successful_binds_persec", tags=None, count=1)
     aggregator.assert_metric("active_directory.ldap.searches_persec", tags=None, count=1)
     assert aggregator.metrics_asserted_pct == 100.0
+
+
+@requires_windows
+def test_default_admin_share():
+    initialize_pdh_tests()
+    c = PDHBaseCheck("testcheck", {}, {}, [DEFAULT_INSTANCE], SINGLE_INSTANCE_COUNTER)
+    nr = c._get_netresource('1.1.1.1')
+    assert nr.lpRemoteName == '\\\\1.1.1.1\\c$'
+
+
+@requires_windows
+def test_custom_admin_share():
+    initialize_pdh_tests()
+    instance = copy.deepcopy(DEFAULT_INSTANCE)
+    instance['admin_share'] = 'ipc$'
+    c = PDHBaseCheck("testcheck", {}, {}, [instance], SINGLE_INSTANCE_COUNTER)
+    nr = c._get_netresource('1.2.3.4')
+    assert nr.lpRemoteName == '\\\\1.2.3.4\\ipc$'
+
+
+@requires_windows
+def test_no_admin_share():
+    initialize_pdh_tests()
+    instance = copy.deepcopy(DEFAULT_INSTANCE)
+    instance['admin_share'] = ''
+    c = PDHBaseCheck("testcheck", {}, {}, [instance], SINGLE_INSTANCE_COUNTER)
+    nr = c._get_netresource('1.2.3.4')
+    assert nr.lpRemoteName == '\\\\1.2.3.4'

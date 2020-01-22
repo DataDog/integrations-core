@@ -1,5 +1,9 @@
 # CHANGELOG - Kube Metrics Server
 
+## 1.1.0 / 2020-01-13
+
+* [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
+
 ## 1.0.1 / 2019-08-24
 
 * [Fixed] Fix prometheus_url conf. See [#4175](https://github.com/DataDog/integrations-core/pull/4175).

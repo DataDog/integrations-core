@@ -52,20 +52,28 @@ class InstanceConfig:
         self.instance = instance
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
+
         profile = instance.get('profile')
+
         if is_affirmative(instance.get('use_global_metrics', True)):
             self.metrics.extend(global_metrics)
+
         if profile:
             if profile not in profiles:
                 raise ConfigurationError("Unknown profile '{}'".format(profile))
             self.metrics.extend(profiles[profile]['definition']['metrics'])
+
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
-        self._snmp_engine, self.mib_view_controller = self.create_snmp_engine(mibs_path)
+        self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path)
+        self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
+
         self.ip_address = None
         self.ip_network = None
+
         self.discovered_instances = {}
         self.failing_instances = defaultdict(int)
         self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
+
         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
@@ -93,14 +101,15 @@ class InstanceConfig:
 
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
-        self._resolver = OIDResolver(self.mib_view_controller, self.enforce_constraints)
-        self.resolve_oid = self._resolver.resolve_oid
 
         self._auth_data = self.get_auth_data(instance)
 
         self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)
 
         self._context_data = hlapi.ContextData(*self.get_context_data(instance))
+
+    def resolve_oid(self, oid):
+        return self._resolver.resolve_oid(oid)
 
     def refresh_with_profile(self, profile, warning, log):
         self.metrics.extend(profile['definition']['metrics'])
@@ -118,6 +127,7 @@ class InstanceConfig:
         """
         snmp_engine = hlapi.SnmpEngine()
         mib_builder = snmp_engine.getMibBuilder()
+
         if mibs_path is not None:
             mib_builder.addMibSources(builder.DirMibSource(mibs_path))
 
@@ -154,17 +164,22 @@ class InstanceConfig:
             priv_key = None
             auth_protocol = None
             priv_protocol = None
+
             if 'authKey' in instance:
                 auth_key = instance['authKey']
                 auth_protocol = hlapi.usmHMACMD5AuthProtocol
+
             if 'privKey' in instance:
                 priv_key = instance['privKey']
                 auth_protocol = hlapi.usmHMACMD5AuthProtocol
                 priv_protocol = hlapi.usmDESPrivProtocol
+
             if 'authProtocol' in instance:
                 auth_protocol = getattr(hlapi, instance['authProtocol'])
+
             if 'privProtocol' in instance:
                 priv_protocol = getattr(hlapi, instance['privProtocol'])
+
             return hlapi.UsmUserData(user, auth_key, priv_key, auth_protocol, priv_protocol)
 
         raise ConfigurationError('An authentication method needs to be provided')
@@ -183,6 +198,7 @@ class InstanceConfig:
         if 'user' in instance:
             if 'context_engine_id' in instance:
                 context_engine_id = OctetString(instance['context_engine_id'])
+
             if 'context_name' in instance:
                 context_name = instance['context_name']
 
@@ -204,28 +220,35 @@ class InstanceConfig:
                 identity = hlapi.ObjectIdentity(symbol_oid)
             else:
                 identity = hlapi.ObjectIdentity(mib, symbol)
+
             return identity, symbol
 
         def get_table_symbols(mib, table):
             identity, table = extract_symbol(mib, table)
             key = (mib, table)
+
             if key in table_oids:
                 return table_oids[key][1], table
 
             table_object = hlapi.ObjectType(identity)
             symbols = []
+
             table_oids[key] = (table_object, symbols)
+
             return symbols, table
 
         # Check the metrics completely defined
         for metric in metrics:
             forced_type = metric.get('forced_type')
             metric_tags = metric.get('metric_tags', [])
+
             if 'MIB' in metric:
                 if not ('table' in metric or 'symbol' in metric):
                     raise ConfigurationError('When specifying a MIB, you must specify either table or symbol')
+
                 if 'symbol' in metric:
                     to_query = metric['symbol']
+
                     try:
                         _, parsed_metric_name = get_table_symbols(metric['MIB'], to_query)
                     except Exception as e:
@@ -233,24 +256,30 @@ class InstanceConfig:
                     else:
                         parsed_metric = ParsedMetric(parsed_metric_name, metric_tags, forced_type)
                         parsed_metrics.append(parsed_metric)
+
                     continue
+
                 elif 'symbols' not in metric:
                     raise ConfigurationError('When specifying a table, you must specify a list of symbols')
 
                 symbols, _ = get_table_symbols(metric['MIB'], metric['table'])
                 index_tags = []
                 column_tags = []
+
                 for metric_tag in metric_tags:
                     if not ('tag' in metric_tag and ('index' in metric_tag or 'column' in metric_tag)):
                         raise ConfigurationError(
                             'When specifying metric tags, you must specify a tag, and an index or column'
                         )
+
                     tag_key = metric_tag['tag']
+
                     if 'column' in metric_tag:
                         # In case it's a column, we need to query it as well
                         mib = metric_tag.get('MIB', metric['MIB'])
                         identity, column = extract_symbol(mib, metric_tag['column'])
                         column_tags.append((tag_key, column))
+
                         try:
                             object_type = hlapi.ObjectType(identity)
                         except Exception as e:
@@ -265,41 +294,54 @@ class InstanceConfig:
                                 )
                             else:
                                 symbols.append(object_type)
+
                     elif 'index' in metric_tag:
                         index_tags.append((tag_key, metric_tag['index']))
+
                         if 'mapping' in metric_tag:
                             # Need to do manual resolution
+
                             for symbol in metric['symbols']:
                                 self._resolver.register_index(
                                     symbol['name'], metric_tag['index'], metric_tag['mapping']
                                 )
+
                             for tag in metric['metric_tags']:
                                 if 'column' in tag:
                                     self._resolver.register_index(
                                         tag['column']['name'], metric_tag['index'], metric_tag['mapping']
                                     )
+
                 for symbol in metric['symbols']:
                     identity, parsed_metric_name = extract_symbol(metric['MIB'], symbol)
+
                     try:
                         symbols.append(hlapi.ObjectType(identity))
                     except Exception as e:
                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+
                     parsed_metric = ParsedTableMetric(parsed_metric_name, index_tags, column_tags, forced_type)
                     parsed_metrics.append(parsed_metric)
+
             elif 'OID' in metric:
                 oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID']))
+
                 table_oids[metric['OID']] = (oid_object, [])
                 self._resolver.register(to_oid_tuple(metric['OID']), metric['name'])
+
                 parsed_metric = ParsedMetric(metric['name'], metric_tags, forced_type, enforce_scalar=False)
                 parsed_metrics.append(parsed_metric)
+
             else:
                 raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
 
         oids = []
         all_oids = []
         bulk_oids = []
+
         # Use bulk for SNMP version > 1 and there are enough symbols
         bulk_limit = self.bulk_threshold if self._auth_data.mpModel else 0
+
         for table, symbols in table_oids.values():
             if not symbols:
                 # No table to browse, just one symbol

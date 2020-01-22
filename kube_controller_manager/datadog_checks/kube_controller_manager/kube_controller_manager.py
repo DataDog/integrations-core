@@ -81,7 +81,7 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         "record_namespace": "kube-system",
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         self.QUEUE_METRICS_TRANSFORMERS = {
             '_adds': self.queue_adds,
             '_depth': self.queue_depth,
@@ -103,7 +103,6 @@ class KubeControllerManagerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         super(KubeControllerManagerCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 "kube_controller_manager": {

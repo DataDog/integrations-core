@@ -4,13 +4,11 @@
 import fnmatch
 import ipaddress
 import json
-import os
 import threading
 import time
 from collections import defaultdict
 
 import pysnmp.proto.rfc1902 as snmp_type
-import yaml
 from pyasn1.codec.ber import decoder
 from pysnmp import hlapi
 from pysnmp.error import PySnmpError
@@ -21,30 +19,9 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
+from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedTableMetric
-
-try:
-    from datadog_checks.base.utils.common import total_time_to_temporal_percent
-except ImportError:
-
-    # Provide fallback for agent < 6.16
-    def total_time_to_temporal_percent(total_time, scale=1000):
-        return total_time / scale * 100
-
-
-try:
-    from datadog_agent import get_config, read_persistent_cache, write_persistent_cache
-except ImportError:
-
-    def get_config(value):
-        return ''
-
-    def write_persistent_cache(value, key):
-        pass
-
-    def read_persistent_cache(value):
-        return ''
-
+from .utils import get_profile_definition
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -68,7 +45,7 @@ DEFAULT_OID_BATCH_SIZE = 10
 
 
 def reply_invalid(oid):
-    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid) or endOfMibView.isSameTypeWith(oid)
+    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
 
 
 class SnmpCheck(AgentCheck):
@@ -87,29 +64,31 @@ class SnmpCheck(AgentCheck):
 
         # Load Custom MIB directory
         self.mibs_path = init_config.get('mibs_folder')
+
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
+
         self.profiles = init_config.get('profiles', {})
         self.profiles_by_oid = {}
-        confd = get_config('confd_path')
-        for profile, profile_data in self.profiles.items():
-            filename = profile_data.get('definition_file')
-            if filename:
-                if not os.path.isabs(filename):
-                    filename = os.path.join(confd, 'snmp.d', 'profiles', filename)
-                try:
-                    with open(filename) as f:
-                        data = yaml.safe_load(f)
-                except Exception:
-                    raise ConfigurationError("Couldn't read profile '{}' in '{}'".format(profile, filename))
-            else:
-                data = profile_data['definition']
-            self.profiles[profile] = {'definition': data}
-            sys_object_oid = data.get('sysobjectid')
-            if sys_object_oid:
-                self.profiles_by_oid[sys_object_oid] = profile
+        self._load_profiles()
 
         self.instance['name'] = self._get_instance_key(self.instance)
         self._config = self._build_config(self.instance)
+
+    def _load_profiles(self):
+        """
+        Load the configured SNMP profiles and index them by sysObjectID, if possible.
+        """
+        for name, profile in self.profiles.items():
+            try:
+                definition = get_profile_definition(profile)
+            except Exception as exc:
+                raise ConfigurationError("Couldn't read profile '{}': {}".format(name, exc))
+
+            self.profiles[name] = {'definition': definition}
+
+            sys_object_oid = definition.get('sysobjectid')
+            if sys_object_oid is not None:
+                self.profiles_by_oid[sys_object_oid] = name
 
     def _build_config(self, instance):
         return InstanceConfig(
@@ -158,13 +137,16 @@ class SnmpCheck(AgentCheck):
                 try:
                     profile = self._profile_for_sysobject_oid(sys_object_oid)
                 except ConfigurationError:
-                    if not (host_config.table_oids or host_config.raw_oids):
+                    if not (host_config.all_oids or host_config.bulk_oids):
                         self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
                     host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
                 config.discovered_instances[host] = host_config
 
+                write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
+
+            # Write again at the end of the loop, in case some host have been removed since last
             write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
 
             time_elapsed = time.time() - start_time
@@ -321,7 +303,7 @@ class SnmpCheck(AgentCheck):
                 else:
                     self.warning(message)
 
-            all_binds.extend(var_binds_table)
+            all_binds.extend(var_bind for var_bind in var_binds_table if var_bind[1] is not endOfMibView)
         return all_binds, error
 
     def _start_discovery(self):
@@ -445,7 +427,7 @@ class SnmpCheck(AgentCheck):
             try:
                 tag_value = index[idx_tag[1] - 1]
             except IndexError:
-                self.log.warning('Not enough indexes, skipping this tag')
+                self.log.warning('Not enough indexes, skipping tag %s', tag_group)
                 continue
             tags.append('{}:{}'.format(tag_group, tag_value))
         for col_tag in column_tags:

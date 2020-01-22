@@ -1,5 +1,10 @@
 # CHANGELOG - elastic
 
+## 1.16.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Add OOTB support for AWS Signature Version 4 Signing. See [#5289](https://github.com/DataDog/integrations-core/pull/5289).
+
 ## 1.15.0 / 2019-12-02
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).

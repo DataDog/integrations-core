@@ -143,7 +143,7 @@ def coverage_sources(check):
     elif check == 'datadog_checks_downloader':
         package_path = 'datadog_checks/downloader'
     else:
-        package_path = 'datadog_checks/{}'.format(check)
+        package_path = f'datadog_checks/{check}'
 
     return package_path, 'tests'
 
@@ -152,7 +152,7 @@ def fix_coverage_report(check, report_file):
     report = read_file_binary(report_file)
 
     # Make every check's `tests` directory path unique so they don't get combined in UI
-    report = report.replace(b'"tests/', '"{}/tests/'.format(check).encode('utf-8'))
+    report = report.replace(b'"tests/', f'"{check}/tests/'.encode('utf-8'))
 
     write_file_binary(report_file, report)
 
@@ -172,7 +172,7 @@ def construct_pytest_options(
     e2e=False,
 ):
     # Prevent no verbosity
-    pytest_options = '--verbosity={}'.format(verbose or 1)
+    pytest_options = f'--verbosity={verbose or 1}'
 
     if not verbose:
         pytest_options += ' --tb=short'
@@ -198,10 +198,10 @@ def construct_pytest_options(
             # junit report file must contain the env name to handle multiple envs
             # $TOX_ENV_NAME is a tox injected variable
             # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
-            ' --junit-xml=.junit/test-{test_group}-$TOX_ENV_NAME.xml'
+            f' --junit-xml=.junit/test-{test_group}-$TOX_ENV_NAME.xml'
             # Junit test results class prefix
-            ' --junit-prefix={check}'
-        ).format(check=check, test_group=test_group)
+            f' --junit-prefix={check}'
+        )
 
     if coverage:
         pytest_options += (
@@ -216,19 +216,19 @@ def construct_pytest_options(
         )
 
     if marker:
-        pytest_options += ' -m "{}"'.format(marker)
+        pytest_options += f' -m "{marker}"'
 
     if test_filter:
-        pytest_options += ' -k "{}"'.format(test_filter)
+        pytest_options += f' -k "{test_filter}"'
 
     if pytest_args:
-        pytest_options += ' {}'.format(pytest_args)
+        pytest_options += f' {pytest_args}'
 
     return pytest_options
 
 
 def pytest_coverage_sources(*checks):
-    return ' '.join(' '.join('--cov={}'.format(source) for source in coverage_sources(check)) for check in checks)
+    return ' '.join(' '.join(f'--cov={source}' for source in coverage_sources(check)) for check in checks)
 
 
 def testable_files(files):

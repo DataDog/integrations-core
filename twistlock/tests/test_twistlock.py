@@ -51,20 +51,24 @@ class MockResponse:
         return json.loads(self._json)
 
 
-def mock_get(url, *args, **kwargs):
-    split_url = url.split('/')
-    path = split_url[-1]
-    f_name = os.path.join(HERE, 'fixtures', "{}.json".format(path))
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-        return MockResponse(text_data)
+def mock_get_factory(fixture_group):
+    def mock_get(url, *args, **kwargs):
+        split_url = url.split('/')
+        path = split_url[-1]
+        f_name = os.path.join(HERE, 'fixtures', fixture_group, "{}.json".format(path))
+        with open(f_name, 'r') as f:
+            text_data = f.read()
+            return MockResponse(text_data)
+
+    return mock_get
 
 
-def test_check(aggregator):
+@pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
+def test_check(aggregator, fixture_group):
 
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get, autospec=True):
+    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True):
         check.check(instance)
         check.check(instance)
 
@@ -75,7 +79,8 @@ def test_check(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_config_project(aggregator):
+@pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
+def test_config_project(aggregator, fixture_group):
 
     project = 'foo'
     project_tag = 'project:{}'.format(project)
@@ -84,7 +89,7 @@ def test_config_project(aggregator):
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get, autospec=True) as r:
+    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True) as r:
         check.check(instance)
 
         r.assert_called_with(

@@ -1,5 +1,15 @@
 # CHANGELOG - process
 
+## 1.11.1 / 2020-01-15
+
+* [Fixed] Fix debug logging. See [#5460](https://github.com/DataDog/integrations-core/pull/5460).
+
+## 1.11.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Uncomment required config: search_string. See [#5359](https://github.com/DataDog/integrations-core/pull/5359).
+
 ## 1.10.4 / 2019-12-23
 
 * [Fixed] Add debug logging when processes are not found. See [#5313](https://github.com/DataDog/integrations-core/pull/5313).

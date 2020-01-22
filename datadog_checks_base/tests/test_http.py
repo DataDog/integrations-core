@@ -493,25 +493,32 @@ class TestAuth:
 
             m.assert_called_once_with(aws_host='uri', aws_region='us-east-1', aws_service='es')
 
-    def test_config_aws_no_host(self):
-        instance = {'auth_type': 'aws'}
+    @pytest.mark.parametrize(
+        'case, instance, match',
+        [
+            ('no host', {'auth_type': 'aws'}, '^AWS auth requires the setting `aws_host`$'),
+            ('no region', {'auth_type': 'aws', 'aws_host': 'uri'}, '^AWS auth requires the setting `aws_region`$'),
+            (
+                'no service',
+                {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'us-east-1'},
+                '^AWS auth requires the setting `aws_service`$',
+            ),
+            ('empty host', {'auth_type': 'aws', 'aws_host': ''}, '^AWS auth requires the setting `aws_host`$'),
+            (
+                'empty region',
+                {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': ''},
+                '^AWS auth requires the setting `aws_region`$',
+            ),
+            (
+                'empty service',
+                {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'us-east-1', 'aws_service': ''},
+                '^AWS auth requires the setting `aws_service`$',
+            ),
+        ],
+    )
+    def test_config_aws_invalid_cases(self, case, instance, match):
         init_config = {}
-
-        with pytest.raises(ConfigurationError, match='^AWS auth requires the setting `aws_host`$'):
-            RequestsWrapper(instance, init_config)
-
-    def test_config_aws_no_region(self):
-        instance = {'auth_type': 'aws', 'aws_host': 'uri'}
-        init_config = {}
-
-        with pytest.raises(ConfigurationError, match='^AWS auth requires the setting `aws_region`$'):
-            RequestsWrapper(instance, init_config)
-
-    def test_config_aws_no_service(self):
-        instance = {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'us-east-1'}
-        init_config = {}
-
-        with pytest.raises(ConfigurationError, match='^AWS auth requires the setting `aws_service`$'):
+        with pytest.raises(ConfigurationError, match=match):
             RequestsWrapper(instance, init_config)
 
 

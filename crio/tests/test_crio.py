@@ -33,7 +33,7 @@ def test_crio(aggregator, mock_data):
     Testing crio.
     """
 
-    c = CrioCheck(CHECK_NAME, None, {}, [instance])
+    c = CrioCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     aggregator.assert_metric(NAMESPACE + '.operations.count')
     aggregator.assert_metric(NAMESPACE + '.operations.latency.count')

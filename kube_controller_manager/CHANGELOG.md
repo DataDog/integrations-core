@@ -1,5 +1,10 @@
 # CHANGELOG - Kube_controller_manager
 
+## 1.5.0 / 2020-01-13
+
+* [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
+* [Fixed] Fix logger method bug. See [#5395](https://github.com/DataDog/integrations-core/pull/5395).
+
 ## 1.4.0 / 2019-07-19
 
 * [Added] Add telemetry metrics counter by ksm collector. See [#4125](https://github.com/DataDog/integrations-core/pull/4125).

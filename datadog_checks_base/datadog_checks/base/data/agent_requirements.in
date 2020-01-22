@@ -50,6 +50,7 @@ pysocks==1.7.0
 python-binary-memcached==0.26.1; sys_platform != 'win32'
 python-dateutil==2.8.0
 python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
+pytz==2019.3
 pyvmomi==v6.5.0.2017.5-1
 pywin32==227; sys_platform == 'win32'
 pyyaml==5.1
@@ -66,7 +67,7 @@ service_identity[idna]==18.1.0
 simplejson==3.6.5
 six==1.12.0
 supervisor==4.0.1
-tuf==0.12.1
+tuf==0.12.2
 uptime==3.0.1
 vertica-python==0.10.1
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'

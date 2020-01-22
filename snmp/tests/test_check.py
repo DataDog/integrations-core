@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import ipaddress
+import logging
 import os
 import socket
 import time
@@ -580,18 +581,47 @@ def test_profile_sys_object_prefix(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_profile_sys_object_unknown(aggregator):
+def test_profile_sys_object_unknown(aggregator, caplog):
     """If the fetched sysObjectID is not referenced by any profiles, check fails."""
-    instance = common.generate_instance_config([])
+    caplog.set_level(logging.WARNING)
+
+    unknown_sysobjectid = '1.2.3.4.5'
     init_config = {
-        'profiles': {'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.2.3.4.5'}}}
+        'profiles': {
+            'profile1': {'definition': {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': unknown_sysobjectid}}
+        }
     }
+
+    # Via config...
+
+    instance = common.generate_instance_config([])
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
-
     aggregator.all_metrics_asserted()
+
+    # Via network discovery...
+
+    host = socket.gethostbyname(common.HOST)
+    network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
+    instance = {
+        'name': 'snmp_conf',
+        'network_address': network,
+        'port': common.PORT,
+        'community_string': 'public',
+    }
+
+    check = SnmpCheck('snmp', init_config, [instance])
+    check._start_discovery()
+    time.sleep(2)  # Give discovery a chance to fail finding a matching profile.
+    check.check(instance)
+
+    for record in caplog.records:
+        if "Host {} didn't match a profile".format(host) in record.message:
+            break
+    else:
+        pytest.fail()
 
 
 def test_profile_sys_object_no_metrics():

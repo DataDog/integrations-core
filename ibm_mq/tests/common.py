@@ -5,6 +5,7 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
@@ -93,80 +94,81 @@ E2E_METADATA = {
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib'},
 }
 
-
 QUEUE_METRICS = [
-    'ibm_mq.queue.service_interval',
-    'ibm_mq.queue.inhibit_put',
-    'ibm_mq.queue.depth_low_limit',
-    'ibm_mq.queue.inhibit_get',
-    'ibm_mq.queue.harden_get_backout',
-    'ibm_mq.queue.service_interval_event',
-    'ibm_mq.queue.trigger_control',
-    'ibm_mq.queue.usage',
-    'ibm_mq.queue.scope',
-    'ibm_mq.queue.type',
-    'ibm_mq.queue.depth_max',
-    'ibm_mq.queue.backout_threshold',
-    'ibm_mq.queue.depth_high_event',
-    'ibm_mq.queue.depth_low_event',
-    'ibm_mq.queue.trigger_message_priority',
-    'ibm_mq.queue.depth_current',
-    'ibm_mq.queue.depth_max_event',
-    'ibm_mq.queue.open_input_count',
-    'ibm_mq.queue.persistence',
-    'ibm_mq.queue.trigger_depth',
-    'ibm_mq.queue.max_message_length',
-    'ibm_mq.queue.depth_high_limit',
-    'ibm_mq.queue.priority',
-    'ibm_mq.queue.input_open_option',
-    'ibm_mq.queue.message_delivery_sequence',
-    'ibm_mq.queue.retention_interval',
-    'ibm_mq.queue.open_output_count',
-    'ibm_mq.queue.trigger_type',
-    'ibm_mq.queue.depth_percent',
-    'ibm_mq.queue.high_q_depth',
-    'ibm_mq.queue.msg_deq_count',
-    'ibm_mq.queue.msg_enq_count',
-    'ibm_mq.queue.time_since_reset',
+    ('ibm_mq.queue.service_interval', GAUGE),
+    ('ibm_mq.queue.inhibit_put', GAUGE),
+    ('ibm_mq.queue.depth_low_limit', GAUGE),
+    ('ibm_mq.queue.inhibit_get', GAUGE),
+    ('ibm_mq.queue.harden_get_backout', GAUGE),
+    ('ibm_mq.queue.service_interval_event', GAUGE),
+    ('ibm_mq.queue.trigger_control', GAUGE),
+    ('ibm_mq.queue.usage', GAUGE),
+    ('ibm_mq.queue.scope', GAUGE),
+    ('ibm_mq.queue.type', GAUGE),
+    ('ibm_mq.queue.depth_max', GAUGE),
+    ('ibm_mq.queue.backout_threshold', GAUGE),
+    ('ibm_mq.queue.depth_high_event', GAUGE),
+    ('ibm_mq.queue.depth_low_event', GAUGE),
+    ('ibm_mq.queue.trigger_message_priority', GAUGE),
+    ('ibm_mq.queue.depth_current', GAUGE),
+    ('ibm_mq.queue.depth_max_event', GAUGE),
+    ('ibm_mq.queue.open_input_count', GAUGE),
+    ('ibm_mq.queue.persistence', GAUGE),
+    ('ibm_mq.queue.trigger_depth', GAUGE),
+    ('ibm_mq.queue.max_message_length', GAUGE),
+    ('ibm_mq.queue.depth_high_limit', GAUGE),
+    ('ibm_mq.queue.priority', GAUGE),
+    ('ibm_mq.queue.input_open_option', GAUGE),
+    ('ibm_mq.queue.message_delivery_sequence', GAUGE),
+    ('ibm_mq.queue.retention_interval', GAUGE),
+    ('ibm_mq.queue.open_output_count', GAUGE),
+    ('ibm_mq.queue.trigger_type', GAUGE),
+    ('ibm_mq.queue.depth_percent', GAUGE),
+    ('ibm_mq.queue.high_q_depth', GAUGE),
+    ('ibm_mq.queue.msg_deq_count', COUNT),
+    ('ibm_mq.queue.msg_enq_count', COUNT),
+    ('ibm_mq.queue.time_since_reset', COUNT),
 ]
 
-QUEUE_STATUS_METRICS = ['ibm_mq.queue.uncommitted_msgs']
+QUEUE_STATUS_METRICS = [
+    ('ibm_mq.queue.uncommitted_msgs', GAUGE),
+]
 
 CHANNEL_METRICS = [
-    'ibm_mq.channel.batch_size',
-    'ibm_mq.channel.batch_interval',
-    'ibm_mq.channel.long_retry',
-    'ibm_mq.channel.long_timer',
-    'ibm_mq.channel.max_message_length',
-    'ibm_mq.channel.short_retry',
-    'ibm_mq.channel.disc_interval',
-    'ibm_mq.channel.hb_interval',
-    'ibm_mq.channel.keep_alive_interval',
-    'ibm_mq.channel.mr_count',
-    'ibm_mq.channel.mr_interval',
-    'ibm_mq.channel.network_priority',
-    'ibm_mq.channel.npm_speed',
-    'ibm_mq.channel.sharing_conversations',
-    'ibm_mq.channel.short_timer',
+    ('ibm_mq.channel.batch_size', GAUGE),
+    ('ibm_mq.channel.batch_interval', GAUGE),
+    ('ibm_mq.channel.long_retry', GAUGE),
+    ('ibm_mq.channel.long_timer', GAUGE),
+    ('ibm_mq.channel.max_message_length', GAUGE),
+    ('ibm_mq.channel.short_retry', GAUGE),
+    ('ibm_mq.channel.disc_interval', GAUGE),
+    ('ibm_mq.channel.hb_interval', GAUGE),
+    ('ibm_mq.channel.keep_alive_interval', GAUGE),
+    ('ibm_mq.channel.mr_count', GAUGE),
+    ('ibm_mq.channel.mr_interval', GAUGE),
+    ('ibm_mq.channel.network_priority', GAUGE),
+    ('ibm_mq.channel.npm_speed', GAUGE),
+    ('ibm_mq.channel.sharing_conversations', GAUGE),
+    ('ibm_mq.channel.short_timer', GAUGE),
 ]
 
 CHANNEL_STATUS_METRICS = [
-    'ibm_mq.channel.buffers_rcvd',
-    'ibm_mq.channel.buffers_sent',
-    'ibm_mq.channel.bytes_rcvd',
-    'ibm_mq.channel.bytes_sent',
-    'ibm_mq.channel.channel_status',
-    'ibm_mq.channel.mca_status',
-    'ibm_mq.channel.msgs',
-    'ibm_mq.channel.ssl_key_resets',
+    ('ibm_mq.channel.buffers_rcvd', GAUGE),
+    ('ibm_mq.channel.buffers_sent', GAUGE),
+    ('ibm_mq.channel.bytes_rcvd', GAUGE),
+    ('ibm_mq.channel.bytes_sent', GAUGE),
+    ('ibm_mq.channel.channel_status', GAUGE),
+    ('ibm_mq.channel.mca_status', GAUGE),
+    ('ibm_mq.channel.msgs', GAUGE),
+    ('ibm_mq.channel.ssl_key_resets', GAUGE),
 ]
 
 METRICS = (
     [
-        'ibm_mq.queue_manager.dist_lists',
-        'ibm_mq.queue_manager.max_msg_list',
-        'ibm_mq.channel.channels',
-        'ibm_mq.channel.count',
+        ('ibm_mq.queue_manager.dist_lists', GAUGE),
+        ('ibm_mq.queue_manager.max_msg_list', GAUGE),
+        ('ibm_mq.channel.channels', GAUGE),
+        ('ibm_mq.channel.count', GAUGE),
     ]
     + QUEUE_METRICS
     + QUEUE_STATUS_METRICS
