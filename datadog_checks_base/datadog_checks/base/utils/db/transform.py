@@ -26,6 +26,9 @@ SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
 
 def get_tag(transformers, column_name, **modifiers):
+    """
+    modifiers: boolean
+    """
     template = '{}:{{}}'.format(column_name)
     boolean = is_affirmative(modifiers.pop('boolean', None))
 
@@ -50,6 +53,9 @@ def get_monotonic_gauge(transformers, column_name, **modifiers):
 
 
 def get_temporal_percent(transformers, column_name, **modifiers):
+    """
+    modifiers: scale
+    """
     scale = modifiers.pop('scale', None)
     if scale is None:
         raise ValueError('the `scale` parameter is required')
@@ -74,6 +80,9 @@ def get_temporal_percent(transformers, column_name, **modifiers):
 
 
 def get_match(transformers, column_name, **modifiers):
+    """
+    modifiers: items
+    """
     # Do work in a separate function to avoid having to `del` a bunch of variables
     compiled_items = _compile_match_items(transformers, modifiers)
 
@@ -86,6 +95,9 @@ def get_match(transformers, column_name, **modifiers):
 
 
 def get_service_check(transformers, column_name, **modifiers):
+    """
+    modifiers: status_map
+    """
     # Do work in a separate function to avoid having to `del` a bunch of variables
     status_map = _compile_service_check_statuses(modifiers)
 
@@ -98,6 +110,9 @@ def get_service_check(transformers, column_name, **modifiers):
 
 
 def get_time_elapsed(transformers, column_name, **modifiers):
+    """
+    modifiers: format
+    """
     time_format = modifiers.pop('format', 'native')
     if not isinstance(time_format, str):
         raise ValueError('the `format` parameter must be a string')
@@ -120,6 +135,9 @@ def get_time_elapsed(transformers, column_name, **modifiers):
 
 
 def get_expression(transformers, name, **modifiers):
+    """
+    modifiers: expression, verbose, submit_type
+    """
     available_sources = modifiers.pop('sources')
 
     expression = modifiers.pop('expression', None)
@@ -172,6 +190,9 @@ def get_expression(transformers, name, **modifiers):
 
 
 def get_percent(transformers, name, **modifiers):
+    """
+    modifiers: part, total
+    """
     available_sources = modifiers.pop('sources')
 
     part = modifiers.pop('part', None)

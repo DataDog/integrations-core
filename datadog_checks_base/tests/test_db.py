@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta
 
 import pytest
 import pytz
@@ -30,17 +30,6 @@ def create_query_manager(*args, **kwargs):
     check.check_id = 'test:instance'
 
     return QueryManager(check, executor, [Query(arg) for arg in args], **kwargs)
-
-
-class EST(tzinfo):
-    def utcoffset(self, dt):
-        return timedelta(hours=-5) + self.dst(dt)
-
-    def dst(self, dt):
-        return timedelta(0)
-
-    def tzname(self, dt):
-        return 'Eastern Standard Time'
 
 
 class TestQueryResultIteration:
@@ -1531,7 +1520,7 @@ class TestColumnTransformers:
                 ],
                 'tags': ['test:bar'],
             },
-            executor=mock_executor([['tag1', datetime.now(EST()) + timedelta(hours=-1)]]),
+            executor=mock_executor([['tag1', datetime.now(pytz.timezone('EST')) + timedelta(hours=-1)]]),
             tags=['test:foo'],
         )
         query_manager.compile_queries()
