@@ -496,7 +496,7 @@ class __AgentCheck(object):
         Logs a deprecation notice at most once per AgentCheck instance, for the pre-defined `deprecation_key`
         """
         if not self._deprecations[deprecation_key][0]:
-            self.log.warning(self._deprecations[deprecation_key][1])
+            self.warning(self._deprecations[deprecation_key][1])
             self._deprecations[deprecation_key][0] = True
 
     # TODO: Remove once our checks stop calling it
