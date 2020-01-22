@@ -21,7 +21,7 @@ from datadog_checks.base.errors import CheckException
 
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedTableMetric
-from .utils import get_profile_definition
+from .profiles import get_profile_definition
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(

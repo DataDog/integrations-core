@@ -1,3 +1,10 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
+"""
+Utilities and helpers related to SNMP profiles.
+"""
+
 import os
 
 import yaml
@@ -6,15 +13,10 @@ from .compat import get_config
 
 
 def get_profile_definition(profile):
+    # type: (dict) -> dict
     """
     Return the definition of an SNMP profile,
     either from the filesystem or from the profile configuration itself.
-
-    Parameters:
-    * profile (dict)
-
-    Returns:
-    * definition (dict)
 
     Raises:
     * Exception: if the definition file was not found or is malformed.
@@ -28,6 +30,7 @@ def get_profile_definition(profile):
 
 
 def _read_profile_definition(definition_file):
+    # type: (str) -> dict
     confd = get_config('confd_path')
 
     if not os.path.isabs(definition_file):
