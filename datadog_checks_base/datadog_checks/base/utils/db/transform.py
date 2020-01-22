@@ -4,12 +4,13 @@
 from __future__ import division
 
 import re
+from datetime import datetime
 
 from ... import is_affirmative
 from ...constants import ServiceCheck
 from .. import constants
 from ..common import compute_percent, total_time_to_temporal_percent
-from .utils import create_extra_transformer
+from .utils import create_extra_transformer, normalize_datetime
 
 # Used for the user-defined `expression`s
 ALLOWED_GLOBALS = {
@@ -25,6 +26,9 @@ SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
 
 def get_tag(transformers, column_name, **modifiers):
+    """
+    modifiers: boolean
+    """
     template = '{}:{{}}'.format(column_name)
     boolean = is_affirmative(modifiers.pop('boolean', None))
 
@@ -49,6 +53,9 @@ def get_monotonic_gauge(transformers, column_name, **modifiers):
 
 
 def get_temporal_percent(transformers, column_name, **modifiers):
+    """
+    modifiers: scale
+    """
     scale = modifiers.pop('scale', None)
     if scale is None:
         raise ValueError('the `scale` parameter is required')
@@ -73,6 +80,9 @@ def get_temporal_percent(transformers, column_name, **modifiers):
 
 
 def get_match(transformers, column_name, **modifiers):
+    """
+    modifiers: items
+    """
     # Do work in a separate function to avoid having to `del` a bunch of variables
     compiled_items = _compile_match_items(transformers, modifiers)
 
@@ -85,6 +95,9 @@ def get_match(transformers, column_name, **modifiers):
 
 
 def get_service_check(transformers, column_name, **modifiers):
+    """
+    modifiers: status_map
+    """
     # Do work in a separate function to avoid having to `del` a bunch of variables
     status_map = _compile_service_check_statuses(modifiers)
 
@@ -96,7 +109,35 @@ def get_service_check(transformers, column_name, **modifiers):
     return service_check
 
 
+def get_time_elapsed(transformers, column_name, **modifiers):
+    """
+    modifiers: format
+    """
+    time_format = modifiers.pop('format', 'native')
+    if not isinstance(time_format, str):
+        raise ValueError('the `format` parameter must be a string')
+
+    gauge = transformers['gauge'](transformers, column_name, **modifiers)
+
+    if time_format == 'native':
+
+        def time_elapsed(_, value, **kwargs):
+            value = normalize_datetime(value)
+            gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
+
+    else:
+
+        def time_elapsed(_, value, **kwargs):
+            value = normalize_datetime(datetime.strptime(value, time_format))
+            gauge(_, (datetime.now(value.tzinfo) - value).total_seconds(), **kwargs)
+
+    return time_elapsed
+
+
 def get_expression(transformers, name, **modifiers):
+    """
+    modifiers: expression, verbose, submit_type
+    """
     available_sources = modifiers.pop('sources')
 
     expression = modifiers.pop('expression', None)
@@ -149,6 +190,9 @@ def get_expression(transformers, name, **modifiers):
 
 
 def get_percent(transformers, name, **modifiers):
+    """
+    modifiers: part, total
+    """
     available_sources = modifiers.pop('sources')
 
     part = modifiers.pop('part', None)
@@ -183,6 +227,7 @@ COLUMN_TRANSFORMERS = {
     'tag': get_tag,
     'match': get_match,
     'service_check': get_service_check,
+    'time_elapsed': get_time_elapsed,
 }
 
 EXTRA_TRANSFORMERS = {'expression': get_expression, 'percent': get_percent}
