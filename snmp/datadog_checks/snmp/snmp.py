@@ -217,12 +217,6 @@ class SnmpCheck(AgentCheck):
         enforce_constraints,  # type: bool
     ):
         # type: (...) -> typing.Tuple[typing.List[ObjectType], typing.Optional[str]]
-        # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
-        # It returns the wrong value when the OID passeed is referring to a specific leaf.
-        # For example:
-        # snmpgetnext -v2c -c public localhost:11111 1.3.6.1.2.1.25.4.2.1.7.222
-        # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
-        # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None  # type: typing.Optional[str]
         first_oid = 0
         all_binds = []  # type: typing.List[ObjectType]

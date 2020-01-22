@@ -55,9 +55,13 @@ class OID(object):
         # type: () -> str
         return '.'.join(map(str, self.as_tuple()))
 
+    def as_object_identity(self):
+        # type: () -> ObjectIdentity
+        return ObjectIdentity(self.as_tuple())
+
     def as_object_type(self):
         # type: () -> ObjectType
-        return ObjectType(ObjectIdentity(self.as_tuple()))
+        return ObjectType(self.as_object_identity())
 
     def __repr__(self):
         # type: () -> str

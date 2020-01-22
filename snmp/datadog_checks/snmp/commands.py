@@ -11,11 +11,12 @@ http://net-snmp.sourceforge.net/tutorial/tutorial-5/commands/index.html
 import logging
 import typing
 
-from pysnmp.hlapi import ObjectType, bulkCmd, getCmd, nextCmd
+from pysnmp.hlapi import bulkCmd, getCmd, nextCmd
 
 from . import utils
 from .config import InstanceConfig
 from .models import SNMPCommandResult
+from .types import ObjectType
 
 # NOTE: commands that have not been wrapped around yet are exposed as-is here.
 __all__ = ['bulkCmd', 'nextCmd', 'snmp_get']
@@ -41,7 +42,7 @@ def snmp_get(
     log.debug('Running SNMP command GET on OIDs: %s', oids)
 
     options = {'lookupMib': enforce_constraints}
-    results = config.call_command(getCmd, *oids, **options)
+    results = config.call_command(getCmd, oids, **options)
 
     # As far as we're concerned, PySNMP returns a generator of only 1 result in the case of a GET.
     # (We can actually `.send()` a new set of OIDs into the generator, and PySNMP would issue a new

@@ -12,8 +12,9 @@ from pysnmp.smi import builder, view
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from . import utils
-from .models import OID, ObjectType, SNMPCommandResult
+from .models import OID, SNMPCommandResult
 from .resolver import OIDResolver
+from .types import ObjectType
 
 
 class ParsedMetric(object):
@@ -116,13 +117,13 @@ class InstanceConfig:
     def call_cmd(self, cmd, *args, **kwargs):
         return cmd(self._snmp_engine, self._auth_data, self._transport, self._context_data, *args, **kwargs)
 
-    def call_command(self, command, *var_binds, **options):
-        # type: (typing.Callable, ObjectType, typing.Any) -> typing.Iterator[SNMPCommandResult]
+    def call_command(self, command, oids, **options):
+        # type: (typing.Callable, typing.Sequence[ObjectType], typing.Any) -> typing.Iterator[SNMPCommandResult]
         """
         Call a PySNMP command, injecting configuration stored on this instance.
         """
         return utils.call_pysnmp_command(
-            command, self._snmp_engine, self._auth_data, self._transport, self._context_data, *var_binds, **options
+            command, self._snmp_engine, self._auth_data, self._transport, self._context_data, *oids, **options
         )
 
     @staticmethod
