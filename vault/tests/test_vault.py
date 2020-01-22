@@ -8,6 +8,7 @@ import pytest
 import requests
 
 from datadog_checks.vault import Vault
+from datadog_checks.vault.errors import ApiUnreachable
 
 from .common import INSTANCES, MockResponse
 from .utils import run_check
@@ -106,12 +107,10 @@ class TestVault:
 
     def test_api_unreachable(self):
         instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with pytest.raises(requests.exceptions.RequestException):
-            c = Vault(Vault.CHECK_NAME, {}, [instance])
-            c.access_api(instance['api_url'], ignore_status_codes=None)
-
-        assert c.access_api.msg is not None
+        with pytest.raises(ApiUnreachable, match=r"Error accessing Vault endpoint.*"):
+            c.access_api("http://foo.bar", ignore_status_codes=None)
 
     def test_service_check_unsealed_ok(self, aggregator):
         instance = INSTANCES['main']
