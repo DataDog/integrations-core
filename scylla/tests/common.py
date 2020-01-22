@@ -4,13 +4,16 @@
 CHECK_NAME = 'scylla'
 NAMESPACE = 'scylla.'
 
+# fmt: off
 INSTANCE_METRIC_GROUP_MAP = {
     'scylla.alien': [
         'scylla.alien.receive_batch_queue_length',
         'scylla.alien.total_received_messages',
         'scylla.alien.total_sent_messages',
     ],
-    'scylla.batchlog_manager': ['scylla.batchlog_manager.total_write_replay_attempts'],
+    'scylla.batchlog_manager': [
+        'scylla.batchlog_manager.total_write_replay_attempts',
+    ],
     'scylla.cache': [
         'scylla.cache.active_reads',
         'scylla.cache.bytes_total',
@@ -57,7 +60,9 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.commitlog.slack',
         'scylla.commitlog.unused_segments',
     ],
-    'scylla.compaction_manager': ['scylla.compaction_manager.compactions'],
+    'scylla.compaction_manager': [
+        'scylla.compaction_manager.compactions',
+    ],
     'scylla.cql': [
         'scylla.cql.authorized_prepared_statements_cache_evictions',
         'scylla.cql.authorized_prepared_statements_cache_size',
@@ -135,7 +140,9 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.execution_stages.tasks_preempted',
         'scylla.execution_stages.tasks_scheduled',
     ],
-    'scylla.gossip': ['scylla.gossip.heart_beat'],
+    'scylla.gossip': [
+        'scylla.gossip.heart_beat',
+    ],
     'scylla.hints': [
         'scylla.hints.for_views_manager_corrupted_files',
         'scylla.hints.for_views_manager_discarded',
@@ -198,9 +205,17 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.memory.total_memory',
         'scylla.memory.virtual_dirty_bytes',
     ],
-    'scylla.memtables': ['scylla.memtables.pending_flushes', 'scylla.memtables.pending_flushes_bytes'],
-    'scylla.node': ['scylla.node.operation_mode'],
-    'scylla.query_processor': ['scylla.query_processor.queries', 'scylla.query_processor.statements_prepared'],
+    'scylla.memtables': [
+        'scylla.memtables.pending_flushes',
+        'scylla.memtables.pending_flushes_bytes',
+    ],
+    'scylla.node': [
+        'scylla.node.operation_mode'
+    ],
+    'scylla.query_processor': [
+        'scylla.query_processor.queries',
+        'scylla.query_processor.statements_prepared',
+    ],
     'scylla.reactor': [
         'scylla.reactor.aio_bytes_read',
         'scylla.reactor.aio_bytes_write',
@@ -233,7 +248,9 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.scheduler.tasks_processed',
         'scylla.scheduler.time_spent_on_task_quota_violations_ms',
     ],
-    'scylla.scylladb': ['scylla.scylladb.current_version'],
+    'scylla.scylladb': [
+        'scylla.scylladb.current_version',
+    ],
     'scylla.sstables': [
         'scylla.sstables.capped_local_deletion_time',
         'scylla.sstables.capped_tombstone_deletion_time',
@@ -296,8 +313,15 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.storage.proxy_replica_received_counter_updates',
         'scylla.storage.proxy_replica_received_mutations',
     ],
-    'scylla.streaming': ['scylla.streaming.total_incoming_bytes', 'scylla.streaming.total_outgoing_bytes'],
-    'scylla.thrift': ['scylla.thrift.current_connections', 'scylla.thrift.served', 'scylla.thrift.thrift_connections'],
+    'scylla.streaming': [
+        'scylla.streaming.total_incoming_bytes',
+        'scylla.streaming.total_outgoing_bytes',
+    ],
+    'scylla.thrift': [
+        'scylla.thrift.current_connections',
+        'scylla.thrift.served',
+        'scylla.thrift.thrift_connections',
+    ],
     'scylla.tracing': [
         'scylla.tracing.active_sessions',
         'scylla.tracing.cached_records',
@@ -319,6 +343,7 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.transport.requests_serving',
     ],
 }
+# fmt: on
 
 
 INSTANCE_DEFAULT_GROUPS = [
