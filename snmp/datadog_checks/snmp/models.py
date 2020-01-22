@@ -61,7 +61,7 @@ class OID(object):
 
     def __repr__(self):
         # type: () -> str
-        return '<OID: {}>'.format(self.as_string())
+        return 'OID({!r})'.format(self.as_string())
 
 
 class Variable(object):
