@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import typing
 from collections import defaultdict
 
 from pyasn1.type.univ import OctetString
@@ -10,12 +11,9 @@ from pysnmp.smi import builder, view
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
+from . import utils
+from .models import OID, ObjectType, SNMPCommandResult
 from .resolver import OIDResolver
-
-
-def to_oid_tuple(oid_string):
-    """Return a OID tuple from a OID string."""
-    return tuple(map(int, oid_string.lstrip('.').split('.')))
 
 
 class ParsedMetric(object):
@@ -118,6 +116,15 @@ class InstanceConfig:
     def call_cmd(self, cmd, *args, **kwargs):
         return cmd(self._snmp_engine, self._auth_data, self._transport, self._context_data, *args, **kwargs)
 
+    def call_command(self, command, *var_binds, **options):
+        # type: (typing.Callable, ObjectType, typing.Any) -> typing.Iterator[SNMPCommandResult]
+        """
+        Call a PySNMP command, injecting configuration stored on this instance.
+        """
+        return utils.call_pysnmp_command(
+            command, self._snmp_engine, self._auth_data, self._transport, self._context_data, *var_binds, **options
+        )
+
     @staticmethod
     def create_snmp_engine(mibs_path):
         """
@@ -216,7 +223,7 @@ class InstanceConfig:
             if isinstance(symbol, dict):
                 symbol_oid = symbol['OID']
                 symbol = symbol['name']
-                self._resolver.register(to_oid_tuple(symbol_oid), symbol)
+                self._resolver.register(OID(symbol_oid).as_tuple(), symbol)
                 identity = hlapi.ObjectIdentity(symbol_oid)
             else:
                 identity = hlapi.ObjectIdentity(mib, symbol)
@@ -327,7 +334,7 @@ class InstanceConfig:
                 oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID']))
 
                 table_oids[metric['OID']] = (oid_object, [])
-                self._resolver.register(to_oid_tuple(metric['OID']), metric['name'])
+                self._resolver.register(OID(metric['OID']).as_tuple(), metric['name'])
 
                 parsed_metric = ParsedMetric(metric['name'], metric_tags, forced_type, enforce_scalar=False)
                 parsed_metrics.append(parsed_metric)

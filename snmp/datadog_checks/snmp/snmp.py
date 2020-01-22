@@ -6,26 +6,29 @@ import ipaddress
 import json
 import threading
 import time
+import typing
 from collections import defaultdict
 
 import pysnmp.proto.rfc1902 as snmp_type
 from pyasn1.codec.ber import decoder
-from pysnmp import hlapi
-from pysnmp.error import PySnmpError
-from pysnmp.smi import builder
-from pysnmp.smi.exval import endOfMibView, noSuchInstance, noSuchObject
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
+from . import commands, utils
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedTableMetric
+from .exceptions import PySnmpError
 from .profiles import get_profile_definition
-
-# Additional types that are not part of the SNMP protocol. cf RFC 2856
-CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
-    'HCNUM-TC', 'CounterBasedGauge64', 'ZeroBasedCounter64'
+from .types import (
+    CounterBasedGauge64,
+    ObjectIdentity,
+    ObjectType,
+    ZeroBasedCounter64,
+    endOfMibView,
+    noSuchInstance,
+    noSuchObject,
 )
 
 # Metric type that we support
@@ -181,7 +184,7 @@ class SnmpCheck(AgentCheck):
             try:
                 self.log.debug('Running SNMP command getBulk on OID %r', oid)
                 binds_iterator = config.call_cmd(
-                    hlapi.bulkCmd,
+                    commands.bulkCmd,
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
                     oid,
@@ -207,44 +210,47 @@ class SnmpCheck(AgentCheck):
         results.default_factory = None
         return results, error
 
-    def fetch_oids(self, config, oids, enforce_constraints):
+    def fetch_oids(
+        self,
+        config,  # type: InstanceConfig
+        oids,  # type: typing.Sequence[ObjectType]
+        enforce_constraints,  # type: bool
+    ):
+        # type: (...) -> typing.Tuple[typing.List[ObjectType], typing.Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passeed is referring to a specific leaf.
         # For example:
         # snmpgetnext -v2c -c public localhost:11111 1.3.6.1.2.1.25.4.2.1.7.222
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
-        error = None
+        error = None  # type: typing.Optional[str]
         first_oid = 0
-        all_binds = []
+        all_binds = []  # type: typing.List[ObjectType]
+
         while first_oid < len(oids):
             try:
+                # SNMP hosts can respond to requests for a batch of OIDs, so we
+                # use that to make less round trips to the host.
                 oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
-                self.log.debug('Running SNMP command get on OIDS %s', oids_batch)
-                error_indication, error_status, _, var_binds = next(
-                    config.call_cmd(hlapi.getCmd, *oids_batch, lookupMib=enforce_constraints)
-                )
-                self.log.debug('Returned vars: %s', var_binds)
 
-                self.raise_on_error_indication(error_indication, config.ip_address)
+                # Try fetching these OIDs via GET. If the SNMP host hasn't found
+                # some of them, we'll try again with GETNEXT.
+                # NOTE: we shouldn't start with GETNEXT, because that would return wrong
+                # results for OIDs that refer to specific leafs (i.e. those for which GET would return a result).
+                result = commands.snmp_get(config, oids_batch, enforce_constraints, self.log)
 
-                missing_results = []
+                found, missing = utils.partition_missing_oids(result)
+                all_binds.extend(variable.var_bind for variable in found)
 
-                for var in var_binds:
-                    result_oid, value = var
-                    if reply_invalid(value):
-                        oid_tuple = result_oid.asTuple()
-                        missing_results.append(hlapi.ObjectType(hlapi.ObjectIdentity(oid_tuple)))
-                    else:
-                        all_binds.append(var)
+                if missing:
+                    missing_var_binds = [variable.var_bind for variable in missing]
 
-                if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
                     # Don't walk through the entire MIB, stop at end of table
-                    self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
+                    self.log.debug('Running SNMP command getNext on OIDS %s', missing_var_binds)
                     binds_iterator = config.call_cmd(
-                        hlapi.nextCmd,
-                        *missing_results,
+                        commands.nextCmd,
+                        *missing_var_binds,
                         lookupMib=enforce_constraints,
                         ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                         lexicographicMode=False
@@ -258,17 +264,17 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
-            # if we fail move onto next batch
-            first_oid += self.oid_batch_size
+            finally:
+                first_oid += self.oid_batch_size
 
         return all_binds, error
 
     def fetch_sysobject_oid(self, config):
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
-        oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
+        oid = ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
         self.log.debug('Running SNMP command on OID %r', oid)
-        error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
+        error_indication, _, _, var_binds = next(config.call_cmd(commands.nextCmd, oid, lookupMib=False))
         self.raise_on_error_indication(error_indication, config.ip_address)
         self.log.debug('Returned vars: %s', var_binds)
         return var_binds[0][1].prettyPrint()

@@ -15,7 +15,7 @@ import yaml
 from datadog_checks import snmp
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
-from datadog_checks.snmp import SnmpCheck
+from datadog_checks.snmp import SnmpCheck, utils
 
 from . import common
 
@@ -69,7 +69,7 @@ def test_transient_error(aggregator):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
     check = common.create_check(instance)
 
-    with mock.patch.object(check, 'raise_on_error_indication', side_effect=RuntimeError):
+    with mock.patch.object(utils, 'raise_on_error_indication', side_effect=RuntimeError):
         check.check(instance)
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
@@ -109,7 +109,7 @@ def test_snmp_getnext_call():
     check = common.create_check(instance)
 
     # Test that we invoke next with the correct keyword arguments that are hard to test otherwise
-    with mock.patch("datadog_checks.snmp.snmp.hlapi.nextCmd") as nextCmd:
+    with mock.patch("datadog_checks.snmp.commands.nextCmd") as nextCmd:
 
         check.check(instance)
         _, kwargs = nextCmd.call_args

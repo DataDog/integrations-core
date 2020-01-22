@@ -7,3 +7,4 @@ pysmi==0.3.4
 # Can't upgrade until https://github.com/etingof/pysnmp/issues/329 is fixed
 pysnmp==4.4.9
 pysnmp-mibs==0.1.6
+typing==3.7.4.1; python_version < '3.0'
