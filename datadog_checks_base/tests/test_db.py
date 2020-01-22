@@ -1721,3 +1721,25 @@ class TestCustomQueries:
 
         with pytest.raises(ValueError, match='^field `query` for custom query #1 is required$'):
             query_manager.compile_queries()
+
+    def test_prefix(self, aggregator):
+        query_manager = create_query_manager(
+            check=AgentCheck(
+                'test',
+                {},
+                [
+                    {
+                        'custom_queries': [
+                            {'metric_prefix': 'prefix', 'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}], 'tags': ['test:bar']},
+                        ],
+                    },
+                ],
+            ),
+            executor=mock_executor([[1]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric('prefix.test.foo', 1, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar'])
+        aggregator.assert_all_metrics_covered()

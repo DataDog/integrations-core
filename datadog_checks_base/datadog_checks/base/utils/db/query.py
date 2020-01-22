@@ -44,6 +44,8 @@ class Query(object):
         if tags is not None and not isinstance(tags, list):
             raise ValueError('field `tags` for {} must be a list'.format(query_name))
 
+        prefix = self.query_data.get('metric_prefix')
+
         # Keep track of all defined names
         sources = {}
 
@@ -83,8 +85,11 @@ class Query(object):
 
             modifiers = {key: value for key, value in column.items() if key not in ('name', 'type')}
 
+            data_name = column_name
+            if prefix:
+                data_name = '{}.{}'.format(prefix, data_name)
             try:
-                transformer = column_transformers[column_type](column_transformers, column_name, **modifiers)
+                transformer = column_transformers[column_type](column_transformers, data_name, **modifiers)
             except Exception as e:
                 error = 'error compiling type `{}` for column {} of {}: {}'.format(
                     column_type, column_name, query_name, e
