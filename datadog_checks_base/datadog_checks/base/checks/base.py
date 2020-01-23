@@ -8,6 +8,7 @@ import json
 import logging
 import re
 import traceback
+import typing
 import unicodedata
 from collections import defaultdict, deque
 from os.path import basename
@@ -852,4 +853,4 @@ class __AgentCheckPy2(__AgentCheck):
         return data
 
 
-AgentCheck = __AgentCheckPy3 if PY3 else __AgentCheckPy2  # type: __AgentCheck
+AgentCheck = __AgentCheckPy3 if PY3 else __AgentCheckPy2  # type: typing.Type[__AgentCheck]
