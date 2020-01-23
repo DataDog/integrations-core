@@ -628,6 +628,7 @@ class TestLimits:
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 4
 
+
 class TestCheckInitializations:
     def test_default(self):
         class TestCheck(AgentCheck):
