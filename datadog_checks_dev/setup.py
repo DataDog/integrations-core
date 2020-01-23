@@ -73,7 +73,7 @@ setup(
             'atomicwrites',
             'click',
             'colorama',
-            'docker<4',
+            'docker==3.6.0',
             'docker-compose>=1.25',
             'in-toto>=0.4.1',
             'pip-tools',
