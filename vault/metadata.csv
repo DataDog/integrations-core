@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-vault.go.gc.duration.seconds.count,gauge,,,,GC invocation durations count.,0,vault,
+vault.go.gc.duration.seconds.count,count,,,,GC invocation durations count.,0,vault,
 vault.go.gc.duration.seconds.quantile,gauge,,second,,GC invocation duration quantile.,0,vault,
 vault.go.gc.duration.seconds.sum,gauge,,second,,GC invocation duration total.,0,vault,
 vault.go.goroutines,gauge,,,,Number of goroutines that currently exist.,0,vault,
