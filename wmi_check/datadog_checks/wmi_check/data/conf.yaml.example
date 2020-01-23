@@ -42,9 +42,18 @@ instances:
 
     ## @param filters - list of strings - optional
     ## `filters` parameter is a list of filters on the WMI query you may want.
+    ##  Filters can be in one of these forms:
+    ##    [{<FILTER_PROPERTY>: <FILTER_VALUE>},...] or
+    ##    [{FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...]
+    ##
+    ##  If you just provide a value we defailt to '=' comparison operator.
+    ##
+    ##   * <FILTER_PROPERTY> the name of the filter; something like 'PercentProcessorTime'
+    ##
     #
     # filters:
-    #   - <FILTER>
+    #   - {<FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]}
+    #   - {<FILTER_PROPERTY>: <FILTER_VALUE>}
 
     ## @param provider - integer - optional - default: 64
     ## `provider` set the WMI provider.
