@@ -852,4 +852,4 @@ class __AgentCheckPy2(__AgentCheck):
         return data
 
 
-AgentCheck = __AgentCheckPy3 if PY3 else __AgentCheckPy2
+AgentCheck = __AgentCheckPy3 if PY3 else __AgentCheckPy2  # type: __AgentCheck
