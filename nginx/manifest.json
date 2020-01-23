@@ -30,6 +30,13 @@
     "dashboards": {
       "NGINX Plus base overview": "assets/dashboards/plus_overview.json"
     },
+    "saved_views": {
+      "Nginx 4xx errors": "assets/saved_views/4xx_errors.json",
+      "Nginx status code evolution": "assets/saved_views/status_code_evolution.json",
+      "Pages with error faced by bots": "assets/saved_views/pages_with_error_faced_by_bots.json",
+      "Nginx error patterns": "assets/saved_views/error_patterns.json",
+      "Nginx slowest endpoints": "assets/saved_views/slowest_endpoints.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

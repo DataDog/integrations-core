@@ -1,0 +1,20 @@
+{ 
+  "name": "Nginx - Slowest endpoints",
+  "type": "logs",
+  "page": "analytics",
+  "query": "source:nginx",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "service", "host", "status", "@http.status_code", "@http.method", "@http.url_details.path", "@http.useragent_details.browser.family", "@http.useragent_details.device.family", "@http.useragent_details.os.family", "@network.client.ip"],
+  "options": {
+    "group_bys": [
+      { "facet": "@http.url_details.path" }
+    ],
+    "aggregations": [
+      { "metric": "@duration", "type": "avg" }
+    ],
+    "limit": "50",
+    "widget": "toplist"
+  }
+}
