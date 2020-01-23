@@ -39,6 +39,8 @@ class Oracle(AgentCheck):
         if not only_custom_queries:
             manager_queries.extend([queries.ProcessMetrics, queries.SystemMetrics, queries.TableSpaceMetrics])
 
+        self._fix_custom_queries()
+
         self._query_manager = QueryManager(
             self,
             self.execute_query_raw,
