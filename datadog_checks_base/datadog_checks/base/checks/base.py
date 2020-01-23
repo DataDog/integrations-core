@@ -212,6 +212,14 @@ class __AgentCheck(object):
                     'to `skip_proxy` and will be removed in Agent version 6.13.'
                 ),
             ],
+            'service_tag': [
+                False,
+                (
+                    'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `{}`. '
+                    'Set `disable_legacy_service_tag` to `true` to disable this warning. '
+                    'The default will become `true` and cannot be changed in Agent version 8.'
+                ),
+            ],
         }
 
         # Setup metric limits
