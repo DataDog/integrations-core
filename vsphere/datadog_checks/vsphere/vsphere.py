@@ -12,7 +12,7 @@ from itertools import chain
 from pyVmomi import vim
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.stubs import datadog_agent
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
@@ -136,7 +136,7 @@ class VSphereCheck(AgentCheck):
                 # The resource does not match the specified patterns
                 continue
 
-            mor_name = ensure_unicode(properties.get("name", "unknown"))
+            mor_name = to_string(properties.get("name", "unknown"))
             mor_type_str = MOR_TYPE_AS_STRING[type(mor)]
             hostname = None
             tags = []
@@ -146,15 +146,15 @@ class VSphereCheck(AgentCheck):
                 if power_state != vim.VirtualMachinePowerState.poweredOn:
                     # Skipping because the VM is not powered on
                     # TODO: Sometimes VM are "poweredOn" but "disconnected" and thus have no metrics
-                    self.log.debug("Skipping VM %s in state %s", mor_name, ensure_unicode(power_state))
+                    self.log.debug("Skipping VM %s in state %s", mor_name, to_string(power_state))
                     continue
 
                 # Hosts are not considered as parents of the VMs they run, we use the `runtime.host` property
                 # to get the name of the ESXi host
                 runtime_host = properties.get("runtime.host")
                 runtime_host_props = infrastructure_data.get(runtime_host, {})
-                runtime_hostname = ensure_unicode(runtime_host_props.get("name", "unknown"))
-                tags.append(u'vsphere_host:{}'.format(runtime_hostname))
+                runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
+                tags.append('vsphere_host:{}'.format(runtime_hostname))
 
                 if self.config.use_guest_hostname:
                     hostname = properties.get("guest.hostName", mor_name)
@@ -163,10 +163,10 @@ class VSphereCheck(AgentCheck):
             elif isinstance(mor, vim.HostSystem):
                 hostname = mor_name
             else:
-                tags.append(u'vsphere_{}:{}'.format(mor_type_str, mor_name))
+                tags.append('vsphere_{}:{}'.format(mor_type_str, mor_name))
 
             tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
-            tags.append(u'vsphere_type:{}'.format(mor_type_str))
+            tags.append('vsphere_type:{}'.format(mor_type_str))
             mor_payload = {"tags": tags}
             if hostname:
                 mor_payload['hostname'] = hostname
@@ -208,7 +208,7 @@ class VSphereCheck(AgentCheck):
                     continue
 
                 if not result.value:
-                    self.log.debug("Skipping metric %s because the value is empty", ensure_unicode(metric_name))
+                    self.log.debug("Skipping metric %s because the value is empty", to_string(metric_name))
                     continue
 
                 # Get the most recent value that isn't negative
@@ -217,7 +217,7 @@ class VSphereCheck(AgentCheck):
                     self.log.debug(
                         "Skipping metric %s because the value returned by vCenter"
                         " is negative (i.e. the metric is not yet available).",
-                        ensure_unicode(metric_name),
+                        to_string(metric_name),
                     )
                     continue
                 value = valid_values[-1]
@@ -237,7 +237,7 @@ class VSphereCheck(AgentCheck):
                     hostname = None
                 else:
                     # Tags are (mostly) submitted as external host tags.
-                    hostname = ensure_unicode(mor_props.get('hostname'))
+                    hostname = to_string(mor_props.get('hostname'))
                     if self.config.excluded_host_tags:
                         tags.extend(
                             [t for t in mor_props['tags'] if t.split(":", 1)[0] in self.config.excluded_host_tags]
@@ -247,7 +247,7 @@ class VSphereCheck(AgentCheck):
 
                 # vsphere "rates" should be submitted as gauges (rate is
                 # precomputed).
-                self.gauge(ensure_unicode(metric_name), value, hostname=hostname, tags=tags)
+                self.gauge(to_string(metric_name), value, hostname=hostname, tags=tags)
 
     def query_metrics_wrapper(self, query_specs):
         """Just an instrumentation wrapper around the VSphereAPI.query_metrics method

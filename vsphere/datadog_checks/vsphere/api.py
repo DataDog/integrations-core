@@ -7,7 +7,6 @@ import ssl
 from pyVim import connect
 from pyVmomi import vim, vmodl
 
-from datadog_checks.base import ensure_unicode
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 
 # Python 3 only
@@ -70,7 +69,7 @@ class VSphereAPI(object):
             # Next line tries a simple API call to check the health of the connection.
             conn.CurrentTime()
         except Exception as e:
-            err_msg = "Connection to {} failed: {}".format(ensure_unicode(self.config.hostname), e)
+            err_msg = "Connection to {} failed: {}".format(self.config.hostname, e)
             raise APIConnectionError(err_msg)
 
         self._conn = conn

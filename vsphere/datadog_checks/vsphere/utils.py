@@ -3,15 +3,13 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from pyVmomi import vim
 
-from datadog_checks.base import ensure_unicode
-from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, SHORT_ROLLUP, REFERENCE_METRIC
+from datadog_checks.base import to_string
+from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
 
 
 def format_metric_name(counter):
     return "{}.{}.{}".format(
-        ensure_unicode(counter.groupInfo.key),
-        ensure_unicode(counter.nameInfo.key),
-        ensure_unicode(SHORT_ROLLUP[str(counter.rollupType)]),
+        to_string(counter.groupInfo.key), to_string(counter.nameInfo.key), SHORT_ROLLUP[str(counter.rollupType)],
     )
 
 
@@ -97,19 +95,19 @@ def get_parent_tags_recursively(mor, infrastructure_data):
     if parent:
         tags = []
         parent_props = infrastructure_data.get(parent, {})
-        parent_name = ensure_unicode(parent_props.get('name', 'unknown'))
+        parent_name = to_string(parent_props.get('name', 'unknown'))
         if isinstance(parent, vim.HostSystem):
-            tags.append(u'vsphere_host:{}'.format(parent_name))
+            tags.append('vsphere_host:{}'.format(parent_name))
         elif isinstance(parent, vim.Folder):
-            tags.append(u'vsphere_folder:{}'.format(parent_name))
+            tags.append('vsphere_folder:{}'.format(parent_name))
         elif isinstance(parent, vim.ComputeResource):
             if isinstance(parent, vim.ClusterComputeResource):
-                tags.append(u'vsphere_cluster:{}'.format(parent_name))
-            tags.append(u'vsphere_compute:{}'.format(parent_name))
+                tags.append('vsphere_cluster:{}'.format(parent_name))
+            tags.append('vsphere_compute:{}'.format(parent_name))
         elif isinstance(parent, vim.Datacenter):
-            tags.append(u'vsphere_datacenter:{}'.format(parent_name))
+            tags.append('vsphere_datacenter:{}'.format(parent_name))
         elif isinstance(parent, vim.Datastore):
-            tags.append(u'vsphere_datastore:{}'.format(parent_name))
+            tags.append('vsphere_datastore:{}'.format(parent_name))
 
         parent_tags = get_parent_tags_recursively(parent, infrastructure_data)
         parent_tags.extend(tags)

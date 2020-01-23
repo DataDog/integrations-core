@@ -42,7 +42,7 @@ class VSphereConfig(object):
         self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
         self.should_collect_events = instance.get("collect_events", self.collection_type == 'realtime')
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
-        self.base_tags = instance.get("tags", []) + [u"vcenter_server:{}".format(self.hostname)]
+        self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
         self.refresh_infrastructure_cache_interval = instance.get(
             'refresh_infrastructure_cache_interval', DEFAULT_REFRESH_INFRASTRUCTURE_CACHE_INTERVAL
         )
@@ -111,7 +111,7 @@ class VSphereConfig(object):
 
             if resource_filter['resource'] not in allowed_resource_types:
                 self.log.warning(
-                    u"Ignoring filter %r because resource %s is not collected when collection_type is %s.",
+                    "Ignoring filter %r because resource %s is not collected when collection_type is %s.",
                     resource_filter,
                     resource_filter['resource'],
                     self.collection_type,
@@ -124,8 +124,8 @@ class VSphereConfig(object):
 
             if resource_filter['property'] not in allowed_prop_names:
                 self.log.warning(
-                    u"Ignoring filter %r because property '%s' is not valid "
-                    u"for resource type %s. Should be one of %r.",
+                    "Ignoring filter %r because property '%s' is not valid "
+                    "for resource type %s. Should be one of %r.",
                     resource_filter,
                     resource_filter['property'],
                     resource_filter['resource'],
@@ -136,7 +136,7 @@ class VSphereConfig(object):
             filter_key = (resource_filter['resource'], resource_filter['property'])
             if filter_key in formatted_resource_filters:
                 self.log.warning(
-                    u"Ignoring filter %r because you already have a filter for resource type %s and property %s.",
+                    "Ignoring filter %r because you already have a filter for resource type %s and property %s.",
                     resource_filter,
                     resource_filter['resource'],
                     resource_filter['property'],
