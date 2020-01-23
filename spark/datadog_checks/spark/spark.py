@@ -159,9 +159,8 @@ class SparkCheck(AgentCheck):
 
         # Spark proxy may display an html warning page, which redirects to the same url with the additional
         # `proxyapproved=true` GET param.
-        # This flag is set to True the first time the spark proxy answers with the warning-redirect page
-        # to prevent making twice the number of queries.
-        self.follows_proxy_redirects = False
+        # The page also sets a cookie that needs to be stored (no need to set persist_connections in the config)
+        self.proxy_redirect_cookies = None
 
     def check(self, instance):
         # Get additional tags from the conf file
@@ -281,11 +280,9 @@ class SparkCheck(AgentCheck):
         else:
             raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, cluster_mode))
 
-    def _collect_version(self, base_url):
+    def _collect_version(self, base_url, tags):
         try:
-            response = self.http.get(self._join_url_dir(base_url, SPARK_VERSION_PATH))
-            response.raise_for_status()
-            version_json = response.json()
+            version_json = self._rest_request_to_json(base_url, SPARK_VERSION_PATH, SPARK_SERVICE_CHECK, tags)
             version = version_json['spark']
         except Exception as e:
             self.log.debug("Failed to collect version information: %s", e)
@@ -298,7 +295,7 @@ class SparkCheck(AgentCheck):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         """
-        self._collect_version(spark_driver_address)
+        self._collect_version(spark_driver_address, tags)
         running_apps = {}
         metrics_json = self._rest_request_to_json(
             spark_driver_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
@@ -340,7 +337,7 @@ class SparkCheck(AgentCheck):
 
                     if app_id and app_name and app_url:
                         if not version_set:
-                            version_set = self._collect_version(app_url)
+                            version_set = self._collect_version(app_url, tags)
                         if pre_20_mode:
                             self.log.debug('Getting application list in pre-20 mode')
                             applist = self._rest_request_to_json(
@@ -475,7 +472,7 @@ class SparkCheck(AgentCheck):
         version_set = False
         for app_id, (app_name, tracking_url) in iteritems(running_apps):
             if not version_set:
-                version_set = self._collect_version(tracking_url)
+                version_set = self._collect_version(tracking_url, tags)
             response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
 
             for app in response:
@@ -638,8 +635,8 @@ class SparkCheck(AgentCheck):
             for directory in args:
                 url = self._join_url_dir(url, directory)
 
-        # Add proxyapproved=True if self.follows_proxy_redirects
-        if self.follows_proxy_redirects:
+        # Add proxyapproved=True if we already have the proxy cookie
+        if self.proxy_redirect_cookies:
             kwargs["proxyapproved"] = 'true'
 
         # Add kwargs as arguments
@@ -649,7 +646,7 @@ class SparkCheck(AgentCheck):
 
         try:
             self.log.debug('Spark check URL: %s', url)
-            response = self.http.get(url)
+            response = self.http.get(url, cookies=self.proxy_redirect_cookies)
             response.raise_for_status()
 
             match = PROXY_WITH_DIFFERENT_USER_WARNING.match(response.text)
@@ -661,13 +658,13 @@ class SparkCheck(AgentCheck):
                         "configuration. Please update this value to collect spark metrics."
                     )
                 redirect_link = match.group(1)
-                self.follows_proxy_redirects = True
+                self.proxy_redirect_cookies = response.cookies
                 # When using a proxy and the remote user is different that the current user
                 # spark will display an html warning page.
                 # This page displays a redirect link (which appends `proxyapproved=true`) and also
                 # sets a cookie to the current http session. Let's follow the link.
                 # https://github.com/apache/hadoop/blob/2064ca015d1584263aac0cc20c60b925a3aff612/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-web-proxy/src/main/java/org/apache/hadoop/yarn/server/webproxy/WebAppProxyServlet.java#L368
-                response = self.http.get(redirect_link)
+                response = self.http.get(redirect_link, cookies=self.proxy_redirect_cookies)
                 response.raise_for_status()
 
         except Timeout as e:

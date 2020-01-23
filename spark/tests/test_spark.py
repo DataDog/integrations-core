@@ -156,6 +156,7 @@ class MockedResponse:
     def __init__(self, json_data, status_code):
         self.json_data = json_data
         self.status_code = status_code
+        self.cookies = None
 
     @property
     def text(self):
@@ -992,7 +993,7 @@ def test_metadata(aggregator, datadog_agent):
         c.check_id = "test:123"
         c.check(STANDALONE_CONFIG_PRE_20)
 
-        c._collect_version(SPARK_APP_URL)
+        c._collect_version(SPARK_APP_URL, None)
 
         raw_version = "2.4.0"
 
