@@ -73,7 +73,7 @@ def test_success_fixture_whitelist_blacklist(aggregator):
         c.check(instance)
 
     for metric in aggregator.metric_names:
-        assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out")
+        assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out.")
 
 
 def test_service_check(aggregator):
