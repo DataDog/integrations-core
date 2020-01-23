@@ -217,7 +217,7 @@ class __AgentCheck(object):
                 (
                     'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `{}`. '
                     'Set `disable_legacy_service_tag` to `true` to disable this warning. '
-                    'The default will become `true` and may not be changed in Agent version 8.'
+                    'The default will become `true` and cannot be changed in Agent version 8.'
                 ),
             ],
         }
