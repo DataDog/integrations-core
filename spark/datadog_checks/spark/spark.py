@@ -144,7 +144,7 @@ SPARK_STREAMING_STATISTICS_METRICS = {
     'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT),
 }
 
-PROXY_WITH_DIFFERENT_USER_WARNING = re.compile(r'<html>.*<a href="(.*)">.*</html>')
+PROXY_WITH_DIFFERENT_USER_WARNING = re.compile(r'<html>.*<a href="(.*)">.*</html>', re.S)
 
 
 class SparkCheck(AgentCheck):
@@ -638,7 +638,7 @@ class SparkCheck(AgentCheck):
             for directory in args:
                 url = self._join_url_dir(url, directory)
 
-        # Add proxyenabled=True if self.follows_proxy_redirects
+        # Add proxyapproved=True if self.follows_proxy_redirects
         if self.follows_proxy_redirects:
             kwargs["proxyapproved"] = 'true'
 
@@ -652,14 +652,15 @@ class SparkCheck(AgentCheck):
             response = self.http.get(url)
             response.raise_for_status()
 
-            redirect_link = PROXY_WITH_DIFFERENT_USER_WARNING.match(response.text)
-            if redirect_link:
+            match = PROXY_WITH_DIFFERENT_USER_WARNING.match(response.text)
+            if match:
                 if not self.http.persist_connections:
                     raise ConfigurationError(
                         "The spark proxy answered with a warning page. To overcome the warning, the integration needs "
                         "to store a cookie, which can only be done by setting `persist_connections: true` in your"
                         "configuration. Please update this value to collect spark metrics."
                     )
+                redirect_link = match.group(1)
                 self.follows_proxy_redirects = True
                 # When using a proxy and the remote user is different that the current user
                 # spark will display an html warning page.
