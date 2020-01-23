@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import itertools
 from contextlib import closing
 
 import cx_Oracle
@@ -55,8 +56,8 @@ class Oracle(AgentCheck):
         `metric_prefix`, change the submission name to contain it.
         """
         custom_queries = self.instance.get('custom_queries', [])
-        custom_queries.extend(self.init_config.get('global_custom_queries', []))
-        for query in custom_queries:
+        global_custom_queries = self.init_config.get('global_custom_queries', [])
+        for query in itertools.chain(custom_queries, global_custom_queries):
             prefix = query.get('metric_prefix')
             if prefix and prefix != self.__NAMESPACE__:
                 if prefix.startswith(self.__NAMESPACE__ + '.'):
