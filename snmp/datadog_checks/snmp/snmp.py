@@ -218,22 +218,20 @@ class SnmpCheck(AgentCheck):
     ):
         # type: (...) -> typing.Tuple[typing.List[ObjectType], typing.Optional[str]]
         error = None  # type: typing.Optional[str]
-        first_oid = 0
         all_binds = []  # type: typing.List[ObjectType]
 
-        while first_oid < len(oids):
+        # SNMP hosts can respond to requests for a batch of OIDs, so we
+        # use that to make less round trips to the host.
+        for batch_of_oids in utils.batches(oids, size=self.oid_batch_size):
             try:
-                # SNMP hosts can respond to requests for a batch of OIDs, so we
-                # use that to make less round trips to the host.
-                oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
-
                 # Try fetching these OIDs via GET. If the SNMP host hasn't found
                 # some of them, we'll try again with GETNEXT.
                 # NOTE: we shouldn't start with GETNEXT, because that would return wrong
                 # results for OIDs that refer to specific leafs (i.e. those for which GET would return a result).
-                result = commands.snmp_get(config, oids_batch, enforce_constraints, self.log)
+                result = commands.snmp_get(config, batch_of_oids, enforce_constraints, self.log)
 
-                found, missing = utils.partition_missing_oids(result)
+                found, missing = utils.partition(lambda variable: variable.was_oid_found_by_snmp_host, result.variables)
+
                 all_binds.extend(variable.var_bind for variable in found)
 
                 if missing:
@@ -257,9 +255,6 @@ class SnmpCheck(AgentCheck):
                 if not error:
                     error = message
                 self.warning(message)
-
-            finally:
-                first_oid += self.oid_batch_size
 
         return all_binds, error
 

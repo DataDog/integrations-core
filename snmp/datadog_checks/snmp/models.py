@@ -78,22 +78,20 @@ class Variable(object):
     def __init__(self, var_bind):
         # type: (typing.Union[ObjectType, typing.Tuple]) -> None
         try:
-            self.name, self.value = var_bind
+            name = var_bind[0]  # type: typing.Union[ObjectIdentity, ObjectName]
+            value = var_bind[1]  # type: Asn1Type
         except SmiError as exc:
             raise RuntimeError(
-                'Could not destructure variable: {!r}.\n'
-                'HINT: Did you try instanciating a `Variable()` object directly? '
+                'Could not deconstruct MIB variable: {!r}.\n'
+                'HINT: Did you try instantiating a `Variable()` object directly? '
                 'This can only work if the given `ObjectType` has been resolved, i.e. someone '
                 'called `.resolveWithMib(mibViewController)` on it. Note that this should have been done by '
                 'PySNMP if this variable came from executing an SNMP command.'.format(exc)
             )
         else:
+            self.oid = OID(name)
+            self.value = value
             self.var_bind = var_bind
-
-    @property
-    def oid(self):
-        # type: () -> OID
-        return OID(self.name)
 
     @property
     def was_oid_found_by_snmp_host(self):
@@ -108,7 +106,7 @@ class SNMPCommandResult(object):
     Parameters
     ----------
     variables:
-        A list of MIB variables, i.e. the response of the SNMP host for a given requested OID.
+        A tuple of MIB variables, i.e. the responses of the SNMP host for a set of requested OID.
         Each variable contains the OID and its value.
     error_indication:
         This represents an error that occurred while requesting the SNMP host, such as a timeout or
@@ -125,13 +123,13 @@ class SNMPCommandResult(object):
 
     def __init__(
         self,
-        variables,  # type: typing.Sequence[Variable]
+        variables,  # type: typing.Tuple[Variable, ...]
         error_indication=None,  # type: Asn1Type
         error_status=None,  # type: Asn1Type
         error_index=0,  # type: int
         error=None,  # type: str
     ):
-        self.variables = tuple(variables)  # type: typing.Tuple[Variable, ...]
+        self.variables = variables
         self.error_indication = error_indication
         self.error_status = error_status
         self.error_index = error_index
