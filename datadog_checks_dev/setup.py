@@ -26,7 +26,7 @@ REQUIRES = [
     'coverage==4.5.4',  # pinned due to https://github.com/nedbat/coveragepy/issues/883
     'mock',
     'psutil',
-    'PyYAML>=5.1',
+    'PyYAML>=5.3',
     'pytest',
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
@@ -73,7 +73,8 @@ setup(
             'atomicwrites',
             'click',
             'colorama',
-            'docker-compose>=1.23.1,<1.24.0',
+            'docker<4',
+            'docker-compose>=1.25',
             'in-toto>=0.4.1',
             'pip-tools',
             'pylint',
