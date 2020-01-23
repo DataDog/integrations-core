@@ -491,12 +491,12 @@ class __AgentCheck(object):
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
-    def _log_deprecation(self, deprecation_key):
+    def _log_deprecation(self, deprecation_key, *args):
         """
         Logs a deprecation notice at most once per AgentCheck instance, for the pre-defined `deprecation_key`
         """
         if not self._deprecations[deprecation_key][0]:
-            self.warning(self._deprecations[deprecation_key][1])
+            self.warning(self._deprecations[deprecation_key][1].format(*args))
             self._deprecations[deprecation_key][0] = True
 
     # TODO: Remove once our checks stop calling it
