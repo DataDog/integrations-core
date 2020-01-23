@@ -614,6 +614,19 @@ class TestLimits:
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
         assert len(aggregator.metrics("metric")) == 10
 
+    def test_metric_limit_instance_config_string(self, aggregator):
+        instances = [{"max_returned_metrics": "4"}]
+        check = AgentCheck("test", {}, instances)
+        assert check.get_warnings() == []
+
+        for _ in range(0, 4):
+            check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 0
+        assert len(aggregator.metrics("metric")) == 4
+
+        check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics("metric")) == 4
 
 class TestCheckInitializations:
     def test_default(self):
