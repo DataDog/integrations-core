@@ -137,7 +137,7 @@ class AgentCheck(object):
         """
         self.metrics = defaultdict(list)  # type: typing.DefaultDict[str, list]
         self.check_id = ''
-        self.instances = kwargs.get('instances', [])  # type: typing.List[typing.Dict[str, typing.Any]]
+        self.instances = kwargs.get('instances', [])  # type: typing.Sequence[typing.Dict[str, typing.Any]]
         self.name = kwargs.get('name', '')  # type: str
         self.init_config = kwargs.get('init_config', {})  # type: typing.Dict[str, typing.Any]
         self.agentConfig = kwargs.get('agentConfig', {})  # type: typing.Dict[str, typing.Any]
@@ -157,7 +157,7 @@ class AgentCheck(object):
                     self.instances = args[3]
             else:
                 # new-style init: the 3rd argument is `instances`
-                self.instances = list(args[2])
+                self.instances = args[2]
 
         # Agent 6+ will only have one instance
         self.instance = self.instances[0] if self.instances else None
