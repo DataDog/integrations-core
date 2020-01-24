@@ -231,6 +231,9 @@ class Vault(OpenMetricsBaseCheck):
             instance = self.instance.copy()
             instance['prometheus_url'] = '{}/sys/metrics?format=prometheus'.format(self._api_url)
 
+            # Send histograms & summaries counts as monotonic_counter
+            instance['send_distribution_counts_as_monotonic'] = True
+
             # Remap important options until OpenMetricsBaseCheck uses the RequestsWrapper
             instance['ssl_verify'] = instance.pop('tls_verify', None)
             instance['ssl_cert'] = instance.pop('tls_cert', None)
