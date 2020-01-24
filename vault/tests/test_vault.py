@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018-2019
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
@@ -403,3 +403,15 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
+
+    def test_no_token(self, aggregator, instance, global_tags):
+        instance = instance()
+        instance['no_token'] = True
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+
+        with pytest.raises(Exception, match='^400 Client Error: Bad Request for url'):
+            run_check(c, extract_message=True)
+
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=0)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=1, tags=global_tags)

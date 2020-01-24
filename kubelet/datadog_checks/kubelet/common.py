@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -52,6 +52,15 @@ def get_pod_by_uid(uid, podlist):
         except KeyError:
             continue
     return None
+
+
+def urljoin(*args):
+    """
+    Joins given arguments into an url. Trailing but not leading slashes are
+    stripped for each argument.
+    :return: string
+    """
+    return '/'.join(arg.strip('/') for arg in args)
 
 
 def is_static_pending_pod(pod):

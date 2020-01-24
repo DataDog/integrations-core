@@ -1,5 +1,11 @@
 # CHANGELOG - oracle
 
+## 1.11.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Fix deprecated exception. See [#5182](https://github.com/DataDog/integrations-core/pull/5182).
+
 ## 1.10.1 / 2019-10-07
 
 * [Fixed] Use fetchall instead of iterating cursor for custom queries. This fixes an issue with the JDBC driver. See [#4664](https://github.com/DataDog/integrations-core/pull/4664).

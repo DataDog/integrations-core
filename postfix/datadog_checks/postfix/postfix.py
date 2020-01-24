@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2017
+# (C) Datadog, Inc. 2013-present
 # (C) Josiah C Webb <rootkix@gmail.com> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -100,7 +100,7 @@ class PostfixCheck(AgentCheck):
 
         if not self.init_config.get('postqueue', False):
             self.log.debug('postqueue : get_config')
-            self.log.debug('postqueue: {}'.format(self.init_config.get('postqueue', False)))
+            self.log.debug('postqueue: %s', self.init_config.get('postqueue', False))
             if not queues or not directory:
                 raise Exception('using sudo: missing required yaml config entry')
         else:
@@ -120,7 +120,7 @@ class PostfixCheck(AgentCheck):
         pc_output, _, _ = get_subprocess_output(['postconf', 'authorized_mailq_users'], self.log, False)
         authorized_mailq_users = pc_output.strip('\n').split('=')[1].strip()
 
-        self.log.debug('authorized_mailq_users : {}'.format(authorized_mailq_users))
+        self.log.debug('authorized_mailq_users : %s', authorized_mailq_users)
 
         output, _, _ = get_subprocess_output(['postqueue', '-c', postfix_config_dir, '-p'], self.log, False)
 

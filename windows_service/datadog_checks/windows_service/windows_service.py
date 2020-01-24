@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
@@ -59,9 +59,7 @@ class WindowsService(AgentCheck):
             if 'ALL' not in services:
                 for service, service_pattern in sorted(iteritems(service_patterns), reverse=True):
                     self.log.debug(
-                        'Service: {} with Short Name: {} and Pattern: {}'.format(
-                            service, short_name, service_pattern.pattern
-                        )
+                        'Service: %s with Short Name: %s and Pattern: %s', service, short_name, service_pattern.pattern
                     )
                     if service_pattern.match(short_name):
                         services_unseen.discard(service)
@@ -76,7 +74,7 @@ class WindowsService(AgentCheck):
             tags.extend(custom_tags)
 
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
-            self.log.debug('service state for {} {}'.format(short_name, status))
+            self.log.debug('service state for %s %s', short_name, status)
 
         if 'ALL' not in services:
             for service in services_unseen:
@@ -86,4 +84,4 @@ class WindowsService(AgentCheck):
                 tags.extend(custom_tags)
 
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
-                self.log.debug('service state for {} {}'.format(service, status))
+                self.log.debug('service state for %s %s', service, status)

@@ -18,6 +18,14 @@ instances:
     #
     # password: <PASSWORD>
 
+    ## @param admin_share - string - optional - default: c$
+    ## The administrative share to connect to. Can be a drive or the `ipc$` share if available.
+    ## Note that to be able to connect to remote hosts the administrative share needs to be enabled and the
+    ## user needs network administrator permissions
+    ## If the remote machine doesn't expose any, set this to the empty string `""` to connect without an admin share. 
+    #
+    # admin_share: c$
+
     ## The following example fetches the number of processes and users:
     ##
     ## - countersetname: Processor

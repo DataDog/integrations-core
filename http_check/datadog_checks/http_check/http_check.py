@@ -1,8 +1,9 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
+import copy
 import re
 import socket
 import ssl
@@ -14,7 +15,7 @@ import requests
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+from datadog_checks.base import AgentCheck, ensure_unicode
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
@@ -34,7 +35,7 @@ class HTTPCheck(AgentCheck):
     SC_STATUS = 'http.can_connect'
     SC_SSL_CERT = 'http.ssl_cert'
 
-    HTTP_CONFIG_REMAPPER = {
+    DEFAULT_HTTP_CONFIG_REMAPPER = {
         'client_cert': {'name': 'tls_cert'},
         'client_key': {'name': 'tls_private_key'},
         'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': True},
@@ -45,15 +46,11 @@ class HTTPCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(HTTPCheck, self).__init__(name, init_config, instances)
 
+        self.HTTP_CONFIG_REMAPPER = copy.deepcopy(self.DEFAULT_HTTP_CONFIG_REMAPPER)
+
         self.ca_certs = init_config.get('ca_certs')
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
-
-        self.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = self.ca_certs
-
-        if is_affirmative(self.instance.get('disable_ssl_validation', True)):
-            # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
-            self.http.options['verify'] = False
 
     def check(self, instance):
         (
@@ -103,15 +100,15 @@ class HTTPCheck(AgentCheck):
         r = None
         try:
             parsed_uri = urlparse(addr)
-            self.log.debug("Connecting to {}".format(addr))
+            self.log.debug("Connecting to %s", addr)
             self.http.session.trust_env = False
             if weakcipher:
                 base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
                 self.http.session.mount(base_addr, WeakCiphersAdapter())
                 self.log.debug(
-                    "Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
-                        base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS
-                    )
+                    "Weak Ciphers will be used for %s. Supported Cipherlist: %s",
+                    base_addr,
+                    WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS,
                 )
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
@@ -128,14 +125,14 @@ class HTTPCheck(AgentCheck):
             )
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
-            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
+            self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, e, length)
             service_checks.append(
                 (self.SC_STATUS, AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length))
             )
 
         except socket.error as e:
             length = int((time.time() - start) * 1000)
-            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
+            self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, repr(e), length)
             service_checks.append(
                 (
                     self.SC_STATUS,
@@ -146,7 +143,7 @@ class HTTPCheck(AgentCheck):
 
         except Exception as e:
             length = int((time.time() - start) * 1000)
-            self.log.error("Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
+            self.log.error("Unhandled exception %s. Connection failed after %s ms", e, length)
             raise
 
         else:
@@ -309,13 +306,13 @@ class HTTPCheck(AgentCheck):
         except Exception as e:
             msg = str(e)
             if 'expiration' in msg:
-                self.log.debug("error: {}. Cert might be expired.".format(e))
+                self.log.debug("error: %s. Cert might be expired.", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
-                self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
+                self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
             else:
-                self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
+                self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
                 return AgentCheck.CRITICAL, 0, 0, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
@@ -323,8 +320,8 @@ class HTTPCheck(AgentCheck):
         days_left = time_left.days
         seconds_left = time_left.total_seconds()
 
-        self.log.debug("Exp_date: {}".format(exp_date))
-        self.log.debug("seconds_left: {}".format(seconds_left))
+        self.log.debug("Exp_date: %s", exp_date)
+        self.log.debug("seconds_left: %s", seconds_left)
 
         if seconds_left < seconds_critical:
             return (

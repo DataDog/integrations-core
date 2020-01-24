@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -44,6 +44,10 @@ class Redis(AgentCheck):
         'aof_rewrite_in_progress': 'redis.aof.rewrite',
         'aof_current_size': 'redis.aof.size',
         'aof_buffer_length': 'redis.aof.buffer_length',
+        'loading_total_bytes': 'redis.aof.loading_total_bytes',
+        'loading_loaded_bytes': 'redis.aof.loading_loaded_bytes',
+        'loading_loaded_perc': 'redis.aof.loading_loaded_perc',
+        'loading_eta_seconds': 'redis.aof.loading_eta_seconds',
         # Network
         'connected_clients': 'redis.net.clients',
         'connected_slaves': 'redis.net.slaves',
@@ -277,7 +281,7 @@ class Redis(AgentCheck):
                         key_tags.append('redis_db:db{}'.format(instance_db))
                     key_tags.extend(tags)
                     self.gauge('redis.key.length', 0, tags=key_tags)
-                    self.warning("{} key not found in redis".format(key))
+                    self.warning("%s key not found in redis", key)
             return
 
         # convert to integer the output of `keyspace`, from `db0` to `0`
@@ -287,7 +291,7 @@ class Redis(AgentCheck):
         # user might have configured the instance to target one specific db
         if instance_db:
             if instance_db not in databases:
-                self.warning("Cannot find database {}".format(instance_db))
+                self.warning("Cannot find database %s", instance_db)
                 return
             databases = [instance_db]
 
@@ -313,7 +317,7 @@ class Redis(AgentCheck):
                     try:
                         key_type = ensure_unicode(db_conn.type(key))
                     except redis.ResponseError:
-                        self.log.info("key {} on remote server; skipping".format(text_key))
+                        self.log.info("key %s on remote server; skipping", text_key)
                         continue
 
                     if key_type == 'list':
@@ -366,7 +370,7 @@ class Redis(AgentCheck):
                     key_tags.append('redis_db:db{}'.format(instance_db))
                 key_tags.extend(tags)
                 self.gauge('redis.key.length', 0, tags=key_tags)
-                self.warning("{} key not found in redis".format(key))
+                self.warning("%s key not found in redis", key)
 
     def _check_replication(self, info, tags):
         # Save the replication delay for each slave
@@ -411,7 +415,7 @@ class Redis(AgentCheck):
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
                 if max_slow_entries > DEFAULT_MAX_SLOW_ENTRIES:
                     self.warning(
-                        "Redis {0} is higher than {1}. Defaulting to {1}. "
+                        "Redis {0} is higher than {1}. Defaulting to {1}. "  # noqa: G001
                         "If you need a higher value, please set {0} in your check config".format(
                             MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES
                         )

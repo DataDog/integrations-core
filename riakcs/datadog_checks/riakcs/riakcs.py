@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # (C) Jon Glick <jglick@basho.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -94,7 +94,7 @@ class RiakCs(AgentCheck):
         try:
             s3 = S3Connection(**s3_settings)
         except Exception as e:
-            self.log.error("Error connecting to {0}: {1}".format(aggregation_key, e))
+            self.log.error("Error connecting to %s: %s", aggregation_key, e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags, message=str(e))
             raise
 
@@ -110,7 +110,7 @@ class RiakCs(AgentCheck):
             stats = self.load_json(stats_str)
 
         except Exception as e:
-            self.log.error("Error retrieving stats from {0}: {1}".format(aggregation_key, e))
+            self.log.error("Error retrieving stats from %s: %s", aggregation_key, e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags, message=str(e))
             raise
 

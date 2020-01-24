@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -10,12 +10,11 @@ from os.path import isfile
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
 from six import PY3, iteritems, itervalues, string_types
-from urllib3.exceptions import InsecureRequestWarning
 
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_string
-from ...utils.warnings_util import disable_warnings_ctx
+from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 
 if PY3:
@@ -290,6 +289,45 @@ class OpenMetricsScraperMixin(object):
 
         return config
 
+    def get_http_handler(self, scraper_config):
+        """
+        Get http handler for a specific scrapper config.
+        The http handler is cached using `prometheus_url` as key.
+        """
+        prometheus_url = scraper_config['prometheus_url']
+        if prometheus_url in self._http_handlers:
+            return self._http_handlers[prometheus_url]
+
+        # TODO: Deprecate this behavior in Agent 8
+        if scraper_config['ssl_ca_cert'] is False:
+            scraper_config['ssl_verify'] = False
+
+        # TODO: Deprecate this behavior in Agent 8
+        if scraper_config['ssl_verify'] is False:
+            scraper_config.setdefault('tls_ignore_warning', True)
+
+        http_handler = self._http_handlers[prometheus_url] = RequestsWrapper(
+            scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
+
+        headers = http_handler.options['headers']
+
+        bearer_token = scraper_config['_bearer_token']
+        if bearer_token is not None:
+            headers['Authorization'] = 'Bearer {}'.format(bearer_token)
+
+        # TODO: Determine if we really need this
+        headers.setdefault('accept-encoding', 'gzip')
+
+        return http_handler
+
+    def reset_http_config(self):
+        """
+        You may need to use this when configuration is determined dynamically during every
+        check run, such as when polling an external resource like the Kubelet.
+        """
+        self._http_handlers.clear()
+
     def parse_metric_family(self, response, scraper_config):
         """
         Parse the MetricFamily from a valid requests.Response object to provide a MetricFamily object (see [0])
@@ -556,53 +594,13 @@ class OpenMetricsScraperMixin(object):
             raise
 
     def send_request(self, endpoint, scraper_config, headers=None):
-        # Determine the headers
-        if headers is None:
-            headers = {}
-        if 'accept-encoding' not in headers:
-            headers['accept-encoding'] = 'gzip'
-        headers.update(scraper_config['extra_headers'])
+        kwargs = {}
+        if headers:
+            kwargs['headers'] = headers
 
-        # Add the bearer token to headers
-        bearer_token = scraper_config['_bearer_token']
-        if bearer_token is not None:
-            auth_header = {'Authorization': 'Bearer {}'.format(bearer_token)}
-            headers.update(auth_header)
+        http_handler = self.get_http_handler(scraper_config)
 
-        # Determine the SSL verification settings
-        cert = None
-        if isinstance(scraper_config['ssl_cert'], string_types):
-            if isinstance(scraper_config['ssl_private_key'], string_types):
-                cert = (scraper_config['ssl_cert'], scraper_config['ssl_private_key'])
-            else:
-                cert = scraper_config['ssl_cert']
-
-        verify = scraper_config['ssl_verify']
-        # TODO: deprecate use as `ssl_verify` boolean
-        if scraper_config['ssl_ca_cert'] is False:
-            verify = False
-
-        disable_insecure_warnings = False
-        if isinstance(scraper_config['ssl_ca_cert'], string_types):
-            verify = scraper_config['ssl_ca_cert']
-        elif verify is False:
-            disable_insecure_warnings = True
-
-        # Determine the authentication settings
-        username = scraper_config['username']
-        password = scraper_config['password']
-        auth = (username, password) if username is not None and password is not None else None
-
-        with disable_warnings_ctx(InsecureRequestWarning, disable=disable_insecure_warnings):
-            return requests.get(
-                endpoint,
-                headers=headers,
-                stream=True,
-                timeout=scraper_config['prometheus_timeout'],
-                cert=cert,
-                verify=verify,
-                auth=auth,
-            )
+        return http_handler.get(endpoint, stream=True, **kwargs)
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """
@@ -889,7 +887,7 @@ class OpenMetricsScraperMixin(object):
             for index, sample in enumerate(metric.samples):
                 val = sample[self.SAMPLE_VALUE]
                 if not self._is_value_valid(val):
-                    self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                    self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                     continue
                 if sample[self.SAMPLE_NAME].endswith("_sum"):
                     lst = list(sample)
@@ -912,7 +910,7 @@ class OpenMetricsScraperMixin(object):
             for index, sample in enumerate(metric.samples):
                 val = sample[self.SAMPLE_VALUE]
                 if not self._is_value_valid(val):
-                    self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                    self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                     continue
                 if sample[self.SAMPLE_NAME].endswith("_count"):
                     continue

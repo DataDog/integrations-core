@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # (C) 2018 Aerospike, Inc.
 # (C) 2017 Red Sift
 # (C) 2015 Pippio, Inc. All rights reserved.
@@ -133,7 +133,7 @@ class AerospikeCheck(AgentCheck):
                 self.collect_datacenter(dc)
 
         except Exception as e:
-            self.log.debug("There were no datacenters found: %s" % e)
+            self.log.debug("There were no datacenters found: %s", e)
 
         # https://www.aerospike.com/docs/reference/info/#throughput
         self.collect_throughput(namespaces)

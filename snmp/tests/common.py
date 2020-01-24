@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -6,6 +6,7 @@ import copy
 import logging
 import os
 
+from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.utils.common import get_docker_hostname
 
@@ -20,10 +21,11 @@ AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtoco
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
 AUTH_KEY = 'doggiepass'
 PRIV_KEY = 'doggiePRIVkey'
+SNMP_CONTAINER_NAME = 'dd-snmp'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
-SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public', 'autofetch': True}
+SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
 
 SNMP_V3_CONF = {
     'name': 'snmp_v3_conf',
@@ -153,6 +155,21 @@ PLAY_WITH_GET_NEXT_METRICS = [
     {"OID": "1.3.6.1.2.1.4.31.3.1.3.2.1", "name": "noFallbackAndSameResult"},
 ]
 
+RESOLVED_TABULAR_OBJECTS = [
+    {
+        "MIB": "IF-MIB",
+        "table": "ifTable",
+        "symbols": [
+            {"name": "ifInOctets", "OID": "1.3.6.1.2.1.2.2.1.10"},
+            {"name": "ifOutOctets", "OID": "1.3.6.1.2.1.2.2.1.16"},
+        ],
+        "metric_tags": [
+            {"tag": "interface", "column": {"name": "ifDescr", "OID": "1.3.6.1.2.1.2.2.1.2"}},
+            {"tag": "dumbindex", "index": 1, "mapping": {1: "one", 2: "two", 3: "three", 90: "other"}},
+        ],
+    }
+]
+
 
 def generate_instance_config(metrics, template=None):
     template = template if template else SNMP_CONF
@@ -160,6 +177,12 @@ def generate_instance_config(metrics, template=None):
     instance_config['metrics'] = metrics
     instance_config['name'] = HOST
     return instance_config
+
+
+def generate_container_instance_config(metrics):
+    conf = copy.deepcopy(SNMP_CONF)
+    conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
+    return generate_instance_config(metrics, template=conf)
 
 
 def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_key=None, priv=None, priv_key=None):

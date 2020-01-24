@@ -27,8 +27,13 @@
   "type": "check",
   "integration_id": "vault",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Vault - Overview": "assets/dashboards/vault_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

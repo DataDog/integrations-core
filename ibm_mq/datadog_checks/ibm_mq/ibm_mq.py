@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -8,6 +8,7 @@ from six import iteritems
 
 from datadog_checks.base import ensure_bytes, ensure_unicode
 from datadog_checks.checks import AgentCheck
+from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors, metrics
 from .config import IBMMQConfig
@@ -59,14 +60,14 @@ class IbmMqCheck(AgentCheck):
         config.check_properly_configured()
 
         if not pymqi:
-            log.error("You need to install pymqi: {}".format(pymqiException))
+            log.error("You need to install pymqi: %s", pymqiException)
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
 
         try:
             queue_manager = connection.get_queue_manager_connection(config)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, config.tags)
         except Exception as e:
-            self.warning("cannot connect to queue manager: {}".format(e))
+            self.warning("cannot connect to queue manager: %s", e)
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, config.tags)
             return
 
@@ -93,7 +94,7 @@ class IbmMqCheck(AgentCheck):
                         self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
                 except Exception as e:
-                    self.warning('Cannot connect to queue {}: {}'.format(queue_name, e))
+                    self.warning('Cannot connect to queue %s: %s', queue_name, e)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags)
         finally:
             queue_manager.disconnect()
@@ -128,7 +129,7 @@ class IbmMqCheck(AgentCheck):
                 pcf = pymqi.PCFExecute(queue_manager)
                 response = pcf.MQCMD_INQUIRE_Q(args)
             except pymqi.MQMIError as e:
-                self.warning("Error discovering queue: {}".format(e))
+                self.warning("Error discovering queue: %s", e)
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
@@ -147,7 +148,7 @@ class IbmMqCheck(AgentCheck):
                 self.gauge(mname, m, tags=tags)
                 self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.OK, tags)
             except pymqi.Error as e:
-                self.warning("Error getting queue manager stats: {}".format(e))
+                self.warning("Error getting queue manager stats: %s", e)
                 self.service_check(self.QUEUE_MANAGER_SERVICE_CHECK, AgentCheck.CRITICAL, tags)
 
     def queue_stats(self, queue_manager, queue_name, tags):
@@ -159,7 +160,7 @@ class IbmMqCheck(AgentCheck):
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q(args)
         except pymqi.MQMIError as e:
-            self.warning("Error getting queue stats for {}: {}".format(queue_name, e))
+            self.warning("Error getting queue stats for %s: %s", queue_name, e)
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
@@ -191,7 +192,7 @@ class IbmMqCheck(AgentCheck):
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
-            self.warning("Error getting pcf queue stats for {}: {}".format(queue_name, e))
+            self.warning("Error getting pcf queue stats for %s: %s", queue_name, e)
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
@@ -214,7 +215,7 @@ class IbmMqCheck(AgentCheck):
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_RESET_Q_STATS(args)
         except pymqi.MQMIError as e:
-            self.warning("Error getting pcf queue stats for {}: {}".format(queue_name, e))
+            self.warning("Error getting pcf queue stats for %s: %s", queue_name, e)
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
@@ -224,10 +225,10 @@ class IbmMqCheck(AgentCheck):
                     self._send_metric(metric_type, metric_full_name, metric_value, tags)
 
     def _send_metric(self, metric_type, metric_name, metric_value, tags):
-        if metric_type in ['gauge', 'rate']:
+        if metric_type in [GAUGE, COUNT]:
             getattr(self, metric_type)(metric_name, metric_value, tags=tags)
         else:
-            self.log.warning("Unknown metric type `{}` for metric `{}`".format(metric_type, metric_name))
+            self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
 
     def get_pcf_channel_metrics(self, queue_manager, tags, config):
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')}
@@ -236,7 +237,7 @@ class IbmMqCheck(AgentCheck):
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL(args)
         except pymqi.MQMIError as e:
-            self.log.warning("Error getting CHANNEL stats {}".format(e))
+            self.log.warning("Error getting CHANNEL stats %s", e)
         else:
             channels = len(response)
             mname = '{}.channel.channels'.format(self.METRIC_PREFIX)
@@ -276,9 +277,9 @@ class IbmMqCheck(AgentCheck):
         except pymqi.MQMIError as e:
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.CRITICAL, search_channel_tags)
             if e.comp == pymqi.CMQC.MQCC_FAILED and e.reason == pymqi.CMQCFC.MQRCCF_CHL_STATUS_NOT_FOUND:
-                self.log.debug("Channel status not found for channel {}: {}".format(search_channel_name, e))
+                self.log.debug("Channel status not found for channel %s: %s", search_channel_name, e)
             else:
-                self.log.warning("Error getting CHANNEL status for channel {}: {}".format(search_channel_name, e))
+                self.log.warning("Error getting CHANNEL status for channel %s: %s", search_channel_name, e)
         else:
             for channel_info in response:
                 channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
@@ -305,13 +306,13 @@ class IbmMqCheck(AgentCheck):
         if channel_status in config.channel_status_mapping:
             service_check_status = config.channel_status_mapping[channel_status]
         else:
-            self.log.warning("Status `{}` not found for channel `{}`".format(channel_status, channel_name))
+            self.log.warning("Status `%s` not found for channel `%s`", channel_status, channel_name)
             service_check_status = AgentCheck.UNKNOWN
         self.service_check(self.CHANNEL_STATUS_SERVICE_CHECK, service_check_status, channel_tags)
 
     def _submit_channel_count(self, channel_name, channel_status, channel_tags):
         if channel_status not in CHANNEL_STATUS_NAME_MAPPING:
-            self.log.warning("Status `{}` not found for channel `{}`".format(channel_status, channel_name))
+            self.log.warning("Status `%s` not found for channel `%s`", channel_status, channel_name)
             channel_status = STATUS_MQCHS_UNKNOWN
 
         for status, status_label in iteritems(CHANNEL_STATUS_NAME_MAPPING):

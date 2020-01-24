@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import yaml
@@ -30,7 +30,7 @@ class ConfigSpec(object):
         try:
             self.data = yaml.safe_load(self.contents)
         except Exception as e:
-            self.errors.append('{}: Unable to parse the configuration specification: {}'.format(self.source, e))
+            self.errors.append(f'{self.source}: Unable to parse the configuration specification: {e}')
             return
 
         return spec_validator(self.data, self)

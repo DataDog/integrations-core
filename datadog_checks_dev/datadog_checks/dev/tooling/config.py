@@ -1,16 +1,14 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import OrderedDict, deque
+from collections import deque
 from copy import deepcopy
 
 import toml
 from appdirs import user_data_dir
 from atomicwrites import atomic_write
-from six import string_types
 
-from ..compat import FileNotFoundError
 from ..utils import ensure_parent_dir_exists, file_exists, read_file
 
 APP_DIR = user_data_dir('dd-checks-dev', '')
@@ -27,40 +25,28 @@ SECRET_KEYS = {
     'trello.token',
 }
 
-DEFAULT_CONFIG = OrderedDict(
-    [
-        ('core', os.path.join('~', 'dd', 'integrations-core')),
-        ('extras', os.path.join('~', 'dd', 'integrations-extras')),
-        ('agent', os.path.join('~', 'dd', 'datadog-agent')),
-        ('repo', 'core'),
-        ('color', bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None),
-        ('dd_api_key', os.getenv('DD_API_KEY')),
-        ('dd_app_key', os.getenv('DD_APP_KEY')),
-        ('org', 'default'),
-        ('agent6', OrderedDict((('docker', 'datadog/agent-dev:master'), ('local', 'latest')))),
-        ('agent5', OrderedDict((('docker', 'datadog/dev-dd-agent:master'), ('local', 'latest')))),
-        ('github', OrderedDict((('user', ''), ('token', '')))),
-        ('pypi', OrderedDict((('user', ''), ('pass', '')))),
-        ('trello', OrderedDict((('key', ''), ('token', '')))),
-        (
-            'orgs',
-            OrderedDict(
-                (
-                    (
-                        'default',
-                        OrderedDict(
-                            (
-                                ('api_key', os.getenv('DD_API_KEY')),
-                                ('app_key', os.getenv('DD_APP_KEY')),
-                                ('site', os.getenv('DD_SITE')),
-                            )
-                        ),
-                    ),
-                )
-            ),
-        ),
-    ]
-)
+DEFAULT_CONFIG = {
+    'core': os.path.join('~', 'dd', 'integrations-core'),
+    'extras': os.path.join('~', 'dd', 'integrations-extras'),
+    'agent': os.path.join('~', 'dd', 'datadog-agent'),
+    'repo': 'core',
+    'color': bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None,
+    'dd_api_key': os.getenv('DD_API_KEY'),
+    'dd_app_key': os.getenv('DD_APP_KEY'),
+    'org': 'default',
+    'agent6': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
+    'agent5': {'docker': 'datadog/dev-dd-agent:master', 'local': 'latest'},
+    'github': {'user': '', 'token': ''},
+    'pypi': {'user': '', 'pass': ''},
+    'trello': {'key': '', 'token': ''},
+    'orgs': {
+        'default': {
+            'api_key': os.getenv('DD_API_KEY'),
+            'app_key': os.getenv('DD_APP_KEY'),
+            'site': os.getenv('DD_SITE'),
+        }
+    },
+}
 
 
 def config_file_exists():
@@ -81,7 +67,7 @@ def load_config():
     config = copy_default_config()
 
     try:
-        config.update(toml.loads(read_config_file(), OrderedDict))
+        config.update(toml.loads(read_config_file()))
     except FileNotFoundError:
         pass
 
@@ -107,10 +93,10 @@ def update_config():
     config.update(load_config())
 
     # Support legacy config where agent5 and agent6 were strings
-    if isinstance(config['agent6'], string_types):
-        config['agent6'] = OrderedDict((('docker', config['agent6']), ('local', 'latest')))
-    if isinstance(config['agent5'], string_types):
-        config['agent5'] = OrderedDict((('docker', config['agent5']), ('local', 'latest')))
+    if isinstance(config['agent6'], str):
+        config['agent6'] = {'docker': config['agent6'], 'local': 'latest'}
+    if isinstance(config['agent5'], str):
+        config['agent5'] = {'docker': config['agent5'], 'local': 'latest'}
 
     save_config(config)
     return config
@@ -129,7 +115,7 @@ def scrub_secrets(config):
             if path in branch:
                 if not paths:
                     old_value = branch[path]
-                    if isinstance(old_value, string_types):
+                    if isinstance(old_value, str):
                         branch[path] = '*' * len(old_value)
                 else:
                     branch = branch[path]

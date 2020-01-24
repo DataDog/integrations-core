@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
@@ -31,12 +31,12 @@ def stop(check, env):
         if all_checks:
             envs = get_configured_envs(check)
             if envs:
-                echo_success('{}:'.format(check))
+                echo_success(f'{check}:')
         else:
             envs = [env] if env else get_configured_envs(check)
 
         for env in envs:
-            echo_info('{}:'.format(env), indent=env_indent)
+            echo_info(f'{env}:', indent=env_indent)
             environment = create_interface(check, env)
 
             if on_ci and 'sampling_start_time' in environment.metadata:

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
@@ -8,6 +8,7 @@ import json
 import logging
 import re
 import traceback
+import typing
 import unicodedata
 from collections import defaultdict, deque
 from os.path import basename
@@ -210,6 +211,14 @@ class AgentCheck(object):
                 (
                     'DEPRECATION NOTICE: The `no_proxy` config option has been renamed '
                     'to `skip_proxy` and will be removed in Agent version 6.13.'
+                ),
+            ],
+            'service_tag': [
+                False,
+                (
+                    'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `{}`. '
+                    'Set `disable_legacy_service_tag` to `true` to disable this warning. '
+                    'The default will become `true` and cannot be changed in Agent version 8.'
                 ),
             ],
         }
@@ -491,12 +500,12 @@ class AgentCheck(object):
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
-    def _log_deprecation(self, deprecation_key):
+    def _log_deprecation(self, deprecation_key, *args):
         """
         Logs a deprecation notice at most once per AgentCheck instance, for the pre-defined `deprecation_key`
         """
         if not self._deprecations[deprecation_key][0]:
-            self.log.warning(self._deprecations[deprecation_key][1])
+            self.warning(self._deprecations[deprecation_key][1].format(*args))
             self._deprecations[deprecation_key][0] = True
 
     # TODO: Remove once our checks stop calling it

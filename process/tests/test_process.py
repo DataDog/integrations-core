@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
@@ -190,7 +190,7 @@ def test_check_missing_process(aggregator, caplog):
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     process.check(instance)
     aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
-    assert "Unable to find process named '['fooprocess', '/usr/bin/foo']' from among processes" in caplog.text
+    assert "Unable to find process named ['fooprocess', '/usr/bin/foo'] among processes" in caplog.text
 
 
 def test_check_real_process(aggregator):

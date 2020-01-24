@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -82,11 +82,10 @@ class KubeMetricsServerCheck(OpenMetricsBaseCheck):
 
     KUBE_METRICS_SERVER_NAMESPACE = "kube_metrics_server"
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         super(KubeMetricsServerCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 "kube_metrics_server": {

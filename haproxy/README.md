@@ -57,16 +57,6 @@ Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your
           ## or admin socket: unix:///var/run/haproxy.sock
           #
         - url: http://localhost/admin?stats
-
-          ## @param username - string - optional
-          ## The username to use if services are behind basic auth.
-          #
-          username: "<USERNAME>"
-
-          ## @param password - string - optional
-          ## The password to use if services are behind basic or NTLM auth.
-          #
-          password: "<PASSWORD>"
     ```
 
 2. [Restart the Agent][6].
@@ -102,11 +92,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                     |
-|----------------------|-------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `haproxy`                                                                                 |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                             |
-| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%/admin?stats","username":"<USERNAME>","password":"<PASSWORD>"}` |
+| Parameter            | Value                                     |
+|----------------------|-------------------------------------------|
+| `<INTEGRATION_NAME>` | `haproxy`                                 |
+| `<INIT_CONFIG>`      | blank or `{}`                             |
+| `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%/admin?stats"}` |
 
 ##### Log collection
 

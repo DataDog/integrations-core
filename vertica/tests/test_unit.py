@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -67,11 +67,12 @@ def test_client_logging_enabled(aggregator, instance):
             connection_load_balance=mock.ANY,
             connection_timeout=mock.ANY,
             log_level='DEBUG',
-            log_path=os.devnull,
+            log_path='',
         )
 
 
 def test_client_logging_disabled(aggregator, instance):
+    instance['client_lib_log_level'] = None
     check = VerticaCheck('vertica', {}, [instance])
 
     with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:

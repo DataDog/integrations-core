@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -46,7 +46,7 @@ def mock_leader():
 
 
 def test_check_metrics_1_13(aggregator, mock_metrics, mock_leader):
-    c = KubeSchedulerCheck(CHECK_NAME, None, {}, [instance])
+    c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
     def assert_metric(name, **kwargs):

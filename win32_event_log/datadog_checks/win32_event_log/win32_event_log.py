@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -132,11 +132,11 @@ class Win32EventLogWMI(WinWMICheck):
             wmi_sampler.sample()
         except TimeoutException:
             self.log.warning(
-                u"[Win32EventLog] WMI query timed out."
-                u" class={wmi_class} - properties={wmi_properties} -"
-                u" filters={filters} - tags={tags}".format(
-                    wmi_class=self.EVENT_CLASS, wmi_properties=event_properties, filters=filters, tags=instance_tags
-                )
+                "[Win32EventLog] WMI query timed out. class=%s - properties=%s - filters=%s - tags=%s",
+                self.EVENT_CLASS,
+                event_properties,
+                filters,
+                instance_tags,
             )
         else:
             for ev in wmi_sampler:
@@ -152,7 +152,7 @@ class Win32EventLogWMI(WinWMICheck):
                 if log_ev.is_after(last_ts):
                     self.event(log_ev.to_event_dict())
                 else:
-                    self.log.debug('Skipping event after %s. ts=%s' % (last_ts, log_ev.timestamp))
+                    self.log.debug('Skipping event after %s. ts=%s', last_ts, log_ev.timestamp)
 
             # Update the last time checked
             self.last_ts[instance_key] = datetime.utcnow()

@@ -1,5 +1,9 @@
 # CHANGELOG - dns_check
 
+## 1.5.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.4.1 / 2019-08-24
 
 * [Fixed] Make nameserver optional in the configuration. See [#4283](https://github.com/DataDog/integrations-core/pull/4283).

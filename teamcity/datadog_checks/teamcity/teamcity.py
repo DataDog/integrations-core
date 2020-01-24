@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2014-present
 # (C) Paul Kirby <pkirby@matrix-solutions.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -37,7 +37,7 @@ class TeamCityCheck(AgentCheck):
         if instance_name in self.last_build_ids:
             return
 
-        self.log.debug("Initializing {}".format(instance_name))
+        self.log.debug("Initializing %s", instance_name)
 
         if basic_http_authentication:
             build_url = self.LAST_BUILD_URL_AUTHENTICATED.format(server=server, build_conf=build_conf)
@@ -52,20 +52,18 @@ class TeamCityCheck(AgentCheck):
             if resp.status_code == 401:
                 self.log.error("Access denied. You must enable guest authentication")
             self.log.error(
-                "Failed to retrieve last build ID with code {} for instance '{}'".format(
-                    resp.status_code, instance_name
-                )
+                "Failed to retrieve last build ID with code %s for instance '%s'", resp.status_code, instance_name
             )
             raise
         except Exception:
-            self.log.exception("Unhandled exception to get last build ID for instance '{}'".format(instance_name))
+            self.log.exception("Unhandled exception to get last build ID for instance '%s'", instance_name)
             raise
 
-        self.log.debug("Last build id for instance {} is {}.".format(instance_name, last_build_id))
+        self.log.debug("Last build id for instance %s is %s.", instance_name, last_build_id)
         self.last_build_ids[instance_name] = last_build_id
 
     def _build_and_send_event(self, new_build, instance_name, is_deployment, host, tags):
-        self.log.debug("Found new build with id {}, saving and alerting.".format(new_build["id"]))
+        self.log.debug("Found new build with id %s, saving and alerting.", new_build["id"])
         self.last_build_ids[instance_name] = new_build["id"]
 
         event_dict = {"timestamp": int(time.time()), "source_type_name": "teamcity", "host": host, "tags": []}
@@ -142,7 +140,7 @@ class TeamCityCheck(AgentCheck):
             else:
                 self._build_and_send_event(new_builds["build"][0], instance_name, is_deployment, host, tags)
         except requests.exceptions.HTTPError:
-            self.log.exception("Couldn't fetch last build, got code {}".format(resp.status_code))
+            self.log.exception("Couldn't fetch last build, got code %s", resp.status_code)
             raise
         except Exception:
             self.log.exception("Couldn't fetch last build, unhandled exception")

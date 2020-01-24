@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """
@@ -169,10 +169,14 @@ def copy_dir_contents(path, d):
 def remove_path(path):
     try:
         shutil.rmtree(path, ignore_errors=False)
-    except (FileNotFoundError, OSError):
+    # TODO: Remove FileNotFoundError (and noqa: B014) when Python 2 is removed
+    # In Python 3, IOError have been merged into OSError
+    except (FileNotFoundError, OSError):  # noqa: B014
         try:
             os.remove(path)
-        except (FileNotFoundError, OSError, PermissionError):
+        # TODO: Remove FileNotFoundError (and noqa: B014) when Python 2 is removed
+        # In Python 3, IOError have been merged into OSError
+        except (FileNotFoundError, OSError, PermissionError):  # noqa: B014
             pass
 
 

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2016-2017
+# (C) Datadog, Inc. 2016-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
@@ -13,7 +13,6 @@ from datetime import datetime, timedelta
 import requests
 from kubeutil import get_connection_info
 from six import iteritems
-from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.base.utils.tagging import tagger
@@ -22,7 +21,7 @@ from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
 from .cadvisor import CadvisorScraper
-from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix
+from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix, urljoin
 from .prometheus import CadvisorPrometheusScraperMixin
 
 try:
@@ -84,6 +83,7 @@ DEPRECATED_GAUGES = {
 NEW_1_14_GAUGES = {
     'kubelet_runtime_operations_total': 'kubelet.runtime.operations',
     'kubelet_runtime_operations_errors_total': 'kubelet.runtime.errors',
+    'kubelet_container_log_filesystem_used_bytes': 'kubelet.container.log_filesystem.used_bytes',
 }
 
 DEFAULT_HISTOGRAMS = {
@@ -162,7 +162,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     COUNTER_METRICS = {'kubelet_evictions': 'kubelet.evictions'}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         self.NAMESPACE = 'kubernetes'
         if instances is not None and len(instances) > 1:
             raise Exception('Kubelet check only supports one configured instance.')
@@ -171,7 +171,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         cadvisor_instance = self._create_cadvisor_prometheus_instance(inst)
         kubelet_instance = self._create_kubelet_prometheus_instance(inst)
         generic_instances = [cadvisor_instance, kubelet_instance]
-        super(KubeletCheck, self).__init__(name, init_config, agentConfig, generic_instances)
+        super(KubeletCheck, self).__init__(name, init_config, generic_instances)
 
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
         self.cadvisor_legacy_url = None
@@ -224,6 +224,10 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         return kubelet_instance
 
     def check(self, instance):
+        # Kubelet credential defaults are determined dynamically during every
+        # check run so we must make sure that configuration is always reset
+        self.reset_http_config()
+
         kubelet_conn_info = get_connection_info()
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
@@ -263,7 +267,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         try:
             self.cadvisor_legacy_url = self.detect_cadvisor(endpoint, self.cadvisor_legacy_port)
         except Exception as e:
-            self.log.debug('cAdvisor not found, running in prometheus mode: %s' % str(e))
+            self.log.debug('cAdvisor not found, running in prometheus mode: %s', e)
 
         self.pod_list = self.retrieve_pod_list()
         self.pod_list_utils = PodListUtils(self.pod_list)
@@ -325,7 +329,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 pod_list['items'] = []
             return pod_list
         except Exception as e:
-            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s' % (self.pod_list_url, str(e)))
+            self.log.warning('failed to retrieve pod list from the kubelet at %s : %s', self.pod_list_url, e)
             return None
 
     @staticmethod
@@ -361,7 +365,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             stats_response.raise_for_status()
             return stats_response.json()
         except Exception as e:
-            self.log.warning('GET on kubelet s `/stats/summary` failed: {}'.format(str(e)))
+            self.log.warning('GET on kubelet s `/stats/summary` failed: %s', e)
             return {}
 
     def _report_node_metrics(self, instance_tags):
@@ -399,7 +403,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     is_ok = False
 
         except Exception as e:
-            self.log.warning('kubelet check %s failed: %s' % (url, str(e)))
+            self.log.warning('kubelet check %s failed: %s', url, e)
             self.service_check(
                 service_check_base,
                 AgentCheck.CRITICAL,
@@ -633,7 +637,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         for sample in metric.samples:
             val = sample[self.SAMPLE_VALUE]
             if not self._is_value_valid(val):
-                self.log.debug("Metric value is not supported for metric {}".format(sample[self.SAMPLE_NAME]))
+                self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
                 continue
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             # Determine the tags to send

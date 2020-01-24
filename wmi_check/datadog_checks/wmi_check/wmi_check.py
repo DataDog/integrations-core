@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2017
+# (C) Datadog, Inc. 2013-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -71,11 +71,11 @@ class WMICheck(WinWMICheck):
             metrics = self._extract_metrics(wmi_sampler, tag_by, tag_queries, constant_tags)
         except TimeoutException:
             self.log.warning(
-                u"WMI query timed out."
-                u" class={wmi_class} - properties={wmi_properties} -"
-                u" filters={filters} - tag_queries={tag_queries}".format(
-                    wmi_class=wmi_class, wmi_properties=properties, filters=filters, tag_queries=tag_queries
-                )
+                "WMI query timed out. class=%s - properties=%s - filters=%s - tag_queries=%s",
+                wmi_class,
+                properties,
+                filters,
+                tag_queries,
             )
         else:
             self._submit_metrics(metrics, metric_name_and_type_by_property)

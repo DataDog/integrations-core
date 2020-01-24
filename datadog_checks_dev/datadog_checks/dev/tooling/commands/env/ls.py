@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
@@ -20,7 +20,7 @@ def ls(checks):
             envs = get_available_tox_envs(check, e2e_only=True)
 
             if envs:
-                echo_success('{}:'.format(check))
+                echo_success(f'{check}:')
                 for env in envs:
                     echo_info(env, indent=True)
 
@@ -29,6 +29,6 @@ def ls(checks):
             envs = get_configured_envs(check)
 
             if envs:
-                echo_success('{}:'.format(check))
+                echo_success(f'{check}:')
                 for env in envs:
                     echo_info(env, indent=True)

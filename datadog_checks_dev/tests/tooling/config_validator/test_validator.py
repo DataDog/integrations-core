@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.dev.tooling.config_validator.config_block import MAX_COMMENT_LENGTH, ConfigBlock, ParamProperties
