@@ -43,7 +43,7 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
 2. [Restart the Agent][5].
 
 #### Log Collection
-Cilium contains two types of logs, `cilium-agent` logs and `cilium-operator` logs.
+Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
 #### Available for Agent >6.0
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
