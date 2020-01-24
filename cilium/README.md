@@ -59,7 +59,7 @@ Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
       (...)
     ```
 
-2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5] or mount the `/var/log/pods` directory if you are not using docker.
+2. Mount the Docker socket to the Datadog Agent as done in [this manifest][5] or mount the `/var/log/pods` directory if you are not using Docker.
 
 3. [Restart the Agent][13].
 
