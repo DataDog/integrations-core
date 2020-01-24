@@ -70,11 +70,11 @@ class VSphereCheck(AgentCheck):
 
     def initiate_api_connection(self):
         try:
-            self.log.info(
+            self.log.debug(
                 "Connecting to the vCenter API %s with username %s...", self.config.hostname, self.config.username
             )
             self.api = VSphereAPI(self.config, self.log)
-            self.log.info("Connected")
+            self.log.debug("Connected")
         except APIConnectionError:
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
@@ -82,7 +82,7 @@ class VSphereCheck(AgentCheck):
 
     def refresh_metrics_metadata_cache(self):
         """Request the list of counters (metrics) from vSphere and store them in a cache."""
-        self.log.info(
+        self.log.debug(
             "Refreshing the metrics metadata cache. Collecting all counters metadata for collection_level=%d",
             self.config.collection_level,
         )
@@ -95,7 +95,7 @@ class VSphereCheck(AgentCheck):
             raw=True,
             hostname=self._hostname,
         )
-        self.log.info("Collected %d counters metadata in %.3f seconds.", len(counters), t0.total())
+        self.log.debug("Collected %d counters metadata in %.3f seconds.", len(counters), t0.total())
 
         for mor_type in self.config.collected_resource_types:
             allowed_counters = []
@@ -116,7 +116,7 @@ class VSphereCheck(AgentCheck):
         """Fetch the complete infrastructure, generate tags for each monitored resources and store all of that
         into the infrastructure_cache. It also computes the resource `hostname` property to be used when submitting
         metrics for this mor."""
-        self.log.info("Refreshing the infrastructure cache...")
+        self.log.debug("Refreshing the infrastructure cache...")
         t0 = Timer()
         infrastructure_data = self.api.get_infrastructure()
         self.gauge(
@@ -126,7 +126,7 @@ class VSphereCheck(AgentCheck):
             raw=True,
             hostname=self._hostname,
         )
-        self.log.info("Infrastructure cache refreshed in %.3f seconds.", t0.total())
+        self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
 
         for mor, properties in iteritems(infrastructure_data):
             if not isinstance(mor, tuple(self.config.collected_resource_types)):
@@ -285,7 +285,7 @@ class VSphereCheck(AgentCheck):
         except Exception as e:
             self.log.warning("Unable to schedule all metric collection tasks: %s", e)
         finally:
-            self.log.info("Queued all %d tasks, waiting for completion.", len(tasks))
+            self.log.debug("Queued all %d tasks, waiting for completion.", len(tasks))
             for future in as_completed(tasks):
                 e = future.exception()
                 if e is not None:
@@ -365,7 +365,7 @@ class VSphereCheck(AgentCheck):
             self.set_external_tags(external_host_tags)
 
     def collect_events(self):
-        self.log.info("Starting events collection.")
+        self.log.debug("Starting events collection.")
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
@@ -376,7 +376,7 @@ class VSphereCheck(AgentCheck):
                 raw=True,
                 hostname=self._hostname,
             )
-            self.log.info("Got %s new events from the vCenter event manager", len(new_events))
+            self.log.debug("Got %s new events from the vCenter event manager", len(new_events))
             event_config = {'collect_vcenter_alarms': True}
             for event in new_events:
                 normalized_event = VSphereEvent(event, event_config, self.config.base_tags)
@@ -455,6 +455,6 @@ class VSphereCheck(AgentCheck):
             )
 
         # Creating a thread pool and starting metric collection
-        self.log.info("Starting metric collection in %d threads.", self.config.threads_count)
+        self.log.debug("Starting metric collection in %d threads.", self.config.threads_count)
         self.collect_metrics_async()
-        self.log.info("Metric collection completed.")
+        self.log.debug("Metric collection completed.")
