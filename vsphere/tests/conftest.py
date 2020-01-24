@@ -53,7 +53,7 @@ def mock_threadpool():
         'datadog_checks.vsphere.vsphere.as_completed', side_effect=lambda x: x
     ):
         pool.return_value.submit = lambda f, args: MagicMock(
-            done=MagicMock(return_value=True), result=MagicMock(return_value=f(args))
+            done=MagicMock(return_value=True), result=MagicMock(return_value=f(args)), exception=lambda: None
         )
         yield
 

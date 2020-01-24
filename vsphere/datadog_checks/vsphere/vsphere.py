@@ -173,19 +173,9 @@ class VSphereCheck(AgentCheck):
 
             self.infrastructure_cache.set_mor_data(mor, mor_payload)
 
-    def submit_metrics_callback(self, task):
+    def submit_metrics_callback(self, query_results):
         """Callback of the collection of metrics. This is run in the main thread!"""
-        try:
-            results = task.result()
-        except Exception as e:
-            self.log.warning("A metric collection API call failed with the following error: %s", e)
-            return
-        if not results:
-            # No metric from this call, maybe the mor is disconnected?
-            self.log.debug("A metric collection API call did not return data.")
-            return
-
-        for results_per_mor in results:
+        for results_per_mor in query_results:
             mor_props = self.infrastructure_cache.get_mor_props(results_per_mor.entity)
             if mor_props is None:
                 self.log.debug(
@@ -292,12 +282,23 @@ class VSphereCheck(AgentCheck):
         try:
             for query_specs in self.make_query_specs():
                 tasks.append(self.thread_pool.submit(self.query_metrics_wrapper, query_specs))
+        except Exception as e:
+            self.log.warning("Unable to schedule all metric collection tasks: %s", e)
         finally:
             self.log.info("Queued all %d tasks, waiting for completion.", len(tasks))
             for future in as_completed(tasks):
+                e = future.exception()
+                if e is not None:
+                    self.log.warning("A metric collection API call failed with the following error: %s", e)
+                    continue
+                results = future.result()
+                if not results:
+                    self.log.debug("A metric collection API call did not return data.")
+                    continue
+
                 try:
                     # Callback is called in the main thread
-                    self.submit_metrics_callback(future)
+                    self.submit_metrics_callback(results)
                 except Exception as e:
                     self.log.exception(
                         "Exception '%s' raised during the submit_metrics_callback. "
