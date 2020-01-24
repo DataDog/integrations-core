@@ -37,9 +37,6 @@ def test_is_metric_excluded_by_filters():
 
 def test_is_reference_excluded():
     metric_filters = {'vm': [re.compile(r'^((?!cpu.usage.avg).)*$')]}
-    import pdb
-
-    pdb.set_trace()
     assert not is_metric_excluded_by_filters('cpu.usage.avg', vim.VirtualMachine, metric_filters)
 
 
