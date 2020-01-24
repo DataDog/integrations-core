@@ -64,7 +64,6 @@ setup(
         'deps': get_requirements(
             'requirements.in',
             exclude=[
-                'aws-requests-auth',
                 'botocore',
                 'kubernetes',
                 'pysocks',
@@ -75,7 +74,7 @@ setup(
         ),
         'http': get_requirements(
             'requirements.in',
-            only=['aws-requests-auth', 'botocore', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
+            only=['botocore', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
         ),
         'kube': get_requirements('requirements.in', only=['kubernetes']),
     },
