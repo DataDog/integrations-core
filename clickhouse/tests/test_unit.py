@@ -24,7 +24,7 @@ def test_config(instance):
         m.assert_called_once_with(
             host=instance['server'],
             port=instance['port'],
-            user=instance['username'],
+            user=instance['user'],
             password=instance['password'],
             database='default',
             connect_timeout=10,
