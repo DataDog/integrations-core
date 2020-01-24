@@ -59,8 +59,8 @@ class VSphereConfig(object):
             self.collected_resource_types = REALTIME_RESOURCES
 
         # Filters
-        self.resource_filters = self.parse_resource_filters(instance.get("resource_filters", {}))
-        self.metric_filters = self.parse_metric_filters(instance.get("metric_filters", {}))
+        self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", {}))
+        self.metric_filters = self._parse_metric_filters(instance.get("metric_filters", {}))
 
         self.validate_config()
 
@@ -90,7 +90,7 @@ class VSphereConfig(object):
                 "integer between 1 and 4."
             )
 
-    def parse_resource_filters(self, all_resource_filters):
+    def _parse_resource_filters(self, all_resource_filters):
         formatted_resource_filters = {}
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
 
@@ -147,7 +147,7 @@ class VSphereConfig(object):
 
         return formatted_resource_filters
 
-    def parse_metric_filters(self, all_metric_filters):
+    def _parse_metric_filters(self, all_metric_filters):
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
         metric_filters = {}
         for resource_type, filters in iteritems(all_metric_filters):
