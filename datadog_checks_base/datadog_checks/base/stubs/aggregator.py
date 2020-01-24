@@ -5,7 +5,7 @@ from __future__ import division
 
 from collections import OrderedDict, defaultdict
 
-from six import binary_type, iteritems
+from six import iteritems
 
 from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from datadog_checks.base.stubs.similar import build_similar_elements_msg
@@ -14,13 +14,13 @@ from ..utils.common import ensure_unicode, to_string
 
 
 def normalize_tags(tags, sort=False):
-    # The base class ensures the Agent receives bytes, so to avoid
-    # prefacing our asserted tags like b'foo:bar' we'll convert back.
+    # The base class ensures the Agent receives bytes in PY2 and unicode in PY3.
+    # This function makes sure strings are compared with the same type.
     if tags:
         if sort:
-            return sorted(ensure_unicode(tag) for tag in tags)
+            return sorted(to_string(tag) for tag in tags)
         else:
-            return [ensure_unicode(tag) for tag in tags]
+            return [to_string(tag) for tag in tags]
     return tags
 
 
@@ -120,20 +120,7 @@ class AggregatorStub(object):
         """
         Return all events
         """
-        all_events = [{ensure_unicode(key): value for key, value in iteritems(ev)} for ev in self._events]
-
-        for ev in all_events:
-            to_decode = []
-            for key, value in iteritems(ev):
-                if isinstance(value, binary_type) and key != 'host':
-                    to_decode.append(key)
-            for key in to_decode:
-                ev[key] = ensure_unicode(ev[key])
-
-            if ev.get('tags'):
-                ev['tags'] = normalize_tags(ev['tags'])
-
-        return all_events
+        return self._events
 
     def histogram_bucket(self, name):
         """
