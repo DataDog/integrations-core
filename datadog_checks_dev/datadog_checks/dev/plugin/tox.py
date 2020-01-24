@@ -65,16 +65,16 @@ def add_style_checker(config, sections, make_envconfig, reader):
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'mypy==0.761\nflake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
+        'deps': 'mypy>=0.761\nflake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
         'commands': '\n'.join(
             [
-                'mypy --config-file=../mypy.ini --py2 {}'.format(mypy_args),
                 'flake8 --config=../.flake8 .',
                 'black --check --diff .',
                 'isort --check-only --diff --recursive .',
                 'python -c "print(\'\\n[WARNING] Complying with following lint rules is recommended, '
                 'but not mandatory, yet.\')"',
                 '- flake8 --config=../.flake8 --enable-extensions=G --select=G .',  # lint `flake8-logging-format`
+                'mypy --config-file=../mypy.ini --py2 {}'.format(mypy_args),
             ]
         ),
     }
