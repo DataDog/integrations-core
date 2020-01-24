@@ -5,6 +5,7 @@ from __future__ import division
 
 import os
 import re
+import typing
 from decimal import ROUND_HALF_UP, Decimal
 
 from six import PY3, iteritems, text_type
@@ -13,19 +14,24 @@ from six.moves.urllib.parse import urlparse
 from .constants import MILLISECOND
 
 
-def ensure_bytes(s):
+def ensure_bytes(s):  # type: ignore
     if isinstance(s, text_type):
         s = s.encode('utf-8')
     return s
 
 
-def ensure_unicode(s):
+def ensure_unicode(s):  # type: ignore
     if isinstance(s, bytes):
         s = s.decode('utf-8')
     return s
 
 
-to_string = ensure_unicode if PY3 else ensure_bytes
+# NOTE: the type here is fuzzy, because `to_string()` will actually return bytes on Python 2.
+# Mypy itself is still undecided about what to do w.r.t. bytes vs str in Python 2/3...
+# See: https://github.com/python/typing/issues/208
+# For now, we go with Mypy's current position, i.e. it treats 'str' as a synonym for 'bytes' on Python 2.
+# See: https://mypy.readthedocs.io/en/stable/python2.html#type-checking-python-2-code
+to_string = ensure_unicode if PY3 else ensure_bytes  # type: typing.Callable[[typing.Union[bytes, str]], str]
 
 
 def compute_percent(part, total):

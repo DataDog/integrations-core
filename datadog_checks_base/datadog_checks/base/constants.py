@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import namedtuple
+import typing
 
-ServiceCheck = namedtuple('ServiceCheck', 'OK WARNING CRITICAL UNKNOWN')(0, 1, 2, 3)
+ServiceCheckType = typing.NamedTuple(
+    'ServiceCheck', [('OK', int), ('WARNING', int), ('CRITICAL', int), ('UNKNOWN', int)]
+)
+ServiceCheck = ServiceCheckType(0, 1, 2, 3)

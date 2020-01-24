@@ -17,13 +17,14 @@ import yaml
 from six import PY3, iteritems, text_type
 
 from ..config import is_affirmative
-from ..constants import ServiceCheck
+from ..constants import ServiceCheck, ServiceCheckType
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.proxy import config_proxy_skip
+from ..utils.types import Event, ExternalTags, NormalizedTags, ProxiesMap, RawTags
 
 try:
     import datadog_agent
@@ -53,7 +54,7 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
 
 
 # Metric types for which it's only useful to submit once per set of tags
-ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
+ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]  # type: typing.List[int]
 
 
 class __AgentCheck(object):
@@ -105,6 +106,7 @@ class __AgentCheck(object):
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, *args, **kwargs):
+        # type: (*typing.Any, **typing.Any) -> None
         """In general, you don't need to and you should not override anything from the base
         class except the :py:meth:`check` method but sometimes it might be useful for a Check to
         have its own constructor.
@@ -133,14 +135,14 @@ class __AgentCheck(object):
                 configuration file (a list is used to keep backward compatibility with
                 older versions of the Agent).
         """
-        self.metrics = defaultdict(list)
+        self.metrics = defaultdict(list)  # type: typing.DefaultDict[str, list]
         self.check_id = ''
-        self.instances = kwargs.get('instances', [])
-        self.name = kwargs.get('name', '')
-        self.init_config = kwargs.get('init_config', {})
-        self.agentConfig = kwargs.get('agentConfig', {})
-        self.warnings = []
-        self.metric_limiter = None
+        self.instances = kwargs.get('instances', [])  # type: typing.List[typing.Dict[str, typing.Any]]
+        self.name = kwargs.get('name', '')  # type: str
+        self.init_config = kwargs.get('init_config', {})  # type: typing.Dict[str, typing.Any]
+        self.agentConfig = kwargs.get('agentConfig', {})  # type: typing.Dict[str, typing.Any]
+        self.warnings = []  # type: typing.List[str]
+        self.metric_limiter = None  # type: typing.Optional[Limiter]
 
         if len(args) > 0:
             self.name = args[0]
@@ -155,26 +157,26 @@ class __AgentCheck(object):
                     self.instances = args[3]
             else:
                 # new-style init: the 3rd argument is `instances`
-                self.instances = args[2]
+                self.instances = list(args[2])
 
         # Agent 6+ will only have one instance
         self.instance = self.instances[0] if self.instances else None
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
-        self.hostname = datadog_agent.get_hostname()
+        self.hostname = datadog_agent.get_hostname()  # type: str
 
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
 
         # Provides logic to yield consistent network behavior based on user configuration.
         # Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
-        self._http = None
+        self._http = None  # type: typing.Optional[RequestsWrapper]
 
         # Used for sending metadata via Go bindings
-        self._metadata_manager = None
+        self._metadata_manager = None  # type: typing.Optional[MetadataManager]
 
         # Save the dynamically detected integration version
-        self._check_version = None
+        self._check_version = None  # type: typing.Optional[str]
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -188,40 +190,40 @@ class __AgentCheck(object):
         self.default_integration_http_timeout = float(self.agentConfig.get('default_integration_http_timeout', 9))
 
         self._deprecations = {
-            'increment': [
+            'increment': (
                 False,
                 (
                     'DEPRECATION NOTICE: `AgentCheck.increment`/`AgentCheck.decrement` are deprecated, please '
                     'use `AgentCheck.gauge` or `AgentCheck.count` instead, with a different metric name'
                 ),
-            ],
-            'device_name': [
+            ),
+            'device_name': (
                 False,
                 (
                     'DEPRECATION NOTICE: `device_name` is deprecated, please use a `device:` '
                     'tag in the `tags` list instead'
                 ),
-            ],
-            'in_developer_mode': [
+            ),
+            'in_developer_mode': (
                 False,
                 'DEPRECATION NOTICE: `in_developer_mode` is deprecated, please stop using it.',
-            ],
-            'no_proxy': [
+            ),
+            'no_proxy': (
                 False,
                 (
                     'DEPRECATION NOTICE: The `no_proxy` config option has been renamed '
                     'to `skip_proxy` and will be removed in Agent version 6.13.'
                 ),
-            ],
-            'service_tag': [
+            ),
+            'service_tag': (
                 False,
                 (
                     'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `{}`. '
                     'Set `disable_legacy_service_tag` to `true` to disable this warning. '
                     'The default will become `true` and cannot be changed in Agent version 8.'
                 ),
-            ],
-        }
+            ),
+        }  # type: typing.Dict[str, typing.Tuple[bool, str]]
 
         # Setup metric limits
         try:
@@ -243,6 +245,7 @@ class __AgentCheck(object):
 
     @staticmethod
     def load_config(yaml_str):
+        # type: (str) -> typing.Dict[str, typing.Any]
         """
         Convenience wrapper to ease programmatic use of this class from the C API.
         """
@@ -250,6 +253,7 @@ class __AgentCheck(object):
 
     @property
     def http(self):
+        # type: () -> RequestsWrapper
         if self._http is None:
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
@@ -257,6 +261,7 @@ class __AgentCheck(object):
 
     @property
     def metadata_manager(self):
+        # type: () -> MetadataManager
         if self._metadata_manager is None:
             if not self.check_id and not using_stub_aggregator:
                 raise RuntimeError('Attribute `check_id` must be set')
@@ -267,6 +272,7 @@ class __AgentCheck(object):
 
     @property
     def check_version(self):
+        # type: () -> str
         if self._check_version is None:
             # 'datadog_checks.<PACKAGE>.<MODULE>...'
             module_parts = self.__module__.split('.')
@@ -280,10 +286,12 @@ class __AgentCheck(object):
 
     @property
     def in_developer_mode(self):
+        # type: () -> bool
         self._log_deprecation('in_developer_mode')
         return False
 
     def get_instance_proxy(self, instance, uri, proxies=None):
+        # type: (dict, str, ProxiesMap) -> ProxiesMap
         # TODO: Remove with Agent 5
         proxies = proxies if proxies is not None else self.proxies.copy()
 
@@ -295,10 +303,31 @@ class __AgentCheck(object):
 
         return config_proxy_skip(proxies, uri, skip)
 
-    def _context_uid(self, mtype, name, tags=None, hostname=None):
+    def _context_uid(
+        self,
+        mtype,  # type: int
+        name,  # type: str
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+    ):
+        # type: (...) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
-    def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags):
+    def _normalize_tags_type(self, tags=None, device_name=None, metric_name=None):
+        # type: (RawTags, str, str) -> NormalizedTags
+        raise NotImplementedError
+
+    def submit_histogram_bucket(
+        self,
+        name,  # type: str
+        value,  # type: float
+        lower_bound,  # type: float
+        upper_bound,  # type: float
+        monotonic,  # type: str
+        hostname,  # type: str
+        tags,  # type: RawTags
+    ):
+        # type: (...) -> None
         if value is None:
             # ignore metric sample
             return
@@ -323,7 +352,17 @@ class __AgentCheck(object):
             self, self.check_id, name, value, lower_bound, upper_bound, monotonic, hostname, tags
         )
 
-    def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False):
+    def _submit_metric(
+        self,
+        mtype,  # type: int
+        name,  # type: str
+        value,  # type: float
+        tags=None,  # type: RawTags
+        hostname=None,  # type: str
+        device_name=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         if value is None:
             # ignore metric sample
             return
@@ -356,7 +395,16 @@ class __AgentCheck(object):
 
         aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname)
 
-    def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
+    def gauge(
+        self,
+        name,  # type: str
+        value,  # type: float
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+        device_name=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         """Sample a gauge metric.
 
         :param str name: the name of the metric.
@@ -371,7 +419,16 @@ class __AgentCheck(object):
             aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def count(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
+    def count(
+        self,
+        name,  # type: str
+        value,  # type: float
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+        device_name=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         """Sample a raw count metric.
 
         :param str name: the name of the metric.
@@ -386,7 +443,16 @@ class __AgentCheck(object):
             aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
+    def monotonic_count(
+        self,
+        name,  # type: str
+        value,  # type: float
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+        device_name=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         """Sample an increasing counter metric.
 
         :param str name: the name of the metric.
@@ -401,7 +467,16 @@ class __AgentCheck(object):
             aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def rate(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
+    def rate(
+        self,
+        name,  # type: str
+        value,  # type: float
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+        device_name=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         """Sample a point, with the rate calculated at the end of the check.
 
         :param str name: the name of the metric.
@@ -416,7 +491,16 @@ class __AgentCheck(object):
             aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def histogram(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
+    def histogram(
+        self,
+        name,  # type: str
+        value,  # type: float
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+        device_name=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         """Sample a histogram metric.
 
         :param str name: the name of the metric.
@@ -431,7 +515,16 @@ class __AgentCheck(object):
             aggregator.HISTOGRAM, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def historate(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
+    def historate(
+        self,
+        name,  # type: str
+        value,  # type: float
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+        device_name=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         """Sample a histogram based on rate metrics.
 
         :param str name: the name of the metric.
@@ -446,7 +539,16 @@ class __AgentCheck(object):
             aggregator.HISTORATE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def increment(self, name, value=1, tags=None, hostname=None, device_name=None, raw=False):
+    def increment(
+        self,
+        name,  # type: str
+        value=1,  # type: float
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+        device_name=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         """Increment a counter metric.
 
         :param str name: the name of the metric.
@@ -462,7 +564,16 @@ class __AgentCheck(object):
             aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def decrement(self, name, value=-1, tags=None, hostname=None, device_name=None, raw=False):
+    def decrement(
+        self,
+        name,  # type: str
+        value=-1,  # type: float
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+        device_name=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         """Decrement a counter metric.
 
         :param str name: the name of the metric.
@@ -478,7 +589,16 @@ class __AgentCheck(object):
             aggregator.COUNTER, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
         )
 
-    def service_check(self, name, status, tags=None, hostname=None, message=None, raw=False):
+    def service_check(
+        self,
+        name,  # type: str
+        status,  # type: ServiceCheckType
+        tags=None,  # type: typing.Sequence[str]
+        hostname=None,  # type: str
+        message=None,  # type: str
+        raw=False,  # type: bool
+    ):
+        # type: (...) -> None
         """Send the status of a service.
 
         :param str name: the name of the service check.
@@ -501,18 +621,22 @@ class __AgentCheck(object):
         )
 
     def _log_deprecation(self, deprecation_key, *args):
+        # type: (str, *str) -> None
         """
         Logs a deprecation notice at most once per AgentCheck instance, for the pre-defined `deprecation_key`
         """
         if not self._deprecations[deprecation_key][0]:
             self.warning(self._deprecations[deprecation_key][1].format(*args))
-            self._deprecations[deprecation_key][0] = True
+            deprecation = self._deprecations[deprecation_key]
+            self._deprecations[deprecation_key] = (True, deprecation[1])
 
     # TODO: Remove once our checks stop calling it
     def service_metadata(self, meta_name, value):
+        # type: (str, typing.Any) -> None
         pass
 
     def set_metadata(self, name, value, **options):
+        # type: (str, typing.Any, **typing.Any) -> None
         """Updates the cached metadata ``name`` with ``value``, which is then sent by the Agent at regular intervals.
 
         :param str name: the name of the metadata
@@ -523,19 +647,21 @@ class __AgentCheck(object):
         self.metadata_manager.submit(name, value, options)
 
     def send_config_metadata(self):
+        # type: () -> None
         self.set_metadata('config', self.instance, section='instance', whitelist=self.METADATA_DEFAULT_CONFIG_INSTANCE)
         self.set_metadata(
             'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
         )
 
     def set_external_tags(self, external_tags):
+        # type: (ExternalTags) -> None
         # Example of external_tags format
         # [
         #     ('hostname', {'src_name': ['test:t1']}),
         #     ('hostname2', {'src2_name': ['test2:t3']})
         # ]
         try:
-            new_tags = []
+            new_tags = []  # type: ExternalTags
             for hostname, source_map in external_tags:
                 new_tags.append((to_string(hostname), source_map))
                 for src_name, tags in iteritems(source_map):
@@ -546,6 +672,7 @@ class __AgentCheck(object):
             raise
 
     def convert_to_underscore_separated(self, name):
+        # type: (bytes) -> bytes
         """
         Convert from CamelCase to camel_case
         And substitute illegal metric characters
@@ -556,6 +683,7 @@ class __AgentCheck(object):
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
 
     def warning(self, warning_message, *args, **kwargs):
+        # type: (str, *typing.Any, **typing.Any) -> None
         """Log a warning message and display it in the Agent's status page.
 
         Using *args is intended to make warning work like log.warn/debug/info/etc
@@ -570,7 +698,9 @@ class __AgentCheck(object):
         # https://github.com/python/cpython/blob/1dbe5373851acb85ba91f0be7b83c69563acd68d/Lib/logging/__init__.py#L368-L369
         if args:
             warning_message = warning_message % args
-        frame = inspect.currentframe().f_back
+        currentframe = inspect.currentframe()
+        assert currentframe is not None
+        frame = currentframe.f_back
         lineno = frame.f_lineno
         # only log the last part of the filename, not the full path
         filename = basename(frame.f_code.co_filename)
@@ -579,6 +709,7 @@ class __AgentCheck(object):
         self.warnings.append(warning_message)
 
     def get_warnings(self):
+        # type: () -> typing.List[str]
         """
         Return the list of warnings messages to be displayed in the info page
         """
@@ -587,27 +718,35 @@ class __AgentCheck(object):
         return warnings
 
     def _get_requests_proxy(self):
+        # type: () -> ProxiesMap
         # TODO: Remove with Agent 5
-        no_proxy_settings = {'http': None, 'https': None, 'no': []}
+        no_proxy_settings = {
+            'http': None,
+            'https': None,
+            'no': [],
+        }  # type: ProxiesMap
 
         # First we read the proxy configuration from datadog.conf
-        proxies = self.agentConfig.get('proxy', datadog_agent.get_config('proxy'))
-        if proxies:
-            proxies = proxies.copy()
+        configured_proxies = self.agentConfig.get('proxy', datadog_agent.get_config('proxy'))  # type: dict
 
-        # requests compliant dict
-        if proxies and 'no_proxy' in proxies:
-            proxies['no'] = proxies.pop('no_proxy')
+        if configured_proxies:
+            return {
+                'http': configured_proxies.get('http'),
+                'https': configured_proxies.get('https'),
+                'no': configured_proxies.get('no_proxy', configured_proxies.get('no', [])),
+            }
 
-        return proxies if proxies else no_proxy_settings
+        return no_proxy_settings
 
     def _format_namespace(self, s, raw=False):
+        # type: (str, bool) -> str
         if not raw and self.__NAMESPACE__:
             return '{}.{}'.format(self.__NAMESPACE__, to_string(s))
 
         return to_string(s)
 
     def normalize(self, metric, prefix=None, fix_case=False):
+        # type: (bytes, bytes, bool) -> str
         """
         Turn a metric into a well-formed metric name
         prefix.b.c
@@ -634,6 +773,7 @@ class __AgentCheck(object):
         return to_string(name)
 
     def normalize_tag(self, tag):
+        # type: (typing.Union[str, bytes]) -> str
         """Normalize tag values.
 
         This happens for legacy reasons, when we cleaned up some characters (like '-')
@@ -647,9 +787,11 @@ class __AgentCheck(object):
         return to_string(tag)
 
     def check(self, instance):
+        # type: (typing.Dict[str, typing.Any]) -> None
         raise NotImplementedError
 
     def run(self):
+        # type: () -> str
         try:
             while self.check_initializations:
                 initialization = self.check_initializations.popleft()
@@ -698,6 +840,7 @@ class __AgentCheckPy3(__AgentCheck):
     """
 
     def event(self, event):
+        # type: (Event) -> None
         """Send an event.
 
         An event is a dictionary with the following keys and data types:
@@ -744,7 +887,8 @@ class __AgentCheckPy3(__AgentCheck):
 
         aggregator.submit_event(self, self.check_id, event)
 
-    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
+    def _normalize_tags_type(self, tags=None, device_name=None, metric_name=None):
+        # type: (RawTags, str, str) -> typing.List[str]
         """
         Normalize tags contents and type:
         - append `device_name` as `device:` tag
@@ -782,6 +926,7 @@ class __AgentCheckPy2(__AgentCheck):
     """
 
     def event(self, event):
+        # type: (Event) -> None
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
         for key, value in list(iteritems(event)):
             # transform the unicode objects to plain strings with utf-8 encoding
@@ -806,7 +951,8 @@ class __AgentCheckPy2(__AgentCheck):
 
         aggregator.submit_event(self, self.check_id, event)
 
-    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
+    def _normalize_tags_type(self, tags=None, device_name=None, metric_name=None):
+        # type: (RawTags, str, str) -> NormalizedTags
         """
         Normalize tags contents and type:
         - append `device_name` as `device:` tag
@@ -838,6 +984,7 @@ class __AgentCheckPy2(__AgentCheck):
         return normalized_tags
 
     def _to_bytes(self, data):
+        # type: (typing.Any) -> typing.Optional[bytes]
         """
         Normalize a text data to bytes (type `bytes`) so that the go bindings can
         handle it easily.

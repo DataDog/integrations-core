@@ -4,8 +4,11 @@
 from six import string_types
 from six.moves.urllib.parse import urlparse
 
+from .types import ProxiesMap
+
 
 def config_proxy_skip(proxies, uri, skip_proxy=False):
+    # type: (ProxiesMap, str, bool) -> ProxiesMap
     """
     Returns an amended copy of the proxies dictionary - used by `requests`,
     it will disable the proxy if the uri provided is to be reached directly.

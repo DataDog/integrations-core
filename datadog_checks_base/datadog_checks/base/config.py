@@ -2,8 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import typing
+
 
 def is_affirmative(value):
+    # type: (typing.Any) -> bool
     """
     Attempt to convert different type of values to a meaningful boolean
     """
