@@ -46,7 +46,7 @@ instances:
     ##    [{<FILTER_PROPERTY>: <FILTER_VALUE>},...] or
     ##    [{FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...]
     ##
-    ##  If you just provide a value we defailt to '=' comparison operator.
+    ##  If you just provide a value we default to '=' comparison operator.
     ##
     ##   * <FILTER_PROPERTY> the name of the filter; something like 'PercentProcessorTime'
     ##

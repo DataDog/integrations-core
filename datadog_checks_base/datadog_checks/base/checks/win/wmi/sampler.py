@@ -362,7 +362,7 @@ class WMISampler(object):
                 - [{'Property': value},...] or
                 - [{'Property': [comparison_op, value]},...]
 
-                NOTE: If we just provide a value we defailt to '=' comparison operator.
+                NOTE: If we just provide a value we default to '=' comparison operator.
                 Otherwise, specify the operator in a list as above: [comp_op, value]
                 If we detect a wildcard character ('%') we will override the operator
                 to use LIKE
