@@ -6,11 +6,33 @@ from datadog_checks.dev.utils import ON_LINUX
 from datadog_checks.utils.common import get_docker_hostname
 
 AGG_STATUSES_BY_SERVICE = (
-    (['status:available', 'service:a'], 1),
-    (['status:available', 'service:b'], 4),
-    (['status:unavailable', 'service:b'], 2),
-    (['status:available', 'service:be_edge_http_sre-production_elk-kibana'], 1),
-    (['status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'], 2),
+    (['status:available', 'service:a', 'haproxy_service:a'], 1),
+    (['status:available', 'service:b', 'haproxy_service:b'], 4),
+    (['status:unavailable', 'service:b', 'haproxy_service:b'], 2),
+    (
+        [
+            'status:available',
+            'service:be_edge_http_sre-production_elk-kibana',
+            'haproxy_service:be_edge_http_sre-production_elk-kibana',
+        ],
+        1,
+    ),
+    (
+        [
+            'status:unavailable',
+            'service:be_edge_http_sre-production_elk-kibana',
+            'haproxy_service:be_edge_http_sre-production_elk-kibana',
+        ],
+        2,
+    ),
+)
+
+AGG_STATUSES_BY_SERVICE_DISABLE_SERVICE_TAG = (
+    (['status:available', 'haproxy_service:a'], 1),
+    (['status:available', 'haproxy_service:b'], 4),
+    (['status:unavailable', 'haproxy_service:b'], 2),
+    (['status:available', 'haproxy_service:be_edge_http_sre-production_elk-kibana'], 1),
+    (['status:unavailable', 'haproxy_service:be_edge_http_sre-production_elk-kibana'], 2),
 )
 
 AGG_STATUSES = ((['status:available'], 6), (['status:unavailable'], 4))
