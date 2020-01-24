@@ -77,7 +77,7 @@ class __AgentCheck(object):
     OK, WARNING, CRITICAL, UNKNOWN = ServiceCheck
 
     # Used by `self.http` for an instance of RequestsWrapper
-    HTTP_CONFIG_REMAPPER = None
+    HTTP_CONFIG_REMAPPER = None  # type: typing.Optional[typing.Dict[str, typing.Dict[str, str]]]
 
     # Used by `self.set_metadata` for an instance of MetadataManager
     #
@@ -1000,4 +1000,9 @@ class __AgentCheckPy2(__AgentCheck):
         return data
 
 
-AgentCheck = __AgentCheckPy3 if PY3 else __AgentCheckPy2  # type: typing.Type[__AgentCheck]
+# Static type checkers don't support deriving from a dynamically-defined class,
+# so we define the default one statically, and make the switch in a type-ignored branch.
+# (This is why we can't use a ternary expression such as 'AgentCheck = ... if PY3 else ...'.)
+AgentCheck = __AgentCheckPy3
+if not PY3:
+    AgentCheck = __AgentCheckPy2  # type: ignore

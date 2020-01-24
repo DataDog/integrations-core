@@ -19,7 +19,7 @@ from .headers import get_default_headers, update_headers
 from .warnings_util import disable_warnings_ctx
 
 try:
-    from contextlib import ExitStack
+    from contextlib import ExitStack  # type: ignore  # (We run mypy in Py2 mode -- ExitStack didn't exist on Py2 yet.)
 except ImportError:
     from contextlib2 import ExitStack
 

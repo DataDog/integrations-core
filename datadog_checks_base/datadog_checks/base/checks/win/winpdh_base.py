@@ -10,7 +10,7 @@ from ...utils.containers import hash_mutable
 try:
     from .winpdh import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
 except ImportError:
-    from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE
+    from .winpdh_stub import WinPDHCounter, DATA_TYPE_INT, DATA_TYPE_DOUBLE  # type: ignore
 
 
 RESOURCETYPE_ANY = 0

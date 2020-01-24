@@ -12,8 +12,8 @@ try:
     from yaml import CSafeDumper as yDumper
 except ImportError:
     # On source install C Extensions might have not been built
-    from yaml import SafeLoader as yLoader  # noqa, imported from here elsewhere
-    from yaml import SafeDumper as yDumper  # noqa, imported from here elsewhere
+    from yaml import SafeLoader as yLoader  # type: ignore  # noqa, imported from here elsewhere
+    from yaml import SafeDumper as yDumper  # type: ignore  # noqa, imported from here elsewhere
 
 log = logging.getLogger(__name__)
 

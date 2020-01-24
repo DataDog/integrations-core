@@ -12,13 +12,13 @@ from .utils.common import ensure_bytes, ensure_unicode, to_string
 try:
     from .checks.win import PDHBaseCheck
 except ImportError:
-    PDHBaseCheck = None
+    PDHBaseCheck = None  # type: ignore
 
 # Kubernetes dep will not always be installed
 try:
     from .checks.kube_leader import KubeLeaderElectionBaseCheck
 except ImportError:
-    KubeLeaderElectionBaseCheck = None
+    KubeLeaderElectionBaseCheck = None  # type: ignore
 
 __all__ = [
     '__version__',

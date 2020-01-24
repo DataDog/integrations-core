@@ -13,7 +13,7 @@ from .common import METRIC_PROFILE_NAMESPACE
 try:
     import tracemalloc
 except ImportError:
-    tracemalloc = None
+    tracemalloc = None  # type: ignore
 
 DEFAULT_FRAMES = 100
 DEFAULT_GC = False

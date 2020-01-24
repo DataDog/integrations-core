@@ -16,8 +16,15 @@ except ImportError:
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
 
+Logger = logging.Logger
 
-class AgentLogger(logging.getLoggerClass()):
+# Weird flex, but static type checkers need a statically-defined base class, so
+# we must assign the dynamic logger class in a type-ignored branch.
+if True:
+    Logger = logging.getLoggerClass()  # type: ignore
+
+
+class AgentLogger(Logger):
     def trace(self, msg, *args, **kwargs):
         if self.isEnabledFor(TRACE_LEVEL):
             self._log(TRACE_LEVEL, msg, args, **kwargs)

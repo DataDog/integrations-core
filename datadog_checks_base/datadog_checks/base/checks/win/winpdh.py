@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+import typing
 from collections import defaultdict
 
 import win32pdh
 from six import iteritems, text_type
-from six.moves import winreg
+from six.moves import winreg  # type: ignore  # (Dynamically added on Windows only.)
 
 DATA_TYPE_INT = win32pdh.PDH_FMT_LONG
 DATA_TYPE_DOUBLE = win32pdh.PDH_FMT_DOUBLE
@@ -16,7 +17,7 @@ SINGLE_INSTANCE_KEY = "__single_instance"
 
 class WinPDHCounter(object):
     # store the dictionary of pdh counter names
-    pdh_counter_dict = defaultdict(list)
+    pdh_counter_dict = defaultdict(list)  # type: typing.DefaultDict[str, list]
     _use_en_counter_names = False
 
     def __init__(self, class_name, counter_name, log, instance_name=None, machine_name=None, precision=None):
