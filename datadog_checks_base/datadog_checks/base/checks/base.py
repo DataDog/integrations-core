@@ -8,7 +8,6 @@ import json
 import logging
 import re
 import traceback
-import typing
 import unicodedata
 from collections import defaultdict, deque
 from os.path import basename
