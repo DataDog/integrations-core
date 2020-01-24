@@ -35,7 +35,7 @@ class DockerInterface(object):
         agent_build=None,
         api_key=None,
         dd_url=None,
-        dd_log_url=None,
+        log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
         default_agent=False,
     ):
@@ -48,7 +48,7 @@ class DockerInterface(object):
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY
         self.dd_url = dd_url
-        self.dd_log_url = dd_log_url
+        self.log_url = log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
 
         self._agent_version = self.metadata.get('agent_version')
@@ -220,9 +220,9 @@ class DockerInterface(object):
         if self.dd_url:
             # Set custom agent intake
             env_vars['DD_DD_URL'] = self.dd_url
-        if self.dd_log_url:
+        if self.log_url:
             # Set custom agent log intake
-            env_vars['DD_LOGS_CONFIG_DD_URL'] = self.dd_log_url
+            env_vars['DD_LOGS_CONFIG_DD_URL'] = self.log_url
         env_vars.update(self.env_vars)
 
         volumes = [
@@ -252,17 +252,17 @@ class DockerInterface(object):
         ]
         for volume in volumes:
             command.extend(['-v', volume])
-        
+
         # Any environment variables passed to the start command
         for key, value in sorted(env_vars.items()):
             command.extend(['-e', f'{key}={value}'])
-        
+
         if 'proxy' in self.metadata:
             if 'http' in self.metadata['proxy']:
-                command.extend(['-e', f'DD_PROXY_HTTP={self.metadata['proxy']['http']}'])
+                command.extend(['-e', f"DD_PROXY_HTTP={self.metadata['proxy']['http']}"])
             if 'https' in self.metadata['proxy']:
-                command.extend(['-e', f'DD_PROXY_HTTPS={self.metadata['proxy']['https']}'])
-        
+                command.extend(['-e', f"DD_PROXY_HTTPS={self.metadata['proxy']['https']}"])
+
         if self.base_package:
             # Mount the check directory
             command.append('-v')

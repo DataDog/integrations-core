@@ -108,7 +108,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         )
 
     dd_url = org.get('dd_url')
-    dd_log_url = org.get('dd_log_url')
+    log_url = org.get('log_url')
 
     if profile_memory and not api_key:
         profile_memory = False
@@ -193,7 +193,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         agent_build,
         api_key,
         dd_url,
-        dd_log_url,
+        log_url,
         python,
         not bool(agent),
     )
