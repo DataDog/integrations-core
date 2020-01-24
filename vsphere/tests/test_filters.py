@@ -35,6 +35,14 @@ def test_is_metric_excluded_by_filters():
     assert is_metric_excluded_by_filters('foo', vim.VirtualMachine, metric_filters)
 
 
+def test_is_reference_excluded():
+    metric_filters = {'vm': [re.compile(r'^((?!cpu.usage.avg).)*$')]}
+    import pdb
+
+    pdb.set_trace()
+    assert not is_metric_excluded_by_filters('cpu.usage.avg', vim.VirtualMachine, metric_filters)
+
+
 def test_make_inventory_path():
     root, child1, child2, grandchild1 = [object() for _ in range(4)]
 
