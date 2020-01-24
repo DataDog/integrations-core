@@ -67,7 +67,7 @@ instances:
     #
     password: <PASSWORD>
 
-    ## @param only_custom_queries - string - optional
+    ## @param only_custom_queries - string - optional - default: false
     ## Set this parameter to `true` if you want to skip default system, process, and
     ## tablespace metrics checks.
     #
