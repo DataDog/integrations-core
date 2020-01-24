@@ -103,6 +103,9 @@ wheelhouse/
 
 .pytest_cache
 
+# Type checkers
+.mypy_cache
+
 # By default, ignore in-toto metadata from the command line:
 .in-toto/
 *.link

@@ -11,6 +11,7 @@ import tox.config
 STYLE_CHECK_ENV_NAME = 'style'
 STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
+MYPY_ARGS = 'mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
 
 
@@ -51,15 +52,23 @@ def tox_configure(config):
 def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
+
+    # A list of files, plus any command line options accepted by mypy.
+    # See: https://mypy.readthedocs.io/en/stable/command_line.html
+    # Default to '-V' (i.e. 'show version') so that mypy exits immediately in the default case,
+    # instead of raising an error.
+    mypy_args = sections['testenv'].get(MYPY_ARGS, '-V')
+
     sections[section] = {
         'platform': 'linux|darwin|win32',
         # These tools require Python 3.6+
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'flake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
+        'deps': 'mypy==0.761\nflake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
         'commands': '\n'.join(
             [
+                'mypy --config-file=../mypy.ini --py2 {}'.format(mypy_args),
                 'flake8 --config=../.flake8 .',
                 'black --check --diff .',
                 'isort --check-only --diff --recursive .',
