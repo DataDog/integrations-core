@@ -79,6 +79,8 @@ PERCENT_METRICS = {
 # All metrics that can be collected from VirtualMachines.
 # The table maps a dd-formatted metric_name to a tuple containing:
 # (collection_level, per_instance_collection_level, (optional)is_available_per_instance)
+# Note: Only the keys of the dict are used, but the values can be useful later
+# to decide how and when to collect per-instance level metrics.
 VM_METRICS = {
     'cpu.costop.sum': (2, 3),
     'cpu.demand.avg': (2, 3),
