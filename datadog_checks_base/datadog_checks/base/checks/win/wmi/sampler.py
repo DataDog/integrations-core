@@ -404,7 +404,7 @@ class WMISampler(object):
                     clause = bool_op.join(
                         [
                             '{0} {1} \'{2}\''.format(k, v[0], v[1])
-                            if isinstance(v, tuple)
+                            if isinstance(v, (list, tuple))
                             else '{0} = \'{1}\''.format(k, v)
                             for k, v in internal_filter
                         ]
