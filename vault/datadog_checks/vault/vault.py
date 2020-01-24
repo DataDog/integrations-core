@@ -197,16 +197,16 @@ class Vault(OpenMetricsBaseCheck):
                 self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
                 raise ApiUnreachable(msg)
             json_data = response.json()
-        except JSONDecodeError:
-            msg = 'The Vault endpoint `{}` returned invalid json data.'.format(url)
+        except JSONDecodeError as e:
+            msg = 'The Vault endpoint `{}` returned invalid json data: {}.'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
         except requests.exceptions.Timeout:
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'][0])
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
-        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
-            msg = 'Error accessing Vault endpoint `{}`'.format(url)
+        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError) as e:
+            msg = 'Error accessing Vault endpoint `{}`: {}'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
 
@@ -230,6 +230,9 @@ class Vault(OpenMetricsBaseCheck):
         if self._client_token_path or self._client_token or self._no_token:
             instance = self.instance.copy()
             instance['prometheus_url'] = '{}/sys/metrics?format=prometheus'.format(self._api_url)
+
+            # Send histograms & summaries counts as monotonic_counter
+            instance['send_distribution_counts_as_monotonic'] = True
 
             # Remap important options until OpenMetricsBaseCheck uses the RequestsWrapper
             instance['ssl_verify'] = instance.pop('tls_verify', None)

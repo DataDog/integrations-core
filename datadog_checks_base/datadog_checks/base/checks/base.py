@@ -7,19 +7,19 @@ import inspect
 import json
 import logging
 import re
-import traceback
 import typing
+import traceback
 import unicodedata
 from collections import defaultdict, deque
 from os.path import basename
 
 import yaml
-from six import PY3, iteritems, text_type
+from six import iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck, ServiceCheckType
 from ..utils.agent.utils import should_profile_memory
-from ..utils.common import ensure_bytes, ensure_unicode, to_string
+from ..utils.common import ensure_bytes, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
@@ -57,7 +57,7 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]  # type: typing.List[int]
 
 
-class __AgentCheck(object):
+class AgentCheck(object):
     """The base class for any Agent based integrations.
 
     :cvar DEFAULT_METRIC_LIMIT: allows to set a limit on the number of metric name and tags combination
@@ -312,10 +312,6 @@ class __AgentCheck(object):
     ):
         # type: (...) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
-
-    def _normalize_tags_type(self, tags=None, device_name=None, metric_name=None):
-        # type: (RawTags, str, str) -> NormalizedTags
-        raise NotImplementedError
 
     def submit_histogram_bucket(
         self,
@@ -832,13 +828,6 @@ class __AgentCheck(object):
 
         return result
 
-
-class __AgentCheckPy3(__AgentCheck):
-    """
-    Python3 version of the __AgentCheck base class, overrides few methods to
-    add compatibility with Python3.
-    """
-
     def event(self, event):
         # type: (Event) -> None
         """Send an event.
@@ -864,87 +853,20 @@ class __AgentCheckPy3(__AgentCheck):
         :param ev event: the event to be sent.
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in list(iteritems(event)):
-            # transform any bytes objects to utf-8
-            if isinstance(value, bytes):
-                try:
-                    event[key] = event[key].decode('utf-8')
-                except UnicodeError:
-                    self.log.warning(
-                        'Error decoding unicode field `%s` to utf-8 encoded string, cannot submit event', key
-                    )
-                    return
+        for key in event:
+            # Ensure strings have the correct type
+            try:
+                event[key] = to_string(event[key])
+            except UnicodeError:
+                self.log.warning('Encoding error with field `%s`, cannot submit event', key)
+                return
 
         if event.get('tags'):
             event['tags'] = self._normalize_tags_type(event['tags'])
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
-            event['aggregation_key'] = ensure_unicode(event['aggregation_key'])
-
-        if self.__NAMESPACE__:
-            event.setdefault('source_type_name', self.__NAMESPACE__)
-
-        aggregator.submit_event(self, self.check_id, event)
-
-    def _normalize_tags_type(self, tags=None, device_name=None, metric_name=None):
-        # type: (RawTags, str, str) -> typing.List[str]
-        """
-        Normalize tags contents and type:
-        - append `device_name` as `device:` tag
-        - normalize tags type
-        - doesn't mutate the passed list, returns a new list
-        """
-        normalized_tags = []
-
-        if device_name:
-            self._log_deprecation('device_name')
-            normalized_tags.append('device:{}'.format(ensure_unicode(device_name)))
-
-        if tags is not None:
-            for tag in tags:
-                if tag is None:
-                    continue
-                if not isinstance(tag, str):
-                    try:
-                        tag = tag.decode('utf-8')
-                    except Exception:
-                        self.log.warning(
-                            'Error decoding tag `%s` as utf-8 for metric `%s`, ignoring tag', tag, metric_name
-                        )
-                        continue
-
-                normalized_tags.append(tag)
-
-        return normalized_tags
-
-
-class __AgentCheckPy2(__AgentCheck):
-    """
-    Python2 version of the __AgentCheck base class, overrides few methods to
-    add compatibility with Python2.
-    """
-
-    def event(self, event):
-        # type: (Event) -> None
-        # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in list(iteritems(event)):
-            # transform the unicode objects to plain strings with utf-8 encoding
-            if isinstance(value, text_type):
-                try:
-                    event[key] = event[key].encode('utf-8')
-                except UnicodeError:
-                    self.log.warning(
-                        "Error encoding unicode field '%s' to utf-8 encoded string, can't submit event", key
-                    )
-                    return
-
-        if event.get('tags'):
-            event['tags'] = self._normalize_tags_type(event['tags'])
-        if event.get('timestamp'):
-            event['timestamp'] = int(event['timestamp'])
-        if event.get('aggregation_key'):
-            event['aggregation_key'] = ensure_bytes(event['aggregation_key'])
+            event['aggregation_key'] = to_string(event['aggregation_key'])
 
         if self.__NAMESPACE__:
             event.setdefault('source_type_name', self.__NAMESPACE__)
@@ -962,47 +884,23 @@ class __AgentCheckPy2(__AgentCheck):
         normalized_tags = []
 
         if device_name:
-            self._log_deprecation("device_name")
-            device_tag = self._to_bytes("device:{}".format(device_name))
-            if device_tag is None:
+            self._log_deprecation('device_name')
+            try:
+                normalized_tags.append('device:{}'.format(to_string(device_name)))
+            except UnicodeError:
                 self.log.warning(
-                    'Error encoding device name `%r` to utf-8 for metric `%r`, ignoring tag', device_name, metric_name
+                    'Encoding error with device name `%r` for metric `%r`, ignoring tag', device_name, metric_name
                 )
-            else:
-                normalized_tags.append(device_tag)
-
         if tags is not None:
             for tag in tags:
                 if tag is None:
                     continue
-                encoded_tag = self._to_bytes(tag)
-                if encoded_tag is None:
-                    self.log.warning('Error encoding tag `%r` to utf-8 for metric `%r`, ignoring tag', tag, metric_name)
+                try:
+                    tag = to_string(tag)
+                except UnicodeError:
+                    self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
                     continue
-                normalized_tags.append(encoded_tag)
+
+                normalized_tags.append(tag)
 
         return normalized_tags
-
-    def _to_bytes(self, data):
-        # type: (typing.Any) -> typing.Optional[bytes]
-        """
-        Normalize a text data to bytes (type `bytes`) so that the go bindings can
-        handle it easily.
-        """
-        # TODO: On Python 3, move this `if` line to the `except` branch
-        # as the common case will indeed no longer be bytes.
-        if not isinstance(data, bytes):
-            try:
-                return data.encode('utf-8')
-            except Exception:
-                return None
-
-        return data
-
-
-# Static type checkers don't support deriving from a dynamically-defined class,
-# so we define the default one statically, and make the switch in a type-ignored branch.
-# (This is why we can't use a ternary expression such as 'AgentCheck = ... if PY3 else ...'.)
-AgentCheck = __AgentCheckPy3
-if not PY3:
-    AgentCheck = __AgentCheckPy2  # type: ignore

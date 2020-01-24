@@ -145,6 +145,7 @@ def test_service_checks(aggregator):
         "check:server-loadbalancer",
         "consul_service_id:server-loadbalancer",
         "service:server-loadbalancer",
+        "consul_service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
 
@@ -153,10 +154,16 @@ def test_service_checks(aggregator):
         "check:server-api",
         "consul_service_id:server-loadbalancer",
         "service:server-loadbalancer",
+        "consul_service:server-loadbalancer",
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
-    expected_tags = ["consul_datacenter:dc1", "check:server-api", "service:server-loadbalancer"]
+    expected_tags = [
+        "consul_datacenter:dc1",
+        "check:server-api",
+        "service:server-loadbalancer",
+        "consul_service:server-loadbalancer",
+    ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
 
     expected_tags = ["consul_datacenter:dc1", "check:server-api", "consul_service_id:server-loadbalancer"]
@@ -167,6 +174,47 @@ def test_service_checks(aggregator):
         "check:server-status-empty",
         "consul_service_id:server-empty",
         "service:server-empty",
+        "consul_service:server-empty",
+    ]
+    aggregator.assert_service_check('consul.check', status=ConsulCheck.UNKNOWN, tags=expected_tags, count=1)
+
+    aggregator.assert_service_check('consul.check', count=5)
+
+
+def test_service_checks_disable_service_tag(aggregator):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    my_mocks = consul_mocks._get_consul_mocks()
+    my_mocks['consul_request'] = consul_mocks.mock_get_health_check
+    consul_mocks.mock_check(consul_check, my_mocks)
+    consul_check.check(consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG)
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'check:server-loadbalancer',
+        'consul_service_id:server-loadbalancer',
+        'consul_service:server-loadbalancer',
+    ]
+    aggregator.assert_service_check('consul.check', status=ConsulCheck.CRITICAL, tags=expected_tags, count=1)
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'check:server-api',
+        'consul_service_id:server-loadbalancer',
+        'consul_service:server-loadbalancer',
+    ]
+    aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
+
+    expected_tags = ['consul_datacenter:dc1', 'check:server-api', 'consul_service:server-loadbalancer']
+    aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
+
+    expected_tags = ['consul_datacenter:dc1', 'check:server-api', 'consul_service_id:server-loadbalancer']
+    aggregator.assert_service_check('consul.check', status=ConsulCheck.OK, tags=expected_tags, count=1)
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'check:server-status-empty',
+        'consul_service_id:server-empty',
+        'consul_service:server-empty',
     ]
     aggregator.assert_service_check('consul.check', status=ConsulCheck.UNKNOWN, tags=expected_tags, count=1)
 
