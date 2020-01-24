@@ -5,7 +5,6 @@ import os
 
 import click
 
-from ..compat import PermissionError
 from ..utils import dir_exists
 from .commands import ALL_COMMANDS
 from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning, set_color, set_debug
@@ -33,9 +32,7 @@ def ddev(ctx, core, extras, agent, here, color, quiet, debug):
         # TODO: Remove IOError (and noqa: B014) when Python 2 is removed
         # In Python 3, IOError have been merged into OSError
         except (IOError, OSError, PermissionError):  # noqa: B014
-            echo_warning(
-                'Unable to create config file located at `{}`. ' 'Please check your permissions.'.format(CONFIG_FILE)
-            )
+            echo_warning(f'Unable to create config file located at `{CONFIG_FILE}`. Please check your permissions.')
 
     # Load and store configuration for sub-commands.
     config = load_config()
@@ -52,8 +49,8 @@ def ddev(ctx, core, extras, agent, here, color, quiet, debug):
     root = os.path.expanduser(config.get(repo_choice, ''))
     if here or not dir_exists(root):
         if not here and not quiet:
-            repo = 'datadog-agent' if repo_choice == 'agent' else 'integrations-{}'.format(repo_choice)
-            echo_warning('`{}` directory `{}` does not exist, defaulting to the current location.'.format(repo, root))
+            repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
+            echo_warning(f'`{repo}` directory `{root}` does not exist, defaulting to the current location.')
 
         root = os.getcwd()
 

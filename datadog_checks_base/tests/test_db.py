@@ -2,8 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from datetime import datetime, timedelta
 
 import pytest
+import pytz
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
@@ -913,6 +915,25 @@ class TestTransformerCompilation:
         ):
             query_manager.compile_queries()
 
+    def test_time_elapsed_format_not_string(self):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test.foo', 'type': 'time_elapsed', 'format': 5}],
+                'tags': ['test:bar'],
+            }
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=(
+                '^error compiling type `time_elapsed` for column test.foo of test query: '
+                'the `format` parameter must be a string$'
+            ),
+        ):
+            query_manager.compile_queries()
+
 
 class TestSubmission:
     @pytest.mark.parametrize(
@@ -1385,6 +1406,134 @@ class TestColumnTransformers:
 
         aggregator.assert_service_check('test.foo', 3, message='baz', tags=['test:foo', 'test:bar'])
         aggregator.assert_all_metrics_covered()
+
+    def test_time_elapsed_native(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'test.foo', 'type': 'time_elapsed', 'format': 'native'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', datetime.now(pytz.utc) + timedelta(hours=-1)]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        assert 'test.foo' in aggregator._metrics
+        assert len(aggregator._metrics) == 1
+        assert len(aggregator._metrics['test.foo']) == 1
+        m = aggregator._metrics['test.foo'][0]
+
+        assert 3599 < m.value < 3601
+        assert m.type == aggregator.GAUGE
+        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+
+    def test_time_elapsed_native_default(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [{'name': 'test', 'type': 'tag'}, {'name': 'test.foo', 'type': 'time_elapsed'}],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', datetime.now(pytz.utc) + timedelta(hours=-1)]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        assert 'test.foo' in aggregator._metrics
+        assert len(aggregator._metrics) == 1
+        assert len(aggregator._metrics['test.foo']) == 1
+        m = aggregator._metrics['test.foo'][0]
+
+        assert 3599 < m.value < 3601
+        assert m.type == aggregator.GAUGE
+        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+
+    def test_time_elapsed_format(self, aggregator):
+        time_format = '%Y-%m-%dT%H-%M-%S%Z'
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'test.foo', 'type': 'time_elapsed', 'format': time_format},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', (datetime.now(pytz.utc) + timedelta(hours=-1)).strftime(time_format)]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        assert 'test.foo' in aggregator._metrics
+        assert len(aggregator._metrics) == 1
+        assert len(aggregator._metrics['test.foo']) == 1
+        m = aggregator._metrics['test.foo'][0]
+
+        assert 3599 < m.value < 3601
+        assert m.type == aggregator.GAUGE
+        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+
+    def test_time_elapsed_datetime_naive(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'test.foo', 'type': 'time_elapsed', 'format': 'native'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', datetime.utcnow() + timedelta(hours=-1)]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        assert 'test.foo' in aggregator._metrics
+        assert len(aggregator._metrics) == 1
+        assert len(aggregator._metrics['test.foo']) == 1
+        m = aggregator._metrics['test.foo'][0]
+
+        assert 3599 < m.value < 3601
+        assert m.type == aggregator.GAUGE
+        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
+
+    def test_time_elapsed_datetime_aware(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'test.foo', 'type': 'time_elapsed', 'format': 'native'},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', datetime.now(pytz.timezone('EST')) + timedelta(hours=-1)]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        assert 'test.foo' in aggregator._metrics
+        assert len(aggregator._metrics) == 1
+        assert len(aggregator._metrics['test.foo']) == 1
+        m = aggregator._metrics['test.foo'][0]
+
+        assert 3599 < m.value < 3601
+        assert m.type == aggregator.GAUGE
+        assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
 
 
 class TestExtraTransformers:

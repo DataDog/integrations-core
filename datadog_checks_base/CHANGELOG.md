@@ -1,5 +1,14 @@
 # CHANGELOG - datadog_checks_base
 
+## 10.3.0 / 2020-01-21
+
+* [Added] [pdh] Make the admin share configurable. See [#5485](https://github.com/DataDog/integrations-core/pull/5485).
+
+## 10.2.1 / 2020-01-15
+
+* [Fixed] Fix Kubelet credentials handling. See [#5455](https://github.com/DataDog/integrations-core/pull/5455).
+* [Fixed] Re-introduce legacy cert option handling. See [#5443](https://github.com/DataDog/integrations-core/pull/5443).
+
 ## 10.2.0 / 2020-01-13
 
 * [Added] Update TUF dependency. See [#5441](https://github.com/DataDog/integrations-core/pull/5441).

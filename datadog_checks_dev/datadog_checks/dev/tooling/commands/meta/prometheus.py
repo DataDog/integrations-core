@@ -8,10 +8,8 @@ from itertools import product
 import click
 import pyperclip
 import requests
-from six import iteritems, itervalues
-from six.moves import input, range
 
-from ....utils import dir_exists, ensure_unicode, path_join, write_file_lines
+from ....utils import dir_exists, path_join, write_file_lines
 from ...constants import get_root
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
@@ -24,7 +22,7 @@ METADATA_CSV_HEADER = (
 
 def sanitize_endpoint(endpoint):
     if not endpoint.startswith('http'):
-        endpoint = 'http://{}{}'.format('localhost' if endpoint.startswith(':') else '', endpoint)
+        endpoint = f"http://{'localhost' if endpoint.startswith(':') else ''}{endpoint}"
 
     return endpoint
 
@@ -78,7 +76,7 @@ def info(endpoint):
     num_counter = 0
     num_histogram = 0
 
-    for data in itervalues(metrics):
+    for data in metrics.values():
         metric_type = data.get('type')
 
         if metric_type == 'gauge':
@@ -89,19 +87,19 @@ def info(endpoint):
             num_histogram += 1
 
     if num_metrics:
-        echo_success('Number of metrics: {}'.format(num_metrics))
+        echo_success(f'Number of metrics: {num_metrics}')
     else:
         echo_warning('No metrics!')
         return
 
     if num_gauge:
-        echo_info('Type `gauge`: {}'.format(num_gauge))
+        echo_info(f'Type `gauge`: {num_gauge}')
 
     if num_counter:
-        echo_info('Type `counter`: {}'.format(num_counter))
+        echo_info(f'Type `counter`: {num_counter}')
 
     if num_histogram:
-        echo_info('Type `histogram`: {}'.format(num_histogram))
+        echo_info(f'Type `histogram`: {num_histogram}')
 
 
 @prom.command(
@@ -126,7 +124,7 @@ def parse(ctx, endpoint, check, here):
 
     endpoint = sanitize_endpoint(endpoint)
 
-    echo_waiting('Scraping `{}`...'.format(endpoint))
+    echo_waiting(f'Scraping `{endpoint}`...')
     metrics = parse_metrics(endpoint)
     num_metrics = len(metrics)
 
@@ -135,7 +133,7 @@ def parse(ctx, endpoint, check, here):
     echo_info('    s - Skip')
     echo_info('    q - Quit')
 
-    for i, (metric, data) in enumerate(sorted(iteritems(metrics)), 1):
+    for i, (metric, data) in enumerate(sorted(metrics.items()), 1):
         metric_parts = metric.split('_')
         metric_template = '{}'.join(metric_parts)
         num_separators = len(metric_parts) - 1
@@ -147,16 +145,16 @@ def parse(ctx, endpoint, check, here):
         num_options = len(metric_options)
 
         default_option = num_options
-        options_prompt = 'Choose an option (default {}, as-is): '.format(default_option)
+        options_prompt = f'Choose an option (default {default_option}, as-is): '
         options_text = get_options_text(metric_options)
 
         finished = False
         choice_error = ''
-        progress_status = '({} of {}) '.format(i, num_metrics)
+        progress_status = f'({i} of {num_metrics}) '
         indent = ' ' * len(progress_status)
 
         while not finished:
-            echo_success('\n{}{}'.format(progress_status, metric))
+            echo_success(f'\n{progress_status}{metric}')
 
             echo_success('Type: ', nl=False, indent=indent)
             echo_info(data.get('type', 'None'))
@@ -172,16 +170,12 @@ def parse(ctx, endpoint, check, here):
             echo_waiting(options_prompt, nl=False)
 
             if num_options >= 9:
-                choice = ensure_unicode(input())
+                choice = input()
             else:
                 # Terminals are odd and sometimes produce an erroneous null byte
                 choice = '\x00'
                 while choice == '\x00':
                     choice = click.getchar().strip()
-                    try:
-                        choice = ensure_unicode(choice)
-                    except UnicodeDecodeError:
-                        choice = repr(choice)
 
             if not choice:
                 choice = default_option
@@ -194,11 +188,11 @@ def parse(ctx, endpoint, check, here):
                 continue
             elif choice == 's':
                 echo_info('Skip')
-                echo_info('Skipped {}'.format(metric))
+                echo_info(f'Skipped {metric}')
                 break
             elif choice == 'q':
                 echo_info('Exit')
-                echo_warning('Exited at {}'.format(metric))
+                echo_warning(f'Exited at {metric}')
                 return
 
             try:
@@ -207,8 +201,8 @@ def parse(ctx, endpoint, check, here):
                 pass
 
             if choice not in range(1, num_options + 1):
-                echo_info(u'{}'.format(choice))
-                choice_error = u'`{}` is not a valid option.'.format(choice)
+                echo_info(f'{choice}')
+                choice_error = f'`{choice}` is not a valid option.'
                 continue
             else:
                 choice_error = ''
@@ -221,16 +215,16 @@ def parse(ctx, endpoint, check, here):
             finished = True
 
     metadata_file = path_join(output_dir, 'metadata.csv')
-    echo_waiting('\nWriting `{}`... '.format(metadata_file), nl=False)
+    echo_waiting(f'\nWriting `{metadata_file}`... ', nl=False)
 
-    metric_items = sorted(iteritems(metrics), key=lambda item: item[1]['dd_name'])
-    output_lines = ['{}\n'.format(METADATA_CSV_HEADER)]
+    metric_items = sorted(metrics.items(), key=lambda item: item[1]['dd_name'])
+    output_lines = [f'{METADATA_CSV_HEADER}\n']
     for _, data in metric_items:
         metric_name = data['dd_name']
         metric_type = TYPE_MAP.get(data.get('type'), '')
         metric_description = data.get('description', '')
         if ',' in metric_description:
-            metric_description = '"{}"'.format(metric_description)
+            metric_description = f'"{metric_description}"'
 
         output_lines.append(
             '{check}.{metric_name},{metric_type},,,,{metric_description},0,{check},\n'.format(

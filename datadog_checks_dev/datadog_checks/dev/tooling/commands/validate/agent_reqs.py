@@ -30,17 +30,17 @@ def agent_reqs():
             pinned_version = agent_reqs_content.get(package_name)
             if package_name not in agent_reqs_content:
                 unreleased_checks += 1
-                echo_warning('{} has not yet been released'.format(check_name))
+                echo_warning(f'{check_name} has not yet been released')
             elif check_version != pinned_version:
                 failed_checks += 1
-                echo_failure("{} has version {} but is pinned to {}".format(check_name, check_version, pinned_version))
+                echo_failure(f"{check_name} has version {check_version} but is pinned to {pinned_version}")
             else:
                 ok_checks += 1
 
     if ok_checks:
-        echo_success("{} correctly pinned checks".format(ok_checks))
+        echo_success(f"{ok_checks} correctly pinned checks")
     if unreleased_checks:
-        echo_warning("{} unreleased checks".format(unreleased_checks))
+        echo_warning(f"{unreleased_checks} unreleased checks")
     if failed_checks:
-        echo_failure("{} checks out of sync".format(failed_checks))
+        echo_failure(f"{failed_checks} checks out of sync")
         abort()

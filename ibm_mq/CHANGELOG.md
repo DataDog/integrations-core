@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.3.1 / 2020-01-17
+
+* [Fixed] Fix metric type and missing metrics in metadata.csv. See [#5470](https://github.com/DataDog/integrations-core/pull/5470).
+
 ## 3.3.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

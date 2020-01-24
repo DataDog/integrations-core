@@ -48,7 +48,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
     if not releasing_all:
         for check in checks:
             if check not in valid_checks:
-                abort('Check `{}` is not an Agent-based Integration'.format(check))
+                abort(f'Check `{check}` is not an Agent-based Integration')
 
     # don't run the task on the master branch
     if get_current_branch() == 'master':
@@ -75,7 +75,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
 
         # Initial releases will only bump if not already 1.0.0 so no need to always output
         if not initial_release:
-            echo_success('Check `{}`'.format(check))
+            echo_success(f'Check `{check}`')
 
         if version:
             # sanity check on the version provided
@@ -101,21 +101,21 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
                 if initial_release:
                     continue
                 else:
-                    abort('Current version is {}, cannot bump to {}'.format(cur_version, version))
+                    abort(f'Current version is {cur_version}, cannot bump to {version}')
         else:
             cur_version, changelog_types = ctx.invoke(changes, check=check, dry_run=True)
             if not changelog_types:
-                echo_warning('No changes for {}, skipping...'.format(check))
+                echo_warning(f'No changes for {check}, skipping...')
                 continue
             bump_function = get_bump_function(changelog_types)
             version = bump_function(cur_version)
 
         if initial_release:
-            echo_success('Check `{}`'.format(check))
+            echo_success(f'Check `{check}`')
 
         # update the version number
-        echo_info('Current version of check {}: {}'.format(check, cur_version))
-        echo_waiting('Bumping to {}... '.format(version), nl=False)
+        echo_info(f'Current version of check {check}: {cur_version}')
+        echo_waiting(f'Bumping to {version}... ', nl=False)
         update_version_module(check, cur_version, version)
         echo_success('success!')
 
@@ -147,7 +147,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
 
         # commit the changes.
         # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
-        msg = '[Release] Bumped {} version to {}'.format(check, version)
+        msg = f'[Release] Bumped {check} version to {version}'
         git_commit(commit_targets, msg)
 
         if not initial_release:
@@ -163,7 +163,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
             commit_targets = update_link_metadata(updated_checks)
             git_commit(commit_targets, '[Release] Update metadata', force=True)
         except YubikeyException as e:
-            abort('A problem occurred while signing metadata: {}'.format(e))
+            abort(f'A problem occurred while signing metadata: {e}')
 
     # done
     echo_success('All done, remember to push to origin and open a PR to merge these changes on master')

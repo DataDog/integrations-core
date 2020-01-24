@@ -4,8 +4,6 @@
 from .common import (
     CHARTREPO_HEALTH_URL,
     HEALTH_URL,
-    LOGIN_PRE_1_7_URL,
-    LOGIN_URL,
     PING_URL,
     PROJECTS_URL,
     REGISTRIES_PING_PRE_1_8_URL,
@@ -13,7 +11,6 @@ from .common import (
     REGISTRIES_PRE_1_8_URL,
     REGISTRIES_URL,
     SYSTEM_INFO_URL,
-    VERSION_1_7,
     VERSION_1_8,
     VOLUME_INFO_URL,
 )
@@ -24,15 +21,6 @@ class HarborAPI(object):
         self.base_url = harbor_url
         self.http = http
         self._fetch_and_set_harbor_version()
-
-    def authenticate(self, username, password):
-        """Provides a session cookie used for other calls."""
-        auth_form_data = {'principal': username, 'password': password}
-        if self.harbor_version >= VERSION_1_7:
-            url = self._resolve_url(LOGIN_URL)
-        else:
-            url = self._resolve_url(LOGIN_PRE_1_7_URL)
-        self._make_post_request(url, data=auth_form_data)
 
     def chartrepo_health(self):
         """Support added with Harbor 1.6"""
