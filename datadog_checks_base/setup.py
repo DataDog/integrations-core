@@ -63,7 +63,7 @@ setup(
     extras_require={
         'deps': get_requirements(
             'requirements.in',
-            exclude=['botocore', 'kubernetes', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton',],
+            exclude=['botocore', 'kubernetes', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
         ),
         'http': get_requirements(
             'requirements.in', only=['botocore', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
