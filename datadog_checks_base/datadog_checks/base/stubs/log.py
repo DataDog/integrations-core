@@ -2,18 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import typing
 
 from ..log import CheckLoggingAdapter as AgentLoggingAdapter
 
 TRACE_LEVEL = 7
 
 
-Logger = logging.Logger
-
-# Weird flex, but static type checkers need a statically-defined base class, so
-# we must assign the dynamic logger class in a type-ignored branch.
-if True:
-    Logger = logging.getLoggerClass()  # type: ignore
+if typing.TYPE_CHECKING:
+    Logger = logging.Logger  # Type checkers need base classes to be statically-defined.
+else:
+    Logger = logging.getLoggerClass()
 
 
 class AgentLogger(Logger):
