@@ -100,7 +100,7 @@ def test_default_admin_share():
     nr = c._get_netresource('1.1.1.1')
     assert nr.lpRemoteName == '\\\\1.1.1.1\\c$'
     assert nr.dwType == 0
-    assert nr.lpLocalName == None
+    assert nr.lpLocalName is None
 
 
 @requires_windows
