@@ -59,7 +59,11 @@ def _all_synced_with_remote(refs: typing.Sequence[str]) -> bool:
 def _get_and_parse_commits(base_ref: str, target_ref: str) -> typing.List[typing.Tuple[str, str]]:
     echo_info(f'Getting diff between {base_ref!r} and {target_ref!r}... ', nl=False)
 
-    diff_command = f'git --no-pager log "--pretty=format:%H %s" {base_ref}..{target_ref}'
+    # Format as '<commit_hash> <subject line>', e.g.:
+    # 'a70a792f9d1775b7d6d910044522f7a0d6941ad7 Update README.md'
+    pretty_format = '%H %s'
+
+    diff_command = f'git --no-pager log "--pretty={pretty_format}" {base_ref}..{target_ref}'
 
     try:
         result = run_command(diff_command, capture=True, check=True)
