@@ -115,26 +115,32 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
 
     BASE_REF and TARGET_REF can be any valid git references. It practice, you should use either:
 
-    * A tag: `7.16.1`, `7.17.0-rc.4`, ...\n
-    * A release branch: `6.16.x`, `7.17.x`, ...\n
+    * A tag: `7.16.1`, `7.17.0-rc.4`, ...
+
+    * A release branch: `6.16.x`, `7.17.x`, ...
+
     * The `master` branch.
 
     NOTE: using a minor version shorthand (e.g. `7.16`) is not supported, as it is ambiguous.
 
     Example: assuming we are working on the release of 7.17.0, we can...
 
-    * Create cards for changes between a previous Agent release and `master` (useful when preparing an initial RC):\n
+    * Create cards for changes between a previous Agent release and `master` (useful when preparing an initial RC):
+
         $ ddev release testable 7.16.1 origin/master
 
     * Create cards for changes between a previous RC and `master` (useful when preparing a new RC, and a separate
-    release branch was not created yet):\n
+    release branch was not created yet):
+
         $ ddev release testable 7.17.0-rc.2 origin/master
 
     * Create cards for changes between a previous RC and a release branch (useful to only review changes in a
-    release branch that has diverged from `master`):\n
+    release branch that has diverged from `master`):
+
         $ ddev release testable 7.17.0-rc.4 7.17.x
 
-    * Create cards for changes between two arbitrary tags, e.g. between RCs:\n
+    * Create cards for changes between two arbitrary tags, e.g. between RCs:
+
         $ ddev release testable 7.17.0-rc.4 7.17.0-rc.5
 
     TIP: run with `ddev -x release testable` to force the use of the current directory.
