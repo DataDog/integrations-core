@@ -6,10 +6,10 @@ import pytest
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.scylla import ScyllaCheck
 
-from .common import INSTANCE_DEFAULT_GROUPS, INSTANCE_DEFAULT_METRICS, MANAGER_DEFAULT_METRICS, get_metrics
+from .common import INSTANCE_DEFAULT_GROUPS, INSTANCE_DEFAULT_METRICS, get_metrics
 
 
-def test_instance_default_check(aggregator, db_instance, mock_metrics_request):
+def test_instance_default_check(aggregator, db_instance, mock_db_data):
     c = ScyllaCheck('scylla', {}, [db_instance])
 
     c.check(db_instance)
@@ -19,7 +19,7 @@ def test_instance_default_check(aggregator, db_instance, mock_metrics_request):
     aggregator.assert_all_metrics_covered()
 
 
-def test_instance_additional_check(aggregator, db_instance, mock_metrics_request):
+def test_instance_additional_check(aggregator, db_instance, mock_db_data):
     # add additional metric groups for validation
     additional_metrics = ['scylla.alien', 'scylla.sstables']
     db_instance['metric_groups'] = additional_metrics
@@ -36,7 +36,7 @@ def test_instance_additional_check(aggregator, db_instance, mock_metrics_request
     aggregator.assert_service_check('scylla.prometheus.health', count=1)
 
 
-def test_instance_invalid_group_check(aggregator, db_instance, mock_metrics_request):
+def test_instance_invalid_group_check(aggregator, db_instance, mock_db_data):
     additional_metrics = ['scylla.bogus', 'scylla.sstables']
     db_instance['metric_groups'] = additional_metrics
 
@@ -45,19 +45,3 @@ def test_instance_invalid_group_check(aggregator, db_instance, mock_metrics_requ
 
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
 
-
-def test_manager_check(aggregator, manager_instance, mock_metrics_request):
-    c = ScyllaCheck('scylla', {}, [manager_instance])
-
-    c.check(manager_instance)
-
-    for m in MANAGER_DEFAULT_METRICS:
-        aggregator.assert_metric(m)
-    aggregator.assert_all_metrics_covered()
-
-
-def test_combined_instance_check(aggregator, combined_instance, mock_metrics_request):
-    with pytest.raises(ConfigurationError):
-        c = ScyllaCheck('scylla', {}, [combined_instance])
-
-    aggregator.assert_service_check('scylla.prometheus.health', count=0)

@@ -9,13 +9,6 @@ instances:
     #
   - instance_endpoint: http://localhost:9180/metrics
 
-    ## @param manager_endpoint - string - optional
-    ## Provide to collect `scylla-manager` metrics.
-    ## Scylla Manager metrics are exposed on port 56090 by default.
-    #
-    #
-    # manager_endpoint: http://localhost:56090/metrics
-
     ## @param metric_groups - list of strings - optional
     ## List of additional scylla metric groups to collect in addition to the default
     ## These are only applicable to instance_endpoints, manager_endpoints collect all metrics

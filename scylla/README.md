@@ -16,8 +16,6 @@ No additional installation is needed on your server.
 ### Configuration
 
 1. Edit the `scylla.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your scylla performance data. See the [sample scylla.d/conf.yaml][3] for all available configuration options.
-    * To collect `scylla` metrics, enable the `instance_endpoint` option.
-    * To collect `scylla-manager` metrics, enable the `manager_endpoint` option.
 
 2. [Restart the Agent][4].
 
