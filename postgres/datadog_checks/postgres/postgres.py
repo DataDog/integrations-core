@@ -404,7 +404,8 @@ class PostgreSql(AgentCheck):
                     )
                 )
 
-            descriptor_values, column_values = row[: len(descriptors)], row[len(descriptors) :]
+            descriptor_values = row[: len(descriptors)]
+            column_values = row[len(descriptors) :]
 
             # build a map of descriptors and their values
             desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
