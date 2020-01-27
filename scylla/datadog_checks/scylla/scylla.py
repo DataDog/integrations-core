@@ -49,13 +49,6 @@ class ScyllaCheck(OpenMetricsBaseCheck):
         tags = instance.get('tags', [])
         tags.append('endpoint_host:{}'.format(urlparse(endpoint).hostname))
 
-        instance.update(
-            {
-                'prometheus_url': endpoint,
-                'namespace': namespace,
-                'metrics': metrics,
-                'tags': tags,
-            }
-        )
+        instance.update({'prometheus_url': endpoint, 'namespace': namespace, 'metrics': metrics, 'tags': tags})
 
         super(ScyllaCheck, self).__init__(name, init_config, instances=[instance])

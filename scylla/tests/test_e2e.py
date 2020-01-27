@@ -4,8 +4,8 @@
 
 import pytest
 
-
 from datadog_checks.scylla import ScyllaCheck
+
 from .common import INSTANCE_DEFAULT_METRICS
 
 

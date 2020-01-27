@@ -9,7 +9,6 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.utils.common import get_docker_hostname
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 INSTANCE_PORT = 9180
@@ -19,17 +18,9 @@ INSTANCE_URL = "http://{}:{}/metrics".format(HOST, INSTANCE_PORT)
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
-    with docker_run(
-        compose_file,
-        log_patterns=['init - Scylla version 3'],
-    ):
 
-        instances = {
-            'instances': [
-                {'instance_endpoint': INSTANCE_URL},
-            ]
-        }
-
+    with docker_run(compose_file, log_patterns=['init - Scylla version 3']):
+        instances = {'instances': [{'instance_endpoint': INSTANCE_URL}]}
         yield instances
 
 
@@ -44,12 +35,12 @@ def mock_db_data():
     with open(f_name, 'r') as f:
         text_data = f.read()
     with mock.patch(
-            'requests.get',
-            return_value=mock.MagicMock(
-                status_code=200,
-                raise_for_status=lambda **kwargs: kwargs,
-                iter_lines=lambda **kwargs: text_data.split("\n"),
-                headers={'Content-Type': "text/plain"}
-            ),
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200,
+            raise_for_status=lambda **kwargs: kwargs,
+            iter_lines=lambda **kwargs: text_data.split("\n"),
+            headers={'Content-Type': "text/plain"},
+        ),
     ):
         yield
