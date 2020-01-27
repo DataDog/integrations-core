@@ -16,7 +16,7 @@ datadog-checks-base==10.3.0
 datadog-checks-downloader==2.2.0
 datadog-cilium==1.0.2
 datadog-cisco-aci==1.8.2
-datadog-clickhouse==1.0.0
+datadog-clickhouse==1.0.1
 datadog-cockroachdb==1.1.0
 datadog-consul==1.11.0
 datadog-coredns==1.3.0; sys_platform == 'linux2'
@@ -46,7 +46,7 @@ datadog-harbor==1.3.0
 datadog-hdfs-datanode==1.11.0; sys_platform != 'win32'
 datadog-hdfs-namenode==1.10.0; sys_platform != 'win32'
 datadog-hive==1.1.2
-datadog-http-check==4.6.2
+datadog-http-check==4.6.3
 datadog-hyperv==1.1.0; sys_platform == 'win32'
 datadog-ibm-db2==1.3.0
 datadog-ibm-mq==3.3.1; sys_platform == 'linux2'
@@ -119,7 +119,7 @@ datadog-tomcat==1.2.0
 datadog-twemproxy==1.5.0
 datadog-twistlock==1.5.0
 datadog-varnish==1.6.0
-datadog-vault==2.1.1
+datadog-vault==2.1.2
 datadog-vertica==1.4.0
 datadog-vsphere==4.3.0
 datadog-win32-event-log==2.3.0; sys_platform == 'win32'
