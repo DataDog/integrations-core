@@ -29,16 +29,14 @@ class ConfigTemplates(object):
         path_parts.append(branches.pop(0))
 
         possible_template_paths = (
-            '{}.{}'.format(path_join(path, *path_parts), extension)
-            for path in self.paths
-            for extension in VALID_EXTENSIONS
+            f'{path_join(path, *path_parts)}.{extension}' for path in self.paths for extension in VALID_EXTENSIONS
         )
 
         for template_path in possible_template_paths:
             if file_exists(template_path):
                 break
         else:
-            raise ValueError('Template `{}` does not exist'.format('/'.join(path_parts)))
+            raise ValueError(f"Template `{'/'.join(path_parts)}` does not exist")
 
         if template_path in self.templates:
             data = self.templates[template_path]
@@ -46,7 +44,7 @@ class ConfigTemplates(object):
             try:
                 data = yaml.safe_load(read_file(template_path))
             except Exception as e:
-                raise ValueError('Unable to parse template `{}`: {}'.format(template_path, e))
+                raise ValueError(f'Unable to parse template `{template_path}`: {e}')
 
             self.templates[template_path] = data
 
@@ -56,9 +54,7 @@ class ConfigTemplates(object):
                 if branch in data:
                     data = data[branch]
                 else:
-                    raise ValueError(
-                        'Template `{}` has no element `{}`'.format('/'.join(path_parts), '.'.join(branches[: i + 1]))
-                    )
+                    raise ValueError(f"Template `{'/'.join(path_parts)}` has no element `{'.'.join(branches[:i + 1])}`")
             elif isinstance(data, list):
                 for item in data:
                     if isinstance(item, dict) and item.get('name') == branch:
@@ -103,12 +99,10 @@ class ConfigTemplates(object):
                             break
                     else:
                         raise ValueError(
-                            'Template override `{}` has no named mapping `{}`'.format('.'.join(override_keys[:i]), key)
+                            f"Template override `{'.'.join(override_keys[:i])}` has no named mapping `{key}`"
                         )
                 else:
-                    raise ValueError(
-                        'Template override `{}` does not refer to a mapping'.format('.'.join(override_keys[:i]))
-                    )
+                    raise ValueError(f"Template override `{'.'.join(override_keys[:i])}` does not refer to a mapping")
 
             # Force assign the desired value to the final key
             if isinstance(root, dict):

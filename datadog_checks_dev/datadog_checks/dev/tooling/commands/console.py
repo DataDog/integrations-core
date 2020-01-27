@@ -71,11 +71,11 @@ def echo_debug(text, nl=True, cr=False, err=False, indent=None):
     if not DEBUG_OUTPUT:
         return
 
-    text = 'DEBUG: %s' % text
+    text = f'DEBUG: {text}'
     if indent:
         text = indent_text(text, indent)
     if cr:
-        text = '\n%s' % text
+        text = f'\n{text}'
     click.secho(text, bold=True, nl=nl, err=err, color=DISPLAY_COLOR)
 
 

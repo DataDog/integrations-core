@@ -4,211 +4,102 @@
 
 Simple Network Management Protocol (SNMP) is a standard for monitoring network-connected devices, such as routers, switches, servers, and firewalls. This check collects SNMP metrics from your network devices.
 
-SNMP uses OIDs (Object Identifiers) to uniquely identify managed objects. OIDs follow a hierarchical tree pattern: under the root is ISO which is numbered 1, then next level is ORG and numbered 3 and so on, with each level being separated by a `.` (dot).
+SNMP uses sysOIDs (System Object Identifiers) to uniquely identify devices, and OIDs (Object Identifiers) to uniquely identify managed objects. OIDs follow a hierarchical tree pattern: under the root is ISO, which is numbered 1. The next level is ORG and numbered 3 and so on, with each level being separated by a `.`.
 
-A MIB (Management Information Base) acts as a translator between OIDs and human readable names, and organizes a subset of the hierarchy. Because of the way the tree is structured, most SNMP values start with the same set of objects: 1.3.6.1.1 for MIB-2 which is a standard that holds system information like uptime, interfaces, network stack, and 1.3.6.1.4.1 which holds vendor specific information.
+A MIB (Management Information Base) acts as a translator between OIDs and human readable names, and organizes a subset of the hierarchy. Because of the way the tree is structured, most SNMP values start with the same set of objects:
+
+* `1.3.6.1.1`: (MIB-II) A standard that holds system information like uptime, interfaces, and network stack.
+* `1.3.6.1.4.1`: A standard that holds vendor specific information.
 
 ## Setup
+
 ### Installation
 
 The SNMP check is included in the [Datadog Agent][1] package. No additional installation is necessary.
 
 ### Configuration
-#### Host
 
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+<div class="alert alert-warning">
+<b>Note</b>: The following features are in beta.
+</div>
 
-The SNMP check doesn't collect anything by default. Specify metrics to collect by updating your `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
+The Datadog SNMP check auto-discovers network devices on a provided subnet, and collects metrics using Datadog's sysOID mapped device profiles.
 
-##### SNMP v1-v2 configuration
+Edit the subnet, SNMP version, and profiles in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
+
+#### Autodiscovery
+
+To use Autodiscovery with the SNMP check:
+
+1. Install or upgrade the Datadog Agent to v6.16+. For platform specific instructions, see the [Datadog Agent][4] documentation.
+
+2. Configure the SNMP check with [snmp.d/conf.yaml][3]. The following parameters are available. See the [sample config](#sample-config) for required parameters, default values, and examples.
+
+| Parameter                    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `profiles`                   | A list of profiles to use. A profile is a collection of OIDs the Datadog Agent collects metrics and associated tags from. A complete list of Datadog supported profiles can be found in [Github][5]. Profiles can be referenced by file, under `definition_file`, or written inline under `definition`. Any of the OOTB Datadog profiles can be listed by their name. Additional custom profiles can be referenced by the file path. **Note**: The generic profile is `generic_router.yaml`, which should work for routers, switches, etc. |
+| `network_address`            | The subnet and mask written in IPv4 notation for the Agent to scan and discover devices on.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `community_string`           | For use with SNMPv1 and SNMPv2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `snmp_version`               | The SNMP version you are using.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `port`                       | The port for the Datadog Agent to listen on.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `timeout`                    | The number of seconds before timing out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `retries`                    | The number of retries before failure.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `discovery_interval`         | The interval between discovery scans.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `discovery_allowed_failures` | The number of times a discovered host can fail before being removed from the list of discovered devices.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `bulk_threshold`             | The number of symbols in a table that triggers a BULK request. This paramater is only relevant for SNMPv > 1.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `tags`                       | A list of global tags to add to all SNMP metrics. Read more about [tagging in Datadog][6].                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+##### Sample config
 
 ```yaml
 init_config:
-  ## @param mibs_folder - string - required
-  # mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
-
-  ## @param global_metrics - list of elements - (required if none at the instance level)
-  # global_metrics:
-  ## - MIB: <MIB_NAME>
-  ##   symbol: <SYMBOL>
+  profiles:
+    f5-big-ip:
+      definition_file: f5-big-ip.yaml
+    router:
+      definition_file: generic-router.yaml
 
 instances:
-    ## @param ip_address - string - required
-  - ip_address: localhost
+  -  
+    ## @param network_address - string - optional
+    network_address: "<NETWORK_ADDRESS>"
 
-    ## @param port - integer - required
-    ## Default SNMP port.
-    #
+    ## @param port - integer - optional - default: 161
     port: 161
 
     ## @param community_string - string - optional
-    # community_string: public
+    community_string: public
 
     ## @param snmp_version - integer - optional - default: 2
-    # snmp_version: 2
+    snmp_version: 2
 
-    ## @param metrics - list of elements - (required if none at the init_config level)
-    metrics:
-    - MIB: <MIB_NAME>
-      symbol: <SYMBOL>
-    - OID: <OID>
-      name: <OID_NAME>
-      metric_tags:
-        - <TAG>
+    ## @param timeout - integer - optional - default: 1
+    timeout: 1
+
+    ## @param retries - integer - optional - default: 5
+    retries: 5
+
+    ## @param discovery_interval - integer - optional - default: 3600
+    discovery_interval: 3600
+
+    ## @param discovery_allowed_failures - integer - optional - default: 3
+    discovery_allowed_failures: 3
+
+    ## @param enforce_mib_constraints - boolean - optional - default: true
+    enforce_mib_constraints: true
+
+    ## @param bulk_threshold - integer - optional - default: 5
+    bulk_threshold: 5
+
+    ## @param tags - list of key:value element - optional
+    tags:
+       - "<KEY_1>:<VALUE_1>"
+       - "<KEY_2>:<VALUE_2>"
 ```
 
-##### SNMP v3 configuration
+##### sysOID mapped device profiles
 
-**Note**: See the [SNMP Library reference][4] for all configuration options.
-
-```yaml
-init_config:
-  ## @param mibs_folder - string - required
-  # mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
-
-  ## @param global_metrics - list of elements - (required if none at the instance level)
-  # global_metrics:
-  ## - MIB: <MIB_NAME>
-  ##   symbol: <SYMBOL>
-
-instances:
-    ## @param ip_address - string - required
-  - ip_address: localhost
-
-    ## @param port - integer - required
-    port: 161
-
-    ## @param snmp_version - integer - optional - default: 2
-    snmp_version: 3
-
-    ## @param user - string - required
-    user: <USERNAME>
-
-    ## @param authProtocol - string - required
-    authProtocol: <AUTHENTICATION_PROTOCOL>
-
-    ## @param authKey - string - required
-    authKey: <AUTHENTICATION_TYPE_KEY>
-
-    ## @param privProtocol - string - required
-    privProtocol: <PRIVACY_TYPE>
-
-    ## @param privKey - string - required
-    privKey: <PRIVACY_TYPE_KEY>
-
-    ## @param metrics - list of elements - (required if none at the init_config level)
-    metrics:
-    - MIB: <MIB_NAME>
-      symbol: <SYMBOL>
-    - OID: <OID>
-      name: <OID_NAME>
-      metric_tags:
-        - <TAG>
-```
-
-* List each SNMP device as a distinct instance.
-* For each instance, list your choice of SNMP counters and gauges in under `metrics`.
-
-There are a few ways to specify the metrics to collect. See the [sample snmp.d/conf.yaml][3] for examples.
-
-* MIB and symbol
-* OID and name
-* MIB and table
-
-##### Use your own MIB
-
-To use your own MIB with the Datadog Agent, convert it to the [PySNMP][5] format. This can be done using the `mibdump.py` script that ships with PySNMP. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][6].
-
-Since Datadog Agent v5.14, the Agent's PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (refer to the [changelog][7]). This means that the `build-pysnmp-mib` which shipped with the Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
-
-In Linux, find the location of `mibdump.py`, run:
-
-```shell
-$ find /opt/datadog-agent/ -type f -name build-pysnmp-mib.py -o -name mibdump.py
-/opt/datadog-agent/embedded/bin/mibdump.py
-```
-
-Windows example:
-
-```powershell
-C:\>dir mibdump.py /s
-
-Directory of C:\Program Files\Datadog\Datadog Agent\embedded\Scripts
-```
-
-In Linux, use this format for the script:
-
-```shell
-<PATH_TO_FILE>/mibdump.py \
-  --mib-source <PATH_TO_MIB_FILES> \
-  --mib-source http://mibs.snmplabs.com/asn1/@mib@ \
-  --destination-directory=<PATH_TO_CONVERTED_MIB_PYFILES> \
-  --destination-format=pysnmp <MIB_FILE_NAME>
-```
-
-Windows Powershell example:
-
-Agent versions <=6.11:
-
-```powershell
-PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FILE>\mibdump.py' `
-  --mib-source <PATH_TO_MIB_SOURCE> `
-  --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
-  --destination-directory=<PATH_TO_MIB_DESTINATION> `
-  --destination-format=pysnmp <MIB_FILE_NAME>
-```
-
-Agent versions >=6.12:
-
-```powershell
-PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe' '<PATH_TO_FILE>\mibdump.py' `
-  --mib-source <PATH_TO_MIB_SOURCE> `
-  --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
-  --destination-directory=<PATH_TO_MIB_DESTINATION> `
-  --destination-format=pysnmp <MIB_FILE_NAME>
-```
-
-Example using the `CISCO-TCP-MIB`:
-
-```
- # /opt/datadog-agent/embedded/bin/mibdump.py --mib-source <PATH_TO_MIB_FILE>  --mib-source http://mibs.snmplabs.com/asn1/@mib@ --destination-directory=/opt/datadog-agent/pysnmp/custom_mibpy/ --destination-format=pysnmp CISCO-TCP-MIB
-
- Source MIB repositories: <PATH_TO_MIB_FILE>, http://mibs.snmplabs.com/asn1/@mib@
- Borrow missing/failed MIBs from: http://mibs.snmplabs.com/pysnmp/notexts/@mib@
- Existing/compiled MIB locations: pysnmp.smi.mibs, pysnmp_mibs
- Compiled MIBs destination directory: /opt/datadog-agent/pysnmp/custom_mibpy/
- MIBs excluded from code generation: INET-ADDRESS-MIB, PYSNMP-USM-MIB, RFC-1212, RFC-1215, RFC1065-SMI, RFC1155-SMI, RFC1158-MIB, RFC1213-MIB, SNMP-FRAMEWORK-MIB, SNMP-TARGET-MIB, SNMPv2-CONF, SNMPv2-SMI, SNMPv2-TC, SNMPv2-TM, TRANSPORT-ADDRESS-MIB
- MIBs to compile: CISCO-TCP
- Destination format: pysnmp
- Parser grammar cache directory: not used
- Also compile all relevant MIBs: yes
- Rebuild MIBs regardless of age: no
- Dry run mode: no Create/update MIBs: yes
- Byte-compile Python modules: yes (optimization level no)
- Ignore compilation errors: no
- Generate OID->MIB index: no
- Generate texts in MIBs: no
- Keep original texts layout: no
- Try various file names while searching for MIB module: yes
- Created/updated MIBs: CISCO-SMI, CISCO-TCP-MIB (CISCO-TCP)
- Pre-compiled MIBs borrowed:
- Up to date MIBs: INET-ADDRESS-MIB, SNMPv2-CONF, SNMPv2-SMI, SNMPv2-TC, TCP-MIB
- Missing source MIBs:
- Ignored MIBs:
- Failed MIBs:
-
- # ls /opt/datadog-agent/pysnmp/custom_mibpy/
-CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
-
-```
-
-The Agent looks for the converted MIB Python files by specifying the destination path with `mibs_folder` in the [SNMP YAML configuration][8].
-
-[Restart the Agent][9] to start sending SNMP metrics to Datadog.
-
-##### Profiles
-
-To group configurations, the check allows defining profiles to reuse metric definitions on several instances. Profiles define metrics the same way as instances, either inline in the configuration file or in separate files. Each instance can only match a single profile. For example, you can define a profile in the `init_config` section:
+Profiles allow the SNMP check to reuse metric definitions across several device types or instances. Profiles define metrics the same way as instances, either inline in the configuration file or in separate files. Each instance can only match a single profile. For example, you can define a profile in the `init_config` section:
 
 ```yaml
 init_config:
@@ -236,46 +127,303 @@ instances:
      # and use the profile if it matches.
 ```
 
-If necessary, additional metrics can be defined in the instances. These metrics are collected alongside those in the profile.
+If necessary, additional metrics can be defined in the instances. These metrics are collected in addition to those in the profile.
 
-#### Containerized
-For containerized environments, see the [Autodiscovery Integration Templates][16] for guidance on applying the parameters below.
+#### Metric definition by profile
 
-##### SNMP v1
+Profiles can be used interchangeably, such that devices that share MIB dependencies can reuse the same profiles. For example, the Cisco c3850 profile can be used across many Cisco switches.
 
-| Parameter              | Value                                                                                                                                                                                              |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------                                                        |
-| `<INTEGRATION_NAME>`   | `snmp`                                                                                                                                                                                             |
-| `<INIT_CONFIG>`        | `{"mibs_folder":"<PATH_TO_ADDITIONAL_MIBS>"}`                                                                                                                                                      |
-| `<INSTANCE_CONFIG>`    | ```{"ip_address":"%%host%%", "port":"161", "community_string":"<COMMUNITY_NAME>", "snmp_version":"1", "metrics":[{"MIB":"<MIB_NAME>","symbol":"<SYMBOL>"},{"OID":"<OID>","name":"<OID_NAME>"}]}``` |
+* [Generic router](#generic-router-profile)
+* [F5 Big IP](#f5-big-ip-profile)
+* [Dell iDRAC](#dell-idrac-profile)
+* [Cisco Nexus](#cisco-nexus-profile)
+* [Cisco c3850](#cisco-c3850-device-profile)
+* [Cisco Meraki](#cisco-meraki-profile)
 
-##### SNMP v2
+##### Generic router profile
 
-| Parameter              | Value                                                                                                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------                                                                               |
-| `<INTEGRATION_NAME>`   | `snmp`                                                                                                                                                                         |
-| `<INIT_CONFIG>`        | `{"mibs_folder":"<PATH_TO_ADDITIONAL_MIBS>"}`                                                                                                                                  |
-| `<INSTANCE_CONFIG>`    | ```{"ip_address":"%%host%%", "port":"161", "community_string":"<COMMUNITY_NAME>", "metrics":[{"MIB":"<MIB_NAME>","symbol":"<SYMBOL>"},{"OID":"<OID>","name":"<OID_NAME>"}]}``` |
+The [generic router profile][7] collects the following metrics.
 
-##### SNMP v3
+| Metric                                 | Description                                                                                                                                                                                                                                                               | Tags                     |
+|----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|
+| `snmp.ifInDiscards`                    | The number of inbound packets chosen to be discarded even though no errors had been detected to prevent them being deliverable to a higher-layer protocol.                                                                                                                | `interface`              |
+| `snmp.ifOutErrors`                     | The number of outbound packets that could not be transmitted because of errors.                                                                                                                                                                                           | `interface`              |
+| `snmp.ifOutDiscards`                   | The number of outbound packets chosen to be discarded even though no errors had been detected to prevent them being transmitted.                                                                                                                                          | `interface`              |
+| `snmp.ifInErrors`                      | The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.                                                                                                                                                    | `interface`              |
+| `snmp.ifAdminStatus`                   | The desired state of the interface.                                                                                                                                                                                                                                       | `interface`              |
+| `snmp.ifOperStatus`                    | The current operational state of the interface.                                                                                                                                                                                                                           | `interface`              |
+| `snmp.ifHCInOctets`                    | The total number of octets received on the interface including framing characters.                                                                                                                                                                                        | `interface`              |
+| `snmp.ifHCInUcastPkts`                 | The number of packets delivered by this sub-layer to a higher (sub-)layer that were not addressed to a multicast or broadcast address at this sub-layer.                                                                                                                  | `interface`              |
+| `snmp.ifHCInBroadcastPkts`             | The number of packets delivered by this sub-layer to a higher (sub-)layer that were addressed to a broadcast address at this sub-layer.                                                                                                                                   | `interface`              |
+| `snmp.ifHCOutOctets`                   | The total number of octets transmitted out of the interface including framing characters.                                                                                                                                                                                 | `interface`              |
+| `snmp.ifHCOutUcastPkts`                | The total number of packets higher-level protocols requested be transmitted that were not addressed to a multicast or broadcast address at this sub-layer including those that were discarded or not sent.                                                                | `interface`              |
+| `snmp.ifHCOutMulticastPkts`            | The total number of packets that higher-level protocols requested be transmitted that were addressed to a multicast address at this sub-layer including those that were discarded or not sent.                                                                            | `interface`              |
+| `snmp.ifHCOutBroadcastPkts`            | The total number of packets that higher-level protocols requested be transmitted that were addressed to a broadcast address at this sub-layer, including those that were discarded or not sent.                                                                           | `interface`              |
+| `snmp.ipSystemStatsHCInReceives`       | The total number of input IP datagrams received including those received in error.                                                                                                                                                                                        | `ipversion`              |
+| `snmp.ipSystemStatsHCInOctets`         | The total number of octets received in input IP datagrams including those received in error.                                                                                                                                                                              | `ipversion`              |
+| `snmp.ipSystemStatsInHdrErrors`        | The number of input IP datagrams discarded due to errors in their IP headers including version number mismatch, their IP headers, other format errors, hop count exceeded, errors discovered in processing their IP options, etc.                                         | `ipversion`              |
+| `snmp.ipSystemStatsInNoRoutes`         | The number of input IP datagrams discarded because no route could be found to transmit them to their destination.                                                                                                                                                         | `ipversion`              |
+| `snmp.ipSystemStatsInAddrErrors`       | The number of input IP datagrams discarded because the IP address in the header's destination field was not a valid address to be received at this entity.                                                                                                                | `ipversion`              |
+| `snmp.ipSystemStatsInUnknownProtos`    | The number of locally-addressed IP datagrams received successfully but discarded because of an unknown or unsupported protocol.                                                                                                                                           | `ipversion`              |
+| `snmp.ipSystemStatsInTruncatedPkts`    | The number of input IP datagrams discarded because the datagram frame didn't carry enough data.                                                                                                                                                                           | `ipversion`              |
+| `snmp.ipSystemStatsHCInForwDatagrams`  | The number of input datagrams for which this entity was not their final IP destination and for which this entity attempted to find a route to forward them to that final destination.                                                                                     | `ipversion`              |
+| `snmp.ipSystemStatsReasmReqds`         | The number of IP fragments received that needed to be reassembled at this interface.                                                                                                                                                                                      | `ipversion`              |
+| `snmp.ipSystemStatsReasmOKs`           | The number of IP datagrams successfully reassembled.                                                                                                                                                                                                                      | `ipversion`              |
+| `snmp.ipSystemStatsReasmFails`         | The number of failures detected by the IP reassembly algorithm (for whatever reason: timed out, errors, etc.).                                                                                                                                                            | `ipversion`              |
+| `snmp.ipSystemStatsInDiscards`         | The number of input IP datagrams for which no problems were encountered to prevent their continued processing, but were discarded due to other reasons, for example lack of buffer space.                                                                                 | `ipversion`              |
+| `snmp.ipSystemStatsHCInDelivers`       | The total number of datagrams successfully delivered to IP user-protocols (including ICMP).                                                                                                                                                                               | `ipversion`              |
+| `snmp.ipSystemStatsHCOutRequests`      | The total number of IP datagrams that local IP user-protocols (including ICMP) supplied to IP in requests for transmission.                                                                                                                                               | `ipversion`              |
+| `snmp.ipSystemStatsOutNoRoutes`        | The number of locally generated IP datagrams discarded because no route could be found to transmit them to their destination.                                                                                                                                             | `ipversion`              |
+| `snmp.ipSystemStatsHCOutForwDatagrams` | The number of datagrams for which this entity was not their final IP destination and for which it was successful in finding a path to their final destination.                                                                                                            | `ipversion`              |
+| `snmp.ipSystemStatsOutDiscards`        | The number of output IP datagrams for which no problem was encountered to prevent their transmission to their destination, but were discarded due to other reasons, for example lack of buffer space.                                                                     | `ipversion`              |
+| `snmp.ipSystemStatsOutFragReqds`       | The number of IP datagrams that would require fragmentation to be transmitted.                                                                                                                                                                                            | `ipversion`              |
+| `snmp.ipSystemStatsOutFragOKs`         | The number of IP datagrams successfully fragmented.                                                                                                                                                                                                                       | `ipversion`              |
+| `snmp.ipSystemStatsOutFragFails`       | The number of IP datagrams discarded because they needed to be fragmented but could not be.                                                                                                                                                                               | `ipversion`              |
+| `snmp.ipSystemStatsOutFragCreates`     | The number of output datagram fragments generated as a result of IP fragmentation.                                                                                                                                                                                        | `ipversion`              |
+| `snmp.ipSystemStatsHCOutTransmits`     | The total number of IP datagrams that this entity supplied to the lower layers for transmission.                                                                                                                                                                          | `ipversion`              |
+| `snmp.ipSystemStatsHCOutOctets`        | The total number of octets in IP datagrams delivered to the lower layers for transmission.                                                                                                                                                                                | `ipversion`              |
+| `snmp.ipSystemStatsHCInMcastPkts`      | The number of IP multicast datagrams received.                                                                                                                                                                                                                            | `ipversion`              |
+| `snmp.ipSystemStatsHCInMcastOctets`    | The total number of octets received in IP multicast datagrams.                                                                                                                                                                                                            | `ipversion`              |
+| `snmp.ipSystemStatsHCOutMcastPkts`     | The number of IP multicast datagrams transmitted.                                                                                                                                                                                                                         | `ipversion`              |
+| `snmp.ipSystemStatsHCOutMcastOctets`   | The total number of octets transmitted in IP multicast datagrams.                                                                                                                                                                                                         | `ipversion`              |
+| `snmp.ipSystemStatsHCInBcastPkts`      | The number of IP broadcast datagrams received.                                                                                                                                                                                                                            | `ipversion`              |
+| `snmp.ipSystemStatsHCOutBcastPkts`     | The number of IP broadcast datagrams transmitted.                                                                                                                                                                                                                         | `ipversion`              |
+| `snmp.ipIfStatsHCInOctets`             | The total number of octets received in input IP datagrams including those received in error.                                                                                                                                                                              | `ipversion`, `interface` |
+| `snmp.ipIfStatsInHdrErrors`            | The number of input IP datagrams discarded due to errors in their IP headers including version number mismatch, other format errors, hop count exceeded, errors discovered in processing their IP options, etc.                                                           | `ipversion`, `interface` |
+| `snmp.ipIfStatsInNoRoutes`             | The number of input IP datagrams discarded because no route could be found to transmit them to their destination.                                                                                                                                                         | `ipversion`, `interface` |
+| `snmp.ipIfStatsInAddrErrors`           | The number of input IP datagrams discarded because the IP address in their IP header's destination field was not a valid address to be received at this entity.                                                                                                           | `ipversion`, `interface` |
+| `snmp.ipIfStatsInUnknownProtos`        | The number of locally-addressed IP datagrams received successfully but discarded because of an unknown or unsupported protocol.                                                                                                                                           | `ipversion`, `interface` |
+| `snmp.ipIfStatsInTruncatedPkts`        | The number of input IP datagrams discarded because the datagram frame didn't carry enough data.                                                                                                                                                                           | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCInForwDatagrams`      | The number of input datagrams for which this entity was not their final IP destination and for which this entity attempted to find a route to forward them to that final destination.                                                                                     | `ipversion`, `interface` |
+| `snmp.ipIfStatsReasmReqds`             | The number of IP fragments received that needed to be reassembled at this interface.                                                                                                                                                                                      | `ipversion`, `interface` |
+| `snmp.ipIfStatsReasmOKs`               | The number of IP datagrams successfully reassembled.                                                                                                                                                                                                                      | `ipversion`, `interface` |
+| `snmp.ipIfStatsReasmFails`             | The number of failures detected by the IP reassembly algorithm (for whatever reason: timed out, errors, etc.).                                                                                                                                                            | `ipversion`, `interface` |
+| `snmp.ipIfStatsInDiscards`             | The number of input IP datagrams for which no problems were encountered to prevent their continued processing, but were discarded due to other reasons, for example lack of buffer space.                                                                                 | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCInDelivers`           | The total number of datagrams successfully delivered to IP user-protocols (including ICMP).                                                                                                                                                                               | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCOutRequests`          | The total number of IP datagrams that local IP user-protocols (including ICMP) supplied to IP in requests for transmission.                                                                                                                                               | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCOutForwDatagrams`     | The number of datagrams for which this entity was not their final IP destination and for which it was successful in finding a path to their final destination.                                                                                                            | `ipversion`, `interface` |
+| `snmp.ipIfStatsOutDiscards`            | The number of output IP datagrams for which no problem was encountered to prevent their transmission to their destination, but were discarded due to other reasons, for example lack of buffer space.                                                                     | `ipversion`, `interface` |
+| `snmp.ipIfStatsOutFragReqds`           | The number of IP datagrams requiring fragmentation to be transmitted.                                                                                                                                                                                                     | `ipversion`, `interface` |
+| `snmp.ipIfStatsOutFragOKs`             | The number of IP datagrams successfully fragmented.                                                                                                                                                                                                                       | `ipversion`, `interface` |
+| `snmp.ipIfStatsOutFragFails`           | The number of IP datagrams discarded because they needed to be fragmented but could not be.                                                                                                                                                                               | `ipversion`, `interface` |
+| `snmp.ipIfStatsOutFragCreates`         | The number of output datagram fragments generated as a result of IP fragmentation.                                                                                                                                                                                        | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCOutTransmits`         | The total number of IP datagrams that this entity supplied to the lower layers for transmission.                                                                                                                                                                          | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCOutOctets`            | The total number of octets in IP datagrams delivered to the lower layers for transmission.                                                                                                                                                                                | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCInMcastPkts`          | The number of IP multicast datagrams received.                                                                                                                                                                                                                            | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCInMcastOctets`        | The total number of octets received in IP multicast datagrams.                                                                                                                                                                                                            | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCOutMcastPkts`         | The number of IP multicast datagrams received.                                                                                                                                                                                                                            | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCOutMcastOctets`       | The total number of octets transmitted in IP multicast datagrams.                                                                                                                                                                                                         | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCInBcastPkt`s          | The number of IP broadcast datagrams received.                                                                                                                                                                                                                            | `ipversion`, `interface` |
+| `snmp.ipIfStatsHCOutBcastPkts`         | The number of IP broadcast datagrams transmitted.                                                                                                                                                                                                                         | `ipversion`, `interface` |
+| `snmp.tcpActiveOpens`                  | The number of times that TCP connections have made a direct transition to the SYN-SENT state from the CLOSED state.                                                                                                                                                       |                          |
+| `snmp.tcpPassiveOpens`                 | The number of times TCP connections have made a direct transition to the SYN-RCVD state from the LISTEN state.                                                                                                                                                            |                          |
+| `snmp.tcpAttemptFails`                 | The number of times that TCP connections have made a direct transition to the CLOSED state from either the SYN-SENT state or the SYN-RCVD state, plus the number of times that TCP connections have made a direct transition to the LISTEN state from the SYN-RCVD state. |                          |
+| `snmp.tcpEstabResets`                  | The number of times that TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.                                                                                                                     |                          |
+| `snmp.tcpCurrEstab`                    | The number of TCP connections for which the current state is either ESTABLISHED or CLOSE-WAIT.                                                                                                                                                                            |                          |
+| `snmp.tcpHCInSegs`                     | The total number of segments received, including those received in error.                                                                                                                                                                                                 |                          |
+| `snmp.tcpHCOutSegs`                    | The total number of segments sent, including those on current connections but excluding those containing only retransmitted octets.                                                                                                                                       |                          |
+| `snmp.tcpRetransSegs`                  | The total number of segments retransmitted; that is, the number of TCP segments transmitted containing one or more previously transmitted octets.                                                                                                                         |                          |
+| `snmp.tcpInErrs`                       | The total number of segments received in error (e.g., bad TCP checksums).                                                                                                                                                                                                 |                          |
+| `snmp.tcpOutRsts`                      | The number of TCP segments sent containing the RST flag.                                                                                                                                                                                                                  |                          |
+| `snmp.udpHCInDatagrams`                | The total number of UDP datagrams delivered to UDP users, for devices that can receive more than 1 million UDP datagrams per second.                                                                                                                                      |                          |
+| `snmp.udpNoPorts`                      | The total number of received UDP datagrams for which there was no application at the destination port.                                                                                                                                                                    |                          |
+| `snmp.udpInErrors`                     | The number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.                                                                                                                               |                          |
+| `snmp.udpHCOutDatagrams`               | The total number of UDP datagrams sent from this entity, for devices that can transmit more than 1 million UDP datagrams per second.                                                                                                                                      |                          |
 
-**Note**: See the [SNMP Library reference][4] for all configuration options.
+##### F5 BIG-IP profile
 
-| Parameter              | Value                                                                                                                                                                                                                                                                                                                  |
-| ---------------------- | -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------      |
-| `<INTEGRATION_NAME>`   | `snmp`                                                                                                                                                                                                                                                                                                                 |
-| `<INIT_CONFIG>`        | `{"mibs_folder":"<PATH_TO_ADDITIONAL_MIBS>"}`                                                                                                                                                                                                                                                                          |
-| `<INSTANCE_CONFIG>`    | ```{"ip_address":"%%host%%", "port":"161", "snmp_version":"3", "user":"<USER_NAME>", "authKey":"<PASSWORD>", "privKey":"<PRIVACY_TYPE_KEY>", "authProtocol":"<AUTHENTICATION_PROTOCOL>", "privProtocol":"<PRIVACY_TYPE>", "metrics":[{"MIB":"<MIB_NAME>","symbol":"<SYMBOL>"},{"OID":"<OID>","name":"<OID_NAME>"}]}``` |
+The [F5 BIG-IP profile][8] collects the following metrics.
 
 
-### Custom metrics
-Metrics collected by the SNMP integration are considered [custom metrics][10], which impacts your [bill][11].
+| Metric                                   | Description                                                                                                                                                                                                                                                          | Tags        |
+|------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| `snmp.sysStatMemoryTotal`                | The total memory available in bytes for TMM (Traffic Management Module).                                                                                                                                                                                             |             |
+| `snmp.sysStatMemoryUsed`                 | The memory in use in bytes for TMM (Traffic Management Module).                                                                                                                                                                                                      |             |
+| `snmp.sysGlobalTmmStatMemoryTotal`       | The total memory available in bytes for TMM (Traffic Management Module).                                                                                                                                                                                             |             |
+| `snmp.sysGlobalTmmStatMemoryUsed`        | The memory in use in bytes for TMM (Traffic Management Module).                                                                                                                                                                                                      |             |
+| `snmp.sysGlobalHostOtherMemoryTotal`     | The total other non-TMM memory in bytes for the system.                                                                                                                                                                                                              |             |
+| `snmp.sysGlobalHostOtherMemoryUsed`      | The other non-TMM memory in bytes currently in use for the system.                                                                                                                                                                                                   |             |
+| `snmp.sysGlobalHostSwapTotal`            | The total swap in bytes for the system.                                                                                                                                                                                                                              |             |
+| `snmp.sysGlobalHostSwapUsed`             | The swap in bytes currently in use for the system.                                                                                                                                                                                                                   |             |
+| `snmp.sysMultiHostCpuTable`              | A table containing entries of system CPU usage information for a system.                                                                                                                                                                                             |             |
+| `snmp.sysMultiHostCpuUser`               | The time spent by the specified processor in user context for the associated host.                                                                                                                                                                                   | `cpu`       |
+| `snmp.sysMultiHostCpuNice`               | The time spent by the specified processor running niced processes for the associated host.                                                                                                                                                                           | `cpu`       |
+| `snmp.sysMultiHostCpuSystem`             | The time spent by the specified processor servicing system calls for the associated host.                                                                                                                                                                            | `cpu`       |
+| `snmp.sysMultiHostCpuIdle`               | The time spent by the specified processor doing nothing for the associated host.                                                                                                                                                                                     | `cpu`       |
+| `snmp.sysMultiHostCpuIrq`                | The time spent by the specified processor servicing hardware interrupts for the associated host.                                                                                                                                                                     | `cpu`       |
+| `snmp.sysMultiHostCpuSoftirq`            | The time spent by the specified processor servicing soft interrupts for the associated host.                                                                                                                                                                         | `cpu`       |
+| `snmp.sysMultiHostCpuIowait`             | The time spent by the specified processor waiting for external I/O to complete for the associated host.                                                                                                                                                              | `cpu`       |
+| `snmp.sysTcpStatOpen`                    | The number of current open connections.                                                                                                                                                                                                                              |             |
+| `snmp.sysTcpStatCloseWait`               | The number of current connections in CLOSE-WAIT/LAST-ACK.                                                                                                                                                                                                            |             |
+| `snmp.sysTcpStatFinWait`                 | The number of current connections in FIN-WAIT/CLOSING.                                                                                                                                                                                                               |             |
+| `snmp.sysTcpStatTimeWait`                | The number of current connections in TIME-WAIT.                                                                                                                                                                                                                      |             |
+| `snmp.sysTcpStatAccepts`                 | The number of connections accepted.                                                                                                                                                                                                                                  |             |
+| `snmp.sysTcpStatAcceptfails`             | The number of connections not accepted.                                                                                                                                                                                                                              |             |
+| `snmp.sysTcpStatConnects`                | The number of connections established.                                                                                                                                                                                                                               |             |
+| `snmp.sysTcpStatConnfails`               | The number of connection failures.                                                                                                                                                                                                                                   |             |
+| `snmp.sysUdpStatOpen`                    | The number of current open connections.                                                                                                                                                                                                                              |             |
+| `snmp.sysUdpStatAccepts`                 | The number of connections accepted.                                                                                                                                                                                                                                  |             |
+| `snmp.sysUdpStatAcceptfails`             | The number of connections not accepted.                                                                                                                                                                                                                              |             |
+| `snmp.sysUdpStatConnects`                | The number of connections established.                                                                                                                                                                                                                               |             |
+| `snmp.sysUdpStatConnfails`               | The number of connection failures.                                                                                                                                                                                                                                   |             |
+| `snmp.sysClientsslStatCurConns`          | The current number of concurrent connections with established SSL sessions being maintained by the filter.                                                                                                                                                           |             |
+| `snmp.sysClientsslStatEncryptedBytesIn`  | The total encrypted bytes received.                                                                                                                                                                                                                                  |             |
+| `snmp.sysClientsslStatEncryptedBytesOut` | The total encrypted bytes sent.                                                                                                                                                                                                                                      |             |
+| `snmp.sysClientsslStatDecryptedBytesIn`  | The total decrypted bytes received.                                                                                                                                                                                                                                  |             |
+| `snmp.sysClientsslStatDecryptedBytesOut` | The total decrypted bytes sent.                                                                                                                                                                                                                                      |             |
+| `snmp.sysClientsslStatHandshakeFailures` | The total number of handshake failures.                                                                                                                                                                                                                              |             |
+| `snmp.ifInErrors`                        | The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.                                                                                                                                               | `interface` |
+| `snmp.ifOutErrors`                       | The number of outbound packets that could not be transmitted because of errors.                                                                                                                                                                                      | `interface` |
+| `snmp.ifAdminStatus`                     | The desired state of the interface.                                                                                                                                                                                                                                  | `interface` |
+| `snmp.ifOperStatus`                      | The current operational state of the interface.                                                                                                                                                                                                                      | `interface` |
+| `snmp.tcpActiveOpens`                    | The number of times TCP connections have made a direct transition to the SYN-SENT state from the CLOSED state.                                                                                                                                                       |             |
+| `snmp.tcpPassiveOpens`                   | The number of times TCP connections have made a direct transition to the SYN-RCVD state from the LISTEN state.                                                                                                                                                       |             |
+| `snmp.tcpAttemptFails`                   | The number of times TCP connections have made a direct transition to the CLOSED state from either the SYN-SENT state or the SYN-RCVD state, plus the number of times that TCP connections have made a direct transition to the LISTEN state from the SYN-RCVD state. |             |
+| `snmp.tcpEstabResets`                    | The number of times TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.                                                                                                                     |             |
+| `snmp.tcpCurrEstab`                      | The number of TCP connections for which the current state is either ESTABLISHED or CLOSE-WAIT.                                                                                                                                                                       |             |
+| `snmp.tcpHCInSegs`                       | The total number of segments received including those received in error.                                                                                                                                                                                             |             |
+| `snmp.tcpHCOutSegs`                      | The total number of segments sent including those on current connections but excluding those containing only retransmitted octets.                                                                                                                                   |             |
+| `snmp.tcpRetransSegs`                    | The total number of segments retransmitted, meaning the number of TCP segments transmitted containing one or more previously transmitted octets.                                                                                                                     |             |
+| `snmp.tcpInErrs`                         | The total number of segments received due to errors such as bad TCP checksums.                                                                                                                                                                                       |             |
+| `snmp.tcpOutRsts`                        | The number of TCP segments sent containing the RST flag.                                                                                                                                                                                                             |             |
+| `snmp.udpHCInDatagrams`                  | The total number of UDP datagrams delivered to UDP users for devices that can receive more than 1 million UDP datagrams per second.                                                                                                                                  |             |
+| `snmp.udpNoPorts`                        | The total number of received UDP datagrams for which there was no application at the destination port.                                                                                                                                                               |             |
+| `snmp.udpInErrors`                       | The number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.                                                                                                                          |             |
+| `snmp.udpHCOutDatagrams`                 | The total number of UDP datagrams sent from this entity for devices that can transmit more than 1 million UDP datagrams per second.                                                                                                                                  |             |
+
+##### Cisco c3850 device profile
+
+The [Cisco c3850 device profile][9] collects the following metrics.
+
+
+| Metric                             | Description                                                                                                                                                                                           | Tags                       |
+|------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
+| `snmp.entSensorValue`              | The most recent measurement seen by the sensor.                                                                                                                                                       | `sensor_id`, `sensor_type` |
+| `snmp.cefcFRUPowerAdminStatus`     | Administratively desired FRU power state.                                                                                                                                                             | `fru`                      |
+| `snmp.cefcFRUPowerOperStatus`      | Operational FRU power state.                                                                                                                                                                          | `fru`                      |
+| `snmp.cefcFRUCurrent`              | Current supplied by the FRU (positive values) or current required to operate the FRU (negative values).                                                                                               | `fru`                      |
+| `snmp.cpmCPUTotalMonIntervalValue` | The overall CPU busy percentage in the last cpmCPUMonInterval period.                                                                                                                                 | `cpu`                      |
+| `snmp.cpmCPUMemoryUsed`            | The overall CPU wide system memory currently in use.                                                                                                                                                  | `cpu`                      |
+| `snmp.cpmCPUMemoryFree`            | The overall CPU wide system memory currently free.                                                                                                                                                    | `cpu`                      |
+| `snmp.cieIfLastInTime`             | The elapsed time in milliseconds since the last protocol input packet was received.                                                                                                                   | `interface`                |
+| `snmp.cieIfLastOutTime`            | The elapsed time in milliseconds since the last protocol output packet was transmitted.                                                                                                               | `interface`                |
+| `snmp.cieIfInputQueueDrops`        | The number of input packets dropped.                                                                                                                                                                  | `interface`                |
+| `snmp.cieIfOutputQueueDrops`       | The number of output packets dropped by the interface even though no error was detected to prevent them being transmitted.                                                                            | `interface`                |
+| `snmp.cieIfResetCount`             | The number of times the interface was internally reset and brought up.                                                                                                                                | `interface`                |
+| `snmp.ifInErrors`                  | The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.                                                                                | `interface`                |
+| `snmp.ifOutErrors`                 | The number of outbound packets that could not be transmitted because of errors.                                                                                                                       | `interface`                |
+| `snmp.ifInDiscards`                | The number of inbound packets which were chosen to be discarded even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.                                | `interface`                |
+| `snmp.ifHCInOctets`                | The total number of octets received on the interface including framing characters.                                                                                                                    | `interface`                |
+| `snmp.ifHCOutOctets`               | The total number of octets transmitted out of the interface including framing characters.                                                                                                             | `interface`                |
+| `snmp.ifOutDiscards`               | The number of outbound packets chosen to be discarded even though no errors had been detected to prevent their being transmitted.                                                                     | `interface`                |
+| `snmp.ifAdminStatus`               | The desired state of the interface.                                                                                                                                                                   | `interface`                |
+| `snmp.ifOperStatus`                | The current operational state of the interface.                                                                                                                                                       | `interface`                |
+| `snmp.ifHCInOctets`                | The total number of octets received on the interface including framing characters.                                                                                                                    | `interface`                |
+| `snmp.ifHCInUcastPkts`             | The number of packets delivered by this sub-layer to a higher (sub-)layer not addressed to a multicast or broadcast address at this sub-layer.                                                        | `interface`                |
+| `snmp.ifHCInBroadcastPkts`         | The number of packets delivered by this sub-layer to a higher (sub-)layer addressed to a broadcast address at this sub-layer.                                                                         | `interface`                |
+| `snmp.ifHCOutOctets`               | The total number of octets transmitted out of the interface including framing characters.                                                                                                             | `interface`                |
+| `snmp.ifHCOutUcastPkts`            | The total number of packets that higher-level protocols requested be transmitted that were not addressed to a multicast or broadcast address at this sub-layer including those discarded or not sent. | `interface`                |
+| `snmp.ifHCOutMulticastPkts`        | The total number of packets that higher-level protocols requested be transmitted that were addressed to a multicast address at this sub-layer including those discarded or not sent.                  | `interface`                |
+| `snmp.ifHCOutBroadcastPkts`        | The total number of packets that higher-level protocols requested be transmitted addressed to a broadcast address at this sub-layer including those discarded or not sent.                            | `interface`                |
+
+##### Cisco Nexus Profile
+
+The Cisco Nexus Profile collects the following metrics.
+
+| Metric                             | Description                                                                                                                                                                                                                                                               | Tags                      |
+|------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
+| `snmp.entSensorValue`              | The most recent measurement seen by the sensor.                                                                                                                                                                                                                           | `sensor_type`,`sensor_id` |
+| `snmp.cefcFRUPowerAdminStatus`     | Administratively desired FRU power state.                                                                                                                                                                                                                                 | `fru`                     |
+| `snmp.cefcFRUPowerOperStatus`      | Operational FRU power state.                                                                                                                                                                                                                                              | `fru`                     |
+| `snmp.cefcFRUCurrent`              | Current supplied by the FRU (positive values) or current required to operate the FRU (negative values).                                                                                                                                                                   | `fru`                     |
+| `snmp.cpmCPUTotalMonIntervalValue` | The overall CPU busy percentage in the last cpmCPUMonInterval period.                                                                                                                                                                                                     | `cpu`                     |
+| `snmp.cpmCPUMemoryUsed`            | The overall CPU wide system memory which is currently under use.                                                                                                                                                                                                          | `cpu`                     |
+| `snmp.cpmCPUMemoryFree`            | The overall CPU wide system memory which is currently free.                                                                                                                                                                                                               | `cpu`                     |
+| `snmp.cieIfResetCount`             | The number of times the interface was internally reset and brought up.                                                                                                                                                                                                    | `interface`               |
+| `snmp.ifInErrors`                  | The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.                                                                                                                                                    | `interface`               |
+| `snmp.ifOutErrors`                 | The number of outbound packets that could not be transmitted because of errors.                                                                                                                                                                                           | `interface`               |
+| `snmp.ifInDiscards`                | The number of inbound packets which were chosen to be discarded even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.                                                                                                    | `interface`               |
+| `snmp.ifOutDiscards`               | The number of outbound packets chosen to be discarded even though no errors had been detected to prevent their being transmitted.                                                                                                                                         | `interface`               |
+| `snmp.ifAdminStatus`               | The desired state of the interface.                                                                                                                                                                                                                                       | `interface`               |
+| `snmp.ifOperStatus`                | The current operational state of the interface.                                                                                                                                                                                                                           | `interface`               |
+| `snmp.ifHCInOctets`                | The total number of octets received on the interface including framing characters.                                                                                                                                                                                        | `interface`               |
+| `snmp.ifHCInUcastPkts`             | The number of packets delivered by this sub-layer to a higher (sub-)layer not addressed to a multicast or broadcast address at this sub-layer.                                                                                                                            | `interface`               |
+| `snmp.ifHCInBroadcastPkts`         | The number of packets delivered by this sub-layer to a higher (sub-)layer addressed to a broadcast address at this sub-layer.                                                                                                                                             | `interface`               |
+| `snmp.ifHCOutOctets`               | The total number of octets transmitted out of the interface including framing characters.                                                                                                                                                                                 | `interface`               |
+| `snmp.ifHCOutUcastPkts`            | The total number of packets that higher-level protocols requested be transmitted that were not addressed to a multicast or broadcast address at this sub-layer including those discarded or not sent.                                                                     | `interface`               |
+| `snmp.ifHCOutMulticastPkts`        | The total number of packets that higher-level protocols requested be transmitted that were addressed to a multicast address at this sub-layer including those discarded or not sent.                                                                                      | `interface`               |
+| `snmp.ifHCOutBroadcastPkts`        | The total number of packets that higher-level protocols requested be transmitted addressed to a broadcast address at this sub-layer including those discarded or not sent.                                                                                                | `interface`               |
+| `snmp.tcpActiveOpens`              | The number of times that TCP connections have made a direct transition to the SYN-SENT state from the CLOSED state.                                                                                                                                                       |                           |
+| `snmp.tcpPassiveOpens`             | The number of times TCP connections have made a direct transition to the SYN-RCVD state from the LISTEN state.                                                                                                                                                            |                           |
+| `snmp.tcpAttemptFails`             | The number of times that TCP connections have made a direct transition to the CLOSED state from either the SYN-SENT state or the SYN-RCVD state, plus the number of times that TCP connections have made a direct transition to the LISTEN state from the SYN-RCVD state. |                           |
+| `snmp.tcpEstabResets`              | The number of times that TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.                                                                                                                     |                           |
+| `snmp.tcpCurrEstab`                | The number of TCP connections for which the current state is either ESTABLISHED or CLOSE-WAIT.                                                                                                                                                                            |                           |
+| `snmp.tcpHCInSegs`                 | The total number of segments received, including those received in error.                                                                                                                                                                                                 |                           |
+| `snmp.tcpHCOutSegs`                | The total number of segments sent, including those on current connections but excluding those containing only retransmitted octets.                                                                                                                                       |                           |
+| `snmp.tcpRetransSegs`              | The total number of segments retransmitted; that is, the number of TCP segments transmitted containing one or more previously transmitted octets.                                                                                                                         |                           |
+| `snmp.tcpInErrs`                   | The total number of segments received in error (e.g., bad TCP checksums).                                                                                                                                                                                                 |                           |
+| `snmp.tcpOutRsts`                  | The number of TCP segments sent containing the RST flag.                                                                                                                                                                                                                  |                           |
+| `snmp.udpHCInDatagrams`            | The total number of UDP datagrams delivered to UDP users, for devices that can receive more than 1 million UDP datagrams per second.                                                                                                                                      |                           |
+| `snmp.udpNoPorts`                  | The total number of received UDP datagrams for which there was no application at the destination port.                                                                                                                                                                    |                           |
+| `snmp.udpInErrors`                 | The number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.                                                                                                                               |                           |
+| `snmp.udpHCOutDatagrams`           | The total number of UDP datagrams sent from this entity, for devices that can transmit more than 1 million UDP datagrams per second.                                                                                                                                      |                           |
+
+##### Cisco Meraki Profile
+
+The Cisco Meraki device profile collects the following metrics.
+
+
+| Metric                       | Description                                                          | Tags                           |
+|------------------------------|----------------------------------------------------------------------|--------------------------------|
+| `snmp.devStatus`             | The status of the device's connection to the Meraki Cloud Controller | `device`, `product`, `network` |
+| `snmp.devClientCount`        | The number of clients currently associated with the device.          | `device`, `product`, `network` |
+| `snmp.devInterfaceSentPkts`  | The number of packets sent on this interface.                        | `interface`                    |
+| `snmp.devInterfaceRecvPkts`  | The number of packets received on this interface.                    | `interface`                    |
+| `snmp.devInterfaceSentBytes` | The number of bytes sent on this interface.                          | `interface`                    |
+| `snmp.devInterfaceRecvBytes` | The number of bytes received on this interface.                      | `interface`                    |
+
+##### Dell iDRAC Profile
+
+The Dell iDRAC device profile collects the following metrics.
+
+| Metric                                                | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Tags             |
+|-------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|
+| `snmp.systemStateChassisStatus`                       | The status of this system chassis.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `chassis_index`  |
+| `snmp.systemStatePowerUnitStatusRedundancy`           | The combined redundancy status of all power units of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `chassis_index`  |
+| `snmp.systemStatePowerSupplyStatusCombined`           | The combined status of all power supplies of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `chassis_index`  |
+| `snmp.systemStateAmperageStatusCombined`              | The combined status of all amperage probes of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `chassis_index`  |
+| `snmp.systemStatePowerSupplyStatusCombined`           | The combined status of all power supplies of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `chassis_index`  |
+| `snmp.systemStateCoolingUnitStatusRedundancy`         | The combined redundancy status of all cooling units of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | `chassis_index`  |
+| `snmp.systemStateCoolingDeviceStatusCombined`         | The combined status of all cooling devices of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `chassis_index`  |
+| `snmp.systemStateTemperatureStatusCombined`           | The combined status of all temperature probes of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | `chassis_index`  |
+| `snmp.systemStateMemoryDeviceStatusCombined`          | The combined status of all memory devices of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `chassis_index`  |
+| `snmp.systemStateChassisIntrusionStatusCombined`      | The combined status of all intrusion detection devices of this system chassis.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `chassis_index`  |
+| `snmp.systemStatePowerUnitStatusCombined`             | The combined status of all power units of this chassis.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `chassis_index`  |
+| `snmp.systemStateCoolingUnitStatusCombined`           | The combined status of all cooling units of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `chassis_index`  |
+| `snmp.systemStateProcessorDeviceStatusCombined`       | The combined status of all processor devices of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | `chassis_index`  |
+| `snmp.systemStateTemperatureStatisticsStatusCombined` | The combined status of all temperature statistics objects of this system.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `chassis_index`  |
+| `snmp.physicalDiskState`                              | The current state of this physical disk. Possible states: 1 - The current state could not be determined., 2 - The physical disk is available for use, but no RAID configuration has been assigned. 3- A RAID configuration has been assigned to the physical disk. 4- The physical disk has been moved from another controller and contains all or some portion of a virtual disk. 5 - The physical disk is not available to the RAID controller. 6 - The physical disk is currently blocked by controller. 7 - The physical disk is not operational. 8 - The physical disk is not a RAID capable disk. 9 - The physical disk has been removed. 10 - The physical disk media has been placed in read only mode. | `disk_name`      |
+| `snmp.physicalDiskCapacityInMB`                       | The size of the physical disk in megabytes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `snmp.disk_name` |
+| `snmp.physicalDiskUsedSpaceInMB`                      | The amount of used space in megabytes on the physical disk.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `disk_name`      |
+| `snmp.physicalDiskFreeSpaceInMB`                      | The amount of free space in megabytes on the physical disk.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `disk_name`      |
+| `snmp.enclosurePowerSupplyState`                      | The current state of this power supply unit. Possible states: 1- The current state could not be determined. 2- The power supply unit is operating normally. 3- The power supply unit has encountered a hardware problem or is not responding. 4- The power supply unit is no longer connected to the enclosure or there exists a problem communicating to it. 5- The power supply unit is unstable.                                                                                                                                                                                                                                                                                                             | `supply_name`    |
+| `snmp.adapterRxPackets`                               | Total packets received.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `adapter`        |
+| `snmp.adapterTxPackets`                               | Total packets transmitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `adapter`        |
+| `snmp.adapterRxBytes`                                 | Total number of bytes received.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | `adapter`        |
+| `snmp.adapterTxBytes`                                 | Total number of bytes transmitted.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `adapter`        |
+| `snmp.adapterRxErrors`                                | Total number of packets received with errors (packets that failed to reach the protocol).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `adapter`        |
+| `snmp.adapterTxErrors`                                | Total number of packets that failed to transmit.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | `adapter`        |
+| `snmp.adapterRxDropped`                               | Total number of receive packets dropped due to overrun.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `snmp.adapter`   |
+| `snmp.adapterTxDropped`                               | Total number of transmit packets dropped due to successive collisions.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `adapter`        |
+| `snmp.adapterRxMulticast`                             | Total number of Multicast packets received.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `adapter`        |
+| `snmp.adapterCollisions`                              | Total number of single collisions.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `adapter`        |
 
 ### Validation
 
-[Run the Agent's status subcommand][12] and look for `snmp` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `snmp` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 The SNMP check submits specified metrics under the `snmp.*` namespace.
@@ -291,29 +439,25 @@ Returns `CRITICAL` if the Agent cannot collect SNMP metrics, otherwise returns `
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][13].
+Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][14]
-* [Monitoring Unifi devices using SNMP and Datadog][15]
-
+* [Does Datadog have a list of commonly used/compatible OIDs with SNMP?][12]
+* [Monitoring Unifi devices using SNMP and Datadog][13]
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example
-[4]: http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
-[5]: http://snmplabs.com/pysnmp/index.html
-[6]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
-[7]: https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md#dependency-changes-3
-[8]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[11]: https://docs.datadoghq.com/account_management/billing/custom_metrics
-[12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[13]: https://docs.datadoghq.com/help
-[14]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
-[15]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
-[16]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[4]: https://docs.datadoghq.com/agent
+[5]: https://github.com/DataDog/integrations-core/tree/master/snmp/datadog_checks/snmp/data/profiles
+[6]: https://docs.datadoghq.com/tagging/
+[7]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/generic-router.yaml
+[8]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/f5-big-ip.yaml
+[9]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-3850.yaml
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[11]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
+[13]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca

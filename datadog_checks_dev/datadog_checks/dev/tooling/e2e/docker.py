@@ -48,17 +48,17 @@ class DockerInterface(object):
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
 
         self._agent_version = self.metadata.get('agent_version')
-        self.container_name = 'dd_{}_{}'.format(self.check, self.env)
+        self.container_name = f'dd_{self.check}_{self.env}'
         self.config_dir = locate_config_dir(check, env)
         self.config_file = locate_config_file(check, env)
         self.config_file_name = config_file_name(self.check)
 
         # If we use a default build, and it's missing the py suffix, adds it
         if default_agent and self.agent_build and 'py' not in self.agent_build:
-            self.agent_build = '{}-py{}'.format(self.agent_build, self.python_version)
+            self.agent_build = f'{self.agent_build}-py{self.python_version}'
 
         if self.agent_build and self.metadata.get('use_jmx', False):
-            self.agent_build = '{}-jmx'.format(self.agent_build)
+            self.agent_build = f'{self.agent_build}-jmx'
 
     @property
     def agent_version(self):
@@ -66,7 +66,7 @@ class DockerInterface(object):
 
     @property
     def check_mount_dir(self):
-        return '/home/{}'.format(self.check)
+        return f'/home/{self.check}'
 
     @property
     def base_mount_dir(self):
@@ -85,8 +85,8 @@ class DockerInterface(object):
         if command.startswith('pip '):
             command = command.replace('pip', ' '.join(get_pip_exe(self.python_version)), 1)
 
-        cmd += ' {}'.format(self.container_name)
-        cmd += ' {}'.format(command)
+        cmd += f' {self.container_name}'
+        cmd += f' {command}'
 
         return run_command(cmd, **kwargs)
 
@@ -104,32 +104,32 @@ class DockerInterface(object):
     ):
         # JMX check
         if jmx_list:
-            command = '{} jmx list {}'.format(self.agent_command, jmx_list)
+            command = f'{self.agent_command} jmx list {jmx_list}'
         # Classic check
         else:
-            command = '{} check {}'.format(self.agent_command, self.check)
+            command = f'{self.agent_command} check {self.check}'
 
             if rate:
-                command += ' {}'.format(get_rate_flag(self.agent_version))
+                command += f' {get_rate_flag(self.agent_version)}'
 
             # These are only available for Agent 6+
             if times is not None:
-                command += ' --check-times {}'.format(times)
+                command += f' --check-times {times}'
 
             if pause is not None:
-                command += ' --pause {}'.format(pause)
+                command += f' --pause {pause}'
 
             if delay is not None:
-                command += ' --delay {}'.format(delay)
+                command += f' --delay {delay}'
 
             if as_json:
-                command += ' --json {}'.format(as_json)
+                command += f' --json {as_json}'
 
             if break_point is not None:
-                command += ' --breakpoint {}'.format(break_point)
+                command += f' --breakpoint {break_point}'
 
         if log_level is not None:
-            command += ' --log-level {}'.format(log_level)
+            command += f' --log-level {log_level}'
 
         return self.exec_command(command, capture=capture, interactive=break_point is not None)
 
@@ -161,11 +161,11 @@ class DockerInterface(object):
                 'run',
                 '--rm',
                 '-e',
-                'DD_API_KEY={}'.format(self.api_key),
+                f'DD_API_KEY={self.api_key}',
                 self.agent_build,
                 'head',
                 '--lines=1',
-                '{}'.format(get_agent_version_manifest('linux')),
+                f"{get_agent_version_manifest('linux')}",
             ]
             result = run_command(command, capture=True)
             match = re.search(MANIFEST_VERSION_PATTERN, result.stdout)
@@ -179,14 +179,14 @@ class DockerInterface(object):
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.check_mount_dir))
         if file_exists(path_join(get_root(), self.check, REQUIREMENTS_IN)):
-            command.extend(('-r', '{}/{}'.format(self.check_mount_dir, REQUIREMENTS_IN)))
+            command.extend(('-r', f'{self.check_mount_dir}/{REQUIREMENTS_IN}'))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.base_mount_dir))
-        command.extend(('-r', '{}/{}'.format(self.base_mount_dir, REQUIREMENTS_IN)))
+        command.extend(('-r', f'{self.base_mount_dir}/{REQUIREMENTS_IN}'))
         run_command(command, capture=True, check=True)
 
     def update_agent(self):
@@ -210,23 +210,30 @@ class DockerInterface(object):
                 'host',
                 # Agent 6 will simply fail without an API key
                 '-e',
-                'DD_API_KEY={}'.format(self.api_key),
+                f'DD_API_KEY={self.api_key}',
+                # Don't write .pyc, needed to fix this issue (only Python 2):
+                # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
+                # in the first place.
+                # More info: https://github.com/DataDog/integrations-core/pull/5454
+                # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
+                '-e',
+                'PYTHONDONTWRITEBYTECODE=1',
                 # Run expvar on a random port
                 '-e',
                 'DD_EXPVAR_PORT=0',
                 # Run API on a random port
                 '-e',
-                'DD_CMD_PORT={}'.format(free_port),
+                f'DD_CMD_PORT={free_port}',
                 # Disable trace agent
                 '-e',
                 'DD_APM_ENABLED=false',
                 # Mount the config directory, not the file, to ensure updates are propagated
                 # https://github.com/moby/moby/issues/15793#issuecomment-135411504
                 '-v',
-                '{}:{}'.format(self.config_dir, get_agent_conf_dir(self.check, self.agent_version)),
+                f'{self.config_dir}:{get_agent_conf_dir(self.check, self.agent_version)}',
                 # Mount the check directory
                 '-v',
-                '{}:{}'.format(path_join(get_root(), self.check), self.check_mount_dir),
+                f'{path_join(get_root(), self.check)}:{self.check_mount_dir}',
                 # Mount the /proc directory
                 '-v',
                 '/proc:/host/proc',
@@ -236,18 +243,18 @@ class DockerInterface(object):
 
             # Any environment variables passed to the start command
             for key, value in sorted(self.env_vars.items()):
-                command.extend(['-e', '{}={}'.format(key, value)])
+                command.extend(['-e', f'{key}={value}'])
 
             if 'proxy' in self.metadata:
                 if 'http' in self.metadata['proxy']:
-                    command.extend(['-e', 'DD_PROXY_HTTP={}'.format(self.metadata['proxy']['http'])])
+                    command.extend(['-e', f"DD_PROXY_HTTP={self.metadata['proxy']['http']}"])
                 if 'https' in self.metadata['proxy']:
-                    command.extend(['-e', 'DD_PROXY_HTTPS={}'.format(self.metadata['proxy']['https'])])
+                    command.extend(['-e', f"DD_PROXY_HTTPS={self.metadata['proxy']['https']}"])
 
             if self.base_package:
                 # Mount the check directory
                 command.append('-v')
-                command.append('{}:{}'.format(self.base_package, self.base_mount_dir))
+                command.append(f'{self.base_package}:{self.base_mount_dir}')
 
             # The chosen tag
             command.append(self.agent_build)

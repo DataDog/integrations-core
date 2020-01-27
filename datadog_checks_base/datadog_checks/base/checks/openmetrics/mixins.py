@@ -287,17 +287,26 @@ class OpenMetricsScraperMixin(object):
         if config['metadata_metric_name'] and config['metadata_label_map']:
             config['_default_metric_transformers'][config['metadata_metric_name']] = self.transform_metadata
 
-        # Set up the HTTP wrapper for this endpoint
-        self._set_up_http_handler(endpoint, config)
-
         return config
 
-    def _set_up_http_handler(self, endpoint, scraper_config):
+    def get_http_handler(self, scraper_config):
+        """
+        Get http handler for a specific scrapper config.
+        The http handler is cached using `prometheus_url` as key.
+        """
+        prometheus_url = scraper_config['prometheus_url']
+        if prometheus_url in self._http_handlers:
+            return self._http_handlers[prometheus_url]
+
+        # TODO: Deprecate this behavior in Agent 8
+        if scraper_config['ssl_ca_cert'] is False:
+            scraper_config['ssl_verify'] = False
+
         # TODO: Deprecate this behavior in Agent 8
         if scraper_config['ssl_verify'] is False:
             scraper_config.setdefault('tls_ignore_warning', True)
 
-        http_handler = self.http_handlers[endpoint] = RequestsWrapper(
+        http_handler = self._http_handlers[prometheus_url] = RequestsWrapper(
             scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
         )
 
@@ -309,6 +318,15 @@ class OpenMetricsScraperMixin(object):
 
         # TODO: Determine if we really need this
         headers.setdefault('accept-encoding', 'gzip')
+
+        return http_handler
+
+    def reset_http_config(self):
+        """
+        You may need to use this when configuration is determined dynamically during every
+        check run, such as when polling an external resource like the Kubelet.
+        """
+        self._http_handlers.clear()
 
     def parse_metric_family(self, response, scraper_config):
         """
@@ -580,7 +598,9 @@ class OpenMetricsScraperMixin(object):
         if headers:
             kwargs['headers'] = headers
 
-        return self.http_handlers[scraper_config['prometheus_url']].get(endpoint, stream=True, **kwargs)
+        http_handler = self.get_http_handler(scraper_config)
+
+        return http_handler.get(endpoint, stream=True, **kwargs)
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """

@@ -37,7 +37,7 @@ def explore():
 def find():
     """Show the location of the config file."""
     if ' ' in CONFIG_FILE:
-        echo_info('"{}"'.format(CONFIG_FILE))
+        echo_info(f'"{CONFIG_FILE}"')
     else:
         echo_info(CONFIG_FILE)
 
@@ -86,7 +86,7 @@ def set_value(ctx, key, value):
     scrubbing = False
     if value is None:
         scrubbing = any(fnmatch(key, pattern) for pattern in SECRET_KEYS)
-        value = click.prompt('Value for `{}`'.format(key), hide_input=scrubbing)
+        value = click.prompt(f'Value for `{key}`', hide_input=scrubbing)
 
     if key in ('core', 'extras', 'agent') and not value.startswith('~'):
         value = os.path.abspath(value)

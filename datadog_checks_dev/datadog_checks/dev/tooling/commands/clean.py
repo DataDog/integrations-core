@@ -14,7 +14,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_wait
 @click.command(context_settings=CONTEXT_SETTINGS, short_help="Remove a project's build artifacts")
 @click.argument('check', required=False)
 @click.option(
-    '--compiled-only', '-c', is_flag=True, help='Remove compiled files only ({}).'.format(', '.join(DELETE_EVERYWHERE)),
+    '--compiled-only', '-c', is_flag=True, help=f"Remove compiled files only ({', '.join(DELETE_EVERYWHERE)}).",
 )
 @click.option(
     '--all',
@@ -54,7 +54,7 @@ def clean(ctx, check, compiled_only, all_matches, force, verbose):
         path = os.getcwd()
 
     if compiled_only:
-        echo_waiting('Cleaning compiled artifacts in `{}`...'.format(path))
+        echo_waiting(f'Cleaning compiled artifacts in `{path}`...')
         removed_paths = remove_compiled_scripts(path, detect_project=not all_matches)
     else:
         force_clean_root = False
@@ -78,14 +78,14 @@ def clean(ctx, check, compiled_only, all_matches, force, verbose):
             else:
                 target_description = 'artifacts (excluding those listed above)'
 
-        echo_waiting('Cleaning {} in `{}`...'.format(target_description, path))
+        echo_waiting(f'Cleaning {target_description} in `{path}`...')
         removed_paths = clean_package(path, detect_project=not all_matches, force_clean_root=force_clean_root)
 
     if verbose:
         if removed_paths:
             echo_success('Removed paths:')
             for p in removed_paths:
-                echo_info('    {}'.format(p))
+                echo_info(f'    {p}')
 
     if removed_paths:
         echo_success('Cleaned!')

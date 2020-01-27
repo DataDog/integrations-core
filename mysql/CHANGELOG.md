@@ -1,5 +1,10 @@
 # CHANGELOG - mysql
 
+## 1.12.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.11.0 / 2019-12-20
 
 * [Added] Document log_processing_rules for MySQL slow query logs. See [#5237](https://github.com/DataDog/integrations-core/pull/5237).

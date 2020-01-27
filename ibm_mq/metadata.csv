@@ -27,6 +27,10 @@ ibm_mq.channel.ssl_key_resets,gauge,,,,SSL secret key resets,0,ibm_mq,ssl key re
 ibm_mq.channel.batches,gauge,,,,Number of completed batches,0,ibm_mq,batches
 ibm_mq.channel.current_msgs,gauge,,message,,Number of messages in-doubt,0,ibm_mq,current msgs
 ibm_mq.channel.indoubt_status,gauge,,,,Whether the channel is currently in doubt,0,ibm_mq,indoubt status
+ibm_mq.queue.high_q_depth,gauge,,message,,Maximum number of messages on a queue,0,ibm_mq,high q depth
+ibm_mq.queue.msg_deq_count,count,,message,,Number of messages dequeued ,0,ibm_mq,msg deq count
+ibm_mq.queue.msg_enq_count,count,,message,,Number of messages enqueued,0,ibm_mq,msg enq count
+ibm_mq.queue.time_since_reset,count,,second,,Time since statistics reset in seconds,0,ibm_mq,time since reset
 ibm_mq.queue.service_interval,gauge,,millisecond,,the time since last serviced,0,ibm_mq,service interval
 ibm_mq.queue.inhibit_put,gauge,,occurrence,,puts are inhibited,0,ibm_mq,puts inhibited
 ibm_mq.queue.depth_low_limit,gauge,,item,,the low limit on the depth to create an alert,0,ibm_mq,depth low limit

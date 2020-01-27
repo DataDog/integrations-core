@@ -1,5 +1,15 @@
 # CHANGELOG - spark
 
+## 1.11.1 / 2020-01-15
+
+* [Fixed] Make sure version collection fails gracefully. See [#5465](https://github.com/DataDog/integrations-core/pull/5465).
+
+## 1.11.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Collect version metadata. See [#5032](https://github.com/DataDog/integrations-core/pull/5032).
+
 ## 1.10.1 / 2019-12-06
 
 * [Fixed] Remove reference to Kubernetes in the service check message for `spark_driver_mode`. See [#5159](https://github.com/DataDog/integrations-core/pull/5159).

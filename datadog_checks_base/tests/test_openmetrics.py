@@ -2115,3 +2115,25 @@ def test_ssl_verify_not_raise_warning(mocked_openmetrics_check_factory, text_dat
 
     assert "httpbin.org" in resp.content.decode('utf-8')
     assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+
+def test_send_request_with_dynamic_prometheus_url(mocked_openmetrics_check_factory, text_data):
+    instance = dict(
+        {
+            'prometheus_url': 'https://www.example.com',
+            'metrics': [{'foo': 'bar'}],
+            'namespace': 'openmetrics',
+            'ssl_verify': False,
+        }
+    )
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    # `prometheus_url` changed just before calling `send_request`
+    scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
+
+    with pytest.warns(None) as record:
+        resp = check.send_request('https://httpbin.org/get', scraper_config)
+
+    assert "httpbin.org" in resp.content.decode('utf-8')
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)

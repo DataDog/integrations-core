@@ -197,16 +197,16 @@ class Vault(OpenMetricsBaseCheck):
                 self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
                 raise ApiUnreachable(msg)
             json_data = response.json()
-        except JSONDecodeError:
-            msg = 'The Vault endpoint `{}` returned invalid json data.'.format(url)
+        except JSONDecodeError as e:
+            msg = 'The Vault endpoint `{}` returned invalid json data: {}.'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
         except requests.exceptions.Timeout:
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'][0])
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
-        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
-            msg = 'Error accessing Vault endpoint `{}`'.format(url)
+        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError) as e:
+            msg = 'Error accessing Vault endpoint `{}`: {}'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
 
@@ -231,6 +231,9 @@ class Vault(OpenMetricsBaseCheck):
             instance = self.instance.copy()
             instance['prometheus_url'] = '{}/sys/metrics?format=prometheus'.format(self._api_url)
 
+            # Send histograms & summaries counts as monotonic_counter
+            instance['send_distribution_counts_as_monotonic'] = True
+
             # Remap important options until OpenMetricsBaseCheck uses the RequestsWrapper
             instance['ssl_verify'] = instance.pop('tls_verify', None)
             instance['ssl_cert'] = instance.pop('tls_cert', None)
@@ -243,7 +246,7 @@ class Vault(OpenMetricsBaseCheck):
             self._scraper_config['custom_tags'] = self._tags
 
             # https://www.vaultproject.io/api/overview#the-x-vault-request-header
-            self._set_header(self.http_handlers[instance['prometheus_url']], 'X-Vault-Request', 'true')
+            self._set_header(self.get_http_handler(self._scraper_config), 'X-Vault-Request', 'true')
 
             if not self._no_token:
                 if self._client_token_path:
@@ -257,7 +260,7 @@ class Vault(OpenMetricsBaseCheck):
     def set_client_token(self, client_token):
         self._client_token = client_token
         self._set_header(self.http, 'X-Vault-Token', client_token)
-        self._set_header(self.http_handlers[self._scraper_config['prometheus_url']], 'X-Vault-Token', client_token)
+        self._set_header(self.get_http_handler(self._scraper_config), 'X-Vault-Token', client_token)
 
     def renew_client_token(self):
         with open(self._client_token_path, 'rb') as f:

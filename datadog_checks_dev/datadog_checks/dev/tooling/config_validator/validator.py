@@ -121,7 +121,7 @@ def _parse_for_config_blocks(config_lines, start, end, errors):
             new_end = get_end_of_part(config_lines, idx, indent=indent)
             if new_end is None:
                 block_name = cfg_block.param_prop.var_name if cfg_block.param_prop else "?"
-                err_string = "The object {} cannot be parsed correctly, check indentation".format(block_name)
+                err_string = f"The object {block_name} cannot be parsed correctly, check indentation"
                 errors.append(ValidatorError(err_string, idx))
                 return blocks
             if new_end > end:
@@ -141,7 +141,7 @@ def _check_no_duplicate_names(blocks, errors):
     names_list = [b.param_prop.var_name for b in same_level_blocks if b.param_prop]
     duplicates = set([x for x in names_list if names_list.count(x) > 1])
     for dup in duplicates:
-        errors.append(ValidatorError("Duplicate variable with name {}".format(dup), None))
+        errors.append(ValidatorError(f"Duplicate variable with name {dup}", None))
 
     sub_lists_of_other_blocks = [b for b in blocks if isinstance(b, list)]
     for l in sub_lists_of_other_blocks:

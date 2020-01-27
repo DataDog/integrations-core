@@ -18,8 +18,8 @@ def test_check_basic_case(aggregator, instance):
 
 
 @pytest.mark.e2e
-def test_check_e2e(dd_agent_check, instance):
-    aggregator = dd_agent_check(instance, rate=True)
+def test_check_e2e(dd_agent_check, e2e_instance):
+    aggregator = dd_agent_check(e2e_instance, rate=True)
 
     assert_basic_case(aggregator)
 

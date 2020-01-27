@@ -1,28 +1,50 @@
 [
     {
         "agent_version": "5.5.0",
-        "integration":"consul",
-        "groups": ["host", "check", "service", "consul_service_id"],
+        "integration": "Consul",
+        "groups": [
+            "host",
+            "check",
+            "service",
+            "consul_service_id"
+        ],
         "check": "consul.check",
-        "statuses": ["ok", "warning", "critical", "unknown"],
+        "statuses": [
+            "ok",
+            "warning",
+            "critical",
+            "unknown"
+        ],
         "name": "Health Check",
         "description": "Returns OK if the service is up, WARNING if there is an issue and CRITICAL when down."
     },
     {
         "agent_version": "5.5.0",
-        "integration":"consul",
-        "groups": ["host", "consul_url"],
+        "integration": "Consul",
+        "groups": [
+            "host",
+            "consul_url"
+        ],
         "check": "consul.up",
-        "statuses": ["ok", "critical"],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
         "name": "Up",
         "description": "Returns OK if the consul server is up, CRITICAL otherwise."
     },
     {
         "agent_version": "5.5.0",
-        "integration":"consul",
-        "groups": ["host", "url"],
+        "integration": "Consul",
+        "groups": [
+            "host",
+            "url"
+        ],
         "check": "consul.can_connect",
-        "statuses": ["ok", "critical"],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
         "name": "Can Connect",
         "description": "Returns OK if the Agent can make HTTP requests to consul, CRITICAL otherwise."
     }

@@ -26,7 +26,7 @@ REQUIRES = [
     'coverage==4.5.4',  # pinned due to https://github.com/nedbat/coveragepy/issues/883
     'mock',
     'psutil',
-    'PyYAML>=5.1',
+    'PyYAML>=5.3',
     'pytest',
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
@@ -58,11 +58,14 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     packages=['datadog_checks', 'datadog_checks.dev'],
     install_requires=REQUIRES,
+    # TODO: Uncomment when we fully drop Python 2
+    # python_requires='>=3.7',
     include_package_data=True,
     extras_require={
         'cli': [
@@ -70,7 +73,7 @@ setup(
             'atomicwrites',
             'click',
             'colorama',
-            'docker-compose>=1.23.1,<1.24.0',
+            'docker-compose>=1.25',
             'in-toto>=0.4.1',
             'pip-tools',
             'pylint',

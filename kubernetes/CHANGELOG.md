@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes
 
+## 1.6.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
 ## 1.5.1 / 2018-09-04
 
 * [Fixed] Add data files to the wheel package. See [#1727][1].
