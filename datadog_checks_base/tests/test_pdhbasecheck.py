@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -88,3 +88,13 @@ def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
     aggregator.assert_metric("active_directory.ldap.successful_binds_persec", tags=None, count=1)
     aggregator.assert_metric("active_directory.ldap.searches_persec", tags=None, count=1)
     assert aggregator.metrics_asserted_pct == 100.0
+
+
+@requires_windows
+def test_default_admin_share():
+    initialize_pdh_tests()
+    c = PDHBaseCheck("testcheck", {}, {}, [DEFAULT_INSTANCE], SINGLE_INSTANCE_COUNTER)
+    nr = c._get_netresource('1.1.1.1')
+    assert nr.lpRemoteName == '\\\\1.1.1.1\\c$'
+    assert nr.dwType == 0
+    assert nr.lpLocalName == None
