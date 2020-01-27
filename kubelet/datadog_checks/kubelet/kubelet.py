@@ -268,7 +268,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             tags = tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.LOW) or None
             if not tags:
                 continue
-            pod_tags_by_pvc[pvc_name + '|' + kube_ns] = tags
+            pod_tags_by_pvc['{}|{}'.format(pvc_name, kube_ns)] = tags
         return pod_tags_by_pvc
 
     def check(self, instance):
@@ -708,6 +708,6 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     kube_ns = label_value
                 if pvc_name and kube_ns:
                     break
-            pod_tags = self.pod_tags_by_pvc.get(pvc_name + "|" + kube_ns, [])
+            pod_tags = self.pod_tags_by_pvc.get('{}|{}'.format(pvc_name, kube_ns), [])
             tags.extend(pod_tags)
             self.gauge(metric_name_with_namespace, val, tags=list(set(tags)), hostname=custom_hostname)
