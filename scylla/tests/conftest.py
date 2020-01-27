@@ -5,7 +5,6 @@ import os
 
 import mock
 import pytest
-from datadog_checks.base import ConfigurationError
 
 from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
@@ -55,7 +54,8 @@ def manager_instance():
 
 @pytest.fixture(scope="session")
 def combined_instance():
-    return {'instance_endpoint': INSTANCE_URL, 'manager_endpoint': MANAGER_URL, 'tags': ['manager_test']}
+    # should raise an error with this config
+    return {'instance_endpoint': INSTANCE_URL, 'manager_endpoint': MANAGER_URL, 'tags': ['config_error_test']}
 
 
 def mocked_metrics(endpoint):

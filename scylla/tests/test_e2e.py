@@ -4,6 +4,8 @@
 
 import pytest
 
+
+from datadog_checks.scylla import ScyllaCheck
 from .common import INSTANCE_DEFAULT_METRICS, MANAGER_DEFAULT_METRICS
 
 
@@ -13,7 +15,4 @@ def test_check_ok(dd_agent_check):
     for metric in INSTANCE_DEFAULT_METRICS + MANAGER_DEFAULT_METRICS:
         aggregator.assert_metric(metric)
 
-
-@pytest.mark.e2e
-def test_service_check(aggregator, instance):
-    pass
+    aggregator.assert_service_check('scylla.prometheus.health', ScyllaCheck.OK)
