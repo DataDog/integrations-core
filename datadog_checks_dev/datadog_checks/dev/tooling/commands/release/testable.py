@@ -30,10 +30,12 @@ def validate_version(ctx: click.Context, param: click.Parameter, value: str, ign
     parts = value.split('.')
 
     if len(parts) == 2:
-        # Treat as a shorthand to a minor version, e.g. '7.17'.
-        parts.append('0')
-        version_info = parse_version('.'.join(parts))
-        return f'{version_info.major}.{version_info.minor}'
+        example_release_tag = f'{value}.1'
+        example_release_branch = f'{value}.x'
+        raise click.BadParameter(
+            f"Using a minor version ({value!r}) is ambiguous. Use a release tag (e.g. {example_release_tag!r}) "
+            f"or a release branch (e.g. {example_release_branch!r}) instead."
+        )
 
     if len(parts) == 3 and parts[-1] == 'x':
         # Treat as a release branch, e.g. '7.17.x'.
@@ -84,23 +86,24 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
 @click.command(
     context_settings=CONTEXT_SETTINGS, short_help='Create a Trello card for each change that needs to be tested'
 )
-@click.argument('last_release', callback=validate_version)
+@click.argument('base_ref', callback=validate_version)
 @click.argument(
-    'next_release', callback=functools.partial(validate_version, ignore={'origin/master'}), default='origin/master'
+    'target_ref', callback=functools.partial(validate_version, ignore=['origin/master']), default='origin/master'
 )
 @click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.pass_context
-def testable(ctx: click.Context, last_release: str, next_release: str, milestone: str, dry_run: bool) -> None:
+def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool) -> None:
     """
-    Create a Trello card for changes since LAST_RELEASE that need to be tested for the NEXT_RELEASE.
+    Create a Trello card for changes since a previous release (referenced by BASE_REF)
+    that need to be tested for the next release (referenced by TARGET_REF).
 
-    LAST_RELEASE and NEXT_RELEASE can refer to:
+    BASE_REF and TARGET_REF can refer to:
 
     * A git tag: 6.17.1, 7.17.0-rc.4, ...\n
     * A release branch: 6.16.x, 7.17.x, ...
 
-    NEXT_RELEASE defaults to `origin/master` if not specified.
+    If not specified, TARGET_REF defaults to `origin/master`.
 
     NOTE: using a minor version shorthand, such as '7.16', is not supported anymore, as it is ambiguous whether you'd
     refer to the latest patch release (e.g. 7.16.1) or the release branch (e.g. 7.16.x).
@@ -110,11 +113,12 @@ def testable(ctx: click.Context, last_release: str, next_release: str, milestone
     * Create cards for changes between a previous Agent release and `master` (useful when preparing an initial RC):\n
         $ ddev release testable 7.16.1
 
-    * Create cards for changes between an RC and `master` (useful when preparing a new RC):\n
-        $ ddev release testable 7.17.0-rc.4
+    * Create cards for changes between a previous RC and `master` (useful when preparing a new RC, and a separate
+    release branch was not created yet):\n
+        $ ddev release testable 7.17.0-rc.2
 
-    * Create cards for changes between an RC and a release branch (useful to only review changes from the release
-    branch when it has diverged from `master`):\n
+    * Create cards for changes between a previous RC and a release branch (useful to only review changes in a
+    release branch that has diverged from `master`):\n
         $ ddev release testable 7.17.0-rc.4 7.17.x
 
     * Create cards for changes between two arbitrary tags, e.g. between RCs:\n
@@ -140,7 +144,7 @@ def testable(ctx: click.Context, last_release: str, next_release: str, milestone
     if repo not in ('integrations-core', 'datadog-agent'):
         abort(f'Repo `{repo}` is unsupported.')
 
-    echo_info(f'Ref {last_release!r} will be compared to {next_release!r}.')
+    echo_info(f'Ref {base_ref!r} will be compared to {target_ref!r}.')
 
     echo_waiting('Getting diff... ', nl=False)
     diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..{}'
@@ -151,16 +155,26 @@ def testable(ctx: click.Context, last_release: str, next_release: str, milestone
         if result.code:
             abort(f'Unable to run {fetch_command}.')
 
-        if last_release in result.stderr or next_release in result.stderr:
+        if base_ref in result.stderr or target_ref in result.stderr:
             abort(f'Your repository is not sync with the remote repository. Please run git fetch in {root!r} folder.')
 
-        reftag = f"refs/tags/{last_release}"
-        result = run_command(diff_command.format(reftag, next_release), capture=True)
+        reftag = f"refs/tags/{base_ref}"
+        result = run_command(diff_command.format(reftag, target_ref), capture=True)
         if result.code:
-            abort(
-                'Unable to get the diff. '
-                f'HINT: ensure {last_release!r} and {next_release!r} both refer to either a tag or a release branch.'
+            origin_release_branch = f'origin/{base_ref}'
+            echo_failure('failed!')
+            echo_waiting(
+                f'Tag {base_ref!r} does not exist, retrying with release branch {origin_release_branch!r}...'
             )
+            result = run_command(diff_command.format(origin_release_branch, target_ref), capture=True)
+            if result.code:
+                abort(
+                    'Unable to get the diff. '
+                    f'HINT: ensure {base_ref!r} and {target_ref!r} both refer to either an existing tag, '
+                    'or a release branch.'
+                )
+            else:
+                echo_success('success!')
         else:
             echo_success('success!')
 
