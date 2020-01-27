@@ -7,8 +7,8 @@ import inspect
 import json
 import logging
 import re
-import typing
 import traceback
+import typing
 import unicodedata
 from collections import defaultdict, deque
 from os.path import basename
