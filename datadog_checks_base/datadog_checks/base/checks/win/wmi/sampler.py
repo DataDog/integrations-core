@@ -357,6 +357,8 @@ class WMISampler(object):
         """
         Transform filters to a comprehensive WQL `WHERE` clause.
 
+        Specifying more than 1 filter defaults to an `OR` operator in the `WHERE` clause.
+
         Builds filter from a filter list.
         - filters: expects a list of dicts, typically:
                 - [{'Property': value},...] or

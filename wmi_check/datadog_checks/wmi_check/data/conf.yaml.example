@@ -46,6 +46,8 @@ instances:
     ##    [{<FILTER_PROPERTY>: <FILTER_VALUE>},...] or
     ##    [{FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...]
     ##
+    ##  All metrics will be filtered out if any of the filters are true.
+    ##
     ##  Providing just a <FILTER_VALUE> defaults to the '=' comparison operator.
     ##
     ##   * <FILTER_PROPERTY> the name of the filter, for example 'PercentProcessorTime'.
