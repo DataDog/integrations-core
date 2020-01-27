@@ -16,14 +16,16 @@ class TrelloClient:
             'Integrations': '5ae1e3e2c81fff836d00497e',
             'Logs': '5aeca4c19707c4222bf6d883',
             'Platform': '5d9b687492952e6578ecf04d',
-            'Process': '5aeca4c8621e4359b9cb9c27',
+            'Networks': '5e1de8cf867357791ec5ee47',
+            'Processes': '5aeca4c8621e4359b9cb9c27',
             'Trace': '5bcf3ffbe0651642ae029038',
         }
         self.label_team_map = {
             'team/agent-apm': 'Trace',
             'team/agent-core': 'Core',
             'team/agent-platform': 'Platform',
-            'team/burrito': 'Process',
+            'team/networks': 'Networks',
+            'team/processes': 'Processes',
             'team/containers': 'Containers',
             'team/integrations': 'Integrations',
             'team/logs': 'Logs',

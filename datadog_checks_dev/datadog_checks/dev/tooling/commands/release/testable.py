@@ -156,9 +156,10 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             '2': 'Containers',
             '3': 'Logs',
             '4': 'Platform',
-            '5': 'Process',
-            '6': 'Trace',
-            '7': 'Integrations',
+            '5': 'Networks',
+            '6': 'Processes',
+            '7': 'Trace',
+            '8': 'Integrations',
             's': 'Skip',
             'q': 'Quit',
         }
