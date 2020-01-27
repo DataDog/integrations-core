@@ -157,7 +157,7 @@ Use the default configuration of your `airflow.d/conf.yaml` file to activate the
 
     Change the `path` and `service` parameter values and configure them for your environment.
 
-    Configuration for DAG processor manager and Scheduler logs:
+    a. Configuration for DAG processor manager and Scheduler logs:
 
     ```yaml
       logs:
@@ -178,8 +178,10 @@ Use the default configuration of your `airflow.d/conf.yaml` file to activate the
               name: new_log_start_with_date
               pattern: \[\d{4}\-\d{2}\-\d{2}
     ```
+   
+    Regular clean up is recommended for scheduler logs, since one log file is created per day.
 
-    Additional configuration for DAG tasks logs:
+    b. Additional configuration for DAG tasks logs:
 
     ```yaml
       logs:
