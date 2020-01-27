@@ -46,7 +46,7 @@ instances:
     ##    [{<FILTER_PROPERTY>: <FILTER_VALUE>},...] or
     ##    [{FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...]
     ##
-    ##  All metrics will be filtered out if any of the filters are true.
+    ##  All metrics will be filtered out if any of the filters are false.
     ##
     ##  Providing just a <FILTER_VALUE> defaults to the '=' comparison operator.
     ##
