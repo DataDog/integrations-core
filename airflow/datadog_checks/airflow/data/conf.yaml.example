@@ -225,6 +225,8 @@ instances:
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+##
+## Info/caveat about collecting DAG tasks logs: https://docs.datadoghq.com/fr/integrations/airflow/#log-collection
 #
 # logs:
 #   - type: file
@@ -237,14 +239,6 @@ instances:
 #         pattern: \[\d{4}\-\d{2}\-\d{2}
 #   - type: file
 #     path: <PATH_TO_AIRFLOW>/logs/scheduler/*/*.log
-#     source: airflow
-#     service: <SERVICE_NAME>
-#     log_processing_rules:
-#       - type: multi_line
-#         name: new_log_start_with_date
-#         pattern: \[\d{4}\-\d{2}\-\d{2}
-#   - type: file
-#     path: <PATH_TO_AIRFLOW>/logs/*/*/*/*.log
 #     source: airflow
 #     service: <SERVICE_NAME>
 #     log_processing_rules:
