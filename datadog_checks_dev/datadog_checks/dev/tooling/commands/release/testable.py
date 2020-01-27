@@ -23,10 +23,13 @@ def validate_version(ctx, param, value):
         parts = value.split('.')
         if len(parts) == 2:
             parts.append('0')
-        version_info = parse_version_info('.'.join(parts))
-        return f'{version_info.major}.{version_info.minor}'
+            version_info = parse_version_info('.'.join(parts))
+            return f'{version_info.major}.{version_info.minor}'
+        else:
+            version_info = parse_version_info('.'.join(parts))
+            return str(version_info)
     except ValueError:
-        raise click.BadParameter('needs to be in semver format x.y[.z]')
+        raise click.BadParameter('needs to be in semver format M.m[.p[-r]]')
 
 
 def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
@@ -68,14 +71,36 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
     context_settings=CONTEXT_SETTINGS, short_help='Create a Trello card for each change that needs to be tested'
 )
 @click.option('--start', 'start_id', help='The PR number or commit hash to start at')
-@click.option('--since', 'agent_version', callback=validate_version, help='The version of the Agent to compare')
+@click.option(
+    '--since',
+    'agent_version',
+    callback=validate_version,
+    help=(
+        'The version of the Agent to compare, used as the diff base. '
+        'Defaults to the latest minor version as listed in the `release.json` file in the Agent `master` branch. '
+    ),
+)
+@click.option(
+    '--until',
+    'diff_target',
+    help='The branch or tag to use as the diff target.',
+    default='origin/master',
+)
 @click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.pass_context
-def testable(ctx, start_id, agent_version, milestone, dry_run):
+def testable(ctx, start_id, agent_version, diff_target, milestone, dry_run):
     """Create a Trello card for each change that needs to be tested for
     the next release. Run via `ddev -x release testable` to force the use
     of the current directory.
+
+    Usage:
+
+    * Create cards for the first RC of an Agent release:\n
+        $ ddev release testable --since 7.17
+
+    * Create cards for fixes made in an RC, relative to a previous RC:\n
+        $ ddev release testable --since 7.17.0-rc.4 --until 7.17.0-rc.5
 
     To avoid GitHub's public API rate limits, you need to set
     `github.user`/`github.token` in your config file or use the
@@ -96,15 +121,13 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         abort(f'Repo `{repo}` is unsupported.')
 
     if agent_version:
-        current_agent_version = agent_version
+        diff_base = agent_version
     else:
         echo_waiting('Finding the current minor release of the Agent... ', nl=False)
-        current_agent_version = get_current_agent_version()
-        echo_success(current_agent_version)
+        diff_base = get_current_agent_version()
+        echo_success(diff_base)
 
-    current_release_branch = f'{current_agent_version}.x'
-    diff_target_branch = 'origin/master'
-    echo_info(f'Branch `{current_release_branch}` will be compared to `{diff_target_branch}`.')
+    echo_info(f'Reference `{diff_base}` will be compared to `{diff_target}`.')
 
     echo_waiting('Getting diff... ', nl=False)
     diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..{}'
@@ -115,7 +138,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         if result.code:
             abort(f'Unable to run {fetch_command}.')
 
-        if current_release_branch in result.stderr or diff_target_branch in result.stderr:
+        if diff_base in result.stderr or diff_target in result.stderr:
             abort(
                 'Your repository is not sync with the remote repository. Please run git fetch in {} folder.'.format(
                     root
@@ -123,20 +146,20 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
             )
 
         # compare with the local tag first
-        reftag = f"{'refs/tags/'}{current_release_branch}"
-        result = run_command(diff_command.format(reftag, diff_target_branch), capture=True)
+        reftag = f"refs/tags/{diff_base}"
+        result = run_command(diff_command.format(reftag, diff_target), capture=True)
         if result.code:
             # if it didn't work, compare with a branch.
-            origin_release_branch = f'origin/{current_release_branch}'
+            origin_release_branch = f'origin/{diff_base}.x'
             echo_failure('failed!')
             echo_waiting(
-                'Local branch `{}` might not exist, trying `{}`... '.format(
-                    current_release_branch, origin_release_branch
+                'Local branch or tag `{}` might not exist, trying with `{}`... '.format(
+                    diff_base, origin_release_branch
                 ),
                 nl=False,
             )
 
-            result = run_command(diff_command.format(origin_release_branch, diff_target_branch), capture=True)
+            result = run_command(diff_command.format(origin_release_branch, diff_target), capture=True)
             if result.code:
                 abort('Unable to get the diff.')
             else:
