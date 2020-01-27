@@ -179,7 +179,7 @@ Use the default configuration of your `airflow.d/conf.yaml` file to activate the
               pattern: \[\d{4}\-\d{2}\-\d{2}
     ```
    
-    Regular clean up is recommended for scheduler logs, since one log file is created per day.
+    Regular clean up is recommended for scheduler logs with daily log rotation.
 
     b. Additional configuration for DAG tasks logs:
 
