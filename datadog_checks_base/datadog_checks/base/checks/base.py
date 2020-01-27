@@ -694,7 +694,7 @@ class AgentCheck(object):
         # https://github.com/python/cpython/blob/1dbe5373851acb85ba91f0be7b83c69563acd68d/Lib/logging/__init__.py#L368-L369
         if args:
             warning_message = warning_message % args
-        frame = inspect.currentframe().f_back  # type: ignore # (mypy doesn't know that currentframe() can't be None…)
+        frame = inspect.currentframe().f_back  # type: ignore # (mypy doesn't know that currentframe() can't be None)
         lineno = frame.f_lineno
         # only log the last part of the filename, not the full path
         filename = basename(frame.f_code.co_filename)
