@@ -163,9 +163,7 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
         if result.code:
             origin_release_branch = f'origin/{base_ref}'
             echo_failure('failed!')
-            echo_waiting(
-                f'Tag {base_ref!r} does not exist, retrying with release branch {origin_release_branch!r}...'
-            )
+            echo_waiting(f'Tag {base_ref!r} does not exist, retrying with release branch {origin_release_branch!r}...')
             result = run_command(diff_command.format(origin_release_branch, target_ref), capture=True)
             if result.code:
                 abort(
