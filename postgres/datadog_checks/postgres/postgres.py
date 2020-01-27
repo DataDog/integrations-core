@@ -391,12 +391,19 @@ class PostgreSql(AgentCheck):
         num_results = 0
 
         for row in results:
-            # Check that all columns will be processed
-            assert len(row) == len(descriptors) + len(cols)
-
             # A row contains descriptor values on the left (used for tagging), and
             # metric values on the right (used as values for metrics).
             # E.g.: (descriptor, descriptor, ..., value, value, value, value, ...)
+
+            expected_number_of_columns = len(descriptors) + len(cols)
+            if len(row) != expected_number_of_columns:
+                raise RuntimeError(
+                    'Row does not contain enough values: '
+                    'expected {} ({} descriptors + {} columns), got {}'.format(
+                        expected_number_of_columns, len(descriptors), len(cols), len(row)
+                    )
+                )
+
             descriptor_values, column_values = row[: len(descriptors)], row[len(descriptors) :]
 
             # build a map of descriptors and their values
