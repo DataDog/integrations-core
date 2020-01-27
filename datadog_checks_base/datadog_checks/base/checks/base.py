@@ -727,7 +727,7 @@ class AgentCheck(object):
             return {
                 'http': configured_proxies.get('http'),
                 'https': configured_proxies.get('https'),
-                'no': configured_proxies.get('no_proxy', configured_proxies.get('no', [])),
+                'no': configured_proxies.get('no_proxy', []),
             }
 
         return no_proxy_settings
