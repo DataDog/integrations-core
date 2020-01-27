@@ -45,3 +45,15 @@ def test_instance_invalid_group_check(aggregator, db_instance, mock_db_data):
 
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_instance_integration_check(aggregator, db_instance, mock_db_data):
+    c = ScyllaCheck('scylla', {}, [db_instance])
+
+    c.check(db_instance)
+
+    for m in INSTANCE_DEFAULT_METRICS:
+        aggregator.assert_metric(m)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check('scylla.prometheus.health', count=1)
+

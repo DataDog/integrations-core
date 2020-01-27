@@ -290,6 +290,7 @@ SCYLLA_SSTABLES = {
 }
 
 SCYLLA_STORAGE = {
+    # Scylla 3.1
     'scylla_storage_proxy_coordinator_background_read_repairs': 'storage.proxy.coordinator_background_read_repairs',
     'scylla_storage_proxy_coordinator_background_reads': 'storage.proxy.coordinator_background_reads',
     'scylla_storage_proxy_coordinator_background_replica_writes_failed_local_node': 'storage.proxy.coordinator_background_replica_writes_failed_local_node',  # noqa E501
@@ -328,6 +329,8 @@ SCYLLA_STORAGE = {
     'scylla_storage_proxy_replica_reads': 'storage.proxy.replica_reads',
     'scylla_storage_proxy_replica_received_counter_updates': 'storage.proxy.replica_received_counter_updates',
     'scylla_storage_proxy_replica_received_mutations': 'storage.proxy.replica_received_mutations',
+    # Scylla 3.2 - renamed
+    'scylla_storage_proxy_coordinator_foreground_read_repairs': 'storage.proxy.coordinator_foreground_read_repair',
 }
 
 SCYLLA_STREAMING = {
