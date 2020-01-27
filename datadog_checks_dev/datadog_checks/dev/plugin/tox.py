@@ -11,7 +11,8 @@ import tox.config
 STYLE_CHECK_ENV_NAME = 'style'
 STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
-MYPY_ARGS = 'mypy_args'
+TYPES_FLAG = 'dd_check_types'
+MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
 
 
@@ -53,11 +54,30 @@ def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
 
-    # A list of files, plus any command line options accepted by mypy.
-    # See: https://mypy.readthedocs.io/en/stable/command_line.html
-    # Default to '-V' (i.e. 'show version') so that mypy exits immediately in the default case,
-    # instead of raising an error.
-    mypy_args = sections['testenv'].get(MYPY_ARGS, '-V')
+    dependencies = [
+        'flake8',
+        'flake8-bugbear',
+        'flake8-logging-format',
+        'black',
+        'isort[pyproject]>=4.3.15',
+    ]
+
+    commands = [
+        'flake8 --config=../.flake8 .',
+        'black --check --diff .',
+        'isort --check-only --diff --recursive .',
+        'python -c "print(\'\\n[WARNING] Complying with following lint rules is recommended, '
+        'but not mandatory, yet.\')"',
+        '- flake8 --config=../.flake8 --enable-extensions=G --select=G .',  # lint `flake8-logging-format`
+    ]
+
+    if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
+        # For command line options accepted by mypy, see: https://mypy.readthedocs.io/en/stable/command_line.html
+        # Defaults to type-checking the entire integration package.
+        mypy_args = sections['testenv'].get(MYPY_ARGS_OPTION, 'datadog_checks')
+
+        dependencies.append('mypy>=0.761')
+        commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
 
     sections[section] = {
         'platform': 'linux|darwin|win32',
@@ -65,18 +85,8 @@ def add_style_checker(config, sections, make_envconfig, reader):
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'mypy>=0.761\nflake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
-        'commands': '\n'.join(
-            [
-                'flake8 --config=../.flake8 .',
-                'black --check --diff .',
-                'isort --check-only --diff --recursive .',
-                'python -c "print(\'\\n[WARNING] Complying with following lint rules is recommended, '
-                'but not mandatory, yet.\')"',
-                '- flake8 --config=../.flake8 --enable-extensions=G --select=G .',  # lint `flake8-logging-format`
-                'mypy --config-file=../mypy.ini --py2 {}'.format(mypy_args),
-            ]
-        ),
+        'deps': '\n'.join(dependencies),
+        'commands': '\n'.join(commands),
     }
 
     # Always add the environment configurations
