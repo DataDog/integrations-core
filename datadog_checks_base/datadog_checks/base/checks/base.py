@@ -215,7 +215,7 @@ class AgentCheck(object):
             'service_tag': [
                 False,
                 (
-                    'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `{}`. '
+                    'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `%s`. '
                     'Set `disable_legacy_service_tag` to `true` to disable this warning. '
                     'The default will become `true` and cannot be changed in Agent version 8.'
                 ),
@@ -504,7 +504,7 @@ class AgentCheck(object):
         Logs a deprecation notice at most once per AgentCheck instance, for the pre-defined `deprecation_key`
         """
         if not self._deprecations[deprecation_key][0]:
-            self.warning(self._deprecations[deprecation_key][1].format(*args))
+            self.warning(self._deprecations[deprecation_key][1], *args)
             self._deprecations[deprecation_key][0] = True
 
     # TODO: Remove once our checks stop calling it
