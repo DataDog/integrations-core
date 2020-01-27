@@ -1,35 +1,49 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import functools
 import time
+import typing
 
 import click
-from semver import parse_version_info
+import semver
 
 from ....subprocess import run_command
 from ....utils import basepath, chdir, get_next
 from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ...trello import TrelloClient
-from ...utils import format_commit_id, get_current_agent_version
+from ...utils import format_commit_id
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 
-def validate_version(ctx, param, value):
-    if not value or ctx.resilient_parsing:
-        return
+def validate_version(ctx: click.Context, param: click.Parameter, value: str, ignore: typing.Sequence[str] = ()) -> str:
+    if value in ignore:
+        return value
 
-    try:
-        parts = value.split('.')
-        if len(parts) == 2:
-            parts.append('0')
-            version_info = parse_version_info('.'.join(parts))
-            return f'{version_info.major}.{version_info.minor}'
-        else:
-            version_info = parse_version_info('.'.join(parts))
-            return str(version_info)
-    except ValueError:
-        raise click.BadParameter('needs to be in semver format M.m[.p[-r]]')
+    def parse_version(version: str) -> semver.VersionInfo:
+        try:
+            return semver.parse_version_info(version)
+        except ValueError:
+            raise click.BadParameter('needs to be in semver format M.m[.p[-r]]')
+
+    parts = value.split('.')
+
+    if len(parts) == 2:
+        # Treat as a shorthand to a minor version, e.g. '7.17'.
+        parts.append('0')
+        version_info = parse_version('.'.join(parts))
+        return f'{version_info.major}.{version_info.minor}'
+
+    if len(parts) == 3 and parts[-1] == 'x':
+        # Treat as a release branch, e.g. '7.17.x'.
+        parts[2] = '0'
+        version_info = parse_version('.'.join(parts))
+        return f'{version_info.major}.{version_info.minor}.x'
+
+    # Treat as a fully-resolved, semver-compliant version string, e.g. '7.17.0', or '7.17.0-rc.2'.
+    version_info = parse_version('.'.join(parts))
+    return str(version_info)
 
 
 def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
@@ -70,37 +84,43 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
 @click.command(
     context_settings=CONTEXT_SETTINGS, short_help='Create a Trello card for each change that needs to be tested'
 )
-@click.option('--start', 'start_id', help='The PR number or commit hash to start at')
-@click.option(
-    '--since',
-    'agent_version',
-    callback=validate_version,
-    help=(
-        'The version of the Agent to compare, used as the diff base. '
-        'Defaults to the latest minor version as listed in the `release.json` file in the Agent `master` branch. '
-    ),
-)
-@click.option(
-    '--until',
-    'diff_target',
-    help='The branch or tag to use as the diff target.',
-    default='origin/master',
+@click.argument('last_release', callback=validate_version)
+@click.argument(
+    'next_release', callback=functools.partial(validate_version, ignore={'origin/master'}), default='origin/master'
 )
 @click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.pass_context
-def testable(ctx, start_id, agent_version, diff_target, milestone, dry_run):
-    """Create a Trello card for each change that needs to be tested for
-    the next release. Run via `ddev -x release testable` to force the use
-    of the current directory.
+def testable(ctx: click.Context, last_release: str, next_release: str, milestone: str, dry_run: bool) -> None:
+    """
+    Create a Trello card for changes since LAST_RELEASE that need to be tested for the NEXT_RELEASE.
 
-    Usage:
+    LAST_RELEASE and NEXT_RELEASE can refer to:
 
-    * Create cards for the first RC of an Agent release:\n
-        $ ddev release testable --since 7.17
+    * A git tag: 6.17.1, 7.17.0-rc.4, ...\n
+    * A release branch: 6.16.x, 7.17.x, ...
 
-    * Create cards for fixes made in an RC, relative to a previous RC:\n
-        $ ddev release testable --since 7.17.0-rc.4 --until 7.17.0-rc.5
+    NEXT_RELEASE defaults to `origin/master` if not specified.
+
+    NOTE: using a minor version shorthand, such as '7.16', is not supported anymore, as it is ambiguous whether you'd
+    refer to the latest patch release (e.g. 7.16.1) or the release branch (e.g. 7.16.x).
+
+    Example: assuming we are working on the release of 7.17.0, we can...
+
+    * Create cards for changes between a previous Agent release and `master` (useful when preparing an initial RC):\n
+        $ ddev release testable 7.16.1
+
+    * Create cards for changes between an RC and `master` (useful when preparing a new RC):\n
+        $ ddev release testable 7.17.0-rc.4
+
+    * Create cards for changes between an RC and a release branch (useful to only review changes from the release
+    branch when it has diverged from `master`):\n
+        $ ddev release testable 7.17.0-rc.4 7.17.x
+
+    * Create cards for changes between two arbitrary tags, e.g. between RCs:\n
+        $ ddev release testable 7.17.0-rc.4 7.17.0-rc.5
+
+    TIP: run with `ddev -x release testable` to force the use of the current directory.
 
     To avoid GitHub's public API rate limits, you need to set
     `github.user`/`github.token` in your config file or use the
@@ -120,14 +140,7 @@ def testable(ctx, start_id, agent_version, diff_target, milestone, dry_run):
     if repo not in ('integrations-core', 'datadog-agent'):
         abort(f'Repo `{repo}` is unsupported.')
 
-    if agent_version:
-        diff_base = agent_version
-    else:
-        echo_waiting('Finding the current minor release of the Agent... ', nl=False)
-        diff_base = get_current_agent_version()
-        echo_success(diff_base)
-
-    echo_info(f'Reference `{diff_base}` will be compared to `{diff_target}`.')
+    echo_info(f'Ref {last_release!r} will be compared to {next_release!r}.')
 
     echo_waiting('Getting diff... ', nl=False)
     diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..{}'
@@ -138,32 +151,16 @@ def testable(ctx, start_id, agent_version, diff_target, milestone, dry_run):
         if result.code:
             abort(f'Unable to run {fetch_command}.')
 
-        if diff_base in result.stderr or diff_target in result.stderr:
-            abort(
-                'Your repository is not sync with the remote repository. Please run git fetch in {} folder.'.format(
-                    root
-                )
-            )
+        if last_release in result.stderr or next_release in result.stderr:
+            abort(f'Your repository is not sync with the remote repository. Please run git fetch in {root!r} folder.')
 
-        # compare with the local tag first
-        reftag = f"refs/tags/{diff_base}"
-        result = run_command(diff_command.format(reftag, diff_target), capture=True)
+        reftag = f"refs/tags/{last_release}"
+        result = run_command(diff_command.format(reftag, next_release), capture=True)
         if result.code:
-            # if it didn't work, compare with a branch.
-            origin_release_branch = f'origin/{diff_base}.x'
-            echo_failure('failed!')
-            echo_waiting(
-                'Local branch or tag `{}` might not exist, trying with `{}`... '.format(
-                    diff_base, origin_release_branch
-                ),
-                nl=False,
+            abort(
+                'Unable to get the diff. '
+                f'HINT: ensure {last_release!r} and {next_release!r} both refer to either a tag or a release branch.'
             )
-
-            result = run_command(diff_command.format(origin_release_branch, diff_target), capture=True)
-            if result.code:
-                abort('Unable to get the diff.')
-            else:
-                echo_success('success!')
         else:
             echo_success('success!')
 
@@ -189,10 +186,9 @@ def testable(ctx, start_id, agent_version, diff_target, milestone, dry_run):
     options_prompt = f'Choose an option (default {options[default_option]}): '
     options_text = '\n' + '\n'.join('{} - {}'.format(key, value) for key, value in options.items())
 
-    commit_ids = set()
+    commit_ids: typing.Set[str] = set()
     user_config = ctx.obj
     trello = TrelloClient(user_config)
-    found_start_id = False
 
     for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
         commit_id = parse_pr_number(commit_subject)
@@ -239,13 +235,6 @@ def testable(ctx, start_id, agent_version, diff_target, milestone, dry_run):
             echo_info(f'Already seen PR #{commit_id}, skipping it.')
             continue
         commit_ids.add(commit_id)
-
-        if start_id and not found_start_id:
-            if start_id == commit_id or start_id == commit_hash:
-                found_start_id = True
-            else:
-                echo_info(f'Looking for {format_commit_id(start_id)}, skipping {format_commit_id(commit_id)}.')
-                continue
 
         pr_labels = sorted(get_pr_labels(pr_data))
         documentation_pr = False
