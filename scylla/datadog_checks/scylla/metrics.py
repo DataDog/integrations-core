@@ -290,44 +290,44 @@ SCYLLA_SSTABLES = {
 }
 
 SCYLLA_STORAGE = {
-    'scylla_storage_proxy_coordinator_background_read_repairs': 'storage.proxy_coordinator_background_read_repairs',
-    'scylla_storage_proxy_coordinator_background_reads': 'storage.proxy_coordinator_background_reads',
-    'scylla_storage_proxy_coordinator_background_replica_writes_failed_local_node': 'storage.proxy_coordinator_background_replica_writes_failed_local_node',  # noqa
-    'scylla_storage_proxy_coordinator_background_write_bytes': 'storage.proxy_coordinator_background_write_bytes',
-    'scylla_storage_proxy_coordinator_background_writes': 'storage.proxy_coordinator_background_writes',
-    'scylla_storage_proxy_coordinator_background_writes_failed': 'storage.proxy_coordinator_background_writes_failed',
-    'scylla_storage_proxy_coordinator_canceled_read_repairs': 'storage.proxy_coordinator_canceled_read_repairs',
-    'scylla_storage_proxy_coordinator_completed_reads_local_node': 'storage.proxy_coordinator_completed_reads_local_node',  # noqa
-    'scylla_storage_proxy_coordinator_current_throttled_base_writes': 'storage.proxy_coordinator_current_throttled_base_writes',  # noqa
-    'scylla_storage_proxy_coordinator_current_throttled_writes': 'storage.proxy_coordinator_current_throttled_writes',
-    'scylla_storage_proxy_coordinator_foreground_read_repair': 'storage.proxy_coordinator_foreground_read_repair',
-    'scylla_storage_proxy_coordinator_foreground_reads': 'storage.proxy_coordinator_foreground_reads',
-    'scylla_storage_proxy_coordinator_foreground_writes': 'storage.proxy_coordinator_foreground_writes',
-    'scylla_storage_proxy_coordinator_last_mv_flow_control_delay': 'storage.proxy_coordinator_last_mv_flow_control_delay',  # noqa
-    'scylla_storage_proxy_coordinator_queued_write_bytes': 'storage.proxy_coordinator_queued_write_bytes',
-    'scylla_storage_proxy_coordinator_range_timeouts': 'storage.proxy_coordinator_range_timeouts',
-    'scylla_storage_proxy_coordinator_range_unavailable': 'storage.proxy_coordinator_range_unavailable',
-    'scylla_storage_proxy_coordinator_read_errors_local_node': 'storage.proxy_coordinator_read_errors_local_node',
-    'scylla_storage_proxy_coordinator_read_latency': 'storage.proxy_coordinator_read_latency',
-    'scylla_storage_proxy_coordinator_read_repair_write_attempts_local_node': 'storage.proxy_coordinator_read_repair_write_attempts_local_node',  # noqa
-    'scylla_storage_proxy_coordinator_read_retries': 'storage.proxy_coordinator_read_retries',
-    'scylla_storage_proxy_coordinator_read_timeouts': 'storage.proxy_coordinator_read_timeouts',
-    'scylla_storage_proxy_coordinator_read_unavailable': 'storage.proxy_coordinator_read_unavailable',
-    'scylla_storage_proxy_coordinator_reads_local_node': 'storage.proxy_coordinator_reads_local_node',
-    'scylla_storage_proxy_coordinator_speculative_data_reads': 'storage.proxy_coordinator_speculative_data_reads',
-    'scylla_storage_proxy_coordinator_speculative_digest_reads': 'storage.proxy_coordinator_speculative_digest_reads',
-    'scylla_storage_proxy_coordinator_throttled_writes': 'storage.proxy_coordinator_throttled_writes',
-    'scylla_storage_proxy_coordinator_total_write_attempts_local_node': 'storage.proxy_coordinator_total_write_attempts_local_node',  # noqa
-    'scylla_storage_proxy_coordinator_write_errors_local_node': 'storage.proxy_coordinator_write_errors_local_node',
-    'scylla_storage_proxy_coordinator_write_latency': 'storage.proxy_coordinator_write_latency',
-    'scylla_storage_proxy_coordinator_write_timeouts': 'storage.proxy_coordinator_write_timeouts',
-    'scylla_storage_proxy_coordinator_write_unavailable': 'storage.proxy_coordinator_write_unavailable',
-    'scylla_storage_proxy_replica_cross_shard_ops': 'storage.proxy_replica_cross_shard_ops',
-    'scylla_storage_proxy_replica_forwarded_mutations': 'storage.proxy_replica_forwarded_mutations',
-    'scylla_storage_proxy_replica_forwarding_errors': 'storage.proxy_replica_forwarding_errors',
-    'scylla_storage_proxy_replica_reads': 'storage.proxy_replica_reads',
-    'scylla_storage_proxy_replica_received_counter_updates': 'storage.proxy_replica_received_counter_updates',
-    'scylla_storage_proxy_replica_received_mutations': 'storage.proxy_replica_received_mutations',
+    'scylla_storage_proxy.coordinator_background_read_repairs': 'storage.proxy.coordinator_background_read_repairs',
+    'scylla_storage_proxy.coordinator_background_reads': 'storage.proxy.coordinator_background_reads',
+    'scylla_storage_proxy.coordinator_background_replica_writes_failed_local_node': 'storage.proxy.coordinator_background_replica_writes_failed_local_node',  # noqa E501
+    'scylla_storage_proxy.coordinator_background_write_bytes': 'storage.proxy.coordinator_background_write_bytes',
+    'scylla_storage_proxy.coordinator_background_writes': 'storage.proxy.coordinator_background_writes',
+    'scylla_storage_proxy.coordinator_background_writes_failed': 'storage.proxy.coordinator_background_writes_failed',
+    'scylla_storage_proxy.coordinator_canceled_read_repairs': 'storage.proxy.coordinator_canceled_read_repairs',
+    'scylla_storage_proxy.coordinator_completed_reads_local_node': 'storage.proxy.coordinator_completed_reads_local_node',  # noqa E501
+    'scylla_storage_proxy.coordinator_current_throttled_base_writes': 'storage.proxy.coordinator_current_throttled_base_writes',  # noqa E501
+    'scylla_storage_proxy.coordinator_current_throttled_writes': 'storage.proxy.coordinator_current_throttled_writes',
+    'scylla_storage_proxy.coordinator_foreground_read_repair': 'storage.proxy.coordinator_foreground_read_repair',
+    'scylla_storage_proxy.coordinator_foreground_reads': 'storage.proxy.coordinator_foreground_reads',
+    'scylla_storage_proxy.coordinator_foreground_writes': 'storage.proxy.coordinator_foreground_writes',
+    'scylla_storage_proxy.coordinator_last_mv_flow_control_delay': 'storage.proxy.coordinator_last_mv_flow_control_delay',  # noqa E501
+    'scylla_storage_proxy.coordinator_queued_write_bytes': 'storage.proxy.coordinator_queued_write_bytes',
+    'scylla_storage_proxy.coordinator_range_timeouts': 'storage.proxy.coordinator_range_timeouts',
+    'scylla_storage_proxy.coordinator_range_unavailable': 'storage.proxy.coordinator_range_unavailable',
+    'scylla_storage_proxy.coordinator_read_errors_local_node': 'storage.proxy.coordinator_read_errors_local_node',
+    'scylla_storage_proxy.coordinator_read_latency': 'storage.proxy.coordinator_read_latency',
+    'scylla_storage_proxy.coordinator_read_repair_write_attempts_local_node': 'storage.proxy.coordinator_read_repair_write_attempts_local_node',  # noqa E501
+    'scylla_storage_proxy.coordinator_read_retries': 'storage.proxy.coordinator_read_retries',
+    'scylla_storage_proxy.coordinator_read_timeouts': 'storage.proxy.coordinator_read_timeouts',
+    'scylla_storage_proxy.coordinator_read_unavailable': 'storage.proxy.coordinator_read_unavailable',
+    'scylla_storage_proxy.coordinator_reads_local_node': 'storage.proxy.coordinator_reads_local_node',
+    'scylla_storage_proxy.coordinator_speculative_data_reads': 'storage.proxy.coordinator_speculative_data_reads',
+    'scylla_storage_proxy.coordinator_speculative_digest_reads': 'storage.proxy.coordinator_speculative_digest_reads',
+    'scylla_storage_proxy.coordinator_throttled_writes': 'storage.proxy.coordinator_throttled_writes',
+    'scylla_storage_proxy.coordinator_total_write_attempts_local_node': 'storage.proxy.coordinator_total_write_attempts_local_node',  # noqa E501
+    'scylla_storage_proxy.coordinator_write_errors_local_node': 'storage.proxy.coordinator_write_errors_local_node',
+    'scylla_storage_proxy.coordinator_write_latency': 'storage.proxy.coordinator_write_latency',
+    'scylla_storage_proxy.coordinator_write_timeouts': 'storage.proxy.coordinator_write_timeouts',
+    'scylla_storage_proxy.coordinator_write_unavailable': 'storage.proxy.coordinator_write_unavailable',
+    'scylla_storage_proxy.replica_cross_shard_ops': 'storage.proxy.replica_cross_shard_ops',
+    'scylla_storage_proxy.replica_forwarded_mutations': 'storage.proxy.replica_forwarded_mutations',
+    'scylla_storage_proxy.replica_forwarding_errors': 'storage.proxy.replica_forwarding_errors',
+    'scylla_storage_proxy.replica_reads': 'storage.proxy.replica_reads',
+    'scylla_storage_proxy.replica_received_counter_updates': 'storage.proxy.replica_received_counter_updates',
+    'scylla_storage_proxy.replica_received_mutations': 'storage.proxy.replica_received_mutations',
 }
 
 SCYLLA_STREAMING = {
