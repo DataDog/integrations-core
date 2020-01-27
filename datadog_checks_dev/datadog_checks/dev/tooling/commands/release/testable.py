@@ -1,51 +1,18 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import functools
 import time
 import typing
 
 import click
-import semver
 
-from ....subprocess import run_command
+from ....subprocess import SubprocessError, run_command
 from ....utils import basepath, chdir, get_next
 from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ...trello import TrelloClient
 from ...utils import format_commit_id
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-
-
-def validate_version(ctx: click.Context, param: click.Parameter, value: str, ignore: typing.Sequence[str] = ()) -> str:
-    if value in ignore:
-        return value
-
-    def parse_version(version: str) -> semver.VersionInfo:
-        try:
-            return semver.parse_version_info(version)
-        except ValueError:
-            raise click.BadParameter('needs to be in semver format M.m[.p[-r]]')
-
-    parts = value.split('.')
-
-    if len(parts) == 2:
-        example_release_tag = f'{value}.1'
-        example_release_branch = f'{value}.x'
-        raise click.BadParameter(
-            f"Using a minor version ({value!r}) is ambiguous. Use a release tag (e.g. {example_release_tag!r}) "
-            f"or a release branch (e.g. {example_release_branch!r}) instead."
-        )
-
-    if len(parts) == 3 and parts[-1] == 'x':
-        # Treat as a release branch, e.g. '7.17.x'.
-        parts[2] = '0'
-        version_info = parse_version('.'.join(parts))
-        return f'{version_info.major}.{version_info.minor}.x'
-
-    # Treat as a fully-resolved, semver-compliant version string, e.g. '7.17.0', or '7.17.0-rc.2'.
-    version_info = parse_version('.'.join(parts))
-    return str(version_info)
 
 
 def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
@@ -83,13 +50,57 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
                 break
 
 
+def _all_synced_with_remote(refs: typing.Sequence[str]) -> bool:
+    fetch_command = 'git fetch --dry'
+    result = run_command(fetch_command, capture=True, check=True)
+    return all(ref not in result.stderr for ref in refs)
+
+
+def _get_and_parse_commits(base_ref: str, target_ref: str) -> typing.List[typing.Tuple[str, str]]:
+    echo_info(f'Getting diff between {base_ref!r} and {target_ref!r}... ', nl=False)
+
+    diff_command = f'git --no-pager log "--pretty=format:%H %s" {base_ref}..{target_ref}'
+
+    try:
+        result = run_command(diff_command, capture=True, check=True)
+    except SubprocessError:
+        echo_failure('Failed!')
+        raise
+
+    echo_success('Success!')
+    lines: typing.List[str] = result.stdout.splitlines()
+
+    commits = []
+
+    for line in reversed(lines):
+        commit_hash, _, commit_subject = line.partition(' ')
+        commits.append((commit_hash, commit_subject))
+
+    return commits
+
+
+def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> typing.List[typing.Tuple[str, str]]:
+    with chdir(root):
+        if not _all_synced_with_remote((base_ref, target_ref)):
+            abort(f'Your repository is not sync with the remote repository. Please run `git fetch` in {root!r} folder.')
+
+        try:
+            return _get_and_parse_commits(base_ref, target_ref)
+        except SubprocessError as exc:
+            echo_failure(str(exc))
+            echo_failure('Unable to get the diff.')
+            echo_info(
+                f'HINT: ensure {base_ref!r} and {target_ref!r} both refer to a valid git reference '
+                '(such as a tag or a release branch).'
+            )
+            raise click.Abort
+
+
 @click.command(
     context_settings=CONTEXT_SETTINGS, short_help='Create a Trello card for each change that needs to be tested'
 )
-@click.argument('base_ref', callback=validate_version)
-@click.argument(
-    'target_ref', callback=functools.partial(validate_version, ignore=['origin/master']), default='origin/master'
-)
+@click.argument('base_ref')
+@click.argument('target_ref')
 @click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.pass_context
@@ -98,24 +109,22 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
     Create a Trello card for changes since a previous release (referenced by BASE_REF)
     that need to be tested for the next release (referenced by TARGET_REF).
 
-    BASE_REF and TARGET_REF can refer to:
+    BASE_REF and TARGET_REF can be any valid git references. It practice, you should use either:
 
-    * A git tag: 6.17.1, 7.17.0-rc.4, ...\n
-    * A release branch: 6.16.x, 7.17.x, ...
+    * A tag: `7.16.1`, `7.17.0-rc.4`, ...\n
+    * A release branch: `6.16.x`, `7.17.x`, ...\n
+    * The `master` branch.
 
-    If not specified, TARGET_REF defaults to `origin/master`.
-
-    NOTE: using a minor version shorthand, such as '7.16', is not supported anymore, as it is ambiguous whether you'd
-    refer to the latest patch release (e.g. 7.16.1) or the release branch (e.g. 7.16.x).
+    NOTE: using a minor version shorthand (e.g. `7.16`) is not supported, as it is ambiguous.
 
     Example: assuming we are working on the release of 7.17.0, we can...
 
     * Create cards for changes between a previous Agent release and `master` (useful when preparing an initial RC):\n
-        $ ddev release testable 7.16.1
+        $ ddev release testable 7.16.1 origin/master
 
     * Create cards for changes between a previous RC and `master` (useful when preparing a new RC, and a separate
     release branch was not created yet):\n
-        $ ddev release testable 7.17.0-rc.2
+        $ ddev release testable 7.17.0-rc.2 origin/master
 
     * Create cards for changes between a previous RC and a release branch (useful to only review changes in a
     release branch that has diverged from `master`):\n
@@ -144,41 +153,12 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
     if repo not in ('integrations-core', 'datadog-agent'):
         abort(f'Repo `{repo}` is unsupported.')
 
-    echo_info(f'Ref {base_ref!r} will be compared to {target_ref!r}.')
+    commits = get_commits_between(base_ref, target_ref, root=root)
+    num_changes = len(commits)
 
-    echo_waiting('Getting diff... ', nl=False)
-    diff_command = 'git --no-pager log "--pretty=format:%H %s" {}..{}'
-
-    with chdir(root):
-        fetch_command = 'git fetch --dry'
-        result = run_command(fetch_command, capture=True)
-        if result.code:
-            abort(f'Unable to run {fetch_command}.')
-
-        if base_ref in result.stderr or target_ref in result.stderr:
-            abort(f'Your repository is not sync with the remote repository. Please run git fetch in {root!r} folder.')
-
-        reftag = f"refs/tags/{base_ref}"
-        result = run_command(diff_command.format(reftag, target_ref), capture=True)
-        if result.code:
-            origin_release_branch = f'origin/{base_ref}'
-            echo_failure('failed!')
-            echo_waiting(f'Tag {base_ref!r} does not exist, retrying with release branch {origin_release_branch!r}...')
-            result = run_command(diff_command.format(origin_release_branch, target_ref), capture=True)
-            if result.code:
-                abort(
-                    'Unable to get the diff. '
-                    f'HINT: ensure {base_ref!r} and {target_ref!r} both refer to either an existing tag, '
-                    'or a release branch.'
-                )
-            else:
-                echo_success('success!')
-        else:
-            echo_success('success!')
-
-    # [(commit_hash, commit_subject), ...]
-    diff_data = [tuple(line.split(None, 1)) for line in reversed(result.stdout.splitlines())]
-    num_changes = len(diff_data)
+    if not num_changes:
+        echo_warning('No changes.')
+        return
 
     if repo == 'integrations-core':
         options = {'1': 'Integrations', '2': 'Containers', '3': 'Core', '4': 'Platform', 's': 'Skip', 'q': 'Quit'}
@@ -202,7 +182,7 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
     user_config = ctx.obj
     trello = TrelloClient(user_config)
 
-    for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
+    for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id:
             api_response = get_pr(commit_id, user_config, raw=True)
