@@ -137,30 +137,37 @@ class AgentCheck(object):
         """
         self.metrics = defaultdict(list)  # type: typing.DefaultDict[str, list]
         self.check_id = ''
-        self.instances = kwargs.get('instances', [])  # type: typing.Sequence[typing.Dict[str, typing.Any]]
-        self.name = kwargs.get('name', '')  # type: str
-        self.init_config = kwargs.get('init_config', {})  # type: typing.Dict[str, typing.Any]
-        self.agentConfig = kwargs.get('agentConfig', {})  # type: typing.Dict[str, typing.Any]
         self.warnings = []  # type: typing.List[str]
-        self.metric_limiter = None  # type: typing.Optional[Limiter]
+        self.metric_limiter = None  # typing.Optional[Limiter]
+
+        instances = kwargs.get('instances', [])
+        name = kwargs.get('name', '')
+        init_config = kwargs.get('init_config', {})
+        agentConfig = kwargs.get('agentConfig', {})
 
         if len(args) > 0:
-            self.name = args[0]
+            name = args[0]
         if len(args) > 1:
-            self.init_config = args[1]
+            init_config = args[1]
         if len(args) > 2:
             # agent pass instances as tuple but in test we are usually using list, so we are testing for both
             if len(args) > 3 or not isinstance(args[2], (list, tuple)) or 'instances' in kwargs:
                 # old-style init: the 3rd argument is `agentConfig`
-                self.agentConfig = args[2]
+                agentConfig = args[2]
                 if len(args) > 3:
-                    self.instances = args[3]
+                    instances = args[3]
             else:
                 # new-style init: the 3rd argument is `instances`
-                self.instances = args[2]
+                instances = args[2]
+
+        # The assignments above are a bit too dynamic for mypy, so let's give it some help.
+        self.instances = typing.cast(typing.Sequence[typing.Dict[str, typing.Any]], instances)
+        self.name = typing.cast(str, name)
+        self.init_config = typing.cast(typing.Dict[str, typing.Any], init_config)
+        self.agentConfig = typing.cast(typing.Dict[str, typing.Any], agentConfig)
 
         # Agent 6+ will only have one instance
-        self.instance = self.instances[0] if self.instances else None
+        self.instance = self.instances[0] if self.instances else {}
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -227,7 +234,7 @@ class AgentCheck(object):
 
         # Setup metric limits
         try:
-            metric_limit = self.instances[0].get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
+            metric_limit = self.instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
             # Do not allow to disable limiting if the class has set a non-zero default value
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
@@ -255,7 +262,7 @@ class AgentCheck(object):
     def http(self):
         # type: () -> RequestsWrapper
         if self._http is None:
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            self._http = RequestsWrapper(self.instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
 
