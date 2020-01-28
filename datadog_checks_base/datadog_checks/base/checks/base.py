@@ -236,6 +236,12 @@ class AgentCheck(object):
         try:
             limit = int(raw_limit)
         except (ValueError, TypeError):
+            self.warning(
+                "Configured 'max_returned_metrics' cannot be interpreted as an integer: %r. "
+                "Reverting to the default limit: %s",
+                raw_limit,
+                self.DEFAULT_METRIC_LIMIT,
+            )
             return self.DEFAULT_METRIC_LIMIT
 
         # Do not allow to disable limiting if the class has set a non-zero default value.
