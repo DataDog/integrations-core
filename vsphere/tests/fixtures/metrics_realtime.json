@@ -5,7 +5,7 @@
             1581
         ],
         "counterId": 1,
-        "instance": ""
+        "instance": "4"
     },
     {
         "entity": "VM4-2",
@@ -13,7 +13,7 @@
             1581
         ],
         "counterId": 2,
-        "instance": ""
+        "instance": "4"
     },
     {
         "entity": "VM4-2",
@@ -21,7 +21,7 @@
             1581
         ],
         "counterId": 3,
-        "instance": ""
+        "instance": "4"
     },
     {
         "entity": "VM4-2",
@@ -29,7 +29,7 @@
             1581
         ],
         "counterId": 4,
-        "instance": ""
+        "instance": "4"
     },
     {
         "entity": "VM4-2",
@@ -11853,7 +11853,7 @@
             9181
         ],
         "counterId": 389,
-        "instance": ""
+        "instance": "16"
     },
     {
         "entity": "10.0.0.104",
@@ -11861,7 +11861,7 @@
             9181
         ],
         "counterId": 390,
-        "instance": ""
+        "instance": "16"
     },
     {
         "entity": "10.0.0.104",
@@ -11869,7 +11869,7 @@
             9181
         ],
         "counterId": 391,
-        "instance": ""
+        "instance": "16"
     },
     {
         "entity": "10.0.0.104",
@@ -11877,7 +11877,7 @@
             9181
         ],
         "counterId": 392,
-        "instance": ""
+        "instance": "16"
     },
     {
         "entity": "10.0.0.104",
@@ -13333,7 +13333,7 @@
             29028344
         ],
         "counterId": 155,
-        "instance": ""
+        "instance": "sys-uptime-instance-value"
     },
     {
         "entity": "VM4-11",

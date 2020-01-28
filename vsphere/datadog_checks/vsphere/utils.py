@@ -2,9 +2,32 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from pyVmomi import vim
+from six import iteritems
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
+from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR
+
+METRIC_TO_INSTANCE_TAG_MAPPING = {
+    # Structure:
+    # prefix: tag key used for instance value
+    'cpu.': 'cpu_core',
+    # Examples: 0, 15
+    'datastore.': 'vmfs_uuid',
+    # Examples: fd3f776b-2ca26041, 5deed40f-cef2b3f6-0bcd-000c2927ce06
+    'disk.': 'device_path',
+    # Examples: mpx.vmhba0:C0:T1:L0, mpx.vmhba0:C0:T1:L0
+    'net.': 'nic',
+    # Examples: vmnic1, 4000
+    'storageAdapter.': 'storage_adapter',
+    # Examples: vmhba1, vmhba64
+    'storagePath.': 'storage_path',
+    # Examples: ide.vmhba64-ide.0:0-mpx.vmhba64:C0:T0:L0, pscsi.vmhba0-pscsi.0:1-mpx.vmhba0:C0:T1:L0
+    'sys.resource': 'resource_path',
+    # Examples: host/system/vmotion, host/system
+    'virtualDisk.': 'disk',
+    # Examples: scsi0:0, scsi0:0
+}
 
 
 def format_metric_name(counter):
@@ -69,6 +92,11 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
     return True
 
 
+def is_metric_included_by_filters(metric_name, mor_type, metric_filters):
+    filters = metric_filters.get(MOR_TYPE_AS_STRING[mor_type], [])
+    return match_any_regex(metric_name, filters)
+
+
 def make_inventory_path(mor, infrastructure_data):
     mor_name = infrastructure_data.get(mor).get('name', '')
     mor_parent = infrastructure_data.get(mor).get('parent')
@@ -115,22 +143,27 @@ def get_parent_tags_recursively(mor, infrastructure_data):
     return []
 
 
-def should_collect_per_instance_values(metric_name, resource_type):
-    # TODO: Implement. For now we don't collect per-instance level metrics (aka per-core for cpu, per-vm for disk etc.)
-    # TODO: Collecting per-instance metrics is really expensive for big environments and has usually little value.
-    # TODO: Also that adds an extra layer of complexity where users have to set `instance:none` to see the correct
-    # value.
-    return False
+def should_collect_per_instance_values(config, metric_name, resource_type):
+    return is_metric_included_by_filters(
+        metric_name, resource_type, config.collect_per_instance_filters
+    ) and is_metric_available_per_instance(metric_name, resource_type)
 
 
 def get_mapped_instance_tag(metric_name):
-    """When collecting per-instance metric, the `instance` tag can mean a lot of different things. The meaning of the
-    tag cannot be guessed by looking at the api results and has to be infered using documentation or experience.
-    This method acts as a utility to map a metric_name to the meaning of its instance tag.
-    TODO: More
     """
-    if metric_name.startswith('cpu'):
-        return 'cpu_core'
-    elif metric_name.startswith('disk'):
-        return 'vm'
+    When collecting per-instance metric, the `instance` tag can mean a lot of different things. The meaning of the
+    tag cannot be guessed by looking at the api results and has to be inferred using documentation or experience.
+    This method acts as a utility to map a metric_name to the meaning of its instance tag.
+    """
+    for prefix, tag_key in iteritems(METRIC_TO_INSTANCE_TAG_MAPPING):
+        if metric_name.startswith(prefix):
+            return tag_key
     return 'instance'
+
+
+def is_metric_available_per_instance(metric_name, resource_type):
+    metric_data = ALLOWED_METRICS_FOR_MOR.get(resource_type, {}).get(metric_name)
+    if not metric_data:
+        return False
+    (_, _, available_per_instance) = metric_data
+    return available_per_instance

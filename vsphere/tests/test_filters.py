@@ -11,6 +11,7 @@ from tests.mocked_api import MockedAPI
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.utils import (
     is_metric_excluded_by_filters,
+    is_metric_included_by_filters,
     is_resource_excluded_by_filters,
     make_inventory_path,
     match_any_regex,
@@ -33,6 +34,15 @@ def test_is_metric_excluded_by_filters():
     assert not is_metric_excluded_by_filters('foo0', vim.VirtualMachine, metric_filters)
     assert not is_metric_excluded_by_filters('bar 0', vim.VirtualMachine, metric_filters)
     assert is_metric_excluded_by_filters('foo', vim.VirtualMachine, metric_filters)
+
+
+@pytest.mark.parametrize(
+    'metric_name, expect_match', [('foo1', True), ('foo0', True), ('bar 0', True), ('foo', False),]
+)
+def test_is_metric_included_by_filters(metric_name, expect_match):
+    metric_filters = {'vm': regexes}
+
+    assert expect_match == is_metric_included_by_filters(metric_name, vim.VirtualMachine, metric_filters)
 
 
 def test_is_reference_excluded():

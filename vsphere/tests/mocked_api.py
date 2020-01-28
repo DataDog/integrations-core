@@ -82,7 +82,7 @@ class MockedAPI(object):
             results = [m for m in self.metrics_data if m.entity == entity_name and m.counterId in counter_ids]
             values = []
             for r in results:
-                values.append(MagicMock(id=MagicMock(counterId=r.counterId), value=r.value))
+                values.append(MagicMock(id=MagicMock(counterId=r.counterId, instance=r.instance), value=r.value))
 
             if results:
                 data.append(MagicMock(entity=spec.entity, value=values))

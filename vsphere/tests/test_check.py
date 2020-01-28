@@ -81,3 +81,39 @@ def test_external_host_tags(aggregator, realtime_instance):
 
     check.set_external_tags = MagicMock()
     check.submit_external_host_tags()
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update(
+        {
+            'collect_per_instance_filters': {
+                'vm': [r'cpu\.usage\.raw', r'disk\..*'],
+                'host': [r'cpu\.coreUtilization\..*', r'sys\.uptime\..*', r'disk\..*'],
+            }
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    # Following metrics should match and have instance value tag
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.raw', tags={'cpu_core:4', 'vcenter_server:FAKE'},
+    )
+    for suffix in ['min', 'max', 'raw', 'avg']:
+        aggregator.assert_metric(
+            'vsphere.cpu.coreUtilization.{}'.format(suffix),
+            hostname='10.0.0.104',
+            tags={'cpu_core:16', 'vcenter_server:FAKE'},
+        )
+
+    # Following metrics should NOT match and do NOT have instance value tag
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.min', tags={'vcenter_server:FAKE'},
+    )
+    aggregator.assert_metric(
+        'vsphere.cpu.totalCapacity.avg', tags={'vcenter_server:FAKE'},
+    )
+
+    # `vsphere.disk.read.avg` is available per instance but the instance values are empty, hence no metric submitted.
+    aggregator.assert_metric('vsphere.disk.read.avg', tags={'vcenter_server:FAKE'}, hostname='VM4-1', count=0)

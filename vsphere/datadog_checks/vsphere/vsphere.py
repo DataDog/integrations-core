@@ -32,6 +32,7 @@ from datadog_checks.vsphere.utils import (
     format_metric_name,
     get_mapped_instance_tag,
     get_parent_tags_recursively,
+    is_metric_available_per_instance,
     is_metric_excluded_by_filters,
     is_resource_excluded_by_filters,
     should_collect_per_instance_values,
@@ -174,7 +175,20 @@ class VSphereCheck(AgentCheck):
             self.infrastructure_cache.set_mor_data(mor, mor_payload)
 
     def submit_metrics_callback(self, query_results):
-        """Callback of the collection of metrics. This is run in the main thread!"""
+        """
+        Callback of the collection of metrics. This is run in the main thread!
+        """
+
+        have_instance_value = defaultdict(set)
+
+        for results_per_mor in query_results:
+            resource_type = type(results_per_mor.entity)
+            metadata = self.metrics_metadata_cache.get_metadata(resource_type)
+            for result in results_per_mor.value:
+                metric_name = metadata.get(result.id.counterId)
+                if result.id.instance:
+                    have_instance_value[resource_type].add(metric_name)
+
         for results_per_mor in query_results:
             mor_props = self.infrastructure_cache.get_mor_props(results_per_mor.entity)
             if mor_props is None:
@@ -210,16 +224,17 @@ class VSphereCheck(AgentCheck):
                         to_string(metric_name),
                     )
                     continue
-                value = valid_values[-1]
-                if metric_name in PERCENT_METRICS:
-                    # Convert the percentage to a float.
-                    value /= 100.0
 
                 tags = []
-                if should_collect_per_instance_values(metric_name, resource_type):
-                    instance_tag_key = get_mapped_instance_tag(metric_name)
-                    instance_tag_value = result.id.instance or 'none'
-                    tags.append('{}:{}'.format(instance_tag_key, instance_tag_value))
+                if should_collect_per_instance_values(self.config, metric_name, resource_type):
+                    instance_value = result.id.instance
+                    # When collecting per instance values, it's possible that both aggregated metric and per instance
+                    # metrics are received. In that case, the metric with no instance value is skipped.
+                    if is_metric_available_per_instance(metric_name, resource_type) and not instance_value:
+                        continue
+                    if instance_value:
+                        instance_tag_key = get_mapped_instance_tag(metric_name)
+                        tags.append('{}:{}'.format(instance_tag_key, instance_value))
 
                 if resource_type in HISTORICAL_RESOURCES:
                     # Tags are attached to the metrics
@@ -235,8 +250,12 @@ class VSphereCheck(AgentCheck):
 
                 tags.extend(self.config.base_tags)
 
-                # vsphere "rates" should be submitted as gauges (rate is
-                # precomputed).
+                value = valid_values[-1]
+                if metric_name in PERCENT_METRICS:
+                    # Convert the percentage to a float.
+                    value /= 100.0
+
+                # vSphere "rates" should be submitted as gauges (rate is precomputed).
                 self.gauge(to_string(metric_name), value, hostname=hostname, tags=tags)
 
     def query_metrics_wrapper(self, query_specs):
@@ -249,14 +268,25 @@ class VSphereCheck(AgentCheck):
         return metrics_values
 
     def make_query_specs(self):
+        """
+        Build query specs using MORs and metrics metadata.
+
+        :returns a list of vim.PerformanceManager.QuerySpec: https://www.vmware.com/support/developer/vc-sdk/visdk41pubs/ApiReference/vim.PerformanceManager.QuerySpec.html
+        """
         for resource_type in self.config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
             counters = self.metrics_metadata_cache.get_metadata(resource_type)
             metric_ids = []
             for counter_key, metric_name in iteritems(counters):
-                instance = ""
-                if should_collect_per_instance_values(metric_name, resource_type):
+                # PerformanceManager.MetricId `instance` kwarg:
+                # - An asterisk (*) to specify all instances of the metric for the specified counterId
+                # - Double-quotes ("") to specify aggregated statistics
+                # More info https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.MetricId.html
+                if should_collect_per_instance_values(self.config, metric_name, resource_type):
                     instance = "*"
+                else:
+                    instance = ''
+
                 metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance))
 
             for batch in self.make_batch(mors, metric_ids, resource_type):
