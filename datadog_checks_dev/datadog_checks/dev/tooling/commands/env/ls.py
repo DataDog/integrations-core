@@ -17,7 +17,7 @@ def ls(checks):
         testable_checks = sorted(get_testable_checks() & set(checks))
 
         if not testable_checks:
-            echo_warning('No testable checks found for: {}'.format(', '.join(checks)))
+            echo_warning(f"No testable checks found for: {', '.join(checks)}")
 
         for check in testable_checks:
             envs = get_available_tox_envs(check, e2e_only=True)
@@ -27,7 +27,7 @@ def ls(checks):
                 for env in envs:
                     echo_info(env, indent=True)
             else:
-                echo_warning('No envs found for check: {}'.format(check))
+                echo_warning(f'No envs found for check: {check}')
 
     else:
         found = False
