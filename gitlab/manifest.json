@@ -27,7 +27,9 @@
   "integration_id": "gitlab",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Gitlab Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
