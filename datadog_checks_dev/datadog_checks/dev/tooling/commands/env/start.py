@@ -90,7 +90,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     if not org_name:
         org_name = ctx.obj['org']
     if org_name not in ctx.obj['orgs']:
-        echo_failure('Org `{}` is not defined in your config.'.format(org_name))
+        echo_failure(f'Org `{org_name}` is not defined in your config.')
         abort()
 
     org = ctx.obj['orgs'].get(org_name, {})
