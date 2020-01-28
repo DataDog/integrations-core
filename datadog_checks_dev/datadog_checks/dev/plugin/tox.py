@@ -63,12 +63,9 @@ def add_style_checker(config, sections, make_envconfig, reader):
     ]
 
     commands = [
-        'flake8 --config=../.flake8 .',
+        'flake8 --config=../.flake8 --enable-extensions=G .',
         'black --check --diff .',
         'isort --check-only --diff --recursive .',
-        'python -c "print(\'\\n[WARNING] Complying with following lint rules is recommended, '
-        'but not mandatory, yet.\')"',
-        '- flake8 --config=../.flake8 --enable-extensions=G --select=G .',  # lint `flake8-logging-format`
     ]
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':

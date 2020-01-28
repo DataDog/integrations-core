@@ -143,6 +143,76 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 Use the default configuration of your `airflow.d/conf.yaml` file to activate the collection of your Airflow service checks. See the sample [airflow.d/conf.yaml][3] for all available configuration options.
 
+#### Log collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Uncomment and edit this configuration block at the bottom of your `airflow.d/conf.yaml`:
+
+    Change the `path` and `service` parameter values and configure them for your environment.
+
+    a. Configuration for DAG processor manager and Scheduler logs:
+
+    ```yaml
+      logs:
+        - type: file
+          path: <PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log
+          source: airflow
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+        - type: file
+          path: <PATH_TO_AIRFLOW>/logs/scheduler/*/*.log
+          source: airflow
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+    ```
+   
+    Regular clean up is recommended for scheduler logs with daily log rotation.
+
+    b. Additional configuration for DAG tasks logs:
+
+    ```yaml
+      logs:
+        - type: file
+          path: <PATH_TO_AIRFLOW>/logs/*/*/*/*.log
+          source: airflow
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+    ```
+
+    Caveat: By default Airflow use this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{ try_number }}.log`, the number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
+
+    If you do not view logs in Airflow UI, we recommend this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log rotate this file and use this configuration:
+
+    ```yaml
+      logs:
+        - type: file
+          path: <PATH_TO_AIRFLOW>/logs/dag_tasks.log
+          source: airflow
+          service: <SERVICE_NAME>
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+    ```
+
+3. [Restart the Agent][7].
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `airflow` under the Checks section.
