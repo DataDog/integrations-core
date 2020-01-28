@@ -651,12 +651,6 @@ class SparkCheck(AgentCheck):
 
             match = PROXY_WITH_DIFFERENT_USER_WARNING.match(response.text)
             if match:
-                if not self.http.persist_connections:
-                    raise ConfigurationError(
-                        "The spark proxy answered with a warning page. To overcome the warning, the integration needs "
-                        "to store a cookie, which can only be done by setting `persist_connections: true` in your"
-                        "configuration. Please update this value to collect spark metrics."
-                    )
                 redirect_link = match.group(1)
                 self.proxy_redirect_cookies = response.cookies
                 # When using a proxy and the remote user is different that the current user

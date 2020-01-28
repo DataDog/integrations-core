@@ -153,10 +153,10 @@ CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 
 
 class MockedResponse:
-    def __init__(self, json_data, status_code):
+    def __init__(self, json_data, status_code, cookies=None):
         self.json_data = json_data
         self.status_code = status_code
-        self.cookies = None
+        self.cookies = cookies
 
     @property
     def text(self):
@@ -169,8 +169,8 @@ class MockedResponse:
         return True
 
 
-def yarn_requests_get_mock(*args, **kwargs):
-    arg_url = Url(args[0])
+def yarn_requests_get_mock(url, *args, **kwargs):
+    arg_url = Url(url)
 
     if arg_url == YARN_APP_URL:
         with open(os.path.join(FIXTURE_DIR, 'yarn_apps'), 'rb') as f:
@@ -219,8 +219,8 @@ def yarn_requests_auth_mock(*args, **kwargs):
     return yarn_requests_get_mock(*args, **kwargs)
 
 
-def mesos_requests_get_mock(*args, **kwargs):
-    arg_url = Url(args[0])
+def mesos_requests_get_mock(url, *args, **kwargs):
+    arg_url = Url(url)
 
     if arg_url == MESOS_APP_URL:
         with open(os.path.join(FIXTURE_DIR, 'mesos_apps'), 'rb') as f:
@@ -258,8 +258,8 @@ def mesos_requests_get_mock(*args, **kwargs):
             return MockedResponse(body, 200)
 
 
-def driver_requests_get_mock(*args, **kwargs):
-    arg_url = Url(args[0])
+def driver_requests_get_mock(url, *args, **kwargs):
+    arg_url = Url(url)
 
     if arg_url == DRIVER_APP_URL:
         with open(os.path.join(FIXTURE_DIR, 'spark_apps'), 'rb') as f:
@@ -297,8 +297,8 @@ def driver_requests_get_mock(*args, **kwargs):
             return MockedResponse(body, 200)
 
 
-def standalone_requests_get_mock(*args, **kwargs):
-    arg_url = Url(args[0])
+def standalone_requests_get_mock(url, *args, **kwargs):
+    arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
         with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'rb') as f:
@@ -341,8 +341,8 @@ def standalone_requests_get_mock(*args, **kwargs):
             return MockedResponse(body, 200)
 
 
-def standalone_requests_pre20_get_mock(*args, **kwargs):
-    arg_url = Url(args[0])
+def standalone_requests_pre20_get_mock(url, *args, **kwargs):
+    arg_url = Url(url)
 
     if arg_url == STANDALONE_APP_URL:
         with open(os.path.join(FIXTURE_DIR, 'spark_standalone_apps'), 'rb') as f:
@@ -405,15 +405,15 @@ def standalone_requests_pre20_get_mock(*args, **kwargs):
             return MockedResponse(body, 200)
 
 
-def proxy_with_warning_page_mock(session, *args, **kwargs):
-    session_cookie = session.cookies.get('proxy_cookie')
-    arg_url = args[0]
-
-    url_parts = list(urlparse(arg_url))
+def proxy_with_warning_page_mock(url, *args, **kwargs):
+    cookies = kwargs.get('cookies') or {}
+    proxy_cookie = cookies.get('proxy_cookie')
+    url_parts = list(urlparse(url))
     query = dict(parse_qsl(url_parts[4]))
-    if session_cookie and query.get('proxyapproved') == 'true':
+    if proxy_cookie and query.get('proxyapproved') == 'true':
         del query['proxyapproved']
         url_parts[4] = urlencode(query)
+        import pdb; pdb.set_trace()
         return standalone_requests_get_mock(urlunparse(url_parts), *args[1:], **kwargs)
     else:
         # Display the html warning page with the redirect link
@@ -421,8 +421,8 @@ def proxy_with_warning_page_mock(session, *args, **kwargs):
         url_parts[4] = urlencode(query)
         with open(os.path.join(FIXTURE_DIR, 'html_warning_page'), 'r') as f:
             body = f.read().replace('$REDIRECT_URL$', urlunparse(url_parts))
-            session.cookies['proxy_cookie'] = 'foo'
-            return MockedResponse(body, 200)
+            cookies['proxy_cookie'] = 'foo'
+            return MockedResponse(body, 200, cookies)
 
 
 CHECK_NAME = 'spark'
@@ -469,13 +469,7 @@ STANDALONE_CONFIG = {
     'cluster_name': CLUSTER_NAME,
     'spark_cluster_mode': 'spark_standalone_mode',
 }
-STANDALONE_CONFIG_WITH_SESSION_PROXY = {
-    'spark_url': 'http://localhost:8080',
-    'cluster_name': CLUSTER_NAME,
-    'spark_cluster_mode': 'spark_standalone_mode',
-    'persist_connections': True,
-    'spark_proxy_enabled': True,
-}
+
 STANDALONE_CONFIG_PRE_20 = {
     'spark_url': 'http://localhost:8080',
     'cluster_name': CLUSTER_NAME,
@@ -880,9 +874,9 @@ def test_standalone_unit(aggregator):
 
 @pytest.mark.unit
 def test_standalone_unit_with_proxy_warning_page(aggregator):
-    c = SparkCheck('spark', {}, [STANDALONE_CONFIG_WITH_SESSION_PROXY])
-    with mock.patch('requests.sessions.Session.get', proxy_with_warning_page_mock):
-        c.check(STANDALONE_CONFIG_WITH_SESSION_PROXY)
+    c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
+    with mock.patch('requests.get', proxy_with_warning_page_mock):
+        c.check(STANDALONE_CONFIG)
 
         # Check the running job metrics
         for metric, value in iteritems(SPARK_JOB_RUNNING_METRIC_VALUES):
