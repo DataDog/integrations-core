@@ -167,7 +167,7 @@ class AgentCheck(object):
         self.agentConfig = typing.cast(typing.Dict[str, typing.Any], agentConfig)
 
         # Agent 6+ will only have one instance
-        self.instance = self.instances[0] if self.instances else {}
+        self.instance = self.instances[0] if self.instances else None
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
@@ -234,7 +234,7 @@ class AgentCheck(object):
 
         # Setup metric limits
         try:
-            metric_limit = int(self.instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT))
+            metric_limit = int((self.instance or {}).get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT))
             # Do not allow to disable limiting if the class has set a non-zero default value
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
