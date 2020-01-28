@@ -2,7 +2,7 @@ version: '3'
 
 services:
   scylla-db:
-    image: scylladb/scylla:3.2.0
+    image: scylladb/scylla:${SCYLLA_VERSION}
     container_name: scylla-db
     ports:
       - "9100:9100"

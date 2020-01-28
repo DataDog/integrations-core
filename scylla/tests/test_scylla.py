@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
+
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
@@ -22,11 +24,13 @@ def test_instance_default_check(aggregator, db_instance, mock_db_data):
 def test_instance_additional_check(aggregator, db_instance, mock_db_data):
     # add additional metric groups for validation
     additional_metrics = ['scylla.alien', 'scylla.sstables']
-    db_instance['metric_groups'] = additional_metrics
 
-    c = ScyllaCheck('scylla', {}, [db_instance])
+    instance = deepcopy(db_instance)
+    instance['metric_groups'] = additional_metrics
 
-    c.check(db_instance)
+    c = ScyllaCheck('scylla', {}, [instance])
+
+    c.check(instance)
 
     metrics_to_check = get_metrics(INSTANCE_DEFAULT_GROUPS + additional_metrics)
 
@@ -38,10 +42,12 @@ def test_instance_additional_check(aggregator, db_instance, mock_db_data):
 
 def test_instance_invalid_group_check(aggregator, db_instance, mock_db_data):
     additional_metrics = ['scylla.bogus', 'scylla.sstables']
-    db_instance['metric_groups'] = additional_metrics
+
+    instance = deepcopy(db_instance)
+    instance['metric_groups'] = additional_metrics
 
     with pytest.raises(ConfigurationError):
-        ScyllaCheck('scylla', {}, [db_instance])
+        ScyllaCheck('scylla', {}, [instance])
 
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
 
