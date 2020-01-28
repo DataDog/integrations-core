@@ -1008,9 +1008,7 @@ def test_do_not_crash_on_single_app_failure():
     rest_requests_to_json = mock.MagicMock(side_effect=[RequestException, results])
     c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
 
-    with mock.patch.object(
-        c, '_rest_request_to_json', rest_requests_to_json
-    ), mock.patch.object(c, '_collect_version'):
+    with mock.patch.object(c, '_rest_request_to_json', rest_requests_to_json), mock.patch.object(c, '_collect_version'):
         c._get_spark_app_ids(running_apps, [])
         assert rest_requests_to_json.call_count == 2
 
