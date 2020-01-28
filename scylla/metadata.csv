@@ -7,17 +7,17 @@ scylla.cache.active_reads,gauge,,read,,number of currently active reads,0,scylla
 scylla.cache.bytes_total,gauge,,byte,,total size of memory for the cache,0,scylla,cache bytes total
 scylla.cache.bytes_used,gauge,,byte,,current bytes used by the cache out of the total size of memory,0,scylla,cache bytes used
 scylla.cache.concurrent_misses_same_key,counter,,miss,,total number of operation with misses same key,-1,scylla,cache concurrent misses same key
-scylla.cache.mispopulations,counter,,?,,number of entries not inserted by reads,-1,scylla,cache mispopulations
+scylla.cache.mispopulations,counter,,,,number of entries not inserted by reads,-1,scylla,cache mispopulations
 scylla.cache.partition_evictions,counter,,eviction,,total number of evicted partitions,0,scylla,cache partition evictions
 scylla.cache.partition_hits,counter,,hit,,number of partitions needed by reads and found in cache,0,scylla,cache partition hits
-scylla.cache.partition_insertions,counter,,set,,total number of partitions added to cache,0,scylla,cache partition insertions
-scylla.cache.partition_merges,counter,,?,,total number of partitions merged,0,scylla,cache partition merges
+scylla.cache.partition_insertions,counter,,,,total number of partitions added to cache,0,scylla,cache partition insertions
+scylla.cache.partition_merges,counter,,,,total number of partitions merged,0,scylla,cache partition merges
 scylla.cache.partition_misses,counter,,miss,,number of partitions needed by reads and missing in cache,0,scylla,cache partition misses
-scylla.cache.partition_removals,counter,,?,,total number of invalidated partitions,0,scylla,cache partition removals
-scylla.cache.partitions,gauge,,?,,total number of cached partitions,0,scylla,cache partitions
-scylla.cache.pinned_dirty_memory_overload,counter,,?,,amount of pinned bytes that we tried to unpin over the limit. This should sit constantly at 0; and any number different than 0 is indicative of a bug,-1,scylla,cache pinned dirty memory overload
+scylla.cache.partition_removals,counter,,,,total number of invalidated partitions,0,scylla,cache partition removals
+scylla.cache.partitions,gauge,,,,total number of cached partitions,0,scylla,cache partitions
+scylla.cache.pinned_dirty_memory_overload,counter,,byte,,amount of pinned bytes that we tried to unpin over the limit. This should sit constantly at 0; and any number different than 0 is indicative of a bug,-1,scylla,cache pinned dirty memory overload
 scylla.cache.reads,counter,,get,,number of started reads,1,scylla,cache reads
-scylla.cache.reads_with_misses,counter,,?,,number of reads which had to read from sstables,0,scylla,cache reads with misses
+scylla.cache.reads_with_misses,counter,,read,,number of reads which had to read from sstables,0,scylla,cache reads with misses
 scylla.cache.row_evictions,counter,,eviction,,total number of rows evicted from cache,0,scylla,cache row evictions
 scylla.cache.row_hits,counter,,hit,,total number of rows needed by reads and found in cache,0,scylla,cache row hits
 scylla.cache.row_insertions,counter,,set,,total number of rows added to cache,0,scylla,cache row insertions
@@ -27,257 +27,259 @@ scylla.cache.rows,gauge,,row,,total number of cached rows,0,scylla,cache rows
 scylla.cache.rows_dropped_from_memtable,counter,,row,,total number of rows in memtables which were dropped during cache update on memtable flush,0,scylla,cache rows dropped from memtable
 scylla.cache.rows_merged_from_memtable,counter,,row,,total number of rows in memtables which were merged with existing rows during cache update on memtable flush,0,scylla,cache rows merged from memtable
 scylla.cache.rows_processed_from_memtable,counter,,row,,total number of rows in memtables which were processed during cache update on memtable flush,0,scylla,cache rows processed from memtable
-scylla.cache.sstable_partition_skips,counter,,,<PER_UNIT_NAME>,number of times sstable reader was fast forwarded across partitions,0,scylla,cache sstable partition skips
-scylla.cache.sstable_reader_recreations,counter,,,<PER_UNIT_NAME>,number of times sstable reader was recreated due to memtable flush,0,scylla,cache sstable reader recreations
-scylla.cache.sstable_row_skips,counter,,row,<PER_UNIT_NAME>,number of times sstable reader was fast forwarded within a partition,0,scylla,cache sstable row skips
-scylla.cache.static_row_insertions,counter,,row,<PER_UNIT_NAME>,total number of static rows added to cache,0,scylla,cache static row insertions
-scylla.commitlog.alloc,counter,,,<PER_UNIT_NAME>,Counts a number of times a new mutation has been added to a segment. Divide bytes_written by this value to get the average number of bytes per mutation written to the disk.,0,scylla,commitlog alloc
-scylla.commitlog.allocating_segments,gauge,,,<PER_UNIT_NAME>,Holds the number of not closed segments that still have some free space. This value should not get too high.,-1,scylla,commitlog allocating segments
-scylla.commitlog.bytes_written,counter,,byte,<PER_UNIT_NAME>,"Counts a number of bytes written to the disk. Divide this value by ""alloc"" to get the average number of bytes per mutation written to the disk.",0,scylla,commitlog bytes written
-scylla.commitlog.cycle,counter,,,<PER_UNIT_NAME>,Counts a number of commitlog write cycles - when the data is written from the internal memory buffer to the disk.,0,scylla,commitlog cycle
-scylla.commitlog.disk_total_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds a size of disk space in bytes used for data so far. A too high value indicates that we have some bottleneck in the writing to sstables path.,0,scylla,commitlog disk total bytes
-scylla.commitlog.flush,counter,,,<PER_UNIT_NAME>,Counts a number of times the flush() method was called for a file.,0,scylla,commitlog flush
-scylla.commitlog.flush_limit_exceeded,counter,,,<PER_UNIT_NAME>,Counts a number of times a flush limit was exceeded. A non-zero value indicates that there are too many pending flush operations (see pending_flushes) and some of them will be blocked till the total amount of pending flush operations drops below 5.,-1,scylla,commitlog flush limit exceeded
-scylla.commitlog.memory_buffer_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds the total number of bytes in internal memory buffers.,0,scylla,commitlog memory buffer bytes
-scylla.commitlog.pending_allocations,gauge,,,<PER_UNIT_NAME>,Holds a number of currently pending allocations. A non-zero value indicates that we have a bottleneck in the disk write flow.,-1,scylla,commitlog pending allocations
-scylla.commitlog.pending_flushes,gauge,,,<PER_UNIT_NAME>,Holds a number of currently pending flushes. See the related flush_limit_exceeded metric.,0,scylla,commitlog pending flushes
-scylla.commitlog.requests_blocked_memory,counter,,request,<PER_UNIT_NAME>,Counts a number of requests blocked due to memory pressure. A non-zero value indicates that the commitlog memory quota is not enough to serve the required amount of requests.,-1,scylla,commitlog requests blocked memory
-scylla.commitlog.segments,gauge,,,<PER_UNIT_NAME>,Holds the current number of segments.,0,scylla,commitlog segments
-scylla.commitlog.slack,counter,,byte,<PER_UNIT_NAME>,Counts a number of unused bytes written to the disk due to disk segment alignment.,0,scylla,commitlog slack
-scylla.commitlog.unused_segments,gauge,,,<PER_UNIT_NAME>,Holds the current number of unused segments. A non-zero value indicates that the disk write path became temporary slow.,-1,scylla,commitlog unused segments
-scylla.compaction_manager.compactions,gauge,,,<PER_UNIT_NAME>,Holds the number of currently active compactions.,0,scylla,compaction manager compactions
-scylla.cql.authorized_prepared_statements_cache_evictions,counter,,,<PER_UNIT_NAME>,Counts a number of authenticated prepared statements cache entries evictions.,0,scylla,cql authorized prepared statements cache evictions
-scylla.cql.authorized_prepared_statements_cache_size,gauge,,,<PER_UNIT_NAME>,A number of entries in the authenticated prepared statements cache.,0,scylla,cql authorized prepared statements cache size
-scylla.cql.batches,counter,,,<PER_UNIT_NAME>,Counts a total number of CQL BATCH requests.,0,scylla,cql batches
-scylla.cql.batches_pure_logged,counter,,,<PER_UNIT_NAME>,Counts a total number of LOGGED batches that were executed as LOGGED batches.,0,scylla,cql batches pure logged
-scylla.cql.batches_pure_unlogged,counter,,,<PER_UNIT_NAME>,Counts a total number of UNLOGGED batches that were executed as UNLOGGED batches.,0,scylla,cql batches pure unlogged
-scylla.cql.batches_unlogged_from_logged,counter,,,<PER_UNIT_NAME>,Counts a total number of LOGGED batches that were executed as UNLOGGED batches.,0,scylla,cql batches unlogged from logged
-scylla.cql.deletes,counter,,,<PER_UNIT_NAME>,Counts a total number of CQL DELETE requests.,0,scylla,cql deletes
-scylla.cql.filtered_read_requests,counter,,,<PER_UNIT_NAME>,Counts a total number of CQL read requests that required ALLOW FILTERING. See filtered_rows_read_total to compare how many rows needed to be filtered.,0,scylla,cql filtered read requests
-scylla.cql.filtered_rows_dropped_total,counter,,row,<PER_UNIT_NAME>,Counts a number of rows read during CQL requests that required ALLOW FILTERING and dropped by the filter. Number similar to filtered_rows_read_total indicates that filtering is not accurate and might cause performance degradation.,0,scylla,cql filtered rows dropped total
-scylla.cql.filtered_rows_matched_total,counter,,row,<PER_UNIT_NAME>,Counts a number of rows read during CQL requests that required ALLOW FILTERING and accepted by the filter. Number similar to filtered_rows_read_total indicates that filtering is accurate.,0,scylla,cql filtered rows matched total
-scylla.cql.filtered_rows_read_total,counter,,row,<PER_UNIT_NAME>,Counts a total number of rows read during CQL requests that required ALLOW FILTERING. See filtered_rows_matched_total and filtered_rows_dropped_total for information how accurate filtering queries are.,0,scylla,cql filtered rows read total
-scylla.cql.inserts,counter,,,<PER_UNIT_NAME>,Counts a total number of CQL INSERT requests.,0,scylla,cql inserts
-scylla.cql.prepared_cache_evictions,counter,,eviction,<PER_UNIT_NAME>,Counts a number of prepared statements cache entries evictions.,0,scylla,cql prepared cache evictions
-scylla.cql.prepared_cache_memory_footprint,gauge,,byte,<PER_UNIT_NAME>,Size (in bytes) of the prepared statements cache.,0,scylla,cql prepared cache memory footprint
-scylla.cql.prepared_cache_size,gauge,,,<PER_UNIT_NAME>,A number of entries in the prepared statements cache.,0,scylla,cql prepared cache size
-scylla.cql.reads,counter,,read,<PER_UNIT_NAME>,Counts a total number of CQL read requests.,0,scylla,cql reads
-scylla.cql.reverse_queries,counter,,query,<PER_UNIT_NAME>,Counts number of CQL SELECT requests with ORDER BY DESC.,0,scylla,cql reverse queries
-scylla.cql.rows_read,counter,,row,<PER_UNIT_NAME>,Counts a total number of rows read during CQL requests.,0,scylla,cql rows read
-scylla.cql.secondary_index_creates,counter,,query,<PER_UNIT_NAME>,Counts a total number of CQL CREATE INDEX requests.,0,scylla,cql secondary index creates
-scylla.cql.secondary_index_drops,counter,,query,<PER_UNIT_NAME>,Counts a total number of CQL DROP INDEX requests.,0,scylla,cql secondary index drops
-scylla.cql.secondary_index_reads,counter,,query,<PER_UNIT_NAME>,Counts a total number of CQL read requests performed using secondary indexes.,0,scylla,cql secondary index reads
-scylla.cql.secondary_index_rows_read,counter,,row,<PER_UNIT_NAME>,Counts a total number of rows read during CQL requests performed using secondary indexes.,0,scylla,cql secondary index rows read
-scylla.cql.statements_in_batches,counter,,query,<PER_UNIT_NAME>,Counts a total number of sub-statements in CQL BATCH requests.,0,scylla,cql statements in batches
-scylla.cql.unpaged_select_queries,counter,,query,<PER_UNIT_NAME>,Counts number of unpaged CQL SELECT requests.,0,scylla,cql unpaged select queries
-scylla.cql.updates,counter,,query,<PER_UNIT_NAME>,Counts a total number of CQL UPDATE requests.,0,scylla,cql updates
-scylla.cql.user_prepared_auth_cache_footprint,gauge,,byte,<PER_UNIT_NAME>,Size (in bytes) of the authenticated prepared statements cache.,0,scylla,cql user prepared auth cache footprint
-scylla.database.active_reads,gauge,,read,<PER_UNIT_NAME>,Holds the number of currently active read operations.,0,scylla,database active reads
-scylla.database.active_reads_memory_consumption,gauge,,byte,<PER_UNIT_NAME>,Holds the amount of memory consumed by currently active read operations. If this value gets close to 2474639 we are likely to start dropping new read requests. In that case sstable_read_queue_overloads is going to get a non-zero value.,-1,scylla,database active reads memory consumption
-scylla.database.clustering_filter_count,counter,,,<PER_UNIT_NAME>,Counts bloom filter invocations.,0,scylla,database clustering filter count
-scylla.database.clustering_filter_fast_path_count,counter,,,<PER_UNIT_NAME>,Counts number of times bloom filtering short cut to include all sstables when only one full range was specified.,0,scylla,database clustering filter fast path count
-scylla.database.clustering_filter_sstables_checked,counter,,,<PER_UNIT_NAME>,Counts sstables checked after applying the bloom filter. High value indicates that bloom filter is not very efficient.,-1,scylla,database clustering filter sstables checked
-scylla.database.clustering_filter_surviving_sstables,counter,,,<PER_UNIT_NAME>,Counts sstables that survived the clustering key filtering. High value indicates that bloom filter is not very efficient and still have to access a lot of sstables to get data.,-1,scylla,database clustering filter surviving sstables
-scylla.database.counter_cell_lock_acquisition,counter,,,<PER_UNIT_NAME>,The number of acquired counter cell locks.,0,scylla,database counter cell lock acquisition
-scylla.database.counter_cell_lock_pending,gauge,,,<PER_UNIT_NAME>,The number of counter updates waiting for a lock.,0,scylla,database counter cell lock pending
-scylla.database.dropped_view_updates,counter,,,<PER_UNIT_NAME>,Counts the number of view updates that have been dropped due to cluster overload.,0,scylla,database dropped view updates
-scylla.database.large_partition_exceeding_threshold,counter,,,<PER_UNIT_NAME>,Number of large partitions exceeding compaction_large_partition_warning_threshold_mb. Large partitions have performance impact and should be avoided; check the documentation for details.,-1,scylla,database large partition exceeding threshold
-scylla.database.multishard_query_failed_reader_saves,counter,,,<PER_UNIT_NAME>,The number of times the saving of a shard reader failed.,0,scylla,database multishard query failed reader saves
-scylla.database.multishard_query_failed_reader_stops,counter,,,<PER_UNIT_NAME>,The number of times the stopping of a shard reader failed.,0,scylla,database multishard query failed reader stops
-scylla.database.multishard_query_unpopped_bytes,counter,,byte,<PER_UNIT_NAME>,The total number of bytes that were extracted from the shard reader but were unconsumed by the query and moved back into the reader.,0,scylla,database multishard query unpopped bytes
-scylla.database.multishard_query_unpopped_fragments,counter,,,<PER_UNIT_NAME>,The total number of fragments that were extracted from the shard reader but were unconsumed by the query and moved back into the reader.,0,scylla,database multishard query unpopped fragments
-scylla.database.paused_reads,gauge,,read,<PER_UNIT_NAME>,The number of currently active reads that are temporarily paused.,0,scylla,database paused reads
-scylla.database.paused_reads_permit_based_evictions,counter,,eviction,<PER_UNIT_NAME>,The number of paused reads evicted to free up permits. Permits are required for new reads to start; and the database will evict paused reads (if any) to be able to admit new ones; if there is a shortage of permits.,0,scylla,database paused reads permit based evictions
-scylla.database.querier_cache_drops,counter,,eviction,<PER_UNIT_NAME>,Counts querier cache lookups that found a cached querier but had to drop it due to position mismatch,0,scylla,database querier cache drops
-scylla.database.querier_cache_lookups,counter,,get,<PER_UNIT_NAME>,Counts querier cache lookups (paging queries),0,scylla,database querier cache lookups
-scylla.database.querier_cache_memory_based_evictions,counter,,eviction,<PER_UNIT_NAME>,Counts querier cache entries that were evicted because the memory usage of the cached queriers were above the limit.,0,scylla,database querier cache memory based evictions
-scylla.database.querier_cache_misses,counter,,miss,<PER_UNIT_NAME>,Counts querier cache lookups that failed to find a cached querier,0,scylla,database querier cache misses
-scylla.database.querier_cache_population,gauge,,,<PER_UNIT_NAME>,The number of entries currently in the querier cache.,0,scylla,database querier cache population
-scylla.database.querier_cache_resource_based_evictions,counter,,eviction,<PER_UNIT_NAME>,Counts querier cache entries that were evicted to free up resources (limited by reader concurency limits) necessary to create new readers.,0,scylla,database querier cache resource based evictions
-scylla.database.querier_cache_time_based_evictions,counter,,eviction,<PER_UNIT_NAME>,Counts querier cache entries that timed out and were evicted.,0,scylla,database querier cache time based evictions
-scylla.database.queued_reads,gauge,,read,<PER_UNIT_NAME>,Holds the number of currently queued read operations.,0,scylla,database queued reads
-scylla.database.requests_blocked_memory,counter,,request,<PER_UNIT_NAME>,"Holds the current number of requests blocked due to reaching the memory quota (27839692B). Non-zero value indicates that our bottleneck is memory and more specifically - the memory quota allocated for the ""database"" component.",-1,scylla,database requests blocked memory
-scylla.database.requests_blocked_memory_current,gauge,,request,<PER_UNIT_NAME>,"Holds the current number of requests blocked due to reaching the memory quota (27839692B). Non-zero value indicates that our bottleneck is memory and more specifically - the memory quota allocated for the ""database"" component.",-1,scylla,database requests blocked memory current
-scylla.database.short_data_queries,counter,,query,<PER_UNIT_NAME>,The rate of data queries (data or digest reads) that returned less rows than requested due to result size limiting.,0,scylla,database short data queries
-scylla.database.short_mutation_queries,counter,,query,<PER_UNIT_NAME>,The rate of mutation queries that returned less rows than requested due to result size limiting.,0,scylla,database short mutation queries
-scylla.database.sstable_read_queue_overloads,counter,,,<PER_UNIT_NAME>,Counts the number of times the sstable read queue was overloaded. A non-zero value indicates that we have to drop read requests because they arrive faster than we can serve them.,-1,scylla,database sstable read queue overloads
-scylla.database.total_reads,counter,,read,<PER_UNIT_NAME>,Counts the total number of successful reads on this shard.,0,scylla,database total reads
-scylla.database.total_reads_failed,counter,,read,<PER_UNIT_NAME>,Counts the total number of failed read operations. Add the total_reads to this value to get the total amount of reads issued on this shard.,0,scylla,database total reads failed
-scylla.database.total_result_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds the current amount of memory used for results.,0,scylla,database total result bytes
-scylla.database.total_view_updates_failed_local,counter,,,<PER_UNIT_NAME>,Total number of view updates generated for tables and failed to be applied locally.,0,scylla,database total view updates failed local
-scylla.database.total_view_updates_failed_remote,counter,,,<PER_UNIT_NAME>,Total number of view updates generated for tables and failed to be sent to remote replicas.,0,scylla,database total view updates failed remote
-scylla.database.total_view_updates_pushed_local,counter,,,<PER_UNIT_NAME>,Total number of view updates generated for tables and applied locally.,0,scylla,database total view updates pushed local
-scylla.database.total_view_updates_pushed_remote,counter,,,<PER_UNIT_NAME>,Total number of view updates generated for tables and sent to remote replicas.,0,scylla,database total view updates pushed remote
-scylla.database.total_writes,counter,,write,<PER_UNIT_NAME>,Counts the total number of successful write operations performed by this shard.,0,scylla,database total writes
-scylla.database.total_writes_failed,counter,,write,<PER_UNIT_NAME>,Counts the total number of failed write operations. A sum of this value plus total_writes represents a total amount of writes attempted on this shard.,0,scylla,database total writes failed
-scylla.database.total_writes_timedout,counter,,write,<PER_UNIT_NAME>,Counts write operations failed due to a timeout. A positive value is a sign of storage being overloaded.,-1,scylla,database total writes timedout
-scylla.database.view_building_paused,counter,,,<PER_UNIT_NAME>,Counts the number of times view building process was paused (e.g. due to node unavailability).,0,scylla,database view building paused
-scylla.database.view_update_backlog,counter,,byte,<PER_UNIT_NAME>,Holds the current size in bytes of the pending view updates for all tables,0,scylla,database view update backlog
-scylla.execution_stages.function_calls_enqueued,counter,,,<PER_UNIT_NAME>,Counts function calls added to execution stages queues,0,scylla,execution stages function calls enqueued
-scylla.execution_stages.function_calls_executed,counter,,,<PER_UNIT_NAME>,Counts function calls executed by execution stages,0,scylla,execution stages function calls executed
-scylla.execution_stages.tasks_preempted,counter,,,<PER_UNIT_NAME>,Counts tasks which were preempted before execution all queued operations,0,scylla,execution stages tasks preempted
-scylla.execution_stages.tasks_scheduled,counter,,,<PER_UNIT_NAME>,Counts tasks scheduled by execution stages,0,scylla,execution stages tasks scheduled
-scylla.gossip.heart_beat,counter,,,<PER_UNIT_NAME>,Heartbeat of the current Node.,0,scylla,gossip heart beat
-scylla.hints.for_views_manager_corrupted_files,counter,,file,<PER_UNIT_NAME>,Number of hints files that were discarded during sending because the file was corrupted.,0,scylla,hints for views manager corrupted files
-scylla.hints.for_views_manager_discarded,counter,,,<PER_UNIT_NAME>,Number of hints that were discarded during sending (too old; schema changed; etc.).,0,scylla,hints for views manager discarded
-scylla.hints.for_views_manager_dropped,counter,,,<PER_UNIT_NAME>,Number of dropped hints.,0,scylla,hints for views manager dropped
-scylla.hints.for_views_manager_errors,counter,,error,<PER_UNIT_NAME>,Number of errors during hints writes.,0,scylla,hints for views manager errors
-scylla.hints.for_views_manager_sent,counter,,,<PER_UNIT_NAME>,Number of sent hints.,0,scylla,hints for views manager sent
-scylla.hints.for_views_manager_size_of_hints_in_progress,gauge,,,<PER_UNIT_NAME>,Size of hinted mutations that are scheduled to be written.,0,scylla,hints for views manager size of hints in progress
-scylla.hints.for_views_manager_written,counter,,,<PER_UNIT_NAME>,Number of successfully written hints.,0,scylla,hints for views manager written
-scylla.hints.manager_corrupted_files,counter,,,<PER_UNIT_NAME>,Number of hints files that were discarded during sending because the file was corrupted.,0,scylla,hints manager corrupted files
-scylla.hints.manager_discarded,counter,,,<PER_UNIT_NAME>,Number of hints that were discarded during sending (too old; schema changed; etc.).,0,scylla,hints manager discarded
-scylla.hints.manager_dropped,counter,,,<PER_UNIT_NAME>,Number of dropped hints.,0,scylla,hints manager dropped
-scylla.hints.manager_errors,counter,,error,<PER_UNIT_NAME>,Number of errors during hints writes.,0,scylla,hints manager errors
-scylla.hints.manager_sent,counter,,,<PER_UNIT_NAME>,Number of sent hints.,0,scylla,hints manager sent
-scylla.hints.manager_size_of_hints_in_progress,gauge,,,<PER_UNIT_NAME>,Size of hinted mutations that are scheduled to be written.,0,scylla,hints manager size of hints in progress
-scylla.hints.manager_written,counter,,,<PER_UNIT_NAME>,Number of successfully written hints.,0,scylla,hints manager written
-scylla.httpd.connections_current,gauge,,connection,<PER_UNIT_NAME>,The current number of open  connections,0,scylla,httpd connections current
-scylla.httpd.connections_total,counter,,connection,<PER_UNIT_NAME>,The total number of connections opened,0,scylla,httpd connections total
-scylla.httpd.read_errors,counter,,error,<PER_UNIT_NAME>,The total number of errors while reading http requests,-1,scylla,httpd read errors
-scylla.httpd.reply_errors,counter,,error,<PER_UNIT_NAME>,The total number of errors while replying to http,-1,scylla,httpd reply errors
-scylla.httpd.requests_served,counter,,request,<PER_UNIT_NAME>,The total number of http requests served,0,scylla,httpd requests served
-scylla.io_queue.delay,gauge,,?,<PER_UNIT_NAME>,total delay time in the queue,-1,scylla,io queue delay
-scylla.io_queue.queue_length,gauge,,request,<PER_UNIT_NAME>,Number of requests in the queue,0,scylla,io queue queue length
-scylla.io_queue.shares,gauge,,,<PER_UNIT_NAME>,current amount of shares,0,scylla,io queue shares
-scylla.io_queue.total_bytes,counter,,byte,<PER_UNIT_NAME>,Total bytes passed in the queue,0,scylla,io queue total bytes
-scylla.io_queue.total_operations,counter,,byte,<PER_UNIT_NAME>,Total bytes passed in the queue,0,scylla,io queue total operations
-scylla.lsa.free_space,gauge,,byte,<PER_UNIT_NAME>,Holds a current amount of free memory that is under lsa control.,0,scylla,lsa free space
-scylla.lsa.large_objects_total_space_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds a current size of allocated non-LSA memory.,0,scylla,lsa large objects total space bytes
-scylla.lsa.memory_allocated,counter,,byte,<PER_UNIT_NAME>,Counts number of bytes which were requested from LSA allocator.,0,scylla,lsa memory allocated
-scylla.lsa.memory_compacted,counter,,byte,<PER_UNIT_NAME>,Counts number of bytes which were copied as part of segment compaction.,0,scylla,lsa memory compacted
-scylla.lsa.non_lsa_used_space_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds a current amount of used non-LSA memory.,0,scylla,lsa non lsa used space bytes
-scylla.lsa.occupancy,gauge,,percent,<PER_UNIT_NAME>,Holds a current portion (in percents) of the used memory.,0,scylla,lsa occupancy
-scylla.lsa.segments_compacted,counter,,,<PER_UNIT_NAME>,Counts a number of compacted segments.,0,scylla,lsa segments compacted
-scylla.lsa.segments_migrated,counter,,,<PER_UNIT_NAME>,Counts a number of migrated segments.,0,scylla,lsa segments migrated
-scylla.lsa.small_objects_total_space_bytes,gauge,,byte,<PER_UNIT_NAME>,"Holds a current size of ""small objects"" memory region in bytes.",0,scylla,lsa small objects total space bytes
-scylla.lsa.small_objects_used_space_bytes,gauge,,byte,<PER_UNIT_NAME>,"Holds a current amount of used ""small objects"" memory in bytes.",0,scylla,lsa small objects used space bytes
-scylla.lsa.total_space_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds a current size of allocated memory in bytes.,0,scylla,lsa total space bytes
-scylla.lsa.used_space_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds a current amount of used memory in bytes.,0,scylla,lsa used space bytes
-scylla.memory.allocated_memory,counter,,byte,<PER_UNIT_NAME>,Allocated memeory size in bytes,0,scylla,memory allocated memory
-scylla.memory.cross_cpu_free_operations,counter,,,<PER_UNIT_NAME>,Total number of cross cpu free,0,scylla,memory cross cpu free operations
-scylla.memory.dirty_bytes,gauge,,byte,<PER_UNIT_NAME>,"Holds the current size of all (""regular""; ""system"" and ""streaming"") non-free memory in bytes: used memory + released memory that hasn't been returned to a free memory pool yet. Total memory size minus this value represents the amount of available memory. If this value minus virtual_dirty_bytes is too high then this means that the dirty memory eviction lags behind.",0,scylla,memory dirty bytes
-scylla.memory.free_memory,counter,,byte,<PER_UNIT_NAME>,Free memeory size in bytes,0,scylla,memory free memory
-scylla.memory.free_operations,counter,,,<PER_UNIT_NAME>,Total number of free operations,0,scylla,memory free operations
-scylla.memory.malloc_live_objects,gauge,,,<PER_UNIT_NAME>,Number of live objects,0,scylla,memory malloc live objects
-scylla.memory.malloc_operations,counter,,,<PER_UNIT_NAME>,Total number of malloc operations,0,scylla,memory malloc operations
-scylla.memory.reclaims_operations,counter,,,<PER_UNIT_NAME>,Total reclaims operations,0,scylla,memory reclaims operations
-scylla.memory.regular_dirty_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds the current size of a all non-free memory in bytes: used memory + released memory that hasn't been returned to a free memory pool yet. Total memory size minus this value represents the amount of available memory. If this value minus virtual_dirty_bytes is too high then this means that the dirty memory eviction lags behind.,0,scylla,memory regular dirty bytes
-scylla.memory.regular_virtual_dirty_bytes,gauge,,byte,<PER_UNIT_NAME>,"Holds the size of used memory in bytes. Compare it to ""dirty_bytes"" to see how many memory is wasted (neither used nor available).",0,scylla,memory regular virtual dirty bytes
-scylla.memory.streaming_dirty_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds the current size of a all non-free memory in bytes: used memory + released memory that hasn't been returned to a free memory pool yet. Total memory size minus this value represents the amount of available memory. If this value minus virtual_dirty_bytes is too high then this means that the dirty memory eviction lags behind.,0,scylla,memory streaming dirty bytes
-scylla.memory.streaming_virtual_dirty_bytes,gauge,,byte,<PER_UNIT_NAME>,"Holds the size of used memory in bytes. Compare it to ""dirty_bytes"" to see how many memory is wasted (neither used nor available).",0,scylla,memory streaming virtual dirty bytes
-scylla.memory.system_dirty_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds the current size of a all non-free memory in bytes: used memory + released memory that hasn't been returned to a free memory pool yet. Total memory size minus this value represents the amount of available memory. If this value minus virtual_dirty_bytes is too high then this means that the dirty memory eviction lags behind.,0,scylla,memory system dirty bytes
-scylla.memory.system_virtual_dirty_bytes,gauge,,byte,<PER_UNIT_NAME>,"Holds the size of used memory in bytes. Compare it to ""dirty_bytes"" to see how many memory is wasted (neither used nor available).",0,scylla,memory system virtual dirty bytes
-scylla.memory.total_memory,counter,,byte,<PER_UNIT_NAME>,Total memeory size in bytes,0,scylla,memory total memory
-scylla.memory.virtual_dirty_bytes,gauge,,byte,<PER_UNIT_NAME>,"Holds the size of all (""regular""; ""system"" and ""streaming"") used memory in bytes. Compare it to ""dirty_bytes"" to see how many memory is wasted (neither used nor available).",0,scylla,memory virtual dirty bytes
-scylla.memtables.pending_flushes,gauge,,,<PER_UNIT_NAME>,Holds the current number of memtables that are currently being flushed to sstables. High value in this metric may be an indication of storage being a bottleneck.,-1,scylla,memtables pending flushes
-scylla.memtables.pending_flushes_bytes,gauge,,byte,<PER_UNIT_NAME>,Holds the current number of bytes in memtables that are currently being flushed to sstables. High value in this metric may be an indication of storage being a bottleneck.,-1,scylla,memtables pending flushes bytes
-scylla.node.operation_mode,gauge,,,<PER_UNIT_NAME>,The operation mode of the current node. UNKNOWN = 0; STARTING = 1; JOINING = 2; NORMAL = 3; LEAVING = 4; DECOMMISSIONED = 5; DRAINING = 6; DRAINED = 7; MOVING = 8,0,scylla,node operation mode
-scylla.query_processor.queries,counter,,query,<PER_UNIT_NAME>,Counts queries by consistency level.,0,scylla,query processor queries
-scylla.query_processor.statements_prepared,counter,,,<PER_UNIT_NAME>,Counts a total number of parsed CQL requests.,0,scylla,query processor statements prepared
-scylla.reactor.aio_bytes_read,counter,,byte,<PER_UNIT_NAME>,Total aio-reads bytes,0,scylla,reactor aio bytes read
-scylla.reactor.aio_bytes_write,counter,,byte,<PER_UNIT_NAME>,Total aio-writes bytes,0,scylla,reactor aio bytes write
-scylla.reactor.aio_errors,counter,,error,<PER_UNIT_NAME>,Total aio errors,0,scylla,reactor aio errors
-scylla.reactor.aio_reads,counter,,read,<PER_UNIT_NAME>,Total aio-reads operations,0,scylla,reactor aio reads
-scylla.reactor.aio_writes,counter,,write,<PER_UNIT_NAME>,Total aio-writes operations,0,scylla,reactor aio writes
-scylla.reactor.cpp_exceptions,counter,,,<PER_UNIT_NAME>,Total number of C++ exceptions,0,scylla,reactor cpp exceptions
-scylla.reactor.cpu_busy_ms,counter,,milliseconds,<PER_UNIT_NAME>,Total cpu busy time in milliseconds,0,scylla,reactor cpu busy ms
-scylla.reactor.cpu_steal_time_ms,counter,,milliseconds,<PER_UNIT_NAME>,Total steal time; the time in which some other process was running while Seastar was not trying to run (not sleeping).Because this is in userspace; some time that could be legitimally thought as steal time is not accounted as such. For example; if we are sleeping and can wake up but the kernel hasn't woken us up yet.,-1,scylla,reactor cpu steal time ms
-scylla.reactor.fstream_read_bytes,counter,,byte,<PER_UNIT_NAME>,Counts bytes read from disk file streams.  A high rate indicates high disk activity. Divide by fstream_reads to determine average read size.,0,scylla,reactor fstream read bytes
-scylla.reactor.fstream_read_bytes_blocked,counter,,byte,<PER_UNIT_NAME>,Counts the number of bytes read from disk that could not be satisfied from read-ahead buffers; and had to block. Indicates short streams; or incorrect read ahead configuration.,0,scylla,reactor fstream read bytes blocked
-scylla.reactor.fstream_reads,counter,,read,<PER_UNIT_NAME>,Counts reads from disk file streams.  A high rate indicates high disk activity. Contrast with other fstream_read* counters to locate bottlenecks.,0,scylla,reactor fstream reads
-scylla.reactor.fstream_reads_ahead_bytes_discarded,counter,,byte,<PER_UNIT_NAME>,Counts the number of buffered bytes that were read ahead of time and were discarded because they were not needed; wasting disk bandwidth. Indicates over-eager read ahead configuration.,0,scylla,reactor fstream reads ahead bytes discarded
-scylla.reactor.fstream_reads_aheads_discarded,counter,,,<PER_UNIT_NAME>,Counts the number of times a buffer that was read ahead of time and was discarded because it was not needed; wasting disk bandwidth. Indicates over-eager read ahead configuration.,-1,scylla,reactor fstream reads aheads discarded
-scylla.reactor.fstream_reads_blocked,counter,,,<PER_UNIT_NAME>,Counts the number of times a disk read could not be satisfied from read-ahead buffers; and had to block. Indicates short streams; or incorrect read ahead configuration.,-1,scylla,reactor fstream reads blocked
-scylla.reactor.fsyncs,counter,,,<PER_UNIT_NAME>,Total number of fsync operations,0,scylla,reactor fsyncs
-scylla.reactor.io_queue_requests,gauge,,request,<PER_UNIT_NAME>,Number of requests in the io queue,0,scylla,reactor io queue requests
-scylla.reactor.io_threaded_fallbacks,counter,,,<PER_UNIT_NAME>,Total number of io-threaded-fallbacks operations,0,scylla,reactor io threaded fallbacks
-scylla.reactor.logging_failures,counter,,,<PER_UNIT_NAME>,Total number of logging failures,-1,scylla,reactor logging failures
-scylla.reactor.polls,counter,,,<PER_UNIT_NAME>,Number of times pollers were executed,0,scylla,reactor polls
-scylla.reactor.tasks_pending,gauge,,task,<PER_UNIT_NAME>,Number of pending tasks in the queue,0,scylla,reactor tasks pending
-scylla.reactor.tasks_processed,counter,,task,<PER_UNIT_NAME>,Total tasks processed,0,scylla,reactor tasks processed
-scylla.reactor.timers_pending,counter,,task,<PER_UNIT_NAME>,Number of tasks in the timer-pending queue,0,scylla,reactor timers pending
-scylla.reactor.utilization,gauge,,percent,<PER_UNIT_NAME>,CPU utilization,0,scylla,reactor utilization
-scylla.scheduler.queue_length,gauge,,,<PER_UNIT_NAME>,Size of backlog on this queue; in tasks; indicates whether the queue is busy and/or contended,-1,scylla,scheduler queue length
-scylla.scheduler.runtime_ms,counter,,?,?,Accumulated runtime of this task queue; an increment rate of 1000ms per second indicates full utilization,-1,scylla,scheduler runtime ms
+scylla.cache.sstable_partition_skips,counter,,,,number of times sstable reader was fast forwarded across partitions,0,scylla,cache sstable partition skips
+scylla.cache.sstable_reader_recreations,counter,,,,number of times sstable reader was recreated due to memtable flush,0,scylla,cache sstable reader recreations
+scylla.cache.sstable_row_skips,counter,,row,,number of times sstable reader was fast forwarded within a partition,0,scylla,cache sstable row skips
+scylla.cache.static_row_insertions,counter,,row,,total number of static rows added to cache,0,scylla,cache static row insertions
+scylla.commitlog.alloc,counter,,,,Counts a number of times a new mutation has been added to a segment. Divide bytes_written by this value to get the average number of bytes per mutation written to the disk.,0,scylla,commitlog alloc
+scylla.commitlog.allocating_segments,gauge,,,,Holds the number of not closed segments that still have some free space. This value should not get too high.,-1,scylla,commitlog allocating segments
+scylla.commitlog.bytes_written,counter,,byte,,"Counts a number of bytes written to the disk. Divide this value by ""alloc"" to get the average number of bytes per mutation written to the disk.",0,scylla,commitlog bytes written
+scylla.commitlog.cycle,counter,,,,Counts a number of commitlog write cycles - when the data is written from the internal memory buffer to the disk.,0,scylla,commitlog cycle
+scylla.commitlog.disk_total_bytes,gauge,,byte,,Holds a size of disk space in bytes used for data so far. A too high value indicates that we have some bottleneck in the writing to sstables path.,0,scylla,commitlog disk total bytes
+scylla.commitlog.flush,counter,,,,Counts a number of times the flush() method was called for a file.,0,scylla,commitlog flush
+scylla.commitlog.flush_limit_exceeded,counter,,,,Counts a number of times a flush limit was exceeded. A non-zero value indicates that there are too many pending flush operations (see pending_flushes) and some of them will be blocked till the total amount of pending flush operations drops below 5.,-1,scylla,commitlog flush limit exceeded
+scylla.commitlog.memory_buffer_bytes,gauge,,byte,,Holds the total number of bytes in internal memory buffers.,0,scylla,commitlog memory buffer bytes
+scylla.commitlog.pending_allocations,gauge,,,,Holds a number of currently pending allocations. A non-zero value indicates that we have a bottleneck in the disk write flow.,-1,scylla,commitlog pending allocations
+scylla.commitlog.pending_flushes,gauge,,,,Holds a number of currently pending flushes. See the related flush_limit_exceeded metric.,0,scylla,commitlog pending flushes
+scylla.commitlog.requests_blocked_memory,counter,,request,,Counts a number of requests blocked due to memory pressure. A non-zero value indicates that the commitlog memory quota is not enough to serve the required amount of requests.,-1,scylla,commitlog requests blocked memory
+scylla.commitlog.segments,gauge,,,,Holds the current number of segments.,0,scylla,commitlog segments
+scylla.commitlog.slack,counter,,byte,,Counts a number of unused bytes written to the disk due to disk segment alignment.,0,scylla,commitlog slack
+scylla.commitlog.unused_segments,gauge,,,,Holds the current number of unused segments. A non-zero value indicates that the disk write path became temporary slow.,-1,scylla,commitlog unused segments
+scylla.compaction_manager.compactions,gauge,,,,Holds the number of currently active compactions.,0,scylla,compaction manager compactions
+scylla.cql.authorized_prepared_statements_cache_evictions,counter,,,,Counts a number of authenticated prepared statements cache entries evictions.,0,scylla,cql authorized prepared statements cache evictions
+scylla.cql.authorized_prepared_statements_cache_size,gauge,,,,A number of entries in the authenticated prepared statements cache.,0,scylla,cql authorized prepared statements cache size
+scylla.cql.batches,counter,,,,Counts a total number of CQL BATCH requests.,0,scylla,cql batches
+scylla.cql.batches_pure_logged,counter,,,,Counts a total number of LOGGED batches that were executed as LOGGED batches.,0,scylla,cql batches pure logged
+scylla.cql.batches_pure_unlogged,counter,,,,Counts a total number of UNLOGGED batches that were executed as UNLOGGED batches.,0,scylla,cql batches pure unlogged
+scylla.cql.batches_unlogged_from_logged,counter,,,,Counts a total number of LOGGED batches that were executed as UNLOGGED batches.,0,scylla,cql batches unlogged from logged
+scylla.cql.deletes,counter,,,,Counts a total number of CQL DELETE requests.,0,scylla,cql deletes
+scylla.cql.filtered_read_requests,counter,,,,Counts a total number of CQL read requests that required ALLOW FILTERING. See filtered_rows_read_total to compare how many rows needed to be filtered.,0,scylla,cql filtered read requests
+scylla.cql.filtered_rows_dropped_total,counter,,row,,Counts a number of rows read during CQL requests that required ALLOW FILTERING and dropped by the filter. Number similar to filtered_rows_read_total indicates that filtering is not accurate and might cause performance degradation.,0,scylla,cql filtered rows dropped total
+scylla.cql.filtered_rows_matched_total,counter,,row,,Counts a number of rows read during CQL requests that required ALLOW FILTERING and accepted by the filter. Number similar to filtered_rows_read_total indicates that filtering is accurate.,0,scylla,cql filtered rows matched total
+scylla.cql.filtered_rows_read_total,counter,,row,,Counts a total number of rows read during CQL requests that required ALLOW FILTERING. See filtered_rows_matched_total and filtered_rows_dropped_total for information how accurate filtering queries are.,0,scylla,cql filtered rows read total
+scylla.cql.inserts,counter,,,,Counts a total number of CQL INSERT requests.,0,scylla,cql inserts
+scylla.cql.prepared_cache_evictions,counter,,eviction,,Counts a number of prepared statements cache entries evictions.,0,scylla,cql prepared cache evictions
+scylla.cql.prepared_cache_memory_footprint,gauge,,byte,,Size (in bytes) of the prepared statements cache.,0,scylla,cql prepared cache memory footprint
+scylla.cql.prepared_cache_size,gauge,,,,A number of entries in the prepared statements cache.,0,scylla,cql prepared cache size
+scylla.cql.reads,counter,,read,,Counts a total number of CQL read requests.,0,scylla,cql reads
+scylla.cql.reverse_queries,counter,,query,,Counts number of CQL SELECT requests with ORDER BY DESC.,0,scylla,cql reverse queries
+scylla.cql.rows_read,counter,,row,,Counts a total number of rows read during CQL requests.,0,scylla,cql rows read
+scylla.cql.secondary_index_creates,counter,,query,,Counts a total number of CQL CREATE INDEX requests.,0,scylla,cql secondary index creates
+scylla.cql.secondary_index_drops,counter,,query,,Counts a total number of CQL DROP INDEX requests.,0,scylla,cql secondary index drops
+scylla.cql.secondary_index_reads,counter,,query,,Counts a total number of CQL read requests performed using secondary indexes.,0,scylla,cql secondary index reads
+scylla.cql.secondary_index_rows_read,counter,,row,,Counts a total number of rows read during CQL requests performed using secondary indexes.,0,scylla,cql secondary index rows read
+scylla.cql.statements_in_batches,counter,,query,,Counts a total number of sub-statements in CQL BATCH requests.,0,scylla,cql statements in batches
+scylla.cql.unpaged_select_queries,counter,,query,,Counts number of unpaged CQL SELECT requests.,0,scylla,cql unpaged select queries
+scylla.cql.updates,counter,,query,,Counts a total number of CQL UPDATE requests.,0,scylla,cql updates
+scylla.cql.user_prepared_auth_cache_footprint,gauge,,byte,,Size (in bytes) of the authenticated prepared statements cache.,0,scylla,cql user prepared auth cache footprint
+scylla.database.active_reads,gauge,,read,,Holds the number of currently active read operations.,0,scylla,database active reads
+scylla.database.active_reads_memory_consumption,gauge,,byte,,Holds the amount of memory consumed by currently active read operations. If this value gets close to 2474639 we are likely to start dropping new read requests. In that case sstable_read_queue_overloads is going to get a non-zero value.,-1,scylla,database active reads memory consumption
+scylla.database.clustering_filter_count,counter,,,,Counts bloom filter invocations.,0,scylla,database clustering filter count
+scylla.database.clustering_filter_fast_path_count,counter,,,,Counts number of times bloom filtering short cut to include all sstables when only one full range was specified.,0,scylla,database clustering filter fast path count
+scylla.database.clustering_filter_sstables_checked,counter,,,,Counts sstables checked after applying the bloom filter. High value indicates that bloom filter is not very efficient.,-1,scylla,database clustering filter sstables checked
+scylla.database.clustering_filter_surviving_sstables,counter,,,,Counts sstables that survived the clustering key filtering. High value indicates that bloom filter is not very efficient and still have to access a lot of sstables to get data.,-1,scylla,database clustering filter surviving sstables
+scylla.database.counter_cell_lock_acquisition,counter,,,,The number of acquired counter cell locks.,0,scylla,database counter cell lock acquisition
+scylla.database.counter_cell_lock_pending,gauge,,,,The number of counter updates waiting for a lock.,0,scylla,database counter cell lock pending
+scylla.database.dropped_view_updates,counter,,,,Counts the number of view updates that have been dropped due to cluster overload.,0,scylla,database dropped view updates
+scylla.database.large_partition_exceeding_threshold,counter,,,,Number of large partitions exceeding compaction_large_partition_warning_threshold_mb. Large partitions have performance impact and should be avoided; check the documentation for details.,-1,scylla,database large partition exceeding threshold
+scylla.database.multishard_query_failed_reader_saves,counter,,,,The number of times the saving of a shard reader failed.,0,scylla,database multishard query failed reader saves
+scylla.database.multishard_query_failed_reader_stops,counter,,,,The number of times the stopping of a shard reader failed.,0,scylla,database multishard query failed reader stops
+scylla.database.multishard_query_unpopped_bytes,counter,,byte,,The total number of bytes that were extracted from the shard reader but were unconsumed by the query and moved back into the reader.,0,scylla,database multishard query unpopped bytes
+scylla.database.multishard_query_unpopped_fragments,counter,,,,The total number of fragments that were extracted from the shard reader but were unconsumed by the query and moved back into the reader.,0,scylla,database multishard query unpopped fragments
+scylla.database.paused_reads,gauge,,read,,The number of currently active reads that are temporarily paused.,0,scylla,database paused reads
+scylla.database.paused_reads_permit_based_evictions,counter,,eviction,,The number of paused reads evicted to free up permits. Permits are required for new reads to start; and the database will evict paused reads (if any) to be able to admit new ones; if there is a shortage of permits.,0,scylla,database paused reads permit based evictions
+scylla.database.querier_cache_drops,counter,,eviction,,Counts querier cache lookups that found a cached querier but had to drop it due to position mismatch,0,scylla,database querier cache drops
+scylla.database.querier_cache_lookups,counter,,get,,Counts querier cache lookups (paging queries),0,scylla,database querier cache lookups
+scylla.database.querier_cache_memory_based_evictions,counter,,eviction,,Counts querier cache entries that were evicted because the memory usage of the cached queriers were above the limit.,0,scylla,database querier cache memory based evictions
+scylla.database.querier_cache_misses,counter,,miss,,Counts querier cache lookups that failed to find a cached querier,0,scylla,database querier cache misses
+scylla.database.querier_cache_population,gauge,,,,The number of entries currently in the querier cache.,0,scylla,database querier cache population
+scylla.database.querier_cache_resource_based_evictions,counter,,eviction,,Counts querier cache entries that were evicted to free up resources (limited by reader concurency limits) necessary to create new readers.,0,scylla,database querier cache resource based evictions
+scylla.database.querier_cache_time_based_evictions,counter,,eviction,,Counts querier cache entries that timed out and were evicted.,0,scylla,database querier cache time based evictions
+scylla.database.queued_reads,gauge,,read,,Holds the number of currently queued read operations.,0,scylla,database queued reads
+scylla.database.requests_blocked_memory,counter,,request,,"Holds the current number of requests blocked due to reaching the memory quota (27839692B). Non-zero value indicates that our bottleneck is memory and more specifically - the memory quota allocated for the ""database"" component.",-1,scylla,database requests blocked memory
+scylla.database.requests_blocked_memory_current,gauge,,request,,"Holds the current number of requests blocked due to reaching the memory quota (27839692B). Non-zero value indicates that our bottleneck is memory and more specifically - the memory quota allocated for the ""database"" component.",-1,scylla,database requests blocked memory current
+scylla.database.short_data_queries,counter,,query,,The rate of data queries (data or digest reads) that returned less rows than requested due to result size limiting.,0,scylla,database short data queries
+scylla.database.short_mutation_queries,counter,,query,,The rate of mutation queries that returned less rows than requested due to result size limiting.,0,scylla,database short mutation queries
+scylla.database.sstable_read_queue_overloads,counter,,,,Counts the number of times the sstable read queue was overloaded. A non-zero value indicates that we have to drop read requests because they arrive faster than we can serve them.,-1,scylla,database sstable read queue overloads
+scylla.database.total_reads,counter,,read,,Counts the total number of successful reads on this shard.,0,scylla,database total reads
+scylla.database.total_reads_failed,counter,,read,,Counts the total number of failed read operations. Add the total_reads to this value to get the total amount of reads issued on this shard.,0,scylla,database total reads failed
+scylla.database.total_result_bytes,gauge,,byte,,Holds the current amount of memory used for results.,0,scylla,database total result bytes
+scylla.database.total_view_updates_failed_local,counter,,,,Total number of view updates generated for tables and failed to be applied locally.,0,scylla,database total view updates failed local
+scylla.database.total_view_updates_failed_remote,counter,,,,Total number of view updates generated for tables and failed to be sent to remote replicas.,0,scylla,database total view updates failed remote
+scylla.database.total_view_updates_pushed_local,counter,,,,Total number of view updates generated for tables and applied locally.,0,scylla,database total view updates pushed local
+scylla.database.total_view_updates_pushed_remote,counter,,,,Total number of view updates generated for tables and sent to remote replicas.,0,scylla,database total view updates pushed remote
+scylla.database.total_writes,counter,,write,,Counts the total number of successful write operations performed by this shard.,0,scylla,database total writes
+scylla.database.total_writes_failed,counter,,write,,Counts the total number of failed write operations. A sum of this value plus total_writes represents a total amount of writes attempted on this shard.,0,scylla,database total writes failed
+scylla.database.total_writes_timedout,counter,,write,,Counts write operations failed due to a timeout. A positive value is a sign of storage being overloaded.,-1,scylla,database total writes timedout
+scylla.database.view_building_paused,counter,,,,Counts the number of times view building process was paused (e.g. due to node unavailability).,0,scylla,database view building paused
+scylla.database.view_update_backlog,counter,,byte,,Holds the current size in bytes of the pending view updates for all tables,0,scylla,database view update backlog
+scylla.execution_stages.function_calls_enqueued,counter,,,,Counts function calls added to execution stages queues,0,scylla,execution stages function calls enqueued
+scylla.execution_stages.function_calls_executed,counter,,,,Counts function calls executed by execution stages,0,scylla,execution stages function calls executed
+scylla.execution_stages.tasks_preempted,counter,,,,Counts tasks which were preempted before execution all queued operations,0,scylla,execution stages tasks preempted
+scylla.execution_stages.tasks_scheduled,counter,,,,Counts tasks scheduled by execution stages,0,scylla,execution stages tasks scheduled
+scylla.gossip.heart_beat,counter,,,,Heartbeat of the current Node.,0,scylla,gossip heart beat
+scylla.hints.for_views_manager_corrupted_files,counter,,file,,Number of hints files that were discarded during sending because the file was corrupted.,0,scylla,hints for views manager corrupted files
+scylla.hints.for_views_manager_discarded,counter,,,,Number of hints that were discarded during sending (too old; schema changed; etc.).,0,scylla,hints for views manager discarded
+scylla.hints.for_views_manager_dropped,counter,,,,Number of dropped hints.,0,scylla,hints for views manager dropped
+scylla.hints.for_views_manager_errors,counter,,error,,Number of errors during hints writes.,0,scylla,hints for views manager errors
+scylla.hints.for_views_manager_sent,counter,,,,Number of sent hints.,0,scylla,hints for views manager sent
+scylla.hints.for_views_manager_size_of_hints_in_progress,gauge,,,,Size of hinted mutations that are scheduled to be written.,0,scylla,hints for views manager size of hints in progress
+scylla.hints.for_views_manager_written,counter,,,,Number of successfully written hints.,0,scylla,hints for views manager written
+scylla.hints.manager_corrupted_files,counter,,,,Number of hints files that were discarded during sending because the file was corrupted.,0,scylla,hints manager corrupted files
+scylla.hints.manager_discarded,counter,,,,Number of hints that were discarded during sending (too old; schema changed; etc.).,0,scylla,hints manager discarded
+scylla.hints.manager_dropped,counter,,,,Number of dropped hints.,0,scylla,hints manager dropped
+scylla.hints.manager_errors,counter,,error,,Number of errors during hints writes.,0,scylla,hints manager errors
+scylla.hints.manager_sent,counter,,,,Number of sent hints.,0,scylla,hints manager sent
+scylla.hints.manager_size_of_hints_in_progress,gauge,,,,Size of hinted mutations that are scheduled to be written.,0,scylla,hints manager size of hints in progress
+scylla.hints.manager_written,counter,,,,Number of successfully written hints.,0,scylla,hints manager written
+scylla.httpd.connections_current,gauge,,connection,,The current number of open  connections,0,scylla,httpd connections current
+scylla.httpd.connections_total,counter,,connection,,The total number of connections opened,0,scylla,httpd connections total
+scylla.httpd.read_errors,counter,,error,,The total number of errors while reading http requests,-1,scylla,httpd read errors
+scylla.httpd.reply_errors,counter,,error,,The total number of errors while replying to http,-1,scylla,httpd reply errors
+scylla.httpd.requests_served,counter,,request,,The total number of http requests served,0,scylla,httpd requests served
+scylla.io_queue.delay,gauge,,,,total delay time in the queue,-1,scylla,io queue delay
+scylla.io_queue.queue_length,gauge,,request,,Number of requests in the queue,0,scylla,io queue queue length
+scylla.io_queue.shares,gauge,,,,current amount of shares,0,scylla,io queue shares
+scylla.io_queue.total_bytes,counter,,byte,,Total bytes passed in the queue,0,scylla,io queue total bytes
+scylla.io_queue.total_operations,counter,,byte,,Total bytes passed in the queue,0,scylla,io queue total operations
+scylla.lsa.free_space,gauge,,byte,,Holds a current amount of free memory that is under lsa control.,0,scylla,lsa free space
+scylla.lsa.large_objects_total_space_bytes,gauge,,byte,,Holds a current size of allocated non-LSA memory.,0,scylla,lsa large objects total space bytes
+scylla.lsa.memory_allocated,counter,,byte,,Counts number of bytes which were requested from LSA allocator.,0,scylla,lsa memory allocated
+scylla.lsa.memory_compacted,counter,,byte,,Counts number of bytes which were copied as part of segment compaction.,0,scylla,lsa memory compacted
+scylla.lsa.non_lsa_used_space_bytes,gauge,,byte,,Holds a current amount of used non-LSA memory.,0,scylla,lsa non lsa used space bytes
+scylla.lsa.occupancy,gauge,,percent,,Holds a current portion (in percents) of the used memory.,0,scylla,lsa occupancy
+scylla.lsa.segments_compacted,counter,,,,Counts a number of compacted segments.,0,scylla,lsa segments compacted
+scylla.lsa.segments_migrated,counter,,,,Counts a number of migrated segments.,0,scylla,lsa segments migrated
+scylla.lsa.small_objects_total_space_bytes,gauge,,byte,,"Holds a current size of ""small objects"" memory region in bytes.",0,scylla,lsa small objects total space bytes
+scylla.lsa.small_objects_used_space_bytes,gauge,,byte,,"Holds a current amount of used ""small objects"" memory in bytes.",0,scylla,lsa small objects used space bytes
+scylla.lsa.total_space_bytes,gauge,,byte,,Holds a current size of allocated memory in bytes.,0,scylla,lsa total space bytes
+scylla.lsa.used_space_bytes,gauge,,byte,,Holds a current amount of used memory in bytes.,0,scylla,lsa used space bytes
+scylla.memory.allocated_memory,counter,,byte,,Allocated memory size in bytes,0,scylla,memory allocated memory
+scylla.memory.cross_cpu_free_operations,counter,,,,Total number of cross cpu free,0,scylla,memory cross cpu free operations
+scylla.memory.dirty_bytes,gauge,,byte,,"Holds the current size of all (""regular""; ""system"" and ""streaming"") non-free memory in bytes: used memory + released memory that hasn't been returned to a free memory pool yet. Total memory size minus this value represents the amount of available memory. If this value minus virtual_dirty_bytes is too high then this means that the dirty memory eviction lags behind.",0,scylla,memory dirty bytes
+scylla.memory.free_memory,counter,,byte,,Free memory size in bytes,0,scylla,memory free memory
+scylla.memory.free_operations,counter,,,,Total number of free operations,0,scylla,memory free operations
+scylla.memory.malloc_live_objects,gauge,,,,Number of live objects,0,scylla,memory malloc live objects
+scylla.memory.malloc_operations,counter,,,,Total number of malloc operations,0,scylla,memory malloc operations
+scylla.memory.reclaims_operations,counter,,,,Total reclaims operations,0,scylla,memory reclaims operations
+scylla.memory.regular_dirty_bytes,gauge,,byte,,Holds the current size of a all non-free memory in bytes: used memory + released memory that hasn't been returned to a free memory pool yet. Total memory size minus this value represents the amount of available memory. If this value minus virtual_dirty_bytes is too high then this means that the dirty memory eviction lags behind.,0,scylla,memory regular dirty bytes
+scylla.memory.regular_virtual_dirty_bytes,gauge,,byte,,"Holds the size of used memory in bytes. Compare it to ""dirty_bytes"" to see how many memory is wasted (neither used nor available).",0,scylla,memory regular virtual dirty bytes
+scylla.memory.streaming_dirty_bytes,gauge,,byte,,Holds the current size of a all non-free memory in bytes: used memory + released memory that hasn't been returned to a free memory pool yet. Total memory size minus this value represents the amount of available memory. If this value minus virtual_dirty_bytes is too high then this means that the dirty memory eviction lags behind.,0,scylla,memory streaming dirty bytes
+scylla.memory.streaming_virtual_dirty_bytes,gauge,,byte,,"Holds the size of used memory in bytes. Compare it to ""dirty_bytes"" to see how many memory is wasted (neither used nor available).",0,scylla,memory streaming virtual dirty bytes
+scylla.memory.system_dirty_bytes,gauge,,byte,,Holds the current size of a all non-free memory in bytes: used memory + released memory that hasn't been returned to a free memory pool yet. Total memory size minus this value represents the amount of available memory. If this value minus virtual_dirty_bytes is too high then this means that the dirty memory eviction lags behind.,0,scylla,memory system dirty bytes
+scylla.memory.system_virtual_dirty_bytes,gauge,,byte,,"Holds the size of used memory in bytes. Compare it to ""dirty_bytes"" to see how many memory is wasted (neither used nor available).",0,scylla,memory system virtual dirty bytes
+scylla.memory.total_memory,counter,,byte,,Total memory size in bytes,0,scylla,memory total memory
+scylla.memory.virtual_dirty_bytes,gauge,,byte,,"Holds the size of all (""regular""; ""system"" and ""streaming"") used memory in bytes. Compare it to ""dirty_bytes"" to see how many memory is wasted (neither used nor available).",0,scylla,memory virtual dirty bytes
+scylla.memtables.pending_flushes,gauge,,,,Holds the current number of memtables that are currently being flushed to sstables. High value in this metric may be an indication of storage being a bottleneck.,-1,scylla,memtables pending flushes
+scylla.memtables.pending_flushes_bytes,gauge,,byte,,Holds the current number of bytes in memtables that are currently being flushed to sstables. High value in this metric may be an indication of storage being a bottleneck.,-1,scylla,memtables pending flushes bytes
+scylla.node.operation_mode,gauge,,,,The operation mode of the current node. UNKNOWN = 0; STARTING = 1; JOINING = 2; NORMAL = 3; LEAVING = 4; DECOMMISSIONED = 5; DRAINING = 6; DRAINED = 7; MOVING = 8,0,scylla,node operation mode
+scylla.query_processor.queries,counter,,query,,Counts queries by consistency level.,0,scylla,query processor queries
+scylla.query_processor.statements_prepared,counter,,,,Counts a total number of parsed CQL requests.,0,scylla,query processor statements prepared
+scylla.reactor.aio_bytes_read,counter,,byte,,Total aio-reads bytes,0,scylla,reactor aio bytes read
+scylla.reactor.aio_bytes_write,counter,,byte,,Total aio-writes bytes,0,scylla,reactor aio bytes write
+scylla.reactor.aio_errors,counter,,error,,Total aio errors,0,scylla,reactor aio errors
+scylla.reactor.aio_reads,counter,,read,,Total aio-reads operations,0,scylla,reactor aio reads
+scylla.reactor.aio_writes,counter,,write,,Total aio-writes operations,0,scylla,reactor aio writes
+scylla.reactor.cpp_exceptions,counter,,,,Total number of C++ exceptions,0,scylla,reactor cpp exceptions
+scylla.reactor.cpu_busy_ms,counter,,millisecond,,Total cpu busy time in milliseconds,0,scylla,reactor cpu busy ms
+scylla.reactor.cpu_steal_time_ms,counter,,millisecond,,Total steal time; the time in which some other process was running while Seastar was not trying to run (not sleeping).Because this is in userspace; some time that could be legitimally thought as steal time is not accounted as such. For example; if we are sleeping and can wake up but the kernel hasn't woken us up yet.,-1,scylla,reactor cpu steal time ms
+scylla.reactor.fstream_read_bytes,counter,,byte,,Counts bytes read from disk file streams.  A high rate indicates high disk activity. Divide by fstream_reads to determine average read size.,0,scylla,reactor fstream read bytes
+scylla.reactor.fstream_read_bytes_blocked,counter,,byte,,Counts the number of bytes read from disk that could not be satisfied from read-ahead buffers; and had to block. Indicates short streams; or incorrect read ahead configuration.,0,scylla,reactor fstream read bytes blocked
+scylla.reactor.fstream_reads,counter,,read,,Counts reads from disk file streams.  A high rate indicates high disk activity. Contrast with other fstream_read* counters to locate bottlenecks.,0,scylla,reactor fstream reads
+scylla.reactor.fstream_reads_ahead_bytes_discarded,counter,,byte,,Counts the number of buffered bytes that were read ahead of time and were discarded because they were not needed; wasting disk bandwidth. Indicates over-eager read ahead configuration.,0,scylla,reactor fstream reads ahead bytes discarded
+scylla.reactor.fstream_reads_aheads_discarded,counter,,,,Counts the number of times a buffer that was read ahead of time and was discarded because it was not needed; wasting disk bandwidth. Indicates over-eager read ahead configuration.,-1,scylla,reactor fstream reads aheads discarded
+scylla.reactor.fstream_reads_blocked,counter,,,,Counts the number of times a disk read could not be satisfied from read-ahead buffers; and had to block. Indicates short streams; or incorrect read ahead configuration.,-1,scylla,reactor fstream reads blocked
+scylla.reactor.fsyncs,counter,,,,Total number of fsync operations,0,scylla,reactor fsyncs
+scylla.reactor.io_queue_requests,gauge,,request,,Number of requests in the io queue,0,scylla,reactor io queue requests
+scylla.reactor.io_threaded_fallbacks,counter,,,,Total number of io-threaded-fallbacks operations,0,scylla,reactor io threaded fallbacks
+scylla.reactor.logging_failures,counter,,,,Total number of logging failures,-1,scylla,reactor logging failures
+scylla.reactor.polls,counter,,,,Number of times pollers were executed,0,scylla,reactor polls
+scylla.reactor.tasks_pending,gauge,,task,,Number of pending tasks in the queue,0,scylla,reactor tasks pending
+scylla.reactor.tasks_processed,counter,,task,,Total tasks processed,0,scylla,reactor tasks processed
+scylla.reactor.timers_pending,counter,,task,,Number of tasks in the timer-pending queue,0,scylla,reactor timers pending
+scylla.reactor.utilization,gauge,,percent,,CPU utilization,0,scylla,reactor utilization
+scylla.scheduler.queue_length,gauge,,,,Size of backlog on this queue; in tasks; indicates whether the queue is busy and/or contended,-1,scylla,scheduler queue length
+scylla.scheduler.runtime_ms,counter,,millisecond,,Accumulated runtime of this task queue; an increment rate of 1000ms per second indicates full utilization,-1,scylla,scheduler runtime ms
 scylla.scheduler.shares,gauge,,,,Shares allocated to this queue,0,scylla,scheduler shares
 scylla.scheduler.tasks_processed,counter,,,,Count of tasks executing on this queue; indicates together with runtime_ms indicates length of tasks,0,scylla,scheduler tasks processed
-scylla.scheduler.time_spent_on_task_quota_violations_ms,counter,,milliseconds,,Total amount in milliseconds we were in violation of the task quota,-1,scylla,scheduler time spent on task quota violations ms
+scylla.scheduler.time_spent_on_task_quota_violations_ms,counter,,millisecond,,Total amount in milliseconds we were in violation of the task quota,-1,scylla,scheduler time spent on task quota violations ms
 scylla.scylladb.current_version,gauge,,,,Current ScyllaDB version.,0,scylla,scylladb current version
-scylla.sstables.capped_local_deletion_time,counter,,time,<PER_UNIT_NAME>,Was local deletion time capped at maximum allowed value in Statistics,0,scylla,sstables capped local deletion time
-scylla.sstables.capped_tombstone_deletion_time,counter,,time,<PER_UNIT_NAME>,Was partition tombstone deletion time capped at maximum allowed value,0,scylla,sstables capped tombstone deletion time
-scylla.sstables.cell_tombstone_writes,counter,,,<PER_UNIT_NAME>,Number of cell tombstones written,0,scylla,sstables cell tombstone writes
-scylla.sstables.cell_writes,counter,,,<PER_UNIT_NAME>,Number of cells written,0,scylla,sstables cell writes
-scylla.sstables.index_page_blocks,counter,,request,<PER_UNIT_NAME>,Index page requests which needed to wait due to page not being loaded yet,0,scylla,sstables index page blocks
-scylla.sstables.index_page_hits,counter,,request,<PER_UNIT_NAME>,Index page requests which could be satisfied without waiting,0,scylla,sstables index page hits
-scylla.sstables.index_page_misses,counter,,request,<PER_UNIT_NAME>,Index page requests which initiated a read from disk,0,scylla,sstables index page misses
-scylla.sstables.partition_reads,counter,,read,<PER_UNIT_NAME>,Number of partitions read,0,scylla,sstables partition reads
-scylla.sstables.partition_seeks,counter,,,<PER_UNIT_NAME>,Number of partitions seeked,0,scylla,sstables partition seeks
-scylla.sstables.partition_writes,counter,,write,<PER_UNIT_NAME>,Number of partitions written,0,scylla,sstables partition writes
-scylla.sstables.range_partition_reads,counter,,read,<PER_UNIT_NAME>,Number of partition range flat mutation reads,0,scylla,sstables range partition reads
-scylla.sstables.range_tombstone_writes,counter,,,<PER_UNIT_NAME>,Number of range tombstones written,0,scylla,sstables range tombstone writes
-scylla.sstables.row_reads,counter,,row,<PER_UNIT_NAME>,Number of rows read,0,scylla,sstables row reads
-scylla.sstables.row_writes,counter,,row,<PER_UNIT_NAME>,Number of clustering rows written,0,scylla,sstables row writes
-scylla.sstables.single_partition_reads,counter,,read,<PER_UNIT_NAME>,Number of single partition flat mutation reads,0,scylla,sstables single partition reads
-scylla.sstables.sstable_partition_reads,counter,,read,<PER_UNIT_NAME>,Number of whole sstable flat mutation reads,0,scylla,sstables sstable partition reads
-scylla.sstables.static_row_writes,counter,,row,<PER_UNIT_NAME>,Number of static rows written,0,scylla,sstables static row writes
-scylla.sstables.tombstone_writes,counter,,,<PER_UNIT_NAME>,Number of tombstones written,0,scylla,sstables tombstone writes
-scylla.storage.proxy.coordinator_background_read_repairs,counter,,read,<PER_UNIT_NAME>,number of background read repairs,0,scylla,storage proxy coordinator background read repairs
-scylla.storage.proxy.coordinator_background_reads,gauge,,read,<PER_UNIT_NAME>,number of currently pending background read requests,0,scylla,storage proxy coordinator background reads
-scylla.storage.proxy.coordinator_background_replica_writes_failed_local_node,counter,,,<PER_UNIT_NAME>,number of replica writes that timed out or failed after CL was reachedon a local Node,0,scylla,storage proxy coordinator background replica writes failed local node
-scylla.storage.proxy.coordinator_background_write_bytes,counter,,byte,<PER_UNIT_NAME>,number of bytes in pending background write requests,0,scylla,storage proxy coordinator background write bytes
-scylla.storage.proxy.coordinator_background_writes,gauge,,write,<PER_UNIT_NAME>,number of currently pending background write requests,0,scylla,storage proxy coordinator background writes
-scylla.storage.proxy.coordinator_background_writes_failed,counter,,write,<PER_UNIT_NAME>,number of write requests that failed after CL was reached,0,scylla,storage proxy coordinator background writes failed
-scylla.storage.proxy.coordinator_canceled_read_repairs,counter,,read,<PER_UNIT_NAME>,number of global read repairs canceled due to a concurrent write,0,scylla,storage proxy coordinator canceled read repairs
-scylla.storage.proxy.coordinator_completed_reads_local_node,counter,,read,<PER_UNIT_NAME>,number of data read requests that completedon a local Node,0,scylla,storage proxy coordinator completed reads local node
-scylla.storage.proxy.coordinator_current_throttled_base_writes,gauge,,write,<PER_UNIT_NAME>,number of currently throttled base replica write requests,-1,scylla,storage proxy coordinator current throttled base writes
-scylla.storage.proxy.coordinator_current_throttled_writes,gauge,,write,<PER_UNIT_NAME>,number of currently throttled write requests,-1,scylla,storage proxy coordinator current throttled writes
-scylla.storage.proxy.coordinator_foreground_read_repair,counter,,read,<PER_UNIT_NAME>,number of foreground read repairs,0,scylla,storage proxy coordinator foreground read repair
-scylla.storage.proxy.coordinator_foreground_reads,gauge,,read,<PER_UNIT_NAME>,number of currently pending foreground read requests,0,scylla,storage proxy coordinator foreground reads
-scylla.storage.proxy.coordinator_foreground_writes,gauge,,write,<PER_UNIT_NAME>,number of currently pending foreground write requests,0,scylla,storage proxy coordinator foreground writes
-scylla.storage.proxy.coordinator_last_mv_flow_control_delay,gauge,,second,<PER_UNIT_NAME>,delay (in seconds) added for MV flow control in the last request,-1,scylla,storage proxy coordinator last mv flow control delay
-scylla.storage.proxy.coordinator_queued_write_bytes,counter,,byte,<PER_UNIT_NAME>,number of bytes in pending write requests,0,scylla,storage proxy coordinator queued write bytes
-scylla.storage.proxy.coordinator_range_timeouts,counter,,error,<PER_UNIT_NAME>,number of range read operations failed due to a timeout,-1,scylla,storage proxy coordinator range timeouts
-scylla.storage.proxy.coordinator_range_unavailable,counter,,error,<PER_UNIT_NAME>,"number of range read operations failed due to an ""unavailable"" error",-1,scylla,storage proxy coordinator range unavailable
-scylla.storage.proxy.coordinator_read_errors_local_node,counter,,error,<PER_UNIT_NAME>,number of data read requests that failedon a local Node,-1,scylla,storage proxy coordinator read errors local node
-scylla.storage.proxy.coordinator_read_latency,histogram,,read,<PER_UNIT_NAME>,The general read latency histogram,-1,scylla,storage proxy coordinator read latency
-scylla.storage.proxy.coordinator_read_repair_write_attempts_local_node,counter,,write,<PER_UNIT_NAME>,number of write operations in a read repair contexton a local Node,0,scylla,storage proxy coordinator read repair write attempts local node
-scylla.storage.proxy.coordinator_read_retries,counter,,read,<PER_UNIT_NAME>,number of read retry attempts,-1,scylla,storage proxy coordinator read retries
-scylla.storage.proxy.coordinator_read_timeouts,counter,,error,<PER_UNIT_NAME>,number of read request failed due to a timeout,-1,scylla,storage proxy coordinator read timeouts
-scylla.storage.proxy.coordinator_read_unavailable,counter,,error,<PER_UNIT_NAME>,"number read requests failed due to an ""unavailable"" error",-1,scylla,storage proxy coordinator read unavailable
-scylla.storage.proxy.coordinator_reads_local_node,counter,,read,<PER_UNIT_NAME>,number of data read requestson a local Node,0,scylla,storage proxy coordinator reads local node
-scylla.storage.proxy.coordinator_speculative_data_reads,counter,,read,<PER_UNIT_NAME>,number of speculative data read requests that were sent,0,scylla,storage proxy coordinator speculative data reads
-scylla.storage.proxy.coordinator_speculative_digest_reads,counter,,read,<PER_UNIT_NAME>,number of speculative digest read requests that were sent,0,scylla,storage proxy coordinator speculative digest reads
-scylla.storage.proxy.coordinator_throttled_writes,counter,,write,<PER_UNIT_NAME>,number of throttled write requests,-1,scylla,storage proxy coordinator throttled writes
-scylla.storage.proxy.coordinator_total_write_attempts_local_node,counter,,write,<PER_UNIT_NAME>,total number of write requestson a local Node,0,scylla,storage proxy coordinator total write attempts local node
-scylla.storage.proxy.coordinator_write_errors_local_node,counter,,error,<PER_UNIT_NAME>,number of write requests that failedon a local Node,-1,scylla,storage proxy coordinator write errors local node
-scylla.storage.proxy.coordinator_write_latency,histogram,,write,<PER_UNIT_NAME>,The general write latency histogram,-1,scylla,storage proxy coordinator write latency
-scylla.storage.proxy.coordinator_write_timeouts,counter,,error,<PER_UNIT_NAME>,number of write request failed due to a timeout,-1,scylla,storage proxy coordinator write timeouts
-scylla.storage.proxy.coordinator_write_unavailable,counter,,error,<PER_UNIT_NAME>,"number write requests failed due to an ""unavailable"" error",-1,scylla,storage proxy coordinator write unavailable
-scylla.storage.proxy.replica_cross_shard_ops,counter,,,<PER_UNIT_NAME>,number of operations that crossed a shard boundary,0,scylla,storage proxy replica cross shard ops
-scylla.storage.proxy.replica_forwarded_mutations,counter,,,<PER_UNIT_NAME>,number of mutations forwarded to other replica Nodes,0,scylla,storage proxy replica forwarded mutations
-scylla.storage.proxy.replica_forwarding_errors,counter,,error,<PER_UNIT_NAME>,number of errors during forwarding mutations to other replica Nodes,-1,scylla,storage proxy replica forwarding errors
-scylla.storage.proxy.replica_reads,counter,,read,<PER_UNIT_NAME>,number of remote data read requests this Node received,0,scylla,storage proxy replica reads
-scylla.storage.proxy.replica_received_counter_updates,counter,,,<PER_UNIT_NAME>,number of counter updates received by this node acting as an update leader,0,scylla,storage proxy replica received counter updates
-scylla.storage.proxy.replica_received_mutations,counter,,,<PER_UNIT_NAME>,number of mutations received by a replica Node,0,scylla,storage proxy replica received mutations
-scylla.streaming.total_incoming_bytes,counter,,byte,<PER_UNIT_NAME>,Total number of bytes received on this shard.,0,scylla,streaming total incoming bytes
-scylla.streaming.total_outgoing_bytes,counter,,byte,<PER_UNIT_NAME>,Total number of bytes sent on this shard.,0,scylla,streaming total outgoing bytes
-scylla.thrift.current_connections,gauge,,connection,<PER_UNIT_NAME>,Holds a current number of opened Thrift connections.,0,scylla,thrift current connections
-scylla.thrift.served,counter,,,<PER_UNIT_NAME>,Rate of serving Thrift requests.,0,scylla,thrift served
-scylla.thrift.thrift_connections,counter,,connection,<PER_UNIT_NAME>,Rate of creation of new Thrift connections.,0,scylla,thrift thrift connections
-scylla.tracing.active_sessions,gauge,,,<PER_UNIT_NAME>,Holds a number of a currently active tracing sessions.,0,scylla,tracing active sessions
-scylla.tracing.cached_records,gauge,,,<PER_UNIT_NAME>,Holds a number of tracing records cached in the tracing sessions that are not going to be written in the next write event. If sum of this metric; pending_for_write_records and flushing_records is close to 11000 we are likely to start dropping tracing records.,-1,scylla,tracing cached records
-scylla.tracing.dropped_records,counter,,,<PER_UNIT_NAME>,Counts a number of dropped records due to too many pending records. High value indicates that backend is saturated with the rate with which new tracing records are created.,-1,scylla,tracing dropped records
-scylla.tracing.dropped_sessions,counter,,,<PER_UNIT_NAME>,Counts a number of dropped sessions due to too many pending sessions/records. High value indicates that backend is saturated with the rate with which new tracing records are created.,-1,scylla,tracing dropped sessions
-scylla.tracing.flushing_records,gauge,,,<PER_UNIT_NAME>,Holds a number of tracing records that currently being written to the I/O backend. If sum of this metric; cached_records and pending_for_write_records is close to 11000 we are likely to start dropping tracing records.,-1,scylla,tracing flushing records
-scylla.tracing.keyspace_helper_bad_column_family_errors,counter,,error,<PER_UNIT_NAME>,Counts a number of times write failed due to one of the tables in the system_traces keyspace has an incompatible schema. One error may result one or more tracing records to be lost. Non-zero value indicates that the administrator has to take immediate steps to fix the corresponding schema. The appropriate error message will be printed in the syslog.,-1,scylla,tracing keyspace helper bad column family errors
-scylla.tracing.keyspace_helper_tracing_errors,counter,,error,<PER_UNIT_NAME>,Counts a number of errors during writing to a system_traces keyspace. One error may cause one or more tracing records to be lost.,-1,scylla,tracing keyspace helper tracing errors
-scylla.tracing.pending_for_write_records,gauge,,,<PER_UNIT_NAME>,Holds a number of tracing records that are going to be written in the next write event. If sum of this metric; cached_records and flushing_records is close to 11000 we are likely to start dropping tracing records.,-1,scylla,tracing pending for write records
-scylla.tracing.trace_errors,counter,,error,<PER_UNIT_NAME>,Counts a number of trace records dropped due to an error (e.g. OOM).,-1,scylla,tracing trace errors
-scylla.tracing.trace_records_count,counter,,,<PER_UNIT_NAME>,This metric is a rate of tracing records generation.,0,scylla,tracing trace records count
-scylla.transport.cql_connections,counter,,connection,<PER_UNIT_NAME>,Counts a number of client connections.,0,scylla,transport cql connections
-scylla.transport.current_connections,gauge,,connection,<PER_UNIT_NAME>,Holds a current number of client connections.,0,scylla,transport current connections
-scylla.transport.requests_blocked_memory,counter,,request,<PER_UNIT_NAME>,"Holds an incrementing counter with the requests that ever blocked due to reaching the memory quota limit (12373196B). The first derivative of this value shows how often we block due to memory exhaustion in the ""CQL transport"" component.",-1,scylla,transport requests blocked memory
-scylla.transport.requests_blocked_memory_current,gauge,,request,<PER_UNIT_NAME>,"Holds the number of requests that are currently blocked due to reaching the memory quota limit (12373196B). Non-zero value indicates that our bottleneck is memory and more specifically - the memory quota allocated for the ""CQL transport"" component.",-1,scylla,transport requests blocked memory current
-scylla.transport.requests_served,counter,,request,<PER_UNIT_NAME>,Counts a number of served requests.,0,scylla,transport requests served
-scylla.transport.requests_serving,gauge,,request,<PER_UNIT_NAME>,Holds a number of requests that are being processed right now.,0,scylla,transport requests serving
+scylla.sstables.capped_local_deletion_time,counter,,time,,Was local deletion time capped at maximum allowed value in Statistics,0,scylla,sstables capped local deletion time
+scylla.sstables.capped_tombstone_deletion_time,counter,,time,,Was partition tombstone deletion time capped at maximum allowed value,0,scylla,sstables capped tombstone deletion time
+scylla.sstables.cell_tombstone_writes,counter,,,,Number of cell tombstones written,0,scylla,sstables cell tombstone writes
+scylla.sstables.cell_writes,counter,,,,Number of cells written,0,scylla,sstables cell writes
+scylla.sstables.index_page_blocks,counter,,request,,Index page requests which needed to wait due to page not being loaded yet,0,scylla,sstables index page blocks
+scylla.sstables.index_page_hits,counter,,request,,Index page requests which could be satisfied without waiting,0,scylla,sstables index page hits
+scylla.sstables.index_page_misses,counter,,request,,Index page requests which initiated a read from disk,0,scylla,sstables index page misses
+scylla.sstables.partition_reads,counter,,read,,Number of partitions read,0,scylla,sstables partition reads
+scylla.sstables.partition_seeks,counter,,,,Number of partitions seeked,0,scylla,sstables partition seeks
+scylla.sstables.partition_writes,counter,,write,,Number of partitions written,0,scylla,sstables partition writes
+scylla.sstables.range_partition_reads,counter,,read,,Number of partition range flat mutation reads,0,scylla,sstables range partition reads
+scylla.sstables.range_tombstone_writes,counter,,,,Number of range tombstones written,0,scylla,sstables range tombstone writes
+scylla.sstables.row_reads,counter,,row,,Number of rows read,0,scylla,sstables row reads
+scylla.sstables.row_writes,counter,,row,,Number of clustering rows written,0,scylla,sstables row writes
+scylla.sstables.single_partition_reads,counter,,read,,Number of single partition flat mutation reads,0,scylla,sstables single partition reads
+scylla.sstables.sstable_partition_reads,counter,,read,,Number of whole sstable flat mutation reads,0,scylla,sstables sstable partition reads
+scylla.sstables.static_row_writes,counter,,row,,Number of static rows written,0,scylla,sstables static row writes
+scylla.sstables.tombstone_writes,counter,,,,Number of tombstones written,0,scylla,sstables tombstone writes
+scylla.storage.proxy.coordinator_background_read_repairs,counter,,read,,number of background read repairs,0,scylla,storage proxy coordinator background read repairs
+scylla.storage.proxy.coordinator_background_reads,gauge,,read,,number of currently pending background read requests,0,scylla,storage proxy coordinator background reads
+scylla.storage.proxy.coordinator_background_replica_writes_failed_local_node,counter,,,,number of replica writes that timed out or failed after CL was reachedon a local Node,0,scylla,storage proxy coordinator background replica writes failed local node
+scylla.storage.proxy.coordinator_background_write_bytes,counter,,byte,,number of bytes in pending background write requests,0,scylla,storage proxy coordinator background write bytes
+scylla.storage.proxy.coordinator_background_writes,gauge,,write,,number of currently pending background write requests,0,scylla,storage proxy coordinator background writes
+scylla.storage.proxy.coordinator_background_writes_failed,counter,,write,,number of write requests that failed after CL was reached,0,scylla,storage proxy coordinator background writes failed
+scylla.storage.proxy.coordinator_canceled_read_repairs,counter,,read,,number of global read repairs canceled due to a concurrent write,0,scylla,storage proxy coordinator canceled read repairs
+scylla.storage.proxy.coordinator_completed_reads_local_node,counter,,read,,number of data read requests that completed on a local Node,0,scylla,storage proxy coordinator completed reads local node
+scylla.storage.proxy.coordinator_current_throttled_base_writes,gauge,,write,,number of currently throttled base replica write requests,-1,scylla,storage proxy coordinator current throttled base writes
+scylla.storage.proxy.coordinator_current_throttled_writes,gauge,,write,,number of currently throttled write requests,-1,scylla,storage proxy coordinator current throttled writes
+scylla.storage.proxy.coordinator_foreground_read_repair,counter,,read,,number of foreground read repairs,0,scylla,storage proxy coordinator foreground read repair
+scylla.storage.proxy.coordinator_foreground_reads,gauge,,read,,number of currently pending foreground read requests,0,scylla,storage proxy coordinator foreground reads
+scylla.storage.proxy.coordinator_foreground_writes,gauge,,write,,number of currently pending foreground write requests,0,scylla,storage proxy coordinator foreground writes
+scylla.storage.proxy.coordinator_last_mv_flow_control_delay,gauge,,second,,delay (in seconds) added for MV flow control in the last request,-1,scylla,storage proxy coordinator last mv flow control delay
+scylla.storage.proxy.coordinator_queued_write_bytes,counter,,byte,,number of bytes in pending write requests,0,scylla,storage proxy coordinator queued write bytes
+scylla.storage.proxy.coordinator_range_timeouts,counter,,error,,number of range read operations failed due to a timeout,-1,scylla,storage proxy coordinator range timeouts
+scylla.storage.proxy.coordinator_range_unavailable,counter,,error,,"number of range read operations failed due to an ""unavailable"" error",-1,scylla,storage proxy coordinator range unavailable
+scylla.storage.proxy.coordinator_read_errors_local_node,counter,,error,,number of data read requests that failed on a local Node,-1,scylla,storage proxy coordinator read errors local node
+scylla.storage.proxy.coordinator_read_latency.count,gauge,,read,,The general read latency histogram,-1,scylla,storage proxy coordinator read latency
+scylla.storage.proxy.coordinator_read_latency.sum,gauge,,read,,The general read latency histogram,-1,scylla,storage proxy coordinator read latency
+scylla.storage.proxy.coordinator_read_repair_write_attempts_local_node,counter,,write,,number of write operations in a read repair context on a local Node,0,scylla,storage proxy coordinator read repair write attempts local node
+scylla.storage.proxy.coordinator_read_retries,counter,,read,,number of read retry attempts,-1,scylla,storage proxy coordinator read retries
+scylla.storage.proxy.coordinator_read_timeouts,counter,,error,,number of read request failed due to a timeout,-1,scylla,storage proxy coordinator read timeouts
+scylla.storage.proxy.coordinator_read_unavailable,counter,,error,,"number read requests failed due to an ""unavailable"" error",-1,scylla,storage proxy coordinator read unavailable
+scylla.storage.proxy.coordinator_reads_local_node,counter,,read,,number of data read requests on a local Node,0,scylla,storage proxy coordinator reads local node
+scylla.storage.proxy.coordinator_speculative_data_reads,counter,,read,,number of speculative data read requests that were sent,0,scylla,storage proxy coordinator speculative data reads
+scylla.storage.proxy.coordinator_speculative_digest_reads,counter,,read,,number of speculative digest read requests that were sent,0,scylla,storage proxy coordinator speculative digest reads
+scylla.storage.proxy.coordinator_throttled_writes,counter,,write,,number of throttled write requests,-1,scylla,storage proxy coordinator throttled writes
+scylla.storage.proxy.coordinator_total_write_attempts_local_node,counter,,write,,total number of write requests on a local Node,0,scylla,storage proxy coordinator total write attempts local node
+scylla.storage.proxy.coordinator_write_errors_local_node,counter,,error,,number of write requests that failed on a local Node,-1,scylla,storage proxy coordinator write errors local node
+scylla.storage.proxy.coordinator_write_latency.count,gauge,,write,,The general write latency histogram,-1,scylla,storage proxy coordinator write latency
+scylla.storage.proxy.coordinator_write_latency.sum,gauge,,write,,The general write latency histogram,-1,scylla,storage proxy coordinator write latency
+scylla.storage.proxy.coordinator_write_timeouts,counter,,error,,number of write request failed due to a timeout,-1,scylla,storage proxy coordinator write timeouts
+scylla.storage.proxy.coordinator_write_unavailable,counter,,error,,"number write requests failed due to an ""unavailable"" error",-1,scylla,storage proxy coordinator write unavailable
+scylla.storage.proxy.replica_cross_shard_ops,counter,,,,number of operations that crossed a shard boundary,0,scylla,storage proxy replica cross shard ops
+scylla.storage.proxy.replica_forwarded_mutations,counter,,,,number of mutations forwarded to other replica Nodes,0,scylla,storage proxy replica forwarded mutations
+scylla.storage.proxy.replica_forwarding_errors,counter,,error,,number of errors during forwarding mutations to other replica Nodes,-1,scylla,storage proxy replica forwarding errors
+scylla.storage.proxy.replica_reads,counter,,read,,number of remote data read requests this Node received,0,scylla,storage proxy replica reads
+scylla.storage.proxy.replica_received_counter_updates,counter,,,,number of counter updates received by this node acting as an update leader,0,scylla,storage proxy replica received counter updates
+scylla.storage.proxy.replica_received_mutations,counter,,,,number of mutations received by a replica Node,0,scylla,storage proxy replica received mutations
+scylla.streaming.total_incoming_bytes,counter,,byte,,Total number of bytes received on this shard.,0,scylla,streaming total incoming bytes
+scylla.streaming.total_outgoing_bytes,counter,,byte,,Total number of bytes sent on this shard.,0,scylla,streaming total outgoing bytes
+scylla.thrift.current_connections,gauge,,connection,,Holds a current number of opened Thrift connections.,0,scylla,thrift current connections
+scylla.thrift.served,counter,,,,Rate of serving Thrift requests.,0,scylla,thrift served
+scylla.thrift.thrift_connections,counter,,connection,,Rate of creation of new Thrift connections.,0,scylla,thrift thrift connections
+scylla.tracing.active_sessions,gauge,,,,Holds a number of a currently active tracing sessions.,0,scylla,tracing active sessions
+scylla.tracing.cached_records,gauge,,,,Holds a number of tracing records cached in the tracing sessions that are not going to be written in the next write event. If sum of this metric; pending_for_write_records and flushing_records is close to 11000 we are likely to start dropping tracing records.,-1,scylla,tracing cached records
+scylla.tracing.dropped_records,counter,,,,Counts a number of dropped records due to too many pending records. High value indicates that backend is saturated with the rate with which new tracing records are created.,-1,scylla,tracing dropped records
+scylla.tracing.dropped_sessions,counter,,,,Counts a number of dropped sessions due to too many pending sessions/records. High value indicates that backend is saturated with the rate with which new tracing records are created.,-1,scylla,tracing dropped sessions
+scylla.tracing.flushing_records,gauge,,,,Holds a number of tracing records that currently being written to the I/O backend. If sum of this metric; cached_records and pending_for_write_records is close to 11000 we are likely to start dropping tracing records.,-1,scylla,tracing flushing records
+scylla.tracing.keyspace_helper_bad_column_family_errors,counter,,error,,Counts a number of times write failed due to one of the tables in the system_traces keyspace has an incompatible schema. One error may result one or more tracing records to be lost. Non-zero value indicates that the administrator has to take immediate steps to fix the corresponding schema. The appropriate error message will be printed in the syslog.,-1,scylla,tracing keyspace helper bad column family errors
+scylla.tracing.keyspace_helper_tracing_errors,counter,,error,,Counts a number of errors during writing to a system_traces keyspace. One error may cause one or more tracing records to be lost.,-1,scylla,tracing keyspace helper tracing errors
+scylla.tracing.pending_for_write_records,gauge,,,,Holds a number of tracing records that are going to be written in the next write event. If sum of this metric; cached_records and flushing_records is close to 11000 we are likely to start dropping tracing records.,-1,scylla,tracing pending for write records
+scylla.tracing.trace_errors,counter,,error,,Counts a number of trace records dropped due to an error (e.g. OOM).,-1,scylla,tracing trace errors
+scylla.tracing.trace_records_count,counter,,,,This metric is a rate of tracing records generation.,0,scylla,tracing trace records count
+scylla.transport.cql_connections,counter,,connection,,Counts a number of client connections.,0,scylla,transport cql connections
+scylla.transport.current_connections,gauge,,connection,,Holds a current number of client connections.,0,scylla,transport current connections
+scylla.transport.requests_blocked_memory,counter,,request,,"Holds an incrementing counter with the requests that ever blocked due to reaching the memory quota limit (12373196B). The first derivative of this value shows how often we block due to memory exhaustion in the ""CQL transport"" component.",-1,scylla,transport requests blocked memory
+scylla.transport.requests_blocked_memory_current,gauge,,request,,"Holds the number of requests that are currently blocked due to reaching the memory quota limit (12373196B). Non-zero value indicates that our bottleneck is memory and more specifically - the memory quota allocated for the ""CQL transport"" component.",-1,scylla,transport requests blocked memory current
+scylla.transport.requests_served,counter,,request,,Counts a number of served requests.,0,scylla,transport requests served
+scylla.transport.requests_serving,gauge,,request,,Holds a number of requests that are being processed right now.,0,scylla,transport requests serving
