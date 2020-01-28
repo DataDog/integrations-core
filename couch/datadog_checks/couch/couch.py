@@ -169,6 +169,7 @@ class CouchDB1:
                 couchdb['databases'][dbName] = None
                 if (e.response.status_code == 403) or (e.response.status_code == 401):
                     self.db_blacklist[server].append(dbName)
+
                     self.warning(
                         'Database %s is not readable by the configured user. '
                         'It will be added to the blacklist. Please restart the agent to clear.',
