@@ -151,6 +151,15 @@ COMMON_TAGS = {
         'persistentvolumeclaim:www-web-2',
         'pod_phase:running',
     ],
+    "kubernetes_pod_uid://639980e5-2e6c-11ea-8bb1-42010a800075": [
+        'kube_namespace:default',
+        'kube_service:nginx',
+        'kube_stateful_set:web',
+        'namespace:default',
+        'persistentvolumeclaim:www-web-2',
+        'persistentvolumeclaim:www2-web-3',
+        'pod_phase:running',
+    ],
 }
 
 METRICS_WITH_DEVICE_TAG = {
@@ -845,13 +854,19 @@ def test_create_pod_tags_by_pvc(monkeypatch, tagger):
     pod_tags_by_pvc = check._create_pod_tags_by_pvc(pod_list)
 
     expected_result = {
-        'www-web-2|default': [
+        'default/www-web-2': {
             'kube_namespace:default',
             'kube_service:nginx',
             'kube_stateful_set:web',
             'namespace:default',
-            'persistentvolumeclaim:www-web-2',
             'pod_phase:running',
-        ]
+        },
+        'default/www2-web-3': {
+            'kube_namespace:default',
+            'kube_service:nginx',
+            'kube_stateful_set:web',
+            'namespace:default',
+            'pod_phase:running',
+        },
     }
     assert pod_tags_by_pvc == expected_result
