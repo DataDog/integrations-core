@@ -19,13 +19,13 @@ def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     with docker_run(compose_file, log_patterns=[r'init - Scylla version \S* initialization completed.']):
-        instances = {'instances': [{'instance_endpoint': INSTANCE_URL}]}
+        instances = {'instances': [{'prometheus_url': INSTANCE_URL}]}
         yield instances
 
 
 @pytest.fixture(scope="session")
 def db_instance():
-    return {'instance_endpoint': INSTANCE_URL, 'tags': ['instance_test']}
+    return {'prometheus_url': INSTANCE_URL, 'tags': ['instance_test']}
 
 
 @pytest.fixture()

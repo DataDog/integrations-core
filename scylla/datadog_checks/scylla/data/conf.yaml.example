@@ -2,11 +2,10 @@ init_config:
 
 instances:
 
-    ## @param instance_endpoint - string - required
+    ## @param prometheus_url - string - required
     ## The URL where your database metrics are exposed by Prometheus.
-    ## By default, the Scylla integration collects `instance_endpoint` metrics.
     #
-  - instance_endpoint: http://localhost:9180/metrics
+  - prometheus_url: http://localhost:9180/metrics
 
     ## @param metric_groups - list of strings - optional
     ## List of additional scylla metric groups to collect in addition to the default

@@ -20,7 +20,7 @@ class ScyllaCheck(OpenMetricsBaseCheck):
 
         instance = instances[0]
 
-        endpoint = instance.get('instance_endpoint')
+        endpoint = instance.get('prometheus_url')
         namespace = 'scylla'
 
         # extract additional metrics requested and validate the correct names
@@ -42,7 +42,7 @@ class ScyllaCheck(OpenMetricsBaseCheck):
         metrics = INSTANCE_DEFAULT_METRICS + additional_metrics
 
         tags = instance.get('tags', [])
-        tags.append('endpoint_host:{}'.format(urlparse(endpoint).hostname))
+        tags.append('endpoint_server:{}'.format(urlparse(endpoint).hostname))
 
         instance.update(
             {

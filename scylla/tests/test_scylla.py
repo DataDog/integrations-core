@@ -54,7 +54,7 @@ def test_instance_invalid_group_check(aggregator, db_instance, mock_db_data):
 
 def test_invalid_instance(aggregator, db_instance, mock_db_data):
     instance = deepcopy(db_instance)
-    instance.pop('instance_endpoint')
+    instance.pop('prometheus_url')
 
     with pytest.raises(CheckException):
         ScyllaCheck('scylla', {}, [instance])
