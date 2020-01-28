@@ -1,2 +1,220 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-snmp.discovered_devices_count,gauge,,device,,The total number of devices discovered.,0,snmp,DevicesCount
+snmp.discovered_devices_count,gauge,,device,,The total number of devices discovered.,0,snmp,snmp_DevicesCount
+snmp.ifInDiscards,count,,packet,,[Generic router] The number of inbound packets chosen to be discarded even though no errors had been detected to prevent them being deliverable to a higher-layer protocol.,0,snmp,snmp_snmp.ifInDiscards
+snmp.ifOutErrors,count,,packet,,[Generic router] The number of outbound packets that could not be transmitted because of errors.,0,snmp,snmp_snmp.ifOutErrors
+snmp.ifOutDiscards,count,,packet,,[Generic router] The number of outbound packets chosen to be discarded even though no errors had been detected to prevent them being transmitted.,0,snmp,snmp_snmp.ifOutDiscards
+snmp.ifInErrors,count,,packet,,[Generic router] The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.,0,snmp,snmp_snmp.ifInErrors
+snmp.ifAdminStatus,gauge,,,,[Generic router] The desired state of the interface.,0,snmp,snmp_snmp.ifAdminStatus
+snmp.ifOperStatus,gauge,,,,[Generic router] The current operational state of the interface.,0,snmp,snmp_snmp.ifOperStatus
+snmp.ifHCInOctets,count,,,,[Generic router] The total number of octets received on the interface including framing characters.,0,snmp,snmp_snmp.ifHCInOctets
+snmp.ifHCInUcastPkts,count,,packet,,[Generic router] The number of packets delivered by this sub-layer to a higher (sub-)layer that were not addressed to a multicast or broadcast address at this sub-layer.,0,snmp,snmp_snmp.ifHCInUcastPkts
+snmp.ifHCInBroadcastPkts,count,,packet,,[Generic router] The number of packets delivered by this sub-layer to a higher (sub-)layer that were addressed to a broadcast address at this sub-layer.,0,snmp,snmp_snmp.ifHCInBroadcastPkts
+snmp.ifHCOutOctets,count,,,,[Generic router] The total number of octets transmitted out of the interface including framing characters.,0,snmp,snmp_snmp.ifHCOutOctets
+snmp.ifHCOutUcastPkts,count,,packet,,[Generic router] The total number of packets higher-level protocols requested be transmitted that were not addressed to a multicast or broadcast address at this sub-layer including those that were discarded or not sent.,0,snmp,snmp_snmp.ifHCOutUcastPkts
+snmp.ifHCOutMulticastPkts,count,,packet,,[Generic router] The total number of packets that higher-level protocols requested be transmitted that were addressed to a multicast address at this sub-layer including those that were discarded or not sent.,0,snmp,snmp_snmp.ifHCOutMulticastPkts
+snmp.ifHCOutBroadcastPkts,count,,packet,,"[Generic router] The total number of packets that higher-level protocols requested be transmitted that were addressed to a broadcast address at this sub-layer, including those that were discarded or not sent.",0,snmp,snmp_snmp.ifHCOutBroadcastPkts
+snmp.ipSystemStatsHCInReceives,count,,datagram,,[Generic router] The total number of input IP datagrams received including those received in error.,0,snmp,snmp_snmp.ipSystemStatsHCInReceives
+snmp.ipSystemStatsHCInOctets,count,,,,[Generic router] The total number of octets received in input IP datagrams including those received in error.,0,snmp,snmp_snmp.ipSystemStatsHCInOctets
+snmp.ipSystemStatsInHdrErrors,count,,datagram,,"[Generic router] The number of input IP datagrams discarded due to errors in their IP headers including version number mismatch, their IP headers, other format errors, hop count exceeded, errors discovered in processing their IP options, etc.",0,snmp,snmp_snmp.ipSystemStatsInHdrErrors
+snmp.ipSystemStatsInNoRoutes,count,,datagram,,[Generic router] The number of input IP datagrams discarded because no route could be found to transmit them to their destination.,0,snmp,snmp_snmp.ipSystemStatsInNoRoutes
+snmp.ipSystemStatsInAddrErrors,count,,datagram,,[Generic router] The number of input IP datagrams discarded because the IP address in the header’s destination field was not a valid address to be received at this entity.,0,snmp,snmp_snmp.ipSystemStatsInAddrErrors
+snmp.ipSystemStatsInUnknownProtos,count,,datagram,,[Generic router] The number of locally-addressed IP datagrams received successfully but discarded because of an unknown or unsupported protocol.,0,snmp,snmp_snmp.ipSystemStatsInUnknownProtos
+snmp.ipSystemStatsInTruncatedPkts,count,,datagram,,[Generic router] The number of input IP datagrams discarded because the datagram frame didn’t carry enough data.,0,snmp,snmp_snmp.ipSystemStatsInTruncatedPkts
+snmp.ipSystemStatsHCInForwDatagrams,count,,datagram,,[Generic router] The number of input datagrams for which this entity was not their final IP destination and for which this entity attempted to find a route to forward them to that final destination.,0,snmp,snmp_snmp.ipSystemStatsHCInForwDatagrams
+snmp.ipSystemStatsReasmReqds,count,,,,[Generic router] The number of IP fragments received that needed to be reassembled at this interface.,0,snmp,snmp_snmp.ipSystemStatsReasmReqds
+snmp.ipSystemStatsReasmOKs,count,,datagram,,[Generic router] The number of IP datagrams successfully reassembled.,0,snmp,snmp_snmp.ipSystemStatsReasmOKs
+snmp.ipSystemStatsReasmFails,count,,,,"[Generic router] The number of failures detected by the IP reassembly algorithm (for whatever reason: timed out, errors, etc.).",0,snmp,snmp_snmp.ipSystemStatsReasmFails
+snmp.ipSystemStatsInDiscards,count,,datagram,,"[Generic router] The number of input IP datagrams for which no problems were encountered to prevent their continued processing, but were discarded due to other reasons, for example lack of buffer space.",0,snmp,snmp_snmp.ipSystemStatsInDiscards
+snmp.ipSystemStatsHCInDelivers,count,,datagram,,[Generic router] The total number of datagrams successfully delivered to IP user-protocols (including ICMP).,0,snmp,snmp_snmp.ipSystemStatsHCInDelivers
+snmp.ipSystemStatsHCOutRequests,count,,datagram,,[Generic router] The total number of IP datagrams that local IP user-protocols (including ICMP) supplied to IP in requests for transmission.,0,snmp,snmp_snmp.ipSystemStatsHCOutRequests
+snmp.ipSystemStatsOutNoRoutes,count,,datagram,,[Generic router] The number of locally generated IP datagrams discarded because no route could be found to transmit them to their destination.,0,snmp,snmp_snmp.ipSystemStatsOutNoRoutes
+snmp.ipSystemStatsHCOutForwDatagrams,count,,datagram,,[Generic router] The number of datagrams for which this entity was not their final IP destination and for which it was successful in finding a path to their final destination.,0,snmp,snmp_snmp.ipSystemStatsHCOutForwDatagrams
+snmp.ipSystemStatsOutDiscards,count,,datagram,,"[Generic router] The number of output IP datagrams for which no problem was encountered to prevent their transmission to their destination, but were discarded due to other reasons, for example lack of buffer space.",0,snmp,snmp_snmp.ipSystemStatsOutDiscards
+snmp.ipSystemStatsOutFragReqds,count,,datagram,,[Generic router] The number of IP datagrams that would require fragmentation to be transmitted.,0,snmp,snmp_snmp.ipSystemStatsOutFragReqds
+snmp.ipSystemStatsOutFragOKs,count,,datagram,,[Generic router] The number of IP datagrams successfully fragmented.,0,snmp,snmp_snmp.ipSystemStatsOutFragOKs
+snmp.ipSystemStatsOutFragFails,count,,datagram,,[Generic router] The number of IP datagrams discarded because they needed to be fragmented but could not be.,0,snmp,snmp_snmp.ipSystemStatsOutFragFails
+snmp.ipSystemStatsOutFragCreates,count,,datagram,,[Generic router] The number of output datagram fragments generated as a result of IP fragmentation.,0,snmp,snmp_snmp.ipSystemStatsOutFragCreates
+snmp.ipSystemStatsHCOutTransmits,count,,datagram,,[Generic router] The total number of IP datagrams that this entity supplied to the lower layers for transmission.,0,snmp,snmp_snmp.ipSystemStatsHCOutTransmits
+snmp.ipSystemStatsHCOutOctets,count,,datagram,,[Generic router] The total number of octets in IP datagrams delivered to the lower layers for transmission.,0,snmp,snmp_snmp.ipSystemStatsHCOutOctets
+snmp.ipSystemStatsHCInMcastPkts,count,,datagram,,[Generic router] The number of IP multicast datagrams received.,0,snmp,snmp_snmp.ipSystemStatsHCInMcastPkts
+snmp.ipSystemStatsHCInMcastOctets,count,,datagram,,[Generic router] The total number of octets received in IP multicast datagrams.,0,snmp,snmp_snmp.ipSystemStatsHCInMcastOctets
+snmp.ipSystemStatsHCOutMcastPkts,count,,datagram,,[Generic router] The number of IP multicast datagrams transmitted.,0,snmp,snmp_snmp.ipSystemStatsHCOutMcastPkts
+snmp.ipSystemStatsHCOutMcastOctets,count,,datagram,,[Generic router] The total number of octets transmitted in IP multicast datagrams.,0,snmp,snmp_snmp.ipSystemStatsHCOutMcastOctets
+snmp.ipSystemStatsHCInBcastPkts,count,,datagram,,[Generic router] The number of IP broadcast datagrams received.,0,snmp,snmp_snmp.ipSystemStatsHCInBcastPkts
+snmp.ipSystemStatsHCOutBcastPkts,count,,datagram,,[Generic router] The number of IP broadcast datagrams transmitted.,0,snmp,snmp_snmp.ipSystemStatsHCOutBcastPkts
+snmp.ipIfStatsHCInOctets,count,,datagram,,[Generic router] The total number of octets received in input IP datagrams including those received in error.,0,snmp,snmp_snmp.ipIfStatsHCInOctets
+snmp.ipIfStatsInHdrErrors,count,,datagram,,"[Generic router] The number of input IP datagrams discarded due to errors in their IP headers including version number mismatch, other format errors, hop count exceeded, errors discovered in processing their IP options, etc.",0,snmp,snmp_snmp.ipIfStatsInHdrErrors
+snmp.ipIfStatsInNoRoutes,count,,datagram,,[Generic router] The number of input IP datagrams discarded because no route could be found to transmit them to their destination.,0,snmp,snmp_snmp.ipIfStatsInNoRoutes
+snmp.ipIfStatsInAddrErrors,count,,datagram,,[Generic router] The number of input IP datagrams discarded because the IP address in their IP header’s destination field was not a valid address to be received at this entity.,0,snmp,snmp_snmp.ipIfStatsInAddrErrors
+snmp.ipIfStatsInUnknownProtos,count,,datagram,,[Generic router] The number of locally-addressed IP datagrams received successfully but discarded because of an unknown or unsupported protocol.,0,snmp,snmp_snmp.ipIfStatsInUnknownProtos
+snmp.ipIfStatsInTruncatedPkts,count,,datagram,,[Generic router] The number of input IP datagrams discarded because the datagram frame didn’t carry enough data.,0,snmp,snmp_snmp.ipIfStatsInTruncatedPkts
+snmp.ipIfStatsHCInForwDatagrams,count,,datagram,,[Generic router] The number of input datagrams for which this entity was not their final IP destination and for which this entity attempted to find a route to forward them to that final destination.,0,snmp,snmp_snmp.ipIfStatsHCInForwDatagrams
+snmp.ipIfStatsReasmReqds,count,,,,[Generic router] The number of IP fragments received that needed to be reassembled at this interface.,0,snmp,snmp_snmp.ipIfStatsReasmReqds
+snmp.ipIfStatsReasmOKs,count,,datagram,,[Generic router] The number of IP datagrams successfully reassembled.,0,snmp,snmp_snmp.ipIfStatsReasmOKs
+snmp.ipIfStatsReasmFails,count,,,,"[Generic router] The number of failures detected by the IP reassembly algorithm (for whatever reason: timed out, errors, etc.).",0,snmp,snmp_snmp.ipIfStatsReasmFails
+snmp.ipIfStatsInDiscards,count,,datagram,,"[Generic router] The number of input IP datagrams for which no problems were encountered to prevent their continued processing, but were discarded due to other reasons, for example lack of buffer space.",0,snmp,snmp_snmp.ipIfStatsInDiscards
+snmp.ipIfStatsHCInDelivers,count,,datagram,,[Generic router] The total number of datagrams successfully delivered to IP user-protocols (including ICMP).,0,snmp,snmp_snmp.ipIfStatsHCInDelivers
+snmp.ipIfStatsHCOutRequests,count,,datagram,,[Generic router] The total number of IP datagrams that local IP user-protocols (including ICMP) supplied to IP in requests for transmission.,0,snmp,snmp_snmp.ipIfStatsHCOutRequests
+snmp.ipIfStatsHCOutForwDatagrams,count,,datagram,,[Generic router] The number of datagrams for which this entity was not their final IP destination and for which it was successful in finding a path to their final destination.,0,snmp,snmp_snmp.ipIfStatsHCOutForwDatagrams
+snmp.ipIfStatsOutDiscards,count,,datagram,,"[Generic router] The number of output IP datagrams for which no problem was encountered to prevent their transmission to their destination, but were discarded due to other reasons, for example lack of buffer space.",0,snmp,snmp_snmp.ipIfStatsOutDiscards
+snmp.ipIfStatsOutFragReqds,count,,datagram,,[Generic router] The number of IP datagrams requiring fragmentation to be transmitted.,0,snmp,snmp_snmp.ipIfStatsOutFragReqds
+snmp.ipIfStatsOutFragOKs,count,,datagram,,[Generic router] The number of IP datagrams successfully fragmented.,0,snmp,snmp_snmp.ipIfStatsOutFragOKs
+snmp.ipIfStatsOutFragFails,count,,datagram,,[Generic router] The number of IP datagrams discarded because they needed to be fragmented but could not be.,0,snmp,snmp_snmp.ipIfStatsOutFragFails
+snmp.ipIfStatsOutFragCreates,count,,datagram,,[Generic router] The number of output datagram fragments generated as a result of IP fragmentation.,0,snmp,snmp_snmp.ipIfStatsOutFragCreates
+snmp.ipIfStatsHCOutTransmits,count,,datagram,,[Generic router] The total number of IP datagrams that this entity supplied to the lower layers for transmission.,0,snmp,snmp_snmp.ipIfStatsHCOutTransmits
+snmp.ipIfStatsHCOutOctets,count,,datagram,,[Generic router] The total number of octets in IP datagrams delivered to the lower layers for transmission.,0,snmp,snmp_snmp.ipIfStatsHCOutOctets
+snmp.ipIfStatsHCInMcastPkts,count,,datagram,,[Generic router] The number of IP multicast datagrams received.,0,snmp,snmp_snmp.ipIfStatsHCInMcastPkts
+snmp.ipIfStatsHCInMcastOctets,count,,datagram,,[Generic router] The total number of octets received in IP multicast datagrams.,0,snmp,snmp_snmp.ipIfStatsHCInMcastOctets
+snmp.ipIfStatsHCOutMcastPkts,count,,datagram,,[Generic router] The number of IP multicast datagrams received.,0,snmp,snmp_snmp.ipIfStatsHCOutMcastPkts
+snmp.ipIfStatsHCOutMcastOctets,count,,datagram,,[Generic router] The total number of octets transmitted in IP multicast datagrams.,0,snmp,snmp_snmp.ipIfStatsHCOutMcastOctets
+snmp.ipIfStatsHCInBcastPkts,count,,datagram,,[Generic router] The number of IP broadcast datagrams received.,0,snmp,snmp_snmp.ipIfStatsHCInBcastPkts
+snmp.ipIfStatsHCOutBcastPkts,count,,datagram,,[Generic router] The number of IP broadcast datagrams transmitted.,0,snmp,snmp_snmp.ipIfStatsHCOutBcastPkts
+snmp.tcpActiveOpens,count,,,,[Generic router] The number of times that TCP connections have made a direct transition to the SYN-SENT state from the CLOSED state.,0,snmp,snmp_snmp.tcpActiveOpens
+snmp.tcpPassiveOpens,count,,,,[Generic router] The number of times TCP connections have made a direct transition to the SYN-RCVD state from the LISTEN state.,0,snmp,snmp_snmp.tcpPassiveOpens
+snmp.tcpAttemptFails,count,,,,"[Generic router] The number of times that TCP connections have made a direct transition to the CLOSED state from either the SYN-SENT state or the SYN-RCVD state, plus the number of times that TCP connections have made a direct transition to the LISTEN state from the SYN-RCVD state.",0,snmp,snmp_snmp.tcpAttemptFails
+snmp.tcpEstabResets,count,,,,[Generic router] The number of times that TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.,0,snmp,snmp_snmp.tcpEstabResets
+snmp.tcpCurrEstab,gauge,,,,[Generic router] The number of TCP connections for which the current state is either ESTABLISHED or CLOSE-WAIT.,0,snmp,snmp_snmp.tcpCurrEstab
+snmp.tcpHCInSegs,count,,segment,,"[Generic router] The total number of segments received, including those received in error.",0,snmp,snmp_snmp.tcpHCInSegs
+snmp.tcpHCOutSegs,count,,segment,,"[Generic router] The total number of segments sent, including those on current connections but excluding those containing only retransmitted octets.",0,snmp,snmp_snmp.tcpHCOutSegs
+snmp.tcpRetransSegs,count,,segment,,"[Generic router] The total number of segments retransmitted; that is, the number of TCP segments transmitted containing one or more previously transmitted octets.",0,snmp,snmp_snmp.tcpRetransSegs
+snmp.tcpInErrs,count,,segment,,"[Generic router] The total number of segments received in error (e.g., bad TCP checksums).",0,snmp,snmp_snmp.tcpInErrs
+snmp.tcpOutRsts,count,,segment,,[Generic router] The number of TCP segments sent containing the RST flag.,0,snmp,snmp_snmp.tcpOutRsts
+snmp.udpHCInDatagrams,count,,datagram,,"[Generic router] The total number of UDP datagrams delivered to UDP users, for devices that can receive more than 1 million UDP datagrams per second.",0,snmp,snmp_snmp.udpHCInDatagrams
+snmp.udpNoPorts,count,,datagram,,[Generic router] The total number of received UDP datagrams for which there was no application at the destination port.,0,snmp,snmp_snmp.udpNoPorts
+snmp.udpInErrors,count,,datagram,,[Generic router] The number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.,0,snmp,snmp_snmp.udpInErrors
+snmp.udpHCOutDatagrams,count,,datagram,,"[Generic router] The total number of UDP datagrams sent from this entity, for devices that can transmit more than 1 million UDP datagrams per second.",0,snmp,snmp_snmp.udpHCOutDatagrams
+snmp.sysStatMemoryTotal,gauge,,byte,,[F5 BIG-IP] The total memory available in bytes for TMM (Traffic Management Module).,0,snmp,snmp_snmp.sysStatMemoryTotal
+snmp.sysStatMemoryUsed,gauge,,byte,,[F5 BIG-IP] The memory in use in bytes for TMM (Traffic Management Module).,0,snmp,snmp_snmp.sysStatMemoryUsed
+snmp.sysGlobalTmmStatMemoryTotal,gauge,,byte,,[F5 BIG-IP] The total memory available in bytes for TMM (Traffic Management Module).,0,snmp,snmp_snmp.sysGlobalTmmStatMemoryTotal
+snmp.sysGlobalTmmStatMemoryUsed,gauge,,byte,,[F5 BIG-IP] The memory in use in bytes for TMM (Traffic Management Module).,0,snmp,snmp_snmp.sysGlobalTmmStatMemoryUsed
+snmp.sysGlobalHostOtherMemoryTotal,gauge,,byte,,[F5 BIG-IP] The total other non-TMM memory in bytes for the system.,0,snmp,snmp_snmp.sysGlobalHostOtherMemoryTotal
+snmp.sysGlobalHostOtherMemoryUsed,gauge,,byte,,[F5 BIG-IP] The other non-TMM memory in bytes currently in use for the system.,0,snmp,snmp_snmp.sysGlobalHostOtherMemoryUsed
+snmp.sysGlobalHostSwapTotal,gauge,,byte,,[F5 BIG-IP] The total swap in bytes for the system.,0,snmp,snmp_snmp.sysGlobalHostSwapTotal
+snmp.sysGlobalHostSwapUsed,gauge,,byte,,[F5 BIG-IP] The swap in bytes currently in use for the system.,0,snmp,snmp_snmp.sysGlobalHostSwapUsed
+snmp.sysMultiHostCpuTable,gauge,,,,[F5 BIG-IP] A table containing entries of system CPU usage information for a system.,0,snmp,snmp_snmp.sysMultiHostCpuTable
+snmp.sysMultiHostCpuUser,gauge,,,,[F5 BIG-IP] The time spent by the specified processor in user context for the associated host.,0,snmp,snmp_snmp.sysMultiHostCpuUser
+snmp.sysMultiHostCpuNice,gauge,,,,[F5 BIG-IP] The time spent by the specified processor running niced processes for the associated host.,0,snmp,snmp_snmp.sysMultiHostCpuNice
+snmp.sysMultiHostCpuSystem,gauge,,,,[F5 BIG-IP] The time spent by the specified processor servicing system calls for the associated host.,0,snmp,snmp_snmp.sysMultiHostCpuSystem
+snmp.sysMultiHostCpuIdle,gauge,,,,[F5 BIG-IP] The time spent by the specified processor doing nothing for the associated host.,0,snmp,snmp_snmp.sysMultiHostCpuIdle
+snmp.sysMultiHostCpuIrq,gauge,,,,[F5 BIG-IP] The time spent by the specified processor servicing hardware interrupts for the associated host.,0,snmp,snmp_snmp.sysMultiHostCpuIrq
+snmp.sysMultiHostCpuSoftirq,gauge,,,,[F5 BIG-IP] The time spent by the specified processor servicing soft interrupts for the associated host.,0,snmp,snmp_snmp.sysMultiHostCpuSoftirq
+snmp.sysMultiHostCpuIowait,gauge,,,,[F5 BIG-IP] The time spent by the specified processor waiting for external I/O to complete for the associated host.,0,snmp,snmp_snmp.sysMultiHostCpuIowait
+snmp.sysTcpStatOpen,gauge,,,,[F5 BIG-IP] The number of current open connections.,0,snmp,snmp_snmp.sysTcpStatOpen
+snmp.sysTcpStatCloseWait,gauge,,,,[F5 BIG-IP] The number of current connections in CLOSE-WAIT/LAST-ACK.,0,snmp,snmp_snmp.sysTcpStatCloseWait
+snmp.sysTcpStatFinWait,gauge,,,,[F5 BIG-IP] The number of current connections in FIN-WAIT/CLOSING.,0,snmp,snmp_snmp.sysTcpStatFinWait
+snmp.sysTcpStatTimeWait,gauge,,,,[F5 BIG-IP] The number of current connections in TIME-WAIT.,0,snmp,snmp_snmp.sysTcpStatTimeWait
+snmp.sysTcpStatAccepts,count,,,,[F5 BIG-IP] The number of connections accepted.,0,snmp,snmp_snmp.sysTcpStatAccepts
+snmp.sysTcpStatAcceptfails,count,,,,[F5 BIG-IP] The number of connections not accepted.,0,snmp,snmp_snmp.sysTcpStatAcceptfails
+snmp.sysTcpStatConnects,count,,,,[F5 BIG-IP] The number of connections established.,0,snmp,snmp_snmp.sysTcpStatConnects
+snmp.sysTcpStatConnfails,count,,,,[F5 BIG-IP] The number of connection failures.,0,snmp,snmp_snmp.sysTcpStatConnfails
+snmp.sysUdpStatOpen,gauge,,,,[F5 BIG-IP] The number of current open connections.,0,snmp,snmp_snmp.sysUdpStatOpen
+snmp.sysUdpStatAccepts,count,,,,[F5 BIG-IP] The number of connections accepted.,0,snmp,snmp_snmp.sysUdpStatAccepts
+snmp.sysUdpStatAcceptfails,count,,,,[F5 BIG-IP] The number of connections not accepted.,0,snmp,snmp_snmp.sysUdpStatAcceptfails
+snmp.sysUdpStatConnects,count,,,,[F5 BIG-IP] The number of connections established.,0,snmp,snmp_snmp.sysUdpStatConnects
+snmp.sysUdpStatConnfails,count,,,,[F5 BIG-IP] The number of connection failures.,0,snmp,snmp_snmp.sysUdpStatConnfails
+snmp.sysClientsslStatCurConns,gauge,,,,[F5 BIG-IP] The current number of concurrent connections with established SSL sessions being maintained by the filter.,0,snmp,snmp_snmp.sysClientsslStatCurConns
+snmp.sysClientsslStatEncryptedBytesIn,count,,byte,,[F5 BIG-IP] The total encrypted bytes received.,0,snmp,snmp_snmp.sysClientsslStatEncryptedBytesIn
+snmp.sysClientsslStatEncryptedBytesOut,count,,byte,,[F5 BIG-IP] The total encrypted bytes sent.,0,snmp,snmp_snmp.sysClientsslStatEncryptedBytesOut
+snmp.sysClientsslStatDecryptedBytesIn,count,,byte,,[F5 BIG-IP] The total decrypted bytes received.,0,snmp,snmp_snmp.sysClientsslStatDecryptedBytesIn
+snmp.sysClientsslStatDecryptedBytesOut,count,,byte,,[F5 BIG-IP] The total decrypted bytes sent.,0,snmp,snmp_snmp.sysClientsslStatDecryptedBytesOut
+snmp.sysClientsslStatHandshakeFailures,count,,,,[F5 BIG-IP] The total number of handshake failures.,0,snmp,snmp_snmp.sysClientsslStatHandshakeFailures
+snmp.ifInErrors,count,,packet,,[F5 BIG-IP] The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.,0,snmp,snmp_snmp.ifInErrors
+snmp.ifOutErrors,count,,packet,,[F5 BIG-IP] The number of outbound packets that could not be transmitted because of errors.,0,snmp,snmp_snmp.ifOutErrors
+snmp.ifAdminStatus,gauge,,,,[F5 BIG-IP] The desired state of the interface.,0,snmp,snmp_snmp.ifAdminStatus
+snmp.entSensorValue,gauge,,,,[Cisco c3850] The most recent measurement seen by the sensor.,0,snmp,snmp_snmp.entSensorValue
+snmp.cefcFRUPowerAdminStatus,gauge,,,,[Cisco c3850] Administratively desired FRU power state.,0,snmp,snmp_snmp.cefcFRUPowerAdminStatus
+snmp.cefcFRUPowerOperStatus,gauge,,,,[Cisco c3850] Operational FRU power state.,0,snmp,snmp_snmp.cefcFRUPowerOperStatus
+snmp.cefcFRUCurrent,gauge,,,,[Cisco c3850] Current supplied by the FRU (positive values) or current required to operate the FRU (negative values).,0,snmp,snmp_snmp.cefcFRUCurrent
+snmp.cpmCPUTotalMonIntervalValue,gauge,,percent,,[Cisco c3850] The overall CPU busy percentage in the last cpmCPUMonInterval period.,0,snmp,snmp_snmp.cpmCPUTotalMonIntervalValue
+snmp.cpmCPUMemoryUsed,gauge,,,,[Cisco c3850] The overall CPU wide system memory currently in use.,0,snmp,snmp_snmp.cpmCPUMemoryUsed
+snmp.cpmCPUMemoryFree,gauge,,,,[Cisco c3850] The overall CPU wide system memory currently free.,0,snmp,snmp_snmp.cpmCPUMemoryFree
+snmp.cieIfLastInTime,gauge,,millisecond,,[Cisco c3850] The elapsed time in milliseconds since the last protocol input packet was received.,0,snmp,snmp_snmp.cieIfLastInTime
+snmp.cieIfLastOutTime,gauge,,millisecond,,[Cisco c3850] The elapsed time in milliseconds since the last protocol output packet was transmitted.,0,snmp,snmp_snmp.cieIfLastOutTime
+snmp.cieIfInputQueueDrops,gauge,,packet,,[Cisco c3850] The number of input packets dropped.,0,snmp,snmp_snmp.cieIfInputQueueDrops
+snmp.cieIfOutputQueueDrops,gauge,,packet,,[Cisco c3850] The number of output packets dropped by the interface even though no error was detected to prevent them being transmitted.,0,snmp,snmp_snmp.cieIfOutputQueueDrops
+snmp.cieIfResetCount,count,,,,[Cisco c3850] The number of times the interface was internally reset and brought up.,0,snmp,snmp_snmp.cieIfResetCount
+snmp.ifInErrors,count,,packet,,[Cisco c3850] The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.,0,snmp,snmp_snmp.ifInErrors
+snmp.ifOutErrors,count,,packet,,[Cisco c3850] The number of outbound packets that could not be transmitted because of errors.,0,snmp,snmp_snmp.ifOutErrors
+snmp.ifInDiscards,count,,packet,,[Cisco c3850] The number of inbound packets which were chosen to be discarded even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.,0,snmp,snmp_snmp.ifInDiscards
+snmp.ifHCInOctets,count,,,,[Cisco c3850] The total number of octets received on the interface including framing characters.,0,snmp,snmp_snmp.ifHCInOctets
+snmp.ifHCOutOctets,count,,,,[Cisco c3850] The total number of octets transmitted out of the interface including framing characters.,0,snmp,snmp_snmp.ifHCOutOctets
+snmp.ifOutDiscards,count,,packet,,[Cisco c3850] The number of outbound packets chosen to be discarded even though no errors had been detected to prevent their being transmitted.,0,snmp,snmp_snmp.ifOutDiscards
+snmp.ifAdminStatus,gauge,,,,[Cisco c3850] The desired state of the interface.,0,snmp,snmp_snmp.ifAdminStatus
+snmp.ifOperStatus,gauge,,,,[Cisco c3850] The current operational state of the interface.,0,snmp,snmp_snmp.ifOperStatus
+snmp.ifHCInOctets,count,,,,[Cisco c3850] The total number of octets received on the interface including framing characters.,0,snmp,snmp_snmp.ifHCInOctets
+snmp.ifHCInUcastPkts,count,,packet,,[Cisco c3850] The number of packets delivered by this sub-layer to a higher (sub-)layer not addressed to a multicast or broadcast address at this sub-layer.,0,snmp,snmp_snmp.ifHCInUcastPkts
+snmp.ifHCInBroadcastPkts,count,,packet,,[Cisco c3850] The number of packets delivered by this sub-layer to a higher (sub-)layer addressed to a broadcast address at this sub-layer.,0,snmp,snmp_snmp.ifHCInBroadcastPkts
+snmp.ifHCOutOctets,count,,,,[Cisco c3850] The total number of octets transmitted out of the interface including framing characters.,0,snmp,snmp_snmp.ifHCOutOctets
+snmp.ifHCOutUcastPkts,count,,packet,,[Cisco c3850] The total number of packets that higher-level protocols requested be transmitted that were not addressed to a multicast or broadcast address at this sub-layer including those discarded or not sent.,0,snmp,snmp_snmp.ifHCOutUcastPkts
+snmp.ifHCOutMulticastPkts,count,,packet,,[Cisco c3850] The total number of packets that higher-level protocols requested be transmitted that were addressed to a multicast address at this sub-layer including those discarded or not sent.,0,snmp,snmp_snmp.ifHCOutMulticastPkts
+snmp.ifHCOutBroadcastPkts,count,,packet,,[Cisco c3850] The total number of packets that higher-level protocols requested be transmitted addressed to a broadcast address at this sub-layer including those discarded or not sent.,0,snmp,snmp_snmp.ifHCOutBroadcastPkts
+snmp.entSensorValue,gauge,,,,[Cisco Nexus] The most recent measurement seen by the sensor.,0,snmp,snmp_snmp.entSensorValue
+snmp.cefcFRUPowerAdminStatus,gauge,,,,[Cisco Nexus] Administratively desired FRU power state.,0,snmp,snmp_snmp.cefcFRUPowerAdminStatus
+snmp.cefcFRUPowerOperStatus,gauge,,,,[Cisco Nexus] Operational FRU power state.,0,snmp,snmp_snmp.cefcFRUPowerOperStatus
+snmp.cefcFRUCurrent,gauge,,,,[Cisco Nexus] Current supplied by the FRU (positive values) or current required to operate the FRU (negative values).,0,snmp,snmp_snmp.cefcFRUCurrent
+snmp.cpmCPUTotalMonIntervalValue,gauge,,percent,,[Cisco Nexus] The overall CPU busy percentage in the last cpmCPUMonInterval period.,0,snmp,snmp_snmp.cpmCPUTotalMonIntervalValue
+snmp.cpmCPUMemoryUsed,gauge,,,,[Cisco Nexus] The overall CPU wide system memory which is currently under use.,0,snmp,snmp_snmp.cpmCPUMemoryUsed
+snmp.cpmCPUMemoryFree,gauge,,,,[Cisco Nexus] The overall CPU wide system memory which is currently free.,0,snmp,snmp_snmp.cpmCPUMemoryFree
+snmp.cieIfResetCount,count,,,,[Cisco Nexus] The number of times the interface was internally reset and brought up.,0,snmp,snmp_snmp.cieIfResetCount
+snmp.ifInErrors,count,,packet,,[Cisco Nexus] The number of inbound packets that contained errors preventing them from being deliverable to a higher-layer protocol.,0,snmp,snmp_snmp.ifInErrors
+snmp.ifOutErrors,count,,packet,,[Cisco Nexus] The number of outbound packets that could not be transmitted because of errors.,0,snmp,snmp_snmp.ifOutErrors
+snmp.ifInDiscards,count,,packet,,[Cisco Nexus] The number of inbound packets which were chosen to be discarded even though no errors had been detected to prevent their being deliverable to a higher-layer protocol.,0,snmp,snmp_snmp.ifInDiscards
+snmp.ifOutDiscards,count,,packet,,[Cisco Nexus] The number of outbound packets chosen to be discarded even though no errors had been detected to prevent their being transmitted.,0,snmp,snmp_snmp.ifOutDiscards
+snmp.ifAdminStatus,gauge,,,,[Cisco Nexus] The desired state of the interface.,0,snmp,snmp_snmp.ifAdminStatus
+snmp.ifOperStatus,gauge,,,,[Cisco Nexus] The current operational state of the interface.,0,snmp,snmp_snmp.ifOperStatus
+snmp.ifHCInOctets,count,,,,[Cisco Nexus] The total number of octets received on the interface including framing characters.,0,snmp,snmp_snmp.ifHCInOctets
+snmp.ifHCInUcastPkts,count,,packet,,[Cisco Nexus] The number of packets delivered by this sub-layer to a higher (sub-)layer not addressed to a multicast or broadcast address at this sub-layer.,0,snmp,snmp_snmp.ifHCInUcastPkts
+snmp.ifHCInBroadcastPkts,count,,packet,,[Cisco Nexus] The number of packets delivered by this sub-layer to a higher (sub-)layer addressed to a broadcast address at this sub-layer.,0,snmp,snmp_snmp.ifHCInBroadcastPkts
+snmp.ifHCOutOctets,count,,,,[Cisco Nexus] The total number of octets transmitted out of the interface including framing characters.,0,snmp,snmp_snmp.ifHCOutOctets
+snmp.ifHCOutUcastPkts,count,,packet,,[Cisco Nexus] The total number of packets that higher-level protocols requested be transmitted that were not addressed to a multicast or broadcast address at this sub-layer including those discarded or not sent.,0,snmp,snmp_snmp.ifHCOutUcastPkts
+snmp.ifHCOutMulticastPkts,count,,packet,,[Cisco Nexus] The total number of packets that higher-level protocols requested be transmitted that were addressed to a multicast address at this sub-layer including those discarded or not sent.,0,snmp,snmp_snmp.ifHCOutMulticastPkts
+snmp.ifHCOutBroadcastPkts,count,,packet,,[Cisco Nexus] The total number of packets that higher-level protocols requested be transmitted addressed to a broadcast address at this sub-layer including those discarded or not sent.,0,snmp,snmp_snmp.ifHCOutBroadcastPkts
+snmp.tcpActiveOpens,count,,,,[Cisco Nexus] The number of times that TCP connections have made a direct transition to the SYN-SENT state from the CLOSED state.,0,snmp,snmp_snmp.tcpActiveOpens
+snmp.tcpPassiveOpens,count,,,,[Cisco Nexus] The number of times TCP connections have made a direct transition to the SYN-RCVD state from the LISTEN state.,0,snmp,snmp_snmp.tcpPassiveOpens
+snmp.tcpAttemptFails,count,,,,"[Cisco Nexus] The number of times that TCP connections have made a direct transition to the CLOSED state from either the SYN-SENT state or the SYN-RCVD state, plus the number of times that TCP connections have made a direct transition to the LISTEN state from the SYN-RCVD state.",0,snmp,snmp_snmp.tcpAttemptFails
+snmp.tcpEstabResets,count,,,,[Cisco Nexus] The number of times that TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.,0,snmp,snmp_snmp.tcpEstabResets
+snmp.tcpCurrEstab,count,,,,[Cisco Nexus] The number of TCP connections for which the current state is either ESTABLISHED or CLOSE-WAIT.,0,snmp,snmp_snmp.tcpCurrEstab
+snmp.tcpHCInSegs,count,,segment,,"[Cisco Nexus] The total number of segments received, including those received in error.",0,snmp,snmp_snmp.tcpHCInSegs
+snmp.tcpHCOutSegs,count,,segment,,"[Cisco Nexus] The total number of segments sent, including those on current connections but excluding those containing only retransmitted octets.",0,snmp,snmp_snmp.tcpHCOutSegs
+snmp.tcpRetransSegs,count,,segment,,"[Cisco Nexus] The total number of segments retransmitted; that is, the number of TCP segments transmitted containing one or more previously transmitted octets.",0,snmp,snmp_snmp.tcpRetransSegs
+snmp.tcpInErrs,count,,segment,,"[Cisco Nexus] The total number of segments received in error (e.g., bad TCP checksums).",0,snmp,snmp_snmp.tcpInErrs
+snmp.tcpOutRsts,count,,segment,,[Cisco Nexus] The number of TCP segments sent containing the RST flag.,0,snmp,snmp_snmp.tcpOutRsts
+snmp.udpHCInDatagrams,count,,datagram,,"[Cisco Nexus] The total number of UDP datagrams delivered to UDP users, for devices that can receive more than 1 million UDP datagrams per second.",0,snmp,snmp_snmp.udpHCInDatagrams
+snmp.udpNoPorts,count,,datagram,,[Cisco Nexus] The total number of received UDP datagrams for which there was no application at the destination port.,0,snmp,snmp_snmp.udpNoPorts
+snmp.udpInErrors,count,,datagram,,[Cisco Nexus] The number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.,0,snmp,snmp_snmp.udpInErrors
+snmp.udpHCOutDatagrams,count,,datagram,,"[Cisco Nexus] The total number of UDP datagrams sent from this entity, for devices that can transmit more than 1 million UDP datagrams per second.",0,snmp,snmp_snmp.udpHCOutDatagrams
+snmp.devStatus,gauge,,,,[Cisco Meraki] The status of the device’s connection to the Meraki Cloud Controller,0,snmp,snmp_snmp.devStatus
+snmp.devClientCount,gauge,,,,[Cisco Meraki] The number of clients currently associated with the device.,0,snmp,snmp_snmp.devClientCount
+snmp.devInterfaceSentPkts,gauge,,packet,,[Cisco Meraki] The number of packets sent on this interface.,0,snmp,snmp_snmp.devInterfaceSentPkts
+snmp.devInterfaceRecvPkts,gauge,,packet,,[Cisco Meraki] The number of packets received on this interface.,0,snmp,snmp_snmp.devInterfaceRecvPkts
+snmp.devInterfaceSentBytes,gauge,,byte,,[Cisco Meraki] The number of bytes sent on this interface.,0,snmp,snmp_snmp.devInterfaceSentBytes
+snmp.devInterfaceRecvBytes,gauge,,byte,,[Cisco Meraki] The number of bytes received on this interface.,0,snmp,snmp_snmp.devInterfaceRecvBytes
+snmp.systemStateChassisStatus,gauge,,,,[Dell iDRAC] The status of this system chassis.,0,snmp,snmp_snmp.systemStateChassisStatus
+snmp.systemStatePowerUnitStatusRedundancy,gauge,,,,[Dell iDRAC] The combined redundancy status of all power units of this system.,0,snmp,snmp_snmp.systemStatePowerUnitStatusRedundancy
+snmp.systemStatePowerSupplyStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all power supplies of this system.,0,snmp,snmp_snmp.systemStatePowerSupplyStatusCombined
+snmp.systemStateAmperageStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all amperage probes of this system.,0,snmp,snmp_snmp.systemStateAmperageStatusCombined
+snmp.systemStatePowerSupplyStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all power supplies of this system.,0,snmp,snmp_snmp.systemStatePowerSupplyStatusCombined
+snmp.systemStateCoolingUnitStatusRedundancy,gauge,,,,[Dell iDRAC] The combined redundancy status of all cooling units of this system.,0,snmp,snmp_snmp.systemStateCoolingUnitStatusRedundancy
+snmp.systemStateCoolingDeviceStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all cooling devices of this system.,0,snmp,snmp_snmp.systemStateCoolingDeviceStatusCombined
+snmp.systemStateTemperatureStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all temperature probes of this system.,0,snmp,snmp_snmp.systemStateTemperatureStatusCombined
+snmp.systemStateMemoryDeviceStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all memory devices of this system.,0,snmp,snmp_snmp.systemStateMemoryDeviceStatusCombined
+snmp.systemStateChassisIntrusionStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all intrusion detection devices of this system chassis.,0,snmp,snmp_snmp.systemStateChassisIntrusionStatusCombined
+snmp.systemStatePowerUnitStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all power units of this chassis.,0,snmp,snmp_snmp.systemStatePowerUnitStatusCombined
+snmp.systemStateCoolingUnitStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all cooling units of this system.,0,snmp,snmp_snmp.systemStateCoolingUnitStatusCombined
+snmp.systemStateProcessorDeviceStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all processor devices of this system.,0,snmp,snmp_snmp.systemStateProcessorDeviceStatusCombined
+snmp.systemStateTemperatureStatisticsStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all temperature statistics objects of this system.,0,snmp,snmp_snmp.systemStateTemperatureStatisticsStatusCombined
+snmp.physicalDiskState,gauge,,,,"[Dell iDRAC] The current state of this physical disk. Possible states: 1 - The current state could not be determined., 2 - The physical disk is available for use, but no RAID configuration has been assigned. 3- A RAID configuration has been assigned to the physical disk. 4- The physical disk has been moved from another controller and contains all or some portion of a virtual disk. 5 - The physical disk is not available to the RAID controller. 6 - The physical disk is currently blocked by controller. 7 - The physical disk is not operational. 8 - The physical disk is not a RAID capable disk. 9 - The physical disk has been removed. 10 - The physical disk media has been placed in read only mode.",0,snmp,snmp_snmp.physicalDiskState
+snmp.physicalDiskCapacityInMB,gauge,,mebibyte,,[Dell iDRAC] The size of the physical disk in megabytes.,0,snmp,snmp_snmp.physicalDiskCapacityInMB
+snmp.physicalDiskUsedSpaceInMB,gauge,,mebibyte,,[Dell iDRAC] The amount of used space in megabytes on the physical disk.,0,snmp,snmp_snmp.physicalDiskUsedSpaceInMB
+snmp.physicalDiskFreeSpaceInMB,gauge,,mebibyte,,[Dell iDRAC] The amount of free space in megabytes on the physical disk.,0,snmp,snmp_snmp.physicalDiskFreeSpaceInMB
+snmp.enclosurePowerSupplyState,gauge,,,,[Dell iDRAC] The current state of this power supply unit. Possible states: 1- The current state could not be determined. 2- The power supply unit is operating normally. 3- The power supply unit has encountered a hardware problem or is not responding. 4- The power supply unit is no longer connected to the enclosure or there exists a problem communicating to it. 5- The power supply unit is unstable.,0,snmp,snmp_snmp.enclosurePowerSupplyState
+snmp.adapterRxPackets,count,,packet,,[Dell iDRAC] Total packets received.,0,snmp,snmp_snmp.adapterRxPackets
+snmp.adapterTxPackets,count,,packet,,[Dell iDRAC] Total packets transmitted.,0,snmp,snmp_snmp.adapterTxPackets
+snmp.adapterRxBytes,count,,byte,,[Dell iDRAC] Total number of bytes received.,0,snmp,snmp_snmp.adapterRxBytes
+snmp.adapterTxBytes,count,,byte,,[Dell iDRAC] Total number of bytes transmitted.,0,snmp,snmp_snmp.adapterTxBytes
+snmp.adapterRxErrors,count,,packet,,[Dell iDRAC] Total number of packets received with errors (packets that failed to reach the protocol).,0,snmp,snmp_snmp.adapterRxErrors
+snmp.adapterTxErrors,count,,packet,,[Dell iDRAC] Total number of packets that failed to transmit.,0,snmp,snmp_snmp.adapterTxErrors
+snmp.adapterRxDropped,count,,packet,,[Dell iDRAC] Total number of receive packets dropped due to overrun.,0,snmp,snmp_snmp.adapterRxDropped
+snmp.adapterTxDropped,count,,packet,,[Dell iDRAC] Total number of transmit packets dropped due to successive collisions.,0,snmp,snmp_snmp.adapterTxDropped
+snmp.adapterRxMulticast,count,,packet,,[Dell iDRAC] Total number of Multicast packets received.,0,snmp,snmp_snmp.adapterRxMulticast
+snmp.adapterCollisions,count,,,,[Dell iDRAC] Total number of single collisions.,0,snmp,snmp_snmp.adapterCollisions
