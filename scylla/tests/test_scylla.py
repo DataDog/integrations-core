@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.scylla import ScyllaCheck
 
 from .common import INSTANCE_DEFAULT_GROUPS, INSTANCE_DEFAULT_METRICS, get_metrics
@@ -47,6 +47,16 @@ def test_instance_invalid_group_check(aggregator, db_instance, mock_db_data):
     instance['metric_groups'] = additional_metrics
 
     with pytest.raises(ConfigurationError):
+        ScyllaCheck('scylla', {}, [instance])
+
+    aggregator.assert_service_check('scylla.prometheus.health', count=0)
+
+
+def test_invalid_instance(aggregator, db_instance, mock_db_data):
+    instance = deepcopy(db_instance)
+    instance.pop('instance_endpoint')
+
+    with pytest.raises(CheckException):
         ScyllaCheck('scylla', {}, [instance])
 
     aggregator.assert_service_check('scylla.prometheus.health', count=0)

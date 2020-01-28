@@ -20,30 +20,26 @@ class ScyllaCheck(OpenMetricsBaseCheck):
 
         instance = instances[0]
 
-        if 'instance_endpoint' in instance:
-            endpoint = instance.get('instance_endpoint')
-            namespace = 'scylla'
+        endpoint = instance.get('instance_endpoint')
+        namespace = 'scylla'
 
-            # extract additional metrics requested and validate the correct names
-            metric_groups = instance.get('metric_groups', [])
-            additional_metrics = []
-            if metric_groups:
-                errors = []
-                for group in metric_groups:
-                    try:
-                        additional_metrics.append(ADDITIONAL_METRICS_MAP[group])
-                    except KeyError:
-                        errors.append(group)
+        # extract additional metrics requested and validate the correct names
+        metric_groups = instance.get('metric_groups', [])
+        additional_metrics = []
+        if metric_groups:
+            errors = []
+            for group in metric_groups:
+                try:
+                    additional_metrics.append(ADDITIONAL_METRICS_MAP[group])
+                except KeyError:
+                    errors.append(group)
 
-                if errors:
-                    raise ConfigurationError(
-                        'Invalid metric_groups found in scylla conf.yaml: {}'.format(', '.join(errors))
-                    )
+            if errors:
+                raise ConfigurationError(
+                    'Invalid metric_groups found in scylla conf.yaml: {}'.format(', '.join(errors))
+                )
 
-            metrics = INSTANCE_DEFAULT_METRICS + additional_metrics
-
-        else:
-            raise ConfigurationError("Must provide at least one endpoint per instance")
+        metrics = INSTANCE_DEFAULT_METRICS + additional_metrics
 
         tags = instance.get('tags', [])
         tags.append('endpoint_host:{}'.format(urlparse(endpoint).hostname))
