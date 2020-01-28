@@ -11,7 +11,7 @@ from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, Se
 
 class TestSimilarAssertionMessages(object):
     def test_build_similar_elements_msg(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.gauge('test.another_similar_metric', 0)
         check.gauge('test.very_different_metric', 0)
@@ -35,7 +35,7 @@ Score   Most similar
         assert expected_msg == actual_msg, delta
 
     def test__build_similar_elements__metric_name(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.gauge('test.another_similar_metric', 0)
         check.gauge('test.very_different_metric', 0)
@@ -54,7 +54,7 @@ Score   Most similar
         assert expected_second_most_similar_metric.name == 'test.another_similar_metric'
 
     def test__build_similar_elements__metric_value(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.gauge('test.similar_metric1', 10)
         check.gauge('test.similar_metric2', 20)
@@ -69,7 +69,7 @@ Score   Most similar
         assert expected_most_similar_metric.name == 'test.similar_metric2'
 
     def test__build_similar_elements__metric_tags(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.gauge('test.similar_metric2', 10, tags=['name:less_similar_tag'])
         check.gauge('test.similar_metric1', 10, tags=['name:similar_tag'])
@@ -86,7 +86,7 @@ Score   Most similar
         assert similar_metrics[2][1].name == 'test.similar_metric3'
 
     def test__build_similar_elements__metric_hostname(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.gauge('test.similar_metric2', 10, hostname='less_similar_host')
         check.gauge('test.similar_metric1', 10, hostname='similar_host')
@@ -126,7 +126,7 @@ Score   Most similar
         assert similar_metrics[2][1].name == 'test.similar_metric3'
 
     def test__build_similar_elements__service_check_name(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.service_check('test.second_similar_service_check', AgentCheck.OK)
         check.service_check('test.very_different_service_check', AgentCheck.OK)
@@ -145,7 +145,7 @@ Score   Most similar
         assert similar_service_checks[3][1].name == 'test.very_very_different'
 
     def test__build_similar_elements__service_check_status(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.service_check('test.similar1', AgentCheck.OK)
         check.service_check('test.similar2', AgentCheck.CRITICAL)
@@ -160,7 +160,7 @@ Score   Most similar
         assert similar_service_checks[0][1].name == 'test.similar2'
 
     def test__build_similar_elements__service_check_message(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.service_check('test.similar1', AgentCheck.OK, message="aa")
         check.service_check('test.similar2', AgentCheck.OK, message="bb")
@@ -176,7 +176,7 @@ Score   Most similar
         assert similar_service_checks[0][1].name == 'test.similar3'
 
     def test__build_similar_elements__service_check_tags(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.service_check('test.similar2', AgentCheck.OK, tags=['name:less_similar_tag'])
         check.service_check('test.similar1', AgentCheck.OK, tags=['name:similar_tag'])
@@ -193,7 +193,7 @@ Score   Most similar
         assert similar_service_checks[2][1].name == 'test.similar3'
 
     def test__build_similar_elements__service_check_hostname(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.service_check('test.similar1', AgentCheck.OK, hostname="aa")
         check.service_check('test.similar2', AgentCheck.OK, hostname="bb")
@@ -209,7 +209,7 @@ Score   Most similar
         assert similar_service_checks[0][1].name == 'test.similar3'
 
     def test__build_similar_elements__histogram_buckets(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.submit_histogram_bucket('histogram.bucket3', 1, 0.0, 10.0, True, "hostname", ["tag2"])
         check.submit_histogram_bucket('histogram.bucket2', 1, 125.0, 312.0, True, "hostname", ["tag1"])

@@ -3,6 +3,7 @@ import os
 import pytest
 from mock import patch
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'bearer_tokens')
@@ -12,6 +13,7 @@ class TestSignature:
     INIT_CONFIG = {'my_init_config': 'foo bar init config'}
     AGENT_CONFIG = {'my_agent_config': 'foo bar agent config'}
 
+    @pytest.mark.xfail(reason='Agent 6+ will always pass exactly one instance in practice', raises=ConfigurationError)
     def test_default_legacy_basic(self):
         check = OpenMetricsBaseCheck('openmetrics_check', self.INIT_CONFIG, self.AGENT_CONFIG)
 
@@ -61,6 +63,7 @@ class TestSignature:
         assert check.name == 'openmetrics_check'
         assert check.init_config == {'my_init_config': 'foo bar init config'}
 
+    @pytest.mark.xfail(reason='Agent 6+ will always pass exactly one instance in practice', raises=ConfigurationError)
     def test_default_instances_legacy_kwarg(self):
         instance1 = {'prometheus_url': 'endpoint1'}
         instance2 = {'prometheus_url': 'endpoint2'}

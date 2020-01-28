@@ -17,6 +17,7 @@ from six import iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
+from ..errors import ConfigurationError
 from ..utils.agent.utils import should_profile_memory
 from ..utils.common import ensure_bytes, to_string
 from ..utils.http import RequestsWrapper
@@ -156,8 +157,12 @@ class AgentCheck(object):
                 # new-style init: the 3rd argument is `instances`
                 self.instances = args[2]
 
-        # Agent 6+ will only have one instance
-        self.instance = self.instances[0] if self.instances else None
+        if len(self.instances) != 1:
+            # This should *never* occur in practice, because Agent 6+ guarantees that exactly 1 instance is passed to
+            # a check constructor. If it does, then something is very wrong!
+            raise ConfigurationError('Expected exactly one instance, got {}'.format(len(self.instances)))
+
+        self.instance = self.instances[0]
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()

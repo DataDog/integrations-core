@@ -15,7 +15,7 @@ from datadog_checks.base.checks.kube_leader import ElectionRecord
 
 # Trigger lazy imports
 try:
-    KubeLeaderElectionBaseCheck().check({})
+    KubeLeaderElectionBaseCheck('', {}, [{}]).check({})
 except Exception:
     pass
 
@@ -167,14 +167,14 @@ class TestElectionRecord:
 @mock.patch('datadog_checks.base.checks.kube_leader.mixins.config')
 class TestClientConfig:
     def test_config_incluster(self, config):
-        c = KubeLeaderElectionBaseCheck()
+        c = KubeLeaderElectionBaseCheck('', {}, [{}])
         c.check({})
         config.load_incluster_config.assert_called_once()
 
     @mock.patch('datadog_checks.base.checks.kube_leader.mixins.datadog_agent')
     def test_config_kubeconfig(self, datadog_agent, config):
         datadog_agent.get_config.return_value = "/file/path"
-        c = KubeLeaderElectionBaseCheck()
+        c = KubeLeaderElectionBaseCheck('', {}, [{}])
         c.check({})
         datadog_agent.get_config.assert_called_once_with('kubernetes_kubeconfig_path')
         config.load_kube_config.assert_called_once_with(config_file="/file/path")
@@ -183,7 +183,7 @@ class TestClientConfig:
 class TestBaseCheck:
     def test_valid_endpoints(self, aggregator, mock_read_endpoints, mock_incluster):
         mock_read_endpoints.return_value = make_fake_object(RAW_VALID_RECORD)
-        c = KubeLeaderElectionBaseCheck()
+        c = KubeLeaderElectionBaseCheck('', {}, [{}])
         c.check(EP_INSTANCE)
 
         assert c.get_warnings() == []
@@ -195,7 +195,7 @@ class TestBaseCheck:
 
     def test_valid_configmap(self, aggregator, mock_read_configmap, mock_incluster):
         mock_read_configmap.return_value = make_fake_object(RAW_VALID_RECORD)
-        c = KubeLeaderElectionBaseCheck()
+        c = KubeLeaderElectionBaseCheck('', {}, [{}])
         c.check(CM_INSTANCE)
 
         assert c.get_warnings() == []
@@ -207,7 +207,7 @@ class TestBaseCheck:
 
     def test_empty_configmap(self, aggregator, mock_read_configmap, mock_incluster):
         mock_read_configmap.return_value = make_fake_object()
-        c = KubeLeaderElectionBaseCheck()
+        c = KubeLeaderElectionBaseCheck('', {}, [{}])
         c.check(CM_INSTANCE)
 
         assert len(c.get_warnings()) == 1
@@ -217,7 +217,7 @@ class TestBaseCheck:
         mock_read_configmap.return_value = make_fake_object(
             make_record(holder="me", duration=30, renew=datetime.utcnow(), acquire="2018-12-18T12:32:22Z")
         )
-        c = KubeLeaderElectionBaseCheck()
+        c = KubeLeaderElectionBaseCheck('', {}, [{}])
         c.check(CM_INSTANCE)
 
         assert c.get_warnings() == []
@@ -228,7 +228,7 @@ class TestBaseCheck:
 
     def test_invalid_configmap(self, aggregator, mock_read_configmap, mock_incluster):
         mock_read_configmap.return_value = make_fake_object(make_record(holder="me"))
-        c = KubeLeaderElectionBaseCheck()
+        c = KubeLeaderElectionBaseCheck('', {}, [{}])
         c.check(CM_INSTANCE)
 
         assert c.get_warnings() == []

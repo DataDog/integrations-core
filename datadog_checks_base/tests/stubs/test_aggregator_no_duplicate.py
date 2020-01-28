@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck
 
 
 def test_assert_no_duplicate_message(aggregator):
-    check = AgentCheck()
+    check = AgentCheck('', {}, [{}])
     check.gauge('check.metric.dup1', 1, tags=['aa'])
     check.gauge('check.metric.dup1', 2, tags=['aa'])
     check.gauge('check.metric.dup2', 3, tags=['aa'])
@@ -103,7 +103,7 @@ Duplicate metrics found:
     ],
 )
 def test_assert_no_duplicate_metrics_cases(aggregator, case_name, metrics, expect_assertion_error):
-    check = AgentCheck()
+    check = AgentCheck('', {}, [{}])
 
     for metric_params in metrics:
         metric_type = metric_params.pop("type")
@@ -166,7 +166,7 @@ def test_assert_no_duplicate_metrics_cases(aggregator, case_name, metrics, expec
     ],
 )
 def test_assert_no_duplicate_service_checks_cases(aggregator, case_name, service_checks, expect_assertion_error):
-    check = AgentCheck()
+    check = AgentCheck('', {}, [{}])
 
     for metric_params in service_checks:
         check.service_check(**metric_params)

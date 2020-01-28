@@ -10,7 +10,7 @@ import mock
 import pytest
 from six import PY3
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base import __version__ as base_package_version
 from datadog_checks.base import to_string
 from datadog_checks.base.checks.base import datadog_agent
@@ -20,11 +20,6 @@ def test_instance():
     """
     Simply assert the class can be instantiated
     """
-    # rely on default
-    check = AgentCheck()
-    assert check.init_config == {}
-    assert check.instances == []
-
     # pass dict for 'init_config', a list for 'instances'
     init_config = {'foo': 'bar'}
     instances = [{'bar': 'baz'}]
@@ -32,9 +27,16 @@ def test_instance():
     assert check.init_config == {'foo': 'bar'}
     assert check.instances == [{'bar': 'baz'}]
 
+    # Verify that we enforce passing exactly one instance, i.e. we reflect what
+    # the Agent will do in practice.
+    with pytest.raises(ConfigurationError):
+        AgentCheck(instances=[])
+    with pytest.raises(ConfigurationError):
+        AgentCheck(instances=[{'name': 'first'}, {'name': 'second'}])
+
 
 def test_check_version():
-    check = AgentCheck()
+    check = AgentCheck('', {}, [{}])
 
     assert check.check_version == base_package_version
 
@@ -44,14 +46,14 @@ def test_load_config():
 
 
 def test_log_critical_error():
-    check = AgentCheck()
+    check = AgentCheck('', {}, [{}])
 
     with pytest.raises(NotImplementedError):
         check.log.critical('test')
 
 
 def test_warning_ok():
-    check = AgentCheck()
+    check = AgentCheck('', {}, [{}])
 
     check.warning("foo")
     check.warning("hello %s%s", "world", "!")
@@ -60,7 +62,7 @@ def test_warning_ok():
 
 
 def test_warning_args_errors():
-    check = AgentCheck()
+    check = AgentCheck('', {}, [{}])
 
     check.warning("should not raise error: %s")
 
@@ -143,29 +145,37 @@ def test_warning_args_errors():
                 'instance': {'foo': 'bar'},
             },
         ),
-        (
+        pytest.param(
             'agent 5 signature: no instances',
-            AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}),
+            lambda: AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}),
             {
                 'name': 'check_name',
                 'init_config': {'init_conf1': 'init_value1'},
                 'agentConfig': {'agent_conf1': 'agent_value1'},
                 'instance': None,
             },
+            marks=pytest.mark.xfail(
+                reason='Agent 6+ will always pass exactly one instance in practice.', raises=ConfigurationError
+            ),
         ),
-        (
+        pytest.param(
             'agent 5 signature: no instances and agentConfig as kwarg',
-            AgentCheck('check_name', {'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}),
+            lambda: AgentCheck(
+                'check_name', {'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}
+            ),
             {
                 'name': 'check_name',
                 'init_config': {'init_conf1': 'init_value1'},
                 'agentConfig': {'agent_conf1': 'agent_value1'},
                 'instance': None,
             },
+            marks=pytest.mark.xfail(
+                reason='Agent 6+ will always pass exactly one instance in practice.', raises=ConfigurationError
+            ),
         ),
-        (
+        pytest.param(
             'agent 5 signature: no instances and init_config, agentConfig as kwarg',
-            AgentCheck(
+            lambda: AgentCheck(
                 'check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}
             ),
             {
@@ -174,10 +184,13 @@ def test_warning_args_errors():
                 'agentConfig': {'agent_conf1': 'agent_value1'},
                 'instance': None,
             },
+            marks=pytest.mark.xfail(
+                reason='Agent 6+ will always pass exactly one instance in practice.', raises=ConfigurationError
+            ),
         ),
-        (
+        pytest.param(
             'agent 5 signature: no instances and name, init_config, agentConfig as kwarg',
-            AgentCheck(
+            lambda: AgentCheck(
                 name='check_name',
                 init_config={'init_conf1': 'init_value1'},
                 agentConfig={'agent_conf1': 'agent_value1'},
@@ -188,6 +201,9 @@ def test_warning_args_errors():
                 'agentConfig': {'agent_conf1': 'agent_value1'},
                 'instance': None,
             },
+            marks=pytest.mark.xfail(
+                reason='Agent 6+ will always pass exactly one instance in practice.', raises=ConfigurationError
+            ),
         ),
         (
             'agent 6 signature: only args (instances as list)',
@@ -242,27 +258,30 @@ def test_warning_args_errors():
     ],
 )
 def test_agent_signature(case_name, check, expected_attributes):
+    if callable(check):
+        # Allow lazily-defined check objects so that init-time exceptions are raised within here.
+        check = check()
     actual_attributes = {attr: getattr(check, attr) for attr in expected_attributes}
     assert expected_attributes == actual_attributes
 
 
 class TestMetricNormalization:
     def test_default(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = u'Klüft inför på fédéral'
         normalized_metric_name = 'Kluft_infor_pa_federal'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_fix_case(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = u'Klüft inför på fédéral'
         normalized_metric_name = 'kluft_infor_pa_federal'
 
         assert check.normalize(metric_name, fix_case=True) == normalized_metric_name
 
     def test_prefix(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = u'metric'
         prefix = u'somePrefix'
         normalized_metric_name = 'somePrefix.metric'
@@ -270,7 +289,7 @@ class TestMetricNormalization:
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
 
     def test_prefix_bytes(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = u'metric'
         prefix = b'some'
         normalized_metric_name = 'some.metric'
@@ -278,7 +297,7 @@ class TestMetricNormalization:
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
 
     def test_prefix_unicode_metric_bytes(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = b'metric'
         prefix = u'some'
         normalized_metric_name = 'some.metric'
@@ -286,7 +305,7 @@ class TestMetricNormalization:
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
 
     def test_prefix_fix_case(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = b'metric'
         prefix = u'somePrefix'
         normalized_metric_name = 'some_prefix.metric'
@@ -294,28 +313,28 @@ class TestMetricNormalization:
         assert check.normalize(metric_name, fix_case=True, prefix=prefix) == normalized_metric_name
 
     def test_underscores_redundant(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = u'a_few__redundant___underscores'
         normalized_metric_name = 'a_few_redundant_underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_underscores_at_ends(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = u'_some_underscores_'
         normalized_metric_name = 'some_underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_underscores_and_dots(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = u'some_.dots._and_._underscores'
         normalized_metric_name = 'some.dots.and.underscores'
 
         assert check.normalize(metric_name) == normalized_metric_name
 
     def test_invalid_chars_and_underscore(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = u'metric.hello++aaa$$_bbb'
         normalized_metric_name = 'metric.hello_aaa_bbb'
 
@@ -334,13 +353,13 @@ class TestMetricNormalization:
     ],
 )
 def test_normalize_tag(case, tag, expected_tag):
-    check = AgentCheck()
+    check = AgentCheck('', {}, [{}])
     assert check.normalize_tag(tag) == expected_tag, 'Failed case: {}'.format(case)
 
 
 class TestMetrics:
     def test_namespace(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         check.__NAMESPACE__ = 'test'
 
         check.gauge('metric', 0)
@@ -348,7 +367,7 @@ class TestMetrics:
         aggregator.assert_metric('test.metric')
 
     def test_namespace_override(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         check.__NAMESPACE__ = 'test'
 
         methods = ('gauge', 'count', 'monotonic_count', 'rate', 'histogram', 'historate', 'increment', 'decrement')
@@ -358,7 +377,7 @@ class TestMetrics:
         aggregator.assert_metric('metric', count=len(methods))
 
     def test_non_float_metric(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         metric_name = 'test_metric'
         with pytest.raises(ValueError):
             check.gauge(metric_name, '85k')
@@ -367,7 +386,7 @@ class TestMetrics:
 
 class TestEvents:
     def test_valid_event(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         event = {
             "event_type": "new.event",
             "msg_title": "new test event",
@@ -381,7 +400,7 @@ class TestEvents:
 
     @pytest.mark.parametrize('msg_text', [u'test-π', 'test-π', b'test-\xcf\x80'])
     def test_encoding(self, aggregator, msg_text):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         event = {
             'event_type': 'new.event',
             'msg_title': 'new test event',
@@ -394,7 +413,7 @@ class TestEvents:
         aggregator.assert_event(to_string(msg_text), tags=['∆', 'Ω-bar'])
 
     def test_namespace(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         check.__NAMESPACE__ = 'test'
         event = {
             'event_type': 'new.event',
@@ -410,7 +429,7 @@ class TestEvents:
 
 class TestServiceChecks:
     def test_valid_sc(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
 
         check.service_check("testservicecheck", AgentCheck.OK, tags=None, message="")
         aggregator.assert_service_check("testservicecheck", status=AgentCheck.OK)
@@ -434,14 +453,14 @@ class TestServiceChecks:
         aggregator.assert_service_check("testservicecheckwithnonemessage", status=AgentCheck.OK)
 
     def test_namespace(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         check.__NAMESPACE__ = 'test'
 
         check.service_check('service_check', AgentCheck.OK)
         aggregator.assert_service_check('test.service_check', status=AgentCheck.OK)
 
     def test_namespace_override(self, aggregator):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         check.__NAMESPACE__ = 'test'
 
         check.service_check('service_check', AgentCheck.OK, raw=True)
@@ -450,7 +469,7 @@ class TestServiceChecks:
 
 class TestTags:
     def test_default_string(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         tag = 'default:string'
         tags = [tag]
 
@@ -462,7 +481,7 @@ class TestTags:
         assert normalized_tag is tag
 
     def test_bytes_string(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         tag = b'bytes:string'
         tags = [tag]
 
@@ -478,7 +497,7 @@ class TestTags:
             assert normalized_tag is tag
 
     def test_unicode_string(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         tag = u'unicode:string'
         tags = [tag]
 
@@ -494,7 +513,7 @@ class TestTags:
             assert normalized_tag == tag.encode('utf-8')
 
     def test_unicode_device_name(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         tags = []
         device_name = u'unicode_string'
 
@@ -504,7 +523,7 @@ class TestTags:
         assert isinstance(normalized_device_tag, str if PY3 else bytes)
 
     def test_duplicated_device_name(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         tags = []
         device_name = 'foo'
         check._normalize_tags_type(tags, device_name)
@@ -512,7 +531,7 @@ class TestTags:
         assert len(normalized_tags) == 1
 
     def test_none_value(self, caplog):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         tags = [None, 'tag:foo']
 
         normalized_tags = check._normalize_tags_type(tags, None)
@@ -523,14 +542,14 @@ class TestTags:
         """
         Tests that the external_host_tag modifies in place the list of tags in the provided object
         """
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         external_host_tags = [('hostname', {'src_name': ['key1:val1']})]
         with mock.patch.object(check, '_normalize_tags_type', return_value=['normalize:tag']):
             check.set_external_tags(external_host_tags)
             assert external_host_tags == [('hostname', {'src_name': ['normalize:tag']})]
 
     def test_external_hostname(self):
-        check = AgentCheck()
+        check = AgentCheck('', {}, [{}])
         external_host_tags = [(u'hostnam\xe9', {'src_name': ['key1:val1']})]
         with mock.patch.object(datadog_agent, 'set_external_tags') as set_external_tags:
             check.set_external_tags(external_host_tags)
@@ -546,7 +565,7 @@ class LimitedCheck(AgentCheck):
 
 class TestLimits:
     def test_context_uid(self, aggregator):
-        check = LimitedCheck()
+        check = LimitedCheck('', {}, [{}])
 
         # Test stability of the hash against tag ordering
         uid = check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], None)
@@ -560,7 +579,7 @@ class TestLimits:
         assert uid != check._context_uid(aggregator.GAUGE, "test.metric", ["one", "two"], "host")
 
     def test_metric_limit_gauges(self, aggregator):
-        check = LimitedCheck()
+        check = LimitedCheck('', {}, [{}])
         assert check.get_warnings() == []
 
         for _ in range(0, 10):
@@ -574,7 +593,7 @@ class TestLimits:
         assert len(aggregator.metrics("metric")) == 10
 
     def test_metric_limit_count(self, aggregator):
-        check = LimitedCheck()
+        check = LimitedCheck('', {}, [{}])
         assert check.get_warnings() == []
 
         # Multiple calls for a single set of (metric_name, tags) should not trigger

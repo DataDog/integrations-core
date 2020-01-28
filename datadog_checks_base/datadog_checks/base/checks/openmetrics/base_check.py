@@ -62,21 +62,8 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.default_namespace = default_namespace
 
         # pre-generate the scraper configurations
-
-        if 'instances' in kwargs:
-            instances = kwargs['instances']
-        elif len(args) == 4:
-            # instances from agent 5 signature
-            instances = args[3]
-        elif isinstance(args[2], (tuple, list)):
-            # instances from agent 6 signature
-            instances = args[2]
-        else:
-            instances = None
-
-        if instances is not None:
-            for instance in instances:
-                self.get_scraper_config(instance)
+        for instance in self.instances:
+            self.get_scraper_config(instance)
 
     def check(self, instance):
         # Get the configuration for this specific instance
@@ -90,14 +77,15 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         self.process(scraper_config)
 
-    def get_scraper_config(self, instance):
+    def get_scraper_config(self, instance, override_existing=False):
+        # NOTE: 'override_existing=True' is meant for testing purposes only.
         endpoint = instance.get('prometheus_url')
 
         if endpoint is None:
             raise CheckException("Unable to find prometheus URL in config file.")
 
         # If we've already created the corresponding scraper configuration, return it
-        if endpoint in self.config_map:
+        if endpoint in self.config_map and not override_existing:
             return self.config_map[endpoint]
 
         # Otherwise, we create the scraper configuration

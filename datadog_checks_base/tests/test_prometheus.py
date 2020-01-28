@@ -53,7 +53,7 @@ class SortedTagsPrometheusCheck(PrometheusCheck):
 
 @pytest.fixture
 def mocked_prometheus_check():
-    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    check = PrometheusCheck('prometheus_check', {}, [{}])
     check.gauge = mock.MagicMock()
     check.rate = mock.MagicMock()
     check.log = logging.getLogger('datadog-prometheus.test')
@@ -66,12 +66,12 @@ def mocked_prometheus_check():
 
 @pytest.fixture
 def p_check():
-    return PrometheusCheck('prometheus_check', {}, {}, {})
+    return PrometheusCheck('prometheus_check', {}, [{}])
 
 
 @pytest.fixture
 def sorted_tags_check():
-    return SortedTagsPrometheusCheck('prometheus_check', {}, {}, {})
+    return SortedTagsPrometheusCheck('prometheus_check', {}, [{}])
 
 
 @pytest.fixture
@@ -1896,7 +1896,7 @@ def mock_get():
 
 def test_health_service_check_ok(mock_get):
     """ Tests endpoint health service check OK """
-    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    check = PrometheusCheck('prometheus_check', {}, [{}])
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
@@ -1908,7 +1908,7 @@ def test_health_service_check_ok(mock_get):
 
 def test_health_service_check_failing():
     """ Tests endpoint health service check failing """
-    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    check = PrometheusCheck('prometheus_check', {}, [{}])
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
@@ -1922,7 +1922,7 @@ def test_health_service_check_failing():
 def test_set_prometheus_timeout():
     """ Tests set_prometheus_timeout function call from a PrometheusCheck"""
     # no timeout specified, should be default 10
-    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    check = PrometheusCheck('prometheus_check', {}, [{}])
     instance_default = {
         'prometheus_url': 'http://localhost:10249/metrics',
         'namespace': 'foobar',
@@ -1932,7 +1932,7 @@ def test_set_prometheus_timeout():
     assert check.prometheus_timeout == 10
 
     # timeout set to 3
-    check2 = PrometheusCheck('prometheus_check', {}, {}, {})
+    check2 = PrometheusCheck('prometheus_check', {}, [{}])
     instance_timeout_set = {
         'prometheus_timeout': 3,
         'prometheus_url': 'http://localhost:10249/metrics',
@@ -1944,7 +1944,7 @@ def test_set_prometheus_timeout():
 
 
 def test_text_filter_input():
-    check = PrometheusCheck('prometheus_check', {}, {}, {})
+    check = PrometheusCheck('prometheus_check', {}, [{}])
     check._text_filter_blacklist = ["string1", "string2"]
 
     lines_in = [

@@ -26,9 +26,6 @@ from .mixins import PrometheusScraperMixin
 class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
     DEFAULT_METRIC_LIMIT = 2000
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        super(PrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
-
     def check(self, instance):
         """
         check should take care of getting the url and other params

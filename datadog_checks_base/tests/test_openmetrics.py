@@ -57,7 +57,9 @@ OPENMETRICS_CHECK_INSTANCE = {
 
 @pytest.fixture
 def mocked_prometheus_check():
-    check = OpenMetricsBaseCheck('prometheus_check', {}, {})
+    check = OpenMetricsBaseCheck(
+        'prometheus_check', {}, [{'prometheus_url': 'http://fake.endpoint:10055/metrics', 'namespace': 'prometheus'}]
+    )
     check.log = logging.getLogger('datadog-prometheus.test')
     check.log.debug = mock.MagicMock()
     return check
@@ -77,12 +79,14 @@ def mocked_openmetrics_check_factory():
 
 @pytest.fixture
 def mocked_prometheus_scraper_config(mocked_prometheus_check):
-    yield mocked_prometheus_check.get_scraper_config(PROMETHEUS_CHECK_INSTANCE)
+    yield mocked_prometheus_check.get_scraper_config(PROMETHEUS_CHECK_INSTANCE, override_existing=True)
 
 
 @pytest.fixture
 def p_check():
-    return OpenMetricsBaseCheck('prometheus_check', {}, {})
+    return OpenMetricsBaseCheck(
+        'prometheus_check', {}, [{'prometheus_url': 'http://fake.endpoint:10055/metrics', 'namespace': 'prometheus'}]
+    )
 
 
 @pytest.fixture
@@ -2035,7 +2039,9 @@ class FilterOpenMetricsCheck(OpenMetricsBaseCheck):
 
 @pytest.fixture
 def mocked_filter_openmetrics_check():
-    check = FilterOpenMetricsCheck('prometheus_check', {}, {})
+    check = FilterOpenMetricsCheck(
+        'prometheus_check', {}, [{'prometheus_url': 'http://fake.endpoint:10055/metrics', 'namespace': 'prometheus'}]
+    )
     check.log = logging.getLogger('datadog-prometheus.test')
     check.log.debug = mock.MagicMock()
     return check
