@@ -1,11 +1,17 @@
 [
-  {
-    "agent_version": "6.18.0",
-    "integration":"Scylla",
-    "check": "scylla.prometheus.health",
-    "statuses": ["ok", "critical"],
-    "groups": ["host", "endpoint"],
-    "name": "Scylla prometheus health",
-    "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
-  }
+    {
+        "agent_version": "6.18.0",
+        "integration": "Scylla",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "check": "scylla.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Scylla prometheus health",
+        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
+    }
 ]
