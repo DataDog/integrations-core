@@ -648,17 +648,16 @@ class SparkCheck(AgentCheck):
             self.log.debug('Spark check URL: %s', url)
             response = self.http.get(url, cookies=self.proxy_redirect_cookies)
             response.raise_for_status()
-
-            match = PROXY_WITH_DIFFERENT_USER_WARNING.match(response.text)
-            if match:
-                redirect_link = match.group(1)
+            content = response.text
+            proxy_redirect_url = self._parse_proxy_redirect_url(content)
+            if proxy_redirect_url:
                 self.proxy_redirect_cookies = response.cookies
                 # When using a proxy and the remote user is different that the current user
                 # spark will display an html warning page.
                 # This page displays a redirect link (which appends `proxyapproved=true`) and also
                 # sets a cookie to the current http session. Let's follow the link.
                 # https://github.com/apache/hadoop/blob/2064ca015d1584263aac0cc20c60b925a3aff612/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-web-proxy/src/main/java/org/apache/hadoop/yarn/server/webproxy/WebAppProxyServlet.java#L368
-                response = self.http.get(redirect_link, cookies=self.proxy_redirect_cookies)
+                response = self.http.get(proxy_redirect_url, cookies=self.proxy_redirect_cookies)
                 response.raise_for_status()
 
         except Timeout as e:
@@ -724,3 +723,20 @@ class SparkCheck(AgentCheck):
         """
         s = urlsplit(url)
         return urlunsplit([s.scheme, s.netloc, '', '', ''])
+
+    @staticmethod
+    def _parse_proxy_redirect_url(html_content):
+        """When the spark proxy returns a warning page with a redirect link, this link has to be parsed
+        from the html content."""
+        if not html_content[:6] == "<html>":  # Prevent html parsing of non-html content.
+            return None
+
+        soup = BeautifulSoup(html_content)
+        redirect_link = None
+        for link in soup.findAll('a'):
+            href = link.get('href')
+            if 'proxyapproved' in href:
+                redirect_link = href
+                break
+
+        return redirect_link

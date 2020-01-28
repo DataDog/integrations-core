@@ -413,7 +413,6 @@ def proxy_with_warning_page_mock(url, *args, **kwargs):
     if proxy_cookie and query.get('proxyapproved') == 'true':
         del query['proxyapproved']
         url_parts[4] = urlencode(query)
-        import pdb; pdb.set_trace()
         return standalone_requests_get_mock(urlunparse(url_parts), *args[1:], **kwargs)
     else:
         # Display the html warning page with the redirect link
