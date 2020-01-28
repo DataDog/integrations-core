@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout, RequestException
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, RequestException, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
