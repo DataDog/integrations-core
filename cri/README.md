@@ -18,7 +18,7 @@ Note that if you're using the agent in a container, setting `DD_CRI_SOCKET_PATH`
 
 If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable to the CRI socket automatically enables the `CRI` integration with the default configuration.
 
-For example, to install the integration on Kubernetes, edit your daemonset to mount the CRI socket from the host node to the agent container and set the `DD_CRI_SOCKET_PATH` env var to the daemonset mountPath:
+For example, to install the integration on Kubernetes, edit your daemonset to mount the CRI socket from the host node to the Agent container and set the `DD_CRI_SOCKET_PATH` env var to the daemonset mountPath:
 
 ```
 apiVersion: extensions/v1beta1
