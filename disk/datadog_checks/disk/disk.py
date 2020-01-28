@@ -6,7 +6,7 @@ from __future__ import division
 import os
 import platform
 import re
-import xml.etree.ElementTree
+import xml.etree.ElementTree as ET
 
 import psutil
 from six import iteritems, string_types
@@ -377,10 +377,15 @@ class Disk(AgentCheck):
         # Line sample
         # <device DEVNO="0x0801" LABEL="MYLABEL" UUID="..." TYPE="ext4">/dev/sda1</device>
         for line in blkid_cache_data:
-            root = xml.etree.ElementTree.fromstring(line)
-            device = root.text
-            label = root.attrib.get('LABEL')
-            if label and device:
-                devices_label[device] = 'label:{}'.format(label)
+            try:
+                root = ET.fromstring(line)
+                device = root.text
+                label = root.attrib.get('LABEL')
+                if label and device:
+                    devices_label[device] = 'label:{}'.format(label)
+            except ET.ParseError as e:
+                self.log.warning(
+                    'Failed to parse line %s because of %s - skipping the line (some labels might be missing)', line, e
+                )
 
         return devices_label

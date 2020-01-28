@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 import sys
+from itertools import chain
 
 import mock
 import pytest
@@ -10,7 +11,7 @@ from six import iteritems
 
 from datadog_checks.disk import Disk
 
-from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT, EXPECTED_METRICS
+from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
 from .mocks import MockDiskMetrics, mock_blkid_output
 
 
@@ -160,25 +161,25 @@ def test_min_disk_size(aggregator, gauge_metrics, rate_metrics):
 
 @pytest.mark.skipif(sys.platform != 'linux', reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
-def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file):
+def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gauge_metrics, rate_metrics):
     """
     Verify that the disk labels are set with when the blkid_cache_file option is set
     """
     c = Disk('disk', {}, [instance_blkid_cache_file])
     c.check(instance_blkid_cache_file)
-    for metric in EXPECTED_METRICS:
-        aggregator.assert_metric(
-            metric['metric'], metric_type=aggregator.GAUGE, tags=['device:/dev/sda1', 'label:MYLABEL']
-        )
+    for metric in chain(gauge_metrics, rate_metrics):
+        aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'label:MYLABEL'])
 
 
 @pytest.mark.skipif(sys.platform != 'linux', reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
-def test_blkid_cache_file_contains_no_labels(aggregator, instance_blkid_cache_file_no_label):
+def test_blkid_cache_file_contains_no_labels(
+    aggregator, instance_blkid_cache_file_no_label, gauge_metrics, rate_metrics
+):
     """
     Verify that the disk labels are ignored if the cache file doesn't contain any
     """
     c = Disk('disk', {}, [instance_blkid_cache_file_no_label])
     c.check(instance_blkid_cache_file_no_label)
-    for metric in EXPECTED_METRICS:
-        aggregator.assert_metric(metric['metric'], metric_type=aggregator.GAUGE, tags=['device:/dev/sda1'])
+    for metric in chain(gauge_metrics, rate_metrics):
+        aggregator.assert_metric(metric, tags=['device:/dev/sda1'])
