@@ -6,10 +6,9 @@ import os
 import mock
 import pytest
 
-from datadog_checks.dev import docker_run
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = get_here()
 HOST = get_docker_hostname()
 INSTANCE_PORT = 9180
 INSTANCE_URL = "http://{}:{}/metrics".format(HOST, INSTANCE_PORT)
@@ -37,10 +36,7 @@ def mock_db_data():
     with mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200,
-            raise_for_status=lambda **kwargs: kwargs,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"},
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"},
         ),
     ):
         yield

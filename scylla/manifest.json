@@ -17,7 +17,6 @@
   "public_title": "Datadog-Scylla Integration",
   "categories": [
     "data store",
-    "log collection",
     "autodiscovery"
   ],
   "type": "check",

@@ -4,8 +4,7 @@
 
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import OpenMetricsBaseCheck
-from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 
 from .metrics import ADDITIONAL_METRICS_MAP, INSTANCE_DEFAULT_METRICS
 
@@ -49,6 +48,15 @@ class ScyllaCheck(OpenMetricsBaseCheck):
         tags = instance.get('tags', [])
         tags.append('endpoint_host:{}'.format(urlparse(endpoint).hostname))
 
-        instance.update({'prometheus_url': endpoint, 'namespace': namespace, 'metrics': metrics, 'tags': tags})
+        instance.update(
+            {
+                'prometheus_url': endpoint,
+                'namespace': namespace,
+                'metrics': metrics,
+                'tags': tags,
+                'metadata_metric_name': 'scylla_scylladb_current_version',
+                'metadata_label_map': {'version': 'version'},
+            }
+        )
 
         super(ScyllaCheck, self).__init__(name, init_config, instances=[instance])
