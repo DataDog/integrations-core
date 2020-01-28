@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
-
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
@@ -143,8 +141,6 @@ SPARK_STREAMING_STATISTICS_METRICS = {
     'numRetainedCompletedBatches': ('spark.streaming.statistics.num_retained_completed_batches', MONOTONIC_COUNT),
     'numTotalCompletedBatches': ('spark.streaming.statistics.num_total_completed_batches', MONOTONIC_COUNT),
 }
-
-PROXY_WITH_DIFFERENT_USER_WARNING = re.compile(r'<html>.*<a href="(.*)">.*</html>', re.S)
 
 
 class SparkCheck(AgentCheck):
@@ -731,7 +727,7 @@ class SparkCheck(AgentCheck):
         if not html_content[:6] == "<html>":  # Prevent html parsing of non-html content.
             return None
 
-        soup = BeautifulSoup(html_content)
+        soup = BeautifulSoup(html_content, 'html.parser')
         redirect_link = None
         for link in soup.findAll('a'):
             href = link.get('href')
