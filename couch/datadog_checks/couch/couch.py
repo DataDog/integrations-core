@@ -171,7 +171,7 @@ class CouchDB1:
                     self.db_blacklist[server].append(dbName)
 
                     self.warning(
-                        'Database %s is not readable by the configured user. '
+                        'Database %s issssssss not readable by the configured user. '
                         'It will be added to the blacklist. Please restart the agent to clear.',
                         dbName,
                     )
