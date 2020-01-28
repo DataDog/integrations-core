@@ -19,7 +19,7 @@ INSTANCE_URL = "http://{}:{}/metrics".format(HOST, INSTANCE_PORT)
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
-    with docker_run(compose_file, log_patterns=['init - Scylla version 3']):
+    with docker_run(compose_file, log_patterns=[r'init - Scylla version \S* initialization completed.']):
         instances = {'instances': [{'instance_endpoint': INSTANCE_URL}]}
         yield instances
 
