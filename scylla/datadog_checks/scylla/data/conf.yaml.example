@@ -2,16 +2,14 @@ init_config:
 
 instances:
 
-    ## @param instance_endpoint - string - optional
+    ## @param instance_endpoint - string - required
     ## The URL where your database metrics are exposed by Prometheus.
     ## By default, the Scylla integration collects `instance_endpoint` metrics.
-    ## At least one of instance_endpoint or manager_endpoint must be provided.
     #
   - instance_endpoint: http://localhost:9180/metrics
 
     ## @param metric_groups - list of strings - optional
     ## List of additional scylla metric groups to collect in addition to the default
-    ## These are only applicable to instance_endpoints, manager_endpoints collect all metrics
     #
     # metric_groups:
     #   - scylla.alien
@@ -46,23 +44,9 @@ instances:
     #
     # timeout: 10
 
-    ## @param metrics - list of strings - optional
-    ## List of metrics to be fetched from the prometheus endpoint, if there's a
-    ## value it'll be renamed.
-    #
-    # metrics:
-    #  - processor: cpu
-    #  - memory: mem
-    #  - io
-
-    ## @param prometheus_metrics_prefix - string - optional
-    ## <PREFIX> for exposed Prometheus metrics.
-    #
-    # prometheus_metrics_prefix: <PREFIX>_
-
     ## @param health_service_check - boolean - optional - default: true
     ## Send a service check reporting about the health of the prometheus endpoint
-    ## It's named <NAMESPACE>.prometheus.health
+    ## It's named scylla.prometheus.health
     #
     # health_service_check: true
 
@@ -125,23 +109,37 @@ instances:
     # exclude_labels:
     #   - timestamp
 
-    ## @param ssl_cert - string - optional
-    ## If your prometheus endpoint is secured, enter the path to the certificate and
-    ## you should specify the private key in ssl_private_key parameter
-    ## or it can be the path to a file containing both the certificate & the private key
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of services.
     #
-    # ssl_cert: "<CERT_PATH>"
+    # tls_verify: true
 
-    ## @param ssl_private_key - string - optional
-    ## Needed if the certificate linked in ssl_cert does not include the private key.
-    ## Note: The private key to your local certificate must be unencrypted.
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
+    ## Disable those by setting `tls_ignore_warning` to true.
     #
-    # ssl_private_key: "<KEY_PATH>"
+    # tls_ignore_warning: false
 
-    ## @param ssl_ca_cert - string - optional
-    ## The path to the trusted CA used for generating custom certificates.
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate's authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
     #
-    # ssl_ca_cert: "<CA_CERT_PATH>"
+    # tls_cert: <CERT_PATH>
+
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    #
+    # tls_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param tls_ca_cert - string - optional
+    ## The path to a file of concatenated CA certificates in PEM format or a directory
+    ## containing several CA certificates in PEM format. If a directory, the directory
+    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
+    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    #
+    # tls_ca_cert: <CA_CERT_PATH>
 
     ## @param extra_headers - list of key:value elements - optional
     ## A list of additional HTTP headers to send in queries to the openmetrics endpoint.
