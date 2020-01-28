@@ -4,14 +4,17 @@
 
 This check monitors [Scylla][1] through the Datadog Agent.
 
+Scylla is an open-source NoSQL data store that can act as "a drop-in Apache Cassandra alternative." It has rearchitected the Cassandra model tuned for modern hardware, reducing the size of required clusters while improving theoretical throughput and performance.
+
+This integration collects a majority of the exposed metrics by default, with the ability to customize additional groups based on specific user needs.
+
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host.
 
 ### Installation
 
-The Scylla check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+The Scylla check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -31,7 +34,6 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 
-# TODO
 `scylla.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ### Events
@@ -43,7 +45,7 @@ Scylla does not include any events.
 Need help? Contact [Datadog support][7].
 
 [1]: https://scylla.io
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/scylla/datadog_checks/scylla/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
