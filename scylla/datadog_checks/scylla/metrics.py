@@ -264,10 +264,6 @@ SCYLLA_SCHEDULER = {
     'scylla_scheduler_time_spent_on_task_quota_violations_ms': 'scheduler.time_spent_on_task_quota_violations_ms',
 }
 
-SCYLLA_SCYLLADB = {
-    'scylla_scylladb_current_version': 'scylladb.current_version',
-}
-
 SCYLLA_SSTABLES = {
     'scylla_sstables_capped_local_deletion_time': 'sstables.capped_local_deletion_time',
     'scylla_sstables_capped_tombstone_deletion_time': 'sstables.capped_tombstone_deletion_time',
@@ -371,7 +367,6 @@ INSTANCE_DEFAULT_METRICS = [
     SCYLLA_GOSSIP,
     SCYLLA_NODE,
     SCYLLA_REACTOR,
-    SCYLLA_SCYLLADB,
     SCYLLA_STORAGE,
     SCYLLA_STREAMING,
     SCYLLA_TRANSPORT,

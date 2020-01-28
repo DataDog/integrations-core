@@ -203,7 +203,6 @@ scylla.scheduler.runtime_ms,counter,,millisecond,,Accumulated runtime of this ta
 scylla.scheduler.shares,gauge,,,,Shares allocated to this queue,0,scylla,scheduler shares
 scylla.scheduler.tasks_processed,counter,,,,Count of tasks executing on this queue; indicates together with runtime_ms indicates length of tasks,0,scylla,scheduler tasks processed
 scylla.scheduler.time_spent_on_task_quota_violations_ms,counter,,millisecond,,Total amount in milliseconds we were in violation of the task quota,-1,scylla,scheduler time spent on task quota violations ms
-scylla.scylladb.current_version,gauge,,,,Current ScyllaDB version.,0,scylla,scylladb current version
 scylla.sstables.capped_local_deletion_time,counter,,time,,Was local deletion time capped at maximum allowed value in Statistics,0,scylla,sstables capped local deletion time
 scylla.sstables.capped_tombstone_deletion_time,counter,,time,,Was partition tombstone deletion time capped at maximum allowed value,0,scylla,sstables capped tombstone deletion time
 scylla.sstables.cell_tombstone_writes,counter,,,,Number of cell tombstones written,0,scylla,sstables cell tombstone writes

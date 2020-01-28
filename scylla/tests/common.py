@@ -248,9 +248,6 @@ INSTANCE_METRIC_GROUP_MAP = {
         'scylla.scheduler.tasks_processed',
         'scylla.scheduler.time_spent_on_task_quota_violations_ms',
     ],
-    'scylla.scylladb': [
-        'scylla.scylladb.current_version',
-    ],
     'scylla.sstables': [
         'scylla.sstables.capped_local_deletion_time',
         'scylla.sstables.capped_tombstone_deletion_time',
@@ -351,7 +348,6 @@ INSTANCE_DEFAULT_GROUPS = [
     'scylla.gossip',
     'scylla.node',
     'scylla.reactor',
-    'scylla.scylladb',
     'scylla.storage',
     'scylla.streaming',
     'scylla.transport',
