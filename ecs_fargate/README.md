@@ -295,7 +295,7 @@ Need help? Contact [Datadog support][19].
 
 * Blog post: [Monitor AWS Fargate applications with Datadog][34]
 * FAQ: [Integration Setup for ECS Fargate][7]
-* Blog post: [Monitor your Fargate container logs with Fluent Bit and Datadog][24]
+* Blog post: [Monitor your Fargate container logs with FireLens and Datadog][24]
 
 [1]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
 [2]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats
@@ -320,7 +320,7 @@ Need help? Contact [Datadog support][19].
 [21]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions
 [22]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
 [23]: https://github.com/aws-samples/amazon-ecs-firelens-examples/tree/master/examples/fluent-bit/parse-json
-[24]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/
+[24]: https://www.datadoghq.com/blog/collect-fargate-logs-with-firelens/
 [25]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
 [26]: https://app.datadoghq.com/logs
 [27]: https://docs.datadoghq.com/monitors/monitor_types/

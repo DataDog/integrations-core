@@ -1,6 +1,6 @@
 # Agent Check: Druid
 
-![Druid Dashbaord][1]
+![Druid Dashboard][1]
 
 ## Overview
 

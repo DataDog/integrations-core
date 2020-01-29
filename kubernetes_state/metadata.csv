@@ -27,8 +27,8 @@ kubernetes_state.deployment.rollingupdate.max_unavailable,gauge,,,,Maximum numbe
 kubernetes_state.endpoint.address_available,gauge,,,,Number of addresses available in endpoint,0,kubernetes,k8s_state.endpoint.address_avail
 kubernetes_state.endpoint.address_not_ready,gauge,,,,Number of addresses not ready in endpoint,-1,kubernetes,k8s_state.endpoint.address_not_ready
 kubernetes_state.endpoint.created,gauge,,,,Unix creation timestamp,0,kubernetes,k8s_state.endpoint.creation_time
-kubernetes_state.job.status.failed,counter,,,,Observed number of failed pods in a job,0,kubernetes,k8s_state.job.failed
-kubernetes_state.job.status.succeeded,counter,,,,Observed number of succeeded pods in a job,0,kubernetes,k8s_state.job.succeeded
+kubernetes_state.job.status.failed,count,,,,Observed number of failed pods in a job,0,kubernetes,k8s_state.job.failed
+kubernetes_state.job.status.succeeded,count,,,,Observed number of succeeded pods in a job,0,kubernetes,k8s_state.job.succeeded
 kubernetes_state.limitrange.cpu.min,gauge,,,,Minimum CPU request for this type,0,kubernetes,k8s_state.cpu.min
 kubernetes_state.limitrange.cpu.max,gauge,,,,Maximum CPU limit for this type,0,kubernetes,k8s_state.cpu.max
 kubernetes_state.limitrange.cpu.default,gauge,,,,Default CPU limit if not specified,0,kubernetes,k8s_state.cpu.default
@@ -39,7 +39,7 @@ kubernetes_state.limitrange.memory.max,gauge,,,,Maximum memory limit for this ty
 kubernetes_state.limitrange.memory.default,gauge,,,,Default memory limit if not specified,0,kubernetes,k8s_state.mem.default
 kubernetes_state.limitrange.memory.default_request,gauge,,,,Default memory request if not specified,0,kubernetes,k8s_state.mem.default_request
 kubernetes_state.limitrange.memory.max_limit_request_ratio,gauge,,,,Maximum memory limit / request ratio,0,kubernetes,k8s_state.mem.max_ratio
-kubernetes_state.node.count,counter,60,node,,The number of nodes,0,kubernetes,k8s_state.node.count
+kubernetes_state.node.count,count,60,node,,The number of nodes,0,kubernetes,k8s_state.node.count
 kubernetes_state.node.cpu_capacity,gauge,,cpu,,The total CPU resources of the node,0,kubernetes,k8s_state.node.cpu_capacity
 kubernetes_state.node.memory_capacity,gauge,,byte,,The total memory resources of the node,0,kubernetes,k8s_state.node.memory_capacity
 kubernetes_state.node.pods_capacity,gauge,,,,The total pod resources of the node,0,kubernetes,k8s_state.node.pods_capacity
@@ -100,11 +100,11 @@ kubernetes_state.statefulset.replicas_current,gauge,,,,The number of current rep
 kubernetes_state.statefulset.replicas_ready,gauge,,,,The number of ready replicas per StatefulSet,0,kubernetes,k8s_state.statefulset.replicas_ready
 kubernetes_state.statefulset.replicas_updated,gauge,,,,The number of updated replicas per StatefulSet,0,kubernetes,k8s_state.statefulset.replicas_updated
 kubernetes_state.telemetry.payload.size,gauge,,byte,,The message size received from kube-state-metrics,0,kubernetes,k8s_state.telemetry.payload.size
-kubernetes_state.telemetry.metrics.processed.count,counter,,,,The number of metrics processed,0,kubernetes,k8s_state.telemetry.metrics.processed.count
-kubernetes_state.telemetry.metrics.input.count,counter,,,,The number of metrics received,0,kubernetes,k8s_state.telemetry.metrics.input.count
-kubernetes_state.telemetry.metrics.blacklist.count,counter,,,,The number of metrics blacklisted by the check,0,kubernetes,k8s_state.telemetry.metrics.blacklist.count
-kubernetes_state.telemetry.metrics.ignored.count,counter,,,,The number of metrics ignored by the check,0,kubernetes,k8s_state.telemetry.metrics.ignored.count
-kubernetes_state.telemetry.collector.metrics.count,counter,,,,The number of metrics by collector (kubernetes object kind) by kubernetes namespaces,0,kubernetes,k8s_state.telemetry.collector.metrics.count
+kubernetes_state.telemetry.metrics.processed.count,count,,,,The number of metrics processed,0,kubernetes,k8s_state.telemetry.metrics.processed.count
+kubernetes_state.telemetry.metrics.input.count,count,,,,The number of metrics received,0,kubernetes,k8s_state.telemetry.metrics.input.count
+kubernetes_state.telemetry.metrics.blacklist.count,count,,,,The number of metrics blacklisted by the check,0,kubernetes,k8s_state.telemetry.metrics.blacklist.count
+kubernetes_state.telemetry.metrics.ignored.count,count,,,,The number of metrics ignored by the check,0,kubernetes,k8s_state.telemetry.metrics.ignored.count
+kubernetes_state.telemetry.collector.metrics.count,count,,,,The number of metrics by collector (kubernetes object kind) by kubernetes namespaces,0,kubernetes,k8s_state.telemetry.collector.metrics.count
 kubernetes_state.vpa.lower_bound,gauge,,,,The vpa lower bound recommendation,0,kubernetes,k8s_state.vpa.lower_bound
 kubernetes_state.vpa.target,gauge,,,,The vpa target recommendation,0,kubernetes,k8s_state.vpa.target
 kubernetes_state.vpa.uncapped_target,gauge,,,,The vpa uncapped recommendation recommendation,0,kubernetes,k8s_state.vpa.uncapped_target

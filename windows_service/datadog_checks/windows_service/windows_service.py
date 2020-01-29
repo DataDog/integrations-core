@@ -70,8 +70,12 @@ class WindowsService(AgentCheck):
             state = service_status[1]
             status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
 
-            tags = ['service:{}'.format(short_name)]
+            tags = ['windows_service:{}'.format(short_name)]
             tags.extend(custom_tags)
+
+            if not instance.get('disable_legacy_service_tag', False):
+                self._log_deprecation('service_tag', 'windows_service')
+                tags.append('service:{}'.format(short_name))
 
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
             self.log.debug('service state for %s %s', short_name, status)
@@ -80,8 +84,12 @@ class WindowsService(AgentCheck):
             for service in services_unseen:
                 status = self.CRITICAL
 
-                tags = ['service:{}'.format(service)]
+                tags = ['windows_service:{}'.format(service)]
                 tags.extend(custom_tags)
+
+                if not instance.get('disable_legacy_service_tag', False):
+                    self._log_deprecation('service_tag', 'windows_service')
+                    tags.append('service:{}'.format(service))
 
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
                 self.log.debug('service state for %s %s', service, status)

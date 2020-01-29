@@ -4,10 +4,10 @@ version: "3.5"
 # - https://github.com/mesosphere/docker-containers/tree/master/mesos
 services:
   zookeeper:
-    image: bobrik/zookeeper
+    image: zookeeper
     environment:
-      ZK_CONFIG: tickTime=2000,initLimit=10,syncLimit=5,maxClientCnxns=128,forceSync=no,clientPort=2181
-      ZK_ID: 1
+      ZOO_SYNC_LIMIT: 5
+      ZOO_INIT_LIMIT: 10
 
   mesos-slave:
     image: mesosphere/mesos-slave:${MESOS_SLAVE_VERSION}

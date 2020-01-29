@@ -14,7 +14,14 @@ import in_toto.settings
 in_toto.settings.SUBPROCESS_TIMEOUT = 60
 
 from in_toto import runlib
-from in_toto.gpg.constants import GPG_COMMAND
+
+try:
+    # in-toto < 0.4.2
+    from in_toto.gpg.constants import GPG_COMMAND
+except ImportError:
+    # in-toto >= 0.4.2
+    # https://github.com/in-toto/in-toto/releases/tag/v0.4.2
+    from securesystemslib.gpg.constants import GPG_COMMAND
 
 from .constants import get_root
 from .git import ignored_by_git, tracked_by_git

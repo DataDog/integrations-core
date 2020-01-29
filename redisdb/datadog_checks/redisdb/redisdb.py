@@ -44,6 +44,10 @@ class Redis(AgentCheck):
         'aof_rewrite_in_progress': 'redis.aof.rewrite',
         'aof_current_size': 'redis.aof.size',
         'aof_buffer_length': 'redis.aof.buffer_length',
+        'loading_total_bytes': 'redis.aof.loading_total_bytes',
+        'loading_loaded_bytes': 'redis.aof.loading_loaded_bytes',
+        'loading_loaded_perc': 'redis.aof.loading_loaded_perc',
+        'loading_eta_seconds': 'redis.aof.loading_eta_seconds',
         # Network
         'connected_clients': 'redis.net.clients',
         'connected_slaves': 'redis.net.slaves',

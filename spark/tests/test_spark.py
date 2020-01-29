@@ -11,6 +11,7 @@ import mock
 import pytest
 import requests
 import urllib3
+from requests import RequestException
 from six import iteritems
 from six.moves import BaseHTTPServer
 from six.moves.urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, urlunparse
@@ -1029,6 +1030,18 @@ def test_ssl_cert():
     c = SparkCheck('spark', {}, [SSL_CERT_CONFIG])
 
     c.check(SSL_CERT_CONFIG)
+
+
+@pytest.mark.unit
+def test_do_not_crash_on_single_app_failure():
+    running_apps = {'foo': ('bar', 'http://foo.bar/'), 'foo2': ('bar', 'http://foo.bar/')}
+    results = []
+    rest_requests_to_json = mock.MagicMock(side_effect=[RequestException, results])
+    c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
+
+    with mock.patch.object(c, '_rest_request_to_json', rest_requests_to_json), mock.patch.object(c, '_collect_version'):
+        c._get_spark_app_ids(running_apps, [])
+        assert rest_requests_to_json.call_count == 2
 
 
 class StandaloneAppsResponseHandler(BaseHTTPServer.BaseHTTPRequestHandler):

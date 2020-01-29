@@ -170,7 +170,7 @@ class SQLServer(AgentCheck):
                 self.log.exception("Skipping SQL Server instance")
                 continue
             except Exception as e:
-                self.log.exception("INitialization exception %s", e)
+                self.log.exception("Initialization exception %s", e)
                 continue
 
     def _check_db_exists(self, instance):

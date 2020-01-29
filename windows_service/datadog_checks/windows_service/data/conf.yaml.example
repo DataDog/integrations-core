@@ -14,6 +14,12 @@ instances:
       - <SERVICE_NAME_1>
       - <SERVICE_NAME_2>
 
+    ## @param disable_legacy_service_tag - boolean - optional - default: false
+    ## Whether or not to stop submitting the tag `service` that has been renamed
+    ## to `windows_service` and disable the associated deprecation warning.
+    #
+    # disable_legacy_service_tag: false
+
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every service check emitted by this integration.
     ##

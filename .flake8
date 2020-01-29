@@ -1,7 +1,7 @@
 # TODO: port this to pyproject.toml when supported: https://gitlab.com/pycqa/flake8/merge_requests/245
 
 [flake8]
-select = B,C,E,F,W,B001,B003,B006,B007,B301,B305,B306,B902
+select = B,C,E,F,G,W,B001,B003,B006,B007,B301,B305,B306,B902
 # Ignore reasons:
 # - G200: logging exception is ok, we don't always want to log the stack trace too
 ignore = E203,E722,W503,G200
