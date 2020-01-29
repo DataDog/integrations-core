@@ -165,7 +165,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
     }
 
-    VOLUME_TAGS_TO_EXCLUDE = ['persistentvolumeclaim:', 'pod_phase:']
+    VOLUME_TAG_KEYS_TO_EXCLUDE = ['persistentvolumeclaim', 'pod_phase']
 
     def __init__(self, name, init_config, instances):
         self.NAMESPACE = 'kubernetes'
@@ -263,16 +263,13 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                 continue
 
             # get tags from tagger
-            tags = (
-                tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.LOW)
-                + tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.ORCHESTRATOR)
-            ) or None
+            tags = tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.ORCHESTRATOR) or None
             if not tags:
                 continue
 
             # remove tags that don't apply to PVCs
-            for excluded_tag in self.VOLUME_TAGS_TO_EXCLUDE:
-                tags = [t for t in tags if not t.startswith(excluded_tag)]
+            for excluded_tag in self.VOLUME_TAG_KEYS_TO_EXCLUDE:
+                tags = [t for t in tags if not t.startswith(excluded_tag + ':')]
 
             # get PVC
             for v in volumes:
