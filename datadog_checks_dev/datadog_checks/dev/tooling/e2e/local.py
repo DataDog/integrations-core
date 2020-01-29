@@ -39,6 +39,8 @@ class LocalAgentInterface(object):
         metadata=None,
         agent_build=None,
         api_key=None,
+        dd_url=None,
+        log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
         default_agent=False,
     ):
@@ -51,6 +53,8 @@ class LocalAgentInterface(object):
         self.metadata = metadata or {}
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY
+        self.dd_url = dd_url
+        self.log_url = log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
 
         self._agent_version = self.metadata.get('agent_version')
@@ -59,6 +63,10 @@ class LocalAgentInterface(object):
         self.config_file_name = config_file_name(self.check)
 
         self.env_vars['DD_PYTHON_VERSION'] = str(self.python_version)
+        if self.dd_url:
+            self.env_vars['DD_DD_URL'] = str(self.dd_url)
+        if self.log_url:
+            self.env_vars['DD_LOGS_CONFIG_DD_URL'] = str(self.log_url)
 
     @property
     def platform(self):

@@ -60,12 +60,9 @@ def add_style_checker(config, sections, make_envconfig, reader):
         'deps': 'flake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
         'commands': '\n'.join(
             [
-                'flake8 --config=../.flake8 .',
+                'flake8 --config=../.flake8 --enable-extensions=G .',
                 'black --check --diff .',
                 'isort --check-only --diff --recursive .',
-                'python -c "print(\'\\n[WARNING] Complying with following lint rules is recommended, '
-                'but not mandatory, yet.\')"',
-                '- flake8 --config=../.flake8 --enable-extensions=G --select=G .',  # lint `flake8-logging-format`
             ]
         ),
     }

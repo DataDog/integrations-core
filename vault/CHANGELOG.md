@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 2.1.2 / 2020-01-24
+
+* [Fixed] Send summary count metrics as a count. See [#5538](https://github.com/DataDog/integrations-core/pull/5538).
+
 ## 2.1.1 / 2020-01-13
 
 * [Fixed] Fix http handler. See [#5434](https://github.com/DataDog/integrations-core/pull/5434).

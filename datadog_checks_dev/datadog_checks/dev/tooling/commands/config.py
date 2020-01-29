@@ -82,6 +82,14 @@ def set_value(ctx, key, value):
     New setting:
     [github]
     user = "foo"
+
+    You can also assign values on a per-org basis.
+
+    \b
+    $ ddev config set orgs.<ORG_NAME>.api_key
+    New setting:
+    [orgs.<ORG_NAME>]
+    api_key = "***********"
     """
     scrubbing = False
     if value is None:

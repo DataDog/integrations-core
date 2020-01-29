@@ -537,9 +537,11 @@ class HAProxy(AgentCheck):
                 agg_statuses[service]
 
         for service in agg_statuses:
-            tags = ['service:%s' % service]
+            tags = ['haproxy_service:%s' % service]
             tags.extend(custom_tags)
             tags.extend(active_tag)
+            self._handle_legacy_service_tag(tags, service)
+
             self.gauge(
                 'haproxy.backend_hosts', agg_statuses[service][Services.AVAILABLE], tags=tags + ['available:true']
             )
@@ -590,7 +592,8 @@ class HAProxy(AgentCheck):
 
             tags = []
             if count_status_by_service:
-                tags.append('service:%s' % service)
+                tags.append('haproxy_service:%s' % service)
+                self._handle_legacy_service_tag(tags, service)
             if hostname:
                 tags.append('backend:%s' % hostname)
 
@@ -608,7 +611,8 @@ class HAProxy(AgentCheck):
             if not collate_status_tags_per_host:
                 agg_tags = []
                 if count_status_by_service:
-                    agg_tags.append('service:%s' % service)
+                    agg_tags.append('haproxy_service:%s' % service)
+                    self._handle_legacy_service_tag(agg_tags, service)
                 # An unknown status will be sent as UNAVAILABLE
                 status_key = Services.STATUS_TO_COLLATED.get(status, Services.UNAVAILABLE)
                 agg_statuses_counter[tuple(agg_tags)][status_key] += count
@@ -636,9 +640,10 @@ class HAProxy(AgentCheck):
         back_or_front = data['back_or_front']
         custom_tags = [] if custom_tags is None else custom_tags
         active_tag = [] if active_tag is None else active_tag
-        tags = ["type:%s" % back_or_front, "instance_url:%s" % url, "service:%s" % service_name]
+        tags = ["type:%s" % back_or_front, "instance_url:%s" % url, "haproxy_service:%s" % service_name]
         tags.extend(custom_tags)
         tags.extend(active_tag)
+        self._handle_legacy_service_tag(tags, service_name)
 
         if self._is_service_excl_filtered(service_name, services_incl_filter, services_excl_filter):
             return
@@ -709,10 +714,12 @@ class HAProxy(AgentCheck):
                 alert_type = "info"
             title = "%s reported %s:%s back and %s" % (HAProxy_agent, service_name, hostname, status.upper())
 
-        tags = ["service:%s" % service_name]
+        tags = ["haproxy_service:%s" % service_name]
         if back_or_front == Services.BACKEND:
             tags.append('backend:%s' % hostname)
         tags.extend(custom_tags)
+        self._handle_legacy_service_tag(tags, service_name)
+
         return {
             'timestamp': int(time.time() - lastchg),
             'event_type': EVENT_TYPE,
@@ -740,8 +747,10 @@ class HAProxy(AgentCheck):
             return
 
         if status in Services.STATUS_TO_SERVICE_CHECK:
-            service_check_tags = ["service:%s" % service_name]
+            service_check_tags = ["haproxy_service:%s" % service_name]
             service_check_tags.extend(custom_tags)
+            self._handle_legacy_service_tag(service_check_tags, service_name)
+
             hostname = data['svname']
             if data['back_or_front'] == Services.BACKEND:
                 service_check_tags.append('backend:%s' % hostname)
@@ -751,3 +760,8 @@ class HAProxy(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME, status, message=message, hostname=check_hostname, tags=service_check_tags
             )
+
+    def _handle_legacy_service_tag(self, tags, service):
+        if not self.instance.get('disable_legacy_service_tag', False):
+            self._log_deprecation('service_tag', 'haproxy_service')
+            tags.append('service:{}'.format(service))
