@@ -10,7 +10,7 @@ from ....subprocess import run_command
 from ....utils import basepath, chdir, get_next
 from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
-from ...trello import TrelloClient
+from ...jira import JiraClient
 from ...utils import format_commit_id, get_current_agent_version
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
@@ -29,17 +29,17 @@ def validate_version(ctx, param, value):
         raise click.BadParameter('needs to be in semver format x.y[.z]')
 
 
-def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
+def create_jira_issue(client, teams, pr_title, pr_url, pr_body, dry_run):
     body = f'Pull request: {pr_url}\n\n{pr_body}'
 
     for team in teams:
         if dry_run:
-            echo_success(f'Will create a card for team {team}: ', nl=False)
+            echo_success(f'Will create an issue for team {team}: ', nl=False)
             echo_info(pr_title)
             continue
         creation_attempts = 3
         for attempt in range(3):
-            rate_limited, error, response = client.create_card(team, pr_title, body)
+            rate_limited, error, response = client.create_issue(team, pr_title, body)
             if rate_limited:
                 wait_time = 10
                 echo_warning(
@@ -59,13 +59,13 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
                 )
                 time.sleep(wait_time)
             else:
-                echo_success(f'Created card for team {team}: ', nl=False)
-                echo_info(response.json().get('url'))
+                issue_key = response.json().get('key')
+                echo_success(f'Created issue {issue_key} for team {team}')
                 break
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS, short_help='Create a Trello card for each change that needs to be tested'
+    context_settings=CONTEXT_SETTINGS, short_help='Create a Jira issue for each change that needs to be tested'
 )
 @click.option('--start', 'start_id', help='The PR number or commit hash to start at')
 @click.option('--since', 'agent_version', callback=validate_version, help='The version of the Agent to compare')
@@ -73,22 +73,17 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run):
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.pass_context
 def testable(ctx, start_id, agent_version, milestone, dry_run):
-    """Create a Trello card for each change that needs to be tested for
+    """Create a Jira issue for each change that needs to be tested for
     the next release. Run via `ddev -x release testable` to force the use
     of the current directory.
-
     To avoid GitHub's public API rate limits, you need to set
     `github.user`/`github.token` in your config file or use the
     `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
-
     \b
-    To use Trello:
-    1. Go to `https://trello.com/app-key` and copy your API key.
-    2. Run `ddev config set trello.key` and paste your API key.
-    3. Go to `https://trello.com/1/authorize?key=key&name=name&scope=read,write&expiration=never&response_type=token`,
-       where `key` is your API key and `name` is the name to give your token, e.g. ReleaseTestingYourName.
-       Authorize access and copy your token.
-    4. Run `ddev config set trello.token` and paste your token.
+    To use Jira:
+    1. Go to `https://id.atlassian.com/manage/api-tokens` and create an API token.
+    2. Run `ddev config set jira.user` and enter your jira email.
+    3. Run `ddev config set jira.token` and paste your API token.
     """
     root = get_root()
     repo = basepath(root)
@@ -169,7 +164,7 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
 
     commit_ids = set()
     user_config = ctx.obj
-    trello = TrelloClient(user_config)
+    jira = JiraClient(user_config)
     found_start_id = False
 
     for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
@@ -249,9 +244,13 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
 
-        teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
+        jira_config = user_config['jira']
+        if not (jira_config['user'] and jira_config['token']):
+            abort('Error: You are not authenticated for Jira. Please set your jira ddev config')
+
+        teams = [jira.label_team_map[label] for label in pr_labels if label in jira.label_team_map]
         if teams:
-            create_trello_card(trello, teams, pr_title, pr_url, pr_body, dry_run)
+            create_jira_issue(jira, teams, pr_title, pr_url, pr_body, dry_run)
             continue
 
         finished = False
@@ -310,6 +309,6 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
                 echo_warning(f'Exited at {format_commit_id(commit_id)}')
                 return
             else:
-                create_trello_card(trello, [value], pr_title, pr_url, pr_body, dry_run)
+                create_jira_issue(jira, [value], pr_title, pr_url, pr_body, dry_run)
 
             finished = True
