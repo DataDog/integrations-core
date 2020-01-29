@@ -15,6 +15,17 @@ except ImportError:
 
 
 def traced(fn):
+    """
+    Traced decorator is intended to be used on check method of AgentCheck subclasses.
+
+    Example:
+
+        class MyCheck(AgentCheck):
+
+            @traced
+            def check(self, instance):
+                self.gauge('dummy.metric', 10)
+    """
     @functools.wraps(fn)
     def traced_wrapper(instance, *args, **kwargs):
         if datadog_agent is None:
