@@ -3,7 +3,7 @@ import os
 import pytest
 from mock import patch
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 FIXTURE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fixtures', 'bearer_tokens')
@@ -85,6 +85,7 @@ class TestSignature:
         assert check.name == 'openmetrics_check'
         assert check.init_config == {'my_init_config': 'foo bar init config'}
 
+    @pytest.mark.xfail(reason='We are not supporting the positional-only legacy style anymore', raises=CheckException)
     def test_args_legacy(self):
         instance = {'prometheus_url': 'endpoint'}
         check = OpenMetricsBaseCheck(
@@ -122,35 +123,33 @@ def test_rate_override():
 
 def test_timeout_override():
     endpoint = "none"
-    default_instance = {
-        'default_namespace': {
-            'prometheus_url': endpoint,
-            'metrics': [{"test_rate": "test.rate"}],
-            'prometheus_timeout': 30,
-        }
+    default_instances = {
+        'ns': {'prometheus_url': endpoint, 'metrics': [{"test_rate": "test.rate"}], 'prometheus_timeout': 30}
     }
 
-    instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace'}
-    check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
+    instance = {'prometheus_url': endpoint, 'namespace': 'ns'}
+    check = OpenMetricsBaseCheck(
+        'prometheus_check', {}, {}, [instance], default_instances=default_instances, default_namespace="foo"
+    )
     assert check.get_scraper_config(instance)['prometheus_timeout'] == 30
 
-    instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace', 'prometheus_timeout': 5}
-    check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
+    instance = {'prometheus_url': endpoint, 'namespace': 'ns', 'prometheus_timeout': 5}
+    check = OpenMetricsBaseCheck(
+        'prometheus_check', {}, {}, [instance], default_instances=default_instances, default_namespace="foo"
+    )
     assert check.get_scraper_config(instance)['prometheus_timeout'] == 5
 
 
 def test_label_to_hostname_override():
     endpoint = "none"
-    default_instance = {
-        'default_namespace': {
-            'prometheus_url': endpoint,
-            'metrics': [{"test_rate": "test.rate"}],
-            'label_to_hostname': 'node',
-        }
+    default_instances = {
+        'ns': {'prometheus_url': endpoint, 'metrics': [{"test_rate": "test.rate"}], 'label_to_hostname': 'node'}
     }
 
-    instance = {'prometheus_url': endpoint, 'namespace': 'default_namespace'}
-    check = OpenMetricsBaseCheck('prometheus_check', {}, {}, [instance], default_instance, default_namespace="foo")
+    instance = {'prometheus_url': endpoint, 'namespace': 'ns'}
+    check = OpenMetricsBaseCheck(
+        'prometheus_check', {}, {}, [instance], default_instances=default_instances, default_namespace="foo"
+    )
     assert check.get_scraper_config(instance)['label_to_hostname'] == 'node'
 
 

@@ -88,11 +88,16 @@ class GenericPrometheusCheck(AgentCheck):
 
     DEFAULT_METRIC_LIMIT = 2000
 
-    def __init__(self, *args, default_instances=None, default_namespace="", **kwargs):
+    def __init__(self, *args, **kwargs):
+        default_instances = kwargs.pop('default_instances', None)
+        default_namespace = kwargs.pop('default_namespace', '')
+
         super(GenericPrometheusCheck, self).__init__(*args, **kwargs)
-        self.scrapers_map = {}
+
         self.default_instances = default_instances if default_instances is not None else {}
         self.default_namespace = default_namespace
+        self.scrapers_map = {}
+
         for instance in self.instances:
             self.get_scraper(instance)
 

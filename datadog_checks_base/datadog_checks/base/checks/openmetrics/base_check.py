@@ -43,28 +43,21 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     }
 
     def __init__(self, *args, **kwargs):
-        args = list(args)
         default_instances = kwargs.pop('default_instances', None) or {}
         default_namespace = kwargs.pop('default_namespace', None)
 
-        legacy_kwargs_in_args = args[4:]
-        del args[4:]
-
-        if len(legacy_kwargs_in_args) > 0:
-            default_instances = legacy_kwargs_in_args[0] or {}
-        if len(legacy_kwargs_in_args) > 1:
-            default_namespace = legacy_kwargs_in_args[1]
-
         super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
-        self.config_map = {}
-        self._http_handlers = {}
+
         self.default_instances = default_instances
         self.default_namespace = default_namespace
+        self.config_map = {}
+        self._http_handlers = {}
 
         # pre-generate the scraper configurations
         # NOTE: this is a HACK. We should be accepting a dedicated parameter for populating `.config_map`, such as
         # a 'configuration_instances' parameter. In practice, the Agent will NOT be passing multiple instances,
         # so we must make sure not to break that contract by allowing subclasses to pass multiple instances.
+
         for instance in self.instances:
             self.get_scraper_config(instance)
 
