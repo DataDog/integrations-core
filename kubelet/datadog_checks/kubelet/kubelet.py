@@ -244,16 +244,23 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """
         pod_tags_by_pvc = defaultdict(set)
         for pod in pods['items']:
-            # get kubernetes namespace of pvc
+            # get kubernetes namespace of PVC
             kube_ns = pod.get('metadata', {}).get('namespace')
             if not kube_ns:
                 continue
 
-            # get pod id and tags from tagger
+            # get volumes
+            volumes = pod.get('spec', {}).get('volumes')
+            if not volumes:
+                continue
+
+            # get pod id
             pod_id = pod.get('metadata', {}).get('uid')
             if not pod_id:
                 self.log.debug('skipping pod with no uid')
                 continue
+
+            # get tags from tagger
             tags = tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.LOW) or None
             if not tags:
                 continue
@@ -262,10 +269,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             # the relevant PVC tag will be added later from the label
             tags = [t for t in tags if not t.startswith('persistentvolumeclaim:')]
 
-            # get persistentvolumeclaim
-            volumes = pod.get('spec', {}).get('volumes')
-            if not volumes:
-                continue
+            # get PVC
             for v in volumes:
                 pvc_name = v.get('persistentVolumeClaim', {}).get('claimName')
                 if pvc_name:
@@ -710,6 +714,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
                     kube_ns = label_value
                 if pvc_name and kube_ns:
                     break
+
             pod_tags = self.pod_tags_by_pvc.get('{}/{}'.format(kube_ns, pvc_name), {})
             tags.extend(pod_tags)
             self.gauge(metric_name_with_namespace, val, tags=list(set(tags)), hostname=custom_hostname)
