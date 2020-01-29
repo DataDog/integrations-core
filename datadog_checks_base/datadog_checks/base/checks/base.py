@@ -157,10 +157,11 @@ class AgentCheck(object):
                 # new-style init: the 3rd argument is `instances`
                 self.instances = args[2]
 
-        if len(self.instances) != 1:
+        num_instances = len(self.instances) if self.instances is not None else 0
+        if num_instances != 1:
             # This should *never* occur in practice, because Agent 6+ guarantees that exactly 1 instance is passed to
             # a check constructor. If it does, then something is very wrong!
-            raise ConfigurationError('Expected exactly one instance, got {}'.format(len(self.instances)))
+            raise ConfigurationError('Expected exactly one instance, got {}'.format(num_instances))
 
         self.instance = self.instances[0]
 

@@ -44,9 +44,9 @@ class CassandraNodetoolCheck(AgentCheck):
         r'(?P<rack>.*)'
     )
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        self.nodetool_cmd = init_config.get("nodetool", "/usr/bin/nodetool")
+    def __init__(self, *args, **kwargs):
+        AgentCheck.__init__(self, *args, **kwargs)
+        self.nodetool_cmd = self.init_config.get("nodetool", "/usr/bin/nodetool")
 
     def check(self, instance):
         # Allow to specify a complete command for nodetool such as `docker exec container nodetool`

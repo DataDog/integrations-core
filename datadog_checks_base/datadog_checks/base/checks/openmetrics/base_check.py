@@ -62,6 +62,9 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.default_namespace = default_namespace
 
         # pre-generate the scraper configurations
+        # NOTE: this is a HACK. We should be accepting a dedicated parameter for populating `.config_map`, such as
+        # a 'configuration_instances' parameter. In practice, the Agent will NOT be passing multiple instances,
+        # so we must make sure not to break that contract by allowing subclasses to pass multiple instances.
         for instance in self.instances:
             self.get_scraper_config(instance)
 

@@ -95,12 +95,13 @@ def test_prometheus_default_instance(aggregator, poll_mock):
     """
     Testing prometheus with default instance
     """
+    instance = {'prometheus_url': 'http://custom:1337/metrics'}
 
     c = PrometheusCheck(
         CHECK_NAME,
         None,
         {},
-        [],
+        [instance],
         default_instances={
             'prometheus': {
                 'prometheus_url': 'http://localhost:10249/metrics',
@@ -110,7 +111,9 @@ def test_prometheus_default_instance(aggregator, poll_mock):
         },
         default_namespace='prometheus',
     )
-    c.check({'prometheus_url': 'http://custom:1337/metrics'})
+
+    c.check(instance)
+
     aggregator.assert_metric(
         CHECK_NAME + '.renamed.metric1',
         tags=['node:host1', 'flavor:test', 'matched_label:foobar'],
@@ -128,12 +131,20 @@ def test_prometheus_mixed_instance(aggregator, poll_mock):
     """
     Testing prometheus with default instance
     """
+    instance = {
+        'prometheus_url': 'http://custom:1337/metrics',
+        'namespace': 'prometheus',
+        'metrics': [{'metric1': 'renamed.metric1'}],
+        'label_joins': {'renamed.metric1': {'label_to_match': 'matched_label', 'labels_to_get': ['flavor']}},
+        'label_to_hostname': 'node',
+        'tags': ['extra:foo'],
+    }
 
     c = PrometheusCheck(
         CHECK_NAME,
         None,
         {},
-        [],
+        [instance],
         default_instances={
             'foobar': {
                 'prometheus_url': 'http://localhost:10249/metrics',
@@ -150,18 +161,11 @@ def test_prometheus_mixed_instance(aggregator, poll_mock):
         },
         default_namespace='prometheus',
     )
+
     # run the check twice for label joins
     for _ in range(2):
-        c.check(
-            {
-                'prometheus_url': 'http://custom:1337/metrics',
-                'namespace': 'prometheus',
-                'metrics': [{'metric1': 'renamed.metric1'}],
-                'label_joins': {'renamed.metric1': {'label_to_match': 'matched_label', 'labels_to_get': ['flavor']}},
-                'label_to_hostname': 'node',
-                'tags': ['extra:foo'],
-            }
-        )
+        c.check(instance)
+
     aggregator.assert_metric(
         CHECK_NAME + '.renamed.metric1',
         hostname="host1",

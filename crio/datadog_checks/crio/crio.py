@@ -11,11 +11,9 @@ class CrioCheck(OpenMetricsBaseCheck):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, instances):
+    def __init__(self, *args, **kwargs):
         super(CrioCheck, self).__init__(
-            name,
-            init_config,
-            instances,
+            *args,
             default_instances={
                 "crio": {
                     'prometheus_url': 'http://localhost:9090/metrics',
@@ -31,4 +29,5 @@ class CrioCheck(OpenMetricsBaseCheck):
                 }
             },
             default_namespace="crio",
+            **kwargs
         )

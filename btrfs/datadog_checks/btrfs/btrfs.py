@@ -102,11 +102,6 @@ class FileDescriptor(object):
 
 
 class BTRFS(AgentCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
-        if instances is not None and len(instances) > 1:
-            raise Exception("BTRFS check only supports one configured instance.")
-
     def get_usage(self, mountpoint):
         results = []
 

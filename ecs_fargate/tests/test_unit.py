@@ -22,7 +22,7 @@ def instance():
 
 @pytest.fixture
 def check():
-    return FargateCheck('ecs_fargate', {}, {})
+    return FargateCheck('ecs_fargate', {}, [{}])
 
 
 class MockResponse:

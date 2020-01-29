@@ -22,8 +22,8 @@ class CouchDb(AgentCheck):
     SOURCE_TYPE_NAME = 'couchdb'
     MAX_DB = 50
 
-    def __init__(self, name, init_config, instances):
-        super(CouchDb, self).__init__(name, init_config, instances)
+    def __init__(self, *args, **kwargs):
+        super(CouchDb, self).__init__(*args, **kwargs)
         self.checker = None
 
     def get(self, url, service_check_tags, run_check=False):

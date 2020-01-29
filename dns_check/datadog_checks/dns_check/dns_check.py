@@ -34,13 +34,10 @@ class DNSCheck(AgentCheck):
     SERVICE_CHECK_NAME = 'dns.can_resolve'
     DEFAULT_TIMEOUT = 5
 
-    def __init__(self, name, init_config, instances):
-        inst = instances[0]
-        inst.setdefault("name", "dns-check-0")
-
-        super(DNSCheck, self).__init__(name, init_config, instances)
-
-        self.default_timeout = init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
+    def __init__(self, *args, **kwargs):
+        super(DNSCheck, self).__init__(*args, **kwargs)
+        self.instance.setdefault('name', 'dns-check-0')
+        self.default_timeout = self.init_config.get('default_timeout', self.DEFAULT_TIMEOUT)
 
     def _load_conf(self, instance):
         # Fetches the conf

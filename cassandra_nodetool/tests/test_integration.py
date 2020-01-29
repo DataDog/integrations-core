@@ -16,7 +16,7 @@ def test_integration(aggregator, dd_environment):
     """
     Testing Cassandra Nodetool Integration
     """
-    integration = CassandraNodetoolCheck(common.CHECK_NAME, {}, {})
+    integration = CassandraNodetoolCheck(common.CHECK_NAME, {}, [common.CONFIG_INSTANCE])
     # Starting with recent Cassandra versions, replication takes some time to
     # warm up, let's retry a few times.
     for _ in range(20):

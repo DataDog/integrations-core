@@ -10,12 +10,13 @@ from . import common
 
 
 def test_fabric_mocked(aggregator):
-    check = CiscoACICheck(common.CHECK_NAME, {}, {})
+    instance = common.CONFIG_WITH_TAGS
+    check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
     api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
     api.wrapper_factory = common.FakeFabricSessionWrapper
-    check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
+    check._api_cache[hash_mutable(instance)] = api
 
-    check.check(common.CONFIG_WITH_TAGS)
+    check.check(instance)
 
     tags000 = ['cisco', 'project:cisco_aci', 'medium:broadcast', 'snmpTrapSt:enable', 'fabric_pod_id:1']
     tags101 = tags000 + ['node_id:101']

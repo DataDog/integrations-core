@@ -14,8 +14,9 @@ from .common import BASIC_CONFIG, CHECK_NAME, EXPECTED_METRICS, EXPECTED_SERVICE
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator):
-    ceph_check = Ceph(CHECK_NAME, {}, {})
-    ceph_check.check(copy.deepcopy(BASIC_CONFIG))
+    instance = copy.deepcopy(BASIC_CONFIG)
+    ceph_check = Ceph(CHECK_NAME, {}, [instance])
+    ceph_check.check(instance)
 
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(metric, at_least=1)
