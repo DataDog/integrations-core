@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import wrapt
+from ddtrace.vendor import wrapt
 from ddtrace import tracer
 
 from ..config import is_affirmative
