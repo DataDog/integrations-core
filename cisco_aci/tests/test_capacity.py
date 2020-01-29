@@ -88,13 +88,7 @@ def test_get_eqpt_capacity(aggregator):
     instance = {"tags": ["user_tag:1", "utag:2"]}
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
     api = ApiMock()
-    capacity = Capacity(
-        api,
-        instance=instance,
-        check_tags=["check_tag:1", "ctag:2"],
-        gauge=check.gauge,
-        log=check.log,
-    )
+    capacity = Capacity(api, instance=instance, check_tags=["check_tag:1", "ctag:2"], gauge=check.gauge, log=check.log)
     capacity._get_eqpt_capacity()
     tags = ['fabric_pod_id:1', 'node_id:2', 'check_tag:1', 'ctag:2', 'user_tag:1', 'utag:2']
     hn = 'pod-1-node-2'
@@ -121,13 +115,7 @@ def test_get_contexts(aggregator):
     instance = {"tags": ["user_tag:1", "utag:2"]}
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
     api = ApiMock()
-    capacity = Capacity(
-        api,
-        instance=instance,
-        check_tags=["check_tag:1", "ctag:2"],
-        gauge=check.gauge,
-        log=check.log,
-    )
+    capacity = Capacity(api, instance=instance, check_tags=["check_tag:1", "ctag:2"], gauge=check.gauge, log=check.log)
     capacity._get_contexts()
     tags = ['check_tag:1', 'ctag:2', 'user_tag:1', 'utag:2']
 
@@ -180,13 +168,7 @@ def test_get_apic_capacity_limits(aggregator):
     instance = {"tags": ["user_tag:1", "utag:2"]}
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
     api = ApiMock()
-    capacity = Capacity(
-        api,
-        instance=instance,
-        check_tags=["check_tag:1", "ctag:2"],
-        gauge=check.gauge,
-        log=check.log,
-    )
+    capacity = Capacity(api, instance=instance, check_tags=["check_tag:1", "ctag:2"], gauge=check.gauge, log=check.log)
     capacity._get_apic_capacity_limits()
     tags = ['check_tag:1', 'ctag:2', 'user_tag:1', 'utag:2']
 
@@ -219,13 +201,7 @@ def test_get_apic_capacity_metrics(aggregator):
     instance = {"tags": ["user_tag:1", "utag:2"]}
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
     api = ApiMock()
-    capacity = Capacity(
-        api,
-        instance=instance,
-        check_tags=["check_tag:1", "ctag:2"],
-        gauge=check.gauge,
-        log=check.log,
-    )
+    capacity = Capacity(api, instance=instance, check_tags=["check_tag:1", "ctag:2"], gauge=check.gauge, log=check.log)
     capacity._get_apic_capacity_metrics()
     tags = ['check_tag:1', 'ctag:2', 'user_tag:1', 'utag:2']
 
