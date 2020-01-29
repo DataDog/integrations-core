@@ -37,11 +37,11 @@ instances:
     #
     # port: 50000
 
-    ## @param cert_path - string - optional
-    ## The path to a certicate to use, when connecting to a SSL database. It
+    ## @param tls_cert - string - optional
+    ## The path to a SSL certicate to use, when connecting to a database in a secure fashion. It
     ## has to be accessible and readable by the agent user.
     #
-    # cert_path: <PATH>
+    # tls_cert: <PATH>
 
     ## @param tags - list of key:value strings - optional
     ## List of tags to attach to every metric and service check emitted by this instance.
