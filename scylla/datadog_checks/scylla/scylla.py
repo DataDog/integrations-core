@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
+from datadog_checks.base.errors import CheckException
 
 from .metrics import ADDITIONAL_METRICS_MAP, INSTANCE_DEFAULT_METRICS
 
@@ -21,6 +21,11 @@ class ScyllaCheck(OpenMetricsBaseCheck):
         instance = instances[0]
 
         endpoint = instance.get('prometheus_url')
+        if endpoint is None:
+            # needed to guard for Python2
+            # empty endpoint will raise CheckException at init, but Py2 urlparse will raise AttributeError instead
+            raise CheckException("Unable to find prometheus URL in config file.")
+
         namespace = 'scylla'
 
         # extract additional metrics requested and validate the correct names
@@ -55,4 +60,4 @@ class ScyllaCheck(OpenMetricsBaseCheck):
             }
         )
 
-        super(ScyllaCheck, self).__init__(name, init_config, instances=[instance])
+        super(ScyllaCheck, self).__init__(name, init_config, [instance])

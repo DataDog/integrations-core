@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "scylla",
   "metric_prefix": "scylla.",
-  "metric_to_check": "scylla.scylladb.current_version",
+  "metric_to_check": "scylla.node.operation_mode",
   "creates_events": false,
   "short_description": "Collect per instance metrics and cluster-wide manager metrics",
   "guid": "875e4d62-831b-4929-bea1-57e5c7016d65",
