@@ -859,14 +859,12 @@ def test_create_pod_tags_by_pvc(monkeypatch, tagger):
             'kube_service:nginx',
             'kube_stateful_set:web',
             'namespace:default',
-            'pod_phase:running',
         },
         'default/www2-web-3': {
             'kube_namespace:default',
             'kube_service:nginx',
             'kube_stateful_set:web',
             'namespace:default',
-            'pod_phase:running',
         },
     }
     assert pod_tags_by_pvc == expected_result
