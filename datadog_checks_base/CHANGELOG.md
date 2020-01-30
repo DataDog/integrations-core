@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 10.3.1 / 2020-01-30
+
+* [Fixed] Properly cast `max_returned_metrics` option to an integer. See [#5536](https://github.com/DataDog/integrations-core/pull/5536).
+
 ## 10.3.0 / 2020-01-21
 
 * [Added] [pdh] Make the admin share configurable. See [#5485](https://github.com/DataDog/integrations-core/pull/5485).
