@@ -3952,7 +3952,6 @@ cluster.rds.version: 0
 cluster.xds-grpc.assignment_stale: 0
 cluster.xds-grpc.assignment_timeout_received: 0
 cluster.xds-grpc.bind_errors: 0
-cluster.xds-grpc.client_ssl_socket_factory.downstream_context_secrets_not_ready: 0
 cluster.xds-grpc.client_ssl_socket_factory.ssl_context_update_by_sds: 1
 cluster.xds-grpc.client_ssl_socket_factory.upstream_context_secrets_not_ready: 0
 cluster.xds-grpc.http2.header_overflow: 0
@@ -4451,7 +4450,6 @@ listener.admin.http.admin.downstream_rq_5xx: 0
 listener.admin.http.admin.downstream_rq_completed: 3
 listener.admin.server_ssl_socket_factory.downstream_context_secrets_not_ready: 0
 listener.admin.server_ssl_socket_factory.ssl_context_update_by_sds: 1
-listener.admin.server_ssl_socket_factory.upstream_context_secrets_not_ready: 0
 listener.admin.no_filter_chain_match: 0
 listener_manager.lds.config_reload: 0
 listener_manager.lds.update_attempt: 41529

@@ -1199,14 +1199,6 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
-    'listener.server_ssl_socket_factory.upstream_context_secrets_not_ready': {
-        'tags': (
-            ('address', ),
-            (),
-            (),
-        ),
-        'method': 'monotonic_count',
-    },
     'listener.ssl.connection_error': {
         'tags': (
             ('address', ),
@@ -2236,14 +2228,6 @@ METRICS = {
     'cluster.upstream_rq_retry_overflow': {
         'tags': (
             ('cluster_name', ),
-            (),
-        ),
-        'method': 'monotonic_count',
-    },
-    'cluster.client_ssl_socket_factory.downstream_context_secrets_not_ready': {
-        'tags': (
-            ('cluster_name', ),
-            (),
             (),
         ),
         'method': 'monotonic_count',
