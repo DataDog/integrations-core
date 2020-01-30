@@ -60,6 +60,7 @@ def test_service_check_ko(aggregator, check, instance):
         check.check(instance)
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Lighttpd.CRITICAL, tags=tags)
 
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
