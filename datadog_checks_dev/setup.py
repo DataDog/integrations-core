@@ -74,7 +74,7 @@ setup(
             'click',
             'colorama',
             'docker-compose>=1.25',
-            'in-toto==0.4.2',
+            'in-toto>=0.4.2',
             'pip-tools',
             'pylint',
             'Pillow',
