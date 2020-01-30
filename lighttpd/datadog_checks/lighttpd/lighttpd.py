@@ -92,6 +92,8 @@ class Lighttpd(AgentCheck):
         full_version, server_version = self._get_server_version(headers_resp)
         if full_version:
             self.set_metadata('version', full_version)
+        else:
+            self.log.debug("Lighttpd version %s not found", full_version)
 
         response = r.content
 
@@ -146,7 +148,7 @@ class Lighttpd(AgentCheck):
         match = VERSION_REGEX.match(server_version)
         if match is None:
             self.log.debug("Lighttpd server version is Unknown")
-            return "Unknown"
+            return None, "Unknown"
 
         full_version = match.group(1)
         server_version = int(match.group(2))
