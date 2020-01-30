@@ -11,7 +11,7 @@ HOST = get_docker_hostname()
 PORT = '3128'
 URL = 'http://{}:{}/squid-internal-mgr/counters'.format(HOST, PORT)
 SERVICE_CHECK = "squid.can_connect"
-
+SQUID_SERVER_VERSION = os.getenv('SQUID_SERVER_VERSION')
 CHECK_CONFIG = {"name": "ok_instance", "tags": ["custom_tag"], "host": HOST}
 
 EXPECTED_METRICS = [

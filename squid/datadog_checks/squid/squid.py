@@ -4,7 +4,7 @@
 
 import requests
 from six import iteritems
-
+import re
 # project
 from datadog_checks.checks import AgentCheck
 
@@ -67,6 +67,7 @@ SQUID_COUNTERS = [
     "aborted_requests",
 ]
 
+VERSION_REGEX = re.compile(r".*/(\d+(?:\.\d+)*)")
 
 class SquidCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'cachemgr_username': {'name': 'username'}, 'cachemgr_password': {'name': 'password'}}
@@ -75,7 +76,6 @@ class SquidCheck(AgentCheck):
 
         name, host, port, custom_tags = self.parse_instance(instance)
         tags = ["name:%s" % name]
-
         # Get the squid counters values
         counters = self.get_counters(host, port, tags + custom_tags)
 
@@ -90,6 +90,12 @@ class SquidCheck(AgentCheck):
             res = self.http.get(url)
             res.raise_for_status()
             self.service_check(SERVICE_CHECK, AgentCheck.OK, tags=tags)
+            headers = res.headers
+            version = self.get_version(headers)
+
+            if version:
+                self.set_metadata('version', version)
+
         except requests.exceptions.RequestException as e:
             self.service_check(SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
             self.log.error('There was an error connecting to squid at %s: %s', url, e)
@@ -129,3 +135,15 @@ class SquidCheck(AgentCheck):
             return None, None
 
         return counter, value
+
+    def get_version(self, headers):
+        server_version = headers.get("Server", "")
+        match = VERSION_REGEX.match(server_version)
+        if match is None:
+            self.log.debug("Squid version is Unknown")
+            return "Unknown"
+
+        version = match.group(1)
+        self.log.debug("Squid version is %s", version)
+
+        return version

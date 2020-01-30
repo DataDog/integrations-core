@@ -26,3 +26,23 @@ def test_check_ok(aggregator, check, instance):
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric("squid.cachemgr." + metric, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
+
+@pytest.mark.usefixtures("dd_environment")
+def test_version_metadata(check, instance, datadog_agent):
+    check.check_id = 'test:123'
+
+    check.check(instance)
+
+    version = common.SQUID_SERVER_VERSION
+
+    major, minor, patch = version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))

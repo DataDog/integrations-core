@@ -84,14 +84,16 @@ def test_legacy_username_password(instance, auth_config):
     check = SquidCheck(common.CHECK_NAME, {}, {}, [instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests.get') as g:
-        check.get_counters('host', 'port', [])
+        with mock.patch('datadog_checks.squid.squid.get_version') as v:
+            v.method.return_value = "3.5.12"
+            check.get_counters('host', 'port', [])
 
-        g.assert_called_with(
-            'http://host:port/squid-internal-mgr/counters',
-            auth=('datadog_user', 'datadog_pass'),
-            cert=mock.ANY,
-            headers=mock.ANY,
-            proxies=mock.ANY,
-            timeout=mock.ANY,
-            verify=mock.ANY,
-        )
+            g.assert_called_with(
+                'http://host:port/squid-internal-mgr/counters',
+                auth=('datadog_user', 'datadog_pass'),
+                cert=mock.ANY,
+                headers=mock.ANY,
+                proxies=mock.ANY,
+                timeout=mock.ANY,
+                verify=mock.ANY,
+            )
