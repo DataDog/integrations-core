@@ -8,7 +8,7 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
 
-VERSION_REGEX = re.compile(r".*/((\d+)(?:\.\d+)*)")
+VERSION_REGEX = re.compile(r".*/((\d+).*)")
 
 
 class Lighttpd(AgentCheck):
@@ -90,7 +90,6 @@ class Lighttpd(AgentCheck):
 
         headers_resp = r.headers
         full_version, server_version = self._get_server_version(headers_resp)
-
         if full_version:
             self.set_metadata('version', full_version)
 
