@@ -140,7 +140,6 @@ snmp.systemStateCoolingUnitStatusCombined,gauge,,,,[Dell iDRAC] The combined sta
 snmp.systemStateCoolingUnitStatusRedundancy,gauge,,,,[Dell iDRAC] The combined redundancy status of all cooling units of this system.,0,snmp,snmp_snmp.systemStateCoolingUnitStatusRedundancy
 snmp.systemStateMemoryDeviceStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all memory devices of this system.,0,snmp,snmp_snmp.systemStateMemoryDeviceStatusCombined
 snmp.systemStatePowerSupplyStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all power supplies of this system.,0,snmp,snmp_snmp.systemStatePowerSupplyStatusCombined
-snmp.systemStatePowerSupplyStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all power supplies of this system.,0,snmp,snmp_snmp.systemStatePowerSupplyStatusCombined
 snmp.systemStatePowerUnitStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all power units of this chassis.,0,snmp,snmp_snmp.systemStatePowerUnitStatusCombined
 snmp.systemStatePowerUnitStatusRedundancy,gauge,,,,[Dell iDRAC] The combined redundancy status of all power units of this system.,0,snmp,snmp_snmp.systemStatePowerUnitStatusRedundancy
 snmp.systemStateProcessorDeviceStatusCombined,gauge,,,,[Dell iDRAC] The combined status of all processor devices of this system.,0,snmp,snmp_snmp.systemStateProcessorDeviceStatusCombined
