@@ -33,13 +33,32 @@ def test_lighttpd(aggregator, check, instance):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
+def test_version_metadata(check, instance, datadog_agent):
+    check.check_id = 'test:123'
+
+    check.check(instance)
+
+    version = common.LIGHTTPD_VERSION
+    major, minor, patch = version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
+
+
 def test_service_check_ko(aggregator, check, instance):
     instance['lighttpd_status_url'] = 'http://localhost:1337'
     tags = ['host:localhost', 'port:1337', 'instance:first']
     with pytest.raises(Exception):
         check.check(instance)
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Lighttpd.CRITICAL, tags=tags)
-
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, instance):
@@ -56,24 +75,3 @@ def test_e2e(dd_agent_check, instance):
 
     tags = ['host:{}'.format(common.HOST), 'port:9449', 'instance:first']
     aggregator.assert_service_check('lighttpd.can_connect', status=Lighttpd.OK, tags=tags)
-
-
-@pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(dd_agent_check, check, instance):
-    aggregator = dd_agent_check(instance, rate=True)
-
-    check.check(instance)
-    check.check_id = 'test:123'
-
-    version = common.LIGHTTPD_VERSION
-    major, minor, patch = version.split('.')
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': version,
-    }
-
-    aggregator.assert_metadata('test:123', version_metadata)
-    aggregator.assert_metadata_count(len(version_metadata))

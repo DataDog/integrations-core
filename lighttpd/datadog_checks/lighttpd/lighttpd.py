@@ -89,8 +89,10 @@ class Lighttpd(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         headers_resp = r.headers
-        version, server_version = self._get_server_version(headers_resp)
-        self.set_metadata('version', version)
+        full_version, server_version = self._get_server_version(headers_resp)
+
+        if full_version:
+            self.set_metadata('version', full_version)
 
         response = r.content
 
@@ -147,7 +149,7 @@ class Lighttpd(AgentCheck):
             self.log.debug("Lighttpd server version is Unknown")
             return "Unknown"
 
-        version = match.group(1)
+        full_version = match.group(1)
         server_version = int(match.group(2))
         self.log.debug("Lighttpd server version is %s", server_version)
-        return version, server_version
+        return full_version, server_version
