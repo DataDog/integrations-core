@@ -63,12 +63,14 @@ def test_get_counters(check):
     See https://github.com/DataDog/integrations-core/pull/1643
     """
     with mock.patch('datadog_checks.squid.squid.requests.get') as g:
-        g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
-        check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
-        check.get_counters('host', 'port', [])
-        # we assert `parse_counter` was called only once despite the raw text
-        # containing multiple `\n` chars
-        check.parse_counter.assert_called_once()
+        with mock.patch('datadog_checks.squid.SquidCheck.get_version') as v:
+            v.method.return_value = "3.5.12"
+            g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
+            check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))
+            check.get_counters('host', 'port', [])
+            # we assert `parse_counter` was called only once despite the raw text
+            # containing multiple `\n` chars
+            check.parse_counter.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -84,7 +86,7 @@ def test_legacy_username_password(instance, auth_config):
     check = SquidCheck(common.CHECK_NAME, {}, {}, [instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests.get') as g:
-        with mock.patch('datadog_checks.squid.squid.get_version') as v:
+        with mock.patch('datadog_checks.squid.SquidCheck.get_version') as v:
             v.method.return_value = "3.5.12"
             check.get_counters('host', 'port', [])
 

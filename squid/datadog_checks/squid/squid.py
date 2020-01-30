@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import re
+
 import requests
 from six import iteritems
-import re
+
 # project
 from datadog_checks.checks import AgentCheck
 
@@ -67,7 +69,8 @@ SQUID_COUNTERS = [
     "aborted_requests",
 ]
 
-VERSION_REGEX = re.compile(r".*/(\d+(?:\.\d+)*)")
+VERSION_REGEX = re.compile(r".*/(.*)")
+
 
 class SquidCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'cachemgr_username': {'name': 'username'}, 'cachemgr_password': {'name': 'password'}}
@@ -138,10 +141,11 @@ class SquidCheck(AgentCheck):
 
     def get_version(self, headers):
         server_version = headers.get("Server", "")
+
         match = VERSION_REGEX.match(server_version)
         if match is None:
             self.log.debug("Squid version is Unknown")
-            return "Unknown"
+            return None
 
         version = match.group(1)
         self.log.debug("Squid version is %s", version)

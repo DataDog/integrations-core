@@ -27,6 +27,7 @@ def test_check_ok(aggregator, check, instance):
         aggregator.assert_metric("squid.cachemgr." + metric, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
 
+
 @pytest.mark.usefixtures("dd_environment")
 def test_version_metadata(check, instance, datadog_agent):
     check.check_id = 'test:123'
