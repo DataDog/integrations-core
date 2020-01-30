@@ -1,5 +1,9 @@
 # CHANGELOG - IBM Db2
 
+## 1.4.0 / 2020-01-30
+
+* [Added] Add parameters for SSL configuration. See [#5587](https://github.com/DataDog/integrations-core/pull/5587).
+
 ## 1.3.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
