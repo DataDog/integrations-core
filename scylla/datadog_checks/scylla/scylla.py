@@ -4,7 +4,6 @@
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
-from datadog_checks.base.errors import CheckException
 
 from .metrics import ADDITIONAL_METRICS_MAP, INSTANCE_DEFAULT_METRICS
 
@@ -23,7 +22,6 @@ class ScyllaCheck(OpenMetricsBaseCheck):
         endpoint = instance.get('prometheus_url')
         if endpoint is None:
             raise ConfigurationError("Unable to find prometheus URL in config file.")
-
 
         # extract additional metrics requested and validate the correct names
         metric_groups = instance.get('metric_groups', [])

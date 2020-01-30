@@ -11,6 +11,7 @@ from datadog_checks.scylla import ScyllaCheck
 from .common import INSTANCE_DEFAULT_GROUPS, INSTANCE_DEFAULT_METRICS, get_metrics
 
 
+@pytest.mark.unit
 def test_instance_default_check(aggregator, db_instance, mock_db_data):
     c = ScyllaCheck('scylla', {}, [db_instance])
 
@@ -21,6 +22,7 @@ def test_instance_default_check(aggregator, db_instance, mock_db_data):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.unit
 def test_instance_additional_check(aggregator, db_instance, mock_db_data):
     # add additional metric groups for validation
     additional_metric_groups = ['scylla.alien', 'scylla.sstables']
@@ -40,6 +42,7 @@ def test_instance_additional_check(aggregator, db_instance, mock_db_data):
     aggregator.assert_service_check('scylla.prometheus.health', count=1)
 
 
+@pytest.mark.unit
 def test_instance_invalid_group_check(aggregator, db_instance, mock_db_data):
     additional_metric_groups = ['scylla.bogus', 'scylla.sstables']
 
@@ -52,6 +55,7 @@ def test_instance_invalid_group_check(aggregator, db_instance, mock_db_data):
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
 
 
+@pytest.mark.unit
 def test_invalid_instance(aggregator, db_instance, mock_db_data):
     instance = deepcopy(db_instance)
     instance.pop('prometheus_url')

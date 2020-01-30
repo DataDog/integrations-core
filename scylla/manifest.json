@@ -16,7 +16,7 @@
   ],
   "public_title": "Datadog-Scylla Integration",
   "categories": [
-    "data store",
+    "data store"
   ],
   "type": "check",
   "is_public": false,
