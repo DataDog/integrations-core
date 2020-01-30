@@ -36,6 +36,11 @@ REPOS = {
         },
         'ignored_missing_jobs': set(),
     },
+    'internal': {
+        'jobs_definition_relative_path': '.azure-pipelines/all.yml',
+        'display_name_overrides': {},
+        'ignored_missing_jobs': set(),
+    },
 }
 
 
