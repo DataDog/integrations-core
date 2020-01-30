@@ -8,7 +8,7 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
 
-VERSION_REGEX = re.compile(r".*/(\d)")
+VERSION_REGEX = re.compile(r".*/((\d+)(?:\.\d+)*)")
 
 
 class Lighttpd(AgentCheck):
@@ -89,7 +89,9 @@ class Lighttpd(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         headers_resp = r.headers
-        server_version = self._get_server_version(headers_resp)
+        version, server_version = self._get_server_version(headers_resp)
+        self.set_metadata('version', version)
+
         response = r.content
 
         metric_count = 0
@@ -145,6 +147,7 @@ class Lighttpd(AgentCheck):
             self.log.debug("Lighttpd server version is Unknown")
             return "Unknown"
 
-        version = int(match.group(1))
-        self.log.debug("Lighttpd server version is %s", version)
-        return version
+        version = match.group(1)
+        server_version = int(match.group(2))
+        self.log.debug("Lighttpd server version is %s", server_version)
+        return version, server_version
