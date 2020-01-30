@@ -22,11 +22,8 @@ class ScyllaCheck(OpenMetricsBaseCheck):
 
         endpoint = instance.get('prometheus_url')
         if endpoint is None:
-            # needed to guard for Python2
-            # empty endpoint will raise CheckException at init, but Py2 urlparse will raise AttributeError instead
-            raise CheckException("Unable to find prometheus URL in config file.")
+            raise ConfigurationError("Unable to find prometheus URL in config file.")
 
-        namespace = 'scylla'
 
         # extract additional metrics requested and validate the correct names
         metric_groups = instance.get('metric_groups', [])
@@ -47,16 +44,17 @@ class ScyllaCheck(OpenMetricsBaseCheck):
         metrics = INSTANCE_DEFAULT_METRICS + additional_metrics
 
         tags = instance.get('tags', [])
-        tags.append('endpoint_server:{}'.format(urlparse(endpoint).hostname))
+        tags.append('server:{}'.format(urlparse(endpoint).hostname))
 
         instance.update(
             {
                 'prometheus_url': endpoint,
-                'namespace': namespace,
+                'namespace': 'scylla',
                 'metrics': metrics,
                 'tags': tags,
                 'metadata_metric_name': 'scylla_scylladb_current_version',
                 'metadata_label_map': {'version': 'version'},
+                'send_histogram_buckets': True,
             }
         )
 

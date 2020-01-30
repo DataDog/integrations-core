@@ -38,7 +38,7 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
 
-Scylla does not include any events.
+The Scylla check does not include any events.
 
 ## Troubleshooting
 

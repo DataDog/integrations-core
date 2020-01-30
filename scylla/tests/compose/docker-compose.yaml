@@ -5,8 +5,6 @@ services:
     image: scylladb/scylla:${SCYLLA_VERSION}
     container_name: scylla-db
     ports:
-      - "9100:9100"
       - "9180:9180"
-      - "10000:10000"
     volumes:
       - ./configs/scylla.yaml:/etc/scylla/scylla.yaml

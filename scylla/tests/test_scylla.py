@@ -23,16 +23,16 @@ def test_instance_default_check(aggregator, db_instance, mock_db_data):
 
 def test_instance_additional_check(aggregator, db_instance, mock_db_data):
     # add additional metric groups for validation
-    additional_metrics = ['scylla.alien', 'scylla.sstables']
+    additional_metric_groups = ['scylla.alien', 'scylla.sstables']
 
     instance = deepcopy(db_instance)
-    instance['metric_groups'] = additional_metrics
+    instance['metric_groups'] = additional_metric_groups
 
     c = ScyllaCheck('scylla', {}, [instance])
 
     c.check(instance)
 
-    metrics_to_check = get_metrics(INSTANCE_DEFAULT_GROUPS + additional_metrics)
+    metrics_to_check = get_metrics(INSTANCE_DEFAULT_GROUPS + additional_metric_groups)
 
     for m in metrics_to_check:
         aggregator.assert_metric(m)
@@ -41,10 +41,10 @@ def test_instance_additional_check(aggregator, db_instance, mock_db_data):
 
 
 def test_instance_invalid_group_check(aggregator, db_instance, mock_db_data):
-    additional_metrics = ['scylla.bogus', 'scylla.sstables']
+    additional_metric_groups = ['scylla.bogus', 'scylla.sstables']
 
     instance = deepcopy(db_instance)
-    instance['metric_groups'] = additional_metrics
+    instance['metric_groups'] = additional_metric_groups
 
     with pytest.raises(ConfigurationError):
         ScyllaCheck('scylla', {}, [instance])

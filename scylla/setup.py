@@ -9,9 +9,14 @@ from setuptools import setup
 HERE = path.dirname(path.abspath(__file__))
 
 # Get version info
-ABOUT = {}
-with open(path.join(HERE, 'datadog_checks', 'scylla', '__about__.py')) as f:
-    exec(f.read(), ABOUT)
+with open(path.join(HERE, 'datadog_checks', 'scylla', '__about__.py'), 'r', encoding='utf-8') as f:
+    for line in f:
+        line = line.strip()
+        if line.startswith('__version__'):
+            VERSION = line.split('=')[1].strip(' \'"')
+            break
+    else:
+        VERSION = '0.0.1'
 
 # Get the long description from the README file
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
@@ -23,7 +28,7 @@ CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
 
 setup(
     name='datadog-scylla',
-    version=ABOUT['__version__'],
+    version=VERSION,
     description='The Scylla check',
     long_description=long_description,
     long_description_content_type='text/markdown',
