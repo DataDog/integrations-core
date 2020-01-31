@@ -14,7 +14,7 @@ from .console import UNKNOWN_OPTIONS
 @click.pass_context
 def run(ctx, args):
     """Run commands in the proper repo."""
-    if not args or '-h' in args or '--help' in args:
+    if not args:
         click.echo(ctx.get_help())
         return
 
