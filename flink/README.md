@@ -13,7 +13,16 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. <List of steps to setup this Integration>
+1. Configure the Datadog HTTP Reporter[3] in Flink.
+
+Copy `/opt/flink-metrics-datadog-1.7.2.jar` into the `/lib` folder.
+In the `flink/conf/flink-conf.yaml`, add these lines, replacing xxx with your Datadog API key:
+
+```
+metrics.reporter.dghttp.class: org.apache.flink.metrics.datadog.DatadogHttpReporter
+metrics.reporter.dghttp.apikey: xxx
+metrics.reporter.dghttp.tags: myflinkapp,prod
+```
 
 ### Validation
 

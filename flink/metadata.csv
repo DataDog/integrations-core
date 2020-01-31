@@ -1,1 +1,23 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+
+Job.Status.JVM.CPU.load, gauge, The recent CPU usage of the JVM.
+Job.Status.JVM.CPU.time, gauge, The CPU time used by the JVM.
+TaskManager.Status.JVM.CPU.load, gauge, The recent CPU usage of the JVM.
+TaskManager.Status.JVM.CPU.time, gauge, The CPU time used by the JVM.
+
+
+Job.Status.JVM.Memory.Heap.Used, gauge, The amount of heap memory currently used (in bytes).
+Job.Status.JVM.Memory.Heap.Committed, gauge, The amount of heap memory guaranteed to be available to the JVM (in bytes).
+Job.Status.JVM.Memory.Heap.Max, gauge, The maximum amount of heap memory that can be used for memory management (in bytes).
+Job.Status.JVM.Memory.NonHeap.Used, gauge, The amount of non-heap memory currently used (in bytes).
+Job.Status.JVM.Memory.NonHeap.Committed, gauge, The amount of non-heap memory guaranteed to be available to the JVM (in bytes).
+Job.Status.JVM.Memory.NonHeap.Max, gauge, The maximum amount of non-heap memory that can be used for memory management (in bytes).
+Job.Status.JVM.Memory.Direct.Count, gauge, The number of buffers in the direct buffer pool.
+Job.Status.JVM.Memory.Direct.MemoryUsed, gauge, The amount of memory used by the JVM for the direct buffer pool (in bytes).
+Job.Status.JVM.Memory.Direct.TotalCapacity, gauge,The total capacity of all buffers in the direct buffer pool (in bytes).
+Job.Status.JVM.Memory.Mapped.Count, gauge, The number of buffers in the mapped buffer pool.
+Job.Status.JVM.Memory.Mapped.MemoryUsed, gauge,The amount of memory used by the JVM for the mapped buffer pool (in bytes).
+Job.Status.JVM.Memory.Mapped.TotalCapacity, gauge,The number of buffers in the mapped buffer pool (in bytes).
+
+Job.Status.JVM.Threads.Count, gauge, The total number of live threads.
+Job.Status.JVM.GarbageCollector
