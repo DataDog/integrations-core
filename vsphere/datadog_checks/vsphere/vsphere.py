@@ -32,7 +32,6 @@ from datadog_checks.vsphere.utils import (
     format_metric_name,
     get_mapped_instance_tag,
     get_parent_tags_recursively,
-    is_metric_available_per_instance,
     is_metric_excluded_by_filters,
     is_resource_excluded_by_filters,
     should_collect_per_instance_values,
@@ -220,7 +219,7 @@ class VSphereCheck(AgentCheck):
                     instance_value = result.id.instance
                     # When collecting per instance values, it's possible that both aggregated metric and per instance
                     # metrics are received. In that case, the metric with no instance value is skipped.
-                    if is_metric_available_per_instance(metric_name, resource_type) and not instance_value:
+                    if not instance_value:
                         continue
                     if instance_value:
                         instance_tag_key = get_mapped_instance_tag(metric_name)

@@ -98,7 +98,7 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
 
     # Following metrics should match and have instance value tag
     aggregator.assert_metric(
-        'vsphere.cpu.usage.raw', tags={'cpu_core:4', 'vcenter_server:FAKE'},
+        'vsphere.cpu.usage.raw', tags=['cpu_core:4', 'vcenter_server:FAKE'],
     )
     for suffix in ['min', 'max', 'raw', 'avg']:
         aggregator.assert_metric(
@@ -109,11 +109,11 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
 
     # Following metrics should NOT match and do NOT have instance value tag
     aggregator.assert_metric(
-        'vsphere.cpu.usage.min', tags={'vcenter_server:FAKE'},
+        'vsphere.cpu.usage.min', tags=['vcenter_server:FAKE'],
     )
     aggregator.assert_metric(
-        'vsphere.cpu.totalCapacity.avg', tags={'vcenter_server:FAKE'},
+        'vsphere.cpu.totalCapacity.avg', tags=['vcenter_server:FAKE'],
     )
 
     # `vsphere.disk.read.avg` is available per instance but the instance values are empty, hence no metric submitted.
-    aggregator.assert_metric('vsphere.disk.read.avg', tags={'vcenter_server:FAKE'}, hostname='VM4-1', count=0)
+    aggregator.assert_metric('vsphere.disk.read.avg', tags=['vcenter_server:FAKE'], hostname='VM4-1', count=0)
