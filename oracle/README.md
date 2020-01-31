@@ -145,8 +145,8 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][8].
 
-#### Skip default metrics
- To skip default metric checks for an instance and only run a custom query with an existing metrics gathering user, insert the tag `only_custom_queries` with a value. This allows a configured instance of the Oracle integration to skip the system, process, and tablespace metrics from running, and allows custom queries to be run without having the permissions described in the [Datadog user creation](#datadog-user-creation) section. If this configuration entry is omitted, the user you specify is required to have those table permissions to run a custom query.
+#### Only custom queries
+ To skip default metric checks for an instance and only run custom queries with an existing metrics gathering user, insert the tag `only_custom_queries` with a value of true. This allows a configured instance of the Oracle integration to skip the system, process, and tablespace metrics from running, and allows custom queries to be run without having the permissions described in the [Datadog user creation](#datadog-user-creation) section. If this configuration entry is omitted, the user you specify is required to have those table permissions to run a custom query.
 
  ```yaml
    init_config:
