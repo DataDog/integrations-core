@@ -179,16 +179,6 @@ class VSphereCheck(AgentCheck):
         Callback of the collection of metrics. This is run in the main thread!
         """
 
-        have_instance_value = defaultdict(set)
-
-        for results_per_mor in query_results:
-            resource_type = type(results_per_mor.entity)
-            metadata = self.metrics_metadata_cache.get_metadata(resource_type)
-            for result in results_per_mor.value:
-                metric_name = metadata.get(result.id.counterId)
-                if result.id.instance:
-                    have_instance_value[resource_type].add(metric_name)
-
         for results_per_mor in query_results:
             mor_props = self.infrastructure_cache.get_mor_props(results_per_mor.entity)
             if mor_props is None:
