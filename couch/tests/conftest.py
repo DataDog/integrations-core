@@ -59,13 +59,14 @@ def dd_environment():
             CheckEndpoints([common.URL]),
             lambda: generate_data(couch_version),
             WaitFor(send_replication, args=(couch_version,)),
-            WaitFor(get_replication, args=(couch_version,))
+            WaitFor(get_replication, args=(couch_version,)),
         ],
     ):
         if couch_version == '1':
             yield common.BASIC_CONFIG
         elif couch_version == '2':
             yield common.BASIC_CONFIG_V2
+
 
 def send_replication(couch_version):
     """
