@@ -104,7 +104,7 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
         aggregator.assert_metric(
             'vsphere.cpu.coreUtilization.{}'.format(suffix),
             hostname='10.0.0.104',
-            tags={'cpu_core:16', 'vcenter_server:FAKE'},
+            tags=['cpu_core:16', 'vcenter_server:FAKE'],
         )
 
     # Following metrics should NOT match and do NOT have instance value tag

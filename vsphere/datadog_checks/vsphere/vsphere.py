@@ -221,9 +221,8 @@ class VSphereCheck(AgentCheck):
                     # metrics are received. In that case, the metric with no instance value is skipped.
                     if not instance_value:
                         continue
-                    if instance_value:
-                        instance_tag_key = get_mapped_instance_tag(metric_name)
-                        tags.append('{}:{}'.format(instance_tag_key, instance_value))
+                    instance_tag_key = get_mapped_instance_tag(metric_name)
+                    tags.append('{}:{}'.format(instance_tag_key, instance_value))
 
                 if resource_type in HISTORICAL_RESOURCES:
                     # Tags are attached to the metrics
