@@ -284,7 +284,7 @@ def test_only_max_dbs_are_scanned(aggregator, gauges):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_replication_metrics(aggregator, gauges):
-    url = "{}/_replicator".format(common.NODE1['server'])
+    replicator_url = "{}/_replicator".format(common.NODE1['server'])
     replication_body = {
         '_id': 'my_replication_id',
         'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
@@ -293,7 +293,7 @@ def test_replication_metrics(aggregator, gauges):
         'continuous': True,
     }
     r = requests.post(
-        url,
+        replicator_url,
         auth=(common.NODE1['user'], common.NODE1['password']),
         headers={'Content-Type': 'application/json'},
         json=replication_body,
@@ -302,13 +302,14 @@ def test_replication_metrics(aggregator, gauges):
 
     count = 0
     attempts = 0
-    url = "{}/_active_tasks".format(common.NODE1['server'])
-    while count != 1 and attempts < 20:
+    task_url = "{}/_active_tasks".format(common.NODE1['server'])
+    while count != 1 and attempts < 1:
         attempts += 1
         time.sleep(1)
-        r = requests.get(url, auth=(common.NODE1['user'], common.NODE1['password']))
+        r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
         r.raise_for_status()
         count = len(r.json())
+    #raise Exception(r.json())
 
     for config in [common.NODE1, common.NODE2, common.NODE3]:
         check = CouchDb(common.CHECK_NAME, {}, [config])
