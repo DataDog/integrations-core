@@ -41,7 +41,7 @@ def agent_reqs():
         echo_success(f"{ok_checks} correctly pinned checks")
     if unreleased_checks:
         joined_checks = ', '.join(unreleased_checks)
-        echo_warning(f"{len(unreleased_checks)} unreleased checks: f{joined_checks}")
+        echo_warning(f"{len(unreleased_checks)} unreleased checks: {joined_checks}")
     if failed_checks:
         echo_failure(f"{failed_checks} checks out of sync")
         abort()
