@@ -74,6 +74,9 @@ def add_style_checker(config, sections, make_envconfig, reader):
         # why we're defaulting to 'no arguments' by default.
         mypy_args = sections['testenv'].get(MYPY_ARGS_OPTION, '')
 
+        # Allow using multiple lines for enhanced readability in case of large amount of options/files to check.
+        mypy_args = mypy_args.replace('\n', ' ')
+
         dependencies.append('mypy>=0.761')
         commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
 
