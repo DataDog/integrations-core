@@ -7,9 +7,7 @@ from datadog_checks.couch import CouchDb
 
 from . import common
 
-COUCHDB2_VERSIONS = {
-    '2_3': '2.3.1'
-}
+COUCHDB2_VERSIONS = {'2_3': '2.3.1'}
 
 
 @pytest.mark.usefixtures("dd_environment")
