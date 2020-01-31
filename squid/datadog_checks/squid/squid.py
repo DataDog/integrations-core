@@ -94,10 +94,7 @@ class SquidCheck(AgentCheck):
             res.raise_for_status()
             self.service_check(SERVICE_CHECK, AgentCheck.OK, tags=tags)
             headers = res.headers
-            version = self.get_version(headers)
-
-            if version:
-                self.set_metadata('version', version)
+            self.submit_version(headers)
 
         except requests.exceptions.RequestException as e:
             self.service_check(SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
@@ -139,7 +136,7 @@ class SquidCheck(AgentCheck):
 
         return counter, value
 
-    def get_version(self, headers):
+    def submit_version(self, headers):
         server_version = headers.get("Server", "")
 
         match = VERSION_REGEX.match(server_version)
@@ -150,4 +147,9 @@ class SquidCheck(AgentCheck):
         version = match.group(1)
         self.log.debug("Squid version is %s", version)
 
-        return version
+        if version is not None:
+            self.set_metadata('version', version)
+            self.log.debug("Squid version %s metadata submitted", version)
+
+        else:
+            self.log.debug("Squid version %s not valid version", server_version)
