@@ -90,7 +90,7 @@ class Lighttpd(AgentCheck):
 
         headers_resp = r.headers
         full_version, server_version = self._get_server_version(headers_resp)
-        if full_version:
+        if full_version is not None:
             self.set_metadata('version', full_version)
         else:
             self.log.debug("Lighttpd version %s not found", full_version)
