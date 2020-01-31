@@ -11,7 +11,7 @@ import pytest
 import requests
 
 from datadog_checks.couch import CouchDb
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
 
 from . import common
@@ -50,19 +50,61 @@ def dd_environment():
     If there's any problem executing docker-compose, let the exception bubble
     up.
     """
-    env = os.environ
-    env['COUCH_PORT'] = common.PORT
-    couch_version = env["COUCH_VERSION"][0]
+    couch_version = os.environ["COUCH_VERSION"][0]
 
     with docker_run(
         compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
-        env_vars=env,
-        conditions=[CheckEndpoints([common.URL]), lambda: generate_data(couch_version)],
+        env_vars={'COUCH_PORT': common.PORT},
+        conditions=[
+            CheckEndpoints([common.URL]),
+            lambda: generate_data(couch_version),
+            WaitFor(send_replication, args=(couch_version,)),
+            WaitFor(get_replication, args=(couch_version,))
+        ],
     ):
         if couch_version == '1':
             yield common.BASIC_CONFIG
         elif couch_version == '2':
             yield common.BASIC_CONFIG_V2
+
+def send_replication(couch_version):
+    """
+    Send replication task to trigger tasks
+    """
+    if couch_version == '1':
+        return
+
+    replicator_url = "{}/_replicator".format(common.NODE1['server'])
+
+    replication_body = {
+        '_id': 'my_replication_id',
+        'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
+        'target': 'http://dduser:pawprint@127.0.0.1:5984/kennel_replica',
+        'create_target': True,
+        'continuous': True,
+    }
+    r = requests.post(
+        replicator_url,
+        auth=(common.NODE1['user'], common.NODE1['password']),
+        headers={'Content-Type': 'application/json'},
+        json=replication_body,
+    )
+    r.raise_for_status()
+
+
+def get_replication(couch_version):
+    """
+    Attempt to get active replication tasks
+    """
+    if couch_version == '1':
+        return
+
+    task_url = "{}/_active_tasks".format(common.NODE1['server'])
+
+    r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
+    r.raise_for_status()
+    count = len(r.json())
+    return count > 0
 
 
 def generate_data(couch_version):

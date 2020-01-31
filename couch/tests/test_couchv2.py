@@ -112,6 +112,10 @@ def _assert_check(aggregator, gauges):
         # One for the server stats, the version is already loaded
         aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=2)
 
+    # Assert replication task metrics
+    for gauge in gauges["replication_tasks_gauges"]:
+        aggregator.assert_metric(gauge)
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -183,6 +187,9 @@ def test_check_without_names(aggregator, gauges):
         for gauge in gauges["erlang_gauges"]:
             aggregator.assert_metric(gauge)
 
+        for gauge in gauges["replication_tasks_gauges"]:
+            aggregator.assert_metric(gauge)
+
     for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
         expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
         for gauge in gauges["by_dd_gauges"]:
@@ -216,6 +223,9 @@ def test_only_max_nodes_are_scanned(aggregator, gauges):
     check.check(config)
 
     for gauge in gauges["erlang_gauges"]:
+        aggregator.assert_metric(gauge)
+
+    for gauge in gauges["replication_tasks_gauges"]:
         aggregator.assert_metric(gauge)
 
     for config in [common.NODE1, common.NODE2]:
@@ -284,33 +294,6 @@ def test_only_max_dbs_are_scanned(aggregator, gauges):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_replication_metrics(aggregator, gauges):
-    replicator_url = "{}/_replicator".format(common.NODE1['server'])
-    replication_body = {
-        '_id': 'my_replication_id',
-        'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
-        'target': 'http://dduser:pawprint@127.0.0.1:5984/kennel_replica',
-        'create_target': True,
-        'continuous': True,
-    }
-    r = requests.post(
-        replicator_url,
-        auth=(common.NODE1['user'], common.NODE1['password']),
-        headers={'Content-Type': 'application/json'},
-        json=replication_body,
-    )
-    r.raise_for_status()
-
-    count = 0
-    attempts = 0
-    task_url = "{}/_active_tasks".format(common.NODE1['server'])
-    while count != 1 and attempts < 1:
-        attempts += 1
-        time.sleep(1)
-        r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
-        r.raise_for_status()
-        count = len(r.json())
-    #raise Exception(r.json())
-
     for config in [common.NODE1, common.NODE2, common.NODE3]:
         check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
