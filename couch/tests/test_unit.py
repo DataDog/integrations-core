@@ -39,3 +39,19 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         http_wargs.update(expected_http_kwargs)
 
         r.get.assert_called_with('http://{}:5984/_all_dbs/'.format(common.HOST), **http_wargs)
+
+
+def test_full_version_regex(check, version, expected_parts, datadog_agent):
+    """The default server token is Full. Full results in server info that can include
+    multiple non-Apache version specific information.
+    """
+    check = check({})
+    check.check_id = 'test:123'
+
+    check._submit_metadata(version)
+
+    version_metadata = {'version.{}'.format(k): v for k, v in list(expected_parts.items())}
+    if expected_parts:
+        version_metadata['version.scheme'] = 'semver'
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
