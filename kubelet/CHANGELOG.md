@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 3.5.2 / 2020-01-31
+
+* [Fixed] Ignore insecure warnings for kubelet requests. See [#5607](https://github.com/DataDog/integrations-core/pull/5607).
+
 ## 3.5.1 / 2020-01-15
 
 * [Fixed] Fix Kubelet credentials handling. See [#5455](https://github.com/DataDog/integrations-core/pull/5455).
