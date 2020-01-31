@@ -92,11 +92,6 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
     return True
 
 
-def is_metric_included_by_filters(metric_name, mor_type, metric_filters):
-    filters = metric_filters.get(MOR_TYPE_AS_STRING[mor_type], [])
-    return match_any_regex(metric_name, filters)
-
-
 def make_inventory_path(mor, infrastructure_data):
     mor_name = infrastructure_data.get(mor).get('name', '')
     mor_parent = infrastructure_data.get(mor).get('parent')
@@ -144,9 +139,9 @@ def get_parent_tags_recursively(mor, infrastructure_data):
 
 
 def should_collect_per_instance_values(config, metric_name, resource_type):
-    return is_metric_included_by_filters(
-        metric_name, resource_type, config.collect_per_instance_filters
-    ) and is_metric_available_per_instance(metric_name, resource_type)
+    filters = config.collect_per_instance_filters.get(MOR_TYPE_AS_STRING[resource_type], [])
+    metric_matched = match_any_regex(metric_name, filters)
+    return metric_matched and is_metric_available_per_instance(metric_name, resource_type)
 
 
 def get_mapped_instance_tag(metric_name):
