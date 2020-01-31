@@ -1,0 +1,30 @@
+{
+  "display_name": "apache-flink",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "apache_flink",
+  "metric_prefix": "apache_flink.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "8bbe43c3-5078-4766-a12a-0a4785cea077",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-apache-flink Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "apache-flink",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
