@@ -27,8 +27,9 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.option('--initial', is_flag=True)
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
+@click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
 @click.pass_context
-def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
+def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_file):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
@@ -108,9 +109,9 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run):
 
     # read the old contents
     if check:
-        changelog_path = os.path.join(get_root(), check, 'CHANGELOG.md')
+        changelog_path = os.path.join(get_root(), check, output_file)
     else:
-        changelog_path = os.path.join(get_root(), 'CHANGELOG.md')
+        changelog_path = os.path.join(get_root(), output_file)
     old = list(stream_file_lines(changelog_path))
 
     # write the new changelog in memory
