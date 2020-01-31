@@ -21,7 +21,7 @@ def agent_reqs():
     echo_info("Validating requirements-agent-release.txt...")
     agent_reqs_content = parse_agent_req_file(read_file(get_agent_release_requirements()))
     ok_checks = 0
-    unreleased_checks = 0
+    unreleased_checks = []
     failed_checks = 0
     for check_name in get_valid_checks():
         if check_name not in AGENT_V5_ONLY | NOT_CHECKS:
@@ -29,7 +29,7 @@ def agent_reqs():
             check_version = get_version_string(check_name)
             pinned_version = agent_reqs_content.get(package_name)
             if package_name not in agent_reqs_content:
-                unreleased_checks += 1
+                unreleased_checks.append(check_name)
                 echo_warning(f'{check_name} has not yet been released')
             elif check_version != pinned_version:
                 failed_checks += 1
@@ -40,7 +40,8 @@ def agent_reqs():
     if ok_checks:
         echo_success(f"{ok_checks} correctly pinned checks")
     if unreleased_checks:
-        echo_warning(f"{unreleased_checks} unreleased checks")
+        joined_checks = ', '.join(unreleased_checks)
+        echo_warning(f"{len(unreleased_checks)} unreleased checks: f{joined_checks}")
     if failed_checks:
         echo_failure(f"{failed_checks} checks out of sync")
         abort()
