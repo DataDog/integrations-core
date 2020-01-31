@@ -1,9 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from copy import deepcopy
-
-import mock
 import pytest
 
 from datadog_checks.couch import CouchDb
@@ -13,6 +10,7 @@ from . import common
 COUCHDB2_VERSIONS = {
     '2_3': '2.3.1'
 }
+
 
 @pytest.mark.usefixtures("dd_environment")
 def test_collect_metadata_instance(aggregator, datadog_agent, instance):
