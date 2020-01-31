@@ -22,7 +22,7 @@ def test_collect_metadata_instance(aggregator, datadog_agent, instance):
     version = common.COUCH_RAW_VERSION
 
     # CouchDB2 version is formatted differently for the datadog hosted image
-    if common.COUCH_RAW_VERSION.startswith('2.'):
+    if common.COUCH_MAJOR_VERSION == 2:
         version = COUCHDB2_VERSIONS[common.COUCH_RAW_VERSION]
 
     major, minor, patch = version.split('.')
