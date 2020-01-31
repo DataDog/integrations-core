@@ -70,8 +70,9 @@ def add_style_checker(config, sections, make_envconfig, reader):
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
         # For command line options accepted by mypy, see: https://mypy.readthedocs.io/en/stable/command_line.html
-        # Defaults to type-checking the entire integration package.
-        mypy_args = sections['testenv'].get(MYPY_ARGS_OPTION, 'datadog_checks')
+        # Each integration should explicitly specify its options and which files it'd like to type check, which is
+        # why we're defaulting to 'no arguments' by default.
+        mypy_args = sections['testenv'].get(MYPY_ARGS_OPTION, '')
 
         dependencies.append('mypy>=0.761')
         commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
