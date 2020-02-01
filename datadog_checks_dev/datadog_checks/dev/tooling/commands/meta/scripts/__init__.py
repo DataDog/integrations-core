@@ -5,8 +5,9 @@ import click
 
 from ...console import CONTEXT_SETTINGS
 from .metrics2md import metrics2md
+from .upgrade_python import upgrade_python
 
-ALL_COMMANDS = (metrics2md,)
+ALL_COMMANDS = (metrics2md, upgrade_python)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Miscellaneous scripts that may be useful')
