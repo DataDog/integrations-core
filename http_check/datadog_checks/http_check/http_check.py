@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
+import _strptime  # noqa
 import copy
 import re
 import socket
@@ -10,7 +11,6 @@ import ssl
 import time
 from datetime import datetime
 
-import _strptime  # noqa
 import requests
 from six import string_types
 from six.moves.urllib.parse import urlparse
