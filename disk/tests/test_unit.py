@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-import sys
 from itertools import chain
 
 import mock
@@ -10,6 +9,7 @@ import pytest
 from six import iteritems
 
 from datadog_checks.disk import Disk
+from datadog_checks.base.utils.platform import Platform
 
 from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
 from .mocks import MockDiskMetrics, mock_blkid_output
@@ -159,7 +159,7 @@ def test_min_disk_size(aggregator, gauge_metrics, rate_metrics):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.skipif(sys.platform != 'linux', reason='disk labels are only available on Linux')
+@pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
 def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gauge_metrics, rate_metrics):
     """
@@ -171,7 +171,7 @@ def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gau
         aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'label:MYLABEL'])
 
 
-@pytest.mark.skipif(sys.platform != 'linux', reason='disk labels are only available on Linux')
+@pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
 @pytest.mark.usefixtures('psutil_mocks')
 def test_blkid_cache_file_contains_no_labels(
     aggregator, instance_blkid_cache_file_no_label, gauge_metrics, rate_metrics
