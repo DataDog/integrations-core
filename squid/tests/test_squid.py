@@ -34,12 +34,24 @@ def test_check_ok(aggregator, check, instance):
     [
         (
             'squid/3.0.3',
-            {'version.scheme': 'semver', 'version.major': '3', 'version.minor': '0', 'version.raw': '3.0.3'},
+            {
+                'version.scheme': 'semver',
+                'version.major': '3',
+                'version.minor': '0',
+                'version.patch': '3',
+                'version.raw': '3.0.3',
+            },
             5,
         ),
         (
             'squid/1.4.5',
-            {'version.scheme': 'semver', 'version.major': '1', 'version.minor': '4', 'version.raw': '1.4.5'},
+            {
+                'version.scheme': 'semver',
+                'version.major': '1',
+                'version.minor': '4',
+                'version.patch': '5',
+                'version.raw': '1.4.5',
+            },
             5,
         ),
         # these versions aren't valid squid versions, so the version metadata should not be submitted
