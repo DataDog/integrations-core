@@ -155,15 +155,8 @@ class AgentCheck(object):
                 # new-style init: the 3rd argument is `instances`
                 self.instances = args[2]
 
-        # NOTE: Agent 6+ should pass exactly one instance... But _we_ are not abiding by that rule on our side
-        # everywhere just yet.
-        # For example, some tests use `check = MyCheck('my_check', init_config, [])`,
-        # but then run `check.check(some_instance)` (they should be passing `some_instance` initially).
-        # Worse: some integrations (esp. those based on `OpenMetricsBaseCheck`) or tests enforce the use of
-        # the legacy Agent 5 signature, e.g. `check = MyCheck('my_check', init_config, {})`.
-        # So we still need to account for cases when no instance was passed, hence why `self.instance` *might*
-        # be `None`.
-        # See: https://github.com/DataDog/integrations-core/pull/5573
+        # NOTE: Agent 6+ should pass exactly one instance... But we are not abiding by that rule on our side
+        # everywhere just yet. It's complicated... See: https://github.com/DataDog/integrations-core/pull/5573
         self.instance = self.instances[0] if self.instances else None
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
@@ -230,23 +223,23 @@ class AgentCheck(object):
         }
 
         # Setup metric limits
-        self.metric_limiter = self._get_metric_limiter(name=self.name, instance=self.instance)
+        self.metric_limiter = self._get_metric_limiter(self.name, instance=self.instance)
 
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque([self.send_config_metadata])
 
     def _get_metric_limiter(self, name, instance=None):
         limit = self._get_metric_limit(instance=instance)
+
         if limit > 0:
             return Limiter(name, 'metrics', limit, self.warning)
+
         return None
 
     def _get_metric_limit(self, instance=None):
         if instance is None:
-            # NOTE: the value returned in this case doesn't make much sense, since in practice `instance` will
-            # always be set. We have some pending work to ensure that this assumption is enforced.
-            # See: https://github.com/DataDog/integrations-core/pull/5573
-            # TODO: Remove with Agent 5
+            # Agent 6+ will now always pass an instance when calling into a check, but we still need to
+            # account for this case due to some tests not always passing an instance on init.
             return self.DEFAULT_METRIC_LIMIT
 
         max_returned_metrics = instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
@@ -269,8 +262,8 @@ class AgentCheck(object):
                 self.DEFAULT_METRIC_LIMIT,
             )
             return self.DEFAULT_METRIC_LIMIT
-        else:
-            return limit
+
+        return limit
 
     @staticmethod
     def load_config(yaml_str):
