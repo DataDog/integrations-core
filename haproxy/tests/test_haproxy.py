@@ -224,6 +224,17 @@ def test_version_metadata_http(check, datadog_agent, version_metadata):
     datadog_agent.assert_metadata_count(metadata_count)
 
 
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_uptime_skip_http(check, aggregator):
+    config = copy.deepcopy(CHECK_CONFIG_OPEN)
+    config['startup_grace_seconds'] = 20
+    check = check(config)
+    check.check(config)
+
+    aggregator.assert_all_metrics_covered()
+
+
 @requires_shareable_unix_socket
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
@@ -265,6 +276,21 @@ def test_version_metadata_tcp_socket(check, version_metadata, datadog_agent):
         else len(version_metadata)
     )
     datadog_agent.assert_metadata_count(metadata_count)
+
+
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+@pytest.mark.skipif(
+    haproxy_less_than_1_7 or not platform_supports_sockets,
+    reason='Uptime is only reported on the stats socket in v1.7+',
+)
+def test_uptime_skip_tcp(aggregator, check, dd_environment):
+    config = copy.deepcopy(CONFIG_TCPSOCKET)
+    config['startup_grace_seconds'] = 20
+    check = check(config)
+    check.check(config)
+
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.e2e
