@@ -6,8 +6,8 @@ import ipaddress
 import json
 import threading
 import time
-import typing
 from collections import defaultdict
+from typing import List, Optional, Sequence, Tuple
 
 import pysnmp.proto.rfc1902 as snmp_type
 from pyasn1.codec.ber import decoder
@@ -16,11 +16,12 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
-from . import commands, utils
+# NOTE: it is important to import the entire module instead of individual members so that we can
+# monkey-patch them when testing.
+from . import commands
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedTableMetric
 from .exceptions import PySnmpError
-from .profiles import get_profile_definition
 from .types import (
     CounterBasedGauge64,
     ObjectIdentity,
@@ -30,6 +31,8 @@ from .types import (
     noSuchInstance,
     noSuchObject,
 )
+from .utils.common import batches, partition
+from .utils.profiles import get_profile_definition
 
 # Metric type that we support
 SNMP_COUNTERS = frozenset([snmp_type.Counter32.__name__, snmp_type.Counter64.__name__, ZeroBasedCounter64.__name__])
@@ -213,16 +216,16 @@ class SnmpCheck(AgentCheck):
     def fetch_oids(
         self,
         config,  # type: InstanceConfig
-        oids,  # type: typing.Sequence[ObjectType]
+        oids,  # type: Sequence[ObjectType]
         enforce_constraints,  # type: bool
     ):
-        # type: (...) -> typing.Tuple[typing.List[ObjectType], typing.Optional[str]]
-        error = None  # type: typing.Optional[str]
-        all_binds = []  # type: typing.List[ObjectType]
+        # type: (...) -> Tuple[List[ObjectType], Optional[str]]
+        error = None  # type: Optional[str]
+        all_binds = []  # type: List[ObjectType]
 
         # SNMP hosts can respond to requests for a batch of OIDs, so we
         # use that to make less round trips to the host.
-        for batch_of_oids in utils.batches(oids, size=self.oid_batch_size):
+        for batch_of_oids in batches(oids, size=self.oid_batch_size):
             try:
                 # Try fetching these OIDs via GET. If the SNMP host hasn't found
                 # some of them, we'll try again with GETNEXT.
@@ -230,7 +233,7 @@ class SnmpCheck(AgentCheck):
                 # results for OIDs that refer to specific leafs (i.e. those for which GET would return a result).
                 result = commands.snmp_get(config, batch_of_oids, enforce_constraints, self.log)
 
-                found, missing = utils.partition(lambda variable: variable.was_oid_found_by_snmp_host, result.variables)
+                found, missing = partition(lambda variable: variable.was_oid_found_by_snmp_host, result.variables)
 
                 all_binds.extend(variable.var_bind for variable in found)
 

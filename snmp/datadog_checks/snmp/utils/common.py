@@ -4,24 +4,24 @@
 """
 Generic (typed) utilities.
 
-NOTE: these can't live under `datadog_checks.base.utils.common`
-as there are some subtleties with getting `mypy` to work with namespace packages:
-https://github.com/python/mypy/issues/5759
+NOTE: these can't live under `datadog_checks.base.utils.common` (yet) as there are some
+subtleties with getting `mypy` to work with namespace packages.
+See: https://github.com/python/mypy/issues/5759
 """
 
 import itertools
-import typing
+from typing import Callable, Iterator, Sequence, Tuple, TypeVar
 
 from six.moves import filterfalse
 
-T = typing.TypeVar("T")
+T = TypeVar("T")
 
 
 def partition(
-    pred,  # type: typing.Callable[[T], bool]
-    seq,  # type: typing.Sequence[T]
+    pred,  # type: Callable[[T], bool]
+    seq,  # type: Sequence[T]
 ):
-    # type: (...) -> typing.Tuple[typing.Tuple[T, ...], typing.Tuple[T, ...]]
+    # type: (...) -> Tuple[Tuple[T, ...], Tuple[T, ...]]
     """
     Use a predicate to partition entries into true entries and false entries.
 
@@ -33,7 +33,7 @@ def partition(
 
 
 def batches(seq, size):
-    # type: (typing.Sequence[T], int) -> typing.Iterator[typing.Sequence[T]]
+    # type: (Sequence[T], int) -> Iterator[Sequence[T]]
     """
     Slice a sequence into batches of equal `size` (except maybe for the last batch).
     """

@@ -6,7 +6,7 @@ Classes that model SNMP-related concepts, allowing us to work at a higher level
 than what is provided out-of-the-box by PySNMP.
 """
 
-import typing
+from typing import Sequence, Tuple, Union
 
 from .exceptions import SmiError
 from .types import Asn1Type, ObjectIdentity, ObjectName, ObjectType, noSuchInstance, noSuchObject
@@ -19,11 +19,9 @@ class OID(object):
     Acts as a facade for various types used by PySNMP to represent OIDs.
     """
 
-    def __init__(
-        self, obj  # type: typing.Union[str, typing.Tuple[int, ...], ObjectIdentity, ObjectName]
-    ):
-        # type: (...) -> None
-        identifier = ()  # type: typing.Tuple[int, ...]
+    def __init__(self, obj):
+        # type: (Union[str, Tuple[int, ...], ObjectIdentity, ObjectName]) -> None
+        identifier = ()  # type: Tuple[int, ...]
 
         if isinstance(obj, str):
             identifier = tuple(map(int, obj.lstrip('.').split('.')))
@@ -48,7 +46,7 @@ class OID(object):
         self._identifier = identifier
 
     def as_tuple(self):
-        # type: () -> typing.Tuple[int, ...]
+        # type: () -> Tuple[int, ...]
         return self._identifier
 
     def as_string(self):
@@ -76,9 +74,9 @@ class Variable(object):
     """
 
     def __init__(self, var_bind):
-        # type: (typing.Union[ObjectType, typing.Tuple]) -> None
+        # type: (Union[ObjectType, Tuple]) -> None
         try:
-            name = var_bind[0]  # type: typing.Union[ObjectIdentity, ObjectName]
+            name = var_bind[0]  # type: Union[ObjectIdentity, ObjectName]
             value = var_bind[1]  # type: Asn1Type
         except SmiError as exc:
             raise RuntimeError(
@@ -103,40 +101,38 @@ class SNMPCommandResult(object):
     """
     Container for results of an SNMP command ran via PySNMP.
 
+    For a description of PySNMP parameters, see:
+    http://snmplabs.com/pysnmp/docs/hlapi/asyncore/sync/manager/cmdgen/getcmd.html
+
     Parameters
     ----------
     variables:
-        A tuple of MIB variables, i.e. the responses of the SNMP host for a set of requested OID.
+        The responses of the SNMP host for a set of requested OID.
         Each variable contains the OID and its value.
     error_indication:
-        This represents an error that occurred while requesting the SNMP host, such as a timeout or
-        a network failure.
+        An error that occurred while requesting the SNMP host, e.g. a timeout, network failure, server error...
+        (Same meaning as in PySNMP.)
     error_status:
-        This represents a protocol-level error (similar to a 400 Bad Request error in HTTP), such
-        as requesting an OID that doesn't exist.
-    error_index:
-        If non-zero, the index of the variable at the source of the error.
-        Usage: `variable_with_error = result.var_binds[result.error_index - 1]`.
-    error:
-        A free-form error message provided by us (i.e. not coming from PySNMP).
+        A protocol-level error, e.g. requesting an OID that doesn't exist.
+        (Same meaning than in PySNMP.)
+    error_variable:
+        The variable at the source of the error, if any.
     """
 
     def __init__(
         self,
-        variables,  # type: typing.Tuple[Variable, ...]
+        variables,  # type: Tuple[Variable, ...]
         error_indication=None,  # type: Asn1Type
         error_status=None,  # type: Asn1Type
-        error_index=0,  # type: int
-        error=None,  # type: str
+        error_variable=None,  # type: Variable
     ):
         self.variables = variables
         self.error_indication = error_indication
         self.error_status = error_status
-        self.error_index = error_index
-        self.error = error
+        self.error_variable = error_variable
 
     @property
     def var_binds(self):
-        # type: () -> typing.Sequence[ObjectType]
+        # type: () -> Sequence[ObjectType]
         # Compat with debug logging of response variables.
         return [variable.var_bind for variable in self.variables]

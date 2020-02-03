@@ -15,7 +15,7 @@ import yaml
 from datadog_checks import snmp
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
-from datadog_checks.snmp import SnmpCheck, utils
+from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
@@ -69,7 +69,11 @@ def test_transient_error(aggregator):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
     check = common.create_check(instance)
 
-    with mock.patch.object(utils, 'raise_on_error_indication', side_effect=RuntimeError):
+    def mock_snmp_get_results():
+        error_indication = 'An error'
+        yield error_indication, None, 0, ()
+
+    with mock.patch('datadog_checks.snmp.commands.snmp_get', return_value=mock_snmp_get_results()):
         check.check(instance)
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)

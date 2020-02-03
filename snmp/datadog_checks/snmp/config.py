@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
-import typing
 from collections import defaultdict
+from typing import Any, Callable, Generator, Iterator, Sequence
 
 from pyasn1.type.univ import OctetString
 from pysnmp import hlapi
@@ -11,10 +11,10 @@ from pysnmp.smi import builder, view
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
-from . import utils
 from .models import OID, SNMPCommandResult
 from .resolver import OIDResolver
 from .types import ObjectType
+from .utils.snmp import call_pysnmp_command
 
 
 class ParsedMetric(object):
@@ -117,12 +117,18 @@ class InstanceConfig:
     def call_cmd(self, cmd, *args, **kwargs):
         return cmd(self._snmp_engine, self._auth_data, self._transport, self._context_data, *args, **kwargs)
 
-    def call_command(self, command, oids, **options):
-        # type: (typing.Callable, typing.Sequence[ObjectType], typing.Any) -> typing.Iterator[SNMPCommandResult]
+    # NOTE: Meant to fully replace `.call_cmd()` eventually.
+    def call_command(
+        self,
+        command,  # type: Callable[..., Generator]
+        oids,  # type: Sequence[ObjectType]
+        **options  # type: Any
+    ):
+        # type: (...) -> Iterator[SNMPCommandResult]
         """
         Call a PySNMP command, injecting configuration stored on this instance.
         """
-        return utils.call_pysnmp_command(
+        return call_pysnmp_command(
             command, self._snmp_engine, self._auth_data, self._transport, self._context_data, *oids, **options
         )
 

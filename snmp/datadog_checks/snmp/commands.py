@@ -9,14 +9,14 @@ http://net-snmp.sourceforge.net/tutorial/tutorial-5/commands/index.html
 """
 
 import logging
-import typing
+from typing import Sequence
 
 from pysnmp.hlapi import bulkCmd, getCmd, nextCmd
 
-from . import utils
 from .config import InstanceConfig
 from .models import SNMPCommandResult
 from .types import ObjectType
+from .utils.snmp import raise_on_error_indication
 
 # NOTE: commands that have not been wrapped around yet are exposed as-is here.
 __all__ = ['bulkCmd', 'nextCmd', 'snmp_get']
@@ -24,7 +24,7 @@ __all__ = ['bulkCmd', 'nextCmd', 'snmp_get']
 
 def snmp_get(
     config,  # type: InstanceConfig
-    oids,  # type: typing.Sequence[ObjectType]
+    oids,  # type: Sequence[ObjectType]
     enforce_constraints,  # type: bool
     log,  # type: logging.Logger
 ):
@@ -51,6 +51,6 @@ def snmp_get(
 
     log.debug('Returned vars: %s', result.var_binds)
 
-    utils.raise_on_error_indication(result, config)
+    raise_on_error_indication(result, config)
 
     return result
