@@ -72,7 +72,7 @@ SHORT_ROLLUP = {
 def trace_method(method):
     """
     Decorator to catch and print the exceptions that happen within async tasks.
-    Note: this should be applied to methods of VSphereCheck only!
+    Note: this should be applied to methods of VSphereLegacyCheck only!
     """
 
     def wrapper(*args, **kwargs):
@@ -84,7 +84,7 @@ def trace_method(method):
     return wrapper
 
 
-class VSphereCheck(AgentCheck):
+class VSphereLegacyCheck(AgentCheck):
     """ Get performance metrics from a vCenter server and upload them to Datadog
     References:
         http://pubs.vmware.com/vsphere-51/index.jsp#com.vmware.wssdk.apiref.doc/vim.PerformanceManager.html
@@ -97,8 +97,8 @@ class VSphereCheck(AgentCheck):
     SERVICE_CHECK_NAME = 'vcenter.can_connect'
     pool = None
 
-    def __init__(self, name, init_config, agentConfig, instances):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        AgentCheck.__init__(self, name, init_config, instances)
         self.time_started = time.time()
 
         self.batch_morlist_size = max(init_config.get("batch_morlist_size", BATCH_MORLIST_SIZE), 0)
@@ -409,7 +409,7 @@ class VSphereCheck(AgentCheck):
         resources.extend(RESOURCE_TYPE_NO_METRIC)
         content = server_instance.content
 
-        with VSphereCheck.create_container_view(server_instance, resources) as view_ref:
+        with VSphereLegacyCheck.create_container_view(server_instance, resources) as view_ref:
 
             # Object used to query MORs as well as the attributes we require in one API call
             # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html

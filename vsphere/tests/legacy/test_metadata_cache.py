@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.vsphere.metadata_cache import MetadataCache, MetadataNotFoundError
+from datadog_checks.vsphere.legacy.metadata_cache import MetadataCache, MetadataNotFoundError
 
 
 @pytest.fixture
