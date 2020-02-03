@@ -10,9 +10,8 @@ import ssl
 import time
 from datetime import datetime
 
-import _strptime  # noqa
 import requests
-from six import string_types
+from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ensure_unicode
@@ -20,6 +19,10 @@ from datadog_checks.base import AgentCheck, ensure_unicode
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path
+
+# Apply thread-safety fix, see https://bugs.python.org/issue7980
+if PY2:
+    import _strptime  # noqa
 
 DEFAULT_EXPIRE_DAYS_WARNING = 14
 DEFAULT_EXPIRE_DAYS_CRITICAL = 7
