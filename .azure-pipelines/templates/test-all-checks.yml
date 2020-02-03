@@ -71,6 +71,9 @@ jobs:
     - checkName: cockroachdb
       displayName: CockroachDB
       os: linux
+    - checkName: confluent_platform
+      displayName: Confluent Platform
+      os: linux
     - checkName: consul
       displayName: Consul
       os: linux

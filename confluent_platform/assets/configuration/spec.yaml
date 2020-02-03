@@ -1,0 +1,27 @@
+name: Confluent Platform
+files:
+- name: confluent_platform.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+    - template: init_config/default
+  - template: instances
+    overrides:
+      description: |
+        Every instance is scheduled independent of the others.
+
+        When `collect_default_metrics` is `true`, default metrics are collected for
+        most Kafka / Confluent Platform components:
+          - Broker
+          - Connect
+          - Replicator
+          - Schema Registry
+          - SQL Server
+          - Streams
+          - REST Proxy
+        For each component, you need to create a separate instance to collect its jmx metrics.
+        List of default metrics collected are listed in `metrics.yaml` file.
+    options:
+    - template: instances/jmx
+    - template: instances/default
