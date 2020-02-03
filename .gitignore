@@ -101,7 +101,8 @@ tmp
 wheelhouse/
 *.whl
 
-.pytest_cache
+# Type checking
+.mypy_cache
 
 # By default, ignore in-toto metadata from the command line:
 .in-toto/
