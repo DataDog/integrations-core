@@ -163,7 +163,7 @@ def test_min_disk_size(aggregator, gauge_metrics, rate_metrics):
 @pytest.mark.usefixtures('psutil_mocks')
 def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gauge_metrics, rate_metrics):
     """
-    Verify that the disk labels are set with when the blkid_cache_file option is set
+    Verify that the disk labels are set when the blkid_cache_file option is set
     """
     c = Disk('disk', {}, [instance_blkid_cache_file])
     c.check(instance_blkid_cache_file)
