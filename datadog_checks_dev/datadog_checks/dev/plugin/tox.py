@@ -11,6 +11,8 @@ import tox.config
 STYLE_CHECK_ENV_NAME = 'style'
 STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
+TYPES_FLAG = 'dd_check_types'
+MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
 
 
@@ -51,20 +53,41 @@ def tox_configure(config):
 def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
+
+    dependencies = [
+        'flake8',
+        'flake8-bugbear',
+        'flake8-logging-format',
+        'black',
+        'isort[pyproject]>=4.3.15',
+    ]
+
+    commands = [
+        'flake8 --config=../.flake8 --enable-extensions=G .',
+        'black --check --diff .',
+        'isort --check-only --diff --recursive .',
+    ]
+
+    if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
+        # For command line options accepted by mypy, see: https://mypy.readthedocs.io/en/stable/command_line.html
+        # Each integration should explicitly specify its options and which files it'd like to type check, which is
+        # why we're defaulting to 'no arguments' by default.
+        mypy_args = sections['testenv'].get(MYPY_ARGS_OPTION, '')
+
+        # Allow using multiple lines for enhanced readability in case of large amount of options/files to check.
+        mypy_args = mypy_args.replace('\n', ' ')
+
+        dependencies.append('mypy>=0.761')
+        commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
+
     sections[section] = {
         'platform': 'linux|darwin|win32',
-        # These tools require Python 3.6+
+        # Tools used here require Python 3.6+
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'flake8\nflake8-bugbear\nflake8-logging-format\nblack\nisort[pyproject]>=4.3.15',
-        'commands': '\n'.join(
-            [
-                'flake8 --config=../.flake8 --enable-extensions=G .',
-                'black --check --diff .',
-                'isort --check-only --diff --recursive .',
-            ]
-        ),
+        'deps': '\n'.join(dependencies),
+        'commands': '\n'.join(commands),
     }
 
     # Always add the environment configurations
