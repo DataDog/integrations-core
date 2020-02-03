@@ -42,7 +42,9 @@ class ScyllaCheck(OpenMetricsBaseCheck):
         metrics = INSTANCE_DEFAULT_METRICS + additional_metrics
 
         tags = instance.get('tags', [])
-        tags.append('server:{}'.format(urlparse(endpoint).hostname))
+
+        # include hostname:port for server tag
+        tags.append('server:{}'.format(urlparse(endpoint).netloc))
 
         instance.update(
             {
