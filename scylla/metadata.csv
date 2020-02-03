@@ -239,7 +239,7 @@ scylla.storage.proxy.coordinator_queued_write_bytes,count,,byte,,number of bytes
 scylla.storage.proxy.coordinator_range_timeouts,count,,error,,number of range read operations failed due to a timeout,-1,scylla,storage proxy coordinator range timeouts
 scylla.storage.proxy.coordinator_range_unavailable,count,,error,,"number of range read operations failed due to an ""unavailable"" error",-1,scylla,storage proxy coordinator range unavailable
 scylla.storage.proxy.coordinator_read_errors_local_node,count,,error,,number of data read requests that failed on a local Node,-1,scylla,storage proxy coordinator read errors local node
-scylla.storage.proxy.coordinator_read_latency.count,gauge,,read,,The general read latency histogram,-1,scylla,storage proxy coordinator read latency
+scylla.storage.proxy.coordinator_read_latency.count,count,,read,,The general read latency histogram,-1,scylla,storage proxy coordinator read latency
 scylla.storage.proxy.coordinator_read_latency.sum,gauge,,read,,The general read latency histogram,-1,scylla,storage proxy coordinator read latency
 scylla.storage.proxy.coordinator_read_repair_write_attempts_local_node,count,,write,,number of write operations in a read repair context on a local Node,0,scylla,storage proxy coordinator read repair write attempts local node
 scylla.storage.proxy.coordinator_read_retries,count,,read,,number of read retry attempts,-1,scylla,storage proxy coordinator read retries
@@ -251,7 +251,7 @@ scylla.storage.proxy.coordinator_speculative_digest_reads,count,,read,,number of
 scylla.storage.proxy.coordinator_throttled_writes,count,,write,,number of throttled write requests,-1,scylla,storage proxy coordinator throttled writes
 scylla.storage.proxy.coordinator_total_write_attempts_local_node,count,,write,,total number of write requests on a local Node,0,scylla,storage proxy coordinator total write attempts local node
 scylla.storage.proxy.coordinator_write_errors_local_node,count,,error,,number of write requests that failed on a local Node,-1,scylla,storage proxy coordinator write errors local node
-scylla.storage.proxy.coordinator_write_latency.count,gauge,,write,,The general write latency histogram,-1,scylla,storage proxy coordinator write latency
+scylla.storage.proxy.coordinator_write_latency.count,count,,write,,The general write latency histogram,-1,scylla,storage proxy coordinator write latency
 scylla.storage.proxy.coordinator_write_latency.sum,gauge,,write,,The general write latency histogram,-1,scylla,storage proxy coordinator write latency
 scylla.storage.proxy.coordinator_write_timeouts,count,,error,,number of write request failed due to a timeout,-1,scylla,storage proxy coordinator write timeouts
 scylla.storage.proxy.coordinator_write_unavailable,count,,error,,"number write requests failed due to an ""unavailable"" error",-1,scylla,storage proxy coordinator write unavailable
