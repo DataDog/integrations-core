@@ -46,19 +46,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 **Available for Agent >6.0**
 
-Add this configuration block to your `mcache.d/conf.yaml` file to start collecting your Memcached Logs:
+1. Add this configuration block to your `mcache.d/conf.yaml` file to start collecting your Memcached Logs:
 
     ```yaml
-      logs:
+        logs:
           - type: file
             path: /var/log/memcached.log
             source: memcached
             service: mcache
     ```
 
+    Change the `path` and `service` parameter values and configure them for your environment.
 
-Change the `path` and `service` parameter values and configure them for your environment.
-[Restart the Agent][5] to validate these changes.
+2. [Restart the Agent][5] to validate these changes.
 
 ### Validation
 

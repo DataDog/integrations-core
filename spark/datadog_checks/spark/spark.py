@@ -1,9 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, RequestException, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
@@ -151,6 +150,14 @@ class SparkCheck(AgentCheck):
         'ssl_key': {'name': 'tls_private_key'},
     }
 
+    def __init__(self, name, init_config, instances):
+        super(SparkCheck, self).__init__(name, init_config, instances)
+
+        # Spark proxy may display an html warning page, which redirects to the same url with the additional
+        # `proxyapproved=true` GET param.
+        # The page also sets a cookie that needs to be stored (no need to set persist_connections in the config)
+        self.proxy_redirect_cookies = None
+
     def check(self, instance):
         # Get additional tags from the conf file
         tags = instance.get('tags', [])
@@ -269,11 +276,9 @@ class SparkCheck(AgentCheck):
         else:
             raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, cluster_mode))
 
-    def _collect_version(self, base_url):
+    def _collect_version(self, base_url, tags):
         try:
-            response = self.http.get(self._join_url_dir(base_url, SPARK_VERSION_PATH))
-            response.raise_for_status()
-            version_json = response.json()
+            version_json = self._rest_request_to_json(base_url, SPARK_VERSION_PATH, SPARK_SERVICE_CHECK, tags)
             version = version_json['spark']
         except Exception as e:
             self.log.debug("Failed to collect version information: %s", e)
@@ -286,7 +291,7 @@ class SparkCheck(AgentCheck):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
         """
-        self._collect_version(spark_driver_address)
+        self._collect_version(spark_driver_address, tags)
         running_apps = {}
         metrics_json = self._rest_request_to_json(
             spark_driver_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
@@ -328,7 +333,7 @@ class SparkCheck(AgentCheck):
 
                     if app_id and app_name and app_url:
                         if not version_set:
-                            version_set = self._collect_version(app_url)
+                            version_set = self._collect_version(app_url, tags)
                         if pre_20_mode:
                             self.log.debug('Getting application list in pre-20 mode')
                             applist = self._rest_request_to_json(
@@ -462,9 +467,13 @@ class SparkCheck(AgentCheck):
         spark_apps = {}
         version_set = False
         for app_id, (app_name, tracking_url) in iteritems(running_apps):
-            if not version_set:
-                version_set = self._collect_version(tracking_url)
-            response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
+            try:
+                if not version_set:
+                    version_set = self._collect_version(tracking_url, tags)
+                response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
+            except RequestException as e:
+                self.log.warning("Exception happened when fetching app ids for %s: %s", tracking_url, e)
+                continue
 
             for app in response:
                 app_id = app.get('id')
@@ -626,6 +635,10 @@ class SparkCheck(AgentCheck):
             for directory in args:
                 url = self._join_url_dir(url, directory)
 
+        # Add proxyapproved=True if we already have the proxy cookie
+        if self.proxy_redirect_cookies:
+            kwargs["proxyapproved"] = 'true'
+
         # Add kwargs as arguments
         if kwargs:
             query = '&'.join(['{0}={1}'.format(key, value) for key, value in iteritems(kwargs)])
@@ -633,9 +646,19 @@ class SparkCheck(AgentCheck):
 
         try:
             self.log.debug('Spark check URL: %s', url)
-            response = self.http.get(url)
-
+            response = self.http.get(url, cookies=self.proxy_redirect_cookies)
             response.raise_for_status()
+            content = response.text
+            proxy_redirect_url = self._parse_proxy_redirect_url(content)
+            if proxy_redirect_url:
+                self.proxy_redirect_cookies = response.cookies
+                # When using a proxy and the remote user is different that the current user
+                # spark will display an html warning page.
+                # This page displays a redirect link (which appends `proxyapproved=true`) and also
+                # sets a cookie to the current http session. Let's follow the link.
+                # https://github.com/apache/hadoop/blob/2064ca015d1584263aac0cc20c60b925a3aff612/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-web-proxy/src/main/java/org/apache/hadoop/yarn/server/webproxy/WebAppProxyServlet.java#L368
+                response = self.http.get(proxy_redirect_url, cookies=self.proxy_redirect_cookies)
+                response.raise_for_status()
 
         except Timeout as e:
             self.service_check(
@@ -700,3 +723,20 @@ class SparkCheck(AgentCheck):
         """
         s = urlsplit(url)
         return urlunsplit([s.scheme, s.netloc, '', '', ''])
+
+    @staticmethod
+    def _parse_proxy_redirect_url(html_content):
+        """When the spark proxy returns a warning page with a redirect link, this link has to be parsed
+        from the html content."""
+        if not html_content[:6] == "<html>":  # Prevent html parsing of non-html content.
+            return None
+
+        soup = BeautifulSoup(html_content, 'html.parser')
+        redirect_link = None
+        for link in soup.findAll('a'):
+            href = link.get('href')
+            if 'proxyapproved' in href:
+                redirect_link = href
+                break
+
+        return redirect_link

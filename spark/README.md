@@ -11,6 +11,8 @@ This check monitors [Spark][13] through the Datadog Agent. Collect Spark metrics
 * Tasks: number of tasks active, skipped, failed, and total
 * Job state: number of jobs active, completed, skipped, and failed
 
+**Note**: Spark Structured Streaming metrics are currently not supported.
+
 ## Setup
 ### Installation
 
@@ -31,7 +33,7 @@ Follow the instructions below to configure this check for an Agent running on a 
         init_config:
 
         instances:
-          - spark_url: http://localhost:8088 # Spark master web UI
+          - spark_url: http://localhost:8080 # Spark master web UI
         #   spark_url: http://<Mesos_master>:5050 # Mesos master web UI
         #   spark_url: http://<YARN_ResourceManager_address>:8088 # YARN ResourceManager address
 
