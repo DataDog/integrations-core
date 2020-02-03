@@ -68,6 +68,11 @@ class CouchDb(AgentCheck):
 
             try:
                 version = self.get(self.get_server(instance), tags, True)['version']
+                if version is not None:
+                    self.set_metadata('version', version)
+                else:
+                    self.log.debug("Could not parse CouchDB version: %s", version)
+
             except Exception as e:
                 raise errors.ConnectionError("Unable to talk to the server: {}".format(e))
 
