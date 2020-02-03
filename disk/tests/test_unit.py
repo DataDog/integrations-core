@@ -8,8 +8,8 @@ import mock
 import pytest
 from six import iteritems
 
-from datadog_checks.disk import Disk
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.disk import Disk
 
 from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
 from .mocks import MockDiskMetrics, mock_blkid_output
