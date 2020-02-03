@@ -233,6 +233,8 @@ class DockerInterface(object):
             f'{path_join(get_root(), self.check)}:{self.check_mount_dir}',
             # Mount the /proc directory
             '/proc:/host/proc',
+            # Mount the docker socket
+            '/var/run/docker.sock:/var/run/docker.sock',
         ]
         volumes.extend(self.metadata.get('docker_volumes', []))
 
