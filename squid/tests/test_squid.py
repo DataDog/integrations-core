@@ -42,6 +42,7 @@ def test_check_ok(aggregator, check, instance):
             {'version.scheme': 'semver', 'version.major': '1', 'version.minor': '4', 'version.raw': '1.4.5'},
             5,
         ),
+        # these versions aren't valid squid versions, so the version metadata should not be submitted
         ('squid/1.3', {}, 0),
         ('squid/1', {}, 0,),
         ('1.4.5', {}, 0,),
