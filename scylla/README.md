@@ -2,11 +2,9 @@
 
 ## Overview
 
-This check monitors [Scylla][1] through the Datadog Agent.
+This Datadog-[Scylla][1] integration collects a majority of the exposed metrics by default, with the ability to customize additional groups based on specific user needs.
 
 Scylla is an open-source NoSQL data store that can act as "a drop-in Apache Cassandra alternative." It has rearchitected the Cassandra model tuned for modern hardware, reducing the size of required clusters while improving theoretical throughput and performance.
-
-This integration collects a majority of the exposed metrics by default, with the ability to customize additional groups based on specific user needs.
 
 ## Setup
 
