@@ -146,7 +146,7 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 
 ## Data Collected
 
-The SNMP check submits specified metrics under the `snmp.*` namespace. **Metrics collected depend of the profile used**.
+The SNMP check submits specified metrics under the `snmp.*` namespace. **Metrics collected depends on the integration being configured with the corresponding profile**.
 
 ### Metrics
 
