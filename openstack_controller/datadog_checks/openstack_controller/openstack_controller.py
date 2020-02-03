@@ -12,6 +12,7 @@ from six import iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
+from datadog_checks.base.utils.tracing import traced
 
 from .api import ApiFactory
 from .exceptions import (
@@ -24,7 +25,6 @@ from .exceptions import (
     MissingNovaEndpoint,
 )
 from .retry import BackOffRetry
-from .utils import traced
 
 SOURCE_TYPE = 'openstack'
 

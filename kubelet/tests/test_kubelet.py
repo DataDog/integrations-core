@@ -9,6 +9,7 @@ from datetime import datetime
 import mock
 import pytest
 from six import iteritems
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
@@ -856,3 +857,13 @@ def test_system_container_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_metric('kubernetes.runtime.cpu.usage', 19442853.0, tags)
     aggregator.assert_metric('kubernetes.runtime.memory.rss', 101273600.0, tags)
     aggregator.assert_metric('kubernetes.kubelet.memory.rss', 88477696.0, tags)
+
+
+def test_silent_tls_warning(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', {}, [{}])
+    check.kube_health_url = "https://example.com/"
+    check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
+    with pytest.warns(None) as record:
+        check._perform_kubelet_check([])
+
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)

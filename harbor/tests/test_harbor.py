@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import mock
 import pytest
 
 from datadog_checks.harbor import HarborCheck
@@ -49,7 +50,7 @@ def assert_service_checks(aggregator):
     aggregator.assert_service_check('harbor.can_connect', status=HarborCheck.OK)
     if HARBOR_VERSION > VERSION_1_8:
         for c in HARBOR_COMPONENTS:
-            aggregator.assert_service_check('harbor.status', status=HarborCheck.OK, tags=['component:{}'.format(c)])
+            aggregator.assert_service_check('harbor.status', status=mock.ANY, tags=['component:{}'.format(c)])
     elif HARBOR_VERSION >= VERSION_1_5:
         aggregator.assert_service_check('harbor.status', status=HarborCheck.OK)
     else:

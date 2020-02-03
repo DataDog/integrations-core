@@ -13,9 +13,11 @@ from datetime import datetime, timedelta
 import requests
 from kubeutil import get_connection_info
 from six import iteritems
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.base.utils.tagging import tagger
+from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
@@ -300,15 +302,16 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """
         Perform and return a GET request against kubelet. Support auth and TLS validation.
         """
-        return requests.get(
-            url,
-            timeout=timeout,
-            verify=self.kubelet_credentials.verify(),
-            cert=self.kubelet_credentials.cert_pair(),
-            headers=self.kubelet_credentials.headers(url),
-            params={'verbose': verbose},
-            stream=stream,
-        )
+        with disable_warnings_ctx(InsecureRequestWarning, disable=not self.kubelet_credentials.verify()):
+            return requests.get(
+                url,
+                timeout=timeout,
+                verify=self.kubelet_credentials.verify(),
+                cert=self.kubelet_credentials.cert_pair(),
+                headers=self.kubelet_credentials.headers(url),
+                params={'verbose': verbose},
+                stream=stream,
+            )
 
     def retrieve_pod_list(self):
         try:

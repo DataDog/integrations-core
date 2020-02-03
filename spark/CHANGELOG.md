@@ -1,5 +1,13 @@
 # CHANGELOG - spark
 
+## 1.11.3 / 2020-01-30
+
+* [Fixed] Handle warning message from proxy. See [#5525](https://github.com/DataDog/integrations-core/pull/5525).
+
+## 1.11.2 / 2020-01-29
+
+* [Fixed] Prevent crash when a single app fails. See [#5552](https://github.com/DataDog/integrations-core/pull/5552).
+
 ## 1.11.1 / 2020-01-15
 
 * [Fixed] Make sure version collection fails gracefully. See [#5465](https://github.com/DataDog/integrations-core/pull/5465).
