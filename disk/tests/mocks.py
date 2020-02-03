@@ -15,6 +15,14 @@ def mock_blkid_output():
         return f.read(), '', ''
 
 
+def mock_blkid_cache_file():
+    return os.path.join(HERE, 'fixtures', 'blkid_cache_file')
+
+
+def mock_blkid_cache_file_no_label():
+    return os.path.join(HERE, 'fixtures', 'blkid_cache_file_no_label')
+
+
 class MockPart(object):
     def __init__(
         self, device=DEFAULT_DEVICE_NAME, fstype=DEFAULT_FILE_SYSTEM, mountpoint=DEFAULT_MOUNT_POINT, opts='ro'

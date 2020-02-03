@@ -28,7 +28,7 @@ def tag(check, version, push, dry_run):
 
     valid_checks = get_valid_checks()
     if not tagging_all and check not in valid_checks:
-        abort('Check `{}` is not an Agent-based Integration'.format(check))
+        abort(f'Check `{check}` is not an Agent-based Integration')
 
     if tagging_all:
         if version:
@@ -41,7 +41,7 @@ def tag(check, version, push, dry_run):
     tagged = False
 
     for check in checks:
-        echo_info('{}:'.format(check))
+        echo_info(f'{check}:')
 
         # get the current version
         if not version:
@@ -49,7 +49,7 @@ def tag(check, version, push, dry_run):
 
         # get the tag name
         release_tag = get_release_tag_string(check, version)
-        echo_waiting('Tagging HEAD with {}... '.format(release_tag), indent=True, nl=False)
+        echo_waiting(f'Tagging HEAD with {release_tag}... ', indent=True, nl=False)
 
         if dry_run:
             version = None
@@ -61,7 +61,7 @@ def tag(check, version, push, dry_run):
         if result.code == 128 or 'already exists' in result.stderr:
             echo_warning('already exists')
         elif result.code != 0:
-            abort('\n{}{}'.format(result.stdout, result.stderr), code=result.code)
+            abort(f'\n{result.stdout}{result.stderr}', code=result.code)
         else:
             tagged = True
             echo_success('success!')

@@ -25,7 +25,7 @@ The Linux Proc Extras check can potentially emit [custom metrics][4], which may 
 
 ## Data Collected
 ### Metrics
-The Linux Proc Extras check does not include any metrics.
+See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
 The Linux Proc Extras check does not include any events.
@@ -44,3 +44,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/account_management/billing/custom_metrics
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help
+[8]: https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/metadata.csv

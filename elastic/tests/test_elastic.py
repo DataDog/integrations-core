@@ -171,6 +171,46 @@ def test_metadata(dd_environment, aggregator, elastic_check, instance, version_m
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
+@pytest.mark.parametrize(
+    'instance, expected_aws_host, expected_aws_service',
+    [
+        pytest.param({}, None, None, id='not aws auth'),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'url': 'http://example.com'},
+            'example.com',
+            'es',
+            id='aws_host_from_url',
+        ),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com', 'url': 'http://example.com'},
+            'foo.com',
+            'es',
+            id='aws_host_custom_with_url',
+        ),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com'},
+            'foo.com',
+            'es',
+            id='aws_host_custom_no_url',
+        ),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_service': 'es-foo', 'url': 'http://example.com'},
+            'example.com',
+            'es-foo',
+            id='aws_service_custom',
+        ),
+    ],
+)
+def test_aws_auth(instance, expected_aws_host, expected_aws_service):
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    assert getattr(check.http.options.get('auth'), 'aws_host', None) == expected_aws_host
+    assert getattr(check.http.options.get('auth'), 'service', None) == expected_aws_service
+
+    # make sure class attribute HTTP_CONFIG_REMAPPER is not modified
+    assert 'aws_host' not in ESCheck.HTTP_CONFIG_REMAPPER
+
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, elastic_check, instance, cluster_tags, node_tags):
     aggregator = dd_agent_check(instance, rate=True)

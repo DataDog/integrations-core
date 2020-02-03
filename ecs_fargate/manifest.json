@@ -25,7 +25,9 @@
   "integration_id": "aws-fargate",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "ECS-Fargate": "assets/dashboards/ecs_fargate_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

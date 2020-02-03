@@ -54,7 +54,7 @@ def get_pip_exe(python_version, platform=LINUX):
     if platform == WINDOWS:
         return [r'C:\Program Files\Datadog\Datadog Agent\embedded{}\python.exe'.format(python_version), '-m', 'pip']
     else:
-        return ['/opt/datadog-agent/embedded/bin/pip{}'.format(python_version)]
+        return [f'/opt/datadog-agent/embedded/bin/pip{python_version}']
 
 
 def get_agent_conf_dir(check, agent_version, platform=LINUX):
@@ -65,12 +65,12 @@ def get_agent_conf_dir(check, agent_version, platform=LINUX):
             return r'C:\ProgramData\Datadog\conf.d'
     elif platform == MAC:
         if agent_version >= 6:
-            return '/opt/datadog-agent/etc/conf.d/{}.d'.format(check)
+            return f'/opt/datadog-agent/etc/conf.d/{check}.d'
         else:
             return '/opt/datadog-agent/etc/conf.d'
     else:
         if agent_version >= 6:
-            return '/etc/datadog-agent/conf.d/{}.d'.format(check)
+            return f'/etc/datadog-agent/conf.d/{check}.d'
         else:
             return '/etc/dd-agent/conf.d'
 
@@ -94,7 +94,7 @@ def get_agent_service_cmd(version, platform, action):
             'launchctl',
             'load' if action == 'start' else 'unload',
             '-w',
-            '{}/Library/LaunchAgents/com.datadoghq.agent.plist'.format(expanduser("~")),
+            f"{expanduser('~')}/Library/LaunchAgents/com.datadoghq.agent.plist",
         ]
     else:
         return ['sudo', 'service', 'datadog-agent', action]

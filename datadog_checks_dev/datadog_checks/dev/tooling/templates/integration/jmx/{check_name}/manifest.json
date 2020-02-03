@@ -22,9 +22,12 @@
   "is_public": false,
   "integration_id": "{check_name_kebab}",
   "assets": {{
+    "configuration": {{
+      "spec": "assets/configuration/spec.yaml"
+    }},
     "dashboards": {{}},
-    "saved_views": {{}},
     "monitors": {{}},
+    "saved_views": {{}},
     "service_checks": "assets/service_checks.json"
   }}
 }}

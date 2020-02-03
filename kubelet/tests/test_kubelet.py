@@ -9,6 +9,7 @@ from datetime import datetime
 import mock
 import pytest
 from six import iteritems
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
@@ -344,6 +345,35 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version
                 aggregator.assert_metric_has_tag(metric, tag)
 
     assert aggregator.metrics_asserted_pct == 100.0
+
+
+def test_kubelet_credentials_update(monkeypatch, aggregator):
+    instance = {
+        'kubelet_metrics_endpoint': 'http://10.8.0.1:10255/metrics',
+        'cadvisor_metrics_endpoint': 'http://10.8.0.1:10255/metrics/cadvisor',
+    }
+    check = mock_kubelet_check(monkeypatch, [instance], kube_version=None)
+
+    get = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
+    )
+    with mock.patch('requests.get', return_value=get):
+        check.check(instance)
+
+    assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is True
+    assert check._http_handlers[instance['cadvisor_metrics_endpoint']].options['verify'] is True
+
+    get = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
+    )
+    kubelet_conn_info = {'url': 'http://127.0.0.1:10255', 'ca_cert': False}
+    with mock.patch('requests.get', return_value=get), mock.patch(
+        'datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info
+    ):
+        check.check(instance)
+
+    assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is False
+    assert check._http_handlers[instance['cadvisor_metrics_endpoint']].options['verify'] is False
 
 
 def test_prometheus_cpu_summed(monkeypatch, aggregator, tagger):
@@ -827,3 +857,13 @@ def test_system_container_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_metric('kubernetes.runtime.cpu.usage', 19442853.0, tags)
     aggregator.assert_metric('kubernetes.runtime.memory.rss', 101273600.0, tags)
     aggregator.assert_metric('kubernetes.kubelet.memory.rss', 88477696.0, tags)
+
+
+def test_silent_tls_warning(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', {}, [{}])
+    check.kube_health_url = "https://example.com/"
+    check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
+    with pytest.warns(None) as record:
+        check._perform_kubelet_check([])
+
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)

@@ -28,28 +28,28 @@ def dash():
 @click.pass_context
 def export(ctx, url, integration):
     if integration and integration not in get_valid_integrations():
-        abort('Unknown integration `{}`'.format(integration))
+        abort(f'Unknown integration `{integration}`')
 
     org = ctx.obj['org']
     if not org:
         abort('No `org` has been set')
 
     if org not in ctx.obj['orgs']:
-        abort('Selected org {} is not in `orgs`'.format(org))
+        abort(f'Selected org {org} is not in `orgs`')
 
     org = ctx.obj['orgs'][org]
 
     api_key = org.get('api_key')
     if not api_key:
-        abort('No `api_key` has been set for org `{}`'.format(org))
+        abort(f'No `api_key` has been set for org `{org}`')
 
     app_key = org.get('app_key')
     if not app_key:
-        abort('No `app_key` has been set for org `{}`'.format(org))
+        abort(f'No `app_key` has been set for org `{org}`')
 
     site = org.get('site')
     if not site:
-        abort('No `site` has been set for org `{}`'.format(org))
+        abort(f'No `site` has been set for org `{org}`')
 
     match = re.search(BOARD_ID_PATTERN.format(site=re.escape(site)), url)
     if match:
@@ -92,14 +92,14 @@ def export(ctx, url, integration):
             if new_file_name:
                 file_name = new_file_name
 
-        file_name = '{}.json'.format(file_name.replace(' ', '_'))
+        file_name = f"{file_name.replace(' ', '_')}.json"
         location = path_join(get_root(), integration, 'assets', 'dashboards')
         ensure_dir_exists(location)
 
-        manifest['assets']['dashboards'][payload['board_title']] = 'assets/dashboards/{}'.format(file_name)
+        manifest['assets']['dashboards'][payload['board_title']] = f'assets/dashboards/{file_name}'
         write_manifest(manifest, integration)
     else:
-        file_name = '{}.json'.format(file_name.replace(' ', '_'))
+        file_name = f"{file_name.replace(' ', '_')}.json"
         location = os.getcwd()
 
     file_path = path_join(location, file_name)

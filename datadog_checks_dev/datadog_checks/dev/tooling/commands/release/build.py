@@ -22,11 +22,11 @@ def build(check, sdist):
     else:
         check_dir = resolve_path(check)
         if not dir_exists(check_dir):
-            abort('`{}` is not an Agent-based Integration or Python package'.format(check))
+            abort(f'`{check}` is not an Agent-based Integration or Python package')
 
         check = basepath(check_dir)
 
-    echo_waiting('Building `{}`...'.format(check))
+    echo_waiting(f'Building `{check}`...')
 
     dist_dir = os.path.join(check_dir, 'dist')
     remove_path(dist_dir)
@@ -35,5 +35,5 @@ def build(check, sdist):
     if result.code != 0:
         abort(result.stdout, result.code)
 
-    echo_info('Build done, artifact(s) in: {}'.format(dist_dir))
+    echo_info(f'Build done, artifact(s) in: {dist_dir}')
     echo_success('Success!')

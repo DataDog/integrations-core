@@ -24,9 +24,9 @@ def prune(force):
         envs = get_configured_envs(check)
 
         if envs:
-            echo_info('{}:'.format(check))
+            echo_info(f'{check}:')
             for env in envs:
-                echo_waiting('Removing `{}`... '.format(env), nl=False, indent=True)
+                echo_waiting(f'Removing `{env}`... ', nl=False, indent=True)
                 remove_env_data(check, env)
                 echo_success('success!')
 

@@ -7,7 +7,7 @@ from collections import defaultdict
 from time import time
 
 from kafka import errors as kafka_errors
-from kafka.client import KafkaClient
+from kafka.client_async import KafkaClient
 from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kazoo.client import KazooClient

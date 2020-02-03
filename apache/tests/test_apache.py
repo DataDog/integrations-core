@@ -140,3 +140,38 @@ def test_invalid_version(check):
     check._submit_metadata("invalid_version")
 
     check.log.info.assert_called_once_with("Cannot parse the complete Apache version from %s.", "invalid_version")
+
+
+@pytest.mark.parametrize(
+    'version, expected_parts',
+    [
+        pytest.param(
+            'Apache/2.4.2 (Unix) PHP/4.2.2 MyMod/1.2',
+            {'major': '2', 'minor': '4', 'patch': '2'},
+            id='unix_full_version',
+        ),
+        pytest.param(
+            'Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.2k-fips',
+            {'major': '2', 'minor': '4', 'patch': '6'},
+            id='redhat_version',
+        ),
+        pytest.param('Apache/2.14.27', {'major': '2', 'minor': '14', 'patch': '27'}, id='min_version'),
+        pytest.param('Apache/2.4', {'major': '2', 'minor': '4'}, id='only_minor'),
+        pytest.param('Apache/2', {'major': '2'}, id='only_major'),
+        pytest.param('Apache', {}, id='only_apache'),
+    ],
+)
+def test_full_version_regex(check, version, expected_parts, datadog_agent):
+    """The default server token is Full. Full results in server info that can include
+    multiple non-Apache version specific information.
+    """
+    check = check({})
+    check.check_id = 'test:123'
+
+    check._submit_metadata(version)
+
+    version_metadata = {'version.{}'.format(k): v for k, v in list(expected_parts.items())}
+    if expected_parts:
+        version_metadata['version.scheme'] = 'semver'
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

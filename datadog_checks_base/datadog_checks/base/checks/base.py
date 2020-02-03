@@ -13,12 +13,12 @@ from collections import defaultdict, deque
 from os.path import basename
 
 import yaml
-from six import PY3, iteritems, text_type
+from six import iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..utils.agent.utils import should_profile_memory
-from ..utils.common import ensure_bytes, ensure_unicode, to_string
+from ..utils.common import ensure_bytes, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
@@ -55,7 +55,7 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
 
 
-class __AgentCheck(object):
+class AgentCheck(object):
     """The base class for any Agent based integrations.
 
     :cvar DEFAULT_METRIC_LIMIT: allows to set a limit on the number of metric name and tags combination
@@ -212,11 +212,19 @@ class __AgentCheck(object):
                     'to `skip_proxy` and will be removed in Agent version 6.13.'
                 ),
             ],
+            'service_tag': [
+                False,
+                (
+                    'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `%s`. '
+                    'Set `disable_legacy_service_tag` to `true` to disable this warning. '
+                    'The default will become `true` and cannot be changed in Agent version 8.'
+                ),
+            ],
         }
 
         # Setup metric limits
         try:
-            metric_limit = self.instances[0].get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
+            metric_limit = int(self.instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT))
             # Do not allow to disable limiting if the class has set a non-zero default value
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
@@ -491,12 +499,12 @@ class __AgentCheck(object):
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
-    def _log_deprecation(self, deprecation_key):
+    def _log_deprecation(self, deprecation_key, *args):
         """
         Logs a deprecation notice at most once per AgentCheck instance, for the pre-defined `deprecation_key`
         """
         if not self._deprecations[deprecation_key][0]:
-            self.log.warning(self._deprecations[deprecation_key][1])
+            self.warning(self._deprecations[deprecation_key][1], *args)
             self._deprecations[deprecation_key][0] = True
 
     # TODO: Remove once our checks stop calling it
@@ -681,13 +689,6 @@ class __AgentCheck(object):
 
         return result
 
-
-class __AgentCheckPy3(__AgentCheck):
-    """
-    Python3 version of the __AgentCheck base class, overrides few methods to
-    add compatibility with Python3.
-    """
-
     def event(self, event):
         """Send an event.
 
@@ -712,23 +713,20 @@ class __AgentCheckPy3(__AgentCheck):
         :param ev event: the event to be sent.
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in list(iteritems(event)):
-            # transform any bytes objects to utf-8
-            if isinstance(value, bytes):
-                try:
-                    event[key] = event[key].decode('utf-8')
-                except UnicodeError:
-                    self.log.warning(
-                        'Error decoding unicode field `%s` to utf-8 encoded string, cannot submit event', key
-                    )
-                    return
+        for key in event:
+            # Ensure strings have the correct type
+            try:
+                event[key] = to_string(event[key])
+            except UnicodeError:
+                self.log.warning('Encoding error with field `%s`, cannot submit event', key)
+                return
 
         if event.get('tags'):
             event['tags'] = self._normalize_tags_type(event['tags'])
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
-            event['aggregation_key'] = ensure_unicode(event['aggregation_key'])
+            event['aggregation_key'] = to_string(event['aggregation_key'])
 
         if self.__NAMESPACE__:
             event.setdefault('source_type_name', self.__NAMESPACE__)
@@ -746,102 +744,22 @@ class __AgentCheckPy3(__AgentCheck):
 
         if device_name:
             self._log_deprecation('device_name')
-            normalized_tags.append('device:{}'.format(ensure_unicode(device_name)))
-
+            try:
+                normalized_tags.append('device:{}'.format(to_string(device_name)))
+            except UnicodeError:
+                self.log.warning(
+                    'Encoding error with device name `%r` for metric `%r`, ignoring tag', device_name, metric_name
+                )
         if tags is not None:
             for tag in tags:
                 if tag is None:
                     continue
-                if not isinstance(tag, str):
-                    try:
-                        tag = tag.decode('utf-8')
-                    except Exception:
-                        self.log.warning(
-                            'Error decoding tag `%s` as utf-8 for metric `%s`, ignoring tag', tag, metric_name
-                        )
-                        continue
+                try:
+                    tag = to_string(tag)
+                except UnicodeError:
+                    self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
+                    continue
 
                 normalized_tags.append(tag)
 
         return normalized_tags
-
-
-class __AgentCheckPy2(__AgentCheck):
-    """
-    Python2 version of the __AgentCheck base class, overrides few methods to
-    add compatibility with Python2.
-    """
-
-    def event(self, event):
-        # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in list(iteritems(event)):
-            # transform the unicode objects to plain strings with utf-8 encoding
-            if isinstance(value, text_type):
-                try:
-                    event[key] = event[key].encode('utf-8')
-                except UnicodeError:
-                    self.log.warning(
-                        "Error encoding unicode field '%s' to utf-8 encoded string, can't submit event", key
-                    )
-                    return
-
-        if event.get('tags'):
-            event['tags'] = self._normalize_tags_type(event['tags'])
-        if event.get('timestamp'):
-            event['timestamp'] = int(event['timestamp'])
-        if event.get('aggregation_key'):
-            event['aggregation_key'] = ensure_bytes(event['aggregation_key'])
-
-        if self.__NAMESPACE__:
-            event.setdefault('source_type_name', self.__NAMESPACE__)
-
-        aggregator.submit_event(self, self.check_id, event)
-
-    def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
-        """
-        Normalize tags contents and type:
-        - append `device_name` as `device:` tag
-        - normalize tags type
-        - doesn't mutate the passed list, returns a new list
-        """
-        normalized_tags = []
-
-        if device_name:
-            self._log_deprecation("device_name")
-            device_tag = self._to_bytes("device:{}".format(device_name))
-            if device_tag is None:
-                self.log.warning(
-                    'Error encoding device name `%r` to utf-8 for metric `%r`, ignoring tag', device_name, metric_name
-                )
-            else:
-                normalized_tags.append(device_tag)
-
-        if tags is not None:
-            for tag in tags:
-                if tag is None:
-                    continue
-                encoded_tag = self._to_bytes(tag)
-                if encoded_tag is None:
-                    self.log.warning('Error encoding tag `%r` to utf-8 for metric `%r`, ignoring tag', tag, metric_name)
-                    continue
-                normalized_tags.append(encoded_tag)
-
-        return normalized_tags
-
-    def _to_bytes(self, data):
-        """
-        Normalize a text data to bytes (type `bytes`) so that the go bindings can
-        handle it easily.
-        """
-        # TODO: On Python 3, move this `if` line to the `except` branch
-        # as the common case will indeed no longer be bytes.
-        if not isinstance(data, bytes):
-            try:
-                return data.encode('utf-8')
-            except Exception:
-                return None
-
-        return data
-
-
-AgentCheck = __AgentCheckPy3 if PY3 else __AgentCheckPy2

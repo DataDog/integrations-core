@@ -1,10 +1,15 @@
 [
     {
         "agent_version": "6.15.0",
-        "integration":"mapr",
+        "integration": "MapR",
         "check": "mapr.can_connect",
-        "statuses": ["ok", "critical"],
-        "groups": ["topic"],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "topic"
+        ],
         "name": "Can connect and subscribe to mapr topic",
         "description": "Returns `CRITICAL` if the Agent fails to connect and subscribe to the stream topic, `OK` otherwise."
     }

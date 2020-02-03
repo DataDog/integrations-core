@@ -1,5 +1,17 @@
 # CHANGELOG - http_check
 
+## 4.6.3 / 2020-01-24
+
+* [Fixed] Document that tls_verify is False by default. See [#5547](https://github.com/DataDog/integrations-core/pull/5547).
+
+## 4.6.2 / 2020-01-21
+
+* [Fixed] Properly enable TLS/SSL verification when `tls_verify` is true. See [#5507](https://github.com/DataDog/integrations-core/pull/5507).
+
+## 4.6.1 / 2020-01-17
+
+* [Fixed] Avoid cross instance data sharing. See [#5499](https://github.com/DataDog/integrations-core/pull/5499).
+
 ## 4.6.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).

@@ -221,20 +221,19 @@ Configure the AWS FireLens integration built on Datadog's Fluent Bit output plug
         "options": {
           "Name": "datadog",
           "apikey": "<DATADOG_API_KEY>",
-          "host": "http-intake.logs.datadoghq.com",
+          "Host": "http-intake.logs.datadoghq.com",
           "dd_service": "firelens-test",
           "dd_source": "redis",
           "dd_message_key": "log",
           "dd_tags": "project:fluentbit",
           "TLS": "on",
-          "Host": "http-intake.logs.datadoghq.com",
           "provider": "ecs"
         }
       }
     }
     ```
 
-    **Note**: If your organization is in Datadog EU site, use `http-intake.logs.datadoghq.eu` for the `host` option instead. The full list of available parameters is described in the [Datadog Fluentbit documentation][25].
+    **Note**: If your organization is in Datadog EU site, use `http-intake.logs.datadoghq.eu` for the `Host` option instead. The full list of available parameters is described in the [Datadog Fluentbit documentation][25].
 
 3. Now, whenever a Fargate task runs, Fluent Bit sends the container logs to your Datadog monitoring with information about all of the containers managed by your Fargate tasks. You can see the raw logs on the [Log Explorer page][26], [build monitors][27] for the logs, and use the [Live Container view][28].
 
@@ -296,7 +295,7 @@ Need help? Contact [Datadog support][19].
 
 * Blog post: [Monitor AWS Fargate applications with Datadog][34]
 * FAQ: [Integration Setup for ECS Fargate][7]
-* Blog post: [Monitor your Fargate container logs with Fluent Bit and Datadog][24]
+* Blog post: [Monitor your Fargate container logs with FireLens and Datadog][24]
 
 [1]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
 [2]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats
@@ -321,7 +320,7 @@ Need help? Contact [Datadog support][19].
 [21]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#container_definitions
 [22]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html#firelens-using-fluentbit
 [23]: https://github.com/aws-samples/amazon-ecs-firelens-examples/tree/master/examples/fluent-bit/parse-json
-[24]: https://www.datadoghq.com/blog/collect-fargate-logs-with-fluentbit/
+[24]: https://www.datadoghq.com/blog/collect-fargate-logs-with-firelens/
 [25]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
 [26]: https://app.datadoghq.com/logs
 [27]: https://docs.datadoghq.com/monitors/monitor_types/
