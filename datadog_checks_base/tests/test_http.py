@@ -1151,6 +1151,6 @@ class TestAPI:
 
 class TestIntegration:
     def test_session_timeout(self):
-        http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.001})
+        http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08})
         with pytest.raises(requests.exceptions.Timeout):
-            http.get('https://httpbin.org/get')
+            http.get('https://httpbin.org/delay/0.10')
