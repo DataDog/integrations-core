@@ -9,8 +9,9 @@ from .dashboard import dash
 from .prometheus import prom
 from .scripts import scripts
 from .snmp import snmp
+from .jmx import jmx
 
-ALL_COMMANDS = (changes, dash, prom, scripts, snmp)
+ALL_COMMANDS = (changes, dash, prom, scripts, snmp, jmx)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Collection of useful utilities')
