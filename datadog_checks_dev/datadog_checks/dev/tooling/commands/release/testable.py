@@ -70,10 +70,10 @@ def create_jira_issue(client, teams, pr_title, pr_url, pr_body, dry_run, pr_auth
 
 def pick_card_member(config, author, team):
     """Return a member to assign to the created issue.
-    In practice it returns one jira user which is not the PR author, for the given team.
-    For it to work, you a `jira_user_$team` table in your ddev configuration,
-    with keys being github users and values being their corresponding jira
-    IDs (not names).
+    In practice, it returns one jira user which is not the PR author, for the given team.
+    For it to work, you need a `jira_user_$team` table in your ddev configuration,
+    with keys being github users and values being their corresponding jira IDs (not names).
+
     For example::
         [jira_users_integrations]
         john = "xxxxxxxxxxxxxxxxxxxxx"
