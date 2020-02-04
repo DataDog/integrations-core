@@ -101,13 +101,32 @@ instances:
     ## you can choose which metric you want to collect using a list of regex.
     ## If you do not specify a regex for the resource, all metrics will be collected.
     ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
-    ## for the list of collected metrics (do not prefix then with `vsphere`)
+    ## for the list of collected metrics (do not prefix them with `vsphere`)
     ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
     ##         resources do not have realtime metrics
     ## Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do no
     ##         have historical metrics
     #
     # metric_filters:
+    #   vm:
+    #     - <VM_REGEX>                 # Only possible with "collection_type: realtime"
+    #   host:
+    #     - <HOST_REGEX>               # Only possible with "collection_type: realtime"
+    #   datastore:
+    #     - <DATASTORE_REGEX>          # Only possible with "collection_type: historical"
+    #   datacenter:
+    #     - <DATACENTER_REGEX>         # Only possible with "collection_type: historical"
+    #   cluster:
+    #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
+
+    ## @param collect_per_instance_filters - object - optional - default: none
+    ## For each resource type (vm, host, datastore, datacenter, cluster) to collect,
+    ## you can choose which metric you want to collect the instance value using a list of regex.
+    ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
+    ## for the list of collected metrics (do not prefix them with `vsphere`)
+    ## /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
+    #
+    # collect_per_instance_filters:
     #   vm:
     #     - <VM_REGEX>                 # Only possible with "collection_type: realtime"
     #   host:
