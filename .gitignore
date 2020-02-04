@@ -93,6 +93,9 @@ tmp
 .rbenv-gemsets
 .ruby-version
 
+# pyenv versioning
+.python-version
+
 # Common IDEs & editors
 .idea/
 .vscode/
