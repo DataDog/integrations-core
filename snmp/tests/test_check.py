@@ -1278,3 +1278,21 @@ def test_cisco_nexus(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_hp_ilo4(aggregator):
+    instance = common.generate_instance_config([])
+    instance['community_string'] = 'hp_ilo4'
+    instance['profile'] = 'hp-ilo4'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    definition_file_path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'hp-ilo4.yaml')
+    init_config = {'profiles': {'hp-ilo4': {'definition_file': definition_file_path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    aggregator.assert_metric('snmp.cpqHeSysUtilLifeTime', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+
+    aggregator.assert_all_metrics_covered()
