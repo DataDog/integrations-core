@@ -145,7 +145,6 @@ class SquidCheck(AgentCheck):
             return None
 
         version = match.group(1)
-        self.log.debug("Squid version is %s", version)
 
         if version is not None:
             self.set_metadata('version', version)
