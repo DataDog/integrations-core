@@ -12,16 +12,41 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The MapR check is included in the [Datadog Agent][2] package but requires additional setup operations.
 
-1. Create a `dd-agent` user with a password on every node in the cluster with the same `UID`/`GID` so it is recognized by MapR. See [Managing users and groups][10] for additional details.
-2. Install the Agent on every node you want to monitor.
-3. Install the library *mapr-streams-library* with the following command: `/opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python`. If you use Python 3 with Agent 6, replace `pip` by `pip3`.
-4. Add `/opt/mapr/lib/` to your `/etc/ld.so.conf` (or a file in `/etc/ld.so.conf.d/`). This is required to help the *mapr-streams-library* used by the Agent to find the MapR shared libraries.
-5. Generate a [long-lived ticket][8] for the `dd-agent` user.
-6. Make sure the ticket is readable by the `dd-agent` user.
-7. Configure the integration (see below).
+Prerequisites:
+- [MapR Monitoring][16] needs to be running correctly.
+- You need an available [MapR user][10] (same name, password, uid and gid) with the 'consume' permission on the `/var/mapr/mapr.monitoring/metricstreams` stream. This may be an already existing user or a newly created user. If you want the user user to be called `dd-agent`, you have to create it before installing the agent.
+- You need to generate a [service long-lived ticket][8] for this user that is readable by the `dd-agent` user.
 
-**Note**: If you don't have "security" enabled in the cluster, you can continue without a ticket.
 
+Installation steps for each node:
+1. [Install][2] the Agent
+2. Install the library *mapr-streams-library* with the following command: `sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python`. If you use Python 3 with Agent 6, replace `pip` by `pip3`.
+3. Add `/opt/mapr/lib/` to your `/etc/ld.so.conf` (or a file in `/etc/ld.so.conf.d/`). This is required for the *mapr-streams-library* used by the Agent to find the MapR shared libraries.
+4. Reload the libraries by running `sudo ldconfig`
+5. Configure the integration by specifying the ticket location.
+
+
+### Additional notes
+
+- If you don't have "security" enabled in the cluster, you can continue without a ticket.
+
+- If your production environment does not allow compilation tools like gcc (required to build the mapr-streams-library), it is possible to generate a compiled wheel of the library on a development instance and distribute the compiled wheel to the production hosts. The development and production hosts have to be similar enough for the compiled wheel to be compatible.
+You can run `sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip wheel --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python` to create the wheel file on the development machine.
+And then `sudo -u dd-agent /opt/datadog-agent/embedded/bin/pip install <THE_WHEEL_FILE>` on the production machine.
+
+- If you use python3 with Agent6, make sure to replace `pip` by `pip3` when installing the *mapr-streams-library*
+
+### Troubleshooting
+
+- The agent is on a crash loop after configuring the MapR integration
+There are been a few cases where the C library within *mapr-streams-python* is segfaulting and it was all explained by permissions issues. Make sure the `dd-agent` user has read permission on the ticket file, that the `dd-agent` user is able to run maprcli commands when the MAPR_TICKETFILE_LOCATION environment variable points to the ticket.
+
+- The integration seems to work correctly but doesn't send any metric.
+First make sure to let the agent run for at least a couple of minutes as the integration pulls data from a topic and MapR needs to push data into that topic.
+If that doesn't help, but running the agent manually with `sudo` shows data this is once again some permission issues. Double check everything, in the end the `dd-agent` Linux user should be able to use a locally stored ticket allowing it to run queries against MapR as user X (which may or may not be `dd-agent` itself). And user X needs to have the `consume` permission on the `/var/mapr/mapr.monitoring/metricstreams` stream.
+
+- You see the message `confluent_kafka was not imported correctly ...`
+The agent embedded environment was not able to run the command `import confluent_kafka`. This means that either the *mapr-streams-library* was not installed inside the embedded environment, or that it can't find the mapr-core libraries. The error message should give more details.
 
 ### Configuration
 #### Metric collection
@@ -99,3 +124,4 @@ Need help? Contact [Datadog support][6].
 [13]: https://github.com/DataDog/integrations-core/blob/master/mapr/metadata.csv
 [14]: http://upstart.ubuntu.com/cookbook/#environment-variables
 [15]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
+[16]: https://mapr.com/docs/61/AdministratorGuide/Monitoring.html
