@@ -12,7 +12,10 @@ class JiraClient:
     CREATE_ENDPOINT = API_URL + '/3/issue'
 
     def __init__(self, config):
-        self.auth = HTTPBasicAuth(config['jira']['user'] or None, config['jira']['token'] or None)
+        jira_email = config['jira']['user']
+        jira_token = config['jira']['token']
+
+        self.auth = HTTPBasicAuth(jira_email, jira_token)
         self.team_list_map = {
             'Containers': '21',
             'Core': '31',
@@ -35,7 +38,7 @@ class JiraClient:
     def move_column(self, team, issue_key):
         rate_limited = False
         error = None
-        url = '{}/{}/transitions'.format(self.CREATE_ENDPOINT, issue_key)
+        url = f'{self.CREATE_ENDPOINT}/{issue_key}/transitions'
 
         data = json.dumps({'transition': {'id': self.team_list_map[team]}})
 

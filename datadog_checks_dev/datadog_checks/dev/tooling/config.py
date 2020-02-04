@@ -20,47 +20,34 @@ SECRET_KEYS = {
     'orgs.*.api_key',
     'orgs.*.app_key',
     'github.token',
-    'jira.token',
     'pypi.pass',
-    'trello.key',
-    'trello.token',
+    'jira.token',
 }
 
-DEFAULT_CONFIG = OrderedDict(
-    [
-        ('core', os.path.join('~', 'dd', 'integrations-core')),
-        ('extras', os.path.join('~', 'dd', 'integrations-extras')),
-        ('agent', os.path.join('~', 'dd', 'datadog-agent')),
-        ('repo', 'core'),
-        ('color', bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None),
-        ('dd_api_key', os.getenv('DD_API_KEY')),
-        ('dd_app_key', os.getenv('DD_APP_KEY')),
-        ('org', 'default'),
-        ('agent6', OrderedDict((('docker', 'datadog/agent-dev:master'), ('local', 'latest')))),
-        ('agent5', OrderedDict((('docker', 'datadog/dev-dd-agent:master'), ('local', 'latest')))),
-        ('github', OrderedDict((('user', ''), ('token', '')))),
-        ('jira', OrderedDict((('user', ''), ('token', '')))),
-        ('pypi', OrderedDict((('user', ''), ('pass', '')))),
-        ('trello', OrderedDict((('key', ''), ('token', '')))),
-        (
-            'orgs',
-            OrderedDict(
-                (
-                    (
-                        'default',
-                        OrderedDict(
-                            (
-                                ('api_key', os.getenv('DD_API_KEY')),
-                                ('app_key', os.getenv('DD_APP_KEY')),
-                                ('site', os.getenv('DD_SITE')),
-                            )
-                        ),
-                    ),
-                )
-            ),
-        ),
-    ]
-)
+DEFAULT_CONFIG = {
+    'core': os.path.join('~', 'dd', 'integrations-core'),
+    'extras': os.path.join('~', 'dd', 'integrations-extras'),
+    'agent': os.path.join('~', 'dd', 'datadog-agent'),
+    'repo': 'core',
+    'color': bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None,
+    'dd_api_key': os.getenv('DD_API_KEY'),
+    'dd_app_key': os.getenv('DD_APP_KEY'),
+    'org': 'default',
+    'agent6': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
+    'agent5': {'docker': 'datadog/dev-dd-agent:master', 'local': 'latest'},
+    'github': {'user': '', 'token': ''},
+    'pypi': {'user': '', 'pass': ''},
+    'jira': {'user': '', 'token': ''},
+    'orgs': {
+        'default': {
+            'api_key': os.getenv('DD_API_KEY'),
+            'app_key': os.getenv('DD_APP_KEY'),
+            'site': os.getenv('DD_SITE'),
+            'dd_url': os.getenv('DD_DD_URL'),
+            'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL'),
+        }
+    },
+}
 
 
 def config_file_exists():

@@ -32,14 +32,14 @@ def validate_version(ctx, param, value):
 
 
 def create_jira_issue(client, teams, pr_title, pr_url, pr_body, dry_run, pr_author, config):
-    body = u'Pull request: {}\n\n{}'.format(pr_url, pr_body)
+    body = f'Pull request: {pr_url}\n\n{pr_body}'
 
     for team in teams:
         member = pick_card_member(config, pr_author, team)
         if member:
-            echo_info("Randomly assigned issue to {}".format(member))
+            echo_info(f'Randomly assigned issue to {member}')
         if dry_run:
-            echo_success('Will create an issue for team {}: '.format(team), nl=False)
+            echo_success(f'Will create an issue for team {team}: ', nl=False)
             echo_info(pr_title)
             continue
         creation_attempts = 3
@@ -64,7 +64,8 @@ def create_jira_issue(client, teams, pr_title, pr_url, pr_body, dry_run, pr_auth
                 )
                 time.sleep(wait_time)
             else:
-                echo_success('Created issue {} for team {} '.format(response.json().get('key'), team))
+                issue_key = response.json().get('key')
+                echo_success(f'Created issue {issue_key} for team {team}')
                 break
 
 
@@ -102,14 +103,10 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
     `github.user`/`github.token` in your config file or use the
     `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
     \b
-
     To use Jira:
     1. Go to `https://id.atlassian.com/manage/api-tokens` and create an API token.
-
-    2. Run `ddev config set jira.token` and paste your API token.
-
-    3. Run `ddev config set jira.user` and enter your jira email.
-
+    2. Run `ddev config set jira.user` and enter your jira email.
+    3. Run `ddev config set jira.token` and paste your API token.
     """
     root = get_root()
     repo = basepath(root)
@@ -269,6 +266,10 @@ def testable(ctx, start_id, agent_version, milestone, dry_run):
         pr_title = pr_data.get('title', commit_subject)
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
+
+        jira_config = user_config['jira']
+        if not (jira_config['user'] and jira_config['token']):
+            abort('Error: You are not authenticated for Jira. Please set your jira ddev config')
 
         teams = [jira.label_team_map[label] for label in pr_labels if label in jira.label_team_map]
         if teams:
