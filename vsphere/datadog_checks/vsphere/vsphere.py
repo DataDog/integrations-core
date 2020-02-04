@@ -177,7 +177,7 @@ class VSphereCheck(AgentCheck):
         """
         Callback of the collection of metrics. This is run in the main thread!
 
-        `query_results` currently contain results on one resource type in practice, but this function is generic
+        `query_results` currently contain results of one resource type in practice, but this function is generic
         and can handle results with mixed resource types.
         """
 
