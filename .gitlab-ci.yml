@@ -4,13 +4,15 @@ variables:
   TAGGER_EMAIL: packages@datadoghq.com
   TAGGER_NAME: ci.integrations-core
 
-release-reminder:
-  image: $REMINDER_IMAGE
-  only:
-    - master
-  script:
-    - ./.gitlab/reminder/release-reminder.sh 2>&1
-  tags: [ "runner:main", "size:large" ]
+# Uncomment when/if we modify script to use Jira
+#
+# release-reminder:
+#   image: $REMINDER_IMAGE
+#   only:
+#     - master
+#   script:
+#     - ./.gitlab/reminder/release-reminder.sh 2>&1
+#   tags: [ "runner:main", "size:large" ]
 
 release-auto:
   image: $TAGGER_IMAGE
