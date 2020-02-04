@@ -314,6 +314,9 @@ jobs:
     - checkName: sap_hana
       displayName: SAP HANA
       os: linux
+    - checkName: scylla
+      displayName: Scylla
+      os: linux
     - checkName: snmp
       displayName: SNMP
       os: linux
