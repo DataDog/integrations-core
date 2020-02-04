@@ -176,6 +176,9 @@ class VSphereCheck(AgentCheck):
     def submit_metrics_callback(self, query_results):
         """
         Callback of the collection of metrics. This is run in the main thread!
+
+        `query_results` currently contain results on one resource type in practice, but this function is generic
+        and can handle results with mixed resource types.
         """
 
         # `have_instance_value` is used later to avoid collecting aggregated metrics
