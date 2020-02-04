@@ -41,6 +41,7 @@ class VSphereConfig(object):
         self.metrics_per_query = instance.get("metrics_per_query", DEFAULT_METRICS_PER_QUERY)
         self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
         self.should_collect_events = instance.get("collect_events", self.collection_type == 'realtime')
+        self.should_collect_tags = is_affirmative(instance.get("collect_tags", False))
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
         self.refresh_infrastructure_cache_interval = instance.get(

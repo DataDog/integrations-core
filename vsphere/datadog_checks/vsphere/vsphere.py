@@ -16,6 +16,7 @@ from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.stubs import datadog_agent
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
+from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
@@ -63,6 +64,7 @@ class VSphereCheck(AgentCheck):
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
         )
         self.api = None
+        self.api_rest = None
         # Do not override `AgentCheck.hostname`
         self._hostname = None
         self.thread_pool = ThreadPoolExecutor(max_workers=self.config.threads_count)
@@ -79,6 +81,12 @@ class VSphereCheck(AgentCheck):
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
             raise
+
+        if self.config.should_collect_tags:
+            try:
+                self.api_rest = VSphereRestAPI(self.config, self.log)
+            except APIConnectionError as e:
+                self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
 
     def refresh_metrics_metadata_cache(self):
         """Request the list of counters (metrics) from vSphere and store them in a cache."""
@@ -128,6 +136,13 @@ class VSphereCheck(AgentCheck):
         )
         self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
 
+        rest_tags = {}
+        if self.api_rest:
+            try:
+                rest_tags = self.api_rest.get_resource_tags()
+            except APIConnectionError as e:
+                self.log.error("Failed to collect tags: %s", e)
+
         for mor, properties in iteritems(infrastructure_data):
             if not isinstance(mor, tuple(self.config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
@@ -167,7 +182,12 @@ class VSphereCheck(AgentCheck):
 
             tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
             tags.append('vsphere_type:{}'.format(mor_type_str))
-            mor_payload = {"tags": tags}
+            mor_payload = {"tags": tags, "rest_api_tags": []}
+
+            rest_api_tags = rest_tags.get(type(mor), {}).get(mor._moId)
+            if rest_api_tags:
+                mor_payload['rest_api_tags'].extend(rest_api_tags)
+
             if hostname:
                 mor_payload['hostname'] = hostname
 
@@ -251,6 +271,8 @@ class VSphereCheck(AgentCheck):
                         tags.extend(
                             [t for t in mor_props['tags'] if t.split(":", 1)[0] in self.config.excluded_host_tags]
                         )
+
+                tags.extend(mor_props['rest_api_tags'])
 
                 tags.extend(self.config.base_tags)
 

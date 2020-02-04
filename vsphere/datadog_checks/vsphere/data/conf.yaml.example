@@ -138,6 +138,19 @@ instances:
     #   cluster:
     #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
 
+    ## @param collect_tags - boolean - optional - default: false
+    ## If true, the vSphere Tags will be collected.
+    ## The final tag sent to Datadog is composed of the vSphere tag category as key and vSphere tag name as value.
+    ##    <TAG_CATEGORY>:<TAG_NAME>
+    ## Examples:
+    ## - os_type:windows
+    ## - application_name:my_app
+    ##
+    ## Tagging best practices:
+    ## https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/techpaper/performance/tagging-vsphere67-perf.pdf
+    #
+    # collect_tags: false
+
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name
     ## This requires the VM to have VMware tools installed in it. If the guest hostname is

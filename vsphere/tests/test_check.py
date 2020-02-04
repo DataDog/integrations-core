@@ -4,14 +4,16 @@
 import json
 import os
 
+import mock
 import pytest
 from mock import MagicMock
-from tests.common import HERE
-from tests.mocked_api import MockedAPI
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.config import VSphereConfig
+
+from .common import HERE
+from .mocked_api import MockedAPI
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
@@ -123,3 +125,36 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
         aggregator.assert_metric(
             'vsphere.disk.read.avg', tags=['vcenter_server:FAKE'] + [instance_tag], hostname='VM4-1', count=1
         )
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_collect_tags(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update({'collect_tags': True})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    # Following metrics should match and have instance value tag
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.raw',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4',
+    )
+    aggregator.assert_metric(
+        'vsphere.rescpu.samplePeriod.latest',
+        tags=['my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='10.0.0.104',
+    )
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update({'collect_tags': True})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.log = MagicMock()
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.cpu.usage.raw', tags=['vcenter_server:FAKE'], hostname='10.0.0.104')
+
+    check.log.error.assert_called_once_with(
+        "Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", mock.ANY
+    )
