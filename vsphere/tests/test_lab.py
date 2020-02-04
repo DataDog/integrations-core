@@ -49,6 +49,6 @@ def test_lab(aggregator):
     # Write all metrics to a file
     f = open(os.path.join(HERE, 'metrics_lab.csv'), 'w')
     f.write("name,host,type,value,tags\n")
-    for name, metrics in aggregator._metrics.items():
+    for metrics in aggregator._metrics.values():
         for m in metrics:
             f.write("{},{},{},{},\"{}\"\n".format(m.name, m.hostname, m.type, m.value, m.tags))
