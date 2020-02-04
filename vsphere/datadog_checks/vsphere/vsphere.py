@@ -229,15 +229,16 @@ class VSphereCheck(AgentCheck):
                     continue
 
                 tags = []
-                if should_collect_per_instance_values(self.config, metric_name, resource_type):
+                if should_collect_per_instance_values(self.config, metric_name, resource_type) and (
+                    metric_name in have_instance_value[resource_type]
+                ):
                     instance_value = result.id.instance
                     # When collecting per instance values, it's possible that both aggregated metric and per instance
                     # metrics are received. In that case, the metric with no instance value is skipped.
-                    if not instance_value and (metric_name in have_instance_value[resource_type]):
+                    if not instance_value:
                         continue
-                    if instance_value:
-                        instance_tag_key = get_mapped_instance_tag(metric_name)
-                        tags.append('{}:{}'.format(instance_tag_key, instance_value))
+                    instance_tag_key = get_mapped_instance_tag(metric_name)
+                    tags.append('{}:{}'.format(instance_tag_key, instance_value))
 
                 if resource_type in HISTORICAL_RESOURCES:
                     # Tags are attached to the metrics
