@@ -6,6 +6,7 @@ import os
 import pytest
 
 from datadog_checks.vsphere import VSphereCheck
+
 from .common import HERE
 
 
