@@ -79,7 +79,7 @@ def pick_card_member(config, author, team):
         john = "xxxxxxxxxxxxxxxxxxxxx"
         alice = "yyyyyyyyyyyyyyyyyyyy"
     """
-    users = config.get('jira_users_{}'.format(team.lower()))
+    users = config.get(f'jira_users_{team.lower()}')
     if not users:
         return
     member = random.choice([key for user, key in users.items() if user != author])
