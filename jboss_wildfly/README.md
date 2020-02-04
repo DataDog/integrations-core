@@ -48,7 +48,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 #### Containerized
 ##### Metric collection
 
-For containerized environments, see the [Autodiscovery with JMX][9] guide.
+For containerized environments, see the [Autodiscovery with JMX][8] guide.
 
 ##### Log collection
 
@@ -62,7 +62,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][11] and look for `jboss_wildfly` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `jboss_wildfly` under the Checks section.
 
 ## Data Collected
 
@@ -80,7 +80,7 @@ The JBoss/WildFly integration does not include any service checks.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][6].
 
 [1]: https://developers.redhat.com/products/eap/overview
 [2]: http://wildfly.org
@@ -89,5 +89,7 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/integrations/java
 [6]: https://docs.datadoghq.com/help
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
-[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[8]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
+[9]: https://docs.datadoghq.com/agent/docker/log/
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/metadata.csv
