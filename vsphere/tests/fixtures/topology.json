@@ -1,0 +1,327 @@
+{
+    "spec": "Folder",
+    "name": "Datacenters",
+    "children": [
+        {
+            "spec": "Datacenter",
+            "name": "Dätacenter",
+            "children": [
+                {
+                    "spec": "Folder",
+                    "name": "vm",
+                    "children": [
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "VM1-4",
+                            "runtime.powerState": "off"
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "VM1-6ê",
+                            "runtime.powerState": "off",
+                            "guest.hostName": "ubuntu-test"
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "VM2-1",
+                            "runtime.powerState": "off"
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "VM1-3",
+                            "runtime.powerState": "off"
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "VM2-2",
+                            "runtime.powerState": "off"
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "VM1-5",
+                            "runtime.powerState": "off"
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "VM1-2",
+                            "runtime.powerState": "off"
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "VM-0",
+                            "runtime.powerState": "off"
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "migrationTest",
+                            "runtime.powerState": "off"
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "VM1-1ä",
+                            "runtime.powerState": "off"
+                        }
+                    ]
+                },
+                {
+                    "spec": "Folder",
+                    "name": "host",
+                    "children": [
+                        {
+                            "spec": "ClusterComputeResource",
+                            "name": "Cluster2",
+                            "children": [
+                                {
+                                    "spec": "HostSystem",
+                                    "name": "10.0.0.101"
+                                },
+                                {
+                                    "spec": "HostSystem",
+                                    "name": "10.0.0.102"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "spec": "Folder",
+                    "name": "datastore",
+                    "children": [
+                        {
+                            "spec": "Datastore",
+                            "name": "NFS Share"
+                        },
+                        {
+                            "spec": "StoragePod",
+                            "name": "Datastores",
+                            "children": [
+                                {
+                                    "spec": "Datastore",
+                                    "name": "Datastore 1"
+                                },
+                                {
+                                    "spec": "Datastore",
+                                    "name": "Datastore 2"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "spec": "Folder",
+                    "name": "network"
+                }
+            ]
+        },
+        {
+            "spec": "Datacenter",
+            "name": "Datacenter2",
+            "children": [
+                {
+                    "spec": "Folder",
+                    "name": "vm",
+                    "children": [
+                        {
+                            "spec": "Folder",
+                            "name": "Discovered virtual machine",
+                            "children": [
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-2",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-20",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-4",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-14",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-9",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-15",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-5",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-3",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-12",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-11",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-6",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-13",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-1",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-19",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-18",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-7",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-17",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-10",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-16",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM4-8",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.104"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "VM3-1",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.103"
+                                },
+                                {
+                                    "spec": "VirtualMachine",
+                                    "name": "$VM3-2",
+                                    "runtime.powerState": "on",
+                                    "runtime.host": "10.0.0.103"
+                                }
+                            ]
+                        },
+                        {
+                            "spec": "VirtualMachine",
+                            "name": "$VM5",
+                            "runtime.powerState": "on",
+                            "runtime.host": "10.0.0.103"
+                        }
+                    ]
+                },
+                {
+                    "spec": "Folder",
+                    "name": "host",
+                    "children": [
+                        {
+                            "spec": "ClusterComputeResource",
+                            "name": "Cluster2",
+                            "children": [
+                                {
+                                    "spec": "HostSystem",
+                                    "name": "10.0.0.103"
+                                },
+                                {
+                                    "spec": "HostSystem",
+                                    "name": "10.0.0.104"
+                                }
+                            ]
+                        },
+                        {
+                            "spec": "ClusterComputeResource",
+                            "name": "datastore-cluster"
+                        },
+                        {
+                            "spec": "Folder",
+                            "name": "test"
+                        }
+                    ]
+                },
+                {
+                    "spec": "Folder",
+                    "name": "datastore",
+                    "children": [
+                        {
+                            "spec": "Datastore",
+                            "name": "NFS Share"
+                        },
+                        {
+                            "spec": "Datastore",
+                            "name": "Datastore 3"
+                        },
+                        {
+                            "spec": "Datastore",
+                            "name": "Datastore 4"
+                        }
+                    ]
+                },
+                {
+                    "spec": "Folder",
+                    "name": "network"
+                }
+            ]
+        },
+        {
+            "spec": "Folder",
+            "name": "test"
+        }
+    ]
+}
