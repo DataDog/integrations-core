@@ -22,14 +22,16 @@ class JiraClient:
             'Integrations': '41',
             'Logs': '71',
             'Platform': '51',
-            'Process': '81',
+            'Networks': '171',
+            'Processes': '181',
             'Trace': '61',
         }
         self.label_team_map = {
             'team/agent-apm': 'Trace',
             'team/agent-core': 'Core',
             'team/agent-platform': 'Platform',
-            'team/burrito': 'Process',
+            'team/networks': 'Networks',
+            'team/processes': 'Processes',
             'team/containers': 'Containers',
             'team/integrations': 'Integrations',
             'team/logs': 'Logs',
