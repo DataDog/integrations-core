@@ -33,7 +33,6 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
                     - --enable-metrics
         ```
 
-To collect the cluster-wide `cilium-operator` metrics, see the [Cluster Agent][9].
 
 ### Configuration
 
@@ -42,6 +41,28 @@ To collect the cluster-wide `cilium-operator` metrics, see the [Cluster Agent][9
     * To collect `cilium-operator` metrics, enable the `operator_endpoint` option.
 
 2. [Restart the Agent][5].
+
+#### Log Collection
+Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
+
+#### Available for Agent >6.0
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [DaemonSet configuration][4]:
+
+    ```
+      (...)
+        env:
+          (...)
+          - name: DD_LOGS_ENABLED
+              value: "true"
+          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+              value: "true"
+      (...)
+    ```
+
+2. Mount the Docker socket to the Datadog Agent as done in [this manifest][9] or mount the `/var/log/pods` directory if you are not using Docker.
+
+3. [Restart the Agent][5].
+
 
 ### Validation
 
@@ -73,4 +94,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
 [8]: https://docs.datadoghq.com/help
-[9]: https://docs.datadoghq.com/agent/cluster_agent
+[9]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#create-manifest
