@@ -22757,6 +22757,22 @@
             0
         ],
         "counterId": 130,
+        "instance": "value-aa"
+    },
+    {
+        "entity": "VM4-1",
+        "value": [
+            0
+        ],
+        "counterId": 130,
+        "instance": "value-bb"
+    },
+    {
+        "entity": "VM4-1",
+        "value": [
+            0
+        ],
+        "counterId": 130,
         "instance": ""
     },
     {

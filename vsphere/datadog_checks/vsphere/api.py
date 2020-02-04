@@ -83,7 +83,8 @@ class VSphereAPI(object):
         """
         Requests and returns the list of counter available for a given collection_level.
 
-        :return list of vim.PerformanceManager.CounterInfo: https://vdc-download.vmware.com/vmwb-repository/dcr-public/fe08899f-1eec-4d8d-b3bc-a6664c168c2c/7fdf97a1-4c0d-4be0-9d43-2ceebbc174d9/doc/vim.PerformanceManager.CounterInfo.html
+        :return list of vim.PerformanceManager.CounterInfo:
+        https://vdc-download.vmware.com/vmwb-repository/dcr-public/fe08899f-1eec-4d8d-b3bc-a6664c168c2c/7fdf97a1-4c0d-4be0-9d43-2ceebbc174d9/doc/vim.PerformanceManager.CounterInfo.html
         """
         return self._conn.content.perfManager.QueryPerfCounterByLevel(collection_level)
 

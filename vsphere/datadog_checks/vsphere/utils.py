@@ -6,7 +6,6 @@ from six import iteritems
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
@@ -141,7 +140,7 @@ def get_parent_tags_recursively(mor, infrastructure_data):
 def should_collect_per_instance_values(config, metric_name, resource_type):
     filters = config.collect_per_instance_filters.get(MOR_TYPE_AS_STRING[resource_type], [])
     metric_matched = match_any_regex(metric_name, filters)
-    return metric_matched and is_metric_available_per_instance(metric_name, resource_type)
+    return metric_matched
 
 
 def get_mapped_instance_tag(metric_name):
@@ -154,11 +153,3 @@ def get_mapped_instance_tag(metric_name):
         if metric_name.startswith(prefix):
             return tag_key
     return 'instance'
-
-
-def is_metric_available_per_instance(metric_name, resource_type):
-    metric_data = ALLOWED_METRICS_FOR_MOR.get(resource_type, {}).get(metric_name)
-    if not metric_data:
-        return False
-    (_, _, available_per_instance) = metric_data
-    return available_per_instance

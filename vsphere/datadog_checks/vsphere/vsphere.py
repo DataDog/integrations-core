@@ -178,6 +178,17 @@ class VSphereCheck(AgentCheck):
         Callback of the collection of metrics. This is run in the main thread!
         """
 
+        # `have_instance_value` is used later to avoid collecting aggregated metrics
+        # when instance metrics are collected.
+        have_instance_value = defaultdict(set)
+        for results_per_mor in query_results:
+            resource_type = type(results_per_mor.entity)
+            metadata = self.metrics_metadata_cache.get_metadata(resource_type)
+            for result in results_per_mor.value:
+                metric_name = metadata.get(result.id.counterId)
+                if result.id.instance:
+                    have_instance_value[resource_type].add(metric_name)
+
         for results_per_mor in query_results:
             mor_props = self.infrastructure_cache.get_mor_props(results_per_mor.entity)
             if mor_props is None:
@@ -219,10 +230,11 @@ class VSphereCheck(AgentCheck):
                     instance_value = result.id.instance
                     # When collecting per instance values, it's possible that both aggregated metric and per instance
                     # metrics are received. In that case, the metric with no instance value is skipped.
-                    if not instance_value:
+                    if not instance_value and (metric_name in have_instance_value[resource_type]):
                         continue
-                    instance_tag_key = get_mapped_instance_tag(metric_name)
-                    tags.append('{}:{}'.format(instance_tag_key, instance_value))
+                    if instance_value:
+                        instance_tag_key = get_mapped_instance_tag(metric_name)
+                        tags.append('{}:{}'.format(instance_tag_key, instance_value))
 
                 if resource_type in HISTORICAL_RESOURCES:
                     # Tags are attached to the metrics
@@ -259,7 +271,8 @@ class VSphereCheck(AgentCheck):
         """
         Build query specs using MORs and metrics metadata.
 
-        :returns a list of vim.PerformanceManager.QuerySpec: https://www.vmware.com/support/developer/vc-sdk/visdk41pubs/ApiReference/vim.PerformanceManager.QuerySpec.html
+        :returns a list of vim.PerformanceManager.QuerySpec:
+        https://www.vmware.com/support/developer/vc-sdk/visdk41pubs/ApiReference/vim.PerformanceManager.QuerySpec.html
         """
         for resource_type in self.config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)

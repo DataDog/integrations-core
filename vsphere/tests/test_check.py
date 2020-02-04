@@ -115,5 +115,14 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
         'vsphere.cpu.totalCapacity.avg', tags=['vcenter_server:FAKE'],
     )
 
-    # `vsphere.disk.read.avg` is available per instance but the instance values are empty, hence no metric submitted.
+    # None of `vsphere.disk.usage.avg` metrics have instance values for specific metric+resource_type
+    # Hence the aggregated metric IS collected
+    aggregator.assert_metric('vsphere.disk.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-1', count=1)
+
+    # Some of `vsphere.disk.read.avg` metrics have instance values for specific metric+resource_type
+    # Hence the aggregated metric IS NOT collected
     aggregator.assert_metric('vsphere.disk.read.avg', tags=['vcenter_server:FAKE'], hostname='VM4-1', count=0)
+    for instance_tag in ['device_path:value-aa', 'device_path:value-bb']:
+        aggregator.assert_metric(
+            'vsphere.disk.read.avg', tags=['vcenter_server:FAKE'] + [instance_tag], hostname='VM4-1', count=1
+        )
