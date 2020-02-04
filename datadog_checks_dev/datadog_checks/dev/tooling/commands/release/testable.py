@@ -6,7 +6,6 @@ import time
 
 import click
 from semver import parse_version_info
-from six import iteritems
 
 from ....subprocess import run_command
 from ....utils import basepath, chdir, get_next
