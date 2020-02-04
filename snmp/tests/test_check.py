@@ -1816,3 +1816,26 @@ def test_proliant(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_pan(aggregator):
+    instance = common.generate_instance_config([])
+
+    instance['community_string'] = 'pan'
+    instance['profile'] = 'pan'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'palo-alto.yaml')
+    init_config = {'profiles': {'pan': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    aggregator.assert_metric('snmp.panSessionUtilization',
+                             metric_type=aggregator.GAUGE,
+                             tags=common.CHECK_TAGS,
+                             count=1)
+
+    aggregator.assert_all_metrics_covered()
+
