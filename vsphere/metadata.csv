@@ -351,6 +351,10 @@ vsphere.virtualDisk.writeLatencyUS.latest,gauge,,microsecond,,"Write latency in 
 vsphere.virtualDisk.writeLoadMetric.latest,gauge,,,,Storage DRS virtual disk metric for the write workload model,0,vsphere,virtualdisk writeLoadMetric latest
 vsphere.virtualDisk.writeOIO.latest,gauge,,request,,Average number of outstanding write requests to the virtual disk,0,vsphere,virtualdisk writeOIO latest
 vsphere.vm.count,gauge,,,,The total number of VMs,0,vsphere,vm count
+vsphere.host.count,gauge,,,,The total number of ESXi Hosts,0,vsphere,host count
+vsphere.datastore.count,gauge,,,,The total number of Datastores,0,vsphere,datastore count
+vsphere.datacenter.count,gauge,,,,The total number of Datacenters,0,vsphere,datacenter count
+vsphere.cluster.count,gauge,,,,The total number of Clusters,0,vsphere,cluster count
 vsphere.vmop.numChangeDS.latest,gauge,,operation,,Number of datastore change operations for powered-off and suspended virtual machines,0,vsphere,vmop numChangeDS
 vsphere.vmop.numChangeHost.latest,gauge,,operation,,Number of host change operations for powered-off and suspended virtual machines,0,vsphere,vmop numChangeHost
 vsphere.vmop.numChangeHostDS.latest,gauge,,operation,,Number of host and datastore change operations for powered-off and suspended virtual machines,0,vsphere,vmop numChangeHostDS

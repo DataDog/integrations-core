@@ -7,7 +7,6 @@ from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from itertools import chain
 
 from pyVmomi import vim
 from six import iteritems
@@ -382,19 +381,17 @@ class VSphereCheck(AgentCheck):
         """Send external host tags to the Datadog backend. This is only useful for a REALTIME instance because
         only VMs and Hosts appear as 'datadog hosts'."""
         external_host_tags = []
-        hosts = self.infrastructure_cache.get_mors(vim.HostSystem)
-        vms = self.infrastructure_cache.get_mors(vim.VirtualMachine)
 
-        for mor in chain(hosts, vms):
-            # Safeguard if some mors have a None hostname
-            mor_props = self.infrastructure_cache.get_mor_props(mor)
-            hostname = mor_props.get('hostname')
-            if not hostname:
-                continue
+        for resource_type in REALTIME_RESOURCES:
+            for _, mor_props in self.infrastructure_cache.iter_all(resource_type):
+                hostname = mor_props.get('hostname')
+                # Safeguard if some mors have a None hostname
+                if not hostname:
+                    continue
 
-            tags = [t for t in mor_props['tags'] if t.split(':')[0] not in self.config.excluded_host_tags]
-            tags.extend(self.config.base_tags)
-            external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
+                tags = [t for t in mor_props['tags'] if t.split(':')[0] not in self.config.excluded_host_tags]
+                tags.extend(self.config.base_tags)
+                external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
 
         if external_host_tags:
             self.set_external_tags(external_host_tags)
@@ -479,15 +476,16 @@ class VSphereCheck(AgentCheck):
             self.collect_events()
 
         # Submit the number of VMs that are monitored
-        for resource in self.config.collected_resource_types:
-            # Explicitly do not attach any host to those metrics.
-            resource_count = len(self.infrastructure_cache.get_mors(resource))
-            self.gauge(
-                '{}.count'.format(MOR_TYPE_AS_STRING[resource]),
-                resource_count,
-                tags=self.config.base_tags,
-                hostname=None,
-            )
+        for resource_type in self.config.collected_resource_types:
+            for _, mor_props in self.infrastructure_cache.iter_all(resource_type):
+                # Explicitly do not attach any host to those metrics.
+                resource_tags = mor_props.get('tags', [])
+                self.count(
+                    '{}.count'.format(MOR_TYPE_AS_STRING[resource_type]),
+                    1,
+                    tags=self.config.base_tags + resource_tags,
+                    hostname=None,
+                )
 
         # Creating a thread pool and starting metric collection
         self.log.debug("Starting metric collection in %d threads.", self.config.threads_count)
