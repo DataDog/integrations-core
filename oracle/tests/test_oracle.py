@@ -5,6 +5,10 @@
 import mock
 import pytest
 
+from datadog_checks.oracle import Oracle
+
+from .common import CHECK_NAME
+
 
 def test__get_connection_instant_client(check):
     """
@@ -59,72 +63,30 @@ def test__get_connection_failure(check):
     service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.CRITICAL, tags=expected_tags)
 
 
-def test__check_only_custom_queries(check, instance):
+def test__check_only_custom_queries(instance):
     """
     Test the default metrics are not called when only_custom queries set to true
     """
     instance['only_custom_queries'] = True
 
-    get_sys_metrics = mock.MagicMock()
-    check._get_sys_metrics = get_sys_metrics
-    get_process_metrics = mock.MagicMock()
-    check._get_process_metrics = get_process_metrics
-    get_tablespace_metrics = mock.MagicMock()
-    check._get_tablespace_metrics = get_tablespace_metrics
-    get_custom_metrics = mock.MagicMock()
-    check._get_custom_metrics = get_custom_metrics
-    get_connection = mock.MagicMock()
-    check._get_connection = get_connection
-    check.check(instance)
+    check = Oracle(CHECK_NAME, {}, [instance])
 
-    assert get_sys_metrics.call_count == 0
-    assert get_process_metrics.call_count == 0
-    assert get_tablespace_metrics.call_count == 0
-    assert get_custom_metrics.call_count == 1
+    assert check._query_manager.queries == []
 
 
-def test__check_only_custom_queries_not_set(check, instance):
+def test__check_only_custom_queries_not_set(instance):
     """
     Test the default metrics are called when only_custom queries is not set
     """
     instance['only_custom_queries'] = False
 
-    get_sys_metrics = mock.MagicMock()
-    check._get_sys_metrics = get_sys_metrics
-    get_process_metrics = mock.MagicMock()
-    check._get_process_metrics = get_process_metrics
-    get_tablespace_metrics = mock.MagicMock()
-    check._get_tablespace_metrics = get_tablespace_metrics
-    get_custom_metrics = mock.MagicMock()
-    check._get_custom_metrics = get_custom_metrics
-    get_connection = mock.MagicMock()
-    check._get_connection = get_connection
-    check.check(instance)
+    check = Oracle(CHECK_NAME, {}, [instance])
 
-    assert get_sys_metrics.call_count == 1
-    assert get_process_metrics.call_count == 1
-    assert get_tablespace_metrics.call_count == 1
-    assert get_custom_metrics.call_count == 1
+    assert check._query_manager.queries != []
 
 
-def test__check_only_custom_queries_set_false(check, instance):
+def __test__check_only_custom_queries_set_false(check, instance):
     """
     Test the default metrics are called when only_custom queries is set to False
     """
-
-    get_sys_metrics = mock.MagicMock()
-    check._get_sys_metrics = get_sys_metrics
-    get_process_metrics = mock.MagicMock()
-    check._get_process_metrics = get_process_metrics
-    get_tablespace_metrics = mock.MagicMock()
-    check._get_tablespace_metrics = get_tablespace_metrics
-    get_custom_metrics = mock.MagicMock()
-    check._get_custom_metrics = get_custom_metrics
-    get_connection = mock.MagicMock()
-    check._get_connection = get_connection
-    check.check(instance)
-
-    assert get_sys_metrics.call_count == 1
-    assert get_process_metrics.call_count == 1
-    assert get_tablespace_metrics.call_count == 1
-    assert get_custom_metrics.call_count == 1
+    assert check._query_manager.queries != []
