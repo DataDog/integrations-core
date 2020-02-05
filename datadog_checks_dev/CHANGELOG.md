@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 2.3.0 / 2020-02-05
+
+* [Added] Move CI setup script to ddev. See [#5651](https://github.com/DataDog/integrations-core/pull/5651).
+* [Added] Add `internal` to repo choices. See [#5649](https://github.com/DataDog/integrations-core/pull/5649).
+* [Added] Move remaining flake8 config to .flake8. See [#5635](https://github.com/DataDog/integrations-core/pull/5635).
+
 ## 2.2.0 / 2020-02-04
 
 * [Added] Ignore `__path__` for type hinting of all integrations. See [#5639](https://github.com/DataDog/integrations-core/pull/5639).
