@@ -35,8 +35,8 @@ metrics.scope.task: flink.task
 metrics.scope.operator: flink.operator
 ```
 
-NOTE: This step is optional, but required if you want your metrics to be supported
-and not custom.
+Note that this step is optional for collecting metrics, but required if you want
+your Flink metrics to be supported and not custom.
 
 3. Add any [tags][4] you may want in your `<FLINK_HOME>/conf/flink-conf.yaml`.
 Here is an example of custom tags:
