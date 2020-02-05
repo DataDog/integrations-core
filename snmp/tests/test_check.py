@@ -1290,10 +1290,21 @@ def test_dell_poweredge(aggregator):
     init_config = {'profiles': {'dell-poweredge': {'definition_file': path}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
-    # import pdb
-    # pdb.set_trace()
+    
     check.check(instance)
 
     aggregator.assert_metric('snmp.operatingSystemMemoryAvailablePhysicalSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_metric('snmp.operatingSystemMemoryTotalPageFileSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_metric('snmp.operatingSystemMemoryAvailablePageFileSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_metric('snmp.operatingSystemMemoryTotalVirtualSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_metric('snmp.operatingSystemMemoryAvailableVirtualSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_metric('snmp.operatingSystemMemoryExtTotalPhysicalSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) #an octet string (6) but measures kbytes??
+
+    aggregator.assert_metric('snmp.powerSupplyStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    aggregator.assert_metric('snmp.powerSupplyOutputWatts', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    aggregator.assert_metric('snmp.powerSupplyMaximumInputVoltage', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    aggregator.assert_metric('snmp.powerSupplyCurrentInputVoltage', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+
+
 
     aggregator.assert_all_metrics_covered()
