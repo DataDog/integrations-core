@@ -1311,7 +1311,7 @@ def test_hp_ilo4(aggregator):
 
     cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin']
 
-    sensors = [1, 13, 28]
+    temperature_sensors = [1, 13, 28]
 
     for metric in status_gauges:
         aggregator.assert_metric(
@@ -1328,8 +1328,8 @@ def test_hp_ilo4(aggregator):
             'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
         )
 
-    for sensor_id in sensors:
-        tags = ['sensor_id:{}'.format(sensor_id)] + common.CHECK_TAGS
+    for index in temperature_sensors:
+        tags = ['temperature_index:{}'.format(index)] + common.CHECK_TAGS
         aggregator.assert_metric('snmp.cpqHeTemperatureCelsius', metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cpqHeTemperatureCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
 

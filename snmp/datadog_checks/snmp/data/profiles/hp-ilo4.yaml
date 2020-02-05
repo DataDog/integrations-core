@@ -145,9 +145,9 @@ metrics:
       - # NOTE: other(1), ok(2), degraded(3), failed(4)
         OID: 1.3.6.1.4.1.232.6.2.6.8.1.1.6
         name: cpqHeTemperatureCondition
-    forced_type: gauge # These are sent as INTEGERs instead of Gauges.
+    forced_type: gauge # Sent as INTEGERs instead of Gauges
     metric_tags:
-      - tag: sensor_id
+      - tag: temperature_index
         column:
           OID: 1.3.6.1.4.1.232.6.2.6.8.1.1.3
           name: cpqHeTemperatureIndex
