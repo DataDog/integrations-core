@@ -1278,3 +1278,22 @@ def test_cisco_nexus(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+def test_dell_poweredge(aggregator):
+    instance = common.generate_instance_config([])
+    instance['community_string'] = 'dell-poweredge'
+    instance['profile'] = 'dell-poweredge'
+    instance['enforce_mib_constraints'] = False
+
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'dell-poweredge.yaml')
+
+    init_config = {'profiles': {'dell-poweredge': {'definition_file': definition_file_path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    # import pdb
+    # pdb.set_trace()
+    check.check(instance)
+
+    aggregator.assert_metric('snmp.operatingSystemMemoryAvailablePhysicalSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+
+    aggregator.assert_all_metrics_covered()
