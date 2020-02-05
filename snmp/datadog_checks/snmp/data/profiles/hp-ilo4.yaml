@@ -7,13 +7,21 @@ metrics:
   #     OID: 1.3.6.1.4.1.232.*
   #     name:
 
-  # General health.
+  # System utilization.
 
-  - MIB: CPQHLTH-MIB
+  - # Total time the system has been in full operation.
+    MIB: CPQHLTH-MIB
     symbol:
       OID: 1.3.6.1.4.1.232.6.2.8.1
       name: cpqHeSysUtilLifeTime
     forced_type: monotonic_count # Sent as INTEGER instead of Counter
+
+  - # EISA bus utilization as percentage of theoretical maximum during last minute.
+    MIB: CPQHTLH-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.6.2.8.2
+      name: cpqHeSysUtilEisaBusMin
+    forced_type: gauge # Sent as INTEGER instead of Gauge
 
   # Critical errors.
 
@@ -143,9 +151,8 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.232.6.2.6.8.1.1.3
           name: cpqHeTemperatureIndex
+
   # TODO:
-  # System utilization.
-  # CPU and memory usage.
   # Network interfaces.
   # Network traffic.
   # Power supplies.

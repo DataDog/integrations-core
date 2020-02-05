@@ -1309,6 +1309,8 @@ def test_hp_ilo4(aggregator):
 
     cpqhlth_counts = ['cpqHeSysUtilLifeTime', 'cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
 
+    cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin']
+
     sensors = [1, 13, 28]
 
     for metric in status_gauges:
@@ -1319,6 +1321,11 @@ def test_hp_ilo4(aggregator):
     for metric in cpqhlth_counts:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in cpqhlth_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
         )
 
     for sensor_id in sensors:
