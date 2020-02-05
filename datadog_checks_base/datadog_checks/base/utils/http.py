@@ -108,7 +108,9 @@ class RequestsWrapper(object):
         default_fields['log_requests'] = init_config.get('log_requests', default_fields['log_requests'])
         default_fields['skip_proxy'] = init_config.get('skip_proxy', default_fields['skip_proxy'])
         default_fields['timeout'] = init_config.get('timeout', default_fields['timeout'])
-        default_fields['tls_ignore_warning'] = init_config.get('tls_ignore_warning', default_fields['tls_ignore_warning'])
+        default_fields['tls_ignore_warning'] = init_config.get(
+            'tls_ignore_warning', default_fields['tls_ignore_warning']
+        )
 
         # Populate with the default values
         config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
