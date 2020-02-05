@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 2.4.0 / 2020-02-05
+
+* [Added] Upgrade coverage dependency. See [#5647](https://github.com/DataDog/integrations-core/pull/5647).
+
 ## 2.3.0 / 2020-02-05
 
 * [Added] Move CI setup script to ddev. See [#5651](https://github.com/DataDog/integrations-core/pull/5651).
