@@ -147,8 +147,8 @@ class OpenMetricsScraperMixin(object):
         # }
         config['_active_label_mapping'] = {}
 
-        # `_watched_labels` holds the list of label to watch for enrichment
-        config['_watched_labels'] = set()
+        # `_watched_labels` holds the sets of labels to watch for enrichment
+        config['_watched_labels'] = {}
 
         config['_dry_run'] = True
 
@@ -416,9 +416,14 @@ class OpenMetricsScraperMixin(object):
             if not scraper_config['label_joins']:
                 scraper_config['_dry_run'] = False
             elif not scraper_config['_watched_labels']:
-                # build the _watched_labels set
+                # build the _watched_labels sets
+                scraper_config['_watched_labels']['single'] = set()
+                scraper_config['_watched_labels']['set'] = []
                 for val in itervalues(scraper_config['label_joins']):
-                    scraper_config['_watched_labels'].add(val['label_to_match'])
+                    if 'label_to_match' in val:
+                        scraper_config['_watched_labels']['single'].add(val['label_to_match'])
+                    if 'labels_to_match' in val:
+                        scraper_config['_watched_labels']['set'].append(set(val['labels_to_match']))
 
             for metric in self.parse_metric_family(response, scraper_config):
                 yield metric
@@ -481,7 +486,8 @@ class OpenMetricsScraperMixin(object):
     def _store_labels(self, metric, scraper_config):
         # If targeted metric, store labels
         if metric.name in scraper_config['label_joins']:
-            matching_label = scraper_config['label_joins'][metric.name]['label_to_match']
+            label_joins = scraper_config['label_joins'][metric.name]
+            labels_to_get = label_joins['labels_to_get']
             for sample in metric.samples:
                 # metadata-only metrics that are used for label joins are always equal to 1
                 # this is required for metrics where all combinations of a state are sent
@@ -489,40 +495,86 @@ class OpenMetricsScraperMixin(object):
                 # example: kube_pod_status_phase in kube-state-metrics
                 if sample[self.SAMPLE_VALUE] != 1:
                     continue
-                label_dict = dict()
-                matching_value = None
-                for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
-                    if label_name == matching_label:
-                        matching_value = label_value
-                    elif label_name in scraper_config['label_joins'][metric.name]['labels_to_get']:
-                        label_dict[label_name] = label_value
-                try:
-                    if scraper_config['_label_mapping'][matching_label].get(matching_value):
-                        scraper_config['_label_mapping'][matching_label][matching_value].update(label_dict)
-                    else:
-                        scraper_config['_label_mapping'][matching_label][matching_value] = label_dict
-                except KeyError:
-                    if matching_value is not None:
-                        scraper_config['_label_mapping'][matching_label] = {matching_value: label_dict}
+
+                if 'label_to_match' in label_joins:
+                    label_dict = dict()
+                    matching_value = None
+                    matching_label = label_joins['label_to_match']
+
+                    for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                        if label_name == matching_label:
+                            matching_value = label_value
+                        elif label_name in labels_to_get or '*' in labels_to_get:
+                            label_dict[label_name] = label_value
+
+                    self._update_label_mapping(matching_label, matching_value, label_dict, scraper_config)
+
+                if 'labels_to_match' in label_joins:
+                    matching_labels = sorted(label_joins['labels_to_match'])
+                    if set(matching_labels).issubset(set(sample[self.SAMPLE_LABELS].keys())):
+                        label_dict = dict()
+                        for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                            if label_name in matching_labels:
+                                continue
+                            if label_name in labels_to_get or '*' in labels_to_get:
+                                label_dict[label_name] = label_value
+
+                        mapping_key = ','.join(matching_labels)
+                        matching_values = [sample[self.SAMPLE_LABELS][l] for l in matching_labels]
+                        mapping_value = ','.join(matching_values)
+
+                        self._update_label_mapping(mapping_key, mapping_value, label_dict, scraper_config)
+
+    def _update_label_mapping(self, name, value, label_dict, scraper_config):
+        try:
+            if scraper_config['_label_mapping'][name].get(value):
+                scraper_config['_label_mapping'][name][value].update(label_dict)
+            else:
+                scraper_config['_label_mapping'][name][value] = label_dict
+        except KeyError:
+            if value is not None:
+                scraper_config['_label_mapping'][name] = {value: label_dict}
 
     def _join_labels(self, metric, scraper_config):
         # Filter metric to see if we can enrich with joined labels
         if scraper_config['label_joins']:
             for sample in metric.samples:
-                watched_labels = scraper_config['_watched_labels'].intersection(set(sample[self.SAMPLE_LABELS].keys()))
+                for label_set in scraper_config['_watched_labels']['set']:
+                    if label_set.issubset(set(sample[self.SAMPLE_LABELS].keys())):
+                        matching_labels = sorted(label_set)
+                        mapping_key = ','.join(matching_labels)
+                        matching_values = [sample[self.SAMPLE_LABELS][l] for l in matching_labels]
+                        mapping_value = ','.join(matching_values)
+                        self._set_active_label_mapping(mapping_key, mapping_value, scraper_config)
+                        self._join_labels_from_mapping(sample, mapping_key, mapping_value, scraper_config)
+
+                watched_labels = scraper_config['_watched_labels']['single'].intersection(set(sample[self.SAMPLE_LABELS].keys()))
                 for label_name in watched_labels:
+                    label_value = sample[self.SAMPLE_LABELS][label_name]
                     # Set this label value as active
-                    if label_name not in scraper_config['_active_label_mapping']:
-                        scraper_config['_active_label_mapping'][label_name] = {}
-                    scraper_config['_active_label_mapping'][label_name][sample[self.SAMPLE_LABELS][label_name]] = True
+                    self._set_active_label_mapping(label_name, label_value, scraper_config)
                     # If mapping found add corresponding labels
-                    try:
-                        for name, val in iteritems(
-                            scraper_config['_label_mapping'][label_name][sample[self.SAMPLE_LABELS][label_name]]
-                        ):
-                            sample[self.SAMPLE_LABELS][name] = val
-                    except KeyError:
-                        pass
+                    self._join_labels_from_mapping(sample, label_name, label_value, scraper_config)
+
+    def _join_labels_from_mapping(self, sample, mapping_key, mapping_value, scraper_config):
+        """
+        Add labels from label_values dict to sample
+        """
+        try:
+            for k, v in iteritems(
+                scraper_config['_label_mapping'][mapping_key][mapping_value]
+            ):
+                sample[self.SAMPLE_LABELS][k] = v
+        except KeyError:
+            pass
+
+    def _set_active_label_mapping(self, key, value, scraper_config):
+        """
+        Sets active label mapping in scraper_config
+        """
+        if key not in scraper_config['_active_label_mapping']:
+            scraper_config['_active_label_mapping'][key] = {}
+        scraper_config['_active_label_mapping'][key][value] = True
 
     def process_metric(self, metric, scraper_config, metric_transformers=None):
         """
