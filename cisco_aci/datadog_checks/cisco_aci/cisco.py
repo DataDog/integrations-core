@@ -26,8 +26,8 @@ class CiscoACICheck(AgentCheck):
 
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(CiscoACICheck, self).__init__(name, init_config, instances)
         self.tenant_metrics = aci_metrics.make_tenant_metrics()
         self.last_events_ts = {}
         self.external_host_tags = {}
