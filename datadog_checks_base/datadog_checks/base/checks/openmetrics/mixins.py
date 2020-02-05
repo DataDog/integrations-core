@@ -525,15 +525,18 @@ class OpenMetricsScraperMixin(object):
 
                         self._update_label_mapping(mapping_key, mapping_value, label_dict, scraper_config)
 
-    def _update_label_mapping(self, name, value, label_dict, scraper_config):
+    def _update_label_mapping(self, key, value, label_dict, scraper_config):
+        """
+        Update '_label_mapping' in 'scraper_config' for ('key', 'value')
+        """
         try:
-            if scraper_config['_label_mapping'][name].get(value):
-                scraper_config['_label_mapping'][name][value].update(label_dict)
+            if scraper_config['_label_mapping'][key].get(value):
+                scraper_config['_label_mapping'][key][value].update(label_dict)
             else:
-                scraper_config['_label_mapping'][name][value] = label_dict
+                scraper_config['_label_mapping'][key][value] = label_dict
         except KeyError:
             if value is not None:
-                scraper_config['_label_mapping'][name] = {value: label_dict}
+                scraper_config['_label_mapping'][key] = {value: label_dict}
 
     def _join_labels(self, metric, scraper_config):
         # Filter metric to see if we can enrich with joined labels
@@ -556,13 +559,13 @@ class OpenMetricsScraperMixin(object):
                     # If mapping found add corresponding labels
                     self._join_labels_from_mapping(sample, label_name, label_value, scraper_config)
 
-    def _join_labels_from_mapping(self, sample, mapping_key, mapping_value, scraper_config):
+    def _join_labels_from_mapping(self, sample, key, value, scraper_config):
         """
-        Add labels from label_values dict to sample
+        Enrich 'sample' with labels stored under ('key', 'value') in '_label_mapping'
         """
         try:
             for k, v in iteritems(
-                scraper_config['_label_mapping'][mapping_key][mapping_value]
+                scraper_config['_label_mapping'][key][value]
             ):
                 sample[self.SAMPLE_LABELS][k] = v
         except KeyError:
@@ -570,7 +573,7 @@ class OpenMetricsScraperMixin(object):
 
     def _set_active_label_mapping(self, key, value, scraper_config):
         """
-        Sets active label mapping in scraper_config
+        Sets active '_active_label_mapping' in 'scraper_config' for ('key', 'value')
         """
         if key not in scraper_config['_active_label_mapping']:
             scraper_config['_active_label_mapping'][key] = {}
