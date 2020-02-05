@@ -12,7 +12,12 @@ INTEGRATION_REPOS = [
     'integrations-extras',
     'integrations-internal',
 ]
-REPO_CHOICES = {'core': 'integrations-core', 'extras': 'integrations-extras', 'agent': 'datadog-agent'}
+REPO_CHOICES = {
+    'core': 'integrations-core',
+    'extras': 'integrations-extras',
+    'internal': 'integrations-internal',
+    'agent': 'datadog-agent',
+}
 VERSION_BUMP = {
     'Added': semver.bump_minor,
     'Changed': semver.bump_major,
