@@ -14,4 +14,4 @@ from .run import run
 from .test import test
 from .validate import validate
 
-ALL_COMMANDS = (agent, clean, ci, config, create, dep, env, meta, release, run, test, validate)
+ALL_COMMANDS = (agent, ci, clean, config, create, dep, env, meta, release, run, test, validate)
