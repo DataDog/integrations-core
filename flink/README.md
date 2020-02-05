@@ -2,7 +2,8 @@
 
 ## Overview
 
-This check monitors [flink][1].
+This check monitors [flink][1]. Datadog collects Flink metrics through Flink's
+[Datadog HTTP Reporter][4], which uses [Datadog's HTTP API][2].
 
 ## Setup
 
@@ -36,14 +37,16 @@ metrics.scope.operator: flink.operator
 ```
 
 NOTE: This step is optional, but required if you want your metrics to be supported
-and easily searchable.
+and not custom.
 
 3. Add any tags you may want in `flink/conf/flink-conf.yaml`. Note that as a default,
-any variables in metrics will be sent as [tags][4].
+any variables in metrics will be sent as [tags][4]. Here is an example:
 
 ```yaml
-metrics.reporter.dghttp.tags: flink
+metrics.reporter.dghttp.tags: host:tag1,tag2
 ```
+
+4. Restart Flink to start sending your Flink metrics to the Agent.
 
 ### Validation
 
@@ -65,13 +68,14 @@ flink does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][2].
+Need help? Contact [Datadog support][9].
 
 [1]: https://flink.apache.org/
-[2]: https://docs.datadoghq.com/help
+[2]: https://docs.datadoghq.com/api/?lang=bash#api-reference
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://ci.apache.org/projects/flink/flink-docs-release-1.9/monitoring/metrics.html#datadog-orgapacheflinkmetricsdatadogdatadoghttpreporter
 [5]: https://ci.apache.org/projects/flink/flink-docs-stable/monitoring/metrics.html#system-scope
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
+[9]: https://docs.datadoghq.com/help
