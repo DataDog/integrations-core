@@ -1287,7 +1287,7 @@ def test_dell_poweredge(aggregator):
 
     path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'dell-poweredge.yaml')
 
-    init_config = {'profiles': {'dell-poweredge': {'definition_file': definition_file_path}}}
+    init_config = {'profiles': {'dell-poweredge': {'definition_file': path}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     # import pdb
