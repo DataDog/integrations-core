@@ -1,23 +1,87 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 
-Job.Status.JVM.CPU.load, gauge, The recent CPU usage of the JVM.
-Job.Status.JVM.CPU.time, gauge, The CPU time used by the JVM.
-TaskManager.Status.JVM.CPU.load, gauge, The recent CPU usage of the JVM.
-TaskManager.Status.JVM.CPU.time, gauge, The CPU time used by the JVM.
+##CPU
 
+flink.jobmanager.Status.JVM.CPU.load,gauge,,percent,"The recent CPU usage of the JVM",0,flink,jm_cpu_load
+flink.jobmanager.Status.JVM.CPU.time,gauge,,,"The CPU time used by the JVM",0,flink,jm_cpu_time
+flink.taskmanager.Status.JVM.CPU.load,gauge,,percent,"The recent CPU usage of the JVM",flink,tm_cpu_load
+flink.taskmanager.Status.JVM.CPU.time, gauge,,,"The CPU time used by the JVM",flink,tm_cpu_time
 
-Job.Status.JVM.Memory.Heap.Used, gauge, The amount of heap memory currently used (in bytes).
-Job.Status.JVM.Memory.Heap.Committed, gauge, The amount of heap memory guaranteed to be available to the JVM (in bytes).
-Job.Status.JVM.Memory.Heap.Max, gauge, The maximum amount of heap memory that can be used for memory management (in bytes).
-Job.Status.JVM.Memory.NonHeap.Used, gauge, The amount of non-heap memory currently used (in bytes).
-Job.Status.JVM.Memory.NonHeap.Committed, gauge, The amount of non-heap memory guaranteed to be available to the JVM (in bytes).
-Job.Status.JVM.Memory.NonHeap.Max, gauge, The maximum amount of non-heap memory that can be used for memory management (in bytes).
-Job.Status.JVM.Memory.Direct.Count, gauge, The number of buffers in the direct buffer pool.
-Job.Status.JVM.Memory.Direct.MemoryUsed, gauge, The amount of memory used by the JVM for the direct buffer pool (in bytes).
-Job.Status.JVM.Memory.Direct.TotalCapacity, gauge,The total capacity of all buffers in the direct buffer pool (in bytes).
-Job.Status.JVM.Memory.Mapped.Count, gauge, The number of buffers in the mapped buffer pool.
-Job.Status.JVM.Memory.Mapped.MemoryUsed, gauge,The amount of memory used by the JVM for the mapped buffer pool (in bytes).
-Job.Status.JVM.Memory.Mapped.TotalCapacity, gauge,The number of buffers in the mapped buffer pool (in bytes).
+##MEMORY
 
-Job.Status.JVM.Threads.Count, gauge, The total number of live threads.
-Job.Status.JVM.GarbageCollector
+flink.jobmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,"The amount of heap memory currently used",0,flink,jm_heap_used
+flink.jobmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,"The amount of heap memory guaranteed to be available to the JVM",0,flink,jm_heap_commit
+flink.jobmanager.Status.JVM.Memory.Heap.Max,gauge,,bytes,,"The maximum amount of heap memory that can be used for memory management",0,flink,jm_heap_max
+flink.jobmanager.Status.JVM.Memory.NonHeap.Used,gauge,,bytes,,"The amount of non-heap memory currently used",0,flink,jm_nonheap_used
+flink.jobmanager.Status.JVM.Memory.NonHeap.Committed,gauge,,bytes,,"The amount of non-heap memory guaranteed to be available to the JVM",0,flink,jm_nonheap_commit
+flink.jobmanager.Status.JVM.Memory.NonHeap.Max,gauge,,bytes,,"The maximum amount of non-heap memory that can be used for memory management",0,flink,jm_nonheap_max
+flink.jobmanager.Status.JVM.Memory.Direct.Count,gauge,,,,"The number of buffers in the direct buffer pool",0,flink,jm_direct_ct
+flink.jobmanager.Status.JVM.Memory.Direct.MemoryUsed,gauge,,bytes,,"The amount of memory used by the JVM for the direct buffer pool",0,flink,jm_direct_used
+flink.jobmanager.Status.JVM.Memory.Direct.TotalCapacity,gauge,,bytes,,"The total capacity of all buffers in the direct buffer pool",0,flink,jm_direct_cap
+flink.jobmanager.Status.JVM.Memory.Mapped.Count,gauge,,,,"The number of buffers in the mapped buffer pool"0,flink,jm_mapped_ct
+flink.jobmanager.Status.JVM.Memory.Mapped.MemoryUsed,gauge,,bytes,,"The amount of memory used by the JVM for the mapped buffer pool",0,flink,jm_mapped_used
+flink.jobmanager.Status.JVM.Memory.Mapped.TotalCapacity,gauge,,bytes,,"The number of buffers in the mapped buffer pool",0,flink,jm_mapped_cap
+
+flink.taskmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,"The amount of heap memory currently used",0,flink,tm_heap_used
+flink.taskmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,"The amount of heap memory guaranteed to be available to the JVM",0,flink,tm_heap_commit
+flink.taskmanager.Status.JVM.Memory.Heap.Max,gauge,,bytes,,"The maximum amount of heap memory that can be used for memory management",0,flink,tm_heap_max
+flink.taskmanager.Status.JVM.Memory.NonHeap.Used,gauge,,bytes,,"The amount of non-heap memory currently used",0,flink,tm_nonheap_used
+flink.taskmanager.Status.JVM.Memory.NonHeap.Committed,gauge,,bytes,,"The amount of non-heap memory guaranteed to be available to the JVM",0,flink,tm_nonheap_commit
+flink.taskmanager.Status.JVM.Memory.NonHeap.Max,gauge,,bytes,,"The maximum amount of non-heap memory that can be used for memory management",0,flink,tm_nonheap_max
+flink.taskmanager.Status.JVM.Memory.Direct.Count,gauge,,,,"The number of buffers in the direct buffer pool",0,flink,tm_direct_ct
+flink.taskmanager.Status.JVM.Memory.Direct.MemoryUsed,gauge,,bytes,,"The amount of memory used by the JVM for the direct buffer pool",0,flink,tm_direct_used
+flink.taskmanager.Status.JVM.Memory.Direct.TotalCapacity,gauge,,bytes,,"The total capacity of all buffers in the direct buffer pool",0,flink,tm_direct_cap
+flink.taskmanager.Status.JVM.Memory.Mapped.Count,gauge,,,,"The number of buffers in the mapped buffer pool"0,flink,tm_mapped_ct
+flink.taskmanager.Status.JVM.Memory.Mapped.MemoryUsed,gauge,,bytes,,"The amount of memory used by the JVM for the mapped buffer pool",0,flink,tm_mapped_used
+flink.taskmanager.Status.JVM.Memory.Mapped.TotalCapacity,gauge,,bytes,,"The number of buffers in the mapped buffer pool",0,flink,tm_mapped_cap
+
+##THREADS
+flink.jobmanager.Status.JVM.Threads.Count,gauge,,,,"The total number of live threads",0,flink,jm_threads_ct
+
+flink.taskmanager.Status.JVM.Threads.Count,gauge,,,,"The total number of live threads",0,flink,tm_threads_ct
+
+##GARBAGE COLLECTION
+TODO
+
+##CLASSLOADER
+flink.jobmanager.Status.JVM.ClassLoader.ClassesLoaded,gauge,,,,"The total number of classes loaded since the start of the JVM",0,flink,jm_class_loaded
+flink.jobmanager.Status.JVM.ClassLoader.ClassesUnloaded,gauge,,,,"The total number of classes unloaded since the start of the JVM",0,flink,jm_class_unloaded
+
+flink.taskmanager.Status.JVM.ClassLoader.ClassesLoaded,gauge,,,,"The total number of classes loaded since the start of the JVM",0,flink,tm_class_loaded
+flink.taskmanager.Status.JVM.ClassLoader.ClassesUnloaded,gauge,,,,"The total number of classes unloaded since the start of the JVM",0,flink,tm_class_unloaded
+
+##DEFAULT SHUFFLE SERVICE
+flink.taskmanager.Status.Shuffle.Netty.AvailableMemorySegments,gauge,,,,"The number of unused memory segments",0,flink,tm_shuffle_seg_avail
+flink.taskmanager.Status.Shuffle.Netty.TotalMemorySegments,gauge,,,,"The number of allocated memory segments",0,flink,tm_shuffle_seg_total
+flink.task.Shuffle.Netty.Input.Buffers.inputQueueLength,gauge,,,,"The number of queued input buffers",0,flink,t_in_buffers_queued
+flink.task.Shuffle.Netty.Input.Buffers.inPoolUsage,gauge,,,,"An estimate of the input buffers usage",0,flink,t_in_buffers_used
+flink.task.Shuffle.Netty.Output.Buffers.outputQueueLength,gauge,,,,"The number of queued output buffers",0,flink,t_out_buffers_queued
+flink.task.Shuffle.Netty.Output.Buffers.outPoolUsage,gauge,,,,"An estimate of the output buffers usage",0,flink,t_out_buffers_used
+-- TODO METERR TYPE --
+flink.task.Shuffle.Netty.Input.numBytesInLocal,count,,bytes,,"The total number of bytes this task has read from a local source",0,flink,t_byte_read_loc
+flink.task.Shuffle.Netty.Input.numBytesInLocalPerSecond,meter,,bytes,second,"The number of bytes this task reads from a local source per second",0,flink,t_byte_read_loc_sec
+flink.task.Shuffle.Netty.Input.numBytesInRemote,count,,bytes,,"The total number of bytes this task has read from a remote source",0,flink,t_byte_read_rem
+flink.task.Shuffle.Netty.Input.numBytesInRemotePerSecond,meter,,bytes,,"The number of bytes this task reads from a remote source per second",0,flink,t_byte_read_rem_sec
+flink.task.Shuffle.Netty.Input.numBuffersInLocal,count,,,,"The total number of network buffers this task has read from a local source",0,flink,t_buf_read_loc
+flink.task.Shuffle.Netty.Input.numBuffersInLocalPerSecond,meter,,,second,"The number of network buffers this task reads from a local source per second",0,flink,t_buf_read_loc_sec
+flink.task.Shuffle.Netty.Input.numBuffersInRemote,count,,,,"The total number of network buffers this task has read from a remote source",0,flink,t_buf_read_rem
+flink.task.Shuffle.Netty.Input.numBuffersInRemotePerSecond,count,,,second,"TThe number of network buffers this task reads from a remote source per second",0,flink,t_buf_read_rem_sec
+
+##CLUSTER
+flink.jobmanager.numRegisteredTaskManagers,gauge,,,,"The number of registered taskmanagers",0,flink,jm_reg_tms
+flink.jobmanager.numRunningJobs,gauge,,,,"The number of running jobs",0,flink,jm_num_jobs
+flink.jobmanager.taskSlotsTotal,gauge,,,,"The total number of task slots",0,flink,jm_total_task_slots
+
+##AVAILABILITY
+flink.jobmanager.job.restartingTime,gauge,,milliseconds,,"The time it took to restart the job, or how long the current restart has been in progress",0,flink,jm_job_restart_time
+flink.jobmanager.job.uptime,gauge,,milliseconds,,"The time that the job has been running without interruption. Returns -1 for completed jobs",0,flink,jm_job_uptime
+flink.jobmanager.job.downtime,gauge,,milliseconds,,"For jobs currently in a failing/recovering situation, the time elapsed during this outage. Returns 0 for running jobs and -1 for completed jobs",-1,flink,jm_job_downtime
+flink.jobmanager.job.fullRestarts,gauge,,,,"The total number of full restarts since this job was submitted. Attention: Since 1.9.2, this metric also includes fine-grained restarts",-1,flink,jm_job_restarts
+
+##CHECKPOINTING
+flink.jobmanager.job.lastCheckpointDuration,gauge,,milliseconds,,"The time it took to complete the last checkpoint",0,flink,jm_job_chktpt_dur
+flink.jobmanager.job.lastCheckpointSize,gauge,,bytes,,"The total size of the last checkpoint",0,flink,jm_job_chktpt_size
+flink.jobmanager.job.lastCheckpointExternalPath,gauge,,,,"The path where the last external checkpoint was stored",0,flink,jm_job_chktpt_path
+flink.jobmanager.job.lastCheckpointRestoreTimestamp,gauge,,milliseconds,,"Timestamp when the last checkpoint was restored at the coordinator",0,flink,jm_job_chktpt_restore
+flink.jobmanager.job.lastCheckpointAlignmentBuffered,gauge,,bytes,,"The number of buffered bytes during alignment over all subtasks for the last checkpoint",0,flink,jm_job_chktpt_align
+
