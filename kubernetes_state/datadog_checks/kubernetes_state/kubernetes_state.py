@@ -177,7 +177,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         extra_labels = ksm_instance.get('label_joins', {})
         hostname_override = is_affirmative(ksm_instance.get('hostname_override', True))
-        join_kube_labels = is_affirmative(ksm_instance.get('join_kube_labels', True))
+        join_kube_labels = is_affirmative(ksm_instance.get('join_kube_labels', False))
 
         ksm_instance.update(
             {
