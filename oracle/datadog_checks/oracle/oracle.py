@@ -28,9 +28,15 @@ class Oracle(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(Oracle, self).__init__(name, init_config, instances)
-        (self._server, self._user, self._password, self._service, self._jdbc_driver, self._tags, only_custom_queries) = self._get_config(
-            self.instance
-        )
+        (
+            self._server,
+            self._user,
+            self._password,
+            self._service,
+            self._jdbc_driver,
+            self._tags,
+            only_custom_queries,
+        ) = self._get_config(self.instance)
 
         self.check_initializations.append(self.validate_config)
 
@@ -42,12 +48,7 @@ class Oracle(AgentCheck):
 
         self._fix_custom_queries()
 
-        self._query_manager = QueryManager(
-            self,
-            self.execute_query_raw,
-            queries=manager_queries,
-            tags=self._tags,
-        )
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=manager_queries, tags=self._tags,)
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def _fix_custom_queries(self):
