@@ -362,20 +362,13 @@ class KubernetesState(OpenMetricsBaseCheck):
         ksm_instance['prometheus_url'] = endpoint
 
         if join_kube_labels:
-            ksm_instance['label_joins'].update({
-                'kube_pod_labels': {
-                    'labels_to_match': ['pod', 'namespace'],
-                    'labels_to_get': ['*']
-                },
-                'kube_deployment_labels': {
-                    'labels_to_match': ['deployment', 'namespace'],
-                    'labels_to_get': ['*']
-                },
-                'kube_daemonset_labels': {
-                    'labels_to_match': ['daemonset', 'namespace'],
-                    'labels_to_get': ['*']
-                },
-            })
+            ksm_instance['label_joins'].update(
+                {
+                    'kube_pod_labels': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['*']},
+                    'kube_deployment_labels': {'labels_to_match': ['deployment', 'namespace'], 'labels_to_get': ['*']},
+                    'kube_daemonset_labels': {'labels_to_match': ['daemonset', 'namespace'], 'labels_to_get': ['*']},
+                }
+            )
 
         ksm_instance['label_joins'].update(extra_labels)
         if hostname_override:
