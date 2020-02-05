@@ -1305,11 +1305,23 @@ def test_hp_ilo4(aggregator):
         'cpqHeThermalTempStatus',
         'cpqHeThermalSystemFanStatus',
         'cpqHeThermalCpuFanStatus',
+        'cpqNicVtVirusActivity',
     ]
 
     cpqhlth_counts = ['cpqHeSysUtilLifeTime', 'cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
 
     cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin', 'cpqHePowerMeterCurrReading']
+
+    interfaces = ['eth0', 'en1']
+    phys_adapter_counts = [
+        'cpqNicIfPhysAdapterGoodTransmits',
+        'cpqNicIfPhysAdapterGoodReceives',
+        'cpqNicIfPhysAdapterBadTransmits',
+        'cpqNicIfPhysAdapterBadReceives',
+        'cpqNicIfPhysAdapterInOctets',
+        'cpqNicIfPhysAdapterOutOctets',
+    ]
+    phys_adapter_rates = ['cpqNicIfPhysAdapterSpeed', 'cpqNicIfPhysAdapterSpeedMbps']
 
     temperature_sensors = [1, 13, 28]
     batteries = [1, 3, 4, 5]
@@ -1338,5 +1350,16 @@ def test_hp_ilo4(aggregator):
         tags = ['battery_index:{}'.format(index)] + common.CHECK_TAGS
         aggregator.assert_metric('snmp.cpqHeSysBatteryCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cpqHeSysBatteryStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        for metric in phys_adapter_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in phys_adapter_rates:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1
+            )
 
     aggregator.assert_all_metrics_covered()
