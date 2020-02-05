@@ -6,7 +6,7 @@
   "metric_prefix": "flink.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "Track metrics for your flink jobmanagers, taskmanagers, operators, and more.",
+  "short_description": "Track metrics for your flink jobs.",
   "guid": "8b3e5591-533e-4504-aabb-e697f07461ca",
   "support": "core",
   "supported_os": [
