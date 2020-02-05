@@ -155,6 +155,13 @@ def get_latest_tag(pattern=None, tag_prefix='v'):
     return list(reversed(all_tags))[0][1]
 
 
+def get_latest_commit_hash(root=None):
+    with chdir(root or get_root()):
+        result = run_command('git rev-parse HEAD', capture=True, check=True)
+
+    return result.stdout.strip()
+
+
 def tracked_by_git(filename):
     """
     Return a boolean value for whether the given file is tracked by git.
@@ -172,3 +179,13 @@ def ignored_by_git(filename):
     with chdir(get_root()):
         result = run_command(f'git check-ignore -q {filename}', capture=True)
         return result.code == 0
+
+
+def get_git_user():
+    result = run_command('git config --get user.name', capture=True, check=True)
+    return result.stdout.strip()
+
+
+def get_git_email():
+    result = run_command('git config --get user.email', capture=True, check=True)
+    return result.stdout.strip()
