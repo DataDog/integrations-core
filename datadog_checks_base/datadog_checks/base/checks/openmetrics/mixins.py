@@ -564,9 +564,7 @@ class OpenMetricsScraperMixin(object):
         Enrich 'sample' with labels stored under ('key', 'value') in '_label_mapping'
         """
         try:
-            for k, v in iteritems(
-                scraper_config['_label_mapping'][key][value]
-            ):
+            for k, v in iteritems(scraper_config['_label_mapping'][key][value]):
                 sample[self.SAMPLE_LABELS][k] = v
         except KeyError:
             pass
