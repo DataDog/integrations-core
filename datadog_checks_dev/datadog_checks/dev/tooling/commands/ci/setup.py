@@ -23,7 +23,8 @@ def display_action(script_file):
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Run CI setup scripts')
 @click.argument('checks', nargs=-1)
-def setup(checks):
+@click.option('--changed', is_flag=True, help='Only target changed checks')  # Added for compatibility with `ddev test`
+def setup(checks, changed):
     """
     Run CI setup scripts
     """
@@ -36,7 +37,7 @@ def setup(checks):
     else:
         print(f'Checks chosen: changed')
 
-    check_envs = get_tox_envs(checks, every=True, sort=True, changed_only=True)
+    check_envs = get_tox_envs(checks, every=True, sort=True, changed_only=changed)
 
     for check, _ in check_envs:
         scripts_path = os.path.join(SCRIPTS_PATH, check)
