@@ -1293,6 +1293,26 @@ def test_hp_ilo4(aggregator):
 
     check.check(instance)
 
-    aggregator.assert_metric('snmp.cpqHeSysUtilLifeTime', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+    status_gauges = [
+        'cpqHeCritLogCondition',
+        'cpqHeCorrMemLogStatus',
+        'cpqHeCorrMemLogCondition',
+        'cpqHeAsrStatus',
+        'cpqHeAsrPost',
+        'cpqHeAsrCondition',
+        'cpqHeAsrNetworkAccessStatus',
+    ]
+
+    cpqhlth_counts = ['cpqHeSysUtilLifeTime', 'cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
+
+    for metric in status_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in cpqhlth_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
+        )
 
     aggregator.assert_all_metrics_covered()
