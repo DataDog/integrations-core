@@ -1,5 +1,6 @@
 [run]
 branch = True
+parallel = True
 
 disable_warnings =
     module-not-measured
