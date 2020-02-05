@@ -2,30 +2,29 @@
 
 ## Overview
 
-This check monitors [flink][1]. Datadog collects Flink metrics through Flink's
+This check monitors [Flink][1]. Datadog collects Flink metrics through Flink's
 [Datadog HTTP Reporter][4], which uses [Datadog's HTTP API][2].
 
 ## Setup
 
 ### Installation
 
-The flink check is included in the [Datadog Agent][3] package.
+The Flink check is included in the [Datadog Agent][3] package.
 No additional installation is needed on your server.
 
 ### Configuration
 
 1. Configure the [Datadog HTTP Reporter][4] in Flink.
 
-Copy `/opt/flink-metrics-datadog-1.7.2.jar` into the `/lib` folder.
-In the `flink/conf/flink-conf.yaml`, add these lines, replacing xxx with your Datadog API key:
+Copy `<FLINK_HOME>/opt/flink-metrics-datadog-1.9.2.jar` into your `<FLINK_HOME>/lib` folder.
+In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `xxx` with your Datadog API key:
 
 ```yaml
 metrics.reporter.dghttp.class: org.apache.flink.metrics.datadog.DatadogHttpReporter
 metrics.reporter.dghttp.apikey: xxx
-metrics.reporter.dghttp.tags: myflinkapp,prod
 ```
 
-2. Re-map system scopes in your `flink/conf/flink-conf.yaml`.
+2. Re-map system scopes in your `<FLINK_HOME>/conf/flink-conf.yaml`.
 
 ```yaml
 metrics.scope.jm: flink.jobmanager
@@ -39,12 +38,15 @@ metrics.scope.operator: flink.operator
 NOTE: This step is optional, but required if you want your metrics to be supported
 and not custom.
 
-3. Add any tags you may want in `flink/conf/flink-conf.yaml`. Note that as a default,
-any variables in metrics will be sent as [tags][4]. Here is an example:
+3. Add any [tags][4] you may want in your `<FLINK_HOME>/conf/flink-conf.yaml`.
+Here is an example of custom tags:
 
 ```yaml
 metrics.reporter.dghttp.tags: host:tag1,tag2
 ```
+
+Note that as a default, any variables in metric names will be sent as tags,
+so there is no need to add custom tags for `job_id`, `task_id`, etc.
 
 4. Restart Flink to start sending your Flink metrics to the Agent.
 
@@ -60,7 +62,7 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Service Checks
 
-flink does not include any service checks.
+Flink does not include any service checks.
 
 ### Events
 
