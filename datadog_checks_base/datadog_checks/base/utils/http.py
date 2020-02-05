@@ -482,3 +482,15 @@ AUTH_TYPES = {
     'kerberos': create_kerberos_auth,
     'aws': create_aws_auth,
 }
+
+
+# For documentation generation
+# TODO: use an enum and remove STANDARD_FIELDS when mkautodoc supports it
+class StandardFields(object):
+    pass
+
+
+# mkautodoc does not show the default values but rather the description of its
+# type (when not `None`) which is noisy since everyone knows what e.g. `str` is
+for field in sorted(STANDARD_FIELDS):
+    setattr(StandardFields, field, None)
