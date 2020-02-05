@@ -2,8 +2,7 @@
 sysobjectid: 1.3.6.1.4.1.232.9.4.11
 
 metrics:
-  # -
-  #   MIB: CPQHTLH-MIB
+  # - MIB: CPQHTLH-MIB
   #   symbol:
   #     OID: 1.3.6.1.4.1.232.*
   #     name:
@@ -92,12 +91,63 @@ metrics:
       OID: 1.3.6.1.4.1.232.6.2.5.21
       name: cpqHeAsrNetworkAccessStatus
     forced_type: gauge # Sent as INTEGER instead of Gauge
-  #
+
+  # Temperature and fans.
+
+  - # Overall condition of the thermal environment.
+    # NOTE: other(1), ok(2), degraded(3), failed(4)
+    MIB: CPQHTLH-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.6.2.6.1
+      name: cpqHeThermalCondition
+    forced_type: gauge # Sent as INTEGER instead of Gauge
+
+  - # Status of temperature sensors.
+    # NOTE: other(1), ok(2), degraded(3), failed(4)
+    MIB: CPQHLTH-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.6.2.6.3
+      name: cpqHeThermalTempStatus
+    forced_type: gauge # Sent as INTEGER instead of Gauge
+
+  - # Status of fan(s).
+    # NOTE: other(1), ok(2), degraded(3), failed(4)
+    MIB: CPQHLTH-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.6.2.6.4
+      name: cpqHeThermalSystemFanStatus
+    forced_type: gauge # Sent as INTEGER instead of Gauge
+
+  - # Status of processor fan(s).
+    # NOTE: other(1), ok(2), failed(4)
+    MIB: CPQHLTH-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.6.2.6.5
+      name: cpqHeThermalCpuFanStatus
+    forced_type: gauge # Sent as INTEGER instead of Gauge
+
+  - # Temperator sensors.
+    MIB: CPQHLTH-MIB
+    table:
+      OID: 1.3.6.1.4.1.232.6.2.6.8
+      name: cpqHeTemperatureTable
+    symbols:
+      - OID: 1.3.6.1.4.1.232.6.2.6.8.1.1.4
+        name: cpqHeTemperatureCelsius
+      - # NOTE: other(1), ok(2), degraded(3), failed(4)
+        OID: 1.3.6.1.4.1.232.6.2.6.8.1.1.6
+        name: cpqHeTemperatureCondition
+    forced_type: gauge # These are sent as INTEGERs instead of Gauges.
+    metric_tags:
+      - tag: sensor_id
+        column:
+          OID: 1.3.6.1.4.1.232.6.2.6.8.1.1.3
+          name: cpqHeTemperatureIndex
   # TODO:
-  # Thermal condition.
+  # System utilization.
+  # CPU and memory usage.
   # Network interfaces.
   # Network traffic.
-  # CPU and memory usage.
   # Power supplies.
   # Storage.
   # Field-replaceable units.

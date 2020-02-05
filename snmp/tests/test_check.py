@@ -1301,9 +1301,15 @@ def test_hp_ilo4(aggregator):
         'cpqHeAsrPost',
         'cpqHeAsrCondition',
         'cpqHeAsrNetworkAccessStatus',
+        'cpqHeThermalCondition',
+        'cpqHeThermalTempStatus',
+        'cpqHeThermalSystemFanStatus',
+        'cpqHeThermalCpuFanStatus',
     ]
 
     cpqhlth_counts = ['cpqHeSysUtilLifeTime', 'cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
+
+    sensors = [1, 13, 28]
 
     for metric in status_gauges:
         aggregator.assert_metric(
@@ -1314,5 +1320,10 @@ def test_hp_ilo4(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
         )
+
+    for sensor_id in sensors:
+        tags = ['sensor_id:{}'.format(sensor_id)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.cpqHeTemperatureCelsius', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.cpqHeTemperatureCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
