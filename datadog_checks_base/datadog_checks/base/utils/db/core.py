@@ -11,6 +11,37 @@ from .utils import SUBMISSION_METHODS, create_submission_transformer
 
 
 class QueryManager(object):
+    """
+    This class is in charge of running any number of `Query` instances for a single Check instance.
+
+    You will most often see it created during Check initialization like this:
+
+    ```python
+    self._query_manager = QueryManager(
+        self,
+        self.execute_query,
+        queries=[
+            queries.SomeQuery1,
+            queries.SomeQuery2,
+            queries.SomeQuery3,
+            queries.SomeQuery4,
+            queries.SomeQuery5,
+        ],
+        tags=self.instance.get('tags', []),
+        error_handler=self._error_sanitizer,
+    )
+    self.check_initializations.append(self._query_manager.compile_queries)
+    ```
+
+    - **check** (_AgentCheck_) - an instance of a Check
+    - **executor** (_callable_) - a callable accepting a `str` query as its sole argument and returning
+      a sequence representing either the full result set or an iterator over the result set
+    - **queries** (_List[Query])_) - a list of `Query` instances
+    - **tags** (_List[str])_) - a list of tags to associate with every submission
+    - **error_handler** (_callable_) - a callable accepting a `str` error as its sole argument and returning
+      a sanitized string, useful for scrubbing potentially sensitive information libraries emit
+    """
+
     def __init__(self, check, executor, queries=None, tags=None, error_handler=None):
         self.check = check
         self.executor = executor
@@ -38,6 +69,7 @@ class QueryManager(object):
             self.queries.append(query)
 
     def compile_queries(self):
+        """This method compiles every `Query` object."""
         column_transformers = COLUMN_TRANSFORMERS.copy()
 
         for submission_method, transformer_name in SUBMISSION_METHODS.items():
@@ -49,6 +81,7 @@ class QueryManager(object):
             query.compile(column_transformers, EXTRA_TRANSFORMERS.copy())
 
     def execute(self):
+        """This method is what you call every check run."""
         logger = self.check.log
         global_tags = self.tags
 
@@ -122,6 +155,10 @@ class QueryManager(object):
                             sources[name] = result
 
     def execute_query(self, query):
+        """
+        Called by `execute`, this triggers query execution to check for errors immediately in a way that is compatible
+        with any library. If there are no errors, this is guaranteed to return an iterator over the result set.
+        """
         rows = self.executor(query)
         if rows is None:
             return iter([])

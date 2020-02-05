@@ -1,0 +1,22 @@
+.md-typeset .tabbed-set {
+  border: 1px solid #eee;
+}
+.md-typeset .tabbed-content {
+  padding: 0.5em 1em;
+}
+
+div.autodoc-docstring {
+  padding-left: 20px;
+  margin-bottom: 30px;
+  border-left: 5px solid rgba(230, 230, 230);
+}
+
+div.autodoc-members {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+.md-typeset h5 {
+  color: var(--md-default-fg-color);
+  text-transform: none;
+}
