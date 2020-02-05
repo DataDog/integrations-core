@@ -238,8 +238,12 @@ class AgentCheck(object):
 
     def _get_metric_limit(self, instance=None):
         if instance is None:
-            # Agent 6+ will now always pass an instance when calling into a check, but we still need to
+            # NOTE: Agent 6+ will now always pass an instance when calling into a check, but we still need to
             # account for this case due to some tests not always passing an instance on init.
+            self.log.debug(
+                "No instance provided (this is deprecated!). Reverting to the default metric limit: %s",
+                self.DEFAULT_METRIC_LIMIT,
+            )
             return self.DEFAULT_METRIC_LIMIT
 
         max_returned_metrics = instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
@@ -248,7 +252,7 @@ class AgentCheck(object):
             limit = int(max_returned_metrics)
         except (ValueError, TypeError):
             self.warning(
-                "Configured 'max_returned_metrics' cannot be interpreted as an integer: %r. "
+                "Configured 'max_returned_metrics' cannot be interpreted as an integer: %s. "
                 "Reverting to the default limit: %s",
                 max_returned_metrics,
                 self.DEFAULT_METRIC_LIMIT,
@@ -258,7 +262,7 @@ class AgentCheck(object):
         # Do not allow to disable limiting if the class has set a non-zero default value.
         if limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
             self.warning(
-                'Setting max_returned_metrics to zero is not allowed, reverting to the default of %s metrics',
+                "Setting 'max_returned_metrics' to zero is not allowed. Reverting to the default metric limit: %s",
                 self.DEFAULT_METRIC_LIMIT,
             )
             return self.DEFAULT_METRIC_LIMIT
