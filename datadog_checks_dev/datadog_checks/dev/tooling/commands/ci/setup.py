@@ -7,18 +7,14 @@ import subprocess
 
 import click
 
-from datadog_checks.dev.tooling.constants import get_root
-from datadog_checks.dev.tooling.testing import get_tox_envs
-
-from ..console import CONTEXT_SETTINGS
-
-PLATFORM = platform.system().lower()
-SCRIPTS_PATH = os.path.join(get_root(), '.azure-pipelines', 'scripts')
+from ...constants import get_root
+from ...testing import get_tox_envs
+from ..console import CONTEXT_SETTINGS, echo_debug, echo_info
 
 
 def display_action(script_file):
     display_header = f'Running: {script_file}'
-    print(f'\n{display_header}\n{"-" * len(display_header)}\n')
+    echo_info(f'\n{display_header}\n{"-" * len(display_header)}\n')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Run CI setup scripts')
@@ -28,32 +24,34 @@ def setup(checks, changed):
     """
     Run CI setup scripts
     """
-    print("Run CI setup scripts")
+    cur_platform = platform.system().lower()
+    scripts_path = os.path.join(get_root(), '.azure-pipelines', 'scripts')
+    echo_info("Run CI setup scripts")
     if checks:
         if checks[0] == 'skip':
-            print('Skipping set up')
+            echo_info('Skipping set up')
         else:
-            print(f'Checks chosen: {repr(checks).strip("[]")}')
+            echo_info(f'Checks chosen: {", ".join(checks)}')
     else:
-        print(f'Checks chosen: changed')
+        echo_info(f'Checks chosen: changed')
 
     check_envs = get_tox_envs(checks, every=True, sort=True, changed_only=changed)
 
     for check, _ in check_envs:
-        scripts_path = os.path.join(SCRIPTS_PATH, check)
+        scripts_path = os.path.join(scripts_path, check)
 
         if not os.path.isdir(scripts_path):
-            print(f"Skip! No scripts for check `{check}` at: `{scripts_path}`")
+            echo_debug(f"Skip! No scripts for check `{check}` at: `{scripts_path}`")
             continue
 
         contents = os.listdir(scripts_path)
 
-        if PLATFORM not in contents:
-            print(f"Skip! No scripts for check `{check}` and platform `{PLATFORM}`")
+        if cur_platform not in contents:
+            echo_debug(f"Skip! No scripts for check `{check}` and platform `{cur_platform}`")
             continue
 
-        print(f'Setting up: {check}')
-        scripts_path = os.path.join(scripts_path, PLATFORM)
+        echo_info(f'Setting up: {check}')
+        scripts_path = os.path.join(scripts_path, cur_platform)
         scripts = sorted(os.listdir(scripts_path))
 
         for script in scripts:
