@@ -1309,9 +1309,10 @@ def test_hp_ilo4(aggregator):
 
     cpqhlth_counts = ['cpqHeSysUtilLifeTime', 'cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
 
-    cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin']
+    cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin', 'cpqHePowerMeterCurrReading']
 
     temperature_sensors = [1, 13, 28]
+    batteries = [1, 3, 4, 5]
 
     for metric in status_gauges:
         aggregator.assert_metric(
@@ -1332,5 +1333,10 @@ def test_hp_ilo4(aggregator):
         tags = ['temperature_index:{}'.format(index)] + common.CHECK_TAGS
         aggregator.assert_metric('snmp.cpqHeTemperatureCelsius', metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cpqHeTemperatureCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for index in batteries:
+        tags = ['battery_index:{}'.format(index)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.cpqHeSysBatteryCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.cpqHeSysBatteryStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()

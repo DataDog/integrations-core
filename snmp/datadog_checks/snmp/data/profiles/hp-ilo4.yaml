@@ -152,6 +152,34 @@ metrics:
           OID: 1.3.6.1.4.1.232.6.2.6.8.1.1.3
           name: cpqHeTemperatureIndex
 
+  # Power supplies.
+
+  - # Current power meter reading in Watts.
+    MIB: CPQHLTH-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.6.2.15.3
+      name: cpqHePowerMeterCurrReading
+    forced_type: gauge # Sent as INTEGER instead of Gauge
+
+  - # A table of battery entries.
+    MIB: CPQHLTH-MIB
+    table:
+      OID: 1.3.6.1.4.1.232.6.2.17.2
+      name: cpqHeSysBatteryTable
+    symbols:
+      - # NOTE: other(1), ok(2), degraded(3), failed(4)
+        OID: 1.3.6.1.4.1.232.6.2.17.2.1.1.4
+        name: cpqHeSysBatteryCondition
+      - # NOTE: 15 different statuses are possible -- not listed here, see MIB.
+        OID: 1.3.6.1.4.1.232.6.2.17.2.1.1.5
+        name: cpqHeSysBatteryStatus
+    forced_type: gauge # Sent as INTEGERs instead of Gauges
+    metric_tags:
+      - tag: battery_index
+        column:
+          OID: 1.3.6.1.4.1.232.6.2.17.2.1.1.2
+          name: cpqHeSysBatteryIndex
+
   # TODO:
   # Network interfaces.
   # Network traffic.
