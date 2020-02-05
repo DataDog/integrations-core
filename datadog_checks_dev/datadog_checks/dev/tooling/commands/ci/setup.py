@@ -19,7 +19,7 @@ def display_action(script_file):
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Run CI setup scripts')
 @click.argument('checks', nargs=-1)
-@click.option('--changed', is_flag=True, help='Only target changed checks')  # Added for compatibility with `ddev test`
+@click.option('--changed', is_flag=True, help='Only target changed checks')
 def setup(checks, changed):
     """
     Run CI setup scripts
