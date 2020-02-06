@@ -4,7 +4,7 @@
 
 ## Overview
 
-Get metrics from Btrfs service in real time to:
+Get metrics from Btrfs in real time to:
 
 - Visualize and monitor Btrfs states.
 - Be notified about Btrfs failovers and events.
