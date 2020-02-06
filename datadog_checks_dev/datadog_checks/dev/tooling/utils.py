@@ -246,6 +246,6 @@ def has_e2e(check):
         for fn in files:
             if fn.startswith('test_') and fn.endswith('.py'):
                 with open(os.path.join(path, fn)) as test_file:
-                    if ' pytest.mark.e2e' in test_file.read():
+                    if 'pytest.mark.e2e' in test_file.read():
                         return True
     return False
