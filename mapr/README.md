@@ -14,16 +14,16 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 
 1. Create a `dd-agent` user with a password on every node in the cluster with the same `UID`/`GID` so it is recognized by MapR. See [Managing users and groups][10] for additional details.
 2. Install the Agent on every node you want to monitor.
-3. Install the library *mapr-streams-library* with the following command: `/opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python`. If you use Python 3 with Agent 6, replace `pip` by `pip3`.
-4. Add `/opt/mapr/lib/` to your `/etc/ld.so.conf` (or a file in `/etc/ld.so.conf.d/`). This is required to help the *mapr-streams-library* used by the Agent to find the MapR shared libraries.
+3. Install the library _mapr-streams-library_ with the following command: `/opt/datadog-agent/embedded/bin/pip install --global-option=build_ext --global-option="--library-dirs=/opt/mapr/lib" --global-option="--include-dirs=/opt/mapr/include/" mapr-streams-python`. If you use Python 3 with Agent 6, replace `pip` by `pip3`.
+4. Add `/opt/mapr/lib/` to your `/etc/ld.so.conf` (or a file in `/etc/ld.so.conf.d/`). This is required to help the _mapr-streams-library_ used by the Agent to find the MapR shared libraries.
 5. Generate a [long-lived ticket][8] for the `dd-agent` user.
 6. Make sure the ticket is readable by the `dd-agent` user.
 7. Configure the integration (see below).
 
 **Note**: If you don't have "security" enabled in the cluster, you can continue without a ticket.
 
-
 ### Configuration
+
 #### Metric collection
 
 1. Edit the `mapr.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your MapR performance data. See the [sample mapr.d/conf.yaml][3] for all available configuration options.
@@ -39,7 +39,7 @@ The following command downloads and installs the plugin into the right directory
 
 Then update the `/opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/fluentd.conf` with the following section.
 
-```
+```conf
 <match *>
   @type copy
   <store> # This section is here by default and sends the logs to ElasticCache for Kibana.
@@ -60,7 +60,6 @@ Then update the `/opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/fluentd.conf` w
 
 Refer to [fluent_datadog_plugin][11] documentation for more details about the options you can use.
 
-
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `mapr` under the Checks section.
@@ -74,7 +73,7 @@ See [metadata.csv][13] for a list of default metrics provided by this integratio
 ### Service Checks
 
 - `mapr.can_connect`:
-Returns `CRITICAL` if the Agent fails to connect and subscribe to the stream topic, `OK` otherwise.
+  Returns `CRITICAL` if the Agent fails to connect and subscribe to the stream topic, `OK` otherwise.
 
 ### Events
 
