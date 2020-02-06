@@ -32,7 +32,7 @@ def catalog(checks, out_file):
         fd = tmp.file
         echo_info(f"Catalog is being saved to `{tmp.name}`")
     else:
-        fd = open(out_file)
+        fd = open(out_file, mode='w')
         echo_info(f"Catalog is being saved to `{out_file}`")
 
     checking_all = 'all' in checks
