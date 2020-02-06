@@ -5,6 +5,7 @@
 This check monitors [Openstack][1] from the controller node.
 
 ## Setup
+
 ### Installation
 
 The Openstack_controller check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
@@ -21,30 +22,29 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 
 1. Edit the `openstack_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your openstack_controller performance data. See the [sample openstack_controller.d/conf.yaml][2] for all available configuration options:
 
-    ```yaml
-        init_config:
+   ```yaml
+   init_config:
 
-        instances:
+   instances:
+     ## @param name - string - required
+     ## Unique identifier for this instance.
+     #
+     - name: "<INSTANCE_NAME>"
 
-            ## @param name - string - required
-            ## Unique identifier for this instance.
-            #
-          - name: "<INSTANCE_NAME>"
-
-            ## @param user - object - required
-            ## Password authentication is the only auth method supported
-            ## User expects username, password, and user domain id
-            ## `user` should resolve to a structure like
-            ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
-            ## The check uses the Unscoped token method to collect information about
-            ## all available projects to the user.
-            #
-            user:
-                password: "<PASSWORD>"
-                name: "<USER_NAME>"
-                domain:
-                    id: "<DOMAIN_ID>"
-    ```
+       ## @param user - object - required
+       ## Password authentication is the only auth method supported
+       ## User expects username, password, and user domain id
+       ## `user` should resolve to a structure like
+       ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
+       ## The check uses the Unscoped token method to collect information about
+       ## all available projects to the user.
+       #
+       user:
+         password: "<PASSWORD>"
+         name: "<USER_NAME>"
+         domain:
+           id: "<DOMAIN_ID>"
+   ```
 
 2. [Restart the Agent][3]
 
@@ -59,6 +59,7 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
+
 **openstack.neutron.api.up**
 
 Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
@@ -78,7 +79,6 @@ Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL`
 **openstack.neutron.network.up**
 
 Returns `CRITICAL` if the Network is down. Returns `OK` otherwise.
-
 
 ### Events
 
