@@ -2,9 +2,9 @@
 
 ## Overview
 
-Get metrics from ActiveMQ XML service in real time to:
+Get metrics from ActiveMQ XML in real time to:
 
-- Visualize and monitor ActiveMQ XML states
+- Visualize and monitor ActiveMQ XML states.
 - Be notified about ActiveMQ XML failovers and events.
 
 ## Setup
