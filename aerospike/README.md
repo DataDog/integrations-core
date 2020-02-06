@@ -4,7 +4,7 @@
 
 Get metrics from Aerospike Database in real time to:
 
-- Visualize and monitor Aerospike states
+- Visualize and monitor Aerospike states.
 - Be notified about Aerospike failovers and events.
 
 ## Setup
