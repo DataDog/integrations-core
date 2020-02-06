@@ -114,7 +114,9 @@ class WinWMICheck(AgentCheck):
         target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
 
         # Create a specific sampler
-        with WMISampler(self.log, target_class, [target_property], filters=filters, **sampler.connection) as tag_query_sampler:
+        with WMISampler(
+            self.log, target_class, [target_property], filters=filters, **sampler.connection
+        ) as tag_query_sampler:
             tag_query_sampler.sample()
 
             # Extract tag

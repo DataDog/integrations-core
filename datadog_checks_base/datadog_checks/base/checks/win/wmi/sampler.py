@@ -183,7 +183,9 @@ class WMISampler(object):
                     self.provider,
                     self.username,
                 )
-                connection = locator.ConnectServer(self.host, self.namespace, self.username, self.password, *additional_args)
+                connection = locator.ConnectServer(
+                    self.host, self.namespace, self.username, self.password, *additional_args
+                )
 
                 if self.is_raw_perf_class and not self._previous_sample:
                     self._current_sample = self._query(connection)
