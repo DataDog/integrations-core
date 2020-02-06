@@ -6,8 +6,8 @@
 
 Get metrics from Fluentd to:
 
-* Visualize Fluentd performance.
-* Correlate the performance of Fluentd with the rest of your applications.
+- Visualize Fluentd performance.
+- Correlate the performance of Fluentd with the rest of your applications.
 
 ## Setup
 
@@ -19,7 +19,7 @@ The Fluentd check is included in the [Datadog Agent][3] package, so you don't ne
 
 In your fluentd configuration file, add a `monitor_agent` source:
 
-```
+```text
 <source>
   @type monitor_agent
   bind 0.0.0.0
@@ -37,16 +37,15 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `fluentd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your [Fluentd metrics](#metrics). See the [sample fluentd.d/conf.yaml][5] for all available configuration options.
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-
-          ## @param monitor_agent_url - string - required
-          ## Monitor Agent URL to connect to.
-          #
-        - monitor_agent_url: http://example.com:24220/api/plugins.json
-    ```
+   instances:
+     ## @param monitor_agent_url - string - required
+     ## Monitor Agent URL to connect to.
+     #
+     - monitor_agent_url: http://example.com:24220/api/plugins.json
+   ```
 
 2. [Restart the Agent][6].
 
@@ -65,7 +64,7 @@ Add the `ddsource` attribute with [the name of the log integration][9] in your l
 
 Setup Example:
 
-```
+```conf
   # Match events tagged with "datadog.**" and
   # send them to Datadog
 
@@ -89,17 +88,17 @@ Setup Example:
 
 Additional parameters can be used to change the endpoint used in order to go through a proxy:
 
-* `host`: Proxy endpoint when logs are not directly forwarded to Datadog (default value is `intake.logs.datadoghq.com`)
-* `port`: Proxy port when logs are not directly forwarded to Datadog (default value is `10514`)
-* `ssl_port`: Port used when logs are forwarded in a secure TCP/SSL connection to Datadog (default is `10516`)
-* `use_ssl`: If `true`, the Agent initializes a secure TCP/SSL connection to Datadog. (default value is `true`)
+- `host`: Proxy endpoint when logs are not directly forwarded to Datadog (default value is `intake.logs.datadoghq.com`)
+- `port`: Proxy port when logs are not directly forwarded to Datadog (default value is `10514`)
+- `ssl_port`: Port used when logs are forwarded in a secure TCP/SSL connection to Datadog (default is `10516`)
+- `use_ssl`: If `true`, the Agent initializes a secure TCP/SSL connection to Datadog. (default value is `true`)
 
 This also can be used to send logs to **Datadog EU** by setting:
 
-```
+```conf
 <match datadog.**>
 
-  ...
+  #...
   host 'tcp-intake.logs.datadoghq.eu'
   ssl_port '443'
 
@@ -112,17 +111,17 @@ Datadog tags are critical to be able to jump from one part of the product to ano
 
 If your logs contain any of the following attributes, these attributes are automatically added as Datadog tags on your logs:
 
-* `kubernetes.container_image`
-* `kubernetes.container_name`
-* `kubernetes.namespace_name`
-* `kubernetes.pod_name`
-* `docker.container_id`
+- `kubernetes.container_image`
+- `kubernetes.container_name`
+- `kubernetes.namespace_name`
+- `kubernetes.pod_name`
+- `docker.container_id`
 
 While the Datadog Agent collects Docker and Kubernetes metadata automatically, FluentD requires a plugin for this. We recommend using [fluent-plugin-kubernetes_metadata_filter][13] to collect this metadata.
 
 Configuration example:
 
-```
+```conf
 # Collect metadata for logs tagged with "kubernetes.**"
  <filter kubernetes.*>
    type kubernetes_metadata
@@ -136,19 +135,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 ##### Metric collection
 
 | Parameter            | Value                                                             |
-|----------------------|-------------------------------------------------------------------|
+| -------------------- | ----------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `fluentd`                                                         |
 | `<INIT_CONFIG>`      | blank or `{}`                                                     |
 | `<INSTANCE_CONFIG>`  | `{"monitor_agent_url": "http://%%host%%:24220/api/plugins.json"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][18].
 
 | Parameter      | Value                                                |
-|----------------|------------------------------------------------------|
+| -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "fluentd", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
@@ -156,11 +155,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 [Run the Agent's status subcommand][14] and look for `fluentd` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][15] for a list of metrics provided by this integration.
 
 ### Events
+
 The FluentD check does not include any events.
 
 ### Service Checks
@@ -174,7 +175,7 @@ Need help? Contact [Datadog support][16].
 
 ## Further Reading
 
-* [How to monitor Fluentd with Datadog][17]
+- [How to monitor Fluentd with Datadog][17]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/fluentd/images/snapshot-fluentd.png
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
