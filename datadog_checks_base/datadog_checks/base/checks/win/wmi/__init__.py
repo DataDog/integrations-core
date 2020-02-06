@@ -114,14 +114,13 @@ class WinWMICheck(AgentCheck):
         target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
 
         # Create a specific sampler
-        tag_query_sampler = WMISampler(self.log, target_class, [target_property], filters=filters, **sampler.connection)
+        with WMISampler(self.log, target_class, [target_property], filters=filters, **sampler.connection) as tag_query_sampler:
+            tag_query_sampler.sample()
 
-        tag_query_sampler.sample()
+            # Extract tag
+            self._raise_on_invalid_tag_query_result(tag_query_sampler, wmi_obj, tag_query)
 
-        # Extract tag
-        self._raise_on_invalid_tag_query_result(tag_query_sampler, wmi_obj, tag_query)
-
-        link_value = str(tag_query_sampler[0][target_property]).lower()
+            link_value = str(tag_query_sampler[0][target_property]).lower()
 
         tag = "{tag_name}:{tag_value}".format(tag_name=target_property.lower(), tag_value="_".join(link_value.split()))
 
