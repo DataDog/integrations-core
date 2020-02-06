@@ -4,7 +4,7 @@
 
 ## Overview
 
-Get metrics from Cassandra service in real time to:
+Get metrics from Cassandra in real time to:
 
 - Visualize and monitor Cassandra states.
 - Be notified about Cassandra failovers and events.
