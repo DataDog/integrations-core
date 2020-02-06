@@ -1,14 +1,17 @@
 # Agent Check: Vault
+
 ## Overview
 
 This check monitors [Vault][1] cluster health and leader changes.
 
 ## Setup
+
 ### Installation
 
 The Vault check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -18,57 +21,64 @@ Follow the instructions below to configure this check for an Agent running on a 
 2. [Restart the Agent][6].
 
 #### Containerized
+
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
 | Parameter            | Value                                    |
-|----------------------|------------------------------------------|
+| -------------------- | ---------------------------------------- |
 | `<INTEGRATION_NAME>` | `vault`                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                            |
 | `<INSTANCE_CONFIG>`  | `{"api_url": "http://%%host%%:8200/v1"}` |
 
 #### Log Collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-```
-logs_enabled: true
-```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Configure Vault to enable audit and server logs.
-    * Audit logs must be enabled by a privileged user with the appropriate policies. See [Enabling audit devices][11] for more information.
-        ```
-        $ vault audit enable file file_path=/vault/vault-audit.log
-        ```
-    *  Make sure that [server logs][12] are written to file. You can configure static server logs in the [Vault systemd startup script][13].
-        The following script is outputting the logs to `/var/log/vault.log`.
-        ```
-        ...
-        [Service]
-        ...
-        ExecStart=/bin/sh -c '/home/vagrant/bin/vault server -config=/home/vagrant/vault_nano/config/vault -log-level="trace" > /var/log/vault.log
-        ...
-        ```
- 
+
+   - Audit logs must be enabled by a privileged user with the appropriate policies. See [Enabling audit devices][11] for more information.
+
+     ```shell
+     vault audit enable file file_path=/vault/vault-audit.log
+     ```
+
+   - Make sure that [server logs][12] are written to file. You can configure static server logs in the [Vault systemd startup script][13].
+     The following script is outputting the logs to `/var/log/vault.log`.
+
+     ```text
+     ...
+     [Service]
+     ...
+     ExecStart=/bin/sh -c '/home/vagrant/bin/vault server -config=/home/vagrant/vault_nano/config/vault -log-level="trace" > /var/log/vault.log
+     ...
+     ```
+
 3. Add this configuration block to your `vault.d/conf.yaml` file to start collecting your Vault logs:
-    ````yaml
-    logs:
-    - type: file
-      path: /vault/vault-audit.log
-      source: vault
-      service: <SERVICE_NAME>
-    - type: file
-      path: /var/log/vault.log
-      source: vault
-      service: <SERVICE_NAME>
-    ```
+
+   ```yaml
+   logs:
+     - type: file
+       path: /vault/vault-audit.log
+       source: vault
+       service: "<SERVICE_NAME>"
+     - type: file
+       path: /var/log/vault.log
+       source: vault
+       service: "<SERVICE_NAME>"
+   ```
 
 ### Validation
 
 [Run the Agent's status subcommand][7] and look for `vault` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][8] for a list of metrics provided by this integration.
@@ -97,9 +107,10 @@ Returns CRITICAL if the check cannot access the metrics endpoint. Otherwise, ret
 Need help? Contact [Datadog support][9].
 
 ## Further Reading
+
 Additional helpful documentation, links, and articles:
 
-* [Monitor HashiCorp Vault with Datadog][10]
+- [Monitor HashiCorp Vault with Datadog][10]
 
 [1]: https://www.vaultproject.io
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
