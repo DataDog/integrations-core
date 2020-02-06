@@ -120,7 +120,6 @@ snmp.sysMultiHostCpuIrq,gauge,,,,[F5 BIG-IP] The time spent by the specified pro
 snmp.sysMultiHostCpuNice,gauge,,,,[F5 BIG-IP] The time spent by the specified processor running niced processes for the associated host.,0,snmp,
 snmp.sysMultiHostCpuSoftirq,gauge,,,,[F5 BIG-IP] The time spent by the specified processor servicing soft interrupts for the associated host.,0,snmp,
 snmp.sysMultiHostCpuSystem,gauge,,,,[F5 BIG-IP] The time spent by the specified processor servicing system calls for the associated host.,0,snmp,
-snmp.sysMultiHostCpuTable,gauge,,,,[F5 BIG-IP] A table containing entries of system CPU usage information for a system.,0,snmp,
 snmp.sysMultiHostCpuUser,gauge,,,,[F5 BIG-IP] The time spent by the specified processor in user context for the associated host.,0,snmp,
 snmp.sysStatMemoryTotal,gauge,,byte,,[F5 BIG-IP] The total memory available in bytes for TMM (Traffic Management Module).,0,snmp,
 snmp.sysStatMemoryUsed,gauge,,byte,,[F5 BIG-IP] The memory in use in bytes for TMM (Traffic Management Module).,0,snmp,
