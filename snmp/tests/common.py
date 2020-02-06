@@ -59,7 +59,7 @@ CAST_METRICS = [
 
 CONSTRAINED_OID = [{"MIB": "RFC1213-MIB", "symbol": "tcpRtoAlgorithm"}]
 
-DUMMY_MIB_OID = [{"MIB": "DUMMY-MIB", "symbol": "scalar"}]
+DUMMY_MIB_OID = [{"MIB": "DUMMY-MIB", "symbol": "ddscalar"}]
 
 FORCED_METRICS = [
     {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32", 'forced_type': 'counter'},  # Gauge32

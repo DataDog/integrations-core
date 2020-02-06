@@ -4,8 +4,6 @@
 
 from collections import defaultdict
 
-from pysnmp import hlapi
-
 
 class OIDTreeNode(object):
 
@@ -68,26 +66,30 @@ class OIDResolver(object):
         tries to resolve indexes to name if that applies, using
         `self._index_resolver`.
         """
-        oid_tuple = oid.asTuple()
-        prefix, resolved = self._resolver.match(oid_tuple)
-        if resolved is not None:
-            index_resolver = self._index_resolver.get(resolved)
-            indexes = oid_tuple[len(prefix) :]
-            if index_resolver:
-                new_indexes = []
-                for i, index in enumerate(indexes, 1):
-                    if i in index_resolver:
-                        new_indexes.append(index_resolver[i][index])
-                    else:
-                        new_indexes.append(index)
-                indexes = tuple(new_indexes)
-            return resolved, indexes
-        result_oid = oid
-        if not self._enforce_constraints:
-            # if enforce_constraints is false, then MIB resolution has not been done yet
-            # so we need to do it manually. We have to specify the mibs that we will need
-            # to resolve the name.
-            oid_to_resolve = hlapi.ObjectIdentity(oid_tuple)
-            result_oid = oid_to_resolve.resolveWithMib(self._mib_view_controller)
-        _, metric, indexes = result_oid.getMibSymbol()
-        return metric, tuple(index.prettyPrint() for index in indexes)
+        from .config import to_oid_tuple
+        oid, result = oid
+        try:
+            oid_tuple = to_oid_tuple(oid)
+        except ValueError:
+            pass
+        else:
+            prefix, resolved = self._resolver.match(oid_tuple)
+            if resolved is not None:
+                index_resolver = self._index_resolver.get(resolved)
+                indexes = oid_tuple[len(prefix) :]
+                if index_resolver:
+                    new_indexes = []
+                    for i, index in enumerate(indexes, 1):
+                        if i in index_resolver:
+                            new_indexes.append(index_resolver[i][index])
+                        else:
+                            new_indexes.append(index)
+                    indexes = tuple(new_indexes)
+                return resolved, indexes
+#        if not self._enforce_constraints:
+#            # if enforce_constraints is false, then MIB resolution has not been done yet
+#            # so we need to do it manually. We have to specify the mibs that we will need
+#            # to resolve the name.
+#            oid_to_resolve = hlapi.ObjectIdentity(oid_tuple)
+#            result_oid = oid_to_resolve.resolveWithMib(self._mib_view_controller)
+        return result.oid, (result.oid_index,)

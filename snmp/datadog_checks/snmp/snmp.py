@@ -8,12 +8,6 @@ import threading
 import time
 from collections import defaultdict
 
-import pysnmp.proto.rfc1902 as snmp_type
-from pyasn1.codec.ber import decoder
-from pysnmp import hlapi
-from pysnmp.error import PySnmpError
-from pysnmp.smi import builder
-from pysnmp.smi.exval import endOfMibView, noSuchInstance, noSuchObject
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -23,29 +17,16 @@ from .compat import read_persistent_cache, total_time_to_temporal_percent, write
 from .config import InstanceConfig, ParsedTableMetric
 from .utils import get_profile_definition
 
-# Additional types that are not part of the SNMP protocol. cf RFC 2856
-CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
-    'HCNUM-TC', 'CounterBasedGauge64', 'ZeroBasedCounter64'
-)
-
-# Metric type that we support
-SNMP_COUNTERS = frozenset([snmp_type.Counter32.__name__, snmp_type.Counter64.__name__, ZeroBasedCounter64.__name__])
-
-SNMP_GAUGES = frozenset(
-    [
-        snmp_type.Gauge32.__name__,
-        snmp_type.Unsigned32.__name__,
-        CounterBasedGauge64.__name__,
-        snmp_type.Integer.__name__,
-        snmp_type.Integer32.__name__,
-    ]
-)
 
 DEFAULT_OID_BATCH_SIZE = 10
 
+SNMP_COUNTERS = frozenset(["COUNTER"])
+
+SNMP_GAUGES = frozenset(["GAUGE"])
+
 
 def reply_invalid(oid):
-    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
+    return oid.snmp_type in ('NOSUCHINSTANCE', 'NOSUCHOBJECT')
 
 
 class SnmpCheck(AgentCheck):
@@ -180,28 +161,29 @@ class SnmpCheck(AgentCheck):
         for oid in bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %r', oid)
-                binds_iterator = config.call_cmd(
-                    hlapi.bulkCmd,
-                    self._NON_REPEATERS,
-                    self._MAX_REPETITIONS,
+                binds = config.call_cmd(
+                    "walk",
                     oid,
+                    #self._NON_REPEATERS,
+                    #self._MAX_REPETITIONS,
                     lookupMib=enforce_constraints,
                     ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                     lexicographicMode=False,
                 )
-                binds, current_error = self._consume_binds_iterator(binds_iterator, config)
-                all_binds.extend(binds)
-                error = current_error if not error else error
+                #binds, current_error = self._consume_binds_iterator(binds_iterator, config)
+                all_binds.extend((oid, r) for r in binds)
+                #error = current_error if not error else error
 
-            except PySnmpError as e:
+            except Exception as e:
+                raise
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
                 self.warning(message)
 
-        for result_oid, value in all_binds:
-            metric, indexes = config.resolve_oid(result_oid)
-            results[metric][indexes] = value
+        for oid, result in all_binds:
+            metric, indexes = config.resolve_oid((oid, result))
+            results[metric][indexes] = result
         self.log.debug('Raw results: %s', results)
         # Freeze the result
         results.default_factory = None
@@ -221,38 +203,35 @@ class SnmpCheck(AgentCheck):
             try:
                 oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
                 self.log.debug('Running SNMP command get on OIDS %s', oids_batch)
-                error_indication, error_status, _, var_binds = next(
-                    config.call_cmd(hlapi.getCmd, *oids_batch, lookupMib=enforce_constraints)
-                )
-                self.log.debug('Returned vars: %s', var_binds)
+                data = config.call_cmd("get", *oids_batch, lookupMib=enforce_constraints)
+                self.log.debug('Returned vars: %s', data)
 
-                self.raise_on_error_indication(error_indication, config.ip_address)
+                #self.raise_on_error_indication(error_indication, config.ip_address)
 
                 missing_results = []
 
-                for var in var_binds:
-                    result_oid, value = var
+                for value, oid in zip(data, oids_batch):
                     if reply_invalid(value):
-                        oid_tuple = result_oid.asTuple()
-                        missing_results.append(hlapi.ObjectType(hlapi.ObjectIdentity(oid_tuple)))
+                        missing_results.append((oid, (value.oid, value.oid_index)))
                     else:
-                        all_binds.append(var)
+                        all_binds.append((oid, value))
 
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
                     # Don't walk through the entire MIB, stop at end of table
                     self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
-                    binds_iterator = config.call_cmd(
-                        hlapi.nextCmd,
-                        *missing_results,
+                    binds = config.call_cmd(
+                        "get_next",
+                        *[r[1] for r in missing_results],
                         lookupMib=enforce_constraints,
                         ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                         lexicographicMode=False
                     )
-                    binds, error = self._consume_binds_iterator(binds_iterator, config)
-                    all_binds.extend(binds)
+                    #binds, error = self._consume_binds_iterator(binds_iterator, config)
+                    all_binds.extend(zip([r[0] for r in missing_results], binds))
 
-            except PySnmpError as e:
+            except Exception as e:
+                raise
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
@@ -367,6 +346,7 @@ class SnmpCheck(AgentCheck):
             error = str(e)
             self.warning(error)
         except Exception as e:
+            raise
             if not error:
                 error = 'Failed to collect metrics for {} - {}'.format(instance['name'], e)
             self.warning(error)
@@ -440,7 +420,7 @@ class SnmpCheck(AgentCheck):
             if reply_invalid(tag_value):
                 self.log.warning("Can't deduct tag from column for tag %s", tag_group)
                 continue
-            tag_value = tag_value.prettyPrint()
+            tag_value = tag_value.value
             tags.append('{}:{}'.format(tag_group, tag_value))
         return tags
 
@@ -459,40 +439,37 @@ class SnmpCheck(AgentCheck):
         if forced_type:
             forced_type = forced_type.lower()
             if forced_type == 'gauge':
-                value = int(snmp_value)
+                value = int(snmp_value.value)
                 self.gauge(metric_name, value, tags)
             elif forced_type == 'percent':
-                value = total_time_to_temporal_percent(int(snmp_value), scale=1)
+                value = total_time_to_temporal_percent(int(snmp_value.value), scale=1)
                 self.rate(metric_name, value, tags)
             elif forced_type == 'counter':
-                value = int(snmp_value)
+                value = int(snmp_value.value)
                 self.rate(metric_name, value, tags)
             elif forced_type == 'monotonic_count':
-                value = int(snmp_value)
+                value = int(snmp_value.value)
                 self.monotonic_count(metric_name, value, tags)
             else:
                 self.warning('Invalid forced-type specified: %s in %s', forced_type, name)
                 raise ConfigurationError('Invalid forced-type in config file: {}'.format(name))
             return
 
-        # Ugly hack but couldn't find a cleaner way
-        # Proper way would be to use the ASN1 method isSameTypeWith but it
-        # wrongfully returns True in the case of CounterBasedGauge64
-        # and Counter64 for example
-        snmp_class = snmp_value.__class__.__name__
-        if snmp_class in SNMP_COUNTERS:
-            value = int(snmp_value)
+        snmp_type = snmp_value.snmp_type
+        if snmp_type in SNMP_COUNTERS:
+            value = int(snmp_value.value)
             self.rate(metric_name, value, tags)
             return
-        if snmp_class in SNMP_GAUGES:
-            value = int(snmp_value)
+        if snmp_type in SNMP_GAUGES:
+            value = int(snmp_value.value)
             self.gauge(metric_name, value, tags)
             return
 
-        if snmp_class == 'Opaque':
+        if snmp_type == 'OPAQUE':
             # Try support for floats
+            from pyasn1.codec.ber import decoder
             try:
-                value = float(decoder.decode(bytes(snmp_value))[0])
+                value = float(decoder.decode(bytes(snmp_value.value))[0])
             except Exception:
                 pass
             else:
@@ -501,11 +478,11 @@ class SnmpCheck(AgentCheck):
 
         # Falls back to try to cast the value.
         try:
-            value = float(snmp_value)
+            value = float(snmp_value.value)
         except ValueError:
             pass
         else:
             self.gauge(metric_name, value, tags)
             return
 
-        self.log.warning('Unsupported metric type %s for %s', snmp_class, metric_name)
+        self.log.warning('Unsupported metric type %s for %s', snmp_type, metric_name)

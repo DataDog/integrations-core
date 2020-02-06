@@ -6,7 +6,7 @@ DUMMY-MIB DEFINITIONS ::= BEGIN
 
     dummy OBJECT IDENTIFIER ::= { enterprises 123456789 }
 
-    scalar OBJECT-TYPE
+    ddscalar OBJECT-TYPE
         SYNTAX INTEGER (1..65535)
         ACCESS read-only
         STATUS mandatory
