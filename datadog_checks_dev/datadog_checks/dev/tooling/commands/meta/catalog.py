@@ -1,28 +1,38 @@
-import click
-from ..console import CONTEXT_SETTINGS, abort, echo_info
-from ...utils import get_data_directory, get_config_file, get_assets_directory, get_check_file, \
-    has_e2e, get_valid_integrations
-import tempfile
-import os
 import csv
+import os
+import tempfile
 
-csv_columns = ['name', 'has_dashboard', 'has_logs', 'is_jmx', 'is_prometheus', 'is_http', 'has_e2e', 'tile_only']
-dogweb_dashboards = ('vsphere', 'sqlserver', 'tomcat', 'pusher', 'sigsci', 'marathon', 'ibm_was', 'nginx', 'immunio')
+import click
+
+from ...utils import (
+    get_assets_directory,
+    get_check_file,
+    get_config_file,
+    get_data_directory,
+    get_valid_integrations,
+    has_e2e,
+)
+from ..console import CONTEXT_SETTINGS, abort, echo_info
+
+CSV_COLUMNS = ['name', 'has_dashboard', 'has_logs', 'is_jmx', 'is_prometheus', 'is_http', 'has_e2e', 'tile_only']
+DOGWEB_DASHBOARDS = ('vsphere', 'sqlserver', 'tomcat', 'pusher', 'sigsci', 'marathon', 'ibm_was', 'nginx', 'immunio')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a catalog with information about integrations')
 @click.argument('checks', nargs=-1, required=True)
-@click.option('-f', '--file', 'out_file', required=False,
-              help='Output to file, you can pass "tmp" to generate a temporary file')
+@click.option(
+    '-f', '--file', 'out_file', required=False, help='Output to file, you can pass "tmp" to generate a temporary file'
+)
 def catalog(checks, out_file):
     if not out_file:
-        fp = None
+        fd = None
     elif out_file == 'tmp':
+        # Default w+b mode does not work with CSV writer in python 3
         tmp = tempfile.NamedTemporaryFile(prefix='integration_catalog', suffix='.csv', delete=False, mode='w')
-        fp = tmp.file
+        fd = tmp.file
         echo_info(f"Catalog is being saved to `{tmp.name}`")
     else:
-        fp = open(out_file)
+        fd = open(out_file)
         echo_info(f"Catalog is being saved to `{out_file}`")
 
     checking_all = 'all' in checks
@@ -35,7 +45,7 @@ def catalog(checks, out_file):
     else:
         checks = valid_checks
 
-    catalog = []
+    integration_catalog = []
     for check in checks:
         has_logs = False
         is_prometheus = False
@@ -61,29 +71,27 @@ def catalog(checks, out_file):
 
         entry = {
             'name': check,
-            'has_dashboard': check in dogweb_dashboards or os.path.exists(os.path.join(get_assets_directory(check), 'dashboards')),
+            'has_dashboard': check in DOGWEB_DASHBOARDS
+                             or os.path.exists(os.path.join(get_assets_directory(check), 'dashboards')),
             'has_logs': has_logs,
             'is_jmx': os.path.exists(os.path.join(get_data_directory(check), 'metrics.yaml')),
             'is_prometheus': is_prometheus,
             'is_http': is_http,
             'has_e2e': has_e2e(check),
-            'tile_only': tile_only
+            'tile_only': tile_only,
         }
-        catalog.append(entry)
+        integration_catalog.append(entry)
 
-    if not fp:
-        for entry in catalog:
+    if not fd:
+        for entry in integration_catalog:
             echo_info(str(entry))
     else:
-        dict_to_csv(fp, catalog)
+        dict_to_csv(fd, integration_catalog)
 
 
-def dict_to_csv(csvfile, catalog: list):
-    try:
-        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
-        writer.writeheader()
-        for entry in catalog:
-            writer.writerow(entry)
-        csvfile.close()
-    except IOError:
-        print("I/O error")
+def dict_to_csv(csvfile, contents: list):
+    writer = csv.DictWriter(csvfile, fieldnames=CSV_COLUMNS)
+    writer.writeheader()
+    for entry in contents:
+        writer.writerow(entry)
+    csvfile.close()
