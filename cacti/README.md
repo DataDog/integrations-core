@@ -4,8 +4,8 @@
 
 Get metrics from cacti service in real time to:
 
-- Visualize and monitor cacti states
-- Be notified about cacti failovers and events.
+- Visualize and monitor Cacti states.
+- Be notified about Cacti failovers and events.
 
 ## Setup
 

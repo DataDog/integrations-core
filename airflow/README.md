@@ -17,7 +17,7 @@ In addition to metrics, the Datadog Agent also sends service checks related to A
 
 ### Installation
 
-All three steps below are needed for the Airflow integration to work properly. Before you begin, you [install the Datadog Agent][9] version `>=6.17` or `>=7.17` that includes Statsd/DogStatsD Mapping feature.
+All three steps below are needed for the Airflow integration to work properly. Before you begin, [install the Datadog Agent][9] version `>=6.17` or `>=7.17`, which includes the StatsD/DogStatsD mapping feature.
 
 #### Step 1: Configure Airflow to collect health metrics and service checks
 
@@ -195,9 +195,9 @@ _Available for Agent versions >6.0_
              pattern: \[\d{4}\-\d{2}\-\d{2}
      ```
 
-     Caveat: By default Airflow use this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{   try_number }}.log`, the number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs   individually for each executed task.
+     Caveat: By default Airflow uses this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{   try_number }}.log`. The number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
 
-     If you do not view logs in Airflow UI, we recommend this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log   rotate this file and use this configuration:
+     If you do not view logs in Airflow UI, Datadog recommends this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log rotate this file and use this configuration:
 
      ```yaml
      logs:

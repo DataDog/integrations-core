@@ -6,7 +6,7 @@
 
 Get metrics from Btrfs service in real time to:
 
-- Visualize and monitor Btrfs states
+- Visualize and monitor Btrfs states.
 - Be notified about Btrfs failovers and events.
 
 ## Setup

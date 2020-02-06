@@ -4,7 +4,7 @@
 
 Get metrics from ASP.NET service in real time to:
 
-- Visualize and monitor ASP.NET states
+- Visualize and monitor ASP.NET states.
 - Be notified about ASP.NET failovers and events.
 
 ## Setup
