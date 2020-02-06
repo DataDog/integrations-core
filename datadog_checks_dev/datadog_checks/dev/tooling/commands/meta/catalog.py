@@ -17,8 +17,9 @@ def catalog(checks, out_file):
     if not out_file:
         fp = None
     elif out_file == 'tmp':
-        fp = tempfile.TemporaryFile()
-        echo_info(f"Catalog is being saved to `{fp.name}`")
+        tmp = tempfile.NamedTemporaryFile(prefix='integration_catalog', suffix='.csv', delete=False, mode='w')
+        fp = tmp.file
+        echo_info(f"Catalog is being saved to `{tmp.name}`")
     else:
         fp = open(out_file)
         echo_info(f"Catalog is being saved to `{out_file}`")
@@ -76,12 +77,12 @@ def catalog(checks, out_file):
         dict_to_csv(fp, catalog)
 
 
-def dict_to_csv(csvfile, catalog):
+def dict_to_csv(csvfile, catalog: list):
     try:
         writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
         writer.writeheader()
-        for data in catalog:
-            writer.writerow(data)
+        for entry in catalog:
+            writer.writerow(entry)
         csvfile.close()
     except IOError:
         print("I/O error")
