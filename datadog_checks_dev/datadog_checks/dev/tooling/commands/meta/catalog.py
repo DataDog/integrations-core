@@ -21,7 +21,11 @@ DOGWEB_DASHBOARDS = ('vsphere', 'sqlserver', 'tomcat', 'pusher', 'sigsci', 'mara
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a catalog with information about integrations')
 @click.argument('checks', nargs=-1, required=True)
 @click.option(
-    '-f', '--file', 'out_file', required=False, help='Output to file, you can pass "tmp" to generate a temporary file'
+    '-f',
+    '--file',
+    'out_file',
+    required=False,
+    help='Output to file (it will be overwritten), you can pass "tmp" to generate a temporary file',
 )
 def catalog(checks, out_file):
     if not out_file:
@@ -32,7 +36,7 @@ def catalog(checks, out_file):
         fd = tmp.file
         echo_info(f"Catalog is being saved to `{tmp.name}`")
     else:
-        fd = open(out_file, mode='w')
+        fd = open(out_file, mode='w+')
         echo_info(f"Catalog is being saved to `{out_file}`")
 
     checking_all = 'all' in checks
@@ -72,7 +76,7 @@ def catalog(checks, out_file):
         entry = {
             'name': check,
             'has_dashboard': check in DOGWEB_DASHBOARDS
-                             or os.path.exists(os.path.join(get_assets_directory(check), 'dashboards')),
+            or os.path.exists(os.path.join(get_assets_directory(check), 'dashboards')),
             'has_logs': has_logs,
             'is_jmx': os.path.exists(os.path.join(get_data_directory(check), 'metrics.yaml')),
             'is_prometheus': is_prometheus,
