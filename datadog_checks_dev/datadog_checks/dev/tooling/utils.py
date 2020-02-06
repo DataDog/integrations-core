@@ -61,6 +61,10 @@ def string_to_toml_type(s):
     return s
 
 
+def get_check_file(check_name):
+    return os.path.join(get_root(), check_name, 'datadog_checks', check_name, check_name + '.py')
+
+
 def get_version_file(check_name):
     if check_name == 'datadog_checks_base':
         return os.path.join(get_root(), check_name, 'datadog_checks', 'base', '__about__.py')
@@ -84,6 +88,10 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
 
 
+def get_config_file(check_name):
+    return os.path.join(get_data_directory(check_name), 'conf.yaml.example')
+
+
 def get_config_spec(check_name):
     if check_name == 'agent':
         return os.path.join(get_root(), 'pkg', 'config', 'conf_spec.yaml')
@@ -96,11 +104,19 @@ def get_default_config_spec(check_name):
     return os.path.join(get_root(), check_name, 'assets', 'configuration', 'spec.yaml')
 
 
+def get_assets_directory(check_name):
+    return os.path.join(get_root(), check_name, 'assets')
+
+
 def get_data_directory(check_name):
     if check_name == 'agent':
         return os.path.join(get_root(), 'pkg', 'config')
     else:
         return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data')
+
+
+def get_test_directory(check_name):
+    return os.path.join(get_root(), check_name, 'tests')
 
 
 def get_config_files(check_name):
@@ -223,3 +239,13 @@ def parse_version_parts(version):
     if not isinstance(version, str):
         return []
     return [int(v) for v in version.split('.') if v.isdigit()]
+
+
+def has_e2e(check):
+    for path, _, files in os.walk(get_test_directory(check)):
+        for fn in files:
+            if fn.startswith('test_') and fn.endswith('.py'):
+                with open(os.path.join(path, fn)) as test_file:
+                    if ' pytest.mark.e2e' in test_file.read():
+                        return True
+    return False
