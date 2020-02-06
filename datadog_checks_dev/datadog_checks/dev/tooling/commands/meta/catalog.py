@@ -7,6 +7,7 @@ import os
 import csv
 
 csv_columns = ['name', 'has_dashboard', 'has_logs', 'is_jmx', 'is_prometheus', 'is_http', 'has_e2e', 'tile_only']
+dogweb_dashboards = ('vsphere', 'sqlserver', 'tomcat', 'pusher', 'sigsci', 'marathon', 'ibm_was', 'nginx', 'immunio')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a catalog with information about integrations')
@@ -60,7 +61,7 @@ def catalog(checks, out_file):
 
         entry = {
             'name': check,
-            'has_dashboard': os.path.exists(os.path.join(get_assets_directory(check), 'dashboards')),
+            'has_dashboard': check in dogweb_dashboards or os.path.exists(os.path.join(get_assets_directory(check), 'dashboards')),
             'has_logs': has_logs,
             'is_jmx': os.path.exists(os.path.join(get_data_directory(check), 'metrics.yaml')),
             'is_prometheus': is_prometheus,
