@@ -2,7 +2,7 @@
 
 ## Overview
 
-Get metrics from cacti service in real time to:
+Get metrics from Cacti in real time to:
 
 - Visualize and monitor Cacti states.
 - Be notified about Cacti failovers and events.
