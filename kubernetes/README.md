@@ -167,7 +167,7 @@ See [this PR][12]
 
 These are pause containers (docker_image:gcr.io/google_containers/pause.\*) that K8s injects into every pod to keep it populated even if the "real" container is restarting/stopped.
 
-The docker*daemon check ignores them through a default exclusion list, but they will show up for K8s metrics like \_kubernetes.cpu.usage.total* and _kubernetes.filesystem.usage_.
+The docker_daemon check ignores them through a default exclusion list, but they will show up for K8s metrics like `kubernetes.cpu.usage.total` and `kubernetes.filesystem.usage`.
 
 ## Further Reading
 
