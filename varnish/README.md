@@ -4,10 +4,10 @@
 
 ## Overview
 
-This check collects varnish metrics regarding:
+This check collects Varnish metrics regarding:
 
 - Clients: connections and requests
-- Cache performance: hits, evictions, etc
+- Cache performance: hits, evictions, etc.
 - Threads: creations, failures, and threads queued
 - Backends: successful, failed, and retried connections
 
@@ -71,7 +71,7 @@ _Available for Agent versions >6.0_
      DAEMON_OPTS="$DAEMON_OPTS -c -a -F '${LOG_FORMAT}'"
    ```
 
-3. Restart Varnishncsa to apply the changes.
+3. Restart the `varnishncsa` utility to apply the changes.
 
 4. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
