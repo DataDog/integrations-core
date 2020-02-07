@@ -2,9 +2,9 @@
 
 ## Overview
 
-This check monitors [TLS][1] protocol versions, certificate expiration & validity, etc.
+This check monitors [TLS][1] protocol versions, certificate expiration and validity, etc.
 
-**Note**: Currently, only TCP is supported.
+**Note**: Only TCP is supported.
 
 ## Setup
 
