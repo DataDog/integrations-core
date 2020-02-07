@@ -4,8 +4,8 @@
 
 This check collects [Presto][1] metrics, for example:
 
-- Overall activity metrics: completed/failed queries, data input/output size, execution time
-- Performance metrics: cluster memory, input CPU, execution CPU time
+- Overall activity metrics: completed/failed queries, data input/output size, execution time.
+- Performance metrics: cluster memory, input CPU, execution CPU time.
 
 ## Setup
 
@@ -18,27 +18,27 @@ No additional installation is needed on your server. Install the Agent on each C
 
 ### Configuration
 
-1. Edit the `presto.d/conf.yaml` file, in the `conf.d/` folder at the root of yourAgent's configuration directory to start collecting your presto performance data. See the [sample presto.d/conf.yaml][4] for all available configuration options.
+1. Edit the `presto.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Presto performance data. See the [sample presto.d/conf.yaml][4] for all available configuration options.
 
-    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect visit the [JMX Checks documentation][5] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][6].
+    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect, visit the [JMX Checks documentation][5] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][7].
 
 #### Metric collection
 
-Use the default configuration of your presto.d/conf.yaml file to activate the collection of your Presto metrics. See the sample [presto.d/conf.yaml][4] for all available configuration options.
+Use the default configuration of your `presto.d/conf.yaml` file to activate the collection of your Presto metrics. See the sample [presto.d/conf.yaml][4] for all available configuration options.
 
 #### Log collection
 
 _Available for Agent versions >6.0_
 
-1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
    ```yaml
    logs_enabled: true
    ```
 
-2. Add this configuration block to your presto.d/conf.yaml file to start collecting your Presto logs:
+2. Add this configuration block to your `presto.d/conf.yaml` file to start collecting your Presto logs:
 
    ```yaml
    logs:
