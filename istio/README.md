@@ -52,7 +52,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
-    # ...
+     ...
 ```
 
 This can also be done with the `kubectl patch` command.
