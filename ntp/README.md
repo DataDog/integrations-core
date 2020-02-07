@@ -45,7 +45,7 @@ The NTP check does not include any events.
 
 `ntp.in_sync`:
 
-Returns CRITICAL if the NTP offset is greater than the threshold specified in `ntp.yaml`, otherwise OK.
+Returns `CRITICAL` if the NTP offset is greater than the threshold specified in `ntp.yaml`, otherwise `OK`.
 
 ## Troubleshooting
 

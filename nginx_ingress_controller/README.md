@@ -27,14 +27,14 @@ _Available for Agent versions >6.0_
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
 
    ```yaml
-     # (...)
+       (...)
        env:
-         # (...)
+           (...)
          - name: DD_LOGS_ENABLED
              value: "true"
          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
              value: "true"
-     # (...)
+       (...)
    ```
 
 2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5].

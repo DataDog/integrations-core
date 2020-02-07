@@ -74,11 +74,11 @@ The Network check does not include any service checks.
 
 ## Troubleshooting
 
-- [How to send TCP/UDP host metrics via the Datadog API ?][9]
+- [How to send TCP/UDP host metrics via the Datadog API][9]
 
 ## Further Reading
 
-- [Built a network monitor on an http check][10]
+- [Build a network monitor on an HTTP check][10]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent

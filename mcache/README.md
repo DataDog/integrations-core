@@ -80,7 +80,7 @@ The Mcache check does not include any events.
 
 `memcache.can_connect`:
 
-Returns CRITICAL if the Agent cannot connect to memcache to collect metrics, otherwise OK.
+Returns `CRITICAL` if the Agent cannot connect to memcache to collect metrics, otherwise `OK`.
 
 ## Troubleshooting
 
