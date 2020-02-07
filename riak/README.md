@@ -4,7 +4,7 @@
 
 ## Overview
 
-This check lets you track node, vnode and ring performance metrics from RiakKV or RiakTS.
+This check lets you track node, vnode, and ring performance metrics from RiakKV or RiakTS.
 
 ## Setup
 
