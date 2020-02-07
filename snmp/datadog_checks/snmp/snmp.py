@@ -205,13 +205,11 @@ class SnmpCheck(AgentCheck):
                     # If we didn't catch the metric using snmpget, try snmpnext
                     # Don't walk through the entire MIB, stop at end of table
                     self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
-                    for r in missing_results:
-                        binds = config.call_cmd(
-                            "walk",
-                            r[1]
-                        )
-                        for bind in binds:
-                            all_binds.append((r[0], bind))
+                    binds = config.call_cmd(
+                        "walk",
+                        *[r[1] for r in missing_results]
+                    )
+                    all_binds.extend((r[0], b) for (r, b) in zip(missing_results, binds))
 
             except Exception as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
