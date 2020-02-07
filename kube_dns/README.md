@@ -32,7 +32,7 @@ kind: Pod
 metadata:
   annotations:
     service-discovery.datadoghq.com/kubedns.check_names: '["kube_dns"]'
-    service-discovery.datadoghq.com/kubedns.init_configs: "[{}]"
+    service-discovery.datadoghq.com/kubedns.init_configs: '[{}]'
     service-discovery.datadoghq.com/kubedns.instances: '[[{"prometheus_endpoint":"http://%%host%%:10055/metrics", "tags":["dns-pod:%%host%%"]}]]'
 ```
 
