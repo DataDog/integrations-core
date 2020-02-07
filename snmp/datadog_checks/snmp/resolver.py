@@ -92,4 +92,4 @@ class OIDResolver(object):
 #            # to resolve the name.
 #            oid_to_resolve = hlapi.ObjectIdentity(oid_tuple)
 #            result_oid = oid_to_resolve.resolveWithMib(self._mib_view_controller)
-        return result.oid, to_oid_tuple(result.oid_index)
+        return result.oid, to_oid_tuple(result.oid_index) if result.oid_index else ()
