@@ -70,7 +70,7 @@ _Available for Agent versions >6.0_
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
 
    ```yaml
-     # (...)
+       (...)
        env:
          # (...)
          - name: DD_LOGS_ENABLED
