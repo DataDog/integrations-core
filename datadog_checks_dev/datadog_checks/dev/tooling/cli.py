@@ -18,8 +18,8 @@ from .constants import set_root
 @click.option('--agent', '-a', is_flag=True, help='Work on `datadog-agent`.')
 @click.option('--here', '-x', is_flag=True, help='Work on the current location.')
 @click.option('--color/--no-color', default=None, help='Whether or not to display colored output (default true).')
-@click.option('--quiet', '-q', is_flag=True)
-@click.option('--debug', '-d', is_flag=True)
+@click.option('--quiet', '-q', help='Silence output', is_flag=True)
+@click.option('--debug', '-d', help='Include debug output', is_flag=True)
 @click.version_option()
 @click.pass_context
 def ddev(ctx, core, extras, agent, here, color, quiet, debug):

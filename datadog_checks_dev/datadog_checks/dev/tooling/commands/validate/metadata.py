@@ -8,8 +8,8 @@ from io import open
 
 import click
 
-from ...utils import get_metadata_file, get_metric_sources, load_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
+from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
@@ -184,7 +184,7 @@ def normalize_metric_name(metric_name):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
-@click.argument('check', required=False)
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 def metadata(check):
     """Validates metadata.csv files
 
@@ -329,3 +329,5 @@ def metadata(check):
 
     if errors:
         abort()
+
+    echo_success('Validated!')

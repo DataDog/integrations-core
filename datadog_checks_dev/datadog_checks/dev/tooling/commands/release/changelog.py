@@ -14,14 +14,14 @@ from ...constants import CHANGELOG_TYPE_NONE, get_root
 from ...git import get_commits_since
 from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
 from ...release import get_release_tag_string
-from ...utils import get_valid_checks, get_version_string
+from ...utils import complete_testable_checks, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, validate_check_arg
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Update the changelog for a check')
-@click.argument('check', callback=validate_check_arg)
+@click.argument('check', autocompletion=complete_testable_checks, callback=validate_check_arg)
 @click.argument('version')
 @click.argument('old_version', required=False)
 @click.option('--initial', is_flag=True)

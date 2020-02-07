@@ -11,6 +11,7 @@ from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 
 from ....utils import basepath, file_exists, path_join, read_file, write_file
 from ...utils import (
+    complete_valid_checks,
     get_config_files,
     get_config_spec,
     get_data_directory,
@@ -26,7 +27,7 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
-@click.argument('check', required=False)
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--sync', is_flag=True, help='Generate example configuration files based on specifications')
 @click.pass_context
 def config(ctx, check, sync):
