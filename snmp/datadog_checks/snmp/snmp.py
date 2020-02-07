@@ -167,7 +167,6 @@ class SnmpCheck(AgentCheck):
                     #self._NON_REPEATERS,
                     #self._MAX_REPETITIONS,
                 )
-                #binds, current_error = self._consume_binds_iterator(binds_iterator, config)
                 all_binds.extend((oid, r) for r in binds)
                 #error = current_error if not error else error
 
@@ -224,7 +223,6 @@ class SnmpCheck(AgentCheck):
                         )
                         for bind in binds:
                             all_binds.append((r[0], bind))
-                    #binds, error = self._consume_binds_iterator(binds_iterator, config)
                     #all_binds.extend(zip([r[0] for r in missing_results], binds))
 
             except Exception as e:
@@ -242,12 +240,11 @@ class SnmpCheck(AgentCheck):
     def fetch_sysobject_oid(self, config):
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
-        oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
+        oid = "1.3.6.1.2.1.1.2"
         self.log.debug('Running SNMP command on OID %r', oid)
-        error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
-        self.raise_on_error_indication(error_indication, config.ip_address)
-        self.log.debug('Returned vars: %s', var_binds)
-        return var_binds[0][1].prettyPrint()
+        binds = config.call_cmd("get_next", oid)
+        self.log.debug('Returned vars: %s', binds)
+        return binds[0].value.lstrip(".")
 
     def _profile_for_sysobject_oid(self, sys_object_oid):
         """Return, if any, a matching profile for sys_object_oid.
@@ -260,27 +257,6 @@ class SnmpCheck(AgentCheck):
         if not oids:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
         return self.profiles_by_oid[oids[-1]]
-
-    def _consume_binds_iterator(self, binds_iterator, config):
-        all_binds = []
-        error = None
-        for error_indication, error_status, _, var_binds_table in binds_iterator:
-            self.log.debug('Returned vars: %s', var_binds_table)
-
-            self.raise_on_error_indication(error_indication, config.ip_address)
-
-            if error_status:
-                message = '{} for instance {}'.format(error_status.prettyPrint(), config.ip_address)
-                error = message
-
-                # submit CRITICAL service check if we can't connect to device
-                if 'unknownUserName' in message:
-                    self.log.error(message)
-                else:
-                    self.warning(message)
-
-            all_binds.extend(var_bind for var_bind in var_binds_table if var_bind[1] is not endOfMibView)
-        return all_binds, error
 
     def _start_discovery(self):
         cache = read_persistent_cache(self.check_id)
