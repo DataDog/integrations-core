@@ -17,7 +17,7 @@ The Fluentd check is included in the [Datadog Agent][3] package, so you don't ne
 
 #### Prepare Fluentd
 
-In your fluentd configuration file, add a `monitor_agent` source:
+In your Fluentd configuration file, add a `monitor_agent` source:
 
 ```text
 <source>

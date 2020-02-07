@@ -14,7 +14,7 @@ Collect Etcd metrics to:
 
 ### Installation
 
-The etcd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Etcd instance(s).
+The Etcd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Etcd instance(s).
 
 ### Configuration
 

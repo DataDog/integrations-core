@@ -29,7 +29,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
    instances:
      ## @param url - string - required
-     ## The URL where elasticsearch accepts HTTP requests. This is used to
+     ## The URL where Elasticsearch accepts HTTP requests. This is used to
      ## fetch statistics from the nodes and information about the cluster health.
      #
      - url: http://localhost:9200

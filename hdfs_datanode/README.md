@@ -20,7 +20,7 @@ The HDFS DataNode check is included in the [Datadog Agent][3] package, so you do
 
 #### Prepare the DataNode
 
-1. The Agent collects metrics from the DataNode's JMX remote interface. The interface is disabled by default, enable it by setting the following option in `hadoop-env.sh` (usually found in \$HADOOP_HOME/conf):
+1. The Agent collects metrics from the DataNode's JMX remote interface. The interface is disabled by default, enable it by setting the following option in `hadoop-env.sh` (usually found in $HADOOP_HOME/conf):
 
    ```conf
    export HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote
