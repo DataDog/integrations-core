@@ -4,15 +4,15 @@
 
 ## Overview
 
-This check collects metrics from your YARN ResourceManager, including (but not limited to)::
+This check collects metrics from your YARN ResourceManager, including (but not limited to):
 
 - Cluster-wide metrics (e.g. number of running apps, running containers, unhealthy nodes, etc.)
 - Per-application metrics (e.g. app progress, elapsed running time, running containers, memory use, etc.)
-- Node metrics (e.g. available vCores, time of last health update, etc/)
+- Node metrics (e.g. available vCores, time of last health update, etc.)
 
 ### Deprecation notice
 
-`yarn.apps.<METRIC>` metrics have been deprecated in favor of `yarn.apps.<METRIC>_gauge` metrics, because `yarn.apps` metrics are incorrectly reported as a `RATE` instead of a `GAUGE`.
+`yarn.apps.<METRIC>` metrics are deprecated in favor of `yarn.apps.<METRIC>_gauge` metrics because `yarn.apps` metrics are incorrectly reported as a `RATE` instead of a `GAUGE`.
 
 ## Setup
 
@@ -87,7 +87,7 @@ Returns `CRITICAL` if the Agent cannot connect to the ResourceManager URI to col
 
 **yarn.application.status**:
 
-Returns per application status according to the mapping specified in the [`conf.yaml`][5] file.
+Returns per-application status according to the mapping specified in the [`conf.yaml`][5] file.
 
 ## Troubleshooting
 
