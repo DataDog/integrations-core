@@ -11,4 +11,4 @@ instances:
     ## Note: To monitor ETCD versions pre-3.x.x set 
     ##`use_preview` param to 'false' and use the `url` param
     #
-  - prometheus: "http://%%host%%:2379/metrics"
+  - prometheus_url: "http://%%host%%:2379/metrics"
