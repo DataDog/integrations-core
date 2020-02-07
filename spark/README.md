@@ -7,21 +7,17 @@
 This check monitors [Spark][13] through the Datadog Agent. Collect Spark metrics for:
 
 - Drivers and executors: RDD blocks, memory used, disk used, duration, etc.
-- RDDs: partition count, memory used, and disk used
-- Tasks: number of tasks active, skipped, failed, and total
-- Job state: number of jobs active, completed, skipped, and failed
+- RDDs: partition count, memory used, and disk used.
+- Tasks: number of tasks active, skipped, failed, and total.
+- Job state: number of jobs active, completed, skipped, and failed.
 
-**Note**: Spark Structured Streaming metrics are currently not supported.
+**Note**: Spark Structured Streaming metrics are not supported.
 
 ## Setup
 
 ### Installation
 
-The Spark check is included in the [Datadog Agent][3] package. No additional installation is needed on your:
-
-- Mesos master (for Spark on Mesos),
-- YARN ResourceManager (for Spark on YARN), or
-- Spark master (for Standalone Spark)
+The Spark check is included in the [Datadog Agent][3] package. No additional installation is needed on your Mesos master (for Spark on Mesos), YARN ResourceManager (for Spark on YARN), or Spark master (for Spark Standalone).
 
 ### Configuration
 
