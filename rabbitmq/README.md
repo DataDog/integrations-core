@@ -6,8 +6,8 @@
 
 This check monitors [RabbitMQ][2] through the Datadog Agent. It allows you to:
 
-- Track queue-based stats: queue size, consumer count, unacknowledged messages, redelivered messages, etc
-- Track node-based stats: waiting processes, used sockets, used file descriptors, etc
+- Track queue-based stats: queue size, consumer count, unacknowledged messages, redelivered messages, etc.
+- Track node-based stats: waiting processes, used sockets, used file descriptors, etc.
 - Monitor vhosts for aliveness and number of connections
 
 And more.
