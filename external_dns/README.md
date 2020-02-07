@@ -26,7 +26,7 @@ kind: Pod
 metadata:
   annotations:
     ad.datadoghq.com/external-dns.check_names: '["external_dns"]'
-    ad.datadoghq.com/external-dns.init_configs: "[{}]"
+    ad.datadoghq.com/external-dns.init_configs: '[{}]'
     ad.datadoghq.com/external-dns.instances: '[{"prometheus_url":"http://%%host%%:7979/metrics", "tags":["externaldns-pod:%%host%%"]}]'
 ```
 
