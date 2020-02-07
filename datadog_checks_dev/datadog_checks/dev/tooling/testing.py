@@ -7,7 +7,7 @@ from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_EXTENSIONS, get_root
 from .e2e import get_active_checks, get_configured_envs
-from .git import files_changed
+from .git import files_changed, get_git_root
 from .utils import get_testable_checks
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
@@ -92,7 +92,7 @@ def get_available_tox_envs(check, sort=False, e2e_only=False, e2e_tests_only=Fal
     else:
         tox_command = 'tox --listenvs'
 
-    with chdir(path_join(get_root(), check)):
+    with chdir(path_join(get_root() or get_git_root(), check)):
         output = run_command(tox_command, capture='out').stdout
 
     env_list = [e.strip() for e in output.splitlines()]

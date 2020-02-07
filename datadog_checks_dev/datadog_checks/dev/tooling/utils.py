@@ -5,6 +5,7 @@ import json
 import os
 import re
 from ast import literal_eval
+from pathlib import Path
 
 import requests
 import semver
@@ -143,19 +144,23 @@ def get_config_files(check_name):
 def get_valid_checks(root=None):
     if root is None:
         root = get_root()
-    return {path for path in os.listdir(root) if file_exists(get_version_file(path))}
+    root = Path(root)
+    return {path for path in os.listdir(root) if file_exists(get_version_file(root / path))}
 
 
 def get_valid_integrations(root=None):
     if root is None:
         root = get_root()
-    return {path for path in os.listdir(root) if file_exists(get_manifest_file(path))}
+    root = Path(root)
+    return {path for path in os.listdir(root) if file_exists(get_manifest_file(root / path))}
 
 
 def get_testable_checks(root=None):
     if root is None:
         root = get_root()
-    return {path for path in os.listdir(root) if file_exists(get_tox_file(path))}
+
+    root = Path(root)
+    return {path for path in os.listdir(root) if file_exists(get_tox_file(root / path))}
 
 
 def get_metric_sources():
