@@ -4,12 +4,12 @@
 
 ## Overview
 
-Get metrics from your Windows applications/servers with Windows Management Instrumentation (WMI) in real time to
+Get metrics from your Windows applications and servers with Windows Management Instrumentation (WMI) in real time to
 
 - Visualize their performance.
 - Correlate their activity with the rest of your applications.
 
-**Note:** It is recommended that the [PDH check][14] be used instead in all cases due to its significantly less overhead and thus better scalability.
+**Note:** It is recommended that the [PDH check][14] be used instead in all cases due to its significantly lower overhead and thus better scalability.
 
 ## Setup
 
@@ -60,8 +60,8 @@ The default configuration uses the filter clause to limit the metrics pulled. Ei
 
 The metrics definitions include three components:
 
-- Class property in WMI
-- Metric name as it appears in Datadog
+- Class property in WMI.
+- Metric name as it appears in Datadog.
 - The metric type.
 
 #### Configuration Options
