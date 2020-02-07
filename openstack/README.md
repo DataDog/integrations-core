@@ -6,7 +6,7 @@
 
 Get metrics from OpenStack service in real time to:
 
-- Visualize and monitor OpenStack states
+- Visualize and monitor OpenStack states.
 - Be notified about OpenStack failovers and events.
 
 ## Setup
@@ -19,7 +19,7 @@ To capture your OpenStack metrics, [install the Agent][2] on your hosts running 
 
 #### Prepare OpenStack
 
-Then configure a Datadog role and user with your identity server:
+Configure a Datadog role and user with your identity server:
 
 ```console
 openstack role create datadog_monitoring
@@ -31,7 +31,7 @@ openstack role add datadog_monitoring \
     --user datadog
 ```
 
-Finally, update your `policy.json` files to grant the needed permissions. `role:datadog_monitoring` requires access to the following operations:
+Then, update your `policy.json` files to grant the needed permissions. `role:datadog_monitoring` requires access to the following operations:
 
 **Nova**
 
@@ -70,9 +70,9 @@ Finally, update your `policy.json` files to grant the needed permissions. `role:
 }
 ```
 
-You may need to restart your Keystone, Neutron and Nova API services to ensure that the policy changes take.
+You may need to restart your Keystone, Neutron, and Nova API services to ensure that the policy changes take.
 
-**Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit our Billing FAQ.
+**Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit the Billing FAQ.
 
 #### Agent Configuration
 
@@ -153,9 +153,9 @@ Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out our [series of blog posts][9] about it.
+To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out Datadog's [series of blog posts][9] about it.
 
-See also our blog posts:
+See also these other Datadog blog posts:
 
 - [Install OpenStack in two commands for dev and test][10]
 - [OpenStack: host aggregates, flavors, and availability zones][11]
