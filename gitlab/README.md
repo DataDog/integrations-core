@@ -4,7 +4,7 @@
 
 Integration that allows to:
 
-* Visualize and monitor metrics collected via Gitlab through Prometheus
+- Visualize and monitor metrics collected via Gitlab through Prometheus
 
 See the [Gitlab documentation][1] for more information about Gitlab and its integration with Prometheus
 
@@ -15,6 +15,7 @@ See the [Gitlab documentation][1] for more information about Gitlab and its inte
 The Gitlab check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Gitlab servers.
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -23,37 +24,37 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's Prometheus metrics endpoint. See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
 
-  **Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
+    **Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
 
 2. [Restart the Agent][5]
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Next, edit `gitlab.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Gitlab log files.
 
-    ```
-      logs:
-        - type: file
-          path: /var/log/gitlab/gitlab-rails/production_json.log
-          service: <SERVICE_NAME>
-          source: gitlab
-        - type: file
-          path: /var/log/gitlab/gitlab-rails/production.log
-          service: <SERVICE_NAME>
-          source: gitlab
-        - type: file
-          path: /var/log/gitlab/gitlab-rails/api_json.log
-          service: <SERVICE_NAME>
-          source: gitlab
-    ```
+   ```yaml
+     logs:
+       - type: file
+         path: /var/log/gitlab/gitlab-rails/production_json.log
+         service: '<SERVICE_NAME>'
+         source: gitlab
+       - type: file
+         path: /var/log/gitlab/gitlab-rails/production.log
+         service: '<SERVICE_NAME>'
+         source: gitlab
+       - type: file
+         path: /var/log/gitlab/gitlab-rails/api_json.log
+         service: '<SERVICE_NAME>'
+         source: gitlab
+   ```
 
 3. [Restart the Agent][5].
 
@@ -64,19 +65,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 ##### Metric collection
 
 | Parameter            | Value                                                                                      |
-|----------------------|--------------------------------------------------------------------------------------------|
+| -------------------- | ------------------------------------------------------------------------------------------ |
 | `<INTEGRATION_NAME>` | `gitlab`                                                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                              |
 | `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "prometheus_endpoint":"http://%%host%%:10055/metrics"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
 
 | Parameter      | Value                                       |
-|----------------|---------------------------------------------|
+| -------------- | ------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "gitlab", "service": "gitlab"}` |
 
 ### Validation
@@ -84,17 +85,22 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 [Run the Agent's status subcommand][8] and look for `gitlab` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Events
+
 The Gitlab check does not include any events.
 
 ### Service Checks
+
 The Gitlab check includes a readiness and a liveness service check.
 Moreover, it provides a service check to ensure that the local Prometheus endpoint is available.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][10].
 
 [1]: https://docs.gitlab.com/ee/administration/monitoring/prometheus
