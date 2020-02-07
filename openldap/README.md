@@ -8,7 +8,7 @@ Use the OpenLDAP integration to get metrics from the `cn=Monitor` backend of you
 
 ### Installation
 
-The OpenLDAP integration is packaged with the Agent. To start gathering your OpenLDAP metrics, you need to:
+The OpenLDAP integration is packaged with the Agent. To start gathering your OpenLDAP metrics:
 
 1. Have the `cn=Monitor` backend configured on your OpenLDAP servers.
 2. [Install the Agent][1] on your OpenLDAP servers.
@@ -19,7 +19,7 @@ The OpenLDAP integration is packaged with the Agent. To start gathering your Ope
 
 If the `cn=Monitor` backend is not configured on your server, follow these steps:
 
-1. Check if monitoring is enabled on your installation
+1. Check if monitoring is enabled on your installation:
 
    ```shell
     sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=module{0},cn=config
@@ -27,7 +27,7 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
 
    If you see a line with `olcModuleLoad: back_monitor.la`, monitoring is already enabled, go to step 3.
 
-2. Enable monitoring on your server
+2. Enable monitoring on your server:
 
    ```text
        cat <<EOF | sudo ldapmodify -Y EXTERNAL -H ldapi:///
@@ -38,7 +38,7 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
        EOF
    ```
 
-3. Create an encrypted password with `slappasswd`
+3. Create an encrypted password with `slappasswd`.
 4. Add a new user:
 
    ```text
@@ -52,7 +52,7 @@ If the `cn=Monitor` backend is not configured on your server, follow these steps
        EOF
    ```
 
-5. Configure the monitor database
+5. Configure the monitor database:
 
    ```text
        cat <<EOF | sudo ldapadd -Y EXTERNAL -H ldapi:///
@@ -101,13 +101,13 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 _Available for Agent versions >6.0_
 
-1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
    ```yaml
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `openldap.d/conf.yaml` file to start collecting your Openldap logs:
+2. Add this configuration block to your `openldap.d/conf.yaml` file to start collecting your OpenLDAP logs:
 
    ```yaml
    logs:
