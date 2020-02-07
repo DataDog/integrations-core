@@ -2,13 +2,11 @@
 
 ## Overview
 
-This check collects TokuMX metrics like:
+This check collects TokuMX metrics, including:
 
-- Opcounters
-- Replication lag
-- Cache table utilization and storage size
-
-And more.
+- Opcounters.
+- Replication lag.
+- Cache table utilization and storage size.
 
 ## Setup
 
@@ -34,7 +32,7 @@ The TokuMX check is included in the [Datadog Agent][2] package, so you don't nee
    echo -e "\033[0;32mpymongo python module - OK\033[0m"
    ```
 
-3. Start the mongo shell.In it create a read-only user for the Datadog Agent in the `admin` database:
+3. Start the Mongo shell. In the shell, create a read-only user for the Datadog Agent in the `admin` database:
 
    ```shell
    # Authenticate as the admin user.
@@ -44,7 +42,7 @@ The TokuMX check is included in the [Datadog Agent][2] package, so you don't nee
    db.addUser("datadog", "<UNIQUEPASSWORD>", true)
    ```
 
-4. Verify that you created the user with the following command (not in the mongo shell).
+4. Verify that you created the user with the following command (not in the Mongo shell).
 
    ```shell
    python -c 'from pymongo import Connection; print Connection().admin.authenticate("datadog", "<UNIQUEPASSWORD>")' | \
