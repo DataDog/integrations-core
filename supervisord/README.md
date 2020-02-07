@@ -4,7 +4,7 @@
 
 ## Overview
 
-This check monitors the uptime, status, and number of processes running under supervisord.
+This check monitors the uptime, status, and number of processes running under Supervisor.
 
 ## Setup
 
@@ -20,7 +20,7 @@ The Agent can collect data from Supervisor via HTTP server or UNIX socket. The A
 
 ##### HTTP server
 
-Add a block like this to supervisor's main configuration file (e.g. `/etc/supervisor.conf`):
+Add a block like this to Supervisor's main configuration file (e.g. `/etc/supervisor.conf`):
 
 ```text
 [inet_http_server]
@@ -42,11 +42,11 @@ file=/var/run/supervisor.sock
 chmod=777
 ```
 
-If supervisor is running as root, make sure `chmod` is set so that non-root users (i.e. dd-agent) can read the socket.
+If Supervisor is running as root, make sure `chmod` is set so that non-root users (i.e. dd-agent) can read the socket.
 
 ---
 
-Reload supervisord.
+Reload `supervisord`.
 
 #### Host
 
@@ -68,18 +68,18 @@ instances:
   #  socket: unix:///var/run//supervisor.sock
 ```
 
-Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of supervisord. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
+Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of Supervisor. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
 
 Configuration Options
 
-- `name` (Required) - An arbitrary name to identify the supervisord server.
-- `host` (Optional) - Defaults to localhost. The host where supervisord server is running.
+- `name` (Required) - An arbitrary name to identify the `supervisord` server.
+- `host` (Optional) - Defaults to localhost. The host where the `supervisord` server is running.
 - `port` (Optional) - Defaults to 9001. The port number.
 - `user` (Optional) - Username
 - `pass` (Optional) - Password
 - `proc_names` (Optional) - Dictionary of process names to monitor
-- `server_check` (Optional) - Defaults to true. Service check for connection to supervisord server.
-- `socket` (Optional) - If using supervisorctl to communicate with supervisor, a socket is needed.
+- `server_check` (Optional) - Defaults to true. Service check for connection to the `supervisord` server.
+- `socket` (Optional) - If using `supervisorctl` to communicate with Supervisor, a socket is needed.
 
 See the [example check configuration][4] for comprehensive descriptions of other check options.
 
@@ -107,7 +107,7 @@ See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
 
-The Supervisord check does not include any events.
+The Supervisor check does not include any events.
 
 ### Service Checks
 
