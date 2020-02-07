@@ -6,11 +6,9 @@
 
 This check collects Tomcat metrics, for example:
 
-- Overall activity metrics: error count, request count, processing times
-- Thread pool metrics: thread count, number of threads busy
+- Overall activity metrics: error count, request count, processing times, etc.
+- Thread pool metrics: thread count, number of threads busy, etc.
 - Servlet processing times
-
-And more.
 
 ## Setup
 
