@@ -44,7 +44,7 @@ Commands
 Command Tab Completion
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Many of the `ddev` commands have tab-completion enabled for them.
+Many of the `ddev` commands have tab-completion enabled.
 There are a couple of ways to activate this for your system. The first is to
 execute the following in your shell:
 
@@ -58,11 +58,11 @@ or for `zsh`:
 
     $ eval "$(_DDEV_COMPLETE=source_zsh ddev)"
 
-Now hitting `tab` at any point in your `ddev` command should autocomplete with available
-options.  Note the limitation that this will only work for `integrations-core` repo, and
+Hitting `tab` at any point in your `ddev` command will autocomplete with available
+options.  Note that this will only work for `integrations-core` repo, and
 not any of the extended repos `ddev` can support.
 
-For a more permenant solition, you can add those lines to either your `.bashrc` or `.zhsrc`
+For a more permenant solution, you can add the lines to either your `.bashrc` or `.zhsrc`
 files respectively, but this may introduce a bit of a lag on startup.  As an alternative,
 run the following command then load the resulting file into your startup script:
 
