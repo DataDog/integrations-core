@@ -129,7 +129,7 @@ class InstanceConfig:
         import easysnmp
 
         if community:
-            return easysnmp.Session(hostname=hostname, community=community, version=version)
+            return easysnmp.Session(hostname=hostname, community=community, version=version, use_enums=True)
 
         if user:
             AUTH_PROTOCOLS = {'usmHMACMD5AuthProtocol': 'MD5', 'usmHMACSHAAuthProtocol': 'SHA'}

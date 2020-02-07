@@ -166,9 +166,6 @@ class SnmpCheck(AgentCheck):
                     oid,
                     #self._NON_REPEATERS,
                     #self._MAX_REPETITIONS,
-                    lookupMib=enforce_constraints,
-                    ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
-                    lexicographicMode=False,
                 )
                 #binds, current_error = self._consume_binds_iterator(binds_iterator, config)
                 all_binds.extend((oid, r) for r in binds)
@@ -203,7 +200,7 @@ class SnmpCheck(AgentCheck):
             try:
                 oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
                 self.log.debug('Running SNMP command get on OIDS %s', oids_batch)
-                data = config.call_cmd("get", *oids_batch, lookupMib=enforce_constraints)
+                data = config.call_cmd("get", *oids_batch)
                 self.log.debug('Returned vars: %s', data)
 
                 #self.raise_on_error_indication(error_indication, config.ip_address)
@@ -220,15 +217,15 @@ class SnmpCheck(AgentCheck):
                     # If we didn't catch the metric using snmpget, try snmpnext
                     # Don't walk through the entire MIB, stop at end of table
                     self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
-                    binds = config.call_cmd(
-                        "get_next",
-                        *[r[1] for r in missing_results],
-                        lookupMib=enforce_constraints,
-                        ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
-                        lexicographicMode=False
-                    )
+                    for r in missing_results:
+                        binds = config.call_cmd(
+                            "walk",
+                            r[1]
+                        )
+                        for bind in binds:
+                            all_binds.append((r[0], bind))
                     #binds, error = self._consume_binds_iterator(binds_iterator, config)
-                    all_binds.extend(zip([r[0] for r in missing_results], binds))
+                    #all_binds.extend(zip([r[0] for r in missing_results], binds))
 
             except Exception as e:
                 raise
