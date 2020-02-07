@@ -129,7 +129,7 @@ class InstanceConfig:
         import easysnmp
 
         if community:
-            return easysnmp.Session(hostname=hostname, community=community, version=version, use_enums=True)
+            return easysnmp.Session(hostname=hostname, community=community, version=version)
 
         if user:
             AUTH_PROTOCOLS = {'usmHMACMD5AuthProtocol': 'MD5', 'usmHMACSHAAuthProtocol': 'SHA'}
@@ -166,10 +166,8 @@ class InstanceConfig:
                 symbol_oid = symbol['OID']
                 symbol = symbol['name']
                 self._resolver.register(to_oid_tuple(symbol_oid), symbol)
-                #identity = hlapi.ObjectIdentity(symbol_oid)
                 identity = symbol_oid
             else:
-                #identity = hlapi.ObjectIdentity(mib, symbol)
                 identity = symbol
 
             return identity, symbol
@@ -181,7 +179,6 @@ class InstanceConfig:
             if key in table_oids:
                 return table_oids[key][1], table
 
-            #table_object = hlapi.ObjectType(identity)
             table_object = identity
             symbols = []
 
@@ -232,21 +229,16 @@ class InstanceConfig:
                         identity, column = extract_symbol(mib, metric_tag['column'])
                         column_tags.append((tag_key, column))
 
-                        try:
-                            #object_type = hlapi.ObjectType(identity)
-                            object_type = identity
-                        except Exception as e:
-                            warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+                        object_type = identity
+                        if 'table' in metric_tag:
+                            tag_symbols, _ = get_table_symbols(mib, metric_tag['table'])
+                            tag_symbols.append(object_type)
+                        elif mib != metric['MIB']:
+                            raise ConfigurationError(
+                                'When tagging from a different MIB, the table must be specified'
+                            )
                         else:
-                            if 'table' in metric_tag:
-                                tag_symbols, _ = get_table_symbols(mib, metric_tag['table'])
-                                tag_symbols.append(object_type)
-                            elif mib != metric['MIB']:
-                                raise ConfigurationError(
-                                    'When tagging from a different MIB, the table must be specified'
-                                )
-                            else:
-                                symbols.append(object_type)
+                            symbols.append(object_type)
 
                     elif 'index' in metric_tag:
                         index_tags.append((tag_key, metric_tag['index']))
@@ -268,17 +260,12 @@ class InstanceConfig:
                 for symbol in metric['symbols']:
                     identity, parsed_metric_name = extract_symbol(metric['MIB'], symbol)
 
-                    try:
-                        #symbols.append(hlapi.ObjectType(identity))
-                        symbols.append(identity)
-                    except Exception as e:
-                        warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+                    symbols.append(identity)
 
                     parsed_metric = ParsedTableMetric(parsed_metric_name, index_tags, column_tags, forced_type)
                     parsed_metrics.append(parsed_metric)
 
             elif 'OID' in metric:
-                #oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID']))
                 oid_object = metric['OID']
 
                 table_oids[metric['OID']] = (oid_object, [])

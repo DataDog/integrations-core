@@ -134,11 +134,6 @@ class SnmpCheck(AgentCheck):
             if discovery_interval - time_elapsed > 0:
                 time.sleep(discovery_interval - time_elapsed)
 
-    def raise_on_error_indication(self, error_indication, ip_address):
-        if error_indication:
-            message = '{} for instance {}'.format(error_indication, ip_address)
-            raise CheckException(message)
-
     def fetch_results(self, config, all_oids, bulk_oids):
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
@@ -164,14 +159,10 @@ class SnmpCheck(AgentCheck):
                 binds = config.call_cmd(
                     "walk",
                     oid,
-                    #self._NON_REPEATERS,
-                    #self._MAX_REPETITIONS,
                 )
                 all_binds.extend((oid, r) for r in binds)
-                #error = current_error if not error else error
 
             except Exception as e:
-                raise
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
@@ -202,8 +193,6 @@ class SnmpCheck(AgentCheck):
                 data = config.call_cmd("get", *oids_batch)
                 self.log.debug('Returned vars: %s', data)
 
-                #self.raise_on_error_indication(error_indication, config.ip_address)
-
                 missing_results = []
 
                 for value, oid in zip(data, oids_batch):
@@ -223,10 +212,8 @@ class SnmpCheck(AgentCheck):
                         )
                         for bind in binds:
                             all_binds.append((r[0], bind))
-                    #all_binds.extend(zip([r[0] for r in missing_results], binds))
 
             except Exception as e:
-                raise
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
