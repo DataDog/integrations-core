@@ -1,17 +1,13 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
 import ipaddress
 from collections import defaultdict
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .resolver import OIDResolver
-
-import os
-#os.putenv('MIBS', '+DUMMY-MIB')
-os.putenv('MIBDIRS', '+/Users/thomas.herve/Projects/integrations-core/snmp/tests/mibs')
-import easysnmp
 
 
 def to_oid_tuple(oid_string):
@@ -65,12 +61,9 @@ class InstanceConfig:
             self.metrics.extend(profiles[profile]['definition']['metrics'])
 
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
-        #self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path)
         if mibs_path:
-            import os
-            #os.environ['MIBDIRS'] = '+{}'.format(mibs_path)
             os.putenv('MIBS', '+DUMMY-MIB')
-            #os.putenv('MIBDIRS', '+{}'.format(mibs_path))
+            os.putenv('MIBDIRS', '+{}'.format(mibs_path))
         self._resolver = OIDResolver(None, self.enforce_constraints)
 
         self.ip_address = None
@@ -84,6 +77,8 @@ class InstanceConfig:
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
+
+        self._version = int(instance.get('snmp_version', 2))
 
         ip_address = instance.get('ip_address')
         network_address = instance.get('network_address')
@@ -108,11 +103,7 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
-        #self._auth_data = self.get_auth_data(instance)
-
         self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)
-
-        #self._context_data = hlapi.ContextData(*self.get_context_data(instance))
 
     def resolve_oid(self, oid):
         return self._resolver.resolve_oid(oid)
@@ -123,95 +114,44 @@ class InstanceConfig:
 
     def call_cmd(self, cmd, *args, **kwargs):
         return getattr(self._transport, cmd)(list(args))
-        #return cmd(self._snmp_engine, self._auth_data, self._transport, self._context_data, *args, **kwargs)
 
-    @staticmethod
-    def create_snmp_engine(mibs_path):
-        """
-        Create a command generator to perform all the snmp query.
-        If mibs_path is not None, load the mibs present in the custom mibs
-        folder. (Need to be in pysnmp format)
-        """
-#        snmp_engine = hlapi.SnmpEngine()
-#        mib_builder = snmp_engine.getMibBuilder()
-#
-#        if mibs_path is not None:
-#            mib_builder.addMibSources(builder.DirMibSource(mibs_path))
-#
-#        mib_view_controller = view.MibViewController(mib_builder)
-#
-#        return snmp_engine, mib_view_controller
-
-    @staticmethod
-    def get_transport_target(instance, timeout, retries):
+    def get_transport_target(self, instance, timeout, retries):
         """
         Generate a Transport target object based on the instance's configuration
         """
         ip_address = instance['ip_address']
         port = int(instance.get('port', 161))  # Default SNMP port
+        hostname = '{}:{}'.format(ip_address, port)
         community = instance.get('community_string')
-        version = int(instance.get('snmp_version', 2))
-        return easysnmp.Session(hostname="{}:{}".format(ip_address, port), community=community, version=version)#, use_numeric=True, use_long_names=True)
+        user = instance.get('user')
+        version = self._version
 
-    @staticmethod
-    def get_auth_data(instance):
-        """
-        Generate a Security Parameters object based on the instance's
-        configuration.
-        """
-#        if 'community_string' in instance:
-#            # SNMP v1 - SNMP v2
-#            # See http://snmplabs.com/pysnmp/docs/api-reference.html#pysnmp.hlapi.CommunityData
-#            if int(instance.get('snmp_version', 2)) == 1:
-#                return hlapi.CommunityData(instance['community_string'], mpModel=0)
-#            return hlapi.CommunityData(instance['community_string'], mpModel=1)
-#
-#        if 'user' in instance:
-#            # SNMP v3
-#            user = instance['user']
-#            auth_key = None
-#            priv_key = None
-#            auth_protocol = None
-#            priv_protocol = None
-#
-#            if 'authKey' in instance:
-#                auth_key = instance['authKey']
-#                auth_protocol = hlapi.usmHMACMD5AuthProtocol
-#
-#            if 'privKey' in instance:
-#                priv_key = instance['privKey']
-#                auth_protocol = hlapi.usmHMACMD5AuthProtocol
-#                priv_protocol = hlapi.usmDESPrivProtocol
-#
-#            if 'authProtocol' in instance:
-#                auth_protocol = getattr(hlapi, instance['authProtocol'])
-#
-#            if 'privProtocol' in instance:
-#                priv_protocol = getattr(hlapi, instance['privProtocol'])
-#
-#            return hlapi.UsmUserData(user, auth_key, priv_key, auth_protocol, priv_protocol)
-#
-#        raise ConfigurationError('An authentication method needs to be provided')
+        import easysnmp
 
-    @staticmethod
-    def get_context_data(instance):
-        """
-        Generate a Context Parameters object based on the instance's
-        configuration.
-        We do not use the hlapi currently, but the rfc3413.oneliner.cmdgen
-        accepts Context Engine Id (always None for now) and Context Name parameters.
-        """
-#        context_engine_id = None
-#        context_name = ''
-#
-#        if 'user' in instance:
-#            if 'context_engine_id' in instance:
-#                context_engine_id = OctetString(instance['context_engine_id'])
-#
-#            if 'context_name' in instance:
-#                context_name = instance['context_name']
-#
-#        return context_engine_id, context_name
+        if community:
+            return easysnmp.Session(hostname=hostname, community=community, version=version)
+
+        if user:
+            AUTH_PROTOCOLS = {'usmHMACMD5AuthProtocol': 'MD5', 'usmHMACSHAAuthProtocol': 'SHA'}
+            PRIV_PROTOCOLS = {'usmDESPrivProtocol': 'DES', 'usmAesCfb128Protocol': 'AES'}
+            version = 3
+            auth_password = instance.get('authKey')
+            auth_protocol = instance.get('authProtocol', 'MD5')
+            auth_protocol = AUTH_PROTOCOLS.get(auth_protocol, auth_protocol)
+            priv_key = instance.get('privKey')
+            priv_protocol = instance.get('privProtocol', 'DES')
+            priv_protocol = PRIV_PROTOCOLS.get(priv_protocol, priv_protocol)
+            context_engine_id = instance.get('context_engine_id', '')
+            context = instance.get('context_name', '')
+
+            return easysnmp.Session(
+                hostname=hostname, security_username=user, context=context,
+                context_engine_id=context_engine_id,
+                auth_password=auth_password, auth_protocol=auth_protocol,
+                privacy_protocol=priv_protocol, privacy_password=priv_key,
+                version=version, security_level='auth_with_privacy')
+
+        raise ConfigurationError()
 
     def parse_metrics(self, metrics, warning, log):
         """Parse configuration and returns data to be used for SNMP queries.
@@ -355,7 +295,7 @@ class InstanceConfig:
         bulk_oids = []
 
         # Use bulk for SNMP version > 1 and there are enough symbols
-        bulk_limit = self.bulk_threshold# if self._auth_data.mpModel else 0
+        bulk_limit = self.bulk_threshold if self._version > 1 else 0
 
         for table, symbols in table_oids.values():
             if not symbols:
