@@ -2,7 +2,7 @@
 
 ## Overview
 
-Track overall and per-pool stats on each of your twemproxy servers. This Agent check collects metrics for client and server connections and errors, request and response rates, bytes in and out of the proxy, and more.
+Track overall and per-pool stats on each of your Twemproxy servers. This Agent check collects metrics for client and server connections and errors, request and response rates, bytes in and out of the proxy, and more.
 
 ## Setup
 
@@ -26,7 +26,7 @@ Follow the instructions below to configure this check for an Agent running on a 
        port: 22222
    ```
 
-2. [Restart the Agent][5] to begin sending twemproxy metrics to Datadog.
+2. [Restart the Agent][5] to begin sending Twemproxy metrics to Datadog.
 
 #### Containerized
 
