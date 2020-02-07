@@ -74,7 +74,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Multiple pools
 
-It is possible to monitor multiple PHP-FPM pools using the same proxy server, a common scenario when running on Kubernetes. To do so, modify your server's routes to point to different PHP-FPM instances. Here is an example Nginx configuration:
+It is possible to monitor multiple PHP-FPM pools using the same proxy server, a common scenario when running on Kubernetes. To do so, modify your server's routes to point to different PHP-FPM instances. Here is an example NGINX configuration:
 
 ```text
 server {
@@ -109,7 +109,7 @@ If your PHP-FPM installation uses unix sockets, you have to use the below syntax
 | `ping_reply`  | `pong`                            |
 | `use_fastcgi` | `true`                            |
 
-**Note**: With Autodiscovery, if the Agent runs in a separate container/task/pod, it doesn't have access to the unix sockets file of your FPM pool. It order to address this, run the Agent as a sidecar.
+**Note**: With Autodiscovery, if the Agent runs in a separate container/task/pod, it doesn't have access to the Unix sockets file of your FPM pool. It order to address this, run the Agent as a sidecar.
 
 ### Validation
 
