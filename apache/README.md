@@ -65,8 +65,7 @@ _Available for Agent versions >6.0_
        service: apache
    ```
 
-   Change the `path` and `service` parameter values and configure them for your environment.
-   See the [sample apache.d/conf.yaml][4] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
 

@@ -55,10 +55,9 @@ _Available for Agent versions >6.0_
               pattern: [A-Z]+ +\[[^\]]+\] +\d{4}-\d{2}-\d{2}
    ```
 
-   Change the `path` and `service` parameter values and configure them for your environment.
-   See the [sample cassandra.d/conf.yaml][5] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample cassandra.d/conf.yaml][5] for all available configuration options.
 
-   To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][7] can be added.
+    To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][7] can be added.
 
 3. [Restart the Agent][6].
 
