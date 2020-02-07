@@ -4,10 +4,10 @@
 
 ## Overview
 
-Get metrics from the PostgreSQL service in real time to:
+Get metrics from PostgreSQL in real time to:
 
-- Visualize and monitor PostgreSQL states
-- Received notifications about PostgreSQL failovers and events
+- Visualize and monitor PostgreSQL states.
+- Received notifications about PostgreSQL failovers and events.
 
 ## Setup
 
@@ -19,16 +19,16 @@ The PostgreSQL check is packaged with the Agent. To start gathering your Postgre
 
 #### Prepare Postgres
 
-To get started with the PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database and run:
+To get started with the PostgreSQL integration, create a read-only `datadog` user with proper access to your PostgreSQL server. Start `psql` on your PostgreSQL database.
 
-For PostgreSQL version 10 and above:
+For PostgreSQL version 10 and above, run:
 
 ```shell
 create user datadog with password '<PASSWORD>';
 grant pg_monitor to datadog;
 ```
 
-For older PostgreSQL versions:
+For older PostgreSQL versions, run:
 
 ```shell
 create user datadog with password '<PASSWORD>';
@@ -103,9 +103,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 _Available for Agent versions >6.0_
 
-PostgreSQL default logging is to `stderr` and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. Refer to the PostgreSQL [documentation][14] on this topic for additional details.
+PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. Refer to the PostgreSQL [documentation][14] on this topic for additional details.
 
-1. Logging is configured within the file `/etc/postgresql/<VERSION>/main/postgresql.conf`, for regular log results including statement outputs uncomment the following parameters in the log section:
+1. Logging is configured within the file `/etc/postgresql/<VERSION>/main/postgresql.conf`. For regular log results, including statement outputs, uncomment the following parameters in the log section:
 
    ```conf
      logging_collector = on
@@ -200,7 +200,7 @@ The PostgreSQL check does not include any events.
 ### Service Checks
 
 **postgres.can_connect**:<br>
-Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL instance, otherwie returns `OK`.
+Returns `CRITICAL` if the Agent is unable to connect to the monitored PostgreSQL instance, otherwise returns `OK`.
 
 ## Further Reading
 
