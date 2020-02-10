@@ -32,12 +32,8 @@ class VSphereRestAPI(object):
 
     def smart_connect(self):
         """
-        Create an authenticated stub configuration object that can be used to issue
-        requests against vCenter.
-        Returns a stub_config that stores the session identifier that can be used
-        to issue authenticated requests against vCenter.
+        Create a vSphere client.
         """
-
         session = requests.Session()
         session.verify = self.config.ssl_verify
         session.cert = self.config.ssl_capath
