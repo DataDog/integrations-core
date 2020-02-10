@@ -1319,7 +1319,6 @@ def test_hp_ilo4(aggregator):
     cpqsm2_gauges = [
         'cpqSm2CntlrBatteryPercentCharged',
         'cpqSm2CntlrSelfTestErrors',
-        'cpqSm2CntlrSelfTestErrorMask',
         'cpqSm2EventTotalEntries',
     ]
 
