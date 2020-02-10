@@ -41,7 +41,7 @@ No additional installation is needed on your server.
     Here is an example of custom tags:
 
     ```yaml
-    metrics.reporter.dghttp.tags: <KEY1>:<VALUE1>, <VALUE2>
+    metrics.reporter.dghttp.tags: <KEY1>:<VALUE1>, <KEY1>:<VALUE2>
     ```
 
     **Note**: By default, any variables in metric names will be sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
