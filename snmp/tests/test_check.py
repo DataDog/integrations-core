@@ -1306,11 +1306,22 @@ def test_hp_ilo4(aggregator):
         'cpqHeThermalSystemFanStatus',
         'cpqHeThermalCpuFanStatus',
         'cpqNicVtVirusActivity',
+        'cpqSm2CntlrServerPowerState',
+        'cpqSm2CntlrBatteryStatus',
+        'cpqSm2CntlrRemoteSessionStatus',
+        'cpqSm2CntlrInterfaceStatus',
     ]
 
     cpqhlth_counts = ['cpqHeSysUtilLifeTime', 'cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
 
     cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin', 'cpqHePowerMeterCurrReading']
+
+    cpqsm2_gauges = [
+        'cpqSm2CntlrBatteryPercentCharged',
+        'cpqSm2CntlrSelfTestErrors',
+        'cpqSm2CntlrSelfTestErrorMask',
+        'cpqSm2EventTotalEntries',
+    ]
 
     interfaces = ['eth0', 'en1']
     phys_adapter_counts = [
@@ -1341,6 +1352,11 @@ def test_hp_ilo4(aggregator):
             'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
         )
 
+    for metric in cpqsm2_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+
     for index in temperature_sensors:
         tags = ['temperature_index:{}'.format(index)] + common.CHECK_TAGS
         aggregator.assert_metric('snmp.cpqHeTemperatureCelsius', metric_type=aggregator.GAUGE, tags=tags, count=1)
@@ -1358,8 +1374,6 @@ def test_hp_ilo4(aggregator):
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
         for metric in phys_adapter_rates:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1
-            )
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
