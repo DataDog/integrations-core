@@ -1323,6 +1323,20 @@ def test_hp_ilo4(aggregator):
         'cpqSm2EventTotalEntries',
     ]
 
+    card_locations = [1, 2]
+    network_card_counts = [
+        'cpqSm2NicXmitBytes',
+        'cpqSm2NicXmitTotalPackets',
+        'cpqSm2NicXmitDiscardPackets',
+        'cpqSm2NicXmitErrorPackets',
+        'cpqSm2NicXmitQueueLength',
+        'cpqSm2NicRecvBytes',
+        'cpqSm2NicRecvTotalPackets',
+        'cpqSm2NicRecvDiscardPackets',
+        'cpqSm2NicRecvErrorPackets',
+        'cpqSm2NicRecvUnknownPackets',
+    ]
+
     interfaces = ['eth0', 'en1']
     phys_adapter_counts = [
         'cpqNicIfPhysAdapterGoodTransmits',
@@ -1366,6 +1380,13 @@ def test_hp_ilo4(aggregator):
         tags = ['battery_index:{}'.format(index)] + common.CHECK_TAGS
         aggregator.assert_metric('snmp.cpqHeSysBatteryCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cpqHeSysBatteryStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for location in card_locations:
+        tags = ['nic_stats_location:{}'.format(location)] + common.CHECK_TAGS
+        for metric in network_card_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
 
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
