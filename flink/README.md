@@ -35,7 +35,7 @@ No additional installation is needed on your server.
     metrics.scope.operator: flink.operator
     ```
 
-    **Note**: The system scopes must be remapped for your Flink metrics to be supported, otherwise they will be submitted as cutom metrics.
+    **Note**: The system scopes must be remapped for your Flink metrics to be supported, otherwise they will be submitted as custom metrics.
 
 3. Configure additional [tags][4] in `<FLINK_HOME>/conf/flink-conf.yaml`.
     Here is an example of custom tags:
