@@ -191,7 +191,12 @@ class Redis(AgentCheck):
             latency_ms = round_value((time.time() - start) * 1000, 2)
             tags = sorted(tags + ["redis_role:%s" % info["role"]])
             self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
-            config = conn.config_get("maxclients")
+            try:
+                config = conn.config_get("maxclients")
+            except redis.ResponseError:
+                # config_get is disabled on some environments
+                self.log.debug("Error querying config")
+                config = {}
             status = AgentCheck.OK
             self.service_check('redis.can_connect', status, tags=tags)
             self._collect_metadata(info)
