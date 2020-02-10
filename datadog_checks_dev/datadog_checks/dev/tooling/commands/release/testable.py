@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 import time
-from typing import List, Set, Tuple
+from typing import List, Optional, Sequence, Set, Tuple
 
 import click
 
@@ -16,7 +16,16 @@ from ...utils import format_commit_id
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 
-def create_jira_issue(client, teams, pr_title, pr_url, pr_body, dry_run, pr_author, config):
+def create_jira_issue(
+    client: JiraClient,
+    teams: List[str],
+    pr_title: str,
+    pr_url: str,
+    pr_body: str,
+    dry_run: bool,
+    pr_author: str,
+    config: dict,
+) -> None:
     body = f'Pull request: {pr_url}\n\n{pr_body}'
 
     for team in teams:
@@ -104,7 +113,7 @@ def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> List[Tu
             raise click.Abort
 
 
-def pick_card_member(config, author, team):
+def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
     """Return a member to assign to the created issue.
     In practice, it returns one jira user which is not the PR author, for the given team.
     For it to work, you need a `jira_users_$team` table in your ddev configuration,
@@ -117,7 +126,7 @@ def pick_card_member(config, author, team):
     """
     users = config.get(f'jira_users_{team.lower()}')
     if not users:
-        return
+        return None
     member = random.choice([key for user, key in users.items() if user != author])
     return member
 
@@ -217,7 +226,7 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
     jira = JiraClient(user_config)
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
-        if commit_id:
+        if commit_id is not None:
             api_response = get_pr(commit_id, user_config, raw=True)
             if api_response.status_code == 401:
                 abort('Access denied. Please ensure your GitHub token has correct permissions.')
