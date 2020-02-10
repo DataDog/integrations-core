@@ -88,7 +88,7 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
     realtime_instance.update(
         {
             'collect_per_instance_filters': {
-                'vm': [r'cpu\.usage\.raw', r'disk\..*'],
+                'vm': [r'cpu\.usagemhz\.avg', r'disk\..*'],
                 'host': [r'cpu\.coreUtilization\..*', r'sys\.uptime\..*', r'disk\..*'],
             }
         }
@@ -98,18 +98,15 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
 
     # Following metrics should match and have instance value tag
     aggregator.assert_metric(
-        'vsphere.cpu.usage.raw', tags=['cpu_core:4', 'vcenter_server:FAKE'],
+        'vsphere.cpu.usagemhz.avg', tags=['cpu_core:6', 'vcenter_server:FAKE'],
     )
-    for suffix in ['min', 'max', 'raw', 'avg']:
-        aggregator.assert_metric(
-            'vsphere.cpu.coreUtilization.{}'.format(suffix),
-            hostname='10.0.0.104',
-            tags=['cpu_core:16', 'vcenter_server:FAKE'],
-        )
+    aggregator.assert_metric(
+        'vsphere.cpu.coreUtilization.avg', hostname='10.0.0.104', tags=['cpu_core:16', 'vcenter_server:FAKE'],
+    )
 
     # Following metrics should NOT match and do NOT have instance value tag
     aggregator.assert_metric(
-        'vsphere.cpu.usage.min', tags=['vcenter_server:FAKE'],
+        'vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'],
     )
     aggregator.assert_metric(
         'vsphere.cpu.totalCapacity.avg', tags=['vcenter_server:FAKE'],
