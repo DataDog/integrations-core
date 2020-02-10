@@ -6,17 +6,20 @@
 
 Get metrics from OpenStack service in real time to:
 
-* Visualize and monitor OpenStack states
-* Be notified about OpenStack failovers and events.
+- Visualize and monitor OpenStack states.
+- Be notified about OpenStack failovers and events.
 
 ## Setup
+
 ### Installation
 
 To capture your OpenStack metrics, [install the Agent][2] on your hosts running hypervisors.
 
 ### Configuration
+
 #### Prepare OpenStack
-Then configure a Datadog role and user with your identity server:
+
+Configure a Datadog role and user with your identity server:
 
 ```console
 openstack role create datadog_monitoring
@@ -28,85 +31,83 @@ openstack role add datadog_monitoring \
     --user datadog
 ```
 
-Finally, update your `policy.json` files to grant the needed permissions. `role:datadog_monitoring` requires access to the following operations:
+Then, update your `policy.json` files to grant the needed permissions. `role:datadog_monitoring` requires access to the following operations:
 
 **Nova**
 
-```
+```json
 {
-    "compute_extension": "aggregates",
-    "compute_extension": "hypervisors",
-    "compute_extension": "server_diagnostics",
-    "compute_extension": "v3:os-hypervisors",
-    "compute_extension": "v3:os-server-diagnostics",
-    "compute_extension": "availability_zone:detail",
-    "compute_extension": "v3:availability_zone:detail",
-    "compute_extension": "used_limits_for_admin",
-    "os_compute_api:os-aggregates:index": "rule:admin_api or role:datadog_monitoring",
-    "os_compute_api:os-aggregates:show": "rule:admin_api or role:datadog_monitoring",
-    "os_compute_api:os-hypervisors": "rule:admin_api or role:datadog_monitoring",
-    "os_compute_api:os-server-diagnostics": "rule:admin_api or role:datadog_monitoring",
-    "os_compute_api:os-used-limits": "rule:admin_api or role:datadog_monitoring"
+  "compute_extension": "aggregates",
+  "compute_extension": "hypervisors",
+  "compute_extension": "server_diagnostics",
+  "compute_extension": "v3:os-hypervisors",
+  "compute_extension": "v3:os-server-diagnostics",
+  "compute_extension": "availability_zone:detail",
+  "compute_extension": "v3:availability_zone:detail",
+  "compute_extension": "used_limits_for_admin",
+  "os_compute_api:os-aggregates:index": "rule:admin_api or role:datadog_monitoring",
+  "os_compute_api:os-aggregates:show": "rule:admin_api or role:datadog_monitoring",
+  "os_compute_api:os-hypervisors": "rule:admin_api or role:datadog_monitoring",
+  "os_compute_api:os-server-diagnostics": "rule:admin_api or role:datadog_monitoring",
+  "os_compute_api:os-used-limits": "rule:admin_api or role:datadog_monitoring"
 }
 ```
 
 **Neutron**
 
-```
+```json
 {
-    "get_network": "rule:admin_or_owner or rule:shared or rule:external or rule:context_is_advsvc or role:datadog_monitoring"
+  "get_network": "rule:admin_or_owner or rule:shared or rule:external or rule:context_is_advsvc or role:datadog_monitoring"
 }
 ```
 
 **Keystone**
 
-```
+```json
 {
-    "identity:get_project": "rule:admin_required or project_id:%(target.project.id)s or role:datadog_monitoring",
-    "identity:list_projects": "rule:admin_required or role:datadog_monitoring"
+  "identity:get_project": "rule:admin_required or project_id:%(target.project.id)s or role:datadog_monitoring",
+  "identity:list_projects": "rule:admin_required or role:datadog_monitoring"
 }
 ```
 
-You may need to restart your Keystone, Neutron and Nova API services to ensure that the policy changes take.
+You may need to restart your Keystone, Neutron, and Nova API services to ensure that the policy changes take.
 
-**Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit our Billing FAQ.
+**Note**: Installing the OpenStack integration could increase the number of VMs that Datadog monitors. For more information on how this may affect your billing, visit the Billing FAQ.
 
 #### Agent Configuration
 
 1. Configure the Datadog Agent to connect to your Keystone server, and specify individual projects to monitor. Edit the `openstack.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] with the configuration below. See the [sample openstack.d/conf.yaml][4] for all available configuration options:
 
-    ```yaml
-        init_config:
+   ```yaml
+   init_config:
+     ## @param keystone_server_url - string - required
+     ## Where your identity server lives.
+     ## Note that the server must support Identity API v3
+     #
+     keystone_server_url: "https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/"
 
-            ## @param keystone_server_url - string - required
-            ## Where your identity server lives.
-            ## Note that the server must support Identity API v3
-            #
-            keystone_server_url: "https://<KEYSTONE_SERVER_ENDPOINT>:<PORT>/"
+   instances:
+     ## @param name - string - required
+     ## Unique identifier for this instance.
+     #
+     - name: "<INSTANCE_NAME>"
 
-        instances:
-
-            ## @param name - string - required
-            ## Unique identifier for this instance.
-            #
-          - name: "<INSTANCE_NAME>"
-
-            ## @param user - object - required
-            ## User credentials
-            ## Password authentication is the only auth method supported.
-            ## `user` object expects the parameter `username`, `password`,
-            ## and `user.domain.id`.
-            ##
-            ## `user` should resolve to a structure like:
-            ##
-            ##  {'password': '<PASSWORD>', 'name': '<USERNAME>', 'domain': {'id': '<DOMAINE_ID>'}}
-            #
-            user:
-              password: "<PASSWORD>"
-              name: datadog
-              domain:
-                id: "<DOMAINE_ID>"
-    ```
+       ## @param user - object - required
+       ## User credentials
+       ## Password authentication is the only auth method supported.
+       ## `user` object expects the parameter `username`, `password`,
+       ## and `user.domain.id`.
+       ##
+       ## `user` should resolve to a structure like:
+       ##
+       ##  {'password': '<PASSWORD>', 'name': '<USERNAME>', 'domain': {'id': '<DOMAINE_ID>'}}
+       #
+       user:
+         password: "<PASSWORD>"
+         name: datadog
+         domain:
+           id: "<DOMAINE_ID>"
+   ```
 
 2. [Restart the Agent][5].
 
@@ -115,13 +116,17 @@ You may need to restart your Keystone, Neutron and Nova API services to ensure t
 [Run the Agent's `status` subcommand][6] and look for `openstack` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
+
 The OpenStack check does not include any events.
 
 ### Service Checks
+
 **openstack.neutron.api.up**:
 
 Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
@@ -148,13 +153,12 @@ Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out our [series of blog posts][9] about it.
+To get a better idea of how (or why) to integrate your Nova OpenStack compute module with Datadog, check out Datadog's [series of blog posts][9] about it.
 
-See also our blog posts:
+See also these other Datadog blog posts:
 
-* [Install OpenStack in two commands for dev and test][10]
-* [OpenStack: host aggregates, flavors, and availability zones][11]
-
+- [Install OpenStack in two commands for dev and test][10]
+- [OpenStack: host aggregates, flavors, and availability zones][11]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/openstack/images/openstack_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
