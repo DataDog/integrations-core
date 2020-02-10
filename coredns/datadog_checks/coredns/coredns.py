@@ -98,6 +98,11 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
         metrics = [DEFAULT_METRICS, GO_METRICS]
         metrics.extend(instance.get('metrics', []))
 
-        instance.update({'prometheus_url': endpoint, 'namespace': 'coredns', 'metrics': metrics})
+        instance.update({
+            'prometheus_url': endpoint,
+            'namespace': 'coredns',
+            'metrics': metrics,
+            'send_distribution_counts_as_monotonic': True,
+        })
 
         return instance
