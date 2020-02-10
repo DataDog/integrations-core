@@ -8,18 +8,17 @@
     "created": "2020-02-05T16:39:17.081662+00:00",
     "new_id": "m7e-3hv-p6n",
     "created_by": {
-        "disabled": false,
-        "handle": "florian.veaux@datadoghq.com",
-        "name": "Florian Veaux",
-        "title": null,
-        "is_admin": true,
-        "role": null,
-        "access_role": "adm",
-        "verified": true,
-        "email": "florian.veaux@datadoghq.com",
-        "icon": "https://secure.gravatar.com/avatar/09f3d0418a785798b46e2e904cbbaad5?s=48&d=retro"
-    },
-    "original_title": "vSphere integration dashboard WIP",
+        "access_role": "adm", 
+        "disabled": false, 
+        "email": "support@datadoghq.com", 
+        "handle": "support@datadoghq.com", 
+        "is_admin": true, 
+        "name": "Datadog", 
+        "role": null, 
+        "title": null, 
+        "verified": true
+    }, 
+    "original_title": "VMware vSphere - Overview",
     "modified": "2020-02-10T15:43:28.499024+00:00",
     "originalHeight": 80,
     "template_variables": [
@@ -34,13 +33,13 @@
             "name": "vcenter_datacenter"
         },
         {
-            "default": "aws.vcenter.localdomain-synthetics",
+            "default": "*",
             "prefix": "host",
             "name": "host"
         }
     ],
     "author_info": {
-        "author_name": "Florian Veaux"
+        "author_name": "Datadog"
     },
     "disableEditing": false,
     "originalWidth": "calc(100% - 32px)",
@@ -51,7 +50,7 @@
             "generated_title": "",
             "title_size": 16,
             "title": true,
-            "url": "https://static.datadoghq.com/static/images/saas_logos/bot/vsphere.png",
+            "url": "https://static.datadoghq.com/static/images/saas_logos/bot/vsphere@2x.png",
             "type": "image",
             "title_align": "left",
             "title_text": "",
