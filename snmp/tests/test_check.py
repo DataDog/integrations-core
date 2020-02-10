@@ -1305,6 +1305,24 @@ def test_dell_poweredge(aggregator):
     aggregator.assert_metric('snmp.powerSupplyMaximumInputVoltage', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
     aggregator.assert_metric('snmp.powerSupplyCurrentInputVoltage', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
 
+    aggregator.assert_metric('snmp.temperatureProbeStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    aggregator.assert_metric('snmp.temperatureProbeReading', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    
+    aggregator.assert_metric('snmp.memoryDeviceStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    aggregator.assert_metric('snmp.memoryDeviceFailureModes', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+
+    aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+
+    aggregator.assert_metric('snmp.processorDeviceStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    aggregator.assert_metric('snmp.processorDeviceThreadCount', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+
+    
+    aggregator.assert_metric('snmp.cacheDeviceStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    aggregator.assert_metric('snmp.cacheDeviceMaximumSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    aggregator.assert_metric('snmp.cacheDeviceCurrentSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    
+
+
 
 
     aggregator.assert_all_metrics_covered()
