@@ -145,9 +145,6 @@ instances:
     ## Examples:
     ## - os_type:windows
     ## - application_name:my_app
-    ##
-    ## Tagging best practices:
-    ## https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/techpaper/performance/tagging-vsphere67-perf.pdf
     #
     # collect_tags: false
 
