@@ -16,35 +16,35 @@ No additional installation is needed on your server.
 
 1. Configure the [Datadog HTTP Reporter][4] in Flink.
 
-	Copy `<FLINK_HOME>/opt/flink-metrics-datadog-1.9.2.jar` into your `<FLINK_HOME>/lib` folder.
-	In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<API_KEY>` with your Datadog API key:
+    Copy `<FLINK_HOME>/opt/flink-metrics-datadog-1.9.2.jar` into your `<FLINK_HOME>/lib` folder.
+    In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<API_KEY>` with your Datadog API key:
 
-	```yaml
-	metrics.reporter.dghttp.class: org.apache.flink.metrics.datadog.DatadogHttpReporter
-	metrics.reporter.dghttp.apikey: <API_KEY>
-	```
+    ```yaml
+    metrics.reporter.dghttp.class: org.apache.flink.metrics.datadog.DatadogHttpReporter
+    metrics.reporter.dghttp.apikey: <API_KEY>
+    ```
 
 2. Re-map system scopes in your `<FLINK_HOME>/conf/flink-conf.yaml`.
 
-	```yaml
-	metrics.scope.jm: flink.jobmanager
-	metrics.scope.jm.job: flink.jobmanager.job
-	metrics.scope.tm: flink.taskmanager
-	metrics.scope.tm.job: flink.taskmanager.job
-	metrics.scope.task: flink.task
-	metrics.scope.operator: flink.operator
-	```
+    ```yaml
+    metrics.scope.jm: flink.jobmanager
+    metrics.scope.jm.job: flink.jobmanager.job
+    metrics.scope.tm: flink.taskmanager
+    metrics.scope.tm.job: flink.taskmanager.job
+    metrics.scope.task: flink.task
+    metrics.scope.operator: flink.operator
+    ```
 
-	**Note**: The system scopes must be remapped for your Flink metrics to be supported, otherwise they will be submitted as cutom metrics.
+    **Note**: The system scopes must be remapped for your Flink metrics to be supported, otherwise they will be submitted as cutom metrics.
 
 3. Configure additional [tags][4] in `<FLINK_HOME>/conf/flink-conf.yaml`.
-	Here is an example of custom tags:
+    Here is an example of custom tags:
 
-	```yaml
-	metrics.reporter.dghttp.tags: <KEY1>:<VALUE1>, <VALUE2>
-	```
+    ```yaml
+    metrics.reporter.dghttp.tags: <KEY1>:<VALUE1>, <VALUE2>
+    ```
 
-	**Note**: By default, any variables in metric names will be sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
+    **Note**: By default, any variables in metric names will be sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
 
 4. Restart Flink to start sending your Flink metrics to the Agent.
 
