@@ -1322,7 +1322,9 @@ def test_hp_ilo4(aggregator):
         'cpqSm2EventTotalEntries',
     ]
 
-    card_locations = [1, 2]
+    EMBEDDED = 2
+    PCMCIA = 3
+    card_locations = [EMBEDDED, PCMCIA]
     network_card_counts = [
         'cpqSm2NicXmitBytes',
         'cpqSm2NicXmitTotalPackets',
