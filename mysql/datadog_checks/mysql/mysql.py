@@ -1,12 +1,12 @@
-# (C) Datadog, Inc. 2018
-# (C) Datadog, Inc. Patrick Galbraith <patg@patg.net> 2013
+# (C) Datadog, Inc. 2013-present
+# (C) Patrick Galbraith <patg@patg.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
 import re
 import traceback
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from contextlib import closing, contextmanager
 
 import pymysql
@@ -274,16 +274,49 @@ SYNTHETIC_VARS = {
     'Qcache_instant_utilization': ('mysql.performance.qcache.utilization.instant', GAUGE),
 }
 
+BUILDS = ('log', 'standard', 'debug', 'valgrind', 'embedded')
+
+MySQLMetadata = namedtuple('MySQLMetadata', ['version', 'flavor', 'build'])
+
 
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
     DEFAULT_MAX_CUSTOM_QUERIES = 20
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        self.mysql_version = {}
+    def __init__(self, name, init_config, instances):
+        super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
+        self.metadata = None
+
+    def _get_metadata(self, db):
+        with closing(db.cursor()) as cursor:
+            cursor.execute('SELECT VERSION()')
+            result = cursor.fetchone()
+
+            # Version might include a build, a flavor, or both
+            # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
+            # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
+            # https://mariadb.com/kb/en/library/version/
+            # and https://mariadb.com/kb/en/library/server-system-variables/#version
+            parts = result[0].split('-')
+            version, flavor, build = [parts[0], '', '']
+
+            for data in parts:
+                if data == "MariaDB":
+                    flavor = "MariaDB"
+                if data != "MariaDB" and flavor == '':
+                    flavor = "MySQL"
+                if data in BUILDS:
+                    build = data
+            if build == '':
+                build = 'unspecified'
+
+            return MySQLMetadata(version, flavor, build)
+
+    def _send_metadata(self):
+        self.set_metadata('version', self.metadata.version + '+' + self.metadata.build)
+        self.set_metadata('flavor', self.metadata.flavor)
 
     @classmethod
     def get_library_versions(cls):
@@ -312,8 +345,9 @@ class MySql(AgentCheck):
 
         with self._connect(host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags) as db:
             try:
-                # Metadata collection
-                self._collect_metadata(db)
+                # metadata collection
+                self.metadata = self._get_metadata(db)
+                self._send_metadata()
 
                 # Metric collection
                 self._collect_metrics(db, tags, options, queries, max_custom_queries)
@@ -474,7 +508,7 @@ class MySql(AgentCheck):
                 if 'Innodb_buffer_pool_bytes_used' not in results:
                     results['Innodb_buffer_pool_bytes_used'] = innodb_buffer_pool_pages_used * innodb_page_size
             except (KeyError, TypeError) as e:
-                self.log.error("Not all InnoDB buffer pool metrics are available, unable to compute: {0}".format(e))
+                self.log.error("Not all InnoDB buffer pool metrics are available, unable to compute: %s", e)
 
             if is_affirmative(options.get('extra_innodb_metrics', False)):
                 self.log.debug("Collecting Extra Innodb Metrics")
@@ -501,7 +535,7 @@ class MySql(AgentCheck):
                 self._collect_scalar('Key_blocks_not_flushed', results) * key_cache_block_size
             )
         except TypeError as e:
-            self.log.error("Not all Key metrics are available, unable to compute: {0}".format(e))
+            self.log.error("Not all Key metrics are available, unable to compute: %s", e)
 
         metrics.update(VARIABLES_VARS)
         metrics.update(INNODB_VARS)
@@ -534,7 +568,7 @@ class MySql(AgentCheck):
 
         if is_affirmative(options.get('replication', False)):
             # Get replica stats
-            is_mariadb = self._get_is_mariadb(db)
+            is_mariadb = self.metadata.flavor == "MariaDB"
             replication_channel = options.get('replication_channel')
             if replication_channel:
                 self.service_check_tags.append("channel:{0}".format(replication_channel))
@@ -620,7 +654,7 @@ class MySql(AgentCheck):
                 )
 
             if len(queries) > max_custom_queries:
-                self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest." % max_custom_queries)
+                self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest.", max_custom_queries)
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
@@ -629,10 +663,6 @@ class MySql(AgentCheck):
             return True
 
         return False
-
-    def _collect_metadata(self, db):
-        version = self._get_version(db)
-        self.service_metadata('version', ".".join(version))
 
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
@@ -656,43 +686,16 @@ class MySql(AgentCheck):
         # so let's be careful when we compute the version number
 
         try:
-            mysql_version = self._get_version(db)
+            mysql_version = self.metadata.version.split('.')
         except Exception as e:
-            self.warning("Cannot compute mysql version, assuming it's older.: %s" % str(e))
+            self.warning("Cannot compute mysql version, assuming it's older.: %s", e)
             return False
-        self.log.debug("MySQL version %s" % mysql_version)
+        self.log.debug("MySQL version %s", mysql_version)
 
         patchlevel = int(re.match(r"([0-9]+)", mysql_version[2]).group(1))
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
 
         return version >= compat_version
-
-    def _get_version(self, db):
-        hostkey = self._get_host_key()
-        if hostkey in self.mysql_version:
-            version = self.mysql_version[hostkey]
-            return version
-
-        # Get MySQL version
-        with closing(db.cursor()) as cursor:
-            cursor.execute('SELECT VERSION()')
-            result = cursor.fetchone()
-
-            # Version might include a description e.g. 4.1.26-log.
-            # See
-            # http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
-            version = result[0].split('-')
-            version = version[0].split('.')
-            self.mysql_version[hostkey] = version
-            return version
-
-    @classmethod
-    def _get_is_mariadb(cls, db):
-        with closing(db.cursor()) as cursor:
-            cursor.execute('SELECT VERSION() LIKE "%MariaDB%"')
-            result = cursor.fetchone()
-
-            return result[0] == 1
 
     def _collect_all_scalars(self, key, dictionary):
         if key not in dictionary or dictionary[key] is None:
@@ -710,11 +713,11 @@ class MySql(AgentCheck):
         return self._collect_type(key, mapping, text_type)
 
     def _collect_type(self, key, mapping, the_type):
-        self.log.debug("Collecting data with %s" % key)
+        self.log.debug("Collecting data with %s", key)
         if key not in mapping:
-            self.log.debug("%s returned None" % key)
+            self.log.debug("%s returned None", key)
             return None
-        self.log.debug("Collecting done, value %s" % mapping[key])
+        self.log.debug("Collecting done, value %s", mapping[key])
         return the_type(mapping[key])
 
     def _collect_dict(self, metric_type, field_metric_map, query, db, tags):
@@ -737,9 +740,9 @@ class MySql(AgentCheck):
                         # cursor.description is a tuple of (column_name, ..., ...)
                         try:
                             col_idx = [d[0].lower() for d in cursor.description].index(field.lower())
-                            self.log.debug("Collecting metric: %s" % metric)
+                            self.log.debug("Collecting metric: %s", metric)
                             if result[col_idx] is not None:
-                                self.log.debug("Collecting done, value %s" % result[col_idx])
+                                self.log.debug("Collecting done, value %s", result[col_idx])
                                 if metric_type == GAUGE:
                                     self.gauge(metric, float(result[col_idx]), tags=tags)
                                 elif metric_type == RATE:
@@ -747,12 +750,12 @@ class MySql(AgentCheck):
                                 else:
                                     self.gauge(metric, float(result[col_idx]), tags=tags)
                             else:
-                                self.log.debug("Received value is None for index %d" % col_idx)
+                                self.log.debug("Received value is None for index %d", col_idx)
                         except ValueError:
-                            self.log.exception("Cannot find %s in the columns %s" % (field, cursor.description))
+                            self.log.exception("Cannot find %s in the columns %s", field, cursor.description)
         except Exception:
-            self.warning("Error while running %s\n%s" % (query, traceback.format_exc()))
-            self.log.exception("Error while running %s" % query)
+            self.warning("Error while running %s\n%s", query, traceback.format_exc())
+            self.log.exception("Error while running %s", query)
 
     def _collect_system_metrics(self, host, db, tags):
         pid = None
@@ -761,7 +764,7 @@ class MySql(AgentCheck):
             pid = self._get_server_pid(db)
 
         if pid:
-            self.log.debug("System metrics for mysql w/ pid: %s" % pid)
+            self.log.debug("System metrics for mysql w/ pid: %s", pid)
             # At last, get mysql cpu data out of psutil or procfs
 
             try:
@@ -779,7 +782,7 @@ class MySql(AgentCheck):
                     self.rate("mysql.performance.cpu_time", ucpu + scpu, tags=tags)
 
             except Exception:
-                self.warning("Error while reading mysql (pid: %s) procfs data\n%s" % (pid, traceback.format_exc()))
+                self.warning("Error while reading mysql (pid: %s) procfs data\n%s", pid, traceback.format_exc())
 
     def _get_pid_file_variable(self, db):
         """
@@ -801,12 +804,12 @@ class MySql(AgentCheck):
         # Try to get pid from pid file, it can fail for permission reason
         pid_file = self._get_pid_file_variable(db)
         if pid_file is not None:
-            self.log.debug("pid file: %s" % str(pid_file))
+            self.log.debug("pid file: %s", str(pid_file))
             try:
                 with open(pid_file, 'rb') as f:
                     pid = int(f.readline())
             except IOError:
-                self.log.debug("Cannot read mysql pid file %s" % pid_file)
+                self.log.debug("Cannot read mysql pid file %s", pid_file)
 
         # If pid has not been found, read it from ps
         if pid is None and PSUTIL_AVAILABLE:
@@ -850,7 +853,7 @@ class MySql(AgentCheck):
 
                 return binary_log_space
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error accessing the BINARY LOGS (must grant REPLICATION CLIENT): %s" % str(e))
+            self.warning("Privileges error accessing the BINARY LOGS (must grant REPLICATION CLIENT): %s", e)
             return None
 
     def _is_innodb_engine_enabled(self, db):
@@ -867,7 +870,7 @@ class MySql(AgentCheck):
                 return cursor.rowcount > 0
 
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
-            self.warning("Possibly innodb stats unavailable - error querying engines table: %s" % str(e))
+            self.warning("Possibly innodb stats unavailable - error querying engines table: %s", e)
             return False
 
     def _get_replica_stats(self, db, is_mariadb, replication_channel):
@@ -898,7 +901,7 @@ class MySql(AgentCheck):
                 # Mysql behaves the same with or without connection name.
                 pass
             else:
-                self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s" % str(e))
+                self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
 
         try:
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
@@ -907,7 +910,7 @@ class MySql(AgentCheck):
                 if binlog_results:
                     replica_results.update({'Binlog_enabled': True})
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s" % str(e))
+            self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
 
         return replica_results
 
@@ -933,7 +936,7 @@ class MySql(AgentCheck):
                 return {'Slaves_connected': slaves}
 
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Privileges error accessing the process tables (must grant PROCESS): %s" % str(e))
+            self.warning("Privileges error accessing the process tables (must grant PROCESS): %s", e)
             return {}
 
     @classmethod
@@ -951,9 +954,7 @@ class MySql(AgentCheck):
                 cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
             self.warning(
-                "Privilege error or engine unavailable accessing the INNODB status \
-                         tables (must grant PROCESS): %s"
-                % str(e)
+                "Privilege error or engine unavailable accessing the INNODB status tables (must grant PROCESS): %s", e,
             )
             return {}
 
@@ -962,7 +963,7 @@ class MySql(AgentCheck):
             # EG: This could be an Aurora Read Instance
             self.warning(
                 """'SHOW ENGINE INNODB STATUS' returned no data.
-                If you are running an Aurora Read Instace, \
+                If you are running an Aurora Read Instance, \
                 this is expected and you should disable the innodb metrics collection"""
             )
             return {}
@@ -1091,7 +1092,7 @@ class MySql(AgentCheck):
                             results['Innodb_pending_normal_aio_reads'] = long(row[4])
                             results['Innodb_pending_normal_aio_writes'] = long(row[12])
                         else:
-                            self.log.warning("Can't parse result line %s" % line)
+                            self.log.warning("Can't parse result line %s", line)
                     elif len(row) == 18:
                         # (len(row) == 18) Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
                         results['Innodb_pending_normal_aio_reads'] = long(row[4])
@@ -1260,7 +1261,7 @@ class MySql(AgentCheck):
         try:
             results['Innodb_checkpoint_age'] = results['Innodb_lsn_current'] - results['Innodb_lsn_last_checkpoint']
         except KeyError as e:
-            self.log.error("Not all InnoDB LSN metrics available, unable to compute: {0}".format(e))
+            self.log.error("Not all InnoDB LSN metrics available, unable to compute: %s", e)
 
         # Finally we change back the metrics values to string to make the values
         # consistent with how they are reported by SHOW GLOBAL STATUS
@@ -1302,7 +1303,7 @@ class MySql(AgentCheck):
 
                 return query_exec_time_95th_per
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("95th percentile performance metrics unavailable at this time: %s" % str(e))
+            self.warning("95th percentile performance metrics unavailable at this time: %s", e)
             return None
 
     def _query_exec_time_per_schema(self, db):
@@ -1336,7 +1337,7 @@ class MySql(AgentCheck):
 
                 return schema_query_avg_run_time
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Avg exec time performance metrics unavailable at this time: %s" % str(e))
+            self.warning("Avg exec time performance metrics unavailable at this time: %s", e)
             return None
 
     def _query_size_per_schema(self, db):
@@ -1345,7 +1346,7 @@ class MySql(AgentCheck):
 
         sql_query_schema_size = """
         SELECT   table_schema,
-                 SUM(data_length+index_length)/1024/1024 AS total_mb
+                 IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
                  FROM     information_schema.tables
                  GROUP BY table_schema;
         """
@@ -1368,7 +1369,7 @@ class MySql(AgentCheck):
 
                 return schema_size
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Avg exec time performance metrics unavailable at this time: %s" % str(e))
+            self.warning("Avg exec time performance metrics unavailable at this time: %s", e)
 
         return {}
 

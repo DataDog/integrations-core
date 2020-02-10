@@ -4,8 +4,8 @@
 
 Get metrics from kube_proxy service in real time to:
 
-* Visualize and monitor kube_proxy states
-* Be notified about kube_proxy failovers and events.
+- Visualize and monitor kube_proxy states
+- Be notified about kube_proxy failovers and events.
 
 ## Configuration
 
@@ -22,5 +22,4 @@ Contribute to the integration if you want to add a relevant metric.
 
 [Run the Agent's `status` subcommand][1] and look for `kube_proxy` under the Checks section.
 
-
-[1]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[1]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# (C) Datadog, Inc. 2016
+# (C) Datadog, Inc. 2016-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
@@ -13,6 +13,7 @@ import pytest
 import requests
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
 from six import iteritems
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
@@ -37,14 +38,6 @@ class MockResponse:
         pass
 
 
-@pytest.fixture
-def aggregator():
-    from datadog_checks.stubs import aggregator
-
-    aggregator.reset()
-    return aggregator
-
-
 PROMETHEUS_CHECK_INSTANCE = {
     'prometheus_url': 'http://fake.endpoint:10055/metrics',
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
@@ -55,12 +48,31 @@ PROMETHEUS_CHECK_INSTANCE = {
 }
 
 
+OPENMETRICS_CHECK_INSTANCE = {
+    'prometheus_url': 'http://fake.endpoint:10055/metrics',
+    'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
+    'namespace': 'openmetrics',
+}
+
+
 @pytest.fixture
 def mocked_prometheus_check():
     check = OpenMetricsBaseCheck('prometheus_check', {}, {})
     check.log = logging.getLogger('datadog-prometheus.test')
     check.log.debug = mock.MagicMock()
     return check
+
+
+@pytest.fixture
+def mocked_openmetrics_check_factory():
+    def factory(instance):
+        check = OpenMetricsBaseCheck('openmetrics_check', {}, [instance])
+        check.check_id = 'test:123'
+        check.log = logging.getLogger('datadog-openmetrics.test')
+        check.log.debug = mock.MagicMock()
+        return check
+
+    return factory
 
 
 @pytest.fixture
@@ -115,7 +127,11 @@ def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_c
     check.process_metric = mock.MagicMock()
     check.process(mocked_prometheus_scraper_config)
     check.poll.assert_called_with(mocked_prometheus_scraper_config)
-    check.process_metric.assert_called_with(ref_gauge, mocked_prometheus_scraper_config, metric_transformers=None)
+    check.process_metric.assert_called_with(
+        ref_gauge,
+        mocked_prometheus_scraper_config,
+        metric_transformers=mocked_prometheus_scraper_config['_default_metric_transformers'],
+    )
 
 
 def test_process_metric_gauge(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
@@ -138,8 +154,9 @@ def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_pro
     check = mocked_prometheus_check
     check.process_metric(filtered_gauge, mocked_prometheus_scraper_config, metric_transformers={})
     check.log.debug.assert_called_with(
-        "Unable to handle metric: process_start_time_seconds - "
-        "error: No handler function named 'process_start_time_seconds' defined"
+        'Skipping metric `%s` as it is not defined in the metrics mapper, '
+        'has no transformer function, nor does it match any wildcards.',
+        'process_start_time_seconds',
     )
     aggregator.assert_all_metrics_covered()
 
@@ -361,7 +378,26 @@ def test_submit_summary(aggregator, mocked_prometheus_check, mocked_prometheus_s
     _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
     check = mocked_prometheus_check
     check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_submit_summary_with_monotonic_count(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+    _sum = SummaryMetricFamily('my_summary', 'Random summary')
+    _sum.add_metric([], 5.0, 120512.0)
+    _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
+    _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
+    _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic'] = True
+    check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
+    aggregator.assert_metric(
+        'prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
+    )
     aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
@@ -377,22 +413,71 @@ def test_submit_histogram(aggregator, mocked_prometheus_check, mocked_prometheus
     check = mocked_prometheus_check
     check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
     aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 1, tags=['upper_bound:1.0'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 2, tags=['upper_bound:31104000.0'], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 3, tags=['upper_bound:432400000.0'], count=1)
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count', 1, tags=['upper_bound:1.0'], count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count', 2, tags=['upper_bound:31104000.0'], count=1, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count', 3, tags=['upper_bound:432400000.0'], count=1, metric_type=aggregator.GAUGE
+    )
     aggregator.assert_all_metrics_covered()
 
 
-def test_submit_histogram_bucket(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+def test_submit_histogram_with_monotonic_count(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+    _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
+    _histo.add_metric(
+        [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
+    )
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic'] = True
+    check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
+    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        4,
+        tags=['upper_bound:none'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        1,
+        tags=['upper_bound:1.0'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        2,
+        tags=['upper_bound:31104000.0'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        3,
+        tags=['upper_bound:432400000.0'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_all_metrics_covered()
+
+
+def test_submit_buckets_as_distribution(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
     _histo.add_metric([], buckets=[("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337)
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['send_distribution_buckets'] = True
     mocked_prometheus_scraper_config['non_cumulative_buckets'] = True
     check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
-    aggregator.assert_metric('prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1)
+    # sum & count gauges should not be sent
+    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=0)
+    aggregator.assert_metric('prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=0)
     # assert buckets
     aggregator.assert_histogram_bucket(
         'prometheus.custom.histogram',
@@ -1980,3 +2065,75 @@ def test_filter_metrics(
         'filter.pod.restart', tags=['pod:kube-dns-autoscaler-97162954-mf6d3', 'namespace:kube-system'], value=42
     )
     aggregator.assert_all_metrics_covered()
+
+
+def test_metadata_default(mocked_openmetrics_check_factory, text_data, datadog_agent):
+    instance = dict(OPENMETRICS_CHECK_INSTANCE)
+    check = mocked_openmetrics_check_factory(instance)
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+
+    check.check(instance)
+    datadog_agent.assert_metadata_count(0)
+
+
+def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datadog_agent):
+    instance = dict(OPENMETRICS_CHECK_INSTANCE)
+    instance['metadata_metric_name'] = 'kubernetes_build_info'
+    instance['metadata_label_map'] = {'version': 'gitVersion'}
+    check = mocked_openmetrics_check_factory(instance)
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+
+    version_metadata = {
+        'version.major': '1',
+        'version.minor': '6',
+        'version.patch': '0',
+        'version.release': 'alpha.0.680',
+        'version.build': '3872cb93abf948-dirty',
+        'version.raw': 'v1.6.0-alpha.0.680+3872cb93abf948-dirty',
+        'version.scheme': 'semver',
+    }
+
+    check.check(instance)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+def test_ssl_verify_not_raise_warning(mocked_openmetrics_check_factory, text_data):
+    instance = dict(
+        {
+            'prometheus_url': 'https://www.example.com',
+            'metrics': [{'foo': 'bar'}],
+            'namespace': 'openmetrics',
+            'ssl_verify': False,
+        }
+    )
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    with pytest.warns(None) as record:
+        resp = check.send_request('https://httpbin.org/get', scraper_config)
+
+    assert "httpbin.org" in resp.content.decode('utf-8')
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+
+def test_send_request_with_dynamic_prometheus_url(mocked_openmetrics_check_factory, text_data):
+    instance = dict(
+        {
+            'prometheus_url': 'https://www.example.com',
+            'metrics': [{'foo': 'bar'}],
+            'namespace': 'openmetrics',
+            'ssl_verify': False,
+        }
+    )
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    # `prometheus_url` changed just before calling `send_request`
+    scraper_config['prometheus_url'] = 'https://www.example.com/foo/bar'
+
+    with pytest.warns(None) as record:
+        resp = check.send_request('https://httpbin.org/get', scraper_config)
+
+    assert "httpbin.org" in resp.content.decode('utf-8')
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)

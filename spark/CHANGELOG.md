@@ -1,5 +1,35 @@
 # CHANGELOG - spark
 
+## 1.11.3 / 2020-01-30
+
+* [Fixed] Handle warning message from proxy. See [#5525](https://github.com/DataDog/integrations-core/pull/5525).
+
+## 1.11.2 / 2020-01-29
+
+* [Fixed] Prevent crash when a single app fails. See [#5552](https://github.com/DataDog/integrations-core/pull/5552).
+
+## 1.11.1 / 2020-01-15
+
+* [Fixed] Make sure version collection fails gracefully. See [#5465](https://github.com/DataDog/integrations-core/pull/5465).
+
+## 1.11.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Collect version metadata. See [#5032](https://github.com/DataDog/integrations-core/pull/5032).
+
+## 1.10.1 / 2019-12-06
+
+* [Fixed] Remove reference to Kubernetes in the service check message for `spark_driver_mode`. See [#5159](https://github.com/DataDog/integrations-core/pull/5159).
+
+## 1.10.0 / 2019-12-02
+
+* [Added] Add Spark driver support. See [#4631](https://github.com/DataDog/integrations-core/pull/4631). Thanks [mrmuggymuggy](https://github.com/mrmuggymuggy).
+
+## 1.9.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.8.1 / 2019-07-18
 
 * [Fixed] Remove unused configs and code for spark check. See [#4133](https://github.com/DataDog/integrations-core/pull/4133).

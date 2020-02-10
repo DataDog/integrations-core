@@ -1,5 +1,15 @@
 # CHANGELOG - kubernetes_state
 
+## 5.1.0 / 2020-01-13
+
+* [Fixed] Fix logger method bug. See [#5395](https://github.com/DataDog/integrations-core/pull/5395).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 5.0.0 / 2019-12-02
+
+* [Changed] Improves tagging compliancy. See [#5105](https://github.com/DataDog/integrations-core/pull/5105).
+* [Fixed] Fix job metrics. See [#4943](https://github.com/DataDog/integrations-core/pull/4943).
+
 ## 4.7.1 / 2019-08-26
 
 * [Fixed] Properly ignore `kube_pod_created` and `kube_pod_container_info`. See [#4435](https://github.com/DataDog/integrations-core/pull/4435).
@@ -8,7 +18,7 @@
 
 * [Added] Grab kube_node_info as kubernetes_state.node.count. See [#4383](https://github.com/DataDog/integrations-core/pull/4383). Thanks [therc](https://github.com/therc).
 * [Added] Add VPA metrics to kubernetes_state integration. See [#4353](https://github.com/DataDog/integrations-core/pull/4353). Thanks [dturn](https://github.com/dturn).
-* [Fixed] Fix KSM job metrics. See [#4224](https://github.com/DataDog/integrations-core/pull/4224).
+* [Fixed] Fix job metrics. See [#4224](https://github.com/DataDog/integrations-core/pull/4224).
 
 ## 4.6.1 / 2019-07-19
 
@@ -21,7 +31,7 @@
 
 ## 4.5.0 / 2019-07-13
 
-* [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025). Thanks [clamoriniere](https://github.com/clamoriniere).
+* [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025).
 
 ## 4.4.1 / 2019-06-19
 
@@ -68,7 +78,7 @@
 * [Added] Add cluster-name suffix to node-names in kubernetes state. See [#2069][14].
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093][15].
 * [Added] Add `pod:` tags to kubernetes_state status reason metrics. See [#1884][16].
-* [Deprecated] [KSM] Deprecate sending pod phase service checks. See [#2029][17].
+* [Deprecated] Deprecate sending pod phase service checks. See [#2029][17].
 * [Added] Add kubernetes persistentvolume metrics. See [#1932][18]. Thanks [Devatoria][19].
 * [Added] Map kube_endpoint metrics. See [#2001][20]. Thanks [mariuscoto][21].
 * [Fixed] Lower case reasons before matching container.status_report.count.* metrics. See [#1949][22].
@@ -169,9 +179,9 @@
 [30]: https://github.com/DataDog/integrations-core/pull/1727
 [31]: https://github.com/DataDog/integrations-core/pull/1664
 [32]: https://github.com/DataDog/datadog-agent/issues/1523
-[33]: 
+[33]: https://github.com/DataDog/integrations-core/pull/1277
 [34]: https://github.com/DataDog/integrations-core/issues/1137
-[35]: 
+[35]: https://github.com/DataDog/integrations-core/issues/1195
 [36]: https://github.com/DataDog/integrations-core/issues/1040
 [37]: https://github.com/DataDog/integrations-core/issues/1000
 [38]: https://github.com/DataDog/integrations-core/issues/874

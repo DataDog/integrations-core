@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2012-2017
+# (C) Datadog, Inc. 2012-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -100,14 +100,17 @@ class HAProxy(AgentCheck):
 
     def check(self, instance):
         url = instance.get('url')
-        self.log.debug('Processing HAProxy data for %s' % url)
-
+        self.log.debug('Processing HAProxy data for %s', url)
         parsed_url = urlparse(url)
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
-            data = self._fetch_socket_data(parsed_url)
-
+            info, data = self._fetch_socket_data(parsed_url)
+            self._collect_version_from_socket(info)
         else:
+            try:
+                self._collect_version_from_http(url)
+            except Exception as e:
+                self.log.warning("Couldn't collect version information: %s", e)
             data = self._fetch_url_data(url)
 
         collect_aggregates_only = instance.get('collect_aggregates_only', True)
@@ -159,11 +162,13 @@ class HAProxy(AgentCheck):
         # Try to fetch data from the stats URL
         url = "%s%s" % (url, STATS_URL)
 
-        self.log.debug("Fetching haproxy stats from url: %s" % url)
+        self.log.debug("Fetching haproxy stats from url: %s", url)
 
         response = self.http.get(url)
         response.raise_for_status()
+        return self._decode_response(response)
 
+    def _decode_response(self, response):
         # it only needs additional decoding in py3, so skip it if it's py2
         if PY2:
             return response.content.splitlines()
@@ -179,10 +184,29 @@ class HAProxy(AgentCheck):
 
             return content.splitlines()
 
+    def _collect_version_from_http(self, url):
+        # the csv format does not offer version info, therefore we need to get the HTML page
+        self.log.debug("collecting version info for HAProxy from %s", url)
+
+        r = self.http.get(url)
+        r.raise_for_status()
+        raw_version = ""
+        for line in self._decode_response(r):
+            if "HAProxy version" in line:
+                raw_version = line
+                break
+
+        if raw_version == "":
+            self.log.debug("unable to find HAProxy version info")
+        else:
+            version = re.search(r"HAProxy version ([^,]+)", raw_version).group(1)
+            self.log.debug("HAProxy version is %s", version)
+            self.set_metadata('version', version)
+
     def _fetch_socket_data(self, parsed_url):
         ''' Hit a given stats socket and return the stats lines '''
 
-        self.log.debug("Fetching haproxy stats from socket: %s" % parsed_url.geturl())
+        self.log.debug("Fetching haproxy stats from socket: %s", parsed_url.geturl())
 
         if parsed_url.scheme == 'tcp':
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -193,17 +217,32 @@ class HAProxy(AgentCheck):
         else:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
-        sock.send(b"show stat\r\n")
+
+        sock.send(b"show info;show stat\r\n")
 
         response = ""
         output = sock.recv(BUFSIZE)
         while output:
             response += output.decode("ASCII")
             output = sock.recv(BUFSIZE)
+        info, data = response.split('\n\n')[:2]
 
         sock.close()
 
-        return response.splitlines()
+        return info, data.splitlines()
+
+    def _collect_version_from_socket(self, info):
+        version = ''
+        for line in info.splitlines():
+            key, value = line.split(':')
+            if key == 'Version':
+                version = value
+                break
+        if version == '':
+            self.log.debug("unable to collect version info from socket")
+        else:
+            self.log.debug("HAProxy version is %s", version)
+            self.set_metadata('version', version)
 
     def _process_data(
         self,
@@ -498,9 +537,11 @@ class HAProxy(AgentCheck):
                 agg_statuses[service]
 
         for service in agg_statuses:
-            tags = ['service:%s' % service]
+            tags = ['haproxy_service:%s' % service]
             tags.extend(custom_tags)
             tags.extend(active_tag)
+            self._handle_legacy_service_tag(tags, service)
+
             self.gauge(
                 'haproxy.backend_hosts', agg_statuses[service][Services.AVAILABLE], tags=tags + ['available:true']
             )
@@ -538,21 +579,21 @@ class HAProxy(AgentCheck):
             try:
                 service, _, hostname, status = host_status
             except Exception:
+                service, _, status = host_status
                 if collect_status_metrics_by_host:
                     self.warning(
-                        '`collect_status_metrics_by_host` is enabled but no host info\
-                                 could be extracted from HAProxy stats endpoint for {0}'.format(
-                            service
-                        )
+                        '`collect_status_metrics_by_host` is enabled but no host info could be extracted from HAProxy '
+                        'stats endpoint for %s',
+                        service,
                     )
-                service, _, status = host_status
 
             if self._is_service_excl_filtered(service, services_incl_filter, services_excl_filter):
                 continue
 
             tags = []
             if count_status_by_service:
-                tags.append('service:%s' % service)
+                tags.append('haproxy_service:%s' % service)
+                self._handle_legacy_service_tag(tags, service)
             if hostname:
                 tags.append('backend:%s' % hostname)
 
@@ -570,7 +611,8 @@ class HAProxy(AgentCheck):
             if not collate_status_tags_per_host:
                 agg_tags = []
                 if count_status_by_service:
-                    agg_tags.append('service:%s' % service)
+                    agg_tags.append('haproxy_service:%s' % service)
+                    self._handle_legacy_service_tag(agg_tags, service)
                 # An unknown status will be sent as UNAVAILABLE
                 status_key = Services.STATUS_TO_COLLATED.get(status, Services.UNAVAILABLE)
                 agg_statuses_counter[tuple(agg_tags)][status_key] += count
@@ -598,9 +640,10 @@ class HAProxy(AgentCheck):
         back_or_front = data['back_or_front']
         custom_tags = [] if custom_tags is None else custom_tags
         active_tag = [] if active_tag is None else active_tag
-        tags = ["type:%s" % back_or_front, "instance_url:%s" % url, "service:%s" % service_name]
+        tags = ["type:%s" % back_or_front, "instance_url:%s" % url, "haproxy_service:%s" % service_name]
         tags.extend(custom_tags)
         tags.extend(active_tag)
+        self._handle_legacy_service_tag(tags, service_name)
 
         if self._is_service_excl_filtered(service_name, services_incl_filter, services_excl_filter):
             return
@@ -671,10 +714,12 @@ class HAProxy(AgentCheck):
                 alert_type = "info"
             title = "%s reported %s:%s back and %s" % (HAProxy_agent, service_name, hostname, status.upper())
 
-        tags = ["service:%s" % service_name]
+        tags = ["haproxy_service:%s" % service_name]
         if back_or_front == Services.BACKEND:
             tags.append('backend:%s' % hostname)
         tags.extend(custom_tags)
+        self._handle_legacy_service_tag(tags, service_name)
+
         return {
             'timestamp': int(time.time() - lastchg),
             'event_type': EVENT_TYPE,
@@ -702,8 +747,10 @@ class HAProxy(AgentCheck):
             return
 
         if status in Services.STATUS_TO_SERVICE_CHECK:
-            service_check_tags = ["service:%s" % service_name]
+            service_check_tags = ["haproxy_service:%s" % service_name]
             service_check_tags.extend(custom_tags)
+            self._handle_legacy_service_tag(service_check_tags, service_name)
+
             hostname = data['svname']
             if data['back_or_front'] == Services.BACKEND:
                 service_check_tags.append('backend:%s' % hostname)
@@ -713,3 +760,8 @@ class HAProxy(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME, status, message=message, hostname=check_hostname, tags=service_check_tags
             )
+
+    def _handle_legacy_service_tag(self, tags, service):
+        if not self.instance.get('disable_legacy_service_tag', False):
+            self._log_deprecation('service_tag', 'haproxy_service')
+            tags.append('service:{}'.format(service))

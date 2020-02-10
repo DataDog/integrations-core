@@ -1,5 +1,62 @@
 # CHANGELOG - snmp
 
+## 2.3.2 / 2020-01-15
+
+* [Fixed] Tweak behavior related to discovery. See [#5466](https://github.com/DataDog/integrations-core/pull/5466).
+
+## 2.3.1 / 2020-01-13
+
+* [Fixed] Fix usage of old OID list attributes on InstanceConfig. See [#5412](https://github.com/DataDog/integrations-core/pull/5412).
+
+## 2.3.0 / 2020-01-07
+
+* [Added] Remove MIB requirement in profiles. See [#5397](https://github.com/DataDog/integrations-core/pull/5397).
+* [Added] Implement table browsing with OIDs. See [#5368](https://github.com/DataDog/integrations-core/pull/5368).
+* [Added] Update license years. See [#5384](https://github.com/DataDog/integrations-core/pull/5384).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Add a profile for Meraki cloud devices. See [#5215](https://github.com/DataDog/integrations-core/pull/5215).
+
+## 2.2.0 / 2020-01-02
+
+* [Added] Add profile for Cisco Nexus switches. See [#5363](https://github.com/DataDog/integrations-core/pull/5363).
+* [Added] Add profile for Intel IDRAC devices. See [#5227](https://github.com/DataDog/integrations-core/pull/5227).
+* [Fixed] Fetch table OIDs per table. See [#5192](https://github.com/DataDog/integrations-core/pull/5192).
+
+## 2.1.0 / 2019-11-27
+
+* [Fixed] Disable MIB autofetch. See [#5094](https://github.com/DataDog/integrations-core/pull/5094).
+* [Added] Add Cisco 3850 profile. See [#5090](https://github.com/DataDog/integrations-core/pull/5090).
+
+## 2.0.1 / 2019-11-21
+
+* [Fixed] Handle total_time_to_temporal_percent missing. See [#5055](https://github.com/DataDog/integrations-core/pull/5055).
+
+## 2.0.0 / 2019-11-15
+
+* [Added] Add interface statuses to profiles. See [#5004](https://github.com/DataDog/integrations-core/pull/5004).
+* [Added] Ignore metrics that are not retrieved. See [#5003](https://github.com/DataDog/integrations-core/pull/5003).
+* [Changed] Modify profile layout. See [#4997](https://github.com/DataDog/integrations-core/pull/4997).
+* [Added] Match profile with sysobject_id prefix. See [#4990](https://github.com/DataDog/integrations-core/pull/4990).
+* [Added] Count the number of discovered devices. See [#4978](https://github.com/DataDog/integrations-core/pull/4978).
+* [Added] Generic network router profile. See [#4937](https://github.com/DataDog/integrations-core/pull/4937).
+* [Added] Allow tagging through different MIBs. See [#4853](https://github.com/DataDog/integrations-core/pull/4853).
+
+## 1.14.1 / 2019-10-16
+
+* [Fixed] Fix allowed host failure retry logic. See [#4782](https://github.com/DataDog/integrations-core/pull/4782).
+
+## 1.14.0 / 2019-10-14
+
+* [Added] Store discovered hosts. See [#4712](https://github.com/DataDog/integrations-core/pull/4712).
+
+## 1.13.0 / 2019-10-11
+
+* [Added] Automatically fetch MIBs that we don't know about. See [#4732](https://github.com/DataDog/integrations-core/pull/4732).
+
+## 1.12.0 / 2019-10-10
+
+* [Added] Add profile for F5 BIG-IP devices. See [#4674](https://github.com/DataDog/integrations-core/pull/4674).
+
 ## 1.11.0 / 2019-09-19
 
 * [Fixed] Handle bytes in network_address. See [#4577](https://github.com/DataDog/integrations-core/pull/4577).

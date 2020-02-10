@@ -1,5 +1,32 @@
 # CHANGELOG - process
 
+## 1.11.1 / 2020-01-15
+
+* [Fixed] Fix debug logging. See [#5460](https://github.com/DataDog/integrations-core/pull/5460).
+
+## 1.11.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Uncomment required config: search_string. See [#5359](https://github.com/DataDog/integrations-core/pull/5359).
+
+## 1.10.4 / 2019-12-23
+
+* [Fixed] Add debug logging when processes are not found. See [#5313](https://github.com/DataDog/integrations-core/pull/5313).
+
+## 1.10.3 / 2019-12-13
+
+* [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
+
+## 1.10.2 / 2019-12-02
+
+* [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
+
+## 1.10.1 / 2019-10-11
+
+* [Fixed] Make iowrite_bytes and ioread_bytes counts. See [#4655](https://github.com/DataDog/integrations-core/pull/4655).
+* [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
+
 ## 1.10.0 / 2019-05-14
 
 * [Added] Upgrade psutil dependency to 5.6.2. See [#3684](https://github.com/DataDog/integrations-core/pull/3684).

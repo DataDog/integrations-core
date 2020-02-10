@@ -1,0 +1,191 @@
+# Profile for Cisco Nexus devices
+
+sysobjectid: 1.3.6.1.4.1.9.12.3.1.3.*
+
+metrics:
+  - MIB: CISCO-ENTITY-SENSOR-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.91.1.1.1
+      name: entSensorValueTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.4
+        name: entSensorValue
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.9.9.91.1.1.1.1.1
+          name: entSensorType
+        tag: sensor_type
+      - index: 1
+        tag: sensor_id
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.117.1.1.2
+      name: cefcFRUPowerStatusTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.1
+        name: cefcFRUPowerAdminStatus
+      - OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.2
+        name: cefcFRUPowerOperStatus
+      - OID: 1.3.6.1.4.1.9.9.117.1.1.2.1.3
+        name: cefcFRUCurrent
+    metric_tags:
+      - index: 1
+        tag: fru
+  - MIB: CISCO-PROCESS-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.109.1.1.1
+      name: cpmCPUTotalTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.10
+        name: cpmCPUTotalMonIntervalValue
+      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
+        name: cpmCPUMemoryUsed
+      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.13
+        name: cpmCPUMemoryFree
+    metric_tags:
+      - index: 1
+        tag: cpu
+  - MIB: CISCO-IF-EXTENSION-MIB
+    forced_type: monotonic_count
+    table:
+      OID: 1.3.6.1.4.1.9.9.276.1.1.2
+      name: cieIfInterfaceTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.276.1.1.2.1.1
+        name: cieIfResetCount
+    metric_tags:
+      - MIB: IF-MIB
+        column:
+          OID: 1.3.6.1.2.1.31.1.1.1.1
+          name: ifName
+        table: ifXTable
+        tag: interface
+  - MIB: IF-MIB
+    forced_type: monotonic_count
+    table:
+      OID: 1.3.6.1.2.1.2.2
+      name: ifTable
+    symbols:
+      - OID: 1.3.6.1.2.1.2.2.1.14
+        name: ifInErrors
+      - OID: 1.3.6.1.2.1.2.2.1.13
+        name: ifInDiscards
+      - OID: 1.3.6.1.2.1.2.2.1.20
+        name: ifOutErrors
+      - OID: 1.3.6.1.2.1.2.2.1.19
+        name: ifOutDiscards
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.2.2.1.2
+          name: ifDescr
+        tag: interface
+  - MIB: IF-MIB
+    table:
+      OID: 1.3.6.1.2.1.2.2
+      name: ifTable
+    symbols:
+      - OID: 1.3.6.1.2.1.2.2.1.7
+        name: ifAdminStatus
+      - OID: 1.3.6.1.2.1.2.2.1.8
+        name: ifOperStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.2.2.1.2
+          name: ifDescr
+        tag: interface
+  - MIB: IF-MIB
+    table:
+      OID: 1.3.6.1.2.1.31.1.1
+      name: ifXTable
+    forced_type: monotonic_count
+    symbols:
+      - OID: 1.3.6.1.2.1.31.1.1.1.6
+        name: ifHCInOctets
+      - OID: 1.3.6.1.2.1.31.1.1.1.7
+        name: ifHCInUcastPkts
+      - OID: 1.3.6.1.2.1.31.1.1.1.8
+        name: ifHCInMulticastPkts
+      - OID: 1.3.6.1.2.1.31.1.1.1.9
+        name: ifHCInBroadcastPkts
+      - OID: 1.3.6.1.2.1.31.1.1.1.10
+        name: ifHCOutOctets
+      - OID: 1.3.6.1.2.1.31.1.1.1.11
+        name: ifHCOutUcastPkts
+      - OID: 1.3.6.1.2.1.31.1.1.1.12
+        name: ifHCOutMulticastPkts
+      - OID: 1.3.6.1.2.1.31.1.1.1.13
+        name: ifHCOutBroadcastPkts
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.31.1.1.1.1
+          name: ifName
+        tag: interface
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.5
+      name: tcpActiveOpens
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.6
+      name: tcpPassiveOpens
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.7
+      name: tcpAttemptFails
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.8
+      name: tcpEstabResets
+  - MIB: TCP-MIB
+    symbol:
+      OID: 1.3.6.1.2.1.6.9
+      name: tcpCurrEstab
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.17
+      name: tcpHCInSegs
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.18
+      name: tcpHCOutSegs
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.12
+      name: tcpRetransSegs
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.14
+      name: tcpInErrs
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.15
+      name: tcpOutRsts
+  - MIB: UDP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.7.8
+      name: udpHCInDatagrams
+  - MIB: UDP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.7.2
+      name: udpNoPorts
+  - MIB: UDP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.7.3
+      name: udpInErrors
+  - MIB: UDP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.7.9
+      name: udpHCOutDatagrams

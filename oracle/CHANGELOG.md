@@ -1,5 +1,19 @@
 # CHANGELOG - oracle
 
+## 1.12.0 / 2020-02-04
+
+* [Added] Add ability to only collect data defined in `custom_queries`. See [#5217](https://github.com/DataDog/integrations-core/pull/5217). Thanks [nowhammies](https://github.com/nowhammies).
+
+## 1.11.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Fix deprecated exception. See [#5182](https://github.com/DataDog/integrations-core/pull/5182).
+
+## 1.10.1 / 2019-10-07
+
+* [Fixed] Use fetchall instead of iterating cursor for custom queries. This fixes an issue with the JDBC driver. See [#4664](https://github.com/DataDog/integrations-core/pull/4664).
+
 ## 1.10.0 / 2019-08-24
 
 * [Added] Upgrade JPype1 to 0.7.0. See [#4211](https://github.com/DataDog/integrations-core/pull/4211).

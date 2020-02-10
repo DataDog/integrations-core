@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
@@ -6,13 +6,13 @@ from __future__ import unicode_literals
 from copy import deepcopy
 from distutils.version import StrictVersion
 
-import mock
 import pytest
 import redis
 
 from datadog_checks.redisdb import Redis
 
-from .common import HOST, PASSWORD, PORT
+from .common import HOST, PASSWORD, PORT, REDIS_VERSION
+from .utils import requires_static_version
 
 # Following metrics are tagged by db
 DB_TAGGED_METRICS = ['redis.persist.percent', 'redis.expires.percent', 'redis.persist', 'redis.keys', 'redis.expires']
@@ -29,7 +29,7 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     db.lpush("test_list", 3)
     db.set("key1", "value")
     db.set("key2", "value")
-    db.setex("expirekey", "expirevalue", 1000)
+    db.setex("expirekey", 1000, "expirevalue")
 
     redis_check = Redis('redisdb', {}, {})
     redis_check.check(redis_instance)
@@ -50,6 +50,8 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
 
     aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected_db + ['key:test_list', 'key_type:list'])
 
+    aggregator.assert_metric('redis.net.maxclients')
+
     # in the old tests these was explicitly asserted, keeping it like that
     assert 'redis.net.commands' in aggregator.metric_names
     version = db.info().get('redis_version')
@@ -69,15 +71,21 @@ def test_service_check(aggregator, redis_auth, redis_instance):
     assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
 
 
-@pytest.mark.integration
-def test_service_metadata(redis_instance):
-    """
-    The Agent toolkit doesn't support service_metadata yet, so we use Mock
-    """
+@requires_static_version
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata(master_instance, datadog_agent):
     redis_check = Redis('redisdb', {}, {})
-    redis_check._collect_metadata = mock.MagicMock()
-    redis_check.check(redis_instance)
-    redis_check._collect_metadata.assert_called_once()
+    redis_check.check_id = 'test:123'
+
+    redis_check.check(master_instance)
+
+    major, minor = REDIS_VERSION.split('.')
+    version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    # We parse the version set in tox which is X.Y so we don't
+    # know `version.patch`, and therefore also `version.raw`.
+    datadog_agent.assert_metadata_count(len(version_metadata) + 2)
 
 
 @pytest.mark.integration

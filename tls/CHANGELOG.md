@@ -1,5 +1,13 @@
 # CHANGELOG - TLS
 
+## 1.4.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
+## 1.3.0 / 2019-12-02
+
+* [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
+
 ## 1.2.0 / 2019-07-04
 
 * [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).

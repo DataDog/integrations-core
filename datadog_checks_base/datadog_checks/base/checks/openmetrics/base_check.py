@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from ...errors import CheckException
@@ -19,9 +19,28 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             metrics:
             - bar
             - foo
+
+
+    Agent 5 signature:
+
+        OpenMetricsBaseCheck(name, init_config, agentConfig, instances=None, default_instances=None,
+                             default_namespace=None)
+
+    Agent 6 signature:
+
+        OpenMetricsBaseCheck(name, init_config, instances, default_instances=None, default_namespace=None)
+
     """
 
     DEFAULT_METRIC_LIMIT = 2000
+
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_verify': {'name': 'tls_verify'},
+        'ssl_cert': {'name': 'tls_cert'},
+        'ssl_private_key': {'name': 'tls_private_key'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
+        'prometheus_timeout': {'name': 'timeout'},
+    }
 
     def __init__(self, *args, **kwargs):
         args = list(args)
@@ -38,16 +57,22 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
         self.config_map = {}
+        self._http_handlers = {}
         self.default_instances = default_instances
         self.default_namespace = default_namespace
 
         # pre-generate the scraper configurations
+
         if 'instances' in kwargs:
             instances = kwargs['instances']
         elif len(args) == 4:
+            # instances from agent 5 signature
             instances = args[3]
-        else:
+        elif isinstance(args[2], (tuple, list)):
+            # instances from agent 6 signature
             instances = args[2]
+        else:
+            instances = None
 
         if instances is not None:
             for instance in instances:

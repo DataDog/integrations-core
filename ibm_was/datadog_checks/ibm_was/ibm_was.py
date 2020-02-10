@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from xml.etree.ElementTree import ParseError
@@ -32,8 +32,10 @@ class IbmWasCheck(AgentCheck):
         validation.validate_config(instance)
         collect_stats = self.setup_configured_stats(instance)
         url = instance.get('servlet_url')
+        self.custom_queries_units_gauge = set(instance.get('custom_queries_units_gauge', []))
 
         nested_tags, metric_categories = self.append_custom_queries(instance, collect_stats)
+        self.custom_stats = list(nested_tags)
         custom_tags = instance.get('tags', [])
 
         service_check_tags = list(custom_tags)
@@ -60,7 +62,7 @@ class IbmWasCheck(AgentCheck):
                 server_tags.extend(node_tags)
 
                 for category, prefix in iteritems(metric_categories):
-                    self.log.debug("Collecting {} stats".format(category))
+                    self.log.debug("Collecting %s stats", category)
                     if collect_stats.get(category):
                         stats = self.get_node_from_name(server, category)
                         self.process_stats(stats, prefix, metric_categories, nested_tags, server_tags)
@@ -72,7 +74,7 @@ class IbmWasCheck(AgentCheck):
         if len(data):
             return data[0]
         else:
-            self.warning('Error finding {} stats in XML output.'.format(path))
+            self.warning('Error finding %s stats in XML output.', path)
             return []
 
     def get_node_from_root(self, xml_data, path):
@@ -101,8 +103,14 @@ class IbmWasCheck(AgentCheck):
             ensure_unicode(child.get('name')), prefix='{}.{}'.format(self.METRIC_PREFIX, prefix), fix_case=True
         )
 
-        # includes deprecated JVM metrics that were reporting as count instead of gauge
-        self.metric_type_mapping[child.tag](metric_name, value, tags=tags)
+        tag = child.tag
+        if (
+            child.get('unit') in self.custom_queries_units_gauge
+            and prefix in self.custom_stats
+            and tag == 'CountStatistic'
+        ):
+            tag = 'TimeStatistic'
+        self.metric_type_mapping[tag](metric_name, value, tags=tags)
 
         # creates new JVM metrics correctly as gauges
         if prefix == "jvm":
@@ -116,7 +124,7 @@ class IbmWasCheck(AgentCheck):
             self.submit_service_checks(tags, AgentCheck.OK)
         except (requests.HTTPError, requests.ConnectionError) as e:
             self.warning(
-                "Couldn't connect to URL: {} with exception: {}. Please verify the address is reachable".format(url, e)
+                "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
             self.submit_service_checks(tags, AgentCheck.CRITICAL)
             raise e

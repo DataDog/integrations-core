@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # flake8: noqa
@@ -6,24 +6,20 @@ import json
 import os
 import shutil
 
-# NOTE: Set one minute for any GPG subprocess to timeout in in-toto.  Should be
-# enough time for developers to find and enter their PIN and / or touch their
-# Yubikey. We do this before we load the rest of in-toto, so that this setting
-# takes effect.
-import in_toto.settings
-in_toto.settings.SUBPROCESS_TIMEOUT = 60
+# How long ddev will wait for GPG to finish, especially when asking dev for signature.
+import securesystemslib.settings
+securesystemslib.settings.SUBPROCESS_TIMEOUT = 60
+
+from securesystemslib.gpg.constants import GPG_COMMAND
 
 from in_toto import runlib
-from in_toto.gpg.constants import GPG_COMMAND
 
 from .constants import get_root
-from .git import git_ls_files
+from .git import ignored_by_git, tracked_by_git
 from ..subprocess import run_command
-from ..utils import (
-    chdir, ensure_dir_exists, path_join, stream_file_lines, write_file
-)
+from ..utils import chdir, ensure_dir_exists, path_join, stream_file_lines
 
-LINK_DIR = '.links'
+LINK_DIR = '.in-toto'
 STEP_NAME = 'tag'
 
 
@@ -31,13 +27,22 @@ class YubikeyException(Exception):
     pass
 
 
-class UntrackedFileException(Exception):
+class NeitherTrackedNorIgnoredFileException(Exception):
     def __init__(self, filename):
         self.filename = filename
 
 
     def __str__(self):
-        return '{} has not been tracked by git!'.format(self.filename)
+        return f'{self.filename} has neither been tracked nor ignored by git and in-toto!'
+
+
+class UntrackedButIgnoredFileException(Exception):
+    def __init__(self, filename):
+        self.filename = filename
+
+
+    def __str__(self):
+        return f'{self.filename} has not been tracked, but it should be ignored by git and in-toto!'
 
 
 def read_gitignore_patterns():
@@ -52,7 +57,7 @@ def read_gitignore_patterns():
 
 
 def get_key_id(gpg_exe):
-    result = run_command('{} --card-status'.format(gpg_exe), capture='out', check=True)
+    result = run_command(f'{gpg_exe} --card-status', capture='out', check=True)
     lines = result.stdout.splitlines()
     for line in lines:
         if line.startswith('Signature key ....:'):
@@ -99,18 +104,16 @@ def update_link_metadata(checks):
     # Find this latest signed link metadata file on disk.
     # NOTE: in-toto currently uses the first 8 characters of the signing keyId.
     key_id_prefix = key_id[:8].lower()
-    tag_link = '{}.{}.link'.format(STEP_NAME, key_id_prefix)
+    tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
 
     # Final location of metadata file.
     metadata_file = path_join(LINK_DIR, tag_link)
 
-    # File used to tell the pipeline where to find the latest metadata file.
-    metadata_file_tracker = path_join(LINK_DIR, 'LATEST')
-
     with chdir(root):
+        # We should ignore products untracked and ignored by git.
         run_in_toto(key_id, products)
 
-        # Check whether each signed product is being tracked by git.
+        # Check whether each signed product is being tracked AND ignored by git.
         # NOTE: We have to check now *AFTER* signing the tag link file, so that
         # we can check against the actual complete list of products.
         with open(tag_link) as tag_json:
@@ -118,14 +121,21 @@ def update_link_metadata(checks):
             products = tag['signed']['products']
 
         for product in products:
-            if not git_ls_files(product):
+            # If NOT tracked...
+            if not tracked_by_git(product):
+                # First, delete the tag link off disk so as not to pollute.
                 os.remove(tag_link)
-                raise UntrackedFileException(product)
 
-        # Tell pipeline which tag link metadata to use.
-        write_file(metadata_file_tracker, tag_link)
+                # AND NOT ignored, then it most likely means the developer
+                # forgot to add the file to git.
+                if not ignored_by_git(product):
+                    raise NeitherTrackedNorIgnoredFileException(product)
+                # AND ignored, then it most likely means that incorrectly
+                # recorded with in-toto files ignored by git.
+                else:
+                    raise UntrackedButIgnoredFileException(product)
 
         # Move it to the expected location.
         shutil.move(tag_link, metadata_file)
 
-    return metadata_file, metadata_file_tracker
+    return (metadata_file,)

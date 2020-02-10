@@ -1,44 +1,4 @@
-variable "account_json" {
-  type = string
-}
-
-variable "user" {
-  type = string
-}
-
-resource "random_id" "password" {
-  byte_length = 16
-}
-
-resource "random_shuffle" "az" {
-  input = ["europe-west4-a", "europe-west4-b", "europe-west4-c"]
-  result_count = 1
-}
-
-resource "random_string" "suffix" {
-  length = 8
-  special = false
-  upper = false
-}
-
-resource "tls_private_key" "ssh-key" {
-  algorithm = "RSA"
-  rsa_bits = 4096
-}
-
-provider "google" {
-  version = "~> 2.11"
-  credentials = var.account_json
-  project = "datadog-integrations-lab"
-  region = "europe-west4"
-  zone = random_shuffle.az.result[0]
-}
-
-resource "local_file" "kubeconfig" {
-  content = data.template_file.kubeconfig.rendered
-  filename = "${path.module}/kubeconfig"
-}
-
+# Shared common terraform config found in the templates/terraform folder in datadog_checks_dev
 resource "google_compute_instance" "linkerd-init" {
   name = replace("linkerd-init-${var.user}-${random_string.suffix.result}", ".", "-")
   machine_type = "n1-standard-2"
@@ -94,8 +54,7 @@ resource "null_resource" "linkerd-init" {
 resource "google_container_cluster" "gke_cluster" {
   name = replace("linkerd-cluster-${var.user}-${random_string.suffix.result}", ".", "-")
   location = random_shuffle.az.result[0]
-  node_version = "1.13.7-gke.8"
-  min_master_version = "1.13.7-gke.8"
+  min_master_version = "1.13.11-gke.14"
 
   lifecycle {
     ignore_changes = ["node_pool"]
@@ -119,20 +78,6 @@ resource "google_container_cluster" "gke_cluster" {
       "https://www.googleapis.com/auth/monitoring",
     ]
     tags = ["linkerd", "lab"]
-  }
-}
-
-data "template_file" "kubeconfig" {
-  template = file("${path.module}/kubeconfig-template.yaml")
-
-  vars = {
-    cluster_name = google_container_cluster.gke_cluster.name
-    user_name = google_container_cluster.gke_cluster.master_auth.0.username
-    user_password = google_container_cluster.gke_cluster.master_auth.0.password
-    endpoint = google_container_cluster.gke_cluster.endpoint
-    cluster_ca = google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate
-    client_cert = google_container_cluster.gke_cluster.master_auth.0.client_certificate
-    client_cert_key = google_container_cluster.gke_cluster.master_auth.0.client_key
   }
 }
 

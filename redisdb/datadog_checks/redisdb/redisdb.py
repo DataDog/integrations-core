@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -28,12 +28,26 @@ class Redis(AgentCheck):
 
     SOURCE_TYPE_NAME = 'redis'
 
+    CONFIG_GAUGE_KEYS = {
+        'maxclients': 'redis.net.maxclients',
+    }
+
     GAUGE_KEYS = {
+        # Active defrag metrics
+        'active_defrag_running': 'redis.active_defrag.running',
+        'active_defrag_hits': 'redis.active_defrag.hits',
+        'active_defrag_misses': 'redis.active_defrag.misses',
+        'active_defrag_key_hits': 'redis.active_defrag.key_hits',
+        'active_defrag_key_misses': 'redis.active_defrag.key_misses',
         # Append-only metrics
         'aof_last_rewrite_time_sec': 'redis.aof.last_rewrite_time',
         'aof_rewrite_in_progress': 'redis.aof.rewrite',
         'aof_current_size': 'redis.aof.size',
         'aof_buffer_length': 'redis.aof.buffer_length',
+        'loading_total_bytes': 'redis.aof.loading_total_bytes',
+        'loading_loaded_bytes': 'redis.aof.loading_loaded_bytes',
+        'loading_loaded_perc': 'redis.aof.loading_loaded_perc',
+        'loading_eta_seconds': 'redis.aof.loading_eta_seconds',
         # Network
         'connected_clients': 'redis.net.clients',
         'connected_slaves': 'redis.net.slaves',
@@ -177,6 +191,7 @@ class Redis(AgentCheck):
             latency_ms = round_value((time.time() - start) * 1000, 2)
             tags = sorted(tags + ["redis_role:%s" % info["role"]])
             self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
+            config = conn.config_get("maxclients")
             status = AgentCheck.OK
             self.service_check('redis.can_connect', status, tags=tags)
             self._collect_metadata(info)
@@ -220,6 +235,11 @@ class Redis(AgentCheck):
             elif info_name in self.RATE_KEYS:
                 self.rate(self.RATE_KEYS[info_name], info[info_name], tags=tags)
 
+        for config_key, value in iteritems(config):
+            metric_name = self.CONFIG_GAUGE_KEYS.get(config_key)
+            if metric_name is not None:
+                self.gauge(metric_name, value, tags=tags)
+
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
         if 'instantaneous_ops_per_sec' in info:
@@ -238,6 +258,10 @@ class Redis(AgentCheck):
         Compute the length of the configured keys across all the databases
         """
         key_list = instance.get('keys')
+
+        if key_list is None:
+            return
+
         instance_db = instance.get('db')
 
         if not isinstance(key_list, list) or not key_list:
@@ -250,14 +274,14 @@ class Redis(AgentCheck):
         databases = list(conn.info('keyspace'))
         if not databases:
             self.warning("Redis database is empty")
-            if warn_on_missing_keys:
-                for key in key_list:
-                    key_tags = ['key:{}'.format(key)]
-                    if instance_db:
-                        key_tags.append('redis_db:db{}'.format(instance_db))
-                    key_tags.extend(tags)
-                    self.gauge('redis.key.length', 0, tags=key_tags)
-                    self.warning("{} key not found in redis".format(key))
+            for key in key_list:
+                key_tags = ['key:{}'.format(key)]
+                if instance_db:
+                    key_tags.append('redis_db:db{}'.format(instance_db))
+                key_tags.extend(tags)
+                self.gauge('redis.key.length', 0, tags=key_tags)
+                if warn_on_missing_keys:
+                    self.warning("%s key not found in redis", key)
             return
 
         # convert to integer the output of `keyspace`, from `db0` to `0`
@@ -267,7 +291,7 @@ class Redis(AgentCheck):
         # user might have configured the instance to target one specific db
         if instance_db:
             if instance_db not in databases:
-                self.warning("Cannot find database {}".format(instance_db))
+                self.warning("Cannot find database %s", instance_db)
                 return
             databases = [instance_db]
 
@@ -293,7 +317,7 @@ class Redis(AgentCheck):
                     try:
                         key_type = ensure_unicode(db_conn.type(key))
                     except redis.ResponseError:
-                        self.log.info("key {} on remote server; skipping".format(text_key))
+                        self.log.info("key %s on remote server; skipping", text_key)
                         continue
 
                     if key_type == 'list':
@@ -340,13 +364,14 @@ class Redis(AgentCheck):
         # Warn if a key is missing from the entire redis instance.
         # Send 0 if the key is missing/empty from the entire redis instance.
         for key, total in iteritems(lengths_overall):
-            if total == 0 and warn_on_missing_keys:
+            if total == 0:
                 key_tags = ['key:{}'.format(key)]
                 if instance_db:
                     key_tags.append('redis_db:db{}'.format(instance_db))
                 key_tags.extend(tags)
                 self.gauge('redis.key.length', 0, tags=key_tags)
-                self.warning("{} key not found in redis".format(key))
+                if warn_on_missing_keys:
+                    self.warning("%s key not found in redis", key)
 
     def _check_replication(self, info, tags):
         # Save the replication delay for each slave
@@ -391,7 +416,7 @@ class Redis(AgentCheck):
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
                 if max_slow_entries > DEFAULT_MAX_SLOW_ENTRIES:
                     self.warning(
-                        "Redis {0} is higher than {1}. Defaulting to {1}. "
+                        "Redis {0} is higher than {1}. Defaulting to {1}. "  # noqa: G001
                         "If you need a higher value, please set {0} in your check config".format(
                             MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES
                         )
@@ -466,4 +491,4 @@ class Redis(AgentCheck):
 
     def _collect_metadata(self, info):
         if info and 'redis_version' in info:
-            self.service_metadata('version', info['redis_version'])
+            self.set_metadata('version', info['redis_version'])

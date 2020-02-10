@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -33,7 +33,7 @@ def mock_from_file(fname):
 
 @pytest.fixture
 def check():
-    return KubeletCheck('kubelet', None, {}, [{}])
+    return KubeletCheck('kubelet', {}, [{}])
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def cadvisor_scraper(check):
 
 
 def test_cadvisor_default_options():
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     cadvisor_scraper_config = check.cadvisor_scraper_config
     assert check.fs_usage_bytes == {}
     assert check.mem_usage_bytes == {}
@@ -71,6 +71,17 @@ def test_is_container_metric():
                 'id': 'deadbeef',
             },
         ),
+        MockMetric(
+            'baz',
+            {
+                'container': 'POD',
+                'namespace': 'default',
+                'pod': 'pod0',
+                'name': 'foo',
+                'image': 'foo',
+                'id': 'deadbeef',
+            },
+        ),
         MockMetric(  # missing container_name
             'foobar', {'namespace': 'default', 'pod_name': 'pod0', 'name': 'foo', 'image': 'foo', 'id': 'deadbeef'}
         ),
@@ -78,25 +89,41 @@ def test_is_container_metric():
     for metric in false_metrics:
         assert CadvisorPrometheusScraperMixin._is_container_metric(metric.label) is False
 
-    true_metric = MockMetric(
-        'foo',
-        {
-            'container_name': 'ctr0',
-            'namespace': 'default',
-            'pod_name': 'pod0',
-            'name': 'foo',
-            'image': 'foo',
-            'id': 'deadbeef',
-        },
-    )
-    assert CadvisorPrometheusScraperMixin._is_container_metric(true_metric.label) is True
+    true_metrics = [
+        MockMetric(
+            'foo',
+            {
+                'container_name': 'ctr0',
+                'namespace': 'default',
+                'pod_name': 'pod0',
+                'name': 'foo',
+                'image': 'foo',
+                'id': 'deadbeef',
+            },
+        ),
+        MockMetric(
+            'bar',
+            {
+                'container': 'ctr0',
+                'namespace': 'default',
+                'pod': 'pod0',
+                'name': 'foo',
+                'image': 'foo',
+                'id': 'deadbeef',
+            },
+        ),
+    ]
+    for metric in true_metrics:
+        assert CadvisorPrometheusScraperMixin._is_container_metric(metric.label) is True
 
 
 def test_is_pod_metric():
     false_metrics = [
         MockMetric('foo', {}),
-        MockMetric('bar', {'container_name': 'ctr0'}),
-        MockMetric('foobar', {'container_name': 'ctr0', 'id': 'deadbeef'}),
+        MockMetric('bar', {'container': 'ctr0'}),
+        MockMetric('baz', {'container_name': 'ctr0'}),
+        MockMetric('foobar', {'container': 'ctr0', 'id': 'deadbeef'}),
+        MockMetric('foobaz', {'container_name': 'ctr0', 'id': 'deadbeef'}),
     ]
 
     true_metrics = [
@@ -105,6 +132,7 @@ def test_is_pod_metric():
         MockMetric(
             'foobar', {'container_name': 'POD', 'id': '/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb'}
         ),
+        MockMetric('foobaz', {'container': 'POD', 'id': '/kubepods/burstable/pod531c80d9-9fc4-11e7-ba8b-42010af002bb'}),
     ]
 
     for metric in false_metrics:
@@ -121,14 +149,55 @@ def test_get_container_label():
 
 
 def test_get_container_id(cadvisor_scraper):
+    # k8s >= 1.16
+    labels = {"container": "datadog-agent", "namespace": "default", "pod": "datadog-agent-pbqt2"}
+    container_id = cadvisor_scraper._get_container_id(labels)
+    assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
+
+    # k8s < 1.16
     labels = {"container_name": "datadog-agent", "namespace": "default", "pod_name": "datadog-agent-pbqt2"}
     container_id = cadvisor_scraper._get_container_id(labels)
     assert container_id == "containerd://51cba2ca229069039575750d44ed3a67e9b5ead651312ba7ff218dd9202fde64"
+
     assert cadvisor_scraper._get_container_id([]) is None
 
 
 def test_get_entity_id_if_container_metric(cadvisor_scraper):
-    staticPod = MockMetric(
+    # k8s >= 1.16
+    static_pod_1_16 = MockMetric(
+        'bar',
+        {
+            "container": "web",
+            "namespace": "default",
+            "pod": "static-web-chk",
+            "name": "web",
+            "image": "nginx",
+            "id": "1",
+        },
+    )
+    assert (
+        cadvisor_scraper._get_entity_id_if_container_metric(static_pod_1_16.label) == "fbf18e171294371272adc19391eae7cc"
+    )
+
+    static_pod_1_15 = MockMetric(
+        'bar',
+        {
+            "container": "web",
+            "container_name": "web",
+            "namespace": "default",
+            "pod": "static-web-chk",
+            "pod_name": "static-web-chk",
+            "name": "web",
+            "image": "nginx",
+            "id": "1",
+        },
+    )
+    assert (
+        cadvisor_scraper._get_entity_id_if_container_metric(static_pod_1_15.label) == "fbf18e171294371272adc19391eae7cc"
+    )
+
+    # k8s < 1.16
+    static_pod_1_14 = MockMetric(
         'bar',
         {
             "container_name": "web",
@@ -139,10 +208,16 @@ def test_get_entity_id_if_container_metric(cadvisor_scraper):
             "id": "1",
         },
     )
-    assert cadvisor_scraper._get_entity_id_if_container_metric(staticPod.label) == "fbf18e171294371272adc19391eae7cc"
+    assert (
+        cadvisor_scraper._get_entity_id_if_container_metric(static_pod_1_14.label) == "fbf18e171294371272adc19391eae7cc"
+    )
 
 
 def test_get_pod_uid(cadvisor_scraper):
+    labels = {"container": "POD", "namespace": "default", "pod": "datadog-agent-pbqt2"}
+    assert cadvisor_scraper._get_pod_uid(labels) == "b66c40af-997d-11e8-96a3-42010a840157"
+
+    # k8s < 1.16
     labels = {"container_name": "POD", "namespace": "default", "pod_name": "datadog-agent-pbqt2"}
     assert cadvisor_scraper._get_pod_uid(labels) == "b66c40af-997d-11e8-96a3-42010a840157"
     assert cadvisor_scraper._get_pod_uid([]) is None
@@ -157,17 +232,36 @@ def test_is_pod_host_networked(cadvisor_scraper):
 
 def test_get_pod_by_metric_label(cadvisor_scraper):
     assert len(cadvisor_scraper.pod_list) == 4
+    kube_proxy_1_16 = cadvisor_scraper._get_pod_by_metric_label(
+        {"container": "POD", "namespace": "kube-system", "pod": "kube-proxy-2d2bq"}
+    )
     kube_proxy = cadvisor_scraper._get_pod_by_metric_label(
         {"container_name": "POD", "namespace": "kube-system", "pod_name": "kube-proxy-2d2bq"}
     )
     fluentd = cadvisor_scraper._get_pod_by_metric_label(
         {"container_name": "POD", "namespace": "kube-system", "pod_name": "fluentd-gcp-v3.0.0-z55q5"}
     )
+    assert kube_proxy_1_16["metadata"]["uid"] == "8abf1ed0-94c4-11e8-96a3-42010a840157"
     assert kube_proxy["metadata"]["uid"] == "8abf1ed0-94c4-11e8-96a3-42010a840157"
     assert fluentd["metadata"]["uid"] == "fe3d57c4-94c4-11e8-96a3-42010a840157"
 
 
 def test_get_kube_container_name():
+    tags = CadvisorPrometheusScraperMixin._get_kube_container_name(
+        {
+            "container": "datadog-agent",
+            "id": "/kubepods/burstable/"
+            "podc2319815-10d0-11e8-bd5a-42010af00137/"
+            "a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479",
+            "image": "datadog/agent-dev@sha256:894fb66f89be0332a47388d7219ab8b365520ff0e3bbf597bd0a378b19efa7ee",
+            "name": "k8s_datadog-agent_datadog-agent-jbm2k_default_c2319815-10d0-11e8-bd5a-42010af00137_0",
+            "namespace": "default",
+            "pod": "datadog-agent-jbm2k",
+        }
+    )
+    assert tags == ["kube_container_name:datadog-agent"]
+
+    # k8s < 1.16
     tags = CadvisorPrometheusScraperMixin._get_kube_container_name(
         {
             "container_name": "datadog-agent",

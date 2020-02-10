@@ -1,10 +1,11 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 import socket
 
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -26,3 +27,7 @@ def is_supported(flavor):
         return False
 
     return True
+
+
+def is_legacy_check(check):
+    return isinstance(check, LegacyKafkaCheck_0_10_2)

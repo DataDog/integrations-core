@@ -1,5 +1,21 @@
 # CHANGELOG - IBM WAS
 
+## 1.5.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.4.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 1.3.1 / 2019-10-17
+
+* [Fixed] Fix character casing logic for custom_queries_units_gauge option. See [#4796](https://github.com/DataDog/integrations-core/pull/4796).
+
+## 1.3.0 / 2019-10-11
+
+* [Added] Add an option for custom count with units. See [#4628](https://github.com/DataDog/integrations-core/pull/4628).
+
 ## 1.2.3 / 2019-09-23
 
 * [Fixed] Don't assume nested tags exist. See [#4605](https://github.com/DataDog/integrations-core/pull/4605).

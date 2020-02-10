@@ -1,5 +1,18 @@
 # CHANGELOG - windows_service
 
+## 2.4.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 2.3.0 / 2019-12-02
+
+* [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+
+## 2.2.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+* [Fixed] Search patterns in reverse sort order. See [#4503](https://github.com/DataDog/integrations-core/pull/4503).
+
 ## 2.1.0 / 2019-05-14
 
 * [Fixed] Add debug to compare short names, service names and patterns. See [#3427](https://github.com/DataDog/integrations-core/pull/3427).

@@ -1,5 +1,18 @@
 # CHANGELOG - win32_event_log
 
+## 2.3.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 2.2.0 / 2019-12-02
+
+* [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+
+## 2.1.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+
 ## 2.0.1 / 2019-08-24
 
 * [Fixed] Remove check for user filter. See [#4342](https://github.com/DataDog/integrations-core/pull/4342).

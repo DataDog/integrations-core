@@ -7,12 +7,7 @@ instances:
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_url: "%%host%%:%%port%%/metrics"
-    
-    ## @param scheme - string - optional
-    ## Used to specify the scheme to reach the APIServer endpoints. Default to https.
-    #
-    # scheme: "https"
+  - prometheus_url: "https://%%host%%:6443/metrics"
 
     ## @param bearer_token_auth - string - optional
     ## Used if you are using RBACs and need the Agent to authenticate
@@ -28,8 +23,8 @@ instances:
 
     ## @param ssl_verify - string - optional
     ## Used to verify self signed certificates. Default to false.
-    # 
-    # ssl_verify: false   
+    #
+    # ssl_verify: false
 
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -15,3 +15,6 @@ class Config:
 
         self.username = instance.get('username')
         self.password = instance.get('password')
+        self.project = instance.get('project')
+        if self.project:
+            self.tags.append("project:{}".format(self.project))

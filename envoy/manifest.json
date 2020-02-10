@@ -2,7 +2,8 @@
   "categories": [
     "cloud",
     "web",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Envoy",
@@ -25,7 +26,9 @@
   "integration_id": "envoy",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Envoy - Overview": "assets/dashboards/envoy_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from collections import OrderedDict
+
 import mock
 import pytest
 from six import PY3
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base import __version__ as base_package_version
+from datadog_checks.base import to_string
 from datadog_checks.base.checks.base import datadog_agent
 
 
@@ -46,6 +50,202 @@ def test_log_critical_error():
         check.log.critical('test')
 
 
+def test_warning_ok():
+    check = AgentCheck()
+
+    check.warning("foo")
+    check.warning("hello %s%s", "world", "!")
+
+    assert ["foo", "hello world!"] == check.warnings
+
+
+def test_warning_args_errors():
+    check = AgentCheck()
+
+    check.warning("should not raise error: %s")
+
+    with pytest.raises(TypeError):
+        check.warning("not enough arguments: %s %s", "a")
+
+    with pytest.raises(TypeError):
+        check.warning("too many arguments: %s %s", "a", "b", "c")
+
+    assert ["should not raise error: %s"] == check.warnings
+
+
+@pytest.mark.parametrize(
+    'case_name, check, expected_attributes',
+    [
+        (
+            'agent 5 signature: only args',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}, [{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: instances as kwarg',
+            AgentCheck(
+                'check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}, instances=[{'foo': 'bar'}]
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: agentConfig and instances as kwarg',
+            AgentCheck(
+                'check_name',
+                {'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+                instances=[{'foo': 'bar'}],
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: init_config, agentConfig and instances as kwarg',
+            AgentCheck(
+                'check_name',
+                init_config={'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+                instances=[{'foo': 'bar'}],
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: name, init_config, agentConfig and instances as kwarg',
+            AgentCheck(
+                name='check_name',
+                init_config={'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+                instances=[{'foo': 'bar'}],
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 5 signature: no instances',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, {'agent_conf1': 'agent_value1'}),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 5 signature: no instances and agentConfig as kwarg',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 5 signature: no instances and init_config, agentConfig as kwarg',
+            AgentCheck(
+                'check_name', init_config={'init_conf1': 'init_value1'}, agentConfig={'agent_conf1': 'agent_value1'}
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 5 signature: no instances and name, init_config, agentConfig as kwarg',
+            AgentCheck(
+                name='check_name',
+                init_config={'init_conf1': 'init_value1'},
+                agentConfig={'agent_conf1': 'agent_value1'},
+            ),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {'agent_conf1': 'agent_value1'},
+                'instance': None,
+            },
+        ),
+        (
+            'agent 6 signature: only args (instances as list)',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, [{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: only args (instances as tuple)',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, ({'foo': 'bar'},)),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: instances as kwarg',
+            AgentCheck('check_name', {'init_conf1': 'init_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: init_config, instances as kwarg',
+            AgentCheck('check_name', init_config={'init_conf1': 'init_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+        (
+            'agent 6 signature: name, init_config, instances as kwarg',
+            AgentCheck(name='check_name', init_config={'init_conf1': 'init_value1'}, instances=[{'foo': 'bar'}]),
+            {
+                'name': 'check_name',
+                'init_config': {'init_conf1': 'init_value1'},
+                'agentConfig': {},
+                'instance': {'foo': 'bar'},
+            },
+        ),
+    ],
+)
+def test_agent_signature(case_name, check, expected_attributes):
+    actual_attributes = {attr: getattr(check, attr) for attr in expected_attributes}
+    assert expected_attributes == actual_attributes
+
+
 class TestMetricNormalization:
     def test_default(self):
         check = AgentCheck()
@@ -64,8 +264,8 @@ class TestMetricNormalization:
     def test_prefix(self):
         check = AgentCheck()
         metric_name = u'metric'
-        prefix = u'some'
-        normalized_metric_name = 'some.metric'
+        prefix = u'somePrefix'
+        normalized_metric_name = 'somePrefix.metric'
 
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
 
@@ -84,6 +284,14 @@ class TestMetricNormalization:
         normalized_metric_name = 'some.metric'
 
         assert check.normalize(metric_name, prefix=prefix) == normalized_metric_name
+
+    def test_prefix_fix_case(self):
+        check = AgentCheck()
+        metric_name = b'metric'
+        prefix = u'somePrefix'
+        normalized_metric_name = 'some_prefix.metric'
+
+        assert check.normalize(metric_name, fix_case=True, prefix=prefix) == normalized_metric_name
 
     def test_underscores_redundant(self):
         check = AgentCheck()
@@ -106,6 +314,29 @@ class TestMetricNormalization:
 
         assert check.normalize(metric_name) == normalized_metric_name
 
+    def test_invalid_chars_and_underscore(self):
+        check = AgentCheck()
+        metric_name = u'metric.hello++aaa$$_bbb'
+        normalized_metric_name = 'metric.hello_aaa_bbb'
+
+        assert check.normalize(metric_name) == normalized_metric_name
+
+
+@pytest.mark.parametrize(
+    'case, tag, expected_tag',
+    [
+        ('nothing to normalize', 'abc:123', 'abc:123'),
+        ('unicode', u'Klüft inför på fédéral', 'Klüft_inför_på_fédéral'),
+        ('invalid chars', 'foo,+*-/()[]{}  \t\nbar:123', 'foo_bar:123'),
+        ('leading and trailing underscores', '__abc:123__', 'abc:123'),
+        ('redundant underscore', 'foo_____bar', 'foo_bar'),
+        ('invalid chars and underscore', 'foo++__bar', 'foo_bar'),
+    ],
+)
+def test_normalize_tag(case, tag, expected_tag):
+    check = AgentCheck()
+    assert check.normalize_tag(tag) == expected_tag, 'Failed case: {}'.format(case)
+
 
 class TestMetrics:
     def test_namespace(self, aggregator):
@@ -115,6 +346,16 @@ class TestMetrics:
         check.gauge('metric', 0)
 
         aggregator.assert_metric('test.metric')
+
+    def test_namespace_override(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        methods = ('gauge', 'count', 'monotonic_count', 'rate', 'histogram', 'historate', 'increment', 'decrement')
+        for method in methods:
+            getattr(check, method)('metric', 0, raw=True)
+
+        aggregator.assert_metric('metric', count=len(methods))
 
     def test_non_float_metric(self, aggregator):
         check = AgentCheck()
@@ -132,10 +373,25 @@ class TestEvents:
             "msg_title": "new test event",
             "aggregation_key": "test.event",
             "msg_text": "test event test event",
-            "tags": None,
+            "tags": ["foo", "bar"],
+            "timestamp": 1,
         }
         check.event(event)
-        aggregator.assert_event('test event test event')
+        aggregator.assert_event('test event test event', tags=["foo", "bar"])
+
+    @pytest.mark.parametrize('msg_text', [u'test-π', 'test-π', b'test-\xcf\x80'])
+    def test_encoding(self, aggregator, msg_text):
+        check = AgentCheck()
+        event = {
+            'event_type': 'new.event',
+            'msg_title': 'new test event',
+            'aggregation_key': 'test.event',
+            'msg_text': msg_text,
+            'tags': ['∆', u'Ω-bar'],
+            'timestamp': 1,
+        }
+        check.event(event)
+        aggregator.assert_event(to_string(msg_text), tags=['∆', 'Ω-bar'])
 
     def test_namespace(self, aggregator):
         check = AgentCheck()
@@ -145,10 +401,11 @@ class TestEvents:
             'msg_title': 'new test event',
             'aggregation_key': 'test.event',
             'msg_text': 'test event test event',
-            'tags': None,
+            'tags': ['foo', 'bar'],
+            'timestamp': 1,
         }
         check.event(event)
-        aggregator.assert_event('test event test event', source_type_name='test')
+        aggregator.assert_event('test event test event', source_type_name='test', tags=['foo', 'bar'])
 
 
 class TestServiceChecks:
@@ -182,6 +439,13 @@ class TestServiceChecks:
 
         check.service_check('service_check', AgentCheck.OK)
         aggregator.assert_service_check('test.service_check', status=AgentCheck.OK)
+
+    def test_namespace_override(self, aggregator):
+        check = AgentCheck()
+        check.__NAMESPACE__ = 'test'
+
+        check.service_check('service_check', AgentCheck.OK, raw=True)
+        aggregator.assert_service_check('service_check', status=AgentCheck.OK)
 
 
 class TestTags:
@@ -246,16 +510,6 @@ class TestTags:
         check._normalize_tags_type(tags, device_name)
         normalized_tags = check._normalize_tags_type(tags, device_name)
         assert len(normalized_tags) == 1
-
-    def test__to_bytes(self):
-        if PY3:
-            pytest.skip('Method only exists on Python 2')
-        check = AgentCheck()
-        assert isinstance(check._to_bytes(b"tag:foo"), bytes)
-        assert isinstance(check._to_bytes(u"tag:☣"), bytes)
-        in_str = mock.MagicMock(side_effect=Exception)
-        in_str.encode.side_effect = Exception
-        assert check._to_bytes(in_str) is None
 
     def test_none_value(self, caplog):
         check = AgentCheck()
@@ -359,3 +613,129 @@ class TestLimits:
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
         assert len(aggregator.metrics("metric")) == 10
+
+    def test_metric_limit_instance_config_string(self, aggregator):
+        instances = [{"max_returned_metrics": "4"}]
+        check = AgentCheck("test", {}, instances)
+        assert check.get_warnings() == []
+
+        for _ in range(0, 4):
+            check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 0
+        assert len(aggregator.metrics("metric")) == 4
+
+        check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics("metric")) == 4
+
+    @pytest.mark.parametrize(
+        "max_returned_metrics",
+        (
+            pytest.param("I am not a int-convertible string", id="value-error"),
+            pytest.param(None, id="type-error-1"),
+            pytest.param(["A list is not an int"], id="type-error-2"),
+        ),
+    )
+    def test_metric_limit_instance_config_invalid_int(self, aggregator, max_returned_metrics):
+        instances = [{"max_returned_metrics": max_returned_metrics}]
+        check = LimitedCheck("test", {}, instances)
+        assert len(check.get_warnings()) == 1
+
+        # Should have fell back to the default metric limit.
+        for _ in range(12):
+            check.gauge("metric", 0)
+        assert len(aggregator.metrics("metric")) == 10
+
+
+class TestCheckInitializations:
+    def test_default(self):
+        class TestCheck(AgentCheck):
+            def check(self, _):
+                pass
+
+        check = TestCheck('test', {}, [{}])
+        check.check_id = 'test:123'
+
+        with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+            check.run()
+
+            assert m.call_count == 0
+
+    def test_default_config_sent(self):
+        class TestCheck(AgentCheck):
+            METADATA_DEFAULT_CONFIG_INIT_CONFIG = ['foo']
+            METADATA_DEFAULT_CONFIG_INSTANCE = ['bar']
+
+            def check(self, _):
+                pass
+
+        # Ordered by call order in `AgentCheck.send_config_metadata`
+        value_map = OrderedDict((('instance', 'mock'), ('init_config', 5)))
+
+        config = {'foo': value_map['init_config'], 'bar': value_map['instance']}
+        check = TestCheck('test', config, [config])
+        check.check_id = 'test:123'
+
+        with mock.patch('datadog_checks.base.stubs.datadog_agent.set_check_metadata') as m:
+            check.run()
+
+            assert m.call_count == 2
+            check.run()
+            assert m.call_count == 2
+
+            for (config_type, value), call_args in zip(value_map.items(), m.call_args_list):
+                args, _ = call_args
+                assert args[0] == 'test:123'
+                assert args[1] == 'config.{}'.format(config_type)
+
+                data = json.loads(args[2])[0]
+
+                assert data.pop('is_set', None) is True
+                assert data.pop('value', None) == value
+                assert not data
+
+    def test_success_only_once(self):
+        class TestCheck(AgentCheck):
+            def __init__(self, *args, **kwargs):
+                super(TestCheck, self).__init__(*args, **kwargs)
+                self.state = 1
+                self.initialize = mock.MagicMock(side_effect=self._initialize)
+                self.check_initializations.append(self.initialize)
+
+            def _initialize(self):
+                self.state += 1
+                if self.state % 2:
+                    raise Exception('is odd')
+
+            def check(self, _):
+                pass
+
+        check = TestCheck('test', {}, [{}])
+        check.run()
+        check.run()
+        check.run()
+
+        assert check.initialize.call_count == 1
+
+    def test_error_retry(self):
+        class TestCheck(AgentCheck):
+            def __init__(self, *args, **kwargs):
+                super(TestCheck, self).__init__(*args, **kwargs)
+                self.state = 0
+                self.initialize = mock.MagicMock(side_effect=self._initialize)
+                self.check_initializations.append(self.initialize)
+
+            def _initialize(self):
+                self.state += 1
+                if self.state % 2:
+                    raise Exception('is odd')
+
+            def check(self, _):
+                pass
+
+        check = TestCheck('test', {}, [{}])
+        check.run()
+        check.run()
+        check.run()
+
+        assert check.initialize.call_count == 2

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from ..subprocess import run_command
 from ..utils import chdir, resolve_path, stream_file_lines, write_file_lines
-from .constants import get_root
+from .constants import REQUIREMENTS_IN, get_root
 
 DEP_PATTERN = re.compile(r'([^=]+)(?:==([^;\s]+)(?:; *(.*))?)?')
 
@@ -120,7 +120,7 @@ class PackageCatalog:
         """
         Dump the packages in the catalog in a requirements file
         """
-        write_file_lines(reqs_file, ('{}\n'.format(package) for package in self.packages))
+        write_file_lines(reqs_file, (f'{package}\n' for package in self.packages))
 
     def add_package(self, check_name, package):
         """
@@ -181,9 +181,9 @@ def make_catalog(verify=False, checks=None):
     checks = checks if checks else os.listdir(root)
 
     for check_name in sorted(checks):
-        for package in read_packages(os.path.join(root, check_name, 'requirements.in')):
+        for package in read_packages(os.path.join(root, check_name, REQUIREMENTS_IN)):
             if not package.version:
-                errors.append('Unpinned dependency `{}` in the `{}` check'.format(package.name, check_name))
+                errors.append(f'Unpinned dependency `{package.name}` in the `{check_name}` check')
             catalog.add_package(check_name, package)
 
     return catalog, errors

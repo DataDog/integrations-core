@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -26,6 +26,7 @@ def test_tabular_no_enforce(benchmark):
 
 def test_tabular_bulk(benchmark):
     instance = generate_instance_config(BULK_TABULAR_OBJECTS)
+    instance['bulk_threshold'] = 5
     check = create_check(instance)
 
     benchmark(check.check, instance)

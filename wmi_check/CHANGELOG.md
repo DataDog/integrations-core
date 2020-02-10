@@ -1,5 +1,17 @@
 # CHANGELOG - wmi_check
 
+## 1.7.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
+## 1.6.0 / 2019-12-02
+
+* [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+
+## 1.5.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+
 ## 1.4.2 / 2019-07-13
 
 * [Fixed] Avoid WMISampler inheriting from Thread. See [#4051](https://github.com/DataDog/integrations-core/pull/4051).

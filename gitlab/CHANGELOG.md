@@ -1,5 +1,21 @@
 # CHANGELOG - gitlab
 
+## 2.8.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
+## 2.7.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 2.6.1 / 2019-10-17
+
+* [Fixed] Add missing go_memstats_stack_sys_bytes metric in conf file. See [#4800](https://github.com/DataDog/integrations-core/pull/4800).
+
+## 2.6.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 2.5.1 / 2019-08-30
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).

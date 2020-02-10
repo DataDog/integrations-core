@@ -1,19 +1,17 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import platform
-
 import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.mesos_slave import MesosSlave
 
-from .common import CHECK_NAME
+from .common import CHECK_NAME, URL, not_windows_ci
+
+pytestmark = not_windows_ci
 
 
-# Linux only: https://github.com/docker/for-mac/issues/1031
-@pytest.mark.skipif(platform.system() != 'Linux', reason='Only runs on Unix systems')
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check_integration(instance, aggregator):
@@ -41,9 +39,14 @@ def assert_metrics_covered(aggregator):
     ):
         metrics.update(d)
 
+    expected_tags = ["instance:mytag1", "url:{}/metrics/snapshot".format(URL), "mesos_node:slave"]
+
     for _, v in iteritems(metrics):
         aggregator.assert_metric(v[0])
+        for tag in expected_tags:
+            aggregator.assert_metric_has_tag(v[0], tag)
+        aggregator.assert_metric_has_tag_prefix(v[0], "mesos_pid")
 
     aggregator.assert_all_metrics_covered()
-
-    aggregator.assert_service_check('mesos_slave.can_connect', status=AgentCheck.OK, count=2)
+    # We should submit 2 service checks per check run because 2 endpoints were tried
+    aggregator.assert_service_check('mesos_slave.can_connect', status=AgentCheck.OK, count=4)

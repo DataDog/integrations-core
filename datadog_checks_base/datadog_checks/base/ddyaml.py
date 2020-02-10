@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2011-2016
+# (C) Datadog, Inc. 2011-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
@@ -41,7 +41,7 @@ def safe_yaml_dump_all(
 ):
     if Dumper != yDumper:
         stream_name = get_stream_name(stream)
-        log.debug("Unsafe dumping of YAML has been disabled - using safe dumper instead in {}".format(stream_name))
+        log.debug("Unsafe dumping of YAML has been disabled - using safe dumper instead in %s", stream_name)
 
     if pyyaml_dump_all:
         return pyyaml_dump_all(
@@ -84,7 +84,7 @@ def safe_yaml_dump_all(
 def safe_yaml_load(stream, Loader=yLoader):
     if Loader != yLoader:
         stream_name = get_stream_name(stream)
-        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in %s", stream_name)
 
     if pyyaml_load:
         return pyyaml_load(stream, Loader=yLoader)
@@ -95,7 +95,7 @@ def safe_yaml_load(stream, Loader=yLoader):
 def safe_yaml_load_all(stream, Loader=yLoader):
     if Loader != yLoader:
         stream_name = get_stream_name(stream)
-        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in {}".format(stream_name))
+        log.debug("Unsafe loading of YAML has been disabled - using safe loader instead in %s", stream_name)
 
     if pyyaml_load_all:
         return pyyaml_load_all(stream, Loader=yLoader)

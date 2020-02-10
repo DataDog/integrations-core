@@ -2,6 +2,9 @@ parameters:
   repo: 'core'
 
 steps:
+- script: ddev validate ci
+  displayName: 'Validate CI configuration'
+
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate agent-reqs
     displayName: 'Validate Agent requirements'
@@ -9,13 +12,12 @@ steps:
 - script: ddev validate config
   displayName: 'Validate default configuration files'
 
+- script: ddev validate dashboards
+  displayName: 'Validate dashboard definition files'
+
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate dep
     displayName: 'Validate dependencies'
-
-- ${{ if eq(parameters.repo, 'core') }}:
-  - script: ddev validate logos
-    displayName: 'Validate logos'
 
 - script: ddev validate manifest -i
   displayName: 'Validate manifest files'

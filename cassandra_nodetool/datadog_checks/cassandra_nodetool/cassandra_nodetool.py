@@ -1,11 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 # pylint: disable=W1633
 from __future__ import division
 
 import re
-import shlex
 from collections import defaultdict
 
 from datadog_checks.checks import AgentCheck
@@ -51,7 +50,7 @@ class CassandraNodetoolCheck(AgentCheck):
 
     def check(self, instance):
         # Allow to specify a complete command for nodetool such as `docker exec container nodetool`
-        nodetool_cmd = shlex.split(instance.get("nodetool", self.nodetool_cmd))
+        nodetool_cmd = instance.get("nodetool", self.nodetool_cmd).split()
         host = instance.get("host", DEFAULT_HOST)
         port = instance.get("port", DEFAULT_PORT)
         keyspaces = instance.get("keyspaces", [])

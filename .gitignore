@@ -52,6 +52,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .benchmarks/
+.junit/
 
 # Translations
 *.mo
@@ -92,6 +93,9 @@ tmp
 .rbenv-gemsets
 .ruby-version
 
+# pyenv versioning
+.python-version
+
 # Common IDEs & editors
 .idea/
 .vscode/
@@ -100,8 +104,9 @@ tmp
 wheelhouse/
 *.whl
 
-.pytest_cache
+# Type checking
+.mypy_cache
 
-# by default, ignore in-toto metadata from the command line
-.links/
+# By default, ignore in-toto metadata from the command line:
+.in-toto/
 *.link

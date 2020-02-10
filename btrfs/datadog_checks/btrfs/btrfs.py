@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
@@ -202,5 +202,6 @@ class BTRFS(AgentCheck):
             else:
                 self.log.debug(
                     "Could not retrieve the number of unallocated bytes for all devices,"
-                    " skipping metric for mountpoint {}".format(mountpoint)
+                    " skipping metric for mountpoint %s",
+                    mountpoint,
                 )

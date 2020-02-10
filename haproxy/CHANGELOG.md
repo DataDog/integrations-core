@@ -1,5 +1,23 @@
 # CHANGELOG - haproxy
 
+## 2.6.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 2.5.1 / 2019-12-13
+
+* [Fixed] Handle failure on version endpoint. See [#5208](https://github.com/DataDog/integrations-core/pull/5208).
+
+## 2.5.0 / 2019-12-02
+
+* [Added] Submit version metadata. See [#4851](https://github.com/DataDog/integrations-core/pull/4851).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 2.4.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 2.3.0 / 2019-08-24
 
 * [Added] Add requests wrapper to haproxy. See [#4219](https://github.com/DataDog/integrations-core/pull/4219).

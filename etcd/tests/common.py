@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -11,6 +11,10 @@ HOST = get_docker_hostname()
 PORT = '23790'
 V3_PREVIEW = os.getenv('V3_PREVIEW') == 'true'
 URL = 'http://{}:{}'.format(HOST, PORT)
+
+LEGACY_INSTANCE = {'url': URL, 'use_preview': False}
+
+ETCD_VERSION = os.getenv('ETCD_VERSION')
 
 STORE_METRICS = [
     'compareanddelete.fail',

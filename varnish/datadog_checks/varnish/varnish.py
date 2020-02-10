@@ -1,9 +1,8 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import re
-import shlex
 import xml.parsers.expat  # python 2.4 compatible
 from collections import defaultdict
 from distutils.version import LooseVersion
@@ -76,7 +75,7 @@ class Varnish(AgentCheck):
             self._current_metric += "." + self._current_str
 
     def _char_data(self, data):
-        self.log.debug("Data %s [%s]" % (data, self._current_element))
+        self.log.debug("Data %s [%s]", data, self._current_element)
         data = data.strip()
         if len(data) > 0 and self._current_element != "":
             if self._current_element == "value":
@@ -103,7 +102,7 @@ class Varnish(AgentCheck):
         # discovery feature. This change allows for passing in additional parameters to
         # the script (i.e. %%host%%) so that the command is properly formatted and the
         # desired container is queried.
-        varnishstat_path = shlex.split(instance.get("varnishstat"))
+        varnishstat_path = instance.get('varnishstat', '').split()
         name = instance.get('name')
         metrics_filter = instance.get("metrics_filter", [])
         if not isinstance(metrics_filter, list):
@@ -136,7 +135,7 @@ class Varnish(AgentCheck):
             # discovery feature. This change allows for passing in additional parameters to
             # the script (i.e. %%host%%) so that the command is properly formatted and the
             # desired container is queried.
-            varnishadm_path = shlex.split(instance.get('varnishadm'))
+            varnishadm_path = instance.get('varnishadm', '').split()
             secretfile_path = instance.get('secretfile', '/etc/varnish/secret')
 
             daemon_host = instance.get('daemon_host', 'localhost')
@@ -171,22 +170,30 @@ class Varnish(AgentCheck):
 
         # Assumptions regarding varnish's version
         varnishstat_format = "json"
-        version = LooseVersion('3.0.0')
+        raw_version = None
 
         m1 = self.version_pattern.search(output, re.MULTILINE)
         # v2 prints the version on stderr, v3 on stdout
         m2 = self.version_pattern.search(error, re.MULTILINE)
 
         if m1 is None and m2 is None:
-            self.log.warn("Cannot determine the version of varnishstat, assuming 3 or greater")
+            self.log.warning("Cannot determine the version of varnishstat, assuming 3 or greater")
             self.warning("Cannot determine the version of varnishstat, assuming 3 or greater")
         else:
             if m1 is not None:
-                version = LooseVersion(m1.group())
+                raw_version = m1.group()
             elif m2 is not None:
-                version = LooseVersion(m2.group())
+                raw_version = m2.group()
 
-        self.log.debug("Varnish version: %s", version)
+        self.log.debug("Varnish version: %s", raw_version)
+
+        if raw_version:
+            self.set_metadata('version', raw_version)
+
+        if raw_version is None:
+            raw_version = '3.0.0'
+
+        version = LooseVersion(raw_version)
 
         # Location of varnishstat
         if version < LooseVersion('3.0.0'):
@@ -234,7 +241,7 @@ class Varnish(AgentCheck):
                         self.rate('varnish.n_purgesps', long(value), tags=tags)
         elif varnishstat_format == "text":
             for line in output.split("\n"):
-                self.log.debug("Parsing varnish results: %s" % line)
+                self.log.debug("Parsing varnish results: %s", line)
                 fields = line.split()
                 if len(fields) < 3:
                     break
@@ -244,13 +251,13 @@ class Varnish(AgentCheck):
                 # Now figure out which value to pick
                 if rate_val.lower() in ("nan", "."):
                     # col 2 matters
-                    self.log.debug("Varnish (gauge) %s %d" % (metric_name, int(gauge_val)))
+                    self.log.debug("Varnish (gauge) %s %d", metric_name, int(gauge_val))
                     self.gauge(metric_name, int(gauge_val), tags=tags)
                     if 'n_purges' in metric_name:
                         self.rate('varnish.n_purgesps', float(gauge_val), tags=tags)
                 else:
                     # col 3 has a rate (since restart)
-                    self.log.debug("Varnish (rate) %s %d" % (metric_name, int(gauge_val)))
+                    self.log.debug("Varnish (rate) %s %d", metric_name, int(gauge_val))
                     self.rate(metric_name, float(gauge_val), tags=tags)
 
     def _parse_varnishadm(self, output, tags):

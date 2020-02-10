@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from six import iteritems
@@ -52,7 +52,7 @@ class IIS(PDHBaseCheck):
             iis_host = self.hostname
         else:
             iis_host = inst_host
-        return "iis_host:{}".format(self.normalize(iis_host))
+        return "iis_host:{}".format(self.normalize_tag(iis_host))
 
     def check(self, instance):
         # Duplicate refresh_counters from PDHBaseCheck
@@ -113,7 +113,7 @@ class IIS(PDHBaseCheck):
             if instance_hash in self._tags:
                 tags = list(self._tags[instance_hash])
             tags.append(self.get_iishost(instance))
-            normalized_site = self.normalize(site)
+            normalized_site = self.normalize_tag(site)
             tags.append("site:{}".format(normalized_site))
             self.log.warning("Check didn't get any data for expected site: %r", site)
             self.service_check(self.SERVICE_CHECK, self.CRITICAL, tags)
@@ -126,7 +126,7 @@ class IIS(PDHBaseCheck):
 
         try:
             if not is_single_instance:
-                tags.append("site:{}".format(self.normalize(site_name)))
+                tags.append("site:{}".format(self.normalize_tag(site_name)))
         except Exception as e:
             self.log.error("Caught exception %r setting tags", e)
 

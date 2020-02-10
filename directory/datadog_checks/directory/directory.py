@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from fnmatch import fnmatch
@@ -133,7 +133,7 @@ class DirectoryCheck(AgentCheck):
                     file_stat = file_entry.stat()
 
                 except OSError as ose:
-                    self.warning('DirectoryCheck: could not stat file {} - {}'.format(join(root, file_entry.name), ose))
+                    self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
                 else:
                     # file specific metrics
                     directory_bytes += file_stat.st_size

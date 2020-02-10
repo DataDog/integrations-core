@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
@@ -7,7 +7,7 @@ from .... import EnvVars
 from ...e2e import create_interface, get_configured_envs
 from ...e2e.agent import DEFAULT_PYTHON_VERSION
 from ...testing import get_tox_envs
-from ..console import CONTEXT_SETTINGS, echo_info, echo_warning
+from ..console import CONTEXT_SETTINGS, DEBUG_OUTPUT, echo_info, echo_warning
 from ..test import test as test_command
 from .start import start
 from .stop import stop
@@ -18,7 +18,6 @@ from .stop import stop
 @click.option(
     '--agent',
     '-a',
-    default='6',
     help=(
         'The agent build to use e.g. a Docker image like `datadog/agent:6.5.2`. For '
         'Docker environments you can use an integer corresponding to fields in the '
@@ -29,7 +28,7 @@ from .stop import stop
     '--python',
     '-py',
     type=click.INT,
-    help='The version of Python to use. Defaults to {} if no tox Python is specified.'.format(DEFAULT_PYTHON_VERSION),
+    help=f'The version of Python to use. Defaults to {DEFAULT_PYTHON_VERSION} if no tox Python is specified.',
 )
 @click.option('--dev/--prod', default=None, help='Whether to use the latest version of a check or what is shipped')
 @click.option('--base', is_flag=True, help='Whether to use the latest version of the base check or what is shipped')
@@ -43,9 +42,10 @@ from .stop import stop
     ),
 )
 @click.option('--new-env', '-ne', is_flag=True, help='Execute setup and tear down actions')
-@click.option('--retry', '-r', help='Number of retries for each tox env', type=click.INT)
+@click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
+@click.option('--junit', '-j', 'junit', is_flag=True, help='Generate junit reports')
 @click.pass_context
-def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
+def test(ctx, checks, agent, python, dev, base, env_vars, new_env, profile_memory, junit):
     """Test an environment."""
     check_envs = get_tox_envs(checks, e2e_tests_only=True)
     tests_ran = False
@@ -60,9 +60,12 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
     if dev is None:
         dev = True
 
+    if profile_memory and not new_env:
+        echo_warning('Ignoring --profile-memory, to utilize that you must also select --new-env')
+
     for check, envs in check_envs:
         if not envs:
-            echo_warning('No end-to-end environments found for `{}`'.format(check))
+            echo_warning(f'No end-to-end environments found for `{check}`')
             continue
 
         config_envs = get_configured_envs(check)
@@ -74,7 +77,15 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
         for env in envs:
             if new_env:
                 ctx.invoke(
-                    start, check=check, env=env, agent=agent, python=python, dev=dev, base=base, env_vars=env_vars
+                    start,
+                    check=check,
+                    env=env,
+                    agent=agent,
+                    python=python,
+                    dev=dev,
+                    base=base,
+                    env_vars=env_vars,
+                    profile_memory=profile_memory,
                 )
             elif env not in config_envs:
                 continue
@@ -86,13 +97,15 @@ def test(ctx, checks, agent, python, dev, base, env_vars, new_env, retry):
                 with EnvVars(persisted_env_vars):
                     ctx.invoke(
                         test_command,
-                        checks=['{}:{}'.format(check, env)],
+                        checks=[f'{check}:{env}'],
+                        debug=DEBUG_OUTPUT,
                         e2e=True,
                         passenv=' '.join(persisted_env_vars) if persisted_env_vars else None,
-                        retry=retry,
+                        junit=junit,
                     )
             finally:
                 if new_env:
                     ctx.invoke(stop, check=check, env=env)
+
     if not tests_ran:
         echo_info('Nothing to test!')

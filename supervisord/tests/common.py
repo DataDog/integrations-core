@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -14,6 +14,8 @@ HOST = get_docker_hostname()
 PORT = 19001
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
+
+SUPERVISOR_VERSION = os.getenv('SUPERVISOR_VERSION')
 
 # Supervisord should run 3 programs for 10, 20 and 30 seconds
 # respectively.

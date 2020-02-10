@@ -1,9 +1,7 @@
-# (C) Datadog, Inc. 2010-2018
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-
-from datadog_checks.postgres import PostgreSql
 
 RELATION_METRICS = [
     'postgresql.seq_scans',
@@ -37,10 +35,10 @@ IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgres
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_relations_metrics(aggregator, pg_instance):
+def test_relations_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
 
-    posgres_check = PostgreSql('postgres', {}, {})
+    posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [
@@ -72,14 +70,14 @@ def test_relations_metrics(aggregator, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_relations_metrics2(aggregator, pg_instance):
+def test_relations_metrics2(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = [
         {'relation_regex': '.*', 'schemas': ['hello', 'hello2']},
         # Empty schemas means all schemas, even though the first relation matches first.
         {'relation_regex': r'[pP]ersons[-_]?(dup\d)?'},
     ]
     relations = ['persons', 'personsdup1', 'Personsdup2']
-    posgres_check = PostgreSql('postgres', {}, {})
+    posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
 
     expected_tags = {}
@@ -114,11 +112,11 @@ def test_relations_metrics2(aggregator, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_index_metrics(aggregator, pg_instance):
+def test_index_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['breed']
     pg_instance['dbname'] = 'dogs'
 
-    posgres_check = PostgreSql('postgres', {}, {})
+    posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
 
     expected_tags = pg_instance['tags'] + [

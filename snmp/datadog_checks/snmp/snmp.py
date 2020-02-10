@@ -1,23 +1,27 @@
-# (C) Datadog, Inc. 2010-2019
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import fnmatch
+import ipaddress
+import json
 import threading
 import time
 from collections import defaultdict
 
 import pysnmp.proto.rfc1902 as snmp_type
-import yaml
 from pyasn1.codec.ber import decoder
 from pysnmp import hlapi
 from pysnmp.error import PySnmpError
 from pysnmp.smi import builder
-from pysnmp.smi.exval import noSuchInstance, noSuchObject
+from pysnmp.smi.exval import endOfMibView, noSuchInstance, noSuchObject
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
-from .config import InstanceConfig
+from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
+from .config import InstanceConfig, ParsedTableMetric
+from .utils import get_profile_definition
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -48,6 +52,7 @@ class SnmpCheck(AgentCheck):
 
     SC_STATUS = 'snmp.can_check'
     _running = True
+    _thread = None
     _NON_REPEATERS = 0
     _MAX_REPETITIONS = 25
 
@@ -59,37 +64,42 @@ class SnmpCheck(AgentCheck):
 
         # Load Custom MIB directory
         self.mibs_path = init_config.get('mibs_folder')
+
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
+
         self.profiles = init_config.get('profiles', {})
         self.profiles_by_oid = {}
-        for profile, profile_data in self.profiles.items():
-            filename = profile_data.get('definition_file')
-            if filename:
-                try:
-                    with open(filename) as f:
-                        data = yaml.safe_load(f)
-                except Exception:
-                    raise ConfigurationError("Couldn't read profile '{}' in '{}'".format(profile, filename))
-            else:
-                data = profile_data['definition']
-            self.profiles[profile] = {'definition': data}
-            sys_object_oid = profile_data.get('sysobjectid')
-            if sys_object_oid:
-                self.profiles_by_oid[sys_object_oid] = profile
+        self._load_profiles()
 
         self.instance['name'] = self._get_instance_key(self.instance)
-        self._config = InstanceConfig(
-            self.instance,
+        self._config = self._build_config(self.instance)
+
+    def _load_profiles(self):
+        """
+        Load the configured SNMP profiles and index them by sysObjectID, if possible.
+        """
+        for name, profile in self.profiles.items():
+            try:
+                definition = get_profile_definition(profile)
+            except Exception as exc:
+                raise ConfigurationError("Couldn't read profile '{}': {}".format(name, exc))
+
+            self.profiles[name] = {'definition': definition}
+
+            sys_object_oid = definition.get('sysobjectid')
+            if sys_object_oid is not None:
+                self.profiles_by_oid[sys_object_oid] = name
+
+    def _build_config(self, instance):
+        return InstanceConfig(
+            instance,
             self.warning,
+            self.log,
             self.init_config.get('global_metrics', []),
             self.mibs_path,
             self.profiles,
             self.profiles_by_oid,
         )
-        if self._config.ip_network:
-            self._thread = threading.Thread(target=self.discover_instances, name=self.name)
-            self._thread.daemon = True
-            self._thread.start()
 
     def _get_instance_key(self, instance):
         key = instance.get('name')
@@ -118,27 +128,27 @@ class SnmpCheck(AgentCheck):
                 instance.pop('network_address')
                 instance['ip_address'] = host
 
-                host_config = InstanceConfig(
-                    instance,
-                    self.warning,
-                    self.init_config.get('global_metrics', []),
-                    self.mibs_path,
-                    self.profiles,
-                    self.profiles_by_oid,
-                )
+                host_config = self._build_config(instance)
                 try:
                     sys_object_oid = self.fetch_sysobject_oid(host_config)
                 except Exception as e:
                     self.log.debug("Error scanning host %s: %s", host, e)
                     continue
-                if sys_object_oid not in self.profiles_by_oid:
-                    if not (host_config.table_oids or host_config.raw_oids):
-                        self.log.warn("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
+                try:
+                    profile = self._profile_for_sysobject_oid(sys_object_oid)
+                except ConfigurationError:
+                    if not (host_config.all_oids or host_config.bulk_oids):
+                        self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
-                    profile = self.profiles_by_oid[sys_object_oid]
-                    host_config.refresh_with_profile(self.profiles[profile], self.warning)
+                    host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
                 config.discovered_instances[host] = host_config
+
+                write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
+
+            # Write again at the end of the loop, in case some host have been removed since last
+            write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
+
             time_elapsed = time.time() - start_time
             if discovery_interval - time_elapsed > 0:
                 time.sleep(discovery_interval - time_elapsed)
@@ -148,7 +158,7 @@ class SnmpCheck(AgentCheck):
             message = '{} for instance {}'.format(error_indication, ip_address)
             raise CheckException(message)
 
-    def check_table(self, config, table_oids):
+    def fetch_results(self, config, all_oids, bulk_oids):
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -159,24 +169,17 @@ class SnmpCheck(AgentCheck):
         """
         results = defaultdict(dict)
         enforce_constraints = config.enforce_constraints
-        oids = []
-        bulk_oids = []
-        # Use bulk for SNMP version > 1 and there are enough symbols
-        bulk_limit = config.bulk_threshold if config.auth_data.mpModel else 0
-        for table, symbols in table_oids.items():
-            if not symbols:
-                # No table to browse, just one symbol
-                oids.append(table)
-            elif len(symbols) < bulk_limit:
-                oids.extend(symbols)
-            else:
-                bulk_oids.append(table)
 
-        all_binds, error = self.fetch_oids(config, oids, enforce_constraints=enforce_constraints)
+        all_binds = []
+        error = None
+        for to_fetch in all_oids:
+            binds, current_error = self.fetch_oids(config, to_fetch, enforce_constraints=enforce_constraints)
+            all_binds.extend(binds)
+            error = current_error if not error else error
 
         for oid in bulk_oids:
             try:
-                self.log.debug('Running SNMP command getBulk on OID %s', oid)
+                self.log.debug('Running SNMP command getBulk on OID %r', oid)
                 binds_iterator = config.call_cmd(
                     hlapi.bulkCmd,
                     self._NON_REPEATERS,
@@ -186,8 +189,9 @@ class SnmpCheck(AgentCheck):
                     ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
                     lexicographicMode=False,
                 )
-                binds, error = self._consume_binds_iterator(binds_iterator, config)
+                binds, current_error = self._consume_binds_iterator(binds_iterator, config)
                 all_binds.extend(binds)
+                error = current_error if not error else error
 
             except PySnmpError as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
@@ -196,36 +200,11 @@ class SnmpCheck(AgentCheck):
                 self.warning(message)
 
         for result_oid, value in all_binds:
-            if not enforce_constraints:
-                # if enforce_constraints is false, then MIB resolution has not been done yet
-                # so we need to do it manually. We have to specify the mibs that we will need
-                # to resolve the name.
-                oid_to_resolve = hlapi.ObjectIdentity(result_oid.asTuple()).loadMibs(*config.mibs_to_load)
-                result_oid = oid_to_resolve.resolveWithMib(config.mib_view_controller)
-            _, metric, indexes = result_oid.getMibSymbol()
+            metric, indexes = config.resolve_oid(result_oid)
             results[metric][indexes] = value
         self.log.debug('Raw results: %s', results)
         # Freeze the result
         results.default_factory = None
-        return results, error
-
-    def check_raw(self, config, oids):
-        """
-        Perform a snmpwalk on the domain specified by the oids, on the device
-        configured in instance.
-
-        Returns a dictionary:
-        dict[oid/metric_name] = value
-        In case of scalar objects, the row index is just 0
-        """
-        all_binds, error = self.fetch_oids(config, oids, enforce_constraints=False)
-        results = {}
-
-        for result_oid, value in all_binds:
-            oid = result_oid.asTuple()
-            matching = '.'.join(str(i) for i in oid)
-            results[matching] = value
-        self.log.debug('Raw results: %s', results)
         return results, error
 
     def fetch_oids(self, config, oids, enforce_constraints):
@@ -288,11 +267,23 @@ class SnmpCheck(AgentCheck):
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
-        self.log.debug('Running SNMP command on OID %s', oid)
+        self.log.debug('Running SNMP command on OID %r', oid)
         error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
         self.raise_on_error_indication(error_indication, config.ip_address)
         self.log.debug('Returned vars: %s', var_binds)
         return var_binds[0][1].prettyPrint()
+
+    def _profile_for_sysobject_oid(self, sys_object_oid):
+        """Return, if any, a matching profile for sys_object_oid.
+
+        If several profiles match, it will return the longer match, ie the
+        closest one to the sys_object_oid.
+        """
+        oids = [oid for oid in self.profiles_by_oid if fnmatch.fnmatch(sys_object_oid, oid)]
+        oids.sort()
+        if not oids:
+            raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
+        return self.profiles_by_oid[oids[-1]]
 
     def _consume_binds_iterator(self, binds_iterator, config):
         all_binds = []
@@ -312,20 +303,39 @@ class SnmpCheck(AgentCheck):
                 else:
                     self.warning(message)
 
-            all_binds.extend(var_binds_table)
+            all_binds.extend(var_bind for var_bind in var_binds_table if var_bind[1] is not endOfMibView)
         return all_binds, error
 
+    def _start_discovery(self):
+        cache = read_persistent_cache(self.check_id)
+        if cache:
+            hosts = json.loads(cache)
+            for host in hosts:
+                try:
+                    ipaddress.ip_address(host)
+                except ValueError:
+                    write_persistent_cache(self.check_id, json.dumps([]))
+                    break
+                instance = self.instance.copy()
+                instance.pop('network_address')
+                instance['ip_address'] = host
+
+                host_config = self._build_config(instance)
+                self._config.discovered_instances[host] = host_config
+
+        self._thread = threading.Thread(target=self.discover_instances, name=self.name)
+        self._thread.daemon = True
+        self._thread.start()
+
     def check(self, instance):
-        """
-        Perform two series of SNMP requests, one for all that have MIB associated
-        and should be looked up and one for those specified by oids.
-        """
         config = self._config
-        if instance.get('network_address'):
+        if config.ip_network:
+            if self._thread is None:
+                self._start_discovery()
             for host, discovered in list(config.discovered_instances.items()):
                 if self._check_with_config(discovered):
                     config.failing_instances[host] += 1
-                    if config.failing_instances[host] > config.allowed_failures:
+                    if config.failing_instances[host] >= config.allowed_failures:
                         # Remove it from discovered instances, we'll re-discover it later if it reappears
                         config.discovered_instances.pop(host)
                         # Reset the failure counter as well
@@ -333,30 +343,26 @@ class SnmpCheck(AgentCheck):
                 else:
                     # Reset the counter if not's failing
                     config.failing_instances.pop(host, None)
+            tags = ['network:{}'.format(config.ip_network)]
+            tags.extend(config.tags)
+            self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
             self._check_with_config(config)
 
     def _check_with_config(self, config):
         # Reset errors
         instance = config.instance
-        error = table_results = raw_results = None
+        error = results = None
         try:
-            if not (config.table_oids or config.raw_oids):
+            if not (config.all_oids or config.bulk_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
-                if sys_object_oid not in self.profiles_by_oid:
-                    raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
-                profile = self.profiles_by_oid[sys_object_oid]
-                config.refresh_with_profile(self.profiles[profile], self.warning)
+                profile = self._profile_for_sysobject_oid(sys_object_oid)
+                config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
 
-            if config.table_oids:
-                self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.table_oids))
-                table_results, error = self.check_table(config, config.table_oids)
-                self.report_table_metrics(config.metrics, table_results, config.tags)
-
-            if config.raw_oids:
-                self.log.debug('Querying device %s for %s oids', config.ip_address, len(config.raw_oids))
-                raw_results, error = self.check_raw(config, config.raw_oids)
-                self.report_raw_metrics(config.metrics, raw_results, config.tags)
+            if config.all_oids or config.bulk_oids:
+                self.log.debug('Querying device %s', config.ip_address)
+                results, error = self.fetch_results(config, config.all_oids, config.bulk_oids)
+                self.report_metrics(config.parsed_metrics, results, config.tags)
         except CheckException as e:
             error = str(e)
             self.warning(error)
@@ -371,80 +377,37 @@ class SnmpCheck(AgentCheck):
             status = self.OK
             if error:
                 status = self.CRITICAL
-                if raw_results or table_results:
+                if results:
                     status = self.WARNING
             self.service_check(self.SC_STATUS, status, tags=sc_tags, message=error)
         return error
 
-    def report_raw_metrics(self, metrics, results, tags):
+    def report_metrics(self, metrics, results, tags):
         """
-        For all the metrics that are specified as oid,
-        the conf oid is going to exactly match or be a prefix of the oid sent back by the device
-        Use the instance configuration to find the name to give to the metric
+        For each of the metrics specified gather the tags requested in the
+        instance conf for each row.
 
         Submit the results to the aggregator.
         """
         for metric in metrics:
-            if 'OID' in metric:
-                forced_type = metric.get('forced_type')
-                queried_oid = metric['OID'].lstrip('.')
-                if queried_oid in results:
-                    value = results[queried_oid]
-                else:
-                    for oid in results:
-                        if oid.startswith(queried_oid):
-                            value = results[oid]
-                            break
-                    else:
-                        self.log.warning('No matching results found for oid %s', queried_oid)
-                        continue
-                name = metric.get('name', 'unnamed_metric')
-                metric_tags = tags
-                if metric.get('metric_tags'):
-                    metric_tags = metric_tags + metric.get('metric_tags')
-                self.submit_metric(name, value, forced_type, metric_tags)
-
-    def report_table_metrics(self, metrics, results, tags):
-        """
-        For each of the metrics specified as needing to be resolved with mib,
-        gather the tags requested in the instance conf for each row.
-
-        Submit the results to the aggregator.
-        """
-        for metric in metrics:
-            forced_type = metric.get('forced_type')
-            if 'table' in metric:
-                index_based_tags = []
-                column_based_tags = []
-                for metric_tag in metric.get('metric_tags', []):
-                    tag_key = metric_tag['tag']
-                    if 'index' in metric_tag:
-                        index_based_tags.append((tag_key, metric_tag.get('index')))
-                    elif 'column' in metric_tag:
-                        column_based_tags.append((tag_key, metric_tag.get('column')))
-                    else:
-                        self.log.warning('No indication on what value to use for this tag')
-
-                for value_to_collect in metric.get('symbols', []):
-                    for index, val in iteritems(results[value_to_collect]):
-                        metric_tags = tags + self.get_index_tags(index, results, index_based_tags, column_based_tags)
-                        self.submit_metric(value_to_collect, val, forced_type, metric_tags)
-
-            elif 'symbol' in metric:
-                name = metric['symbol']
+            name = metric.name
+            if name not in results:
+                self.log.debug('Ignoring metric %s', name)
+                continue
+            if isinstance(metric, ParsedTableMetric):
+                for index, val in iteritems(results[name]):
+                    metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
+                    self.submit_metric(name, val, metric.forced_type, metric_tags)
+            else:
                 result = list(results[name].items())
                 if len(result) > 1:
                     self.log.warning('Several rows corresponding while the metric is supposed to be a scalar')
-                    continue
+                    if metric.enforce_scalar:
+                        # For backward compatibility reason, we publish the first value for OID.
+                        continue
                 val = result[0][1]
-                metric_tags = tags
-                if metric.get('metric_tags'):
-                    metric_tags = metric_tags + metric.get('metric_tags')
-                self.submit_metric(name, val, forced_type, metric_tags)
-            elif 'OID' in metric:
-                pass  # This one is already handled by the other batch of requests
-            else:
-                raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
+                metric_tags = tags + metric.metric_tags
+                self.submit_metric(name, val, metric.forced_type, metric_tags)
 
     def get_index_tags(self, index, results, index_tags, column_tags):
         """
@@ -462,9 +425,9 @@ class SnmpCheck(AgentCheck):
         for idx_tag in index_tags:
             tag_group = idx_tag[0]
             try:
-                tag_value = index[idx_tag[1] - 1].prettyPrint()
+                tag_value = index[idx_tag[1] - 1]
             except IndexError:
-                self.log.warning('Not enough indexes, skipping this tag')
+                self.log.warning('Not enough indexes, skipping tag %s', tag_group)
                 continue
             tags.append('{}:{}'.format(tag_group, tag_value))
         for col_tag in column_tags:
@@ -481,12 +444,11 @@ class SnmpCheck(AgentCheck):
             tags.append('{}:{}'.format(tag_group, tag_value))
         return tags
 
-    def submit_metric(self, name, snmp_value, forced_type, tags=None):
+    def submit_metric(self, name, snmp_value, forced_type, tags):
         """
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.
         """
-        tags = [] if tags is None else tags
         if reply_invalid(snmp_value):
             # Metrics not present in the queried object
             self.log.warning('No such Mib available: %s', name)
@@ -495,14 +457,21 @@ class SnmpCheck(AgentCheck):
         metric_name = self.normalize(name, prefix='snmp')
 
         if forced_type:
-            if forced_type.lower() == 'gauge':
+            forced_type = forced_type.lower()
+            if forced_type == 'gauge':
                 value = int(snmp_value)
                 self.gauge(metric_name, value, tags)
-            elif forced_type.lower() == 'counter':
+            elif forced_type == 'percent':
+                value = total_time_to_temporal_percent(int(snmp_value), scale=1)
+                self.rate(metric_name, value, tags)
+            elif forced_type == 'counter':
                 value = int(snmp_value)
                 self.rate(metric_name, value, tags)
+            elif forced_type == 'monotonic_count':
+                value = int(snmp_value)
+                self.monotonic_count(metric_name, value, tags)
             else:
-                self.warning('Invalid forced-type specified: {} in {}'.format(forced_type, name))
+                self.warning('Invalid forced-type specified: %s in %s', forced_type, name)
                 raise ConfigurationError('Invalid forced-type in config file: {}'.format(name))
             return
 

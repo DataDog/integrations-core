@@ -16,6 +16,17 @@ services:
       - "8000:80"
       - "8001:8001"
 
+  xds:
+    build:
+      context: .
+      dockerfile: Dockerfile-xds
+    networks:
+      envoymesh:
+        aliases:
+          - xds
+    expose:
+      - "8080"
+
   service1:
     build:
       context: .

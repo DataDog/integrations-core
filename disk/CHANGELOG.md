@@ -1,5 +1,22 @@
 # CHANGELOG - disk
 
+## 2.6.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 2.5.3 / 2019-12-13
+
+* [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
+
+## 2.5.2 / 2019-12-02
+
+* [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
+
+## 2.5.1 / 2019-10-11
+
+* [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
+
 ## 2.5.0 / 2019-08-24
 
 * [Added] Remove legacy collection method. See [#4417](https://github.com/DataDog/integrations-core/pull/4417).

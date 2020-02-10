@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -14,7 +14,7 @@ ENV_DIR = path_join(APP_DIR, 'envs')
 
 
 def config_file_name(check):
-    return '{}.yaml'.format(check)
+    return f'{check}.yaml'
 
 
 def locate_env_dir(check, env):

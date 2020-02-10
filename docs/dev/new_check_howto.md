@@ -12,7 +12,6 @@ To consider an Agent-based integration complete, and thus ready to be included i
 
 * A `README.md` file with the right format
 * A battery of tests verifying metrics collection
-* A set of images to be used in the UI tile
 * A `metadata.csv` file listing all of the collected metrics
 * A complete `manifest.json` file
 * If the integration collects Service Checks, the `service_checks.json` must be complete as well
@@ -91,6 +90,7 @@ After answering the questions, the output will match that of the dry-run above, 
 
 A Check is a Python class with the following requirements:
 
+* If running with Agent v7+ it should be Python 3 compatible, Python 2 otherwise.
 * It must derive from `AgentCheck`
 * It must provide a method with this signature: `check(self, instance)`
 
@@ -385,32 +385,32 @@ Every integration contains a `manifest.json` file that describes operating param
 
 The complete list of mandatory and optional attributes for the `manifest.json` file:
 
-| Attribute            | Type            | Mandatory/Optional | Description                                                                                                                                                                                                              |
-| -------------------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `integration_id`     | String          | Mandatory          | The unique identifying name of this integration. Usually kebab case of the Display Name                                                                                                                                  |
-| `categories`         | Array of String | Mandatory          | Integration categories used on the [public documentation integrations page][10].                                                                                                                                         |
-| `creates_events`     | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                   |
-| `display_name`       | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation integrations page][10]                                                                                 |
-| `guid`               | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][11]                                                                                                                                                                     |
-| `is_public`          | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not indexed by bots in the Datadog public documentation.                                                                                                        |
-| `maintainer`         | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                   |
-| `manifest_version`   | String          | Mandatory          | Version of the current manifest.                                                                                                                                                                                         |
-| `name`               | String          | Mandatory          | Unique name for the integration. Use the folder name for this parameter.                                                                                                                                                 |
-| `public_title`       | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `Datadog-<INTEGRATION_NAME> integration`.                                                                                   |
-| `short_description`  | String          | Mandatory          | This text appears at the top of the integration tile as well as the integration's rollover text on the integrations page. Maximum 80 characters.                                                                         |
-| `support`            | String          | Mandatory          | Owner of the integration.                                                                                                                                                                                                |
-| `supported_os`       | Array of String | Mandatory          | List of supported OSs. Choose among `linux`,`mac_os`, and `windows`.                                                                                                                                                     |
-| `type`               | String          | Mandatory          | Type of the integration, should be set to `check`.                                                                                                                                                                       |
-| `aliases`            | Array of String | Optional           | A list of URL aliases for the Datadog documentation.                                                                                                                                                                     |
-| `description`        | String          | Optional           | This text appears when sharing an integration documentation link.                                                                                                                                                        |
-| `is_beta`            | Boolean         | Optional           | Default `false`. If set to `true` the integration `README.md` content is not displayed in the Datadog public documentation.                                                                                              |
-| `metric_to_check`    | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken in the Datadog application. |
-| `metric_prefix`      | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                               |
-| `process_signatures` | Array of String | Optional           | A list of signatures that matches the command line of this integration.                                                                                                                                                  |
-| `assets`       | Dictionary | Mandatory          | Relative location of where certain asset files live and their respective names.                                                                                                                                             |
-| `assets`-> `dashboards`       | Dictionary | Mandatory          | Dictionary where the key is the name of the dashboard (must be globally unique across integrations) and the value is the relative file path where the dashbaord definition lives.                                                                                                      |
-| `assets`-> `monitors`       | Dictionary | Mandatory          | Dictionary where the key is the name of the monitor (must be globally unique across integrations) and the value is the relative file path where the dashboard definition lives.                                                                                                                                              |
-| `assets`-> `service_checks`       | String | Mandatory          | Relative location of where the `service_checks.json` file lives.                                                                       |
+| Attribute                   | Type            | Mandatory/Optional | Description                                                                                                                                                                                                              |
+| --------------------        | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `integration_id`            | String          | Mandatory          | The unique identifying name of this integration. Usually kebab case of the Display Name                                                                                                                                  |
+| `categories`                | Array of String | Mandatory          | Integration categories used on the [public documentation integrations page][10].                                                                                                                                         |
+| `creates_events`            | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                   |
+| `display_name`              | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation integrations page][10]                                                                                 |
+| `guid`                      | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][11]                                                                                                                                                                     |
+| `is_public`                 | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not indexed by bots in the Datadog public documentation.                                                                                                        |
+| `maintainer`                | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                   |
+| `manifest_version`          | String          | Mandatory          | Version of the current manifest.                                                                                                                                                                                         |
+| `name`                      | String          | Mandatory          | Unique name for the integration. Use the folder name for this parameter.                                                                                                                                                 |
+| `public_title`              | String          | Mandatory          | Title of the integration displayed on the documentation. Should follow the following format: `Datadog-<INTEGRATION_NAME> integration`.                                                                                   |
+| `short_description`         | String          | Mandatory          | This text appears at the top of the integration tile as well as the integration's rollover text on the integrations page. Maximum 80 characters.                                                                         |
+| `support`                   | String          | Mandatory          | Owner of the integration.                                                                                                                                                                                                |
+| `supported_os`              | Array of String | Mandatory          | List of supported OSs. Choose among `linux`,`mac_os`, and `windows`.                                                                                                                                                     |
+| `type`                      | String          | Mandatory          | Type of the integration, should be set to `check`.                                                                                                                                                                       |
+| `aliases`                   | Array of String | Optional           | A list of URL aliases for the Datadog documentation.                                                                                                                                                                     |
+| `description`               | String          | Optional           | This text appears when sharing an integration documentation link.                                                                                                                                                        |
+| `is_beta`                   | Boolean         | Optional           | Default `false`. If set to `true` the integration `README.md` content is not displayed in the Datadog public documentation.                                                                                              |
+| `metric_to_check`           | String          | Optional           | The presence of this metric determines if this integration is working properly. If this metric is not being reported when this integration is installed, the integration is marked as broken in the Datadog application. |
+| `metric_prefix`             | String          | Optional           | The namespace for this integration's metrics. Every metric reported by this integration will be prepended with this value.                                                                                               |
+| `process_signatures`        | Array of String | Optional           | A list of signatures that matches the command line of this integration.                                                                                                                                                  |
+| `assets`                    | Dictionary      | Mandatory          | Relative location of where certain asset files live and their respective names.                                                                                                                                          |
+| `assets`-> `dashboards`     | Dictionary      | Mandatory          | Dictionary where the key is the name of the dashboard (must be globally unique across integrations) and the value is the relative file path where the dashboard definition lives.                                        |
+| `assets`-> `monitors`       | Dictionary      | Mandatory          | Dictionary where the key is the name of the monitor (must be globally unique across integrations) and the value is the relative file path where the dashboard definition lives.                                          |
+| `assets`-> `service_checks` | String          | Mandatory          | Relative location of where the `service_checks.json` file lives.                                                                                                                                                         |
 
 ##### Example manifest config
 
@@ -441,7 +441,10 @@ Our example integration has a very simple `awesome/manifest.json`, the bulk of w
   "is_public": false,
   "integration_id": "awesome",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "Awesome Overview": "assets/dashboards/overview.json",
+      "Awesome Investigation Dashboard": "assets/dashboards/investigation.json"
+    },
     "monitors": {},
     "service_checks": "assets/service_checks.json"
   }
@@ -504,45 +507,6 @@ Our example integration contains a service check, so we need to add it to the `a
 ]
 ```
 
-### Add images and logos
-
-The directory structure for images and logos:
-
-```
-    awesome/
-    ├── images
-    │   └── an_awesome_image.png
-    ├── assets
-    │   └── logos/
-            ├── avatars-bot.png
-            ├── saas_logos-bot.png
-            └── saas_logos-small.png
-```
-
-The `images` folder contains all images that are used in the integration tile. They must be referenced in the `## Overview` and/or `## Setup` sections in `README.md` as Markdown images using their public URLs. Because the `integrations-core` and `integrations-extras` repositories are public, a public URL can be obtained for any of these files via `https://raw.githubusercontent.com`:
-
-```markdown
-![snapshot](https://raw.githubusercontent.com/DataDog/integrations-extras/master/awesome/images/snapshot.png)
-```
-
-The `assets/logos/` directory must contain **three** images with filenames and sizes that match the following specifications _exactly_. Underneath each specification is a list of places where the images may appear in the web app.
-
-#### saas_logos-bot.png (200 × 128)
-
-* Integration tile images at `/account/settings`
-* Description heading at `/account/settings#integrations/{integration_name}`
-* Integration monitor tiles and search bar results images at `/monitors#create/integration`
-
-#### saas_logos-small.png (120 × 60)
-
-* Integration dashboards list images at `/dash/list`
-* Some integration dashboards/screenboards at `/dash/integration/{integration_dash_name}`
-
-#### avatars-bot.png (128 × 128)
-
-* Event stream at `/event/stream`
-* Notification icons at `/report/monitor`
-
 ### Building
 
 `setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official Python documentation][15].
@@ -554,7 +518,7 @@ Once your `setup.py` is ready, create a wheel:
 
 #### What's in the wheel?
 
-The wheel contains only the files necessary for the functioning of the integration itself. This includes the Check itself, the configuration example file, and some artifacts generated during the build of the wheel. All of the other elements, including images, metadata files, and so forth, are *not* meant to be contained within the wheel. These latter elements are used elsewhere by the greater Datadog platform and eco-system.
+The wheel contains only the files necessary for the functioning of the integration itself. This includes the Check itself, the configuration example file, and some artifacts generated during the build of the wheel. All of the other elements, including the metadata files are *not* meant to be contained within the wheel. These latter elements are used elsewhere by the greater Datadog platform and eco-system.
 
 ### Installing
 
@@ -594,10 +558,10 @@ For Agent versions >= 6.12:
 [9]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
 [10]: https://docs.datadoghq.com/integrations
 [11]: https://www.uuidgenerator.net
-[12]: https://docs.datadoghq.com/developers/metrics/#metric-types
-[13]: https://docs.datadoghq.com/developers/metrics/#units
+[12]: https://docs.datadoghq.com/developers/metrics/metrics_type/
+[13]: https://docs.datadoghq.com/developers/metrics/metrics_units/
 [14]: https://docs.datadoghq.com/getting_started/tagging
 [15]: https://packaging.python.org/tutorials/distributing-packages
-[16]: https://docs.datadoghq.com/agent/?tab=agentv6
+[16]: https://docs.datadoghq.com/agent/
 [17]: https://en.wikipedia.org/wiki/YAML
 [18]: http://yaml-online-parser.appspot.com/

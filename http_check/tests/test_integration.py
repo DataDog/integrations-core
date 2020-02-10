@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -170,7 +170,6 @@ def test_mock_case(aggregator, http_check):
 def test_service_check_instance_name_normalization(aggregator, http_check):
     """
     Service check `instance` tag value is normalized.
-
     Note: necessary to avoid mismatch and backward incompatibility.
     """
 

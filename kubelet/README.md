@@ -4,8 +4,8 @@
 
 This integration gets container metrics from kubelet
 
-* Visualize and monitor kubelet stats
-* Be notified about kubelet failovers and events.
+- Visualize and monitor kubelet stats
+- Be notified about kubelet failovers and events.
 
 ## Installation
 
@@ -23,15 +23,15 @@ Edit the `kubelet.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 The kubelet check can run in two modes:
 
-- the default prometheus mode is compatible with Kubernetes version 1.7.6 or superior
-- the cAdvisor mode (enabled by setting the `cadvisor_port` option) should be compatible with versions 1.3 and up. Consistent tagging and filtering requires at least version 6.2 of the Agent.
+- The default prometheus mode is compatible with Kubernetes version 1.7.6 or superior
+- The cAdvisor mode (enabled by setting the `cadvisor_port` option) should be compatible with versions 1.3 and up. Consistent tagging and filtering requires at least version 6.2 of the Agent.
 
 ## OpenShift <3.7 support
 
 The cAdvisor 4194 port is disabled by default on OpenShift. To enable it, you need to add
 the following lines to your [node-config file][4]:
 
-```
+```text
 kubeletArguments:
   cadvisor-port: ["4194"]
 ```
@@ -48,8 +48,7 @@ The check will still be able to collect:
 - pod limits and requests
 - node capacity metrics
 
-
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files

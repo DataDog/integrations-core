@@ -1,5 +1,14 @@
 # CHANGELOG - varnish
 
+## 1.6.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.5.0 / 2019-12-02
+
+* [Fixed] Remove shlex. See [#5065](https://github.com/DataDog/integrations-core/pull/5065).
+* [Added] Add version metadata. See [#4952](https://github.com/DataDog/integrations-core/pull/4952).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3579](https://github.com/DataDog/integrations-core/pull/3579).

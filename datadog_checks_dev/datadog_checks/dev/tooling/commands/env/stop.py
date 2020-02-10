@@ -1,9 +1,13 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
+
 import click
 
+from ....utils import running_on_ci
 from ...e2e import create_interface, get_configured_checks, get_configured_envs, stop_environment
+from ...e2e.agent import DEFAULT_SAMPLING_WAIT_TIME
 from ..console import CONTEXT_SETTINGS, DEFAULT_INDENT, abort, echo_failure, echo_info, echo_success, echo_waiting
 
 
@@ -14,6 +18,7 @@ def stop(check, env):
     """Stop environments."""
     all_checks = check == 'all'
     checks = get_configured_checks() if all_checks else [check]
+    on_ci = running_on_ci()
 
     if all_checks:
         env_indent = DEFAULT_INDENT
@@ -26,13 +31,28 @@ def stop(check, env):
         if all_checks:
             envs = get_configured_envs(check)
             if envs:
-                echo_success('{}:'.format(check))
+                echo_success(f'{check}:')
         else:
             envs = [env] if env else get_configured_envs(check)
 
         for env in envs:
-            echo_info('{}:'.format(env), indent=env_indent)
+            echo_info(f'{env}:', indent=env_indent)
             environment = create_interface(check, env)
+
+            if on_ci and 'sampling_start_time' in environment.metadata:
+                start_time = environment.metadata['sampling_start_time']
+                wait_time = environment.metadata.get('sampling_wait_time', DEFAULT_SAMPLING_WAIT_TIME)
+
+                notice_displayed = False
+                while time.time() - start_time < wait_time:
+                    if not notice_displayed:
+                        echo_waiting('Collecting samples... ', nl=False, indent=status_indent)
+                        notice_displayed = True
+
+                    time.sleep(1)
+
+                if notice_displayed:
+                    echo_success('success!')
 
             echo_waiting('Stopping the Agent... ', nl=False, indent=status_indent)
             environment.stop_agent()

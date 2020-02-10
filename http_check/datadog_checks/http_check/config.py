@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
@@ -11,13 +11,26 @@ DEFAULT_EXPECTED_CODE = r'(1|2|3)\d\d'
 
 Config = namedtuple(
     'Config',
-    'url, client_cert,'
-    'client_key, method, data, http_response_status_code,'
-    'include_content, headers, response_time,'
-    'content_match, reverse_content_match, tags,'
-    'ssl_expire, instance_ca_certs,'
-    'weakcipher, check_hostname,'
-    'allow_redirects, stream',
+    [
+        'url',
+        'client_cert',
+        'client_key',
+        'method',
+        'data',
+        'http_response_status_code',
+        'include_content',
+        'headers',
+        'response_time',
+        'content_match',
+        'reverse_content_match',
+        'tags',
+        'ssl_expire',
+        'instance_ca_certs',
+        'weakcipher',
+        'check_hostname',
+        'allow_redirects',
+        'stream',
+    ],
 )
 
 
@@ -52,7 +65,7 @@ def from_instance(instance, default_ca_certs=None):
         raise ConfigurationError("The url {} must start with the scheme http or https".format(url))
     include_content = is_affirmative(instance.get('include_content', False))
     ssl_expire = is_affirmative(instance.get('check_certificate_expiration', True))
-    instance_ca_certs = instance.get('ca_certs', default_ca_certs)
+    instance_ca_certs = instance.get('tls_ca_cert', instance.get('ca_certs', default_ca_certs))
     weakcipher = is_affirmative(instance.get('weakciphers', False))
     check_hostname = is_affirmative(instance.get('check_hostname', True))
     allow_redirects = is_affirmative(instance.get('allow_redirects', True))

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -6,11 +6,11 @@ import re
 
 import requests
 
-from .constants import CHANGELOG_LABEL_PREFIX
+from ..utils import basepath
+from .constants import CHANGELOG_LABEL_PREFIX, get_root
 
 API_URL = 'https://api.github.com'
 PR_ENDPOINT = API_URL + '/repos/DataDog/{}/pulls/{}'
-DEFAULT_REPO = 'integrations-core'
 PR_PATTERN = re.compile(r'\(#(\d+)\)')  # match something like `(#1234)` and return `1234` in a group
 
 
@@ -52,10 +52,11 @@ def get_changelog_types(pr_payload):
     return changelog_labels
 
 
-def get_pr(pr_num, config=None, repo=DEFAULT_REPO, raw=False):
+def get_pr(pr_num, config=None, raw=False):
     """
     Get the payload for the given PR number. Let exceptions bubble up.
     """
+    repo = basepath(get_root())
     response = requests.get(PR_ENDPOINT.format(repo, pr_num), auth=get_auth_info(config))
 
     if raw:
@@ -67,8 +68,7 @@ def get_pr(pr_num, config=None, repo=DEFAULT_REPO, raw=False):
 
 def get_pr_from_hash(commit_hash, repo, config=None, raw=False):
     response = requests.get(
-        'https://api.github.com/search/issues?q=sha:{}+repo:DataDog/{}'.format(commit_hash, repo),
-        auth=get_auth_info(config),
+        f'https://api.github.com/search/issues?q=sha:{commit_hash}+repo:DataDog/{repo}', auth=get_auth_info(config),
     )
 
     if raw:

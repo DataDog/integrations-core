@@ -128,6 +128,12 @@ instances:
     #
     # skip_proxy: false
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param username - string - optional
     ## The username to use if services are behind basic auth.
     #
@@ -266,5 +272,15 @@ instances:
 # logs:
 #   - type: file
 #     path: /var/log/elasticsearch/*.log
+#     source: elasticsearch
+#     service: <SERVICE_NAME>
+#
+#   - type: file
+#     path: /var/log/elasticsearch/<CLUSTER_NAME>_index_indexing_slowlog.log
+#     source: elasticsearch
+#     service: <SERVICE_NAME>
+#
+#   - type: file
+#     path: /var/log/elasticsearch/<CLUSTER_NAME>_index_search_slowlog.log
 #     source: elasticsearch
 #     service: <SERVICE_NAME>

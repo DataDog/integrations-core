@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2017
+# (C) Datadog, Inc. 2013-present
 # (C) Stefan Mees <stefan.mees@wooga.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -274,14 +274,12 @@ class Riak(AgentCheck):
             self.gauge(name, float(value), tags=tags)
             return
         except ValueError:
-            self.log.debug("metric name {0} cannot be converted to a float: {1}".format(name, value))
+            self.log.debug("metric name %s cannot be converted to a float: %s", name, value)
             pass
 
         try:
             self.gauge(name, unicodedata.numeric(value), tags=tags)
             return
         except (TypeError, ValueError):
-            self.log.debug(
-                "metric name {0} cannot be converted to a float even using unicode tools: {1}".format(name, value)
-            )
+            self.log.debug("metric name %s cannot be converted to a float even using unicode tools: %s", name, value)
             pass

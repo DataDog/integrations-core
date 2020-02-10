@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
@@ -7,7 +7,7 @@ from collections import defaultdict
 from time import time
 
 from kafka import errors as kafka_errors
-from kafka.client import KafkaClient
+from kafka.client_async import KafkaClient
 from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kazoo.client import KazooClient
@@ -65,6 +65,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
 
     def check(self, instance):
         """The main entrypoint of the check."""
+        self.log.debug("Running legacy Kafka Consumer check.")
         self._zk_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._kafka_consumer_offsets = {}  # Expected format: {(consumer_group, topic, partition): offset}
         self._highwater_offsets = {}  # Expected format: {(topic, partition): offset}
@@ -108,11 +109,11 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         )
         if total_contexts > self._context_limit:
             self.warning(
-                """Discovered {} metric contexts - this exceeds the maximum number of {} contexts permitted by the
+                """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
-                and partitions you wish to monitor.""".format(
-                    total_contexts, self._context_limit
-                )
+                and partitions you wish to monitor.""",
+                total_contexts,
+                self._context_limit,
             )
 
         # Report the metics
@@ -126,6 +127,9 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         kafka_conn_str = self.instance.get('kafka_connect_str')
         if not isinstance(kafka_conn_str, (string_types, list)):
             raise ConfigurationError('kafka_connect_str should be string or list of strings')
+        kafka_version = self.instance.get('kafka_client_api_version')
+        if isinstance(kafka_version, str):
+            kafka_version = tuple(map(int, kafka_version.split(".")))
         kafka_client = KafkaClient(
             bootstrap_servers=kafka_conn_str,
             client_id='dd-agent',
@@ -133,7 +137,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             # if `kafka_client_api_version` is not set, then kafka-python automatically probes the cluster for broker
             # version during the bootstrapping process. Note that probing randomly picks a broker to probe, so in a
             # mixed-version cluster probing returns a non-deterministic result.
-            api_version=self.instance.get('kafka_client_api_version'),
+            api_version=kafka_version,
             # While we check for SSL params, if not present they will default to the kafka-python values for plaintext
             # connections
             security_protocol=self.instance.get('security_protocol', 'PLAINTEXT'),
@@ -228,7 +232,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 if error_type is kafka_errors.NoError:
                     self._highwater_offsets[(topic, partition)] = offsets[0]
                 elif error_type is kafka_errors.NotLeaderForPartitionError:
-                    self.log.warn(
+                    self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic %s, partition: %s. This should only happen "
                         "if the broker that was the partition leader when kafka_admin_client last fetched metadata is "
                         "no longer the leader.",
@@ -239,7 +243,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     )
                     self._kafka_client.cluster.request_update()  # force metadata update on next poll()
                 elif error_type is kafka_errors.UnknownTopicOrPartitionError:
-                    self.log.warn(
+                    self.log.warning(
                         "Kafka broker returned %s (error_code %s) for topic: %s, partition: %s. This should only "
                         "happen if the topic is currently being deleted or the check configuration lists non-existent "
                         "topic partitions.",
@@ -273,7 +277,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
                 if (topic, partition) not in self._highwater_offsets:
-                    self.log.warn(
+                    self.log.warning(
                         "Consumer group: %s has offsets for topic: %s partition: %s, but no stored highwater offset "
                         "(likely the partition is in the middle of leader failover) so cannot calculate consumer lag.",
                         consumer_group,
@@ -297,7 +301,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     self.log.debug(message)
 
             else:
-                self.log.warn(
+                self.log.warning(
                     "Consumer group: %s has offsets for topic: %s, partition: %s, but that topic partition doesn't "
                     "appear to exist in the cluster so skipping reporting these offsets.",
                     consumer_group,

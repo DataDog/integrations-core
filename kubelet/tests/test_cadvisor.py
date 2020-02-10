@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -57,11 +57,14 @@ def test_detect_cadvisor_port_zero():
 def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
     instance_with_tag = {"tags": ["instance:tag"], "cadvisor_port": 4194}
     cadvisor_url = "http://valid:port/url"
-    check = KubeletCheck('kubelet', None, {}, [instance_with_tag])
+    check = KubeletCheck('kubelet', {}, [instance_with_tag])
     monkeypatch.setattr(
         check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_list_1.2.json')))
     )
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    monkeypatch.setattr(
+        check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
+    )
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(
         check, '_retrieve_cadvisor_metrics', mock.Mock(return_value=json.loads(mock_from_file('cadvisor_1.2.json')))
@@ -73,6 +76,7 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
     assert check.cadvisor_legacy_url == cadvisor_url
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
+    check._retrieve_stats.assert_called_once()
     check._retrieve_cadvisor_metrics.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
 

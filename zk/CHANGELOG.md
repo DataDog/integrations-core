@@ -1,5 +1,13 @@
 # CHANGELOG - zk
 
+## 2.4.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
+## 2.3.0 / 2019-12-02
+
+* [Added] Add version metadata. See [#4927](https://github.com/DataDog/integrations-core/pull/4927).
+
 ## 2.2.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3586](https://github.com/DataDog/integrations-core/pull/3586).

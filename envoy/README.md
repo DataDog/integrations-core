@@ -1,11 +1,10 @@
 # Agent Check: Envoy
+
 ## Overview
 
 This check collects distributed system observability metrics from [Envoy][1].
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][15] for guidance on applying these instructions.
 
 ### Installation
 
@@ -86,27 +85,31 @@ static_resources:
 
 ### Configuration
 
-1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your Envoy performance data.
-  See the [sample envoy.d/conf.yaml][8] for all available configuration options.
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
+##### Metric collection
+
+1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your Envoy performance data. See the [sample envoy.d/conf.yaml][8] for all available configuration options.
+
+    ```yaml
+    init_config:
+
+    instances:
+      ## @param stats_url - string - required
+      ## The admin endpoint to connect to. It must be accessible:
+      ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
+      ## Add a `?usedonly` on the end if you wish to ignore
+      ## unused metrics instead of reporting them as `0`.
+      #
+      - stats_url: http://localhost:80/stats
+    ```
 
 2. Check if the Datadog Agent can access Envoy's [admin endpoint][4].
-
 3. [Restart the Agent][9].
 
-| Setting            | Description                                                                                                                                                                |
-| ---                | ---                                                                                                                                                                        |
-| `stats_url`        | (REQUIRED) The admin stats endpoint, e.g. `http://localhost:80/stats`. Add a `?usedonly` on the end if you wish to ignore unused metrics instead of reporting them as `0`. |
-| `tags`             | A list of custom tags to apply to this instance.                                                                                                                           |
-| `metric_whitelist` | A list of regular expressions.                                                                                                                                             |
-| `metric_blacklist` | A list of regular expressions.                                                                                                                                             |
-| `cache_metrics`    | Cache results of whitelist/blacklist to decrease CPU utilization, at the expense of some memory (default is `true`).                                                       |
-| `username`         | The username to authenticate with if behind basic auth.                                                                                                                    |
-| `password`         | The password to authenticate with if behind basic auth.                                                                                                                    |
-| `verify_ssl`       | This instructs the check to validate SSL certificates when connecting to Envoy. Defaulting to `true`, set to `false` if you want to disable SSL certificate validation.    |
-| `skip_proxy`       | If `true`, the check bypasses any proxy settings enabled and attempt to reach Envoy directly.                                                                              |
-| `timeout`          | A custom timeout for network requests in seconds (default is 20).                                                                                                          |
-
-#### Metric filtering
+###### Metric filtering
 
 Metrics can be filtered using a regular expression `metric_whitelist` or `metric_blacklist`. If both are used, then whitelist is applied first, and then blacklist is applied on the resulting set.
 
@@ -133,38 +136,61 @@ If you care only about the cluster name and grpc service, you would add this to 
 
 `^cluster\.<CLUSTER_NAME>\.grpc\.<GRPC_SERVICE>\.`
 
-#### Log collection
+##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Next, edit `envoy.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Envoy log files.
 
-    ```yaml
-      logs:
-        - type: file
-          path: /var/log/envoy.log
-          source: envoy
-          service: envoy
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/envoy.log
+       source: envoy
+       service: envoy
+   ```
 
 3. [Restart the Agent][9].
 
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                      |
+| -------------------- | ------------------------------------------ |
+| `<INTEGRATION_NAME>` | `envoy`                                    |
+| `<INIT_CONFIG>`      | blank or `{}`                              |
+| `<INSTANCE_CONFIG>`  | `{"stats_url": "http://%%host%%:80/stats}` |
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][12].
+
+| Parameter      | Value                                              |
+| -------------- | -------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "envoy", "service": "<SERVICE_NAME>"}` |
+
 ### Validation
 
-[Run the Agent's status subcommand][11] and look for `envoy` under the Checks section.
+[Run the Agent's status subcommand][13] and look for `envoy` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
-See [metadata.csv][12] for a list of metrics provided by this integration.
+See [metadata.csv][14] for a list of metrics provided by this integration.
 
-See [metrics.py][13] for a list of tags sent by each metric.
+See [metrics.py][10] for a list of tags sent by each metric.
 
 ### Events
 
@@ -177,8 +203,7 @@ Returns `CRITICAL` if the Agent cannot connect to Envoy to collect metrics, othe
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][14].
-
+Need help? Contact [Datadog support][15].
 
 [1]: https://www.envoyproxy.io
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -186,12 +211,12 @@ Need help? Contact [Datadog support][14].
 [4]: https://www.envoyproxy.io/docs/envoy/latest/operations/admin
 [5]: https://istio.io/docs/reference/config
 [6]: https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
-[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [8]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/data/conf.yaml.example
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [10]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
-[11]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[12]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
-[13]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
-[14]: https://docs.datadoghq.com/help
-[15]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[12]: https://docs.datadoghq.com/agent/docker/log/
+[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[14]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
+[15]: https://docs.datadoghq.com/help

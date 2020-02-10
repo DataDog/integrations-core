@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import time
@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import requests
 from six import iteritems, itervalues
-from six.moves.urllib.parse import urljoin
+from six.moves.urllib.parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck, to_string
 
@@ -26,6 +26,7 @@ class AuthenticationError(requests.exceptions.HTTPError):
 
 class ESCheck(AgentCheck):
     HTTP_CONFIG_REMAPPER = {
+        'aws_service': {'name': 'aws_service', 'default': 'es'},
         'ssl_verify': {'name': 'tls_verify'},
         'ssl_cert': {'name': 'tls_cert'},
         'ssl_key': {'name': 'tls_private_key'},
@@ -39,6 +40,13 @@ class ESCheck(AgentCheck):
         super(ESCheck, self).__init__(name, init_config, instances)
         # Host status needs to persist across all checks
         self.cluster_status = {}
+
+        if self.instance.get('auth_type') == 'aws' and self.instance.get('url'):
+            self.HTTP_CONFIG_REMAPPER = self.HTTP_CONFIG_REMAPPER.copy()
+            self.HTTP_CONFIG_REMAPPER['aws_host'] = {
+                'name': 'aws_host',
+                'default': urlparse(self.instance['url']).hostname,
+            }
 
     def check(self, instance):
         config = from_instance(instance)
@@ -108,18 +116,19 @@ class ESCheck(AgentCheck):
         """
         try:
             data = self._get_data(config.url, config, send_sc=False)
+            raw_version = data['version']['number']
+            self.set_metadata('version', raw_version)
             # pre-release versions of elasticearch are suffixed with -rcX etc..
             # peel that off so that the map below doesn't error out
-            version = data['version']['number'].split('-')[0]
-            version = [int(p) for p in version.split('.')[0:3]]
+            raw_version = raw_version.split('-')[0]
+            version = [int(p) for p in raw_version.split('.')[0:3]]
         except AuthenticationError:
             raise
         except Exception as e:
-            self.warning("Error while trying to get Elasticsearch version from %s %s" % (config.url, str(e)))
+            self.warning("Error while trying to get Elasticsearch version from %s %s", config.url, e)
             version = [1, 0, 0]
 
-        self.service_metadata('version', version)
-        self.log.debug("Elasticsearch version is %s" % version)
+        self.log.debug("Elasticsearch version is %s", version)
         return version
 
     def _join_url(self, base, url, admin_forwarder=False):
@@ -209,7 +218,7 @@ class ESCheck(AgentCheck):
                 )
             raise
 
-        self.log.debug("request to url {} returned: {}".format(url, resp))
+        self.log.debug("request to url %s returned: %s", url, resp)
 
         return resp.json()
 

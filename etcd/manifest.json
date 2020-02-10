@@ -3,7 +3,8 @@
     "orchestration",
     "containers",
     "configuration & deployment",
-    "orchestration"
+    "orchestration",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "etcd",
@@ -29,7 +30,9 @@
   "integration_id": "etcd",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Etcd Overview": "assets/dashboards/etcd_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

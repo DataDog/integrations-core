@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -157,7 +157,7 @@ class CiscoTags:
 
         tags = tags + endpoint_meta + eth_meta
         if len(eth_meta) > 0:
-            self.log.debug('adding eth level tags: %s' % eth_meta)
+            self.log.debug('adding eth level tags: %s', eth_meta)
         return tags
 
     def get_endpoint_group_tags(self, obj):

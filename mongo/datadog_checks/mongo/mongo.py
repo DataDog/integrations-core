@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018-2019
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -726,7 +726,7 @@ class MongoDb(AgentCheck):
             if result['ok'] == 0:
                 raise pymongo.errors.PyMongoError(result['errmsg'])
         except pymongo.errors.PyMongoError:
-            self.log.error("Failed to run custom query for metric {}".format(metric_prefix))
+            self.log.error("Failed to run custom query for metric %s", metric_prefix)
             raise
 
         if mongo_command == 'count':
@@ -879,6 +879,12 @@ class MongoDb(AgentCheck):
 
         status['stats'] = db.command('dbstats')
         dbstats = {db_name: {'stats': status['stats']}}
+        try:
+            mongo_version = cli.server_info().get('version', '0.0')
+            self.set_metadata('version', mongo_version)
+        except Exception:
+            self.log.exception("Error when collecting the version from the mongo server.")
+            mongo_version = '0.0'
 
         # Handle replica data, if any
         # See
@@ -1032,7 +1038,6 @@ class MongoDb(AgentCheck):
                 submit_method(self, metric_name_alias, val, tags=metrics_tags)
 
         if is_affirmative(instance.get('collections_indexes_stats')):
-            mongo_version = cli.server_info().get('version', '0.0')
             if LooseVersion(mongo_version) >= LooseVersion("3.2"):
                 self._collect_indexes_stats(instance, db, tags)
             else:
@@ -1077,7 +1082,7 @@ class MongoDb(AgentCheck):
                         if metric_name_alias.endswith('countps'):
                             GAUGE(self, metric_name_alias[:-2], value, tags=ns_tags)
             except Exception as e:
-                self.log.warning('Failed to record `top` metrics %s' % str(e))
+                self.log.warning('Failed to record `top` metrics %s', e)
 
         if 'local' in dbnames:  # it might not be if we are connectiing through mongos
             # Fetch information analogous to Mongo's db.getReplicationInfo()

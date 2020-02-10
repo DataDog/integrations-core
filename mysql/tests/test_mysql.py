@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
@@ -20,7 +20,7 @@ from .common import MYSQL_VERSION_PARSED
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_minimal_config(aggregator, instance_basic):
-    mysql_check = MySql(common.CHECK_NAME, {}, {})
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
     mysql_check.check(instance_basic)
 
     # Test service check
@@ -43,7 +43,7 @@ def test_minimal_config(aggregator, instance_basic):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config(aggregator, instance_complex):
-    mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[instance_complex])
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_complex])
     mysql_check.check(instance_complex)
 
     _assert_complex_config(aggregator)
@@ -122,7 +122,7 @@ def test_connection_failure(aggregator, instance_error):
     """
     Service check reports connection failure
     """
-    mysql_check = MySql(common.CHECK_NAME, {}, {}, instances=[instance_error])
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_error])
 
     with pytest.raises(Exception):
         mysql_check.check(instance_error)
@@ -135,7 +135,7 @@ def test_connection_failure(aggregator, instance_error):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config_replica(aggregator, instance_complex):
-    mysql_check = MySql(common.CHECK_NAME, {}, {})
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_complex])
     config = copy.deepcopy(instance_complex)
     config['port'] = common.SLAVE_PORT
     mysql_check.check(config)
@@ -220,7 +220,7 @@ def test__get_server_pid():
     """
     Test the logic looping through the processes searching for `mysqld`
     """
-    mysql_check = MySql(common.CHECK_NAME, {}, {})
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
     mysql_check._get_pid_file_variable = mock.MagicMock(return_value=None)
     mysql_check.log = mock.MagicMock()
     dummy_proc = subprocess.Popen(["python"])
@@ -247,3 +247,14 @@ def test__get_server_pid():
             # the pid should be none but without errors
             assert mysql_check._get_server_pid(None) is None
             assert mysql_check.log.exception.call_count == 0
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_version_metadata(instance_basic, datadog_agent, version_metadata):
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
+    mysql_check.check_id = 'test:123'
+
+    mysql_check.check(instance_basic)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))

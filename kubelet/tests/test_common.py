@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -9,7 +9,7 @@ import mock
 import pytest
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.kubelet import KubeletCredentials, PodListUtils, get_pod_by_uid, is_static_pending_pod
+from datadog_checks.kubelet import KubeletCredentials, PodListUtils, get_pod_by_uid, is_static_pending_pod, urljoin
 
 from .test_kubelet import mock_from_file
 
@@ -100,6 +100,17 @@ def test_pod_by_uid():
     assert pod is None
 
 
+def test_url_join():
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy", "/pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy", "pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/", "pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/", "/pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+
+
 def test_is_static_pod():
     podlist = json.loads(mock_from_file('pods.json'))
 
@@ -120,9 +131,9 @@ def test_credentials_empty():
     assert creds.cert_pair() is None
     assert creds.headers("https://dummy") is None
 
-    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
-    scraper_config = scraper.create_scraper_configuration()
-    scraper_config['prometheus_url'] = "https://dummy"
+    instance = {'prometheus_url': 'https://dummy', 'namespace': 'foo'}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, [instance])
+    scraper_config = scraper.create_scraper_configuration(instance)
     creds.configure_scraper(scraper_config)
     assert scraper_config['ssl_ca_cert'] is None
     assert scraper_config['ssl_cert'] is None
@@ -138,9 +149,9 @@ def test_credentials_certificates():
     assert creds.cert_pair() == ("crt", "key")
     assert creds.headers("https://dummy") is None
 
-    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
-    scraper_config = scraper.create_scraper_configuration({})
-    scraper_config['prometheus_url'] = "https://dummy"
+    instance = {'prometheus_url': 'https://dummy', 'namespace': 'foo'}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, [instance])
+    scraper_config = scraper.create_scraper_configuration(instance)
     creds.configure_scraper(scraper_config)
     assert scraper_config['ssl_ca_cert'] == "ca_cert"
     assert scraper_config['ssl_cert'] == "crt"
@@ -159,9 +170,9 @@ def test_credentials_token_noverify():
     # Make sure we don't leak the token over http
     assert creds.headers("http://dummy") is None
 
-    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
-    scraper_config = scraper.create_scraper_configuration()
-    scraper_config['prometheus_url'] = 'https://dummy'
+    instance = {'prometheus_url': 'https://dummy', 'namespace': 'foo'}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, [instance])
+    scraper_config = scraper.create_scraper_configuration(instance)
     creds.configure_scraper(scraper_config)
     assert scraper_config['ssl_ca_cert'] is False
     assert scraper_config['ssl_cert'] is None

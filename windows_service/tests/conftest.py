@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
@@ -28,6 +28,11 @@ def instance_bad_config():
 @pytest.fixture
 def instance_basic():
     return deepcopy(common.INSTANCE_BASIC)
+
+
+@pytest.fixture
+def instance_basic_disable_service_tag():
+    return deepcopy(common.INSTANCE_BASIC_DISABLE_SERVICE_TAG)
 
 
 @pytest.fixture

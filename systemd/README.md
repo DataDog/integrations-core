@@ -4,18 +4,20 @@
 
 This check monitors [Systemd][1] and the units it manages through the Datadog Agent.
 
-* Track the state and health of your Systemd
-* Monitor the units, services, sockets managed by Systemd
+- Track the state and health of your Systemd
+- Monitor the units, services, sockets managed by Systemd
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying these instructions.
-
 ### Installation
+
+#### Host
 
 The Systemd check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
-Note that if you're using the [agent in a container][8], you need to mount the `/run/systemd/` folder, it contains the socket `/run/systemd/private` needed to to retrieve Systemd data. For Example:
+#### Containerized
+
+For containerized environments, mount the `/run/systemd/` folder, which contains the socket `/run/systemd/private` needed to retrieve the Systemd data, for example:
 
 ```bash
 docker run -d -v /var/run/docker.sock:/var/run/docker.sock:ro \
@@ -58,18 +60,14 @@ Some metrics are only available from specific version of Systemd:
 
 ### Service Checks
 
-**systemd.can_connect**:  
-
+**systemd.can_connect**:<br>
 Returns `OK` if Systemd is reachable, `CRITICAL` otherwise.
 
-**systemd.system.state**:
-
+**systemd.system.state**:<br>
 Returns `OK` if Systemd's system state is running. Returns `CRITICAL` if the state is degraded, maintenance, or stopping. Returns `UNKNOWN` if the state is initializing, starting, or other.
 
-**systemd.unit.state**:
-
+**systemd.unit.state**:<br>
 Returns `OK` if the unit active state is active. Returns `CRITICAL` if the state is inactive, deactivating, or failed. Returns `UNKNOWN` if the state is activating or other.
-
 
 ### Events
 
@@ -86,6 +84,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/systemd/metadata.csv
 [7]: https://docs.datadoghq.com/help/
-[8]: https://docs.datadoghq.com/agent/docker/
 [9]: https://github.com/coreos/go-systemd
-[10]: https://docs.datadoghq.com/agent/autodiscovery/integrations

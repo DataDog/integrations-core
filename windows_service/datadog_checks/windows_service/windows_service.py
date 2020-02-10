@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
@@ -59,9 +59,7 @@ class WindowsService(AgentCheck):
             if 'ALL' not in services:
                 for service, service_pattern in sorted(iteritems(service_patterns), reverse=True):
                     self.log.debug(
-                        'Service: {} with Short Name: {} and Pattern: {}'.format(
-                            service, short_name, service_pattern.pattern
-                        )
+                        'Service: %s with Short Name: %s and Pattern: %s', service, short_name, service_pattern.pattern
                     )
                     if service_pattern.match(short_name):
                         services_unseen.discard(service)
@@ -72,18 +70,26 @@ class WindowsService(AgentCheck):
             state = service_status[1]
             status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
 
-            tags = ['service:{}'.format(short_name)]
+            tags = ['windows_service:{}'.format(short_name)]
             tags.extend(custom_tags)
 
+            if not instance.get('disable_legacy_service_tag', False):
+                self._log_deprecation('service_tag', 'windows_service')
+                tags.append('service:{}'.format(short_name))
+
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
-            self.log.debug('service state for {} {}'.format(short_name, status))
+            self.log.debug('service state for %s %s', short_name, status)
 
         if 'ALL' not in services:
             for service in services_unseen:
                 status = self.CRITICAL
 
-                tags = ['service:{}'.format(service)]
+                tags = ['windows_service:{}'.format(service)]
                 tags.extend(custom_tags)
 
+                if not instance.get('disable_legacy_service_tag', False):
+                    self._log_deprecation('service_tag', 'windows_service')
+                    tags.append('service:{}'.format(service))
+
                 self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
-                self.log.debug('service state for {} {}'.format(service, status))
+                self.log.debug('service state for %s %s', service, status)

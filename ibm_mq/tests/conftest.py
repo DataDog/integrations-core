@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
@@ -71,10 +71,10 @@ def publish():
     for i in range(10):
         try:
             message = 'Hello from Python! Message {}'.format(i)
-            log.info("sending message: {}".format(message))
+            log.info("sending message: %s", message)
             queue.put(message.encode())
         except Exception as e:
-            log.info("exception publishing: {}".format(e))
+            log.info("exception publishing: %s", e)
             queue.close()
             qmgr.disconnect()
             return

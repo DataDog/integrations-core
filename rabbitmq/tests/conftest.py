@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -25,8 +25,8 @@ def dd_environment():
 
     env = {}
 
-    if not os.environ.get('RABBITMQ_VERSION'):
-        env['RABBITMQ_VERSION'] = '3.6.0'
+    if 'RABBITMQ_VERSION' not in os.environ:
+        pytest.exit('RABBITMQ_VERSION not available')
 
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 

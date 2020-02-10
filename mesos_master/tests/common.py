@@ -1,10 +1,15 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import pytest
+
 from datadog_checks.dev import get_here
+from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.utils.common import get_docker_hostname
+
+not_windows_ci = pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -17,6 +22,8 @@ BAD_INSTANCE = {'url': 'http://localhost:9999', 'tasks': ['hello']}
 CHECK_NAME = "mesos_master"
 
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
+
+MESOS_MASTER_VERSION = os.getenv('MESOS_MASTER_VERSION')
 
 BASIC_METRICS = [
     'mesos.registrar.queued_operations',

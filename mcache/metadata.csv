@@ -22,8 +22,8 @@ memcache.get_misses_rate,gauge,,miss,second,Rate at which keys are requested and
 memcache.limit_maxbytes,gauge,,byte,,Number of bytes this server is allowed to use for storage.,0,memcached,maxbytes
 memcache.listen_disabled_num_rate,gauge,,event,second,Rate at which the server has reached the max connection limit.,-1,memcached,listen dsbl rate
 memcache.pointer_size,gauge,,bit,,Default size of pointers on the host OS (generally 32 or 64),0,memcached,ptr size
-memcache.rusage_system_rate,gauge,,fraction,,Fraction of user time the CPU spent executing this server process.,0,memcached,rusage sys rate
-memcache.rusage_user_rate,gauge,,fraction,,Fraction of time the CPU spent executing kernel code on behalf of this server process.,0,memcached,rusage usr rate
+memcache.rusage_system_rate,gauge,,fraction,,Fraction of time the CPU spent executing kernel code on behalf of this server process.,0,memcached,rusage sys rate
+memcache.rusage_user_rate,gauge,,fraction,,Fraction of user time the CPU spent executing this server process.,0,memcached,rusage usr rate
 memcache.threads,gauge,,thread,,Number of threads used by the current Memcached server process.,0,memcached,threads
 memcache.total_connections_rate,gauge,,connection,second,Rate at which connections to this server are opened.,0,memcached,tot conn rate
 memcache.total_items,gauge,,item,,Total number of items stored by this server since it started.,0,memcached,tot items

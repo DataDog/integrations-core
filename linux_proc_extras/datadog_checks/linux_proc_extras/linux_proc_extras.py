@@ -1,5 +1,5 @@
 # (C) Cory Watson <cory@stripe.com> 2016
-# (C) Datadog, Inc. 2016-2017
+# (C) Datadog, Inc. 2016-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -9,6 +9,12 @@ from six import iteritems
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.utils.subprocess_output import get_subprocess_output
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.stubs import datadog_agent
+
 
 PROCESS_STATES = {
     'D': 'uninterruptible',
@@ -24,17 +30,19 @@ PROCESS_PRIOS = {'<': 'high', 'N': 'low', 'L': 'locked'}
 
 
 class MoreUnixCheck(AgentCheck):
-    def check(self, instance):
-        self.tags = instance.get('tags', [])
+    def __init__(self, *args, **kwargs):
+        super(MoreUnixCheck, self).__init__(*args, **kwargs)
+        self.tags = self.instance.get('tags', [])
         self.set_paths()
 
+    def check(self, instance):
         self.get_inode_info()
         self.get_stat_info()
         self.get_entropy_info()
         self.get_process_states()
 
     def set_paths(self):
-        proc_location = self.agentConfig.get('procfs_path', '/proc').rstrip('/')
+        proc_location = (datadog_agent.get_config('procfs_path') or '/proc').rstrip('/')
 
         self.proc_path_map = {
             "inode_info": "sys/fs/inode-nr",

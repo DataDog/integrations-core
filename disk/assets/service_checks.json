@@ -1,10 +1,16 @@
 [
     {
         "agent_version": "6.5.0",
-        "integration":"disk",
+        "integration": "System",
         "check": "disk.read_write",
-        "statuses": ["ok", "critical", "unknown"],
-        "groups": ["device"],
+        "statuses": [
+            "ok",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "device"
+        ],
         "name": "Disk read_write",
         "description": "Returns `CRITICAL` if filesystem is in read-only mode."
     }

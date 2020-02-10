@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -13,6 +13,14 @@ def mock_blkid_output():
     """
     with open(os.path.join(HERE, 'fixtures', 'blkid')) as f:
         return f.read(), '', ''
+
+
+def mock_blkid_cache_file():
+    return os.path.join(HERE, 'fixtures', 'blkid_cache_file')
+
+
+def mock_blkid_cache_file_no_label():
+    return os.path.join(HERE, 'fixtures', 'blkid_cache_file_no_label')
 
 
 class MockPart(object):

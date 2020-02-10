@@ -1,6 +1,8 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
+
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck
@@ -35,6 +37,8 @@ class Apache(AgentCheck):
         'connect_timeout': {'name': 'connect_timeout', 'default': 5},
     }
 
+    VERSION_REGEX = re.compile(r'Apache/(\d+(?:\.\d+)*)')
+
     def __init__(self, name, init_config, instances):
         super(Apache, self).__init__(name, init_config, instances)
         self.assumed_url = {}
@@ -54,26 +58,34 @@ class Apache(AgentCheck):
         service_check_tags = ['host:%s' % apache_host, 'port:%s' % apache_port] + tags
         try:
             self.log.debug(
-                'apache check initiating request, connect timeout %d receive %d'
-                % (self.http.options['timeout'][0], self.http.options['timeout'][1])
+                'apache check initiating request, connect timeout %d receive %d',
+                self.http.options['timeout'][0],
+                self.http.options['timeout'][1],
             )
 
             r = self.http.get(url)
             r.raise_for_status()
 
         except Exception as e:
-            self.log.warning("Caught exception %s" % str(e))
+            self.log.warning("Caught exception %s", e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
         else:
             self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
+
         self.log.debug("apache check succeeded")
         metric_count = 0
+        version_submitted = False
         # Loop through and extract the numerical values
         for line in r.iter_lines(decode_unicode=True):
             values = line.split(': ')
             if len(values) == 2:  # match
                 metric, value = values
+                # Special case: fetch and submit the version
+                if metric == 'ServerVersion':
+                    self._submit_metadata(value)
+                    version_submitted = True
+                    continue
                 try:
                     value = float(value)
                 except ValueError:
@@ -96,12 +108,36 @@ class Apache(AgentCheck):
                     self.rate(metric_name, value, tags=tags)
 
         if metric_count == 0:
-            if self.assumed_url.get(instance['apache_status_url'], None) is None and url[-5:] != '?auto':
+            if self.assumed_url.get(instance['apache_status_url']) is None and url[-5:] != '?auto':
                 self.assumed_url[instance['apache_status_url']] = '%s?auto' % url
                 self.warning("Assuming url was not correct. Trying to add ?auto suffix to the url")
                 self.check(instance)
+                return
             else:
                 raise Exception(
                     ("No metrics were fetched for this instance. Make sure that %s is the proper url.")
                     % instance['apache_status_url']
                 )
+
+        if not version_submitted:
+            # Can't get it from the mod_status output, try to get it from the server header even though
+            # it may not be exposed with some configurations.
+            server_version = r.headers.get("Server")
+            if server_version:
+                self._submit_metadata(server_version)
+
+    def _submit_metadata(self, value):
+        """Possible formats:
+            Apache | Apache/X | Apache/X.Y | Apache/X.Y.Z | Apache/X.Y.Z (<OS>) | Apache/X.Y.Z (<OS>) <not specified>
+            https://httpd.apache.org/docs/2.4/mod/core.html#servertokens
+        """
+        match = self.VERSION_REGEX.match(value)
+
+        if not match or not match.groups():
+            self.log.info("Cannot parse the complete Apache version from %s.", value)
+            return
+
+        version = match.group(1)
+        version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version.split('.'))}
+        self.set_metadata('version', version, scheme='parts', final_scheme='semver', part_map=version_parts)
+        self.log.debug("found apache version %s", version)

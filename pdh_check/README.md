@@ -4,9 +4,10 @@
 
 Get metrics from Windows performance counters in real time to:
 
-* Visualize and monitor Windows performance counters through the PDH API.
+- Visualize and monitor Windows performance counters through the PDH API.
 
 ## Setup
+
 ### Installation
 
 The PDH check is included in the [Datadog Agent][2] package. No additional installation is needed.
@@ -22,6 +23,7 @@ The PDH check is included in the [Datadog Agent][2] package. No additional insta
 Run the [Agent's status subcommand][5] and look for `pdh_check` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][6] for a list of metrics provided by this integration.
@@ -38,11 +40,10 @@ The PDH check does not include any events.
 
 The PDH check does not include any service checks.
 
-
 [2]: https://app.datadoghq.com/account/settings#agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/pdh_check/datadog_checks/pdh_check/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/pdh_check/metadata.csv
 [7]: https://docs.datadoghq.com/developers/metrics/custom_metrics
 [8]: https://docs.datadoghq.com/account_management/billing/custom_metrics

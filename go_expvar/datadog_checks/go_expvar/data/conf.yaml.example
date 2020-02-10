@@ -58,7 +58,7 @@ instances:
     ## Note: You can use a regex when you want to report for all elements matching a certain pattern
     ##
     ## You can also specify a `type` for the metrics. One of:
-    ##  * counter
+    ##  * count
     ##  * gauge (the default)
     ##  * rate (note that this shows up as a gauge in Datadog that is meant to be seen as a "per second rate")
     #
@@ -72,7 +72,7 @@ instances:
     #   - path: memstats/Lookups
     #     type: rate
     #   - path: memstats/Mallocs
-    #     type: counter
+    #     type: count
     #   - path: memstats/Frees
     #     type: rate
     #   - path: memstats/BySize/1/Mallocs
@@ -111,6 +111,12 @@ instances:
     ## settings enabled and attempt to reach services directly.
     #
     # skip_proxy: false
+
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
 
     ## @param username - string - optional
     ## The username to use if services are behind basic auth.

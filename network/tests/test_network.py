@@ -1,7 +1,8 @@
-# (C) Datadog, Inc. 2010-2019
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import logging
 import os
 import platform
 import socket
@@ -12,7 +13,6 @@ import pytest
 from six import PY3, iteritems
 
 from datadog_checks.dev import EnvVars
-from datadog_checks.network import Network
 
 from . import common
 
@@ -132,7 +132,7 @@ def test_add_conntrack_stats_metrics(aggregator, check):
     )
     with mock.patch('datadog_checks.network.network.get_subprocess_output') as subprocess:
         subprocess.return_value = mocked_conntrack_stats, None, None
-        check._add_conntrack_stats_metrics(None, ['foo:bar'])
+        check._add_conntrack_stats_metrics(None, None, ['foo:bar'])
 
         for metric, value in iteritems(CONNTRACK_STATS):
             aggregator.assert_metric(metric, value=value[0], tags=['foo:bar', 'cpu:0'])
@@ -256,7 +256,6 @@ def test_cx_state_psutil(aggregator, check):
 
     with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
         mock_psutil.net_connections.return_value = conn
-        check = Network('network', {}, {})
         check._setup_metrics({})
         check._cx_state_psutil()
         for _, m in iteritems(aggregator._metrics):
@@ -325,3 +324,17 @@ def test_get_net_proc_base_location(aggregator, check, proc_location, envs, expe
     with EnvVars(envs):
         actual = check._get_net_proc_base_location(proc_location)
         assert expected_net_proc_base_location == actual
+
+
+@pytest.mark.skipif(not PY3, reason="mock builtins only works on Python 3")
+@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+def test_proc_permissions_error(aggregator, check, caplog):
+    caplog.set_level(logging.DEBUG)
+    with mock.patch('builtins.open', mock.mock_open()) as mock_file:
+        mock_file.side_effect = IOError()
+        # force linux check so it will run on macOS too
+        check._collect_cx_state = False
+        check._check_linux(instance={})
+        assert 'Unable to read /proc/net/dev.' in caplog.text
+        assert 'Unable to read /proc/net/netstat.' in caplog.text
+        assert 'Unable to read /proc/net/snmp.' in caplog.text

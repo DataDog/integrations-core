@@ -1,13 +1,21 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import mock
 import pytest
 
 from datadog_checks.dev.utils import ON_WINDOWS, mock_context_manager
 
 from .metrics import CORE_GAUGES, CORE_RATES, UNIX_GAUGES
-from .mocks import MockDiskIOMetrics, MockDiskMetrics, MockInodesMetrics, MockPart
+from .mocks import (
+    MockDiskIOMetrics,
+    MockDiskMetrics,
+    MockInodesMetrics,
+    MockPart,
+    mock_blkid_cache_file,
+    mock_blkid_cache_file_no_label,
+)
 
 
 @pytest.fixture
@@ -36,6 +44,16 @@ def instance_basic_volume():
 @pytest.fixture(scope='session')
 def instance_basic_mount():
     return {'use_mount': 'true', 'tag_by_label': False}
+
+
+@pytest.fixture(scope='session')
+def instance_blkid_cache_file():
+    return {'blkid_cache_file': mock_blkid_cache_file()}
+
+
+@pytest.fixture(scope='session')
+def instance_blkid_cache_file_no_label():
+    return {'blkid_cache_file': mock_blkid_cache_file_no_label()}
 
 
 @pytest.fixture(scope='session')

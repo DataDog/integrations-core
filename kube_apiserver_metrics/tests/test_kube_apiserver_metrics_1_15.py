@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -13,9 +13,8 @@ from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 customtag = "custom:tag"
 
 instance = {
-    'prometheus_url': 'localhost:443/metrics',
+    'prometheus_url': 'https://localhost:443/metrics',
     'bearer_token_auth': 'false',
-    'scheme': 'https',
     'tags': [customtag],
 }
 

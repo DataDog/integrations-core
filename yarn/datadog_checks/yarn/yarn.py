@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError, Timeout
@@ -6,6 +6,7 @@ from six import iteritems
 from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.errors import ConfigurationError
 
 # Default settings
 DEFAULT_RM_URI = 'http://localhost:8088'
@@ -33,8 +34,22 @@ INCREMENT = 'increment'
 # Name of the service check
 SERVICE_CHECK_NAME = 'yarn.can_connect'
 
-# Application states to collect
-YARN_APPLICATION_STATES = 'RUNNING'
+# Application states
+YARN_APPLICATION_RUNNING = 'RUNNING'
+
+APPLICATION_STATUS_SERVICE_CHECK = 'yarn.application.status'
+
+DEFAULT_APPLICATION_STATUS_MAPPING = {
+    'ALL': 'unknown',
+    'NEW': 'ok',
+    'NEW_SAVING': 'ok',
+    'SUBMITTED': 'ok',
+    'ACCEPTED': 'ok',
+    YARN_APPLICATION_RUNNING: 'ok',
+    'FINISHED': 'ok',
+    'FAILED': 'critical',
+    'KILLED': 'critical',
+}
 
 # Cluster metrics identifier
 YARN_CLUSTER_METRICS_ELEMENT = 'clusterMetrics'
@@ -144,6 +159,16 @@ class YarnCheck(AgentCheck):
 
     _ALLOWED_APPLICATION_TAGS = ['applicationTags', 'applicationType', 'name', 'queue', 'user']
 
+    def __init__(self, *args, **kwargs):
+        super(YarnCheck, self).__init__(*args, **kwargs)
+        application_status_mapping = self.instance.get('application_status_mapping', DEFAULT_APPLICATION_STATUS_MAPPING)
+        try:
+            self.application_status_mapping = {
+                k.upper(): getattr(AgentCheck, v.upper()) for k, v in application_status_mapping.items()
+            }
+        except AttributeError as e:
+            raise ConfigurationError("Invalid mapping: {}".format(e))
+
     def check(self, instance):
 
         # Get properties from conf file
@@ -152,7 +177,7 @@ class YarnCheck(AgentCheck):
         queue_blacklist = instance.get('queue_blacklist', [])
 
         if type(app_tags) is not dict:
-            self.log.error("application_tags is incorrect: {} is not a dictionary".format(app_tags))
+            self.log.error("application_tags is incorrect: %s is not a dictionary", app_tags)
             app_tags = {}
 
         filtered_app_tags = {}
@@ -172,8 +197,8 @@ class YarnCheck(AgentCheck):
         cluster_name = instance.get('cluster_name')
         if cluster_name is None:
             self.warning(
-                "The cluster_name must be specified in the instance configuration, "
-                "defaulting to '{}'".format(DEFAULT_CLUSTER_NAME)
+                "The cluster_name must be specified in the instance configuration, defaulting to '%s'",
+                DEFAULT_CLUSTER_NAME,
             )
             cluster_name = DEFAULT_CLUSTER_NAME
 
@@ -203,31 +228,39 @@ class YarnCheck(AgentCheck):
         """
         Get metrics for running applications
         """
-        metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags, states=YARN_APPLICATION_STATES)
+        metrics_json = self._rest_request_to_json(rm_address, YARN_APPS_PATH, addl_tags)
 
         if metrics_json and metrics_json['apps'] is not None and metrics_json['apps']['app'] is not None:
-
             for app_json in metrics_json['apps']['app']:
+                tags = self._get_app_tags(app_json, app_tags) + addl_tags
 
-                tags = []
-                for dd_tag, yarn_key in iteritems(app_tags):
-                    try:
-                        val = app_json[yarn_key]
-                        if val:
-                            tags.append('{tag}:{value}'.format(tag=dd_tag, value=val))
-                    except KeyError:
-                        self.log.error("Invalid value {} for application_tag".format(yarn_key))
+                if app_json['state'] == YARN_APPLICATION_RUNNING:
+                    self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
+                    self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
 
-                tags.extend(addl_tags)
+                self.service_check(
+                    APPLICATION_STATUS_SERVICE_CHECK,
+                    self.application_status_mapping.get(app_json['state'], AgentCheck.UNKNOWN),
+                    tags=tags,
+                )
 
-                self._set_yarn_metrics_from_json(tags, app_json, DEPRECATED_YARN_APP_METRICS)
-                self._set_yarn_metrics_from_json(tags, app_json, YARN_APP_METRICS)
+    def _get_app_tags(self, app_json, app_tags):
+        tags = []
+        for dd_tag, yarn_key in iteritems(app_tags):
+            try:
+                val = app_json[yarn_key]
+                if val:
+                    tags.append('{tag}:{value}'.format(tag=dd_tag, value=val))
+            except KeyError:
+                self.log.error("Invalid value %s for application_tag", yarn_key)
+        return tags
 
     def _yarn_node_metrics(self, rm_address, addl_tags):
         """
         Get metrics related to YARN nodes
         """
         metrics_json = self._rest_request_to_json(rm_address, YARN_NODES_PATH, addl_tags)
+        version_set = False
 
         if metrics_json and metrics_json['nodes'] is not None and metrics_json['nodes']['node'] is not None:
 
@@ -238,6 +271,10 @@ class YarnCheck(AgentCheck):
                 tags.extend(addl_tags)
 
                 self._set_yarn_metrics_from_json(tags, node_json, YARN_NODE_METRICS)
+                version = node_json.get('version')
+                if not version_set and version:
+                    self.set_metadata('version', version)
+                    version_set = True
 
     def _yarn_scheduler_metrics(self, rm_address, addl_tags, queue_blacklist):
         """
@@ -270,7 +307,7 @@ class YarnCheck(AgentCheck):
                 queue_name = queue_json['queueName']
 
                 if queue_name in queue_blacklist:
-                    self.log.debug('Queue "{}" is blacklisted. Ignoring it'.format(queue_name))
+                    self.log.debug('Queue "%s" is blacklisted. Ignoring it', queue_name)
                     continue
 
                 queues_count += 1
@@ -318,7 +355,7 @@ class YarnCheck(AgentCheck):
         elif metric_type == INCREMENT:
             self.increment(metric_name, value, tags=tags, device_name=device_name)
         else:
-            self.log.error('Metric type "{}" unknown'.format(metric_type))
+            self.log.error('Metric type "%s" unknown', metric_type)
 
     def _rest_request_to_json(self, url, object_path, tags, *args, **kwargs):
         """
@@ -335,7 +372,7 @@ class YarnCheck(AgentCheck):
             for directory in args:
                 url = self._join_url_dir(url, directory)
 
-        self.log.debug('Attempting to connect to "{}"'.format(url))
+        self.log.debug('Attempting to connect to "%s"', url)
 
         # Add kwargs as arguments
         if kwargs:

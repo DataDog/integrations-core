@@ -1,11 +1,10 @@
-# (C) Datadog, Inc. 2010-2019
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
 
-from .common import DB_NAME, HOST, PORT
-from .test_common import check_bgw_metrics, check_common_metrics
+from .common import DB_NAME, HOST, PORT, check_bgw_metrics, check_common_metrics
 
 
 @pytest.mark.e2e

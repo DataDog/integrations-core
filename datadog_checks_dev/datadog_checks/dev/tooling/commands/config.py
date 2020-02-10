@@ -1,7 +1,8 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from fnmatch import fnmatch
 
 import click
 import toml
@@ -26,11 +27,17 @@ def config():
     pass
 
 
+@config.command(context_settings=CONTEXT_SETTINGS, short_help='Open the config location in your file manager')
+def explore():
+    """Open the config location in your file manager."""
+    click.launch(CONFIG_FILE, locate=True)
+
+
 @config.command(context_settings=CONTEXT_SETTINGS, short_help='Show the location of the config file')
 def find():
     """Show the location of the config file."""
     if ' ' in CONFIG_FILE:
-        echo_info('"{}"'.format(CONFIG_FILE))
+        echo_info(f'"{CONFIG_FILE}"')
     else:
         echo_info(CONFIG_FILE)
 
@@ -75,11 +82,19 @@ def set_value(ctx, key, value):
     New setting:
     [github]
     user = "foo"
+
+    You can also assign values on a per-org basis.
+
+    \b
+    $ ddev config set orgs.<ORG_NAME>.api_key
+    New setting:
+    [orgs.<ORG_NAME>]
+    api_key = "***********"
     """
     scrubbing = False
     if value is None:
-        scrubbing = key in SECRET_KEYS
-        value = click.prompt('Value for `{}`'.format(key), hide_input=scrubbing)
+        scrubbing = any(fnmatch(key, pattern) for pattern in SECRET_KEYS)
+        value = click.prompt(f'Value for `{key}`', hide_input=scrubbing)
 
     if key in ('core', 'extras', 'agent') and not value.startswith('~'):
         value = os.path.abspath(value)

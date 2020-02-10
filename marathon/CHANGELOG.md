@@ -1,5 +1,17 @@
 # CHANGELOG - marathon
 
+## 1.12.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.11.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 1.10.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.9.0 / 2019-08-24
 
 * [Added] Add request wrapper to marathon. See [#4324](https://github.com/DataDog/integrations-core/pull/4324).

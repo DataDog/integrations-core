@@ -1,6 +1,8 @@
-# (C) Datadog, Inc. 2010-2019
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
+
 from datadog_checks.dev import get_docker_hostname, get_here
 
 CHECK_NAME = 'apache'
@@ -19,6 +21,8 @@ AUTO_CONFIG = {'apache_status_url': AUTO_STATUS_URL, 'tags': ['instance:second']
 
 BAD_CONFIG = {'apache_status_url': 'http://localhost:1234/server-status'}
 
+NO_METRIC_CONFIG = {'apache_status_url': BASE_URL}
+
 APACHE_GAUGES = [
     'apache.performance.idle_workers',
     'apache.performance.busy_workers',
@@ -33,3 +37,5 @@ APACHE_GAUGES = [
 ]
 
 APACHE_RATES = ['apache.net.bytes_per_s', 'apache.net.request_per_s']
+
+APACHE_VERSION = os.getenv('APACHE_VERSION')

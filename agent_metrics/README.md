@@ -4,14 +4,15 @@
 
 Get metrics from the Agent Metrics service in real time to:
 
-* Visualize and monitor `agent_metrics` states
-* Be notified about `agent_metrics` failovers and events.
+- Visualize and monitor `agent_metrics` states.
+- Be notified about `agent_metrics` failovers and events.
 
 **NOTE**: The Agent Metrics check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents prior to major version 6**.
 
-To collect Agent metrics for Agent v6+, use the [Go-expvar check][1] with [the `agent_stats.yaml ` configuration file][2] packaged with the Agent.
+To collect Agent metrics for Agent v6+, use the [Go-expvar check][1] with [the `agent_stats.yaml` configuration file][2] packaged with the Agent.
 
 ## Setup
+
 ### Installation
 
 The Agent Metrics check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your servers.
@@ -23,6 +24,7 @@ The Agent Metrics check is included in the [Datadog Agent][3] package, so you do
 2. [Restart the Agent][6].
 
 #### Metrics collection
+
 The Agent Metrics integration can potentially emit [custom metrics][7], which may impact your [billing][8].
 
 ### Validation
@@ -38,22 +40,25 @@ All data collected are only available for Agent v5.
 See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Events
+
 The Agent Metrics check does not include any events.
 
 ### Service Checks
+
 The Agent Metrics check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][11].
 
 [1]: https://docs.datadoghq.com/integrations/go_expvar
 [2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/go_expvar.d/agent_stats.yaml.example
 [3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/agent-v5/agent_metrics/datadog_checks/agent_metrics/data/conf.yaml.default
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
+[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/developers/metrics/custom_metrics
 [8]: https://docs.datadoghq.com/account_management/billing/custom_metrics
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/agent_metrics/metadata.csv
 [11]: https://docs.datadoghq.com/help

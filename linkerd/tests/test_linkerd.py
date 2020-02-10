@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -22,7 +22,7 @@ def test_linkerd(aggregator):
     """
     Test the full check
     """
-    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
         metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd.txt'))
         check.check(MOCK_INSTANCE)
@@ -40,7 +40,7 @@ def test_linkerd(aggregator):
 
 
 def test_linkerd_v2(aggregator):
-    check = LinkerdCheck('linkerd', None, {}, [MOCK_INSTANCE])
+    check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
         metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd_v2.txt'))
         check.check(MOCK_INSTANCE)
@@ -53,6 +53,14 @@ def test_linkerd_v2(aggregator):
     aggregator.assert_service_check(
         'linkerd.prometheus.health', status=LinkerdCheck.OK, tags=['endpoint:http://fake.tld/prometheus'], count=1
     )
+
+
+def test_openmetrics_error(monkeypatch):
+    check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
+    with requests_mock.Mocker() as metric_request:
+        metric_request.get('http://fake.tld/prometheus', exc="Exception")
+        with pytest.raises(Exception):
+            check.check(MOCK_INSTANCE)
 
 
 @pytest.mark.e2e

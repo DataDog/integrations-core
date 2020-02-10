@@ -1,5 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-__version__ = "9.3.2"
+__version__ = "10.3.0"

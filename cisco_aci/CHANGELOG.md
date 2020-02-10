@@ -1,5 +1,19 @@
 # CHANGELOG - cisco_aci
 
+## 1.8.2 / 2019-12-27
+
+* [Fixed] Ensure only one session object per url. See [#5334](https://github.com/DataDog/integrations-core/pull/5334).
+
+## 1.8.1 / 2019-12-02
+
+* [Fixed] Use RequestsWrapper. See [#5037](https://github.com/DataDog/integrations-core/pull/5037).
+
+## 1.8.0 / 2019-11-20
+
+* [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
+* [Fixed] Refresh auth token when it expires. See [#5039](https://github.com/DataDog/integrations-core/pull/5039).
+* [Added] Standardize logging format. See [#4902](https://github.com/DataDog/integrations-core/pull/4902).
+
 ## 1.7.2 / 2019-08-24
 
 * [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).

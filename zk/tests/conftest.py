@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
@@ -35,12 +35,14 @@ STAT_METRICS = [
     'zookeeper.packets.sent',
 ]
 
+VALID_CONFIG = {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
+
 STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']
 
 
 @pytest.fixture(scope="session")
 def get_instance():
-    return {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
+    return VALID_CONFIG
 
 
 @pytest.fixture

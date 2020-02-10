@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -52,6 +52,18 @@ def get_env_vars(raw=False):
         return env_vars
 
 
+def get_state(key, default=None):
+    value = get_env_vars().get(key.lower())
+    if value is None:
+        return default
+
+    return deserialize_data(value)
+
+
+def save_state(key, value):
+    set_env_vars({key.lower(): serialize_data(value)})
+
+
 def set_up_env():
     return os.getenv(E2E_SET_UP, 'true') != 'false'
 
@@ -75,15 +87,23 @@ def replay_check_run(agent_collector, stub_aggregator):
     errors = []
     for collector in agent_collector:
         aggregator = collector['aggregator']
-        runner = collector['runner']
-        check_id = runner['CheckID']
-        check_name = runner['CheckName']
+        runner = collector.get('runner', {})
+        check_id = runner.get('CheckID', '')
+        check_name = runner.get('CheckName', '')
 
         for data in aggregator.get('metrics', []):
             for _, value in data['points']:
                 metric_type = stub_aggregator.METRIC_ENUM_MAP[data['type']]
-                stub_aggregator.submit_metric(
-                    check_name, check_id, metric_type, data['metric'], value, data['tags'], data['host']
+                stub_aggregator.submit_metric_e2e(
+                    # device is only present when replaying e2e tests. In integration tests it will be a tag
+                    check_name,
+                    check_id,
+                    metric_type,
+                    data['metric'],
+                    value,
+                    data['tags'],
+                    data['host'],
+                    data.get('device'),
                 )
 
         for data in aggregator.get('service_checks', []):
@@ -91,7 +111,7 @@ def replay_check_run(agent_collector, stub_aggregator):
                 check_name, check_id, data['check'], data['status'], data['tags'], data['host_name'], data['message']
             )
 
-        if runner['LastError']:
+        if runner.get('LastError'):
             errors.extend(json.loads(runner['LastError']))
     if errors:
         raise Exception("\n".join("Message: {}\n{}".format(err['message'], err['traceback']) for err in errors))

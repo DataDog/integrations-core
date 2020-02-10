@@ -6,28 +6,24 @@ This check monitors [CRI-O][1].
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
-
 ### Installation
 
 The integration relies on the `--enable-metrics` option of CRI-O that is disabled by default, when enabled metrics are exposed at `127.0.0.1:9090/metrics`.
 
 ### Configuration
 
-1. Edit the `crio.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your CRI-O performance data.
-   See the [sample crio.d/conf.yaml][3] for all available configuration options.
+1. Edit the `crio.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your CRI-O performance data. See the [sample crio.d/conf.yaml][3] for all available configuration options.
 
-2. [Restart the Agent][4]
+2. [Restart the Agent][4].
 
 ### Validation
 
-[Run the Agent's `status` subcommand][5] and look for `crio` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `crio` under the Checks section.
 
 ## Data Collected
 
-CRI-O collect metrics about the count and latency of operations that are done by the runtime.
-Datadog-CRI-O integration is also collecting CPU and memory usage of CRI-O golang binary itself.
+CRI-O collects metrics about the count and latency of operations that are done by the runtime.
+The Datadog-CRI-O integration collects CPU and memory usage of the CRI-O golang binary itself.
 
 ### Metrics
 
@@ -48,7 +44,7 @@ Need help? Contact [Datadog support][7].
 [1]: http://cri-o.io
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://github.com/DataDog/integrations-core/blob/master/crio/datadog_checks/crio/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/crio/metadata.csv
 [7]: https://docs.datadoghq.com/help

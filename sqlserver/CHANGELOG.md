@@ -1,5 +1,18 @@
 # CHANGELOG - sqlserver
 
+## 1.16.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.15.0 / 2019-12-02
+
+* [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+
+## 1.14.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+
 ## 1.13.0 / 2019-07-13
 
 * [Added] Allow SQLNCLI11 provider in SQL server. See [#4097](https://github.com/DataDog/integrations-core/pull/4097).

@@ -148,6 +148,37 @@ coredns_health_request_duration_seconds_count 1.32441e+06
 # HELP coredns_panic_count_total A metrics that counts the number of panics.
 # TYPE coredns_panic_count_total counter
 coredns_panic_count_total 0
+# HELP coredns_forward_request_count_total Counter of requests made per upstream.
+# TYPE coredns_forward_request_count_total counter
+coredns_forward_request_count_total{to="10.0.0.2:53"} 22000
+# HELP coredns_forward_request_duration_seconds Histogram of the time each request took.
+# TYPE coredns_forward_request_duration_seconds histogram
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.00025"} 6163
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.0005"} 6548
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.001"} 14705
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.002"} 20805
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.004"} 21318
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.008"} 21698
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.016"} 21874
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.032"} 21957
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.064"} 21982
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.128"} 21996
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.256"} 21999
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.512"} 21999
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="1.024"} 21999
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="2.048"} 22000
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="4.096"} 22000
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="8.192"} 22000
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="+Inf"} 22000
+coredns_forward_request_duration_seconds_sum{to="10.0.0.2:53"} 27.835685092999963
+coredns_forward_request_duration_seconds_count{to="10.0.0.2:53"} 22000
+# HELP coredns_forward_response_rcode_count_total Counter of requests made per upstream.
+# TYPE coredns_forward_response_rcode_count_total counter
+coredns_forward_response_rcode_count_total{rcode="NOERROR",to="10.0.0.2:53"} 1518
+coredns_forward_response_rcode_count_total{rcode="NXDOMAIN",to="10.0.0.2:53"} 20482
+# HELP coredns_forward_sockets_open Gauge of open sockets per upstream.
+# TYPE coredns_forward_sockets_open gauge
+coredns_forward_sockets_open{to="10.0.0.2:53"} 2
 # HELP coredns_proxy_request_count_total Counter of requests made per protocol, proxy protocol, family and upstream.
 # TYPE coredns_proxy_request_count_total counter
 coredns_proxy_request_count_total{family="1",proto="udp",proxy_proto="dns",to="10.205.0.2:53"} 2031

@@ -1,5 +1,14 @@
 # CHANGELOG - Aerospike
 
+## 1.5.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Add latency and datacenter metrics for Aerospike also collect version metadata information. See [#4969](https://github.com/DataDog/integrations-core/pull/4969).
+
+## 1.4.0 / 2019-12-02
+
+* [Added] Standardize logging format. See [#4897](https://github.com/DataDog/integrations-core/pull/4897).
+
 ## 1.3.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3484](https://github.com/DataDog/integrations-core/pull/3484).

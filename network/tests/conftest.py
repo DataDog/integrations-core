@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from copy import deepcopy
@@ -12,12 +12,12 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield common.INSTANCE
+    yield common.INSTANCE, common.E2E_METADATA
 
 
 @pytest.fixture
 def check():
-    return Network(common.SERVICE_CHECK_NAME, {}, {})
+    return Network(common.SERVICE_CHECK_NAME, {}, [deepcopy(common.INSTANCE)])
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -8,6 +8,10 @@ from datadog_checks.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+
+FLUENTD_VERSION = os.environ.get('FLUENTD_VERSION')
+FLUENTD_IMAGE_TAG = os.environ.get('FLUENTD_IMAGE_TAG')
+FLUENTD_CONTAINER_NAME = 'dd-test-fluentd'
 
 HOST = get_docker_hostname()
 PORT = 24220

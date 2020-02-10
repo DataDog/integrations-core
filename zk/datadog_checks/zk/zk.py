@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -96,7 +96,8 @@ class ZookeeperCheck(AgentCheck):
 
     # example match:
     # "Zookeeper version: 3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT"
-    version_pattern = re.compile(r'(\d+\.\d+\.\d+)')
+    # This regex matches the entire version rather than <major>.<minor>.<patch>
+    metadata_version_pattern = re.compile('Zookeeper version: ([^,]+)')
 
     SOURCE_TYPE_NAME = 'zookeeper'
 
@@ -259,12 +260,16 @@ class ZookeeperCheck(AgentCheck):
         # body correctly. Particularly, the Connections val was added in
         # >= 3.4.4.
         start_line = buf.readline()
-        match = self.version_pattern.search(start_line)
-        if match is None:
+        # this is to grab the additional version information
+        total_match = self.metadata_version_pattern.search(start_line)
+        if total_match is None:
             return (None, None, "inactive", None)
             raise Exception("Could not parse version from stat command output: %s" % start_line)
         else:
-            version = match.group()
+            version = total_match.group(1).split("-")[0]
+            # grabs the entire version number for inventories.
+            metadata_version = total_match.group(1)
+            self.set_metadata('version', metadata_version)
         has_connections_val = LooseVersion(version) > LooseVersion("3.4.4")
 
         # Clients:
@@ -367,12 +372,10 @@ class ZookeeperCheck(AgentCheck):
                 metrics.append(ZKMetric(metric_name, metric_value, metric_type))
 
             except ValueError:
-                self.log.warning(u"Cannot format `mntr` value. key={key}, value{value}".format(key=key, value=value))
+                self.log.warning("Cannot format `mntr` value. key=%s, value=%s", key, value)
                 continue
             except Exception:
-                self.log.exception(
-                    u"Unexpected exception occurred while parsing `mntr` command content:\n{buf}".format(buf=buf)
-                )
+                self.log.exception("Unexpected exception occurred while parsing `mntr` command content:\n%s", buf)
 
         return (metrics, mode)
 

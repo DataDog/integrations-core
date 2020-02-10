@@ -2,13 +2,11 @@
 
 ## Overview
 
-This check monitors [TLS][1] protocol versions, certificate expiration & validity, etc.
+This check monitors [TLS][1] protocol versions, certificate expiration and validity, etc.
 
-**Note**: Currently, only TCP is supported.
+**Note**: Only TCP is supported.
 
 ## Setup
-
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying these instructions.
 
 ### Installation
 
@@ -17,9 +15,23 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+#### Host
+
+Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+
 1. Edit the `tls.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your TLS data. See the [sample tls.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
+
+| Parameter            | Value                                  |
+| -------------------- | -------------------------------------- |
+| `<INTEGRATION_NAME>` | `tls`                                  |
+| `<INIT_CONFIG>`      | blank or `{}`                          |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "port":"443"}` |
 
 ### Validation
 
@@ -37,7 +49,7 @@ TLS does not include any events.
 
 ### Service Checks
 
-See [service_checks.json][7] for a list of service checks provided by this integration.
+See [service_checks.json][7] for a list of service checks provided by this integration:
 
 - `tls.can_connect` - Returns `CRITICAL` if the Agent is unable to connect to the monitored endpoint, otherwise returns `OK`.
 - `tls.version` - Returns `CRITICAL` if a connection is made with a protocol version that is not allowed, otherwise returns `OK`.
@@ -51,8 +63,8 @@ Need help? Contact [Datadog support][8].
 [1]: https://en.wikipedia.org/wiki/Transport_Layer_Security
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/tls/datadog_checks/tls/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/tls/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/tls/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2016
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
@@ -11,7 +11,6 @@ HOST = get_docker_hostname()
 PORT = '3128'
 URL = 'http://{}:{}/squid-internal-mgr/counters'.format(HOST, PORT)
 SERVICE_CHECK = "squid.can_connect"
-
 CHECK_CONFIG = {"name": "ok_instance", "tags": ["custom_tag"], "host": HOST}
 
 EXPECTED_METRICS = [

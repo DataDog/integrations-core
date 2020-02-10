@@ -181,6 +181,12 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param username - string - optional
     ## The username to use if services are behind basic auth.
     #
@@ -291,10 +297,10 @@ instances:
     #
     # kerberos_cache: <KRB5CCNAME>
 
-    ## @param tls_verify - boolean - optional - default: true
+    ## @param tls_verify - boolean - optional - default: false
     ## Instructs the check to validate the TLS certificate of services.
     #
-    # tls_verify: true
+    # tls_verify: false
 
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.

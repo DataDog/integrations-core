@@ -1,5 +1,9 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## 1.5.1 / 2019-12-02
+
+* [Fixed] Remove shlex. See [#5068](https://github.com/DataDog/integrations-core/pull/5068).
+
 ## 1.5.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3487](https://github.com/DataDog/integrations-core/pull/3487).

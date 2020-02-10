@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import INSTANCES, response
+from .common import HOST, INSTANCES, response
 
 CHECK_NAME = 'envoy'
 
@@ -40,7 +40,7 @@ def test_success_fixture(aggregator):
 
     num_metrics = len(response('multiple_services').content.decode().splitlines())
     num_metrics -= sum(c.unknown_metrics.values()) + sum(c.unknown_tags.values())
-    assert 4186 <= metrics_collected == num_metrics
+    assert 4412 <= metrics_collected == num_metrics
 
 
 def test_success_fixture_whitelist(aggregator):
@@ -73,7 +73,7 @@ def test_success_fixture_whitelist_blacklist(aggregator):
         c.check(instance)
 
     for metric in aggregator.metric_names:
-        assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out")
+        assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out.")
 
 
 def test_service_check(aggregator):
@@ -119,4 +119,4 @@ def test_config(test_case, extra_config, expected_http_kwargs):
             auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
         )
         http_wargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://localhost:8001/stats', **http_wargs)
+        r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)

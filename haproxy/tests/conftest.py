@@ -14,6 +14,7 @@ from datadog_checks.haproxy import HAProxy
 from .common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
+    HAPROXY_VERSION,
     HERE,
     PASSWORD,
     STATS_URL,
@@ -46,6 +47,7 @@ def dd_environment():
         service_name="haproxy-open",
         conditions=[WaitFor(wait_for_haproxy_open)],
     ):
+
         if platform_supports_sockets:
             with TempDir() as temp_dir:
                 host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
@@ -65,6 +67,7 @@ def dd_environment():
                         # it won't work without access
                         chown_args = []
                         user = getpass.getuser()
+
                         if user != 'root':
                             chown_args += ['sudo']
                         chown_args += ["chown", user, host_socket_path]
@@ -109,3 +112,28 @@ def haproxy_mock_evil():
     p = mock.patch('requests.get', return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
+
+
+@pytest.fixture(scope="session")
+def version_metadata():
+    # some version has release info
+    parts = HAPROXY_VERSION.split('-')
+    major, minor, patch = parts[0].split('.')
+    if len(parts) > 1:
+        release = parts[1]
+        return {
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': mock.ANY,
+            'version.release': release,
+        }
+    else:
+        return {
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': mock.ANY,
+        }

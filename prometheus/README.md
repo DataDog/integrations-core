@@ -2,7 +2,7 @@
 
 ## Overview
 
-Extract custom metrics from any prometheus endpoints.
+Extract custom metrics from any Prometheus endpoints. **Note**: Datadog recommends using the [OpenMetrics check][10] since it is more efficient and fully supports Prometheus text format. Use the Prometheus check only when the metrics endpoint does not support a text format.
 
 <div class="alert alert-warning">
 All the metrics retrieved by this integration are considered <a href="https://docs.datadoghq.com/developers/metrics/custom_metrics">custom metrics</a>.
@@ -24,10 +24,10 @@ Edit the `prometheus.d/conf.yaml` file to retrieve metrics from applications tha
 
 Each instance is at least composed of:
 
-| Setting          | Description                                                                                                      |
-|------------------|------------------------------------------------------------------------------------------------------------------|
-| `prometheus_url` | A URL that points to the metric route (**Note:** must be unique)                                                 |
-| `namespace`      | This namespace is prepended to all metrics (to avoid metrics name collision)                                     |
+| Setting          | Description                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `prometheus_url` | A URL that points to the metric route (**Note:** must be unique)                                                    |
+| `namespace`      | This namespace is prepended to all metrics (to avoid metrics name collision)                                        |
 | `metrics`        | A list of metrics to retrieve as custom metrics in the form `- <METRIC_NAME>` or `- <METRIC_NAME>: <RENAME_METRIC>` |
 
 When listing metrics, it's possible to use the wildcard `*` like this `- <METRIC_NAME>*` to retrieve all matching metrics. **Note:** use wildcards with caution as it can potentially send a lot of custom metrics.
@@ -43,6 +43,7 @@ If `send_monotonic_counter: True`, the Agent sends the deltas of the values in q
 [Run the Agent's `status` subcommand][3] and look for `prometheus` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 All metrics collected by the prometheus check are forwarded to Datadog as custom metrics.
@@ -50,6 +51,7 @@ All metrics collected by the prometheus check are forwarded to Datadog as custom
 Note: Bucket data for a given `<HISTOGRAM_METRIC_NAME>` Prometheus histogram metric are stored in the `<HISTOGRAM_METRIC_NAME>.count` metric within Datadog with the tags `upper_bound` including the name of the buckets. To access the `+Inf` bucket, use `upper_bound:none`.
 
 ### Events
+
 The Prometheus check does not include any events.
 
 ### Service Checks
@@ -57,19 +59,21 @@ The Prometheus check does not include any events.
 The Prometheus check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][4].
 
 ## Further Reading
 
-* [Introducing Prometheus support for Datadog Agent 6][5]
-* [Configuring a Prometheus Check][6]
-* [Writing a custom Prometheus Check][7]
+- [Introducing Prometheus support for Datadog Agent 6][5]
+- [Configuring a Prometheus Check][6]
+- [Writing a custom Prometheus Check][7]
 
 [2]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
+[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://docs.datadoghq.com/help
 [5]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
 [6]: https://docs.datadoghq.com/agent/prometheus
 [7]: https://docs.datadoghq.com/developers/prometheus
 [8]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
-[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[9]: https://docs.datadoghq.com/getting_started/integrations/prometheus?tab=docker#configuration
+[10]: https://docs.datadoghq.com/integrations/openmetrics

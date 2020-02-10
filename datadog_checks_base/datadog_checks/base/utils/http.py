@@ -1,20 +1,22 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
-import threading
-import warnings
 from contextlib import contextmanager
+from ipaddress import ip_address, ip_network
 
 import requests
+from requests import auth as requests_auth
 from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
 from ..config import is_affirmative
 from ..errors import ConfigurationError
+from .common import ensure_unicode
 from .headers import get_default_headers, update_headers
+from .warnings_util import disable_warnings_ctx
 
 try:
     from contextlib import ExitStack
@@ -27,6 +29,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 # Import lazily to reduce memory footprint and ease installation for development
+requests_aws = None
 requests_kerberos = None
 requests_ntlm = None
 
@@ -38,6 +41,10 @@ LOGGER = logging.getLogger(__file__)
 DEFAULT_TIMEOUT = 10
 
 STANDARD_FIELDS = {
+    'auth_type': 'basic',
+    'aws_host': None,
+    'aws_region': None,
+    'aws_service': None,
     'connect_timeout': None,
     'extra_headers': None,
     'headers': None,
@@ -93,10 +100,6 @@ class RequestsWrapper(object):
         'request_hooks',
     )
 
-    # For modifying the warnings filter since the context
-    # manager that is provided changes module constants
-    warning_lock = threading.Lock()
-
     def __init__(self, instance, init_config, remapper=None, logger=None):
         self.logger = logger or LOGGER
         default_fields = dict(STANDARD_FIELDS)
@@ -105,6 +108,9 @@ class RequestsWrapper(object):
         default_fields['log_requests'] = init_config.get('log_requests', default_fields['log_requests'])
         default_fields['skip_proxy'] = init_config.get('skip_proxy', default_fields['skip_proxy'])
         default_fields['timeout'] = init_config.get('timeout', default_fields['timeout'])
+        default_fields['tls_ignore_warning'] = init_config.get(
+            'tls_ignore_warning', default_fields['tls_ignore_warning']
+        )
 
         # Populate with the default values
         config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
@@ -167,36 +173,26 @@ class RequestsWrapper(object):
             update_headers(headers, config['extra_headers'])
 
         # http://docs.python-requests.org/en/master/user/authentication/
-        auth = None
-        if config['password']:
-            if config['username']:
-                auth = (config['username'], config['password'])
-            elif config['ntlm_domain']:
-                ensure_ntlm()
+        auth_type = config['auth_type'].lower()
+        if auth_type not in AUTH_TYPES:
+            self.logger.warning('auth_type %s is not supported, defaulting to basic', auth_type)
+            auth_type = 'basic'
 
-                auth = requests_ntlm.HttpNtlmAuth(config['ntlm_domain'], config['password'])
-
-        if auth is None and config['kerberos_auth']:
-            ensure_kerberos()
-
-            # For convenience
-            if is_affirmative(config['kerberos_auth']):
-                config['kerberos_auth'] = 'required'
-
-            if config['kerberos_auth'] not in KERBEROS_STRATEGIES:
-                raise ConfigurationError(
-                    'Invalid Kerberos strategy `{}`, must be one of: {}'.format(
-                        config['kerberos_auth'], ' | '.join(KERBEROS_STRATEGIES)
-                    )
+        if auth_type == 'basic':
+            if config['kerberos_auth']:
+                self.logger.warning(
+                    'The ability to use Kerberos auth without explicitly setting auth_type to '
+                    '`kerberos` is deprecated and will be removed in Agent 8'
                 )
+                auth_type = 'kerberos'
+            elif config['ntlm_domain']:
+                self.logger.warning(
+                    'The ability to use NTLM auth without explicitly setting auth_type to '
+                    '`ntlm` is deprecated and will be removed in Agent 8'
+                )
+                auth_type = 'ntlm'
 
-            auth = requests_kerberos.HTTPKerberosAuth(
-                mutual_authentication=KERBEROS_STRATEGIES[config['kerberos_auth']],
-                delegate=is_affirmative(config['kerberos_delegate']),
-                force_preemptive=is_affirmative(config['kerberos_force_initiate']),
-                hostname_override=config['kerberos_hostname'],
-                principal=config['kerberos_principal'],
-            )
+        auth = AUTH_TYPES[auth_type](config)
 
         # http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
         verify = True
@@ -268,7 +264,9 @@ class RequestsWrapper(object):
         self.log_requests = is_affirmative(config['log_requests'])
 
         # Context managers that should wrap all requests
-        self.request_hooks = [self.handle_tls_warning]
+        self.request_hooks = []
+        if self.ignore_tls_warning:
+            self.request_hooks.append(self.handle_tls_warning)
 
         if config['kerberos_keytab']:
             self.request_hooks.append(lambda: handle_kerberos_keytab(config['kerberos_keytab']))
@@ -295,15 +293,10 @@ class RequestsWrapper(object):
 
     def _request(self, method, url, options):
         if self.log_requests:
-            self.logger.debug(u'Sending {} request to {}'.format(method.upper(), url))
+            self.logger.debug(u'Sending %s request to %s', method.upper(), url)
 
-        if self.no_proxy_uris:
-            parsed_uri = urlparse(url)
-
-            for no_proxy_uri in self.no_proxy_uris:
-                if no_proxy_uri in parsed_uri.netloc:
-                    options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
-                    break
+        if self.no_proxy_uris and should_bypass_proxy(url, self.no_proxy_uris):
+            options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
 
         persist = options.pop('persist', None)
         if persist is None:
@@ -314,7 +307,7 @@ class RequestsWrapper(object):
                 stack.enter_context(hook())
 
             if persist:
-                return getattr(self.session, method)(url, **options)
+                return getattr(self.session, method)(url, **self.populate_options(options))
             else:
                 return getattr(requests, method)(url, **self.populate_options(options))
 
@@ -331,13 +324,8 @@ class RequestsWrapper(object):
 
     @contextmanager
     def handle_tls_warning(self):
-        with self.warning_lock:
-
-            with warnings.catch_warnings():
-                if self.ignore_tls_warning:
-                    warnings.simplefilter('ignore', InsecureRequestWarning)
-
-                yield
+        with disable_warnings_ctx(InsecureRequestWarning, disable=True):
+            yield
 
     @property
     def session(self):
@@ -394,7 +382,50 @@ def handle_kerberos_cache(cache_file_path):
         os.environ['KRB5CCNAME'] = old_cache_path
 
 
-def ensure_kerberos():
+def should_bypass_proxy(url, no_proxy_uris):
+    # Accepts a URL and a list of no_proxy URIs
+    # Returns True if URL should bypass the proxy.
+    parsed_uri = urlparse(url).hostname
+
+    for no_proxy_uri in no_proxy_uris:
+        try:
+            # If no_proxy_uri is an IP or IP CIDR.
+            # A ValueError is raised if address does not represent a valid IPv4 or IPv6 address.
+            ipnetwork = ip_network(ensure_unicode(no_proxy_uri))
+            ipaddress = ip_address(ensure_unicode(parsed_uri))
+            if ipaddress in ipnetwork:
+                return True
+        except ValueError:
+            # Treat no_proxy_uri as a domain name
+            # A domain name matches that name and all subdomains.
+            #   e.g. "foo.com" matches "foo.com" and "bar.foo.com"
+            # A domain name with a leading "." matches subdomains only.
+            #   e.g. ".y.com" matches "x.y.com" but not "y.com".
+            dot_no_proxy_uri = no_proxy_uri if no_proxy_uri.startswith(".") else ".{}".format(no_proxy_uri)
+            if no_proxy_uri == parsed_uri or parsed_uri.endswith(dot_no_proxy_uri):
+                return True
+    return False
+
+
+def create_basic_auth(config):
+    # Since this is the default case, only activate when all fields are explicitly set
+    if config['username'] and config['password']:
+        return (config['username'], config['password'])
+
+
+def create_digest_auth(config):
+    return requests_auth.HTTPDigestAuth(config['username'], config['password'])
+
+
+def create_ntlm_auth(config):
+    global requests_ntlm
+    if requests_ntlm is None:
+        import requests_ntlm
+
+    return requests_ntlm.HttpNtlmAuth(config['ntlm_domain'], config['password'])
+
+
+def create_kerberos_auth(config):
     global requests_kerberos
     if requests_kerberos is None:
         import requests_kerberos
@@ -403,8 +434,44 @@ def ensure_kerberos():
         KERBEROS_STRATEGIES['optional'] = requests_kerberos.OPTIONAL
         KERBEROS_STRATEGIES['disabled'] = requests_kerberos.DISABLED
 
+    # For convenience
+    if config['kerberos_auth'] is None or is_affirmative(config['kerberos_auth']):
+        config['kerberos_auth'] = 'required'
 
-def ensure_ntlm():
-    global requests_ntlm
-    if requests_ntlm is None:
-        import requests_ntlm
+    if config['kerberos_auth'] not in KERBEROS_STRATEGIES:
+        raise ConfigurationError(
+            'Invalid Kerberos strategy `{}`, must be one of: {}'.format(
+                config['kerberos_auth'], ' | '.join(KERBEROS_STRATEGIES)
+            )
+        )
+
+    return requests_kerberos.HTTPKerberosAuth(
+        mutual_authentication=KERBEROS_STRATEGIES[config['kerberos_auth']],
+        delegate=is_affirmative(config['kerberos_delegate']),
+        force_preemptive=is_affirmative(config['kerberos_force_initiate']),
+        hostname_override=config['kerberos_hostname'],
+        principal=config['kerberos_principal'],
+    )
+
+
+def create_aws_auth(config):
+    global requests_aws
+    if requests_aws is None:
+        from aws_requests_auth import boto_utils as requests_aws
+
+    for setting in ('aws_host', 'aws_region', 'aws_service'):
+        if not config[setting]:
+            raise ConfigurationError('AWS auth requires the setting `{}`'.format(setting))
+
+    return requests_aws.BotoAWSRequestsAuth(
+        aws_host=config['aws_host'], aws_region=config['aws_region'], aws_service=config['aws_service']
+    )
+
+
+AUTH_TYPES = {
+    'basic': create_basic_auth,
+    'digest': create_digest_auth,
+    'ntlm': create_ntlm_auth,
+    'kerberos': create_kerberos_auth,
+    'aws': create_aws_auth,
+}

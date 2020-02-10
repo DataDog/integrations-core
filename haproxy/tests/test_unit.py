@@ -2,13 +2,20 @@ import copy
 import os
 from collections import defaultdict
 
+import mock
+
 from . import common
 
 BASE_CONFIG = {'url': 'http://localhost/admin?stats', 'collect_status_metrics': True, 'enable_service_check': True}
 
 
-def _assert_agg_statuses(aggregator, count_status_by_service=True, collate_status_tags_per_host=False):
-    expected_statuses = common.AGG_STATUSES_BY_SERVICE if count_status_by_service else common.AGG_STATUSES
+def _assert_agg_statuses(
+    aggregator, count_status_by_service=True, collate_status_tags_per_host=False, disable_service_tag=False
+):
+    if disable_service_tag:
+        expected_statuses = common.AGG_STATUSES_BY_SERVICE_DISABLE_SERVICE_TAG
+    else:
+        expected_statuses = common.AGG_STATUSES_BY_SERVICE if count_status_by_service else common.AGG_STATUSES
     for tags, value in expected_statuses:
         if collate_status_tags_per_host:
             # Assert that no aggregate statuses are sent
@@ -40,16 +47,36 @@ def test_count_per_status_by_service(aggregator, check, haproxy_mock):
     haproxy_check = check(config)
     haproxy_check.check(config)
 
-    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:open', 'service:a'])
-    aggregator.assert_metric('haproxy.count_per_status', value=3, tags=['status:up', 'service:b'])
-    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:open', 'service:b'])
-    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:down', 'service:b'])
-    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:maint', 'service:b'])
-    tags = ['status:up', 'service:be_edge_http_sre-production_elk-kibana']
+    aggregator.assert_metric(
+        'haproxy.count_per_status', value=1, tags=['status:open', 'service:a', 'haproxy_service:a']
+    )
+    aggregator.assert_metric('haproxy.count_per_status', value=3, tags=['status:up', 'service:b', 'haproxy_service:b'])
+    aggregator.assert_metric(
+        'haproxy.count_per_status', value=1, tags=['status:open', 'service:b', 'haproxy_service:b']
+    )
+    aggregator.assert_metric(
+        'haproxy.count_per_status', value=1, tags=['status:down', 'service:b', 'haproxy_service:b']
+    )
+    aggregator.assert_metric(
+        'haproxy.count_per_status', value=1, tags=['status:maint', 'service:b', 'haproxy_service:b']
+    )
+    tags = [
+        'status:up',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['status:down', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'status:down',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['status:no_check', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'status:no_check',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
     _assert_agg_statuses(aggregator)
 
@@ -60,22 +87,37 @@ def test_count_per_status_by_service_and_host(aggregator, check, haproxy_mock):
     haproxy_check = check(config)
     haproxy_check.check(config)
 
-    tags = ['backend:FRONTEND', 'status:open', 'service:a']
+    tags = ['backend:FRONTEND', 'status:open', 'service:a', 'haproxy_service:a']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:FRONTEND', 'status:open', 'service:b']
+    tags = ['backend:FRONTEND', 'status:open', 'service:b', 'haproxy_service:b']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
     for backend in ['i-1', 'i-2', 'i-3']:
-        tags = ['backend:%s' % backend, 'status:up', 'service:b']
+        tags = ['backend:%s' % backend, 'status:up', 'service:b', 'haproxy_service:b']
         aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-4', 'status:down', 'service:b']
+    tags = ['backend:i-4', 'status:down', 'service:b', 'haproxy_service:b']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-5', 'status:maint', 'service:b']
+    tags = ['backend:i-5', 'status:maint', 'service:b', 'haproxy_service:b']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-1', 'status:up', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'backend:i-1',
+        'status:up',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-2', 'status:down', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'backend:i-2',
+        'status:down',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-3', 'status:no_check', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'backend:i-3',
+        'status:no_check',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
 
     _assert_agg_statuses(aggregator)
@@ -88,22 +130,37 @@ def test_count_per_status_by_service_and_collate_per_host(aggregator, check, hap
     config['collate_status_tags_per_host'] = True
     haproxy_check.check(config)
 
-    tags = ['backend:FRONTEND', 'status:available', 'service:a']
+    tags = ['backend:FRONTEND', 'status:available', 'service:a', 'haproxy_service:a']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:FRONTEND', 'status:available', 'service:b']
+    tags = ['backend:FRONTEND', 'status:available', 'service:b', 'haproxy_service:b']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
     for backend in ['i-1', 'i-2', 'i-3']:
-        tags = ['backend:%s' % backend, 'status:available', 'service:b']
+        tags = ['backend:%s' % backend, 'status:available', 'service:b', 'haproxy_service:b']
         aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-4', 'status:unavailable', 'service:b']
+    tags = ['backend:i-4', 'status:unavailable', 'service:b', 'haproxy_service:b']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-5', 'status:unavailable', 'service:b']
+    tags = ['backend:i-5', 'status:unavailable', 'service:b', 'haproxy_service:b']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-1', 'status:available', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'backend:i-1',
+        'status:available',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-2', 'status:unavailable', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'backend:i-2',
+        'status:unavailable',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-3', 'status:unavailable', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'backend:i-3',
+        'status:unavailable',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
 
     _assert_agg_statuses(aggregator, collate_status_tags_per_host=True)
@@ -116,22 +173,37 @@ def test_count_per_status_by_service_and_collate_per_host_evil(aggregator, check
     config['collate_status_tags_per_host'] = True
     haproxy_check.check(config)
 
-    tags = ['backend:FRONTEND', 'status:available', 'service:a']
+    tags = ['backend:FRONTEND', 'status:available', 'service:a', 'haproxy_service:a']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:FRONTEND', 'status:available', 'service:b']
+    tags = ['backend:FRONTEND', 'status:available', 'service:b', 'haproxy_service:b']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
     for backend in ['i-1', 'i-2', 'i-3']:
-        tags = ['backend:%s' % backend, 'status:available', 'service:b']
+        tags = ['backend:%s' % backend, 'status:available', 'service:b', 'haproxy_service:b']
         aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-4', 'status:unavailable', 'service:b']
+    tags = ['backend:i-4', 'status:unavailable', 'service:b', 'haproxy_service:b']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-5', 'status:unavailable', 'service:b']
+    tags = ['backend:i-5', 'status:unavailable', 'service:b', 'haproxy_service:b']
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-1', 'status:available', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'backend:i-1',
+        'status:available',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-2', 'status:unavailable', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'backend:i-2',
+        'status:unavailable',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
-    tags = ['backend:i-3', 'status:unavailable', 'service:be_edge_http_sre-production_elk-kibana']
+    tags = [
+        'backend:i-3',
+        'status:unavailable',
+        'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
 
     _assert_agg_statuses(aggregator, collate_status_tags_per_host=True)
@@ -214,7 +286,7 @@ def test_optional_tags(aggregator, check, haproxy_mock):
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'new-tag')
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'my:new:tag')
     aggregator.assert_metric_has_tag('haproxy.count_per_status', 'my:new:tag')
-    tags = ['service:a', 'new-tag', 'my:new:tag', 'backend:BACKEND']
+    tags = ['service:a', 'haproxy_service:a', 'new-tag', 'my:new:tag', 'backend:BACKEND']
     aggregator.assert_service_check('haproxy.backend_up', tags=tags)
 
 
@@ -228,6 +300,7 @@ def test_regex_tags(aggregator, check, haproxy_mock):
 
     expected_tags = [
         'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
         'type:BACKEND',
         'instance_url:http://localhost/admin?stats',
         'region:infra',
@@ -241,6 +314,7 @@ def test_regex_tags(aggregator, check, haproxy_mock):
     aggregator.assert_metric_has_tag('haproxy.backend.session.current', 'app:elk-kibana', 1)
     tags = [
         'service:be_edge_http_sre-production_elk-kibana',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
         'region:infra',
         'security:edge_http',
         'app:elk-kibana',
@@ -249,3 +323,50 @@ def test_regex_tags(aggregator, check, haproxy_mock):
         'backend:i-1',
     ]
     aggregator.assert_service_check('haproxy.backend_up', tags=tags)
+
+
+def test_version_failure(aggregator, check, datadog_agent):
+    config = copy.deepcopy(BASE_CONFIG)
+    haproxy_check = check(config)
+    filepath = os.path.join(common.HERE, 'fixtures', 'mock_data')
+    with open(filepath, 'rb') as f:
+        data = f.read()
+    with mock.patch('requests.get') as m:
+        m.side_effect = [RuntimeError("Ooops"), mock.Mock(content=data)]
+        haproxy_check.check(config)
+
+    # Version failed, but we should have some metrics
+    aggregator.assert_metric(
+        'haproxy.count_per_status', value=1, tags=['status:open', 'service:a', 'haproxy_service:a']
+    )
+    # But no metadata
+    datadog_agent.assert_metadata_count(0)
+
+
+def test_count_per_status_by_service_disable_service_tag(aggregator, check, haproxy_mock):
+    config = copy.deepcopy(BASE_CONFIG)
+    config['disable_legacy_service_tag'] = True
+    haproxy_check = check(config)
+    haproxy_check.check(config)
+
+    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:open', 'haproxy_service:a'])
+    aggregator.assert_metric('haproxy.count_per_status', value=3, tags=['status:up', 'haproxy_service:b'])
+    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:open', 'haproxy_service:b'])
+    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:down', 'haproxy_service:b'])
+    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=['status:maint', 'haproxy_service:b'])
+    tags = [
+        'status:up',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
+    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
+    tags = [
+        'status:down',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
+    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
+    tags = [
+        'status:no_check',
+        'haproxy_service:be_edge_http_sre-production_elk-kibana',
+    ]
+    aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
+    _assert_agg_statuses(aggregator, disable_service_tag=True)

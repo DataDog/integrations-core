@@ -6,7 +6,7 @@
 *                   @DataDog/agent-integrations
 
 # Documentation
-/docs/                @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+/docs/                @DataDog/baklava @DataDog/agent-integrations
 *.md                  @DataDog/baklava @DataDog/agent-integrations
 conf.yaml.example     @DataDog/baklava @DataDog/agent-integrations
 conf.yaml.default     @DataDog/baklava @DataDog/agent-integrations @DataDog/agent-core
@@ -31,6 +31,9 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 /ecs_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
 /ecs_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /ecs_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/eks_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
+/eks_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/eks_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /kube_apiserver_metrics/                  @DataDog/container-integrations @DataDog/agent-integrations
 /kube_apiserver_metrics/*.md              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /kube_apiserver_metrics/manifest.json     @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
@@ -65,6 +68,11 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 /openmetrics/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /openmetrics/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 
+# System (and Process) checks
+/disk/                                    @DataDog/agent-integrations @DataDog/agent-platform
+/network/                                 @DataDog/agent-integrations @DataDog/agent-platform
+/process/                                 @DataDog/agent-integrations @DataDog/agent-platform
+
 # Checks base
 /datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
@@ -72,8 +80,8 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 requirements.in                                           @DataDog/prodsec
 requirements.txt                                          @DataDog/prodsec
 # As well as the signing tool.
-datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec @DataDog/integrations-tools-and-libraries
+datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec
 # As well as the secure downloader.
-/datadog_checks_downloader/                               @DataDog/prodsec @DataDog/integrations-tools-and-libraries
+/datadog_checks_downloader/                               @DataDog/prodsec
 # As well as the wheel building process
-.gitlab-ci.yml                                            @DataDog/prodsec @DataDog/integrations-tools-and-libraries
+.gitlab-ci.yml                                            @DataDog/prodsec

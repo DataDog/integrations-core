@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -36,9 +36,11 @@ CACTI_TO_DD = {
 
 
 class CactiCheck(AgentCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(CactiCheck, self).__init__(name, init_config, instances)
         self.last_ts = {}
+        # Load the instance config
+        self.config = self._get_config(instances[0])
 
     @staticmethod
     def get_library_versions():
@@ -50,33 +52,37 @@ class CactiCheck(AgentCheck):
         if rrdtool is None:
             raise Exception("Unable to import python rrdtool module")
 
-        # Load the instance config
-        config = self._get_config(instance)
-
-        connection = pymysql.connect(config.host, config.user, config.password, config.db)
+        connection = self._get_connection()
 
         self.log.debug("Connected to MySQL to fetch Cacti metadata")
 
         # Get whitelist patterns, if available
-        patterns = self._get_whitelist_patterns(config.whitelist)
+        patterns = self._get_whitelist_patterns(self.config.whitelist)
 
         # Fetch the RRD metadata from MySQL
-        rrd_meta = self._fetch_rrd_meta(connection, config.rrd_path, patterns, config.field_names, config.tags)
+        rrd_meta = self._fetch_rrd_meta(
+            connection, self.config.rrd_path, patterns, self.config.field_names, self.config.tags
+        )
 
         # Load the metrics from each RRD, tracking the count as we go
         metric_count = 0
         for hostname, device_name, rrd_path in rrd_meta:
-            m_count = self._read_rrd(rrd_path, hostname, device_name, config.tags)
+            m_count = self._read_rrd(rrd_path, hostname, device_name, self.config.tags)
             metric_count += m_count
 
-        self.gauge('cacti.metrics.count', metric_count, tags=config.tags)
+        self.gauge('cacti.metrics.count', metric_count, tags=self.config.tags)
+
+    def _get_connection(self):
+        return pymysql.connect(
+            self.config.host, self.config.user, self.config.password, self.config.db, self.config.port
+        )
 
     def _get_whitelist_patterns(self, whitelist=None):
         patterns = []
         if whitelist:
             if not os.path.isfile(whitelist) or not os.access(whitelist, os.R_OK):
                 # Don't run the check if the whitelist is unavailable
-                self.log.exception("Unable to read whitelist file at %s" % (whitelist))
+                self.log.exception("Unable to read whitelist file at %s", whitelist)
 
             wl = open(whitelist)
             for line in wl:
@@ -96,16 +102,17 @@ class CactiCheck(AgentCheck):
         user = instance.get('mysql_user')
         password = instance.get('mysql_password', '') or ''
         db = instance.get('mysql_db', 'cacti')
+        port = instance.get('mysql_port')
         rrd_path = instance.get('rrd_path')
         whitelist = instance.get('rrd_whitelist')
         field_names = instance.get('field_names', ['ifName', 'dskDevice'])
         tags = instance.get('tags', [])
 
         Config = namedtuple(
-            'Config', ['host', 'user', 'password', 'db', 'rrd_path', 'whitelist', 'field_names', 'tags']
+            'Config', ['host', 'user', 'password', 'db', 'port', 'rrd_path', 'whitelist', 'field_names', 'tags']
         )
 
-        return Config(host, user, password, db, rrd_path, whitelist, field_names, tags)
+        return Config(host, user, password, db, port, rrd_path, whitelist, field_names, tags)
 
     @staticmethod
     def _get_rrd_info(rrd_path):
@@ -123,13 +130,13 @@ class CactiCheck(AgentCheck):
             info = self._get_rrd_info(rrd_path)
         except Exception:
             # Unable to read RRD file, ignore it
-            self.log.exception("Unable to read RRD file at %s" % rrd_path)
+            self.log.exception("Unable to read RRD file at %s", rrd_path)
             return metric_count
 
         # Find the consolidation functions for the RRD metrics
         c_funcs = set([v for k, v in info.items() if k.endswith('.cf')])
         if not c_funcs:
-            self.log.debug("No funcs found for {}".format(rrd_path))
+            self.log.debug("No funcs found for %s", rrd_path)
 
         for c in list(c_funcs):
             last_ts_key = '%s.%s' % (rrd_path, c)
@@ -144,7 +151,7 @@ class CactiCheck(AgentCheck):
                 fetched = self._get_rrd_fetch(rrd_path, c, start)
             except rrdtool.error:
                 # Start time was out of range, skip this RRD
-                self.log.warn("Time %s out of range for %s" % (rrd_path, start))
+                self.log.warning("Time %s out of range for %s", rrd_path, start)
                 return metric_count
 
             # Extract the data

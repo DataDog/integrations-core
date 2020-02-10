@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
@@ -6,6 +6,11 @@ import random
 from six import iteritems
 
 MOCK_CONFIG = {'url': 'http://localhost:8500', 'catalog_checks': True}
+MOCK_CONFIG_DISABLE_SERVICE_TAG = {
+    'url': 'http://localhost:8500',
+    'catalog_checks': True,
+    'disable_legacy_service_tag': True,
+}
 
 MOCK_CONFIG_SERVICE_WHITELIST = {
     'url': 'http://localhost:8500',

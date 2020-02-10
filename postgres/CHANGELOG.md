@@ -1,5 +1,24 @@
 # CHANGELOG - postgres
 
+## 3.5.0 / 2019-12-30
+
+* [Fixed] Handle connection closed. See [#5350](https://github.com/DataDog/integrations-core/pull/5350).
+* [Added] Add version metadata. See [#4874](https://github.com/DataDog/integrations-core/pull/4874).
+
+## 3.4.0 / 2019-12-02
+
+* [Added] Add lock_type tag to lock metric. See [#5006](https://github.com/DataDog/integrations-core/pull/5006). Thanks [tjwp](https://github.com/tjwp).
+* [Added] Extract version utils and use semver for version comparison. See [#4844](https://github.com/DataDog/integrations-core/pull/4844).
+
+## 3.3.0 / 2019-10-30
+
+* [Fixed] Remove multi instance from code. See [#4831](https://github.com/DataDog/integrations-core/pull/4831).
+* [Added] Upgrade psycopg2-binary to 2.8.4. See [#4840](https://github.com/DataDog/integrations-core/pull/4840).
+
+## 3.2.1 / 2019-10-11
+
+* [Fixed] Add cache invalidation and better thread lock. See [#4723](https://github.com/DataDog/integrations-core/pull/4723).
+
 ## 3.2.0 / 2019-09-10
 
 * [Added] Add schema tag to Lock and Size metrics. See [#3721](https://github.com/DataDog/integrations-core/pull/3721). Thanks [fischaz](https://github.com/fischaz).

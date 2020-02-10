@@ -1,0 +1,6 @@
+## @param jmx_metrics - list of mappings - optional
+## Default metrics collected by this check. You should not have to modify this.
+## See Cassandra's metrics.yaml as an example:
+## https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/metrics.yaml
+#
+# jmx_metrics: []

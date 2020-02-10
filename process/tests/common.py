@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.dev import get_here
@@ -10,8 +10,10 @@ CHECK_NAME = 'process'
 PROCESS_METRIC = [
     'system.processes.involuntary_ctx_switches',
     'system.processes.ioread_bytes',
+    'system.processes.ioread_bytes_count',
     'system.processes.ioread_count',
     'system.processes.iowrite_bytes',
+    'system.processes.iowrite_bytes_count',
     'system.processes.iowrite_count',
     'system.processes.mem.pct',
     'system.processes.mem.real',

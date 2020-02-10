@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018-2019
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
@@ -138,3 +138,13 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries):
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'cluster_id:xyz1', count=1)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag1:val1', count=2)
     aggregator.assert_metric_has_tag("dd.custom.mongo.aggregate.total", 'tag2:val2', count=2)
+
+
+def test_metadata(check, instance, datadog_agent):
+    check.check_id = 'test:123'
+    major, minor = common.MONGODB_VERSION.split('.')[:2]
+    version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
+
+    check.check(instance)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata) + 2)

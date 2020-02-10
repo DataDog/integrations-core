@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from codecs import open  # To use a consistent encoding
@@ -62,10 +62,10 @@ setup(
     include_package_data=True,
     extras_require={
         'deps': get_requirements(
-            'requirements.in', exclude=['kubernetes', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton']
+            'requirements.in', exclude=['kubernetes', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
         ),
         'http': get_requirements(
-            'requirements.in', only=['pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton']
+            'requirements.in', only=['pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
         ),
         'kube': get_requirements('requirements.in', only=['kubernetes']),
     },

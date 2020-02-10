@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
@@ -6,7 +6,9 @@ from six import iteritems
 
 from datadog_checks.mesos_master import MesosMaster
 
-from .common import BASIC_METRICS, CHECK_NAME, INSTANCE
+from .common import BASIC_METRICS, CHECK_NAME, INSTANCE, not_windows_ci
+
+pytestmark = not_windows_ci
 
 
 @pytest.mark.integration
