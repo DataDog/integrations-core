@@ -97,7 +97,7 @@ The MapR check does not include any events.
 
 - **The Agent is on a crash loop after configuring the MapR integration**
 
-  There have been a few cases where the C library within _mapr-streams-python_ segfaults, and they were explained by permissions issues. Make sure the `dd-agent` user has read permission on the ticket file, that the `dd-agent` user is able to run maprcli commands when the MAPR_TICKETFILE_LOCATION environment variable points to the ticket.
+  There have been a few cases where the C library within _mapr-streams-python_ segfaults because of permissions issues. Make sure the `dd-agent` user has read permission on the ticket file, that the `dd-agent` user is able to run maprcli commands when the MAPR_TICKETFILE_LOCATION environment variable points to the ticket.
 
 - **The integration seems to work correctly but doesn't send any metric**.
 
