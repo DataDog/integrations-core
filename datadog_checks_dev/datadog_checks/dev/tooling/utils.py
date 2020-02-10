@@ -5,13 +5,14 @@ import json
 import os
 import re
 from ast import literal_eval
+from pathlib import Path
 
 import requests
 import semver
 
 from ..utils import file_exists, read_file, write_file
 from .constants import NOT_CHECKS, VERSION_BUMP, get_root
-from .git import get_latest_tag
+from .git import get_git_root, get_latest_tag
 
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
@@ -59,6 +60,16 @@ def string_to_toml_type(s):
         s = literal_eval(s)
 
     return s
+
+
+def complete_testable_checks(ctx, args, incomplete):
+    root = get_git_root() or os.getcwd()
+    return sorted(k for k in get_testable_checks(root) if k.startswith(incomplete))
+
+
+def complete_valid_checks(ctx, args, incomplete):
+    root = get_git_root() or os.getcwd()
+    return [k for k in get_valid_checks(root) if k.startswith(incomplete)]
 
 
 def get_version_file(check_name):
@@ -130,16 +141,26 @@ def get_config_files(check_name):
     return sorted(files)
 
 
-def get_valid_checks():
-    return {path for path in os.listdir(get_root()) if file_exists(get_version_file(path))}
+def get_valid_checks(root=None):
+    if root is None:
+        root = get_root()
+    root = Path(root)
+    return {path for path in os.listdir(root) if file_exists(get_version_file(root / path))}
 
 
-def get_valid_integrations():
-    return {path for path in os.listdir(get_root()) if file_exists(get_manifest_file(path))}
+def get_valid_integrations(root=None):
+    if root is None:
+        root = get_root()
+    root = Path(root)
+    return {path for path in os.listdir(root) if file_exists(get_manifest_file(root / path))}
 
 
-def get_testable_checks():
-    return {path for path in os.listdir(get_root()) if file_exists(get_tox_file(path))}
+def get_testable_checks(root=None):
+    if root is None:
+        root = get_root()
+
+    root = Path(root)
+    return {path for path in os.listdir(root) if file_exists(get_tox_file(root / path))}
 
 
 def get_metric_sources():

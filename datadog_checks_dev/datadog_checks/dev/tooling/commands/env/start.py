@@ -12,14 +12,14 @@ from ....utils import dir_exists, file_exists, path_join, running_on_ci
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
 from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
 from ...git import get_current_branch
-from ...testing import get_available_tox_envs, get_tox_env_python_version
-from ...utils import get_tox_file
+from ...testing import complete_envs, get_available_tox_envs, get_tox_env_python_version
+from ...utils import complete_testable_checks, get_tox_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Start an environment')
-@click.argument('check')
-@click.argument('env')
+@click.argument('check', autocompletion=complete_testable_checks)
+@click.argument('env', autocompletion=complete_envs)
 @click.option(
     '--agent',
     '-a',
