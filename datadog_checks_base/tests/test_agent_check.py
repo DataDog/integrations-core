@@ -628,6 +628,24 @@ class TestLimits:
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 4
 
+    @pytest.mark.parametrize(
+        "max_returned_metrics",
+        (
+            pytest.param("I am not a int-convertible string", id="value-error"),
+            pytest.param(None, id="type-error-1"),
+            pytest.param(["A list is not an int"], id="type-error-2"),
+        ),
+    )
+    def test_metric_limit_instance_config_invalid_int(self, aggregator, max_returned_metrics):
+        instances = [{"max_returned_metrics": max_returned_metrics}]
+        check = LimitedCheck("test", {}, instances)
+        assert len(check.get_warnings()) == 1
+
+        # Should have fell back to the default metric limit.
+        for _ in range(12):
+            check.gauge("metric", 0)
+        assert len(aggregator.metrics("metric")) == 10
+
 
 class TestCheckInitializations:
     def test_default(self):
