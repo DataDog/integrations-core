@@ -27,7 +27,7 @@
   "assets": {
     "monitors": {},
     "dashboards": {
-      "vSphere Overview": "assets/dashboards/vsphere_overview.json"
+      "vsphere-overview": "assets/dashboards/vsphere_overview.json"
     },
     "service_checks": "assets/service_checks.json"
   }
