@@ -7,6 +7,7 @@ Get metrics from the external DNS service in real time to visualize and monitor 
 For more information about external DNS, see the [Github repo][7].
 
 ## Setup
+
 ### Installation
 
 The external DNS check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.

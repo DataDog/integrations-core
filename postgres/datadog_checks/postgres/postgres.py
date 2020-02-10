@@ -382,46 +382,61 @@ class PostgreSql(AgentCheck):
             )
             results = results[:MAX_CUSTOM_RESULTS]
 
-        desc = scope['descriptors']
+        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
+        # to a tag name (e.g. 'schema').
+        descriptors = scope['descriptors']
 
-        # parse & submit results
-        # A row should look like this
-        # (descriptor, descriptor, ..., value, value, value, value, ...)
-        # with descriptor a PG relation or index name, which we use to create the tags
-        valid_results_size = 0
+        # Parse and submit results.
+
+        num_results = 0
+
         for row in results:
-            # Check that all columns will be processed
-            assert len(row) == len(cols) + len(desc)
+            # A row contains descriptor values on the left (used for tagging), and
+            # metric values on the right (used as values for metrics).
+            # E.g.: (descriptor, descriptor, ..., value, value, value, value, ...)
+
+            expected_number_of_columns = len(descriptors) + len(cols)
+            if len(row) != expected_number_of_columns:
+                raise RuntimeError(
+                    'Row does not contain enough values: '
+                    'expected {} ({} descriptors + {} columns), got {}'.format(
+                        expected_number_of_columns, len(descriptors), len(cols), len(row)
+                    )
+                )
+
+            descriptor_values = row[: len(descriptors)]
+            column_values = row[len(descriptors) :]
 
             # build a map of descriptors and their values
-            desc_map = dict(zip([x[1] for x in desc], row[0 : len(desc)]))
+            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
 
             # if relations *and* schemas are set, filter out table not
             # matching the schema in the configuration
             if scope['relation'] and len(relations_config) > 0 and 'schema' in desc_map and 'table' in desc_map:
-                row_table = desc_map['table']
-                row_schema = desc_map['schema']
+                table = desc_map['table']
+                schema = desc_map['schema']
 
-                if row_table in relations_config:
-                    config_table_objects = [relations_config[row_table]]
+                if table in relations_config:
+                    config_table_objects = [relations_config[table]]
                 else:
                     # Find all matching regexes. Required if the same table matches two different regex
                     regex_configs = (v for v in relations_config.values() if 'relation_regex' in v)
-                    config_table_objects = [r for r in regex_configs if re.match(r['relation_regex'], row_table)]
+                    config_table_objects = [r for r in regex_configs if re.match(r['relation_regex'], table)]
 
                 if not config_table_objects:
-                    self.log.info("Got row %s.%s, but not relation", row_schema, row_table)
+                    self.log.info("Got row %s.%s, but not relation", schema, table)
                 else:
                     # Create set of all schemas by flattening and removing duplicates
                     config_schemas = {s for r in config_table_objects for s in r['schemas']}
                     if ALL_SCHEMAS in config_schemas:
-                        self.log.debug("All schemas are allowed for table %s.%s", row_schema, row_table)
-                    elif row_schema not in config_schemas:
-                        self.log.debug("Skipping non matched schema %s for table %s", desc_map['schema'], row_table)
+                        self.log.debug("All schemas are allowed for table %s.%s", schema, table)
+                    elif schema not in config_schemas:
+                        self.log.debug("Skipping non matched schema %s for table %s", schema, table)
                         continue
 
-            # Build tags
-            # descriptors are: (pg_name, dd_tag_name): value
+            # Build tags.
+
+            # Add tags from the instance.
             # Special-case the "db" tag, which overrides the one that is passed as instance_tag
             # The reason is that pg_stat_database returns all databases regardless of the
             # connection.
@@ -430,20 +445,17 @@ class PostgreSql(AgentCheck):
             else:
                 tags = [t for t in instance_tags]
 
+            # Add tags from descriptors.
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
-            # [(metric-map, value), (metric-map, value), ...]
-            # metric-map is: (dd_name, "rate"|"gauge")
-            # shift the results since the first columns will be the "descriptors"
-            # To submit simply call the function for each value v
-            # v[0] == (metric_name, submit_function)
-            # v[1] == the actual value
-            # tags are
-            for v in zip([scope['metrics'][c] for c in cols], row[len(desc) :]):
-                v[0][1](self, v[0][0], v[1], tags=tags)
-            valid_results_size += 1
+            # Submit metrics to the Agent.
+            for column, value in zip(cols, column_values):
+                name, submit_metric = scope['metrics'][column]
+                submit_metric(self, name, value, tags=tags)
 
-        return valid_results_size
+            num_results += 1
+
+        return num_results
 
     def _collect_stats(
         self,

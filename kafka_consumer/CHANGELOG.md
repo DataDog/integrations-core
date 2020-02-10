@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.3.0 / 2020-01-28
+
+* [Added] Update imports for newer versions of kafka-python. See [#5489](https://github.com/DataDog/integrations-core/pull/5489).
+
 ## 2.2.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

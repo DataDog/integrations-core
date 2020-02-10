@@ -70,6 +70,48 @@ METRICS = {
         ),
         'method': 'gauge',
     },
+    'server.concurrency': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'server.debug_assertion_failures': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'server.hot_restart_epoch': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'server.state': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'server.watchdog_mega_miss': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'server.watchdog_miss': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'filesystem.write_buffered': {
         'tags': (
             (),
@@ -134,6 +176,27 @@ METRICS = {
         'method': 'monotonic_count',
     },
     'runtime.num_keys': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'runtime.admin_overrides_active': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'runtime.deprecated_feature_use': {
+        'tags': (
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'runtime.num_layers': {
         'tags': (
             (),
             (),
@@ -1106,6 +1169,36 @@ METRICS = {
         ),
         'method': 'histogram',
     },
+    'listener.downstream_pre_cx_active': {
+        'tags': (
+            ('address', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'listener.downstream_pre_cx_timeout': {
+        'tags': (
+            ('address', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener.server_ssl_socket_factory.downstream_context_secrets_not_ready': {
+        'tags': (
+            ('address', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener.server_ssl_socket_factory.ssl_context_update_by_sds': {
+        'tags': (
+            ('address', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'listener.ssl.connection_error': {
         'tags': (
             ('address', ),
@@ -1207,6 +1300,13 @@ METRICS = {
             ('address', ),
             (),
             ('sigalg', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'listener.no_filter_chain_match': {
+        'tags': (
+            ('address', ),
+            (),
         ),
         'method': 'monotonic_count',
     },
@@ -1706,6 +1806,14 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'listener.http.downstream_rq_completed': {
+        'tags': (
+            ('address', ),
+            ('stat_prefix', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'http2.rx_reset': {
         'tags': (
             (),
@@ -1822,6 +1930,20 @@ METRICS = {
             (),
         ),
         'method': 'gauge',
+    },
+    'cluster.assignment_stale': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.assignment_timeout_received': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
     },
     'cluster.upstream_cx_total': {
         'tags': (
@@ -1991,6 +2113,20 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.upstream_cx_idle_timeout': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count'
+    },
+    'cluster.upstream_cx_pool_overflow': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count'
+    },
     'cluster.upstream_rq_total': {
         'tags': (
             ('cluster_name', ),
@@ -2096,6 +2232,22 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.client_ssl_socket_factory.ssl_context_update_by_sds': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.client_ssl_socket_factory.upstream_context_secrets_not_ready': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.ssl.connection_error': {
         'tags': (
             ('cluster_name', ),
@@ -2168,6 +2320,38 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.ssl.ciphers': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            ('cipher', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.curves': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            ('curve', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.sigalgs': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            ('sigalg', ),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.ssl.versions': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            ('version', ),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.upstream_flow_control_paused_reading_total': {
         'tags': (
             ('cluster_name', ),
@@ -2196,12 +2380,40 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.upstream_internal_redirect_failed_total': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count'
+    },
+    'cluster.upstream_internal_redirect_succeeded_total': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count'
+    },
     'cluster.membership_change': {
         'tags': (
             ('cluster_name', ),
             (),
         ),
         'method': 'monotonic_count',
+    },
+    'cluster.membership_degraded': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster.membership_excluded': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'gauge',
     },
     'cluster.membership_healthy': {
         'tags': (
@@ -2259,6 +2471,13 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'cluster.update_no_rebuild': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
     'cluster.version': {
         'tags': (
             ('cluster_name', ),
@@ -2274,6 +2493,13 @@ METRICS = {
         'method': 'gauge',
     },
     'cluster.bind_errors': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.original_dst_host_invalid': {
         'tags': (
             ('cluster_name', ),
             (),
@@ -2407,6 +2633,142 @@ METRICS = {
             (),
         ),
         'method': 'monotonic_count',
+    },
+    'cluster.outlier_detection.ejections_enforced_consecutive_local_origin_failure': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.outlier_detection.ejections_detected_consecutive_local_origin_failure': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.outlier_detection.ejections_enforced_local_origin_success_rate': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.outlier_detection.ejections_detected_local_origin_success_rate': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.outlier_detection.ejections_enforced_failure_percentage': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.outlier_detection.ejections_detected_failure_percentage': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.outlier_detection.ejections_enforced_failure_percentage_local_origin': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.outlier_detection.ejections_detected_failure_percentage_local_origin': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.circuit_breakers.cx_open': {
+        'tags': (
+            ('cluster_name', ),
+            ('priority', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster.circuit_breakers.cx_pool_open': {
+        'tags': (
+            ('cluster_name', ),
+            ('priority', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster.circuit_breakers.rq_open': {
+        'tags': (
+            ('cluster_name', ),
+            ('priority', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster.circuit_breakers.rq_pending_open': {
+        'tags': (
+            ('cluster_name', ),
+            ('priority', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster.circuit_breakers.rq_retry_open': {
+        'tags': (
+            ('cluster_name', ),
+            ('priority', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster.circuit_breakers.remaining_cx': {
+        'tags': (
+            ('cluster_name', ),
+            ('priority', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster.circuit_breakers.remaining_pending': {
+        'tags': (
+            ('cluster_name', ),
+            ('priority', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster.circuit_breakers.remaining_rq': {
+        'tags': (
+            ('cluster_name', ),
+            ('priority', ),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'cluster.circuit_breakers.remaining_retries': {
+        'tags': (
+            ('cluster_name', ),
+            ('priority', ),
+            (),
+        ),
+        'method': 'gauge',
     },
     'cluster.upstream_rq_completed': {
         'tags': (
@@ -2767,6 +3129,109 @@ METRICS = {
     'cluster.lb_subsets_fallback': {
         'tags': (
             ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.lb_subsets_fallback_panic': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.header_overflow': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.headers_cb_no_stream': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.inbound_empty_frames_flood': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.inbound_priority_frames_flood': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.inbound_window_update_frames_flood': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.outbound_control_flood': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.outbound_flood': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.rx_messaging_error': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.rx_reset': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.too_many_header_frames': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.trailers': {
+        'tags': (
+            ('cluster_name', ),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'cluster.http2.tx_reset': {
+        'tags': (
+            ('cluster_name', ),
+            (),
             (),
         ),
         'method': 'monotonic_count',

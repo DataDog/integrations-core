@@ -7,11 +7,7 @@ import pytest
 from datadog_checks.ibm_db2 import IbmDb2Check
 from datadog_checks.ibm_db2.utils import scrub_connection_string
 
-from .common import DB2_VERSION
-
 pytestmark = pytest.mark.unit
-
-CHECK_ID = 'test:123'
 
 
 class TestPasswordScrubber:
@@ -50,24 +46,6 @@ def test_retry_connection(aggregator, instance):
         assert ibmdb2._conn != conn1
 
 
-def test_metadata(aggregator, instance, datadog_agent):
-    check = IbmDb2Check('ibm_db2', {}, [instance])
-    check.check_id = CHECK_ID
-
-    check.check(instance)
-
-    # only major and minor are consistent values
-    major, minor = DB2_VERSION.split('.')
-
-    version_metadata = {
-        'version.scheme': 'ibm_db2',
-        'version.major': '11',
-        'version.minor': '1',
-    }
-
-    datadog_agent.assert_metadata(CHECK_ID, version_metadata)
-
-
 def test_parse_version(instance):
     raw_version = '11.01.0202'
     check = IbmDb2Check('ibm_db2', {}, [instance])
@@ -78,3 +56,16 @@ def test_parse_version(instance):
         'fix': '2',
     }
     assert check.parse_version(raw_version) == expected
+
+
+def test_get_connection_data(instance):
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+
+    expected = 'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1'
+    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, None)
+
+    expected = (
+        'database=db1;hostname=host1;port=1000;protocol=tcpip;uid=user1;pwd=pass1;'
+        'security=ssl;sslservercertificate=/path/cert'
+    )
+    assert (expected, '', '') == check.get_connection_data('db1', 'user1', 'pass1', 'host1', 1000, '/path/cert')

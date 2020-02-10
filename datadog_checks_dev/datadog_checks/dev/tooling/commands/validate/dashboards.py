@@ -3,11 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from collections import OrderedDict
 
 import click
 
-from ....compat import JSONDecodeError
 from ....utils import file_exists, read_file
 from ...constants import get_root
 from ...utils import get_valid_integrations, load_manifest
@@ -34,19 +32,19 @@ def dashboards():
 
             dashboard_file = os.path.join(root, check_name, *dashboard_relative_location.split('/'))
             if not file_exists(dashboard_file):
-                echo_info('{}... '.format(check_name), nl=False)
+                echo_info(f'{check_name}... ', nl=False)
                 echo_info(' FAILED')
-                echo_failure('  {} does not exist'.format(dashboard_file))
+                echo_failure(f'  {dashboard_file} does not exist')
                 failed_checks += 1
                 continue
 
             try:
-                decoded = json.loads(read_file(dashboard_file).strip(), object_pairs_hook=OrderedDict)
-            except JSONDecodeError as e:
+                decoded = json.loads(read_file(dashboard_file).strip())
+            except json.JSONDecodeError as e:
                 failed_checks += 1
-                echo_info('{}... '.format(check_name), nl=False)
+                echo_info(f'{check_name}... ', nl=False)
                 echo_failure(' FAILED')
-                echo_failure('  invalid json: {}'.format(e))
+                echo_failure(f'  invalid json: {e}')
                 continue
 
             # Confirm the dashboard payload comes from the old API for now
@@ -65,7 +63,7 @@ def dashboards():
             if file_failed:
                 failed_checks += 1
                 # Display detailed info if file is invalid
-                echo_info('{}... '.format(check_name), nl=False)
+                echo_info(f'{check_name}... ', nl=False)
                 echo_failure(' FAILED'.format(check_name))
                 for display_func, message in display_queue:
                     display_func(message)
@@ -73,7 +71,7 @@ def dashboards():
                 ok_checks += 1
 
     if ok_checks:
-        echo_success("{} valid files".format(ok_checks))
+        echo_success(f"{ok_checks} valid files")
     if failed_checks:
-        echo_failure("{} invalid files".format(failed_checks))
+        echo_failure(f"{failed_checks} invalid files")
         abort()

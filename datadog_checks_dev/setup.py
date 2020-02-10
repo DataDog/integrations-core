@@ -23,10 +23,10 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 
 REQUIRES = [
     "contextlib2; python_version < '3.0'",
-    'coverage==4.5.4',  # pinned due to https://github.com/nedbat/coveragepy/issues/883
+    'coverage>=5.0.3',
     'mock',
     'psutil',
-    'PyYAML>=5.1',
+    'PyYAML>=5.3',
     'pytest',
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
@@ -58,11 +58,14 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     packages=['datadog_checks', 'datadog_checks.dev'],
     install_requires=REQUIRES,
+    # TODO: Uncomment when we fully drop Python 2
+    # python_requires='>=3.7',
     include_package_data=True,
     extras_require={
         'cli': [
@@ -70,8 +73,8 @@ setup(
             'atomicwrites',
             'click',
             'colorama',
-            'docker-compose>=1.23.1,<1.24.0',
-            'in-toto>=0.4.1',
+            'docker-compose>=1.25',
+            'in-toto>=0.4.2',
             'pip-tools',
             'pylint',
             'Pillow',
@@ -81,6 +84,7 @@ setup(
             'toml>=0.9.4, <1.0.0',
             'tox>=3.12.1',
             'twine>=1.11.0',
+            'virtualenv>=20.0.0b1',
             'wheel>=0.31.0',
         ]
     },

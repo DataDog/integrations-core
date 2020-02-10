@@ -5,11 +5,9 @@ import json
 import os
 import re
 from ast import literal_eval
-from collections import OrderedDict
 
 import requests
 import semver
-from six import string_types
 
 from ..utils import file_exists, read_file, write_file
 from .constants import NOT_CHECKS, VERSION_BUMP, get_root
@@ -22,9 +20,9 @@ VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 def format_commit_id(commit_id):
     if commit_id:
         if commit_id.isdigit():
-            return 'PR #{}'.format(commit_id)
+            return f'PR #{commit_id}'
         else:
-            return 'commit hash `{}`'.format(commit_id)
+            return f'commit hash `{commit_id}`'
     return commit_id
 
 
@@ -39,7 +37,7 @@ def get_current_agent_version():
 
     most_recent = sorted(versions)[-1]
 
-    return "{}.{}".format(most_recent[0], most_recent[1])
+    return f"{most_recent[0]}.{most_recent[1]}"
 
 
 def is_package(d):
@@ -148,6 +146,10 @@ def get_metric_sources():
     return {path for path in os.listdir(get_root()) if file_exists(get_metadata_file(path))}
 
 
+def read_metric_data_file(check_name):
+    return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
+
+
 def read_version_file(check_name):
     return read_file(get_version_file(check_name))
 
@@ -172,13 +174,13 @@ def load_manifest(check_name):
     """
     manifest_path = get_manifest_file(check_name)
     if file_exists(manifest_path):
-        return json.loads(read_file(manifest_path).strip(), object_pairs_hook=OrderedDict)
+        return json.loads(read_file(manifest_path).strip())
     return {}
 
 
 def write_manifest(manifest, check_name):
     manifest_path = get_manifest_file(check_name)
-    write_file(manifest_path, '{}\n'.format(json.dumps(manifest, indent=2)))
+    write_file(manifest_path, f'{json.dumps(manifest, indent=2)}\n')
 
 
 def get_bump_function(changelog_types):
@@ -202,7 +204,7 @@ def parse_agent_req_file(contents):
         datadog-active-directory==1.1.1; sys_platform == 'win32'
 
     """
-    catalog = OrderedDict()
+    catalog = {}
     for line in contents.splitlines():
         toks = line.split('==', 1)
         if len(toks) != 2 or not toks[0] or not toks[1]:
@@ -218,6 +220,6 @@ def parse_agent_req_file(contents):
 
 
 def parse_version_parts(version):
-    if not isinstance(version, string_types):
+    if not isinstance(version, str):
         return []
     return [int(v) for v in version.split('.') if v.isdigit()]

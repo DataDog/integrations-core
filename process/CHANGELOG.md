@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 1.11.1 / 2020-01-15
+
+* [Fixed] Fix debug logging. See [#5460](https://github.com/DataDog/integrations-core/pull/5460).
+
 ## 1.11.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

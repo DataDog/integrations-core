@@ -45,7 +45,7 @@ DEFAULT_OID_BATCH_SIZE = 10
 
 
 def reply_invalid(oid):
-    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid) or endOfMibView.isSameTypeWith(oid)
+    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
 
 
 class SnmpCheck(AgentCheck):
@@ -144,6 +144,9 @@ class SnmpCheck(AgentCheck):
                     host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
                 config.discovered_instances[host] = host_config
 
+                write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
+
+            # Write again at the end of the loop, in case some host have been removed since last
             write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
 
             time_elapsed = time.time() - start_time
@@ -300,7 +303,7 @@ class SnmpCheck(AgentCheck):
                 else:
                     self.warning(message)
 
-            all_binds.extend(var_binds_table)
+            all_binds.extend(var_bind for var_bind in var_binds_table if var_bind[1] is not endOfMibView)
         return all_binds, error
 
     def _start_discovery(self):
@@ -424,7 +427,7 @@ class SnmpCheck(AgentCheck):
             try:
                 tag_value = index[idx_tag[1] - 1]
             except IndexError:
-                self.log.warning('Not enough indexes, skipping this tag')
+                self.log.warning('Not enough indexes, skipping tag %s', tag_group)
                 continue
             tags.append('{}:{}'.format(tag_group, tag_value))
         for col_tag in column_tags:

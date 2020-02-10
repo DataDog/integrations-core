@@ -299,6 +299,10 @@ class OpenMetricsScraperMixin(object):
             return self._http_handlers[prometheus_url]
 
         # TODO: Deprecate this behavior in Agent 8
+        if scraper_config['ssl_ca_cert'] is False:
+            scraper_config['ssl_verify'] = False
+
+        # TODO: Deprecate this behavior in Agent 8
         if scraper_config['ssl_verify'] is False:
             scraper_config.setdefault('tls_ignore_warning', True)
 
@@ -316,6 +320,13 @@ class OpenMetricsScraperMixin(object):
         headers.setdefault('accept-encoding', 'gzip')
 
         return http_handler
+
+    def reset_http_config(self):
+        """
+        You may need to use this when configuration is determined dynamically during every
+        check run, such as when polling an external resource like the Kubelet.
+        """
+        self._http_handlers.clear()
 
     def parse_metric_family(self, response, scraper_config):
         """
