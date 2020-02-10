@@ -28,7 +28,9 @@
   "integration_id": "kong",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Kong Overview": "assets/dashboards/kong_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

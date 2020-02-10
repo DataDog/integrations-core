@@ -23,7 +23,7 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 
 REQUIRES = [
     "contextlib2; python_version < '3.0'",
-    'coverage==4.5.4',  # pinned due to https://github.com/nedbat/coveragepy/issues/883
+    'coverage>=5.0.3',
     'mock',
     'psutil',
     'PyYAML>=5.3',
@@ -74,7 +74,7 @@ setup(
             'click',
             'colorama',
             'docker-compose>=1.25',
-            'in-toto>=0.4.1',
+            'in-toto>=0.4.2',
             'pip-tools',
             'pylint',
             'Pillow',
@@ -84,6 +84,7 @@ setup(
             'toml>=0.9.4, <1.0.0',
             'tox>=3.12.1',
             'twine>=1.11.0',
+            'virtualenv>=20.0.0b1',
             'wheel>=0.31.0',
         ]
     },

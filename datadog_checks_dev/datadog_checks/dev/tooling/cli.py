@@ -9,7 +9,7 @@ from ..utils import dir_exists
 from .commands import ALL_COMMANDS
 from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning, set_color, set_debug
 from .config import CONFIG_FILE, config_file_exists, load_config, restore_config
-from .constants import set_root
+from .constants import REPO_CHOICES, set_root
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, invoke_without_command=True)
@@ -39,6 +39,7 @@ def ddev(ctx, core, extras, agent, here, color, quiet, debug):
 
     repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
     config['repo_choice'] = repo_choice
+    config['repo_name'] = REPO_CHOICES[repo_choice]
 
     if color is not None:
         config['color'] = color

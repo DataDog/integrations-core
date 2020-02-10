@@ -34,6 +34,8 @@ class DockerInterface(object):
         metadata=None,
         agent_build=None,
         api_key=None,
+        dd_url=None,
+        log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
         default_agent=False,
     ):
@@ -45,6 +47,8 @@ class DockerInterface(object):
         self.metadata = metadata or {}
         self.agent_build = agent_build
         self.api_key = api_key or FAKE_API_KEY
+        self.dd_url = dd_url
+        self.log_url = log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
 
         self._agent_version = self.metadata.get('agent_version')
@@ -194,72 +198,78 @@ class DockerInterface(object):
             run_command(['docker', 'pull', self.agent_build], capture=True, check=True)
 
     def start_agent(self):
-        if self.agent_build:
-            ip = get_ip()
-            free_port = find_free_port(ip)
-            command = [
-                'docker',
-                'run',
-                # Keep it up
-                '-d',
-                # Ensure consistent naming
-                '--name',
-                self.container_name,
-                # Ensure access to host network
-                '--network',
-                'host',
-                # Agent 6 will simply fail without an API key
-                '-e',
-                f'DD_API_KEY={self.api_key}',
-                # Don't write .pyc, needed to fix this issue (only Python 2):
-                # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
-                # in the first place.
-                # More info: https://github.com/DataDog/integrations-core/pull/5454
-                # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
-                '-e',
-                'PYTHONDONTWRITEBYTECODE=1',
-                # Run expvar on a random port
-                '-e',
-                'DD_EXPVAR_PORT=0',
-                # Run API on a random port
-                '-e',
-                f'DD_CMD_PORT={free_port}',
-                # Disable trace agent
-                '-e',
-                'DD_APM_ENABLED=false',
-                # Mount the config directory, not the file, to ensure updates are propagated
-                # https://github.com/moby/moby/issues/15793#issuecomment-135411504
-                '-v',
-                f'{self.config_dir}:{get_agent_conf_dir(self.check, self.agent_version)}',
-                # Mount the check directory
-                '-v',
-                f'{path_join(get_root(), self.check)}:{self.check_mount_dir}',
-                # Mount the /proc directory
-                '-v',
-                '/proc:/host/proc',
-            ]
-            for volume in self.metadata.get('docker_volumes', []):
-                command.extend(['-v', volume])
+        if not self.agent_build:
+            return
 
-            # Any environment variables passed to the start command
-            for key, value in sorted(self.env_vars.items()):
-                command.extend(['-e', f'{key}={value}'])
+        env_vars = {
+            # Agent 6 will simply fail without an API key
+            'DD_API_KEY': self.api_key,
+            # Run expvar on a random port
+            'DD_EXPVAR_PORT': 0,
+            # Run API on a random port
+            'DD_CMD_PORT': find_free_port(get_ip()),
+            # Disable trace agent
+            'DD_APM_ENABLED': 'false',
+            # Don't write .pyc, needed to fix this issue (only Python 2):
+            # When reinstalling a package, .pyc are not cleaned correctly. The issue is fixed by not writing them
+            # in the first place.
+            # More info: https://github.com/DataDog/integrations-core/pull/5454
+            # TODO: Remove PYTHONDONTWRITEBYTECODE env var when Python 2 support is removed
+            'PYTHONDONTWRITEBYTECODE': "1",
+        }
+        if self.dd_url:
+            # Set custom agent intake
+            env_vars['DD_DD_URL'] = self.dd_url
+        if self.log_url:
+            # Set custom agent log intake
+            env_vars['DD_LOGS_CONFIG_DD_URL'] = self.log_url
+        env_vars.update(self.env_vars)
 
-            if 'proxy' in self.metadata:
-                if 'http' in self.metadata['proxy']:
-                    command.extend(['-e', f"DD_PROXY_HTTP={self.metadata['proxy']['http']}"])
-                if 'https' in self.metadata['proxy']:
-                    command.extend(['-e', f"DD_PROXY_HTTPS={self.metadata['proxy']['https']}"])
+        volumes = [
+            # Mount the config directory, not the file, to ensure updates are propagated
+            # https://github.com/moby/moby/issues/15793#issuecomment-135411504
+            f'{self.config_dir}:{get_agent_conf_dir(self.check, self.agent_version)}',
+            # Mount the check directory
+            f'{path_join(get_root(), self.check)}:{self.check_mount_dir}',
+            # Mount the /proc directory
+            '/proc:/host/proc',
+        ]
+        volumes.extend(self.metadata.get('docker_volumes', []))
 
-            if self.base_package:
-                # Mount the check directory
-                command.append('-v')
-                command.append(f'{self.base_package}:{self.base_mount_dir}')
+        command = [
+            'docker',
+            'run',
+            # Keep it up
+            '-d',
+            # Ensure consistent naming
+            '--name',
+            self.container_name,
+            # Ensure access to host network
+            '--network',
+            'host',
+        ]
+        for volume in volumes:
+            command.extend(['-v', volume])
 
-            # The chosen tag
-            command.append(self.agent_build)
+        # Any environment variables passed to the start command
+        for key, value in sorted(env_vars.items()):
+            command.extend(['-e', f'{key}={value}'])
 
-            return run_command(command, capture=True)
+        if 'proxy' in self.metadata:
+            if 'http' in self.metadata['proxy']:
+                command.extend(['-e', f"DD_PROXY_HTTP={self.metadata['proxy']['http']}"])
+            if 'https' in self.metadata['proxy']:
+                command.extend(['-e', f"DD_PROXY_HTTPS={self.metadata['proxy']['https']}"])
+
+        if self.base_package:
+            # Mount the check directory
+            command.append('-v')
+            command.append(f'{self.base_package}:{self.base_mount_dir}')
+
+        # The chosen tag
+        command.append(self.agent_build)
+
+        return run_command(command, capture=True)
 
     def stop_agent(self):
         # Only error for exit code if config actually exists

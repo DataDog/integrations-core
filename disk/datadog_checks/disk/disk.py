@@ -6,6 +6,7 @@ from __future__ import division
 import os
 import platform
 import re
+import xml.etree.ElementTree as ET
 
 import psutil
 from six import iteritems, string_types
@@ -45,6 +46,7 @@ class Disk(AgentCheck):
         self._custom_tags = instance.get('tags', [])
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
         self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
+        self._blkid_cache_file = instance.get('blkid_cache_file')
 
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
@@ -339,8 +341,13 @@ class Disk(AgentCheck):
 
     def _get_devices_label(self):
         """
-        Get every label to create tags
+        Get every label to create tags and returns a map of device name to label:value
         """
+        if not self._blkid_cache_file:
+            return self._get_devices_label_from_blkid()
+        return self._get_devices_label_from_blkid_cache()
+
+    def _get_devices_label_from_blkid(self):
         devices_label = {}
         try:
             blkid_out, _, _ = get_subprocess_output(['blkid'], self.log)
@@ -355,5 +362,30 @@ class Disk(AgentCheck):
 
         except SubprocessOutputEmptyError:
             self.log.debug("Couldn't use blkid to have device labels")
+
+        return devices_label
+
+    def _get_devices_label_from_blkid_cache(self):
+        devices_label = {}
+        try:
+            with open(self._blkid_cache_file, 'r') as blkid_cache_file_handler:
+                blkid_cache_data = blkid_cache_file_handler.readlines()
+        except IOError as e:
+            self.log.warning("Couldn't read the blkid cache file %s: %s", self._blkid_cache_file, e)
+            return devices_label
+
+        # Line sample
+        # <device DEVNO="0x0801" LABEL="MYLABEL" UUID="..." TYPE="ext4">/dev/sda1</device>
+        for line in blkid_cache_data:
+            try:
+                root = ET.fromstring(line)
+                device = root.text
+                label = root.attrib.get('LABEL')
+                if label and device:
+                    devices_label[device] = 'label:{}'.format(label)
+            except ET.ParseError as e:
+                self.log.warning(
+                    'Failed to parse line %s because of %s - skipping the line (some labels might be missing)', line, e
+                )
 
         return devices_label

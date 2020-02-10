@@ -215,7 +215,7 @@ class AgentCheck(object):
             'service_tag': [
                 False,
                 (
-                    'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `{}`. '
+                    'DEPRECATION NOTICE: The `service` tag is deprecated and has been renamed to `%s`. '
                     'Set `disable_legacy_service_tag` to `true` to disable this warning. '
                     'The default will become `true` and cannot be changed in Agent version 8.'
                 ),
@@ -224,7 +224,7 @@ class AgentCheck(object):
 
         # Setup metric limits
         try:
-            metric_limit = self.instances[0].get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
+            metric_limit = int(self.instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT))
             # Do not allow to disable limiting if the class has set a non-zero default value
             if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
                 metric_limit = self.DEFAULT_METRIC_LIMIT
@@ -504,7 +504,7 @@ class AgentCheck(object):
         Logs a deprecation notice at most once per AgentCheck instance, for the pre-defined `deprecation_key`
         """
         if not self._deprecations[deprecation_key][0]:
-            self.warning(self._deprecations[deprecation_key][1].format(*args))
+            self.warning(self._deprecations[deprecation_key][1], *args)
             self._deprecations[deprecation_key][0] = True
 
     # TODO: Remove once our checks stop calling it

@@ -99,6 +99,8 @@ def test_default_admin_share():
     c = PDHBaseCheck("testcheck", {}, {}, [DEFAULT_INSTANCE], SINGLE_INSTANCE_COUNTER)
     nr = c._get_netresource('1.1.1.1')
     assert nr.lpRemoteName == '\\\\1.1.1.1\\c$'
+    assert nr.dwType == 0
+    assert nr.lpLocalName is None
 
 
 @requires_windows

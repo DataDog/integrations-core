@@ -5,11 +5,13 @@
 [Twistlock][1] is a security scanner. It scans containers, hosts, and packages to find vulnerabilities and compliance issues.
 
 ## Setup
+
 ### Installation
 
 The Twistlock check is included in the [Datadog Agent][3] package, so you do not need to install anything else on your server.
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -21,12 +23,13 @@ Follow the instructions below to configure this check for an Agent running on a 
 2. [Restart the Agent][4].
 
 #### Containerized
+
 For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
 
 ##### Metric collection
 
 | Parameter            | Value                                                                               |
-|----------------------|-------------------------------------------------------------------------------------|
+| -------------------- | ----------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `twistlock`                                                                         |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                       |
 | `<INSTANCE_CONFIG>`  | `{"url":"http://%%host%%:8083", "username":"<USERNAME>", "password": "<PASSWORD>"}` |
@@ -36,7 +39,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 If you're using Kubernetes, add the config to replication controller section of twistlock_console.yaml before deploying:
 
 ```yaml
-...
+---
 apiVersion: v1
 kind: ReplicationController
 metadata:
@@ -50,48 +53,47 @@ spec:
     metadata:
       annotations:
         ad.datadoghq.com/twistlock-console.check_names: '["twistlock"]'
-        ad.datadoghq.com/twistlock-console.init_configs: '[{}]'
+        ad.datadoghq.com/twistlock-console.init_configs: "[{}]"
         ad.datadoghq.com/twistlock-console.instances: '[{"url":"http://%%host%%:8083", "username":"<USERNAME>", "password": "<PASSWORD>"}]'
         ad.datadoghq.com/twistlock-console.logs: '[{"source": "twistlock", "service": "twistlock"}]'
       name: twistlock-console
       namespace: twistlock
       labels:
         name: twistlock-console
-...
 ```
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][8].
 
 | Parameter      | Value                                             |
-|----------------|---------------------------------------------------|
+| -------------- | ------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "twistlock", "service": "twistlock"}` |
 
 ###### Kubernetes
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][6]:
 
-    ```
-      (...)
-        env:
-          (...)
-          - name: DD_LOGS_ENABLED
-              value: "true"
-          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-              value: "true"
-      (...)
-    ```
+   ```yaml
+     #(...)
+       env:
+         #(...)
+         - name: DD_LOGS_ENABLED
+             value: "true"
+         - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+             value: "true"
+     #(...)
+   ```
 
 2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][7].
 
 3. Make sure the log section is included in the Pod annotation for the defender, where the container name can be found just below in the pod spec:
 
-    ```yaml
-      ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
-    ```
+   ```yaml
+   ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
+   ```
 
 4. [Restart the Agent][4].
 
@@ -99,15 +101,15 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it with the environment variable:
 
-    ```
-      DD_LOGS_ENABLED=true
-    ```
+   ```shell
+   DD_LOGS_ENABLED=true
+   ```
 
 2. Add a label on the defender container:
 
-    ```yaml
-      ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
-    ```
+   ```yaml
+   ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
+   ```
 
 3. Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][8]
 

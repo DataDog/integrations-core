@@ -6,15 +6,13 @@ import json
 import os
 import shutil
 
-# NOTE: Set one minute for any GPG subprocess to timeout in in-toto.  Should be
-# enough time for developers to find and enter their PIN and / or touch their
-# Yubikey. We do this before we load the rest of in-toto, so that this setting
-# takes effect.
-import in_toto.settings
-in_toto.settings.SUBPROCESS_TIMEOUT = 60
+# How long ddev will wait for GPG to finish, especially when asking dev for signature.
+import securesystemslib.settings
+securesystemslib.settings.SUBPROCESS_TIMEOUT = 60
+
+from securesystemslib.gpg.constants import GPG_COMMAND
 
 from in_toto import runlib
-from in_toto.gpg.constants import GPG_COMMAND
 
 from .constants import get_root
 from .git import ignored_by_git, tracked_by_git

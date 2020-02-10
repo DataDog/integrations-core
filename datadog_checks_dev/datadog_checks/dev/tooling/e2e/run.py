@@ -30,7 +30,7 @@ def start_environment(check, env):
     env_vars = {
         E2E_TEAR_DOWN: 'false',
         'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
-        'TOX_TESTENV_PASSENV': f"{E2E_TEAR_DOWN} USERNAME PYTEST_ADDOPTS {' '.join(get_ci_env_vars())}",
+        'TOX_TESTENV_PASSENV': f"{E2E_TEAR_DOWN} PROGRAM* USERNAME PYTEST_ADDOPTS {' '.join(get_ci_env_vars())}",
     }
 
     result = _execute(check, command, env_vars)
@@ -42,7 +42,7 @@ def stop_environment(check, env, metadata=None):
     env_vars = {
         E2E_SET_UP: 'false',
         'PYTEST_ADDOPTS': '--benchmark-skip --exitfirst',
-        'TOX_TESTENV_PASSENV': '{}* {} USERNAME PYTEST_ADDOPTS {}'.format(
+        'TOX_TESTENV_PASSENV': '{}* {} PROGRAM* USERNAME PYTEST_ADDOPTS {}'.format(
             E2E_ENV_VAR_PREFIX, E2E_SET_UP, ' '.join(get_ci_env_vars())
         ),
     }

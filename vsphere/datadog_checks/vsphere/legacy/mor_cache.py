@@ -6,7 +6,7 @@ import time
 
 from six import iteritems
 
-from datadog_checks.vsphere.common import REALTIME_RESOURCES
+from datadog_checks.vsphere.legacy.common import REALTIME_RESOURCES
 
 
 class MorNotFoundError(Exception):

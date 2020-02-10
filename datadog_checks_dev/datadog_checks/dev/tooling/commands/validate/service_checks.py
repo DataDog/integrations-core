@@ -132,8 +132,10 @@ def service_checks(sync):
 
             if integration != expected_display_name:
                 file_failed = True
-                message = f'  {check}: integration name `{integration}` must match \
-                            manifest display_name `{expected_display_name}` '
+                message = (
+                    f'  {check}: integration name `{integration}` must match '
+                    f'manifest display_name `{expected_display_name}` '
+                )
                 display_queue.append((echo_failure, message))
 
             # name

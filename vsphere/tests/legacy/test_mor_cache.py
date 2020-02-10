@@ -7,7 +7,7 @@ import pytest
 from mock import MagicMock
 from six.moves import range
 
-from datadog_checks.vsphere.mor_cache import MorCache, MorNotFoundError
+from datadog_checks.vsphere.legacy.mor_cache import MorCache, MorNotFoundError
 
 
 @pytest.fixture

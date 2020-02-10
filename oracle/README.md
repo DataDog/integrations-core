@@ -145,6 +145,42 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][8].
 
+#### Only custom queries
+ To skip default metric checks for an instance and only run custom queries with an existing metrics gathering user, insert the tag `only_custom_queries` with a value of true. This allows a configured instance of the Oracle integration to skip the system, process, and tablespace metrics from running, and allows custom queries to be run without having the permissions described in the [Datadog user creation](#datadog-user-creation) section. If this configuration entry is omitted, the user you specify is required to have those table permissions to run a custom query.
+
+ ```yaml
+   init_config:
+
+   instances:
+
+       ## @param server - string - required
+       ## The IP address or hostname of the Oracle Database Server.
+       #
+     - server: localhost:1521
+
+       ## @param service_name - string - required
+       ## The Oracle Database service name. To view the services available on your server,
+       ## run the following query:
+       ## `SELECT value FROM v$parameter WHERE name='service_names'`
+       #
+       service_name: "<SERVICE_NAME>"
+
+       ## @param user - string - required
+       ## The username for the user account.
+       #
+       user: <USER>
+
+       ## @param password - string - required
+       ## The password for the user account.
+       #
+       password: "<PASSWORD>"
+
+       ## @param only_custom_queries - string - optional
+       ## Set this parameter to any value if you want to only run custom
+       ## queries for this instance.
+       #
+       only_custom_queries: true
+ ```
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.

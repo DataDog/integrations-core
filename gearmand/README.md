@@ -4,9 +4,9 @@
 
 Collect Gearman metrics to:
 
-* Visualize Gearman performance.
-* Know how many tasks are queued or running.
-* Correlate Gearman performance with the rest of your applications.
+- Visualize Gearman performance.
+- Know how many tasks are queued or running.
+- Correlate Gearman performance with the rest of your applications.
 
 ## Setup
 
@@ -20,15 +20,15 @@ The Gearman check is included in the [Datadog Agent][2] package, so you don't ne
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-1. Edit the `gearmand.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Gearman performance data.
-    See the [sample gearmand.d/conf.yaml][4] for all available configuration options.
-    ```yaml
-    init_config:
+1. Edit the `gearmand.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Gearman performance data. See the [sample gearmand.d/conf.yaml][4] for all available configuration options.
 
-    instances:
-        - server: localhost
-          port: 4730
-    ```
+   ```yaml
+   init_config:
+
+   instances:
+     - server: localhost
+       port: 4730
+   ```
 
 2. [Restart the Agent][5]
 
@@ -36,10 +36,10 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
 
-| Parameter            | Value                                                                               |
-|----------------------|-------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `gearmand`                                                                         |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                       |
+| Parameter            | Value                                  |
+| -------------------- | -------------------------------------- |
+| `<INTEGRATION_NAME>` | `gearmand`                             |
+| `<INIT_CONFIG>`      | blank or `{}`                          |
 | `<INSTANCE_CONFIG>`  | `{"server":"%%host%%", "port":"4730"}` |
 
 ### Validation
@@ -47,11 +47,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 [Run the Agent's `status` subcommand][6] and look for `gearmand` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
+
 The Gearmand check does not include any events.
 
 ### Service Checks
@@ -61,6 +63,7 @@ The Gearmand check does not include any events.
 Returns `Critical` if the Agent cannot connect to Gearman to collect metrics.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][8].
 
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations

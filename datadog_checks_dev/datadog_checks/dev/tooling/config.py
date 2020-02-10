@@ -21,8 +21,7 @@ SECRET_KEYS = {
     'orgs.*.app_key',
     'github.token',
     'pypi.pass',
-    'trello.key',
-    'trello.token',
+    'jira.token',
 }
 
 DEFAULT_CONFIG = {
@@ -38,12 +37,14 @@ DEFAULT_CONFIG = {
     'agent5': {'docker': 'datadog/dev-dd-agent:master', 'local': 'latest'},
     'github': {'user': '', 'token': ''},
     'pypi': {'user': '', 'pass': ''},
-    'trello': {'key': '', 'token': ''},
+    'jira': {'user': '', 'token': ''},
     'orgs': {
         'default': {
             'api_key': os.getenv('DD_API_KEY'),
             'app_key': os.getenv('DD_APP_KEY'),
             'site': os.getenv('DD_SITE'),
+            'dd_url': os.getenv('DD_DD_URL'),
+            'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL'),
         }
     },
 }

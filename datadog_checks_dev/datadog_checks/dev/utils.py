@@ -112,6 +112,11 @@ def path_join(path, *paths):
     return os.path.join(path, *paths)
 
 
+def resolve_dir_contents(d):
+    for p in os.listdir(d):
+        yield path_join(d, p)
+
+
 def ensure_dir_exists(d):
     if not dir_exists(d):
         os.makedirs(d)
