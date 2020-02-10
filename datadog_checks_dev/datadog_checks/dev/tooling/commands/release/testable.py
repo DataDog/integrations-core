@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import random
 import time
-import typing
+from typing import List, Set, Tuple
 
 import click
 
@@ -54,13 +54,13 @@ def create_jira_issue(client, teams, pr_title, pr_url, pr_body, dry_run, pr_auth
                 break
 
 
-def _all_synced_with_remote(refs: typing.Sequence[str]) -> bool:
+def _all_synced_with_remote(refs: Sequence[str]) -> bool:
     fetch_command = 'git fetch --dry'
     result = run_command(fetch_command, capture=True, check=True)
     return all(ref not in result.stderr for ref in refs)
 
 
-def _get_and_parse_commits(base_ref: str, target_ref: str) -> typing.List[typing.Tuple[str, str]]:
+def _get_and_parse_commits(base_ref: str, target_ref: str) -> List[Tuple[str, str]]:
     echo_info(f'Getting diff between {base_ref!r} and {target_ref!r}... ', nl=False)
 
     # Format as '<commit_hash> <subject line>', e.g.:
@@ -76,7 +76,7 @@ def _get_and_parse_commits(base_ref: str, target_ref: str) -> typing.List[typing
         raise
 
     echo_success('Success!')
-    lines: typing.List[str] = result.stdout.splitlines()
+    lines: List[str] = result.stdout.splitlines()
 
     commits = []
 
@@ -87,7 +87,7 @@ def _get_and_parse_commits(base_ref: str, target_ref: str) -> typing.List[typing
     return commits
 
 
-def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> typing.List[typing.Tuple[str, str]]:
+def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> List[Tuple[str, str]]:
     with chdir(root):
         if not _all_synced_with_remote((base_ref, target_ref)):
             abort(f'Your repository is not sync with the remote repository. Please run `git fetch` in {root!r} folder.')
@@ -212,7 +212,7 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
     options_prompt = f'Choose an option (default {options[default_option]}): '
     options_text = '\n' + '\n'.join('{} - {}'.format(key, value) for key, value in options.items())
 
-    commit_ids: typing.Set[str] = set()
+    commit_ids: Set[str] = set()
     user_config = ctx.obj
     jira = JiraClient(user_config)
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
