@@ -157,7 +157,7 @@ def test_collect_tags(aggregator, dd_run_check, realtime_instance):
 def test_tag_prefix(aggregator, dd_run_check, realtime_instance):
     realtime_instance.update({
         'collect_tags': True,
-        'vsphere_tag_prefix': 'ABC_',
+        'vsphere_tags_prefix': 'ABC_',
         'excluded_host_tags': ['ABC_my_cat_name_1', 'ABC_my_cat_name_2']
     })
     check = VSphereCheck('vsphere', {}, [realtime_instance])
