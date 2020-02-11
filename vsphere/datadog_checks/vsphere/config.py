@@ -16,7 +16,7 @@ from datadog_checks.vsphere.constants import (
     HISTORICAL_RESOURCES,
     MOR_TYPE_AS_STRING,
     REALTIME_RESOURCES,
-)
+    DEFAULT_VSPHERE_TAG_PREFIX)
 
 
 class VSphereConfig(object):
@@ -42,7 +42,7 @@ class VSphereConfig(object):
         self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
         self.should_collect_events = instance.get("collect_events", self.collection_type == 'realtime')
         self.should_collect_tags = is_affirmative(instance.get("collect_tags", False))
-        self.vsphere_tags_prefix = instance.get("vsphere_tags_prefix", "vsphere_")
+        self.vsphere_tags_prefix = instance.get("vsphere_tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
         self.refresh_infrastructure_cache_interval = instance.get(
