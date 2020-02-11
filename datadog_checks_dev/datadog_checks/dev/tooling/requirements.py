@@ -9,7 +9,7 @@ from ..subprocess import run_command
 from ..utils import chdir, resolve_path, stream_file_lines, write_file_lines
 from .constants import REQUIREMENTS_IN, get_root
 
-DEP_PATTERN = re.compile(r'([^=]+)(?:==([^;\s]+)(?:; *(.*))?)?')
+DEP_PATTERN = re.compile(r'^([^=@]+)(?:(?:==|@)([^;\s]+)(?:; *(.*))?)?')
 
 
 class Package:
@@ -22,9 +22,10 @@ class Package:
         self.marker = marker.lower().replace('"', "'") if marker else ""
 
     def __str__(self):
+        version_sep = '@' if self.name.startswith('git+') else '=='
         return '{}{}{}'.format(
             self.name,
-            '=={}'.format(self.version) if self.version else '',
+            '{}{}'.format(version_sep, self.version) if self.version else '',
             '; {}'.format(self.marker) if self.marker else '',
         )
 
