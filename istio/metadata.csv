@@ -49,13 +49,13 @@ istio.mixer.go.memstats.stack_inuse_bytes,gauge,,byte,,Number of bytes in use by
 istio.mixer.go.memstats.stack_sys_bytes,gauge,,byte,,Number of bytes obtained from system for stack allocator,0,istio,
 istio.mixer.go.memstats.sys_bytes,gauge,,byte,,Number of bytes obtained from system,0,istio,
 istio.mixer.go.threads,gauge,,thread,,Number of OS threads created.,0,istio,
-istio.mixer.grpc.server.handled_total,gauge,,request,,"Total number of fully handled requests, with responses",0,istio,
+istio.mixer.grpc.server.handled_total,count,,request,,"Total number of fully handled requests, with responses",0,istio,
 istio.mixer.grpc.server.handling_seconds.count,gauge,,second,,Count of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,
 istio.mixer.grpc.server.handling_seconds.sum,gauge,,second,,Sum of response latency (seconds) of gRPC that had been application-level handled by the server.,0,istio,
-istio.mixer.grpc.server.msg_received_total,gauge,,message,,Total number of RPC stream messages received on the server.,0,istio,
-istio.mixer.grpc.server.msg_sent_total,gauge,,message,,Total number of messages sent,0,istio,
-istio.mixer.grpc.server.started_total,gauge,,,,Total number of RPCs started on the server.,0,istio,
-istio.mixer.process.cpu_seconds_total,gauge,,second,,Total user and system CPU time spent in seconds.,0,istio,
+istio.mixer.grpc.server.msg_received_total,count,,message,,Total number of RPC stream messages received on the server.,0,istio,
+istio.mixer.grpc.server.msg_sent_total,count,,message,,Total number of messages sent,0,istio,
+istio.mixer.grpc.server.started_total,count,,,,Total number of RPCs started on the server.,0,istio,
+istio.mixer.process.cpu_seconds_total,count,,second,,Total user and system CPU time spent in seconds.,0,istio,
 istio.mixer.process.max_fds,gauge,,file,,Maximum number of open file descriptors.,0,istio,
 istio.mixer.process.open_fds,gauge,,file,,Number of open file descriptors.,0,istio,
 istio.mixer.process.resident_memory_bytes,gauge,,byte,,Resident memory size in bytes.,0,istio,
@@ -210,9 +210,9 @@ istio.citadel.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation
 istio.citadel.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,istio,
 istio.citadel.go.info,gauge,,,,Information about the Go environment.,0,istio,
 istio.citadel.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,istio,
-istio.citadel.go.memstats.alloc_bytes_total,gauge,,byte,,Total number of bytes allocated even if freed.,0,istio,
+istio.citadel.go.memstats.alloc_bytes_total,count,,byte,,Total number of bytes allocated even if freed.,0,istio,
 istio.citadel.go.memstats.buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table.,0,istio,bytes used by profiling
-istio.citadel.go.memstats.frees_total,gauge,,,,Total number of frees.,0,istio,
+istio.citadel.go.memstats.frees_total,count,,,,Total number of frees.,0,istio,
 istio.citadel.go.memstats.gc_cpu_fraction,gauge,,percent,,CPU taken up by GC,0,istio,CPU taken up by gc
 istio.citadel.go.memstats.gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata.,0,istio,
 istio.citadel.go.memstats.heap_alloc_bytes,gauge,,byte,,Bytes allocated to the heap,0,istio,
@@ -222,8 +222,8 @@ istio.citadel.go.memstats.heap_objects,gauge,,object,,Number of objects in the h
 istio.citadel.go.memstats.heap_released_bytes,gauge,,byte,,Number of bytes released to the system in the last gc,0,istio,
 istio.citadel.go.memstats.heap_sys_bytes,gauge,,byte,,Number of bytes used by the heap,0,istio,
 istio.citadel.go.memstats.last_gc_time_seconds,gauge,,second,,Length of last GC,0,istio,gc time
-istio.citadel.go.memstats.lookups_total,gauge,,operation,,Number of lookups,0,istio,lookups total
-istio.citadel.go.memstats.mallocs_total,gauge,,operation,,Number of mallocs,0,istio,mallocs total
+istio.citadel.go.memstats.lookups_total,count,,operation,,Number of lookups,0,istio,lookups total
+istio.citadel.go.memstats.mallocs_total,count,,operation,,Number of mallocs,0,istio,mallocs total
 istio.citadel.go.memstats.mcache_inuse_bytes,gauge,,byte,,Number of bytes in use by mcache structures.,0,istio,
 istio.citadel.go.memstats.mcache_sys_bytes,gauge,,byte,,Number of bytes used for mcache structures obtained from system.,0,istio,
 istio.citadel.go.memstats.mspan_inuse_bytes,gauge,,byte,,Number of bytes in use by mspan structures.,0,istio,
