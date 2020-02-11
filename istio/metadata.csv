@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-istio.mesh.request.count,gauge,,request,,The number of requests,0,istio,request count
+istio.mesh.request.count,count,,request,,The number of requests,0,istio,request count
 istio.mesh.request.duration.count,gauge,,request,,count of request durations,0,istio,request durations count
 istio.mesh.request.duration.sum,gauge,,millisecond,,sum of request durations,0,istio,request durations sum
 istio.mesh.request.size.count,gauge,,request,,count of request sizes,0,istio,request sizes count
@@ -61,21 +61,21 @@ istio.mixer.process.open_fds,gauge,,file,,Number of open file descriptors.,0,ist
 istio.mixer.process.resident_memory_bytes,gauge,,byte,,Resident memory size in bytes.,0,istio,
 istio.mixer.process.start_time_seconds,gauge,,second,,Start time of the process since unix epoch in seconds.,0,istio,
 istio.mixer.process.virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes.,0,istio,
-istio.mixer.grpc_io_server.completed_rpcs,gauge,,,,Count of RPCs by method and status.,0,istio,
+istio.mixer.grpc_io_server.completed_rpcs,count,,,,Count of RPCs by method and status.,0,istio,
 istio.mixer.grpc_io_server.received_bytes_per_rpc,gauge,,byte,,"Distribution of received bytes per RPC, by method.",0,istio,
 istio.mixer.grpc_io_server.sent_bytes_per_rpc,gauge,,byte,,"Distribution of total sent bytes per RPC, by method.",0,istio,
 istio.mixer.grpc_io_server.server_latency,gauge,,,,"Distribution of server latency in milliseconds, by method.",0,istio,
-istio.mixer.config.attributes_total,gauge,,,,The number of known attributes in the current config.,0,istio,
-istio.mixer.config.handler_configs_total,gauge,,,,The number of known handlers in the current config.,0,istio,
-istio.mixer.config.instance_configs_total,gauge,,,,The number of known instances in the current config.,0,istio,
-istio.mixer.config.rule_configs_total,gauge,,,,The number of known rules in the current config.,0,istio,
+istio.mixer.config.attributes_total,count,,,,The number of known attributes in the current config.,0,istio,
+istio.mixer.config.handler_configs_total,count,,,,The number of known handlers in the current config.,0,istio,
+istio.mixer.config.instance_configs_total,count,,,,The number of known instances in the current config.,0,istio,
+istio.mixer.config.rule_configs_total,count,,,,The number of known rules in the current config.,0,istio,
 istio.mixer.dispatcher.destinations_per_request,gauge,,,,Number of handlers dispatched per request by Mixer.,0,istio,
 istio.mixer.dispatcher.instances_per_request,gauge,,,,Number of instances created per request by Mixer.,0,istio,
 istio.mixer.handler.daemons_total,gauge,,,,The current number of active daemon routines in a given adapter environment.,0,istio,
-istio.mixer.handler.new_handlers_total,gauge,,,,The number of handlers that were newly created during config transition.,0,istio,
-istio.mixer.mcp_sink.reconnections,gauge,,,,The number of times the sink has reconnected.,0,istio,
-istio.mixer.mcp_sink.request_acks_total,gauge,,,,The number of request acks received by the source.,0,istio,
-istio.mixer.runtime.dispatches_total,gauge,,operation,,Total number of adapter dispatches handled by Mixer.,0,istio,number of adapter dispatches
+istio.mixer.handler.new_handlers_total,count,,,,The number of handlers that were newly created during config transition.,0,istio,
+istio.mixer.mcp_sink.reconnections,count,,,,The number of times the sink has reconnected.,0,istio,
+istio.mixer.mcp_sink.request_acks_total,count,,,,The number of request acks received by the source.,0,istio,
+istio.mixer.runtime.dispatches_total,count,,operation,,Total number of adapter dispatches handled by Mixer.,0,istio,number of adapter dispatches
 istio.mixer.runtime.dispatch_duration_seconds,gauge,,second,,Duration in seconds for adapter dispatches handled by Mixer.,0,istio,number of adapter dispatches
 istio.pilot.go.gc_duration_seconds.count,gauge,,second,,Count of the GC invocation durations.,0,istio,
 istio.pilot.go.gc_duration_seconds.quantile,gauge,,second,,Quantile of the GC invocation durations.,0,istio,
