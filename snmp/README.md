@@ -19,10 +19,6 @@ The SNMP check is included in the [Datadog Agent][1] package. No additional inst
 
 ### Configuration
 
-<div class="alert alert-warning">
-<b>Note</b>: The following features are in beta.
-</div>
-
 The Datadog SNMP check auto-discovers network devices on a provided subnet, and collects metrics using Datadog's sysOID mapped device profiles.
 
 Edit the subnet, SNMP version, and profiles in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
