@@ -138,7 +138,7 @@ def test_collect_tags(aggregator, dd_run_check, realtime_instance):
 
     # Following metrics should match and have instance value tag
     aggregator.assert_metric(
-        'vsphere.cpu.usage.raw',
+        'vsphere.cpu.usage.avg',
         tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
         hostname='VM4-4',
     )
@@ -161,7 +161,7 @@ def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_inst
     check.log = MagicMock()
     dd_run_check(check)
 
-    aggregator.assert_metric('vsphere.cpu.usage.raw', tags=['vcenter_server:FAKE'], hostname='10.0.0.104')
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='10.0.0.104')
 
     check.log.error.assert_called_once_with(
         "Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", mock.ANY
