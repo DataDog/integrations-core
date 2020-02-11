@@ -358,7 +358,7 @@
                         {
                             "spec": "Datastore",
                             "name": "NFS Share",
-                            "mo_id": "NFS Share-1"
+                            "mo_id": "NFS-Share-1"
                         },
                         {
                             "spec": "Datastore",

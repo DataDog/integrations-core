@@ -124,6 +124,9 @@ class MockedRestAPI(VSphereRestAPI):
             TagAssociation.TagToObjects(
                 tag_id='tag_id_2', object_ids=[DynamicID(type='HostSystem', id='10.0.0.104-1')]
             ),
+            TagAssociation.TagToObjects(
+                tag_id='tag_id_2', object_ids=[DynamicID(type='Datastore', id='NFS-Share-1')]
+            ),
         ]
 
     def smart_connect(self):
