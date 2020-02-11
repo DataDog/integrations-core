@@ -32,7 +32,7 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 | Live Process monitoring        | ❌                                       | ❌                                           | ✅                                             |
 
 <div class="alert alert-warning">
-<b>OpenShift 4.0+</b>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags/aliases as access to metadata servers from PODs network, which otherwise is restricted.
+<bold>OpenShift 4.0+</bold>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags/aliases as access to metadata servers from PODs network, which otherwise is restricted.
 </div>
 
 #### Restricted SCC operations
@@ -69,6 +69,10 @@ If SELinux is in enforcing mode, it is recommended to grant [the `spc_t` type][7
 
 <div class="alert alert-info">
 Do not forget to add <a href="https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#configure-rbac-permissions">datadog-agent service account</a> to the newly created <a href="https://github.com/DataDog/datadog-agent/blob/master/Dockerfiles/manifests/openshift/scc.yaml">datadog-agent SCC</a> by adding <code>system:serviceaccount:<datadog-agent namespace>:<datadog-agent service account name></code> to the <code>users</code> section.
+</div>
+
+<div class="alert alert-warning">
+<b>OpenShift 4.0+</b>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>allowHostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags/aliases as access to metadata servers from PODs network, which otherwise is restricted.
 </div>
 
 ### Validation
