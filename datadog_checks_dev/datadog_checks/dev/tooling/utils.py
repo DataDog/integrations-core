@@ -11,7 +11,7 @@ import semver
 
 from ..utils import file_exists, read_file, write_file
 from .config import load_config
-from .constants import NOT_CHECKS, VERSION_BUMP, get_root, set_root
+from .constants import NOT_CHECKS, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
@@ -65,37 +65,28 @@ def string_to_toml_type(s):
 def complete_set_root(args):
     """Set the root directory within the context of a cli completion operation."""
 
-    # if we have already set to something other than empty string break
-    if get_root() != '':
+    existing_root = get_root()
+    if existing_root:
         return
 
     root = os.getenv('DDEV_ROOT', '')
     if root and os.path.isdir(root):
         set_root(root)
+        return
+
+    config = load_config()
+    for arg in args:
+        if arg in REPO_OPTIONS_MAP:
+            repo_choice = REPO_OPTIONS_MAP[arg]
+            break
     else:
-        config = load_config()
-        repo_map = {
-            '--core': 'core',
-            '-c': 'core',
-            '--extras': 'extras',
-            '-e': 'extras',
-            '--agent': 'agent',
-            '-a': 'agent',
-            '--here': 'here',
-            '-x': 'here',
-        }
-        for arg in args:
-            if arg in repo_map:
-                repo_choice = repo_map[arg]
-                break
-        else:
-            repo_choice = config.get('repo', 'core')
+        repo_choice = config.get('repo', 'core')
 
-        root = os.path.expanduser(config.get(repo_choice, ''))
-        if repo_choice == 'here' or not os.path.exists(root):
-            root = os.getcwd()
+    root = os.path.expanduser(config.get(repo_choice, ''))
+    if repo_choice == 'here' or not os.path.exists(root):
+        root = os.getcwd()
 
-        set_root(root)
+    set_root(root)
 
 
 def complete_testable_checks(ctx, args, incomplete):
