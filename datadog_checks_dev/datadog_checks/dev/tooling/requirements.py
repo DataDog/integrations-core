@@ -20,6 +20,7 @@ class Package:
     version: version of the package: 1.2.3 or a hash like efe345a21b4a for git dependencies
     marker: optional marker e.g. python_version < '3.0' or sys_platform == 'win32'
     """
+
     def __init__(self, name, version, marker):
         if not name:
             raise ValueError("Package must have a valid name")
