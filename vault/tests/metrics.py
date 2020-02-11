@@ -66,6 +66,7 @@ METRICS = {
     'vault.runtime.malloc.count',
     'vault.runtime.num_goroutines',
     'vault.runtime.sys.bytes',
+    'vault.runtime.gc.pause_ns',
     'vault.runtime.total.gc.pause_ns',
     'vault.runtime.total.gc.runs',
     'vault.token.lookup',
