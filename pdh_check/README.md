@@ -26,11 +26,7 @@ Run the [Agent's status subcommand][5] and look for `pdh_check` under the Checks
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this integration.
-
-#### Custom metrics
-
-The PDH check can potentially emit [custom metrics][7], which may impact your [billing][8].
+All metrics collected by the PHD check are forwarded to Datadog as [custom metrics][7], which may impact your [billing][8].
 
 ### Events
 
