@@ -148,6 +148,7 @@ def test_read_packages(catalog, package, tmp_path):
         {package}
         bar==4.0
         git+https://github.com/vmware/vsphere-automation-sdk-python@efe345a21b4ab7b346b65e1cb58d56412edd1c10
+        git+https://github.com/foo/bar@efe345a#my-branch
         # a comment
            --hash fooBarBaz
     '''
@@ -158,4 +159,5 @@ def test_read_packages(catalog, package, tmp_path):
         "foo==3.0; sys_platform == 'win32'",
         'bar==4.0',
         'git+https://github.com/vmware/vsphere-automation-sdk-python@efe345a21b4ab7b346b65e1cb58d56412edd1c10',
+        'git+https://github.com/foo/bar@efe345a#my-branch',
     ]
