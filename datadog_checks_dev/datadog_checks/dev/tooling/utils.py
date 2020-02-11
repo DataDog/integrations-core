@@ -9,9 +9,9 @@ from ast import literal_eval
 import requests
 import semver
 
-from ..utils import file_exists, read_file, write_file
+from ..utils import dir_exists, file_exists, read_file, write_file
 from .config import load_config
-from .constants import NOT_CHECKS, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
+from .constants import NOT_CHECKS, REPO_CHOICES, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
@@ -62,31 +62,50 @@ def string_to_toml_type(s):
     return s
 
 
-def complete_set_root(args):
-    """Set the root directory within the context of a cli completion operation."""
-
+def check_root():
+    """Check if root has already been set."""
     existing_root = get_root()
     if existing_root:
-        return
+        return True
 
     root = os.getenv('DDEV_ROOT', '')
     if root and os.path.isdir(root):
         set_root(root)
+        return True
+    return False
+
+
+def initialize_root(config, agent=False, core=False, extras=False, here=False):
+    """Initialize root directory based on config and options"""
+    if check_root():
         return
 
-    config = load_config()
-    for arg in args:
-        if arg in REPO_OPTIONS_MAP:
-            repo_choice = REPO_OPTIONS_MAP[arg]
-            break
-    else:
-        repo_choice = config.get('repo', 'core')
+    repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
+    config['repo_choice'] = repo_choice
+    config['repo_name'] = REPO_CHOICES[repo_choice]
 
+    message = None
     root = os.path.expanduser(config.get(repo_choice, ''))
-    if repo_choice == 'here' or not os.path.exists(root):
+    if here or not dir_exists(root):
+        if not here:
+            repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
+            message = f'`{repo}` directory `{root}` does not exist, defaulting to the current location.'
+
         root = os.getcwd()
 
     set_root(root)
+    return message
+
+
+def complete_set_root(args):
+    """Set the root directory within the context of a cli completion operation."""
+    if check_root():
+        return
+
+    config = load_config()
+
+    kwargs = {REPO_OPTIONS_MAP[arg]: True for arg in args if arg in REPO_OPTIONS_MAP}
+    initialize_root(config, **kwargs)
 
 
 def complete_testable_checks(ctx, args, incomplete):
