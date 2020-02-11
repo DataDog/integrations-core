@@ -44,12 +44,13 @@ def ddev(ctx, core, extras, agent, here, color, quiet, debug):
     config = load_config()
 
     msg = initialize_root(config, agent, core, extras, here)
-    if msg and not quiet:
-        echo_warning(msg)
+    if not quiet:
+        if msg:
+            echo_warning(msg)
 
-    if debug and not quiet:
-        set_debug()
-        echo_debug(f'Root directory set to: {get_root()}')
+        if debug:
+            set_debug()
+            echo_debug(f'Root directory set to: {get_root()}')
 
     if color is not None:
         config['color'] = color
