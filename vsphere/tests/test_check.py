@@ -129,7 +129,10 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_collect_tags(aggregator, dd_run_check, realtime_instance):
-    realtime_instance.update({'collect_tags': True})
+    realtime_instance.update({
+        'collect_tags': True,
+        'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2']
+    })
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     dd_run_check(check)
 

@@ -182,11 +182,8 @@ class VSphereCheck(AgentCheck):
 
             tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
             tags.append('vsphere_type:{}'.format(mor_type_str))
-            mor_payload = {"tags": tags, "rest_api_tags": []}
-
-            rest_api_tags = rest_tags.get(type(mor), {}).get(mor._moId)
-            if rest_api_tags:
-                mor_payload['rest_api_tags'].extend(rest_api_tags)
+            tags.extend(rest_tags.get(type(mor), {}).get(mor._moId, []))
+            mor_payload = {"tags": tags}
 
             if hostname:
                 mor_payload['hostname'] = hostname
@@ -271,8 +268,6 @@ class VSphereCheck(AgentCheck):
                         tags.extend(
                             [t for t in mor_props['tags'] if t.split(":", 1)[0] in self.config.excluded_host_tags]
                         )
-
-                tags.extend(mor_props['rest_api_tags'])
 
                 tags.extend(self.config.base_tags)
 
