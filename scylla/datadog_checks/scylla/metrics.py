@@ -364,6 +364,7 @@ SCYLLA_TRANSPORT = {
 
 INSTANCE_DEFAULT_METRICS = [
     SCYLLA_CACHE,
+    SCYLLA_COMPACTION,
     SCYLLA_GOSSIP,
     SCYLLA_NODE,
     SCYLLA_REACTOR,
@@ -377,7 +378,6 @@ ADDITIONAL_METRICS_MAP = {
     'scylla.alien': SCYLLA_ALIEN,
     'scylla.batchlog': SCYLLA_BATCHLOG,
     'scylla.commitlog': SCYLLA_COMMITLOG,
-    'scylla.compaction': SCYLLA_COMPACTION,
     'scylla.cql': SCYLLA_CQL,
     'scylla.database': SCYLLA_DATABASE,
     'scylla.execution': SCYLLA_EXECUTION,
