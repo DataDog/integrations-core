@@ -2,10 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+
 import mock
 
-from datadog_checks.dev.tooling.utils import get_version_string, parse_agent_req_file, initialize_root, complete_set_root
 from datadog_checks.dev.tooling.config import copy_default_config
+from datadog_checks.dev.tooling.utils import (
+    complete_set_root,
+    get_version_string,
+    initialize_root,
+    parse_agent_req_file,
+)
 
 
 def test_parse_agent_req_file():
@@ -105,4 +111,3 @@ def test_complete_set_root_extras(set_root, get_root):
         complete_set_root(args)
         assert set_root.called
         set_root.assert_called_with(config['extras'])
-

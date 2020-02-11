@@ -1,14 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
 import click
 
-from .utils import initialize_root
 from .commands import ALL_COMMANDS
 from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning, set_color, set_debug
 from .config import CONFIG_FILE, config_file_exists, load_config, restore_config
+from .utils import initialize_root
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, invoke_without_command=True)
