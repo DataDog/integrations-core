@@ -4,9 +4,8 @@
 from collections import defaultdict
 from time import time
 
-from kafka import KafkaAdminClient
+from kafka import KafkaAdminClient, KafkaClient
 from kafka import errors as kafka_errors
-from kafka.client_async import KafkaClient
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
 from six import string_types
