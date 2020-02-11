@@ -4,8 +4,6 @@
 import time
 from contextlib import contextmanager
 
-from six import iteritems
-
 
 class VSphereCache(object):
     """
@@ -90,9 +88,3 @@ class InfrastructureCache(VSphereCache):
         if mor_type not in self._content:
             self._content[mor_type] = {}
         self._content[mor_type][mor] = mor_data
-
-    def iter_all(self, resource_type):
-        data = self._content.get(resource_type)
-        if data:
-            for mor, props in iteritems(data):
-                yield mor, props

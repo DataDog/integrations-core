@@ -383,7 +383,8 @@ class VSphereCheck(AgentCheck):
         external_host_tags = []
 
         for resource_type in REALTIME_RESOURCES:
-            for _, mor_props in self.infrastructure_cache.iter_all(resource_type):
+            for mor in self.infrastructure_cache.get_mors(resource_type):
+                mor_props = self.infrastructure_cache.get_mor_props(mor)
                 hostname = mor_props.get('hostname')
                 # Safeguard if some mors have a None hostname
                 if not hostname:
@@ -477,7 +478,8 @@ class VSphereCheck(AgentCheck):
 
         # Submit the number of VMs that are monitored
         for resource_type in self.config.collected_resource_types:
-            for _, mor_props in self.infrastructure_cache.iter_all(resource_type):
+            for mor in self.infrastructure_cache.get_mors(resource_type):
+                mor_props = self.infrastructure_cache.get_mor_props(mor)
                 # Explicitly do not attach any host to those metrics.
                 resource_tags = mor_props.get('tags', [])
                 self.count(
