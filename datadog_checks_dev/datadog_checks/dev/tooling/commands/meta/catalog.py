@@ -19,7 +19,7 @@ DOGWEB_DASHBOARDS = ('vsphere', 'sqlserver', 'tomcat', 'pusher', 'sigsci', 'mara
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a catalog with information about integrations')
-@click.argument('checks', nargs=-1, required=True)
+@click.argument('checks', nargs=-1, autocompletion=complete_valid_checks,  required=True)
 @click.option(
     '-f',
     '--file',
