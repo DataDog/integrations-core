@@ -8,11 +8,12 @@ import click
 from ...utils import basepath, dir_exists, resolve_path
 from ..clean import DELETE_EVERYWHERE, DELETE_IN_ROOT, clean_package, remove_compiled_scripts
 from ..constants import get_root
+from ..utils import complete_testable_checks
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help="Remove a project's build artifacts")
-@click.argument('check', required=False)
+@click.argument('check', autocompletion=complete_testable_checks, required=False)
 @click.option(
     '--compiled-only', '-c', is_flag=True, help=f"Remove compiled files only ({', '.join(DELETE_EVERYWHERE)}).",
 )

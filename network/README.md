@@ -16,7 +16,7 @@ The network check is included in the [Datadog Agent][2] package, so you don't ne
 
 To collect metrics with this integration, make sure the conntrack module is activated on your host. If it's not the case, run:
 
-```
+```shell
 sudo modprobe nf_conntrack
 sudo modprobe nf_conntrack_ipv4
 sudo modprobe nf_conntrack_ipv6
@@ -24,60 +24,61 @@ sudo modprobe nf_conntrack_ipv6
 
 ### Configuration
 
-1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
-  See the [sample network.d/conf.yaml][4] for all available configuration options:
+1. The Agent enables the network check by default, but if you want to configure the check yourself, edit file `network.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample network.d/conf.yaml][4] for all available configuration options:
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-
-        ## @param collect_connection_state - boolean - required
-        ## Set to true to collect connection states for your interfaces
-        ## Note: this will require either the command `ss` from system package `iproute2` or
-        ## the command `netstat` from the system package `net-tools` to be installed
-        #
-        - collect_connection_state: false
-    ```
+   instances:
+     ## @param collect_connection_state - boolean - required
+     ## Set to true to collect connection states for your interfaces
+     ## Note: this will require either the command `ss` from system package `iproute2` or
+     ## the command `netstat` from the system package `net-tools` to be installed
+     #
+     - collect_connection_state: false
+   ```
 
 2. [Restart the Agent][5] to effect any configuration changes.
 
-**Note**: 
+**Note**:
 
-Some conntrack metrics require running conntrack with privileged access to be retrieved. 
+Some conntrack metrics require running conntrack with privileged access to be retrieved.
 
 Linux: Configure the following sudoers rule for this to work:
 
-```
+```shell
 dd-agent ALL=NOPASSWD: /usr/sbin/conntrack -S
 ```
 
-Kubernetes: Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+. 
+Kubernetes: Conntrack metrics are available by default in Kubernetes < v1.11 or when using the `host` networking mode in Kubernetes v1.11+.
 
 ### Validation
 
 [Run the Agent's `status` subcommand][6] and look for `network` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
 **Note**: `system.net.conntrack` metrics are available with Agent v6.12+. See the [CHANGELOG][8] for details.
 
 ### Events
+
 The Network check does not include any events.
 
 ### Service Checks
+
 The Network check does not include any service checks.
 
 ## Troubleshooting
 
-* [How to send TCP/UDP host metrics via the Datadog API ?][9]
+- [How to send TCP/UDP host metrics via the Datadog API][9]
 
 ## Further Reading
 
-* [Built a network monitor on an http check][10]
-
+- [Build a network monitor on an HTTP check][10]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent

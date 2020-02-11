@@ -1,7 +1,8 @@
 ## Overview
 
 Red Hat OpenShift is an open source container application platform based on the Kubernetes container orchestrator for enterprise application development and deployment.
-> :warning: There is currently no separate `openshift` check, this README describes the necessary configuration to enable collection of  OpenShift specific metrics in the Agent. Data described here are collected by the [`kube-apiserver-metrics` check][1], setting up this check is necessary to collect the `openshift.*` metrics.
+
+> There is currently no separate `openshift` check, this README describes the necessary configuration to enable collection of OpenShift specific metrics in the Agent. Data described here are collected by the [`kube-apiserver-metrics` check][1], setting up this check is necessary to collect the `openshift.*` metrics.
 
 ## Setup
 
@@ -13,22 +14,22 @@ To install the Agent, refer to the [Agent installation instructions][1] for kube
 
 Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origin and Enterprise clusters. Depending on your needs and the [security constraints][3] of your cluster, three deployment scenarios are supported:
 
-* [Restricted SCC operations](#restricted-scc-operations)
-* [Host network SCC operations](#host-network-scc-operations)
-* [Custom Datadog SCC for all features](#custom-datadog-scc-for-all-features)
+- [Restricted SCC operations](#restricted-scc-operations)
+- [Host network SCC operations](#host-network-scc-operations)
+- [Custom Datadog SCC for all features](#custom-datadog-scc-for-all-features)
 
 | Security Context Constraints   | [Restricted](#restricted-scc-operations) | [Host network](#host-network-scc-operations) | [Custom](#custom-datadog-scc-for-all-features) |
-|--------------------------------|------------------------------------------|----------------------------------------------|------------------------------------------------|
-| Kubernetes layer monitoring    | ✅                                        | ✅                                            | ✅                                              |
-| Kubernetes-based Autodiscovery | ✅                                        | ✅                                            | ✅                                              |
-| Dogstatsd intake               | 🔶                                        | ✅                                            | ✅                                              |
-| APM trace intake               | 🔶                                        | ✅                                            | ✅                                              |
-| Logs network intake            | 🔶                                        | ✅                                            | ✅                                              |
-| Host network metrics           | ❌                                        | ❌                                            | ✅                                              |
-| Docker layer monitoring        | ❌                                        | ❌                                            | ✅                                              |
-| Container logs collection      | ❌                                        | ❌                                            | ✅                                              |
-| Live Container monitoring      | ❌                                        | ❌                                            | ✅                                              |
-| Live Process monitoring        | ❌                                        | ❌                                            | ✅                                              |
+| ------------------------------ | ---------------------------------------- | -------------------------------------------- | ---------------------------------------------- |
+| Kubernetes layer monitoring    | ✅                                       | ✅                                           | ✅                                             |
+| Kubernetes-based Autodiscovery | ✅                                       | ✅                                           | ✅                                             |
+| Dogstatsd intake               | 🔶                                       | ✅                                           | ✅                                             |
+| APM trace intake               | 🔶                                       | ✅                                           | ✅                                             |
+| Logs network intake            | 🔶                                       | ✅                                           | ✅                                             |
+| Host network metrics           | ❌                                       | ❌                                           | ✅                                             |
+| Docker layer monitoring        | ❌                                       | ❌                                           | ✅                                             |
+| Container logs collection      | ❌                                       | ❌                                           | ✅                                             |
+| Live Container monitoring      | ❌                                       | ❌                                           | ✅                                             |
+| Live Process monitoring        | ❌                                       | ❌                                           | ✅                                             |
 
 > :warning: **OpenShift 4.0+**: If you used the OpenShift installer on a supported cloud provider, you will need to deploy the Agent with `hostNetwork: true` to get host tags/aliases as access to metadata servers from PODs network is otherwise restricited.
 
@@ -45,13 +46,13 @@ The Agent suports working on a `sidecar` run mode, to enable running the Agent i
 Add the `allowHostPorts` permission to the pod (either via the standard `hostnetwork` or `hostaccess` SCC, or by creating your own). In this case, you can add the relevant port bindings in your pod specs:
 
 ```yaml
-        ports:
-          - containerPort: 8125
-            name: dogstatsdport
-            protocol: UDP
-          - containerPort: 8126
-            name: traceport
-            protocol: TCP
+ports:
+  - containerPort: 8125
+    name: dogstatsdport
+    protocol: UDP
+  - containerPort: 8126
+    name: traceport
+    protocol: TCP
 ```
 
 #### Custom Datadog SCC for all features
@@ -59,10 +60,10 @@ Add the `allowHostPorts` permission to the pod (either via the standard `hostnet
 If SELinux is in permissive mode or disabled, enable the `hostaccess` SCC to benefit from all features.
 If SELinux is in enforcing mode, it is recommended to grant [the `spc_t` type][7] to the datadog-agent pod. In order to deploy the agent you can use the following [datadog-agent SCC][8] that can be applied after [creating the datadog-agent service account][5]. It grants the following permissions:
 
-* `allowHostPorts: true`: Binds Dogstatsd / APM / Logs intakes to the node's IP.
-* `allowHostPID: true`: Enables Origin Detection for Dogstatsd metrics submitted by Unix Socket.
-* `volumes: hostPath`: Accesses the Docker socket and the host's `proc` and `cgroup` folders, for metric collection.
-* `SELinux type: spc_t`: Accesses the Docker socket and all processes' `proc` and `cgroup` folders, for metric collection. You can read more about this type [in this Red Hat article][7].
+- `allowHostPorts: true`: Binds Dogstatsd / APM / Logs intakes to the node's IP.
+- `allowHostPID: true`: Enables Origin Detection for Dogstatsd metrics submitted by Unix Socket.
+- `volumes: hostPath`: Accesses the Docker socket and the host's `proc` and `cgroup` folders, for metric collection.
+- `SELinux type: spc_t`: Accesses the Docker socket and all processes' `proc` and `cgroup` folders, for metric collection. You can read more about this type [in this Red Hat article][7].
 
 > :warning: Do not forget to add [datadog-agent service account][5] to the newly created [datadog-agent SCC][8] by adding `system:serviceaccount:<datadog-agent namespace>:<datadog-agent service account name>` to the `users` section.
 
@@ -89,7 +90,6 @@ The OpenShift check does not include any Service Checks.
 ## Troubleshooting
 
 Need help? Contact [Datadog support][11].
-
 
 [1]: https://github.com/DataDog/integrations-core/tree/master/kube_apiserver_metrics
 [2]: https://docs.datadoghq.com/agent/kubernetes

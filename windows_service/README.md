@@ -1,4 +1,5 @@
 # Agent Check: Windows Service
+
 ## Overview
 
 This check monitors the state of any Windows Service and submits a service check to Datadog.
@@ -13,7 +14,7 @@ The Windows Service check is included in the [Datadog Agent][1] package, so you 
 
 Edit the `windows_service.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample windows_service.d/conf.yaml][3] for all available configuration options:
 
-```
+```yaml
 init_config:
 
 instances:
@@ -26,9 +27,8 @@ instances:
   ## For an exact match, use ^service$
   #
   - services:
-      - <SERVICE_NAME_1>
-      - <SERVICE_NAME_2>
-
+      - "<SERVICE_NAME_1>"
+      - "<SERVICE_NAME_2>"
   ## @param tags - list of key:value element - optional
   ## List of tags to attach to every service check emitted by this integration.
   ##
@@ -44,6 +44,7 @@ Provide service names as they appear in the `services.msc` properties field (e.g
 [Restart the Agent][4] to start monitoring the services and sending service checks to Datadog.
 
 #### Metrics collection
+
 The Windows Service check can potentially emit [custom metrics][5], which may impact your [billing][6].
 
 ### Validation
@@ -51,19 +52,22 @@ The Windows Service check can potentially emit [custom metrics][5], which may im
 [Run the Agent's status subcommand][7] and look for `windows_service` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 The Windows Service check does not include any metrics.
 
 ### Events
+
 The Windows Service check does not include any events.
 
 ### Service Checks
+
 **windows_service.state**:
 The Agent submits this service check for each Windows service configured in `services`, tagging the service check with 'service:<service_name>'. The service check takes on the following statuses depending on Windows status:
 
 | Windows status   | windows_service.state |
-| ---              | ---                   |
+| ---------------- | --------------------- |
 | Stopped          | CRITICAL              |
 | Start Pending    | WARNING               |
 | Stop Pending     | WARNING               |
@@ -74,14 +78,14 @@ The Agent submits this service check for each Windows service configured in `ser
 | Unknown          | UNKNOWN               |
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-* [Monitoring Windows Server 2012][9]
-* [How to collect Windows Server 2012 metrics][10]
-* [Monitoring Windows Server 2012 with Datadog][11]
-
+- [Monitoring Windows Server 2012][9]
+- [How to collect Windows Server 2012 metrics][10]
+- [Monitoring Windows Server 2012 with Datadog][11]
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

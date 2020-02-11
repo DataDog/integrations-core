@@ -17,51 +17,51 @@ The TCP RTT check-also known as [go-metro][2]-is packaged with the Agent, but re
 Debian-based systems should use one of the following:
 
 ```bash
-$ sudo apt-get install libcap
-$ sudo apt-get install libcap2-bin
+sudo apt-get install libcap
+sudo apt-get install libcap2-bin
 ```
 
 Redhat-based systems should use one of these:
 
 ```bash
-$ sudo yum install libcap
-$ sudo yum install compat-libcap1
+sudo yum install libcap
+sudo yum install compat-libcap1
 ```
 
 Finally, configure PCAP:
 
 ```bash
-$ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
+sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 ```
 
 ### Configuration
 
-Edit the ```go-metro.yaml``` file in your agent's ```conf.d``` directory. See the [sample go-metro.yaml][3] for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
+Edit the `go-metro.yaml` file in your agent's `conf.d` directory. See the [sample go-metro.yaml][3] for all available configuration options. The following is an example file that will show the TCP RTT times for app.datadoghq.com and 192.168.0.22:
 
-  ```yaml
-    init_config:
-      snaplen: 512
-      idle_ttl: 300
-      exp_ttl: 60
-      statsd_ip: 127.0.0.1
-      statsd_port: 8125
-      log_to_file: true
-      log_level: info
-    instances:
-      - interface: eth0
-        tags:
-          - env:prod
-        ips:
-          - 45.33.125.153
-        hosts:
-          - app.datadoghq.com
-  ```
+```yaml
+init_config:
+  snaplen: 512
+  idle_ttl: 300
+  exp_ttl: 60
+  statsd_ip: 127.0.0.1
+  statsd_port: 8125
+  log_to_file: true
+  log_level: info
+instances:
+  - interface: eth0
+    tags:
+      - env:prod
+    ips:
+      - 45.33.125.153
+    hosts:
+      - app.datadoghq.com
+```
 
 ### Validation
 
 To validate that the check is running correctly, you should see `system.net.tcp.rtt` metrics showing in the Datadog interface. Also, if you [Run the Agent's `status` subcommand][4], you should see something similar to the following:
 
-```
+```text
 ● datadog-agent.service - "Datadog Agent"
     Loaded: loaded (/lib/...datadog-agent.service; enabled; vendor preset: enabled)
     Active: active (running) since Thu 2016-03-31 20:35:27 UTC; 42min ago
@@ -81,17 +81,21 @@ If the TCP RTT check has started you should see something similar to the go-metr
 **This is a passive check, so unless there are packets actively being sent to the hosts mentioned in the yaml file, the metrics are not reported.**
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Events
+
 The Go-metro check does not include any events.
 
 ### Service Checks
+
 The Go-metro check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][6].
 
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations

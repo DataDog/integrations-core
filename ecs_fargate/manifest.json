@@ -26,7 +26,7 @@
   "assets": {
     "monitors": {},
     "dashboards": {
-      "ECS-Fargate": "assets/dashboards/ecs_fargate_overview.json"
+      "Amazon Fargate": "assets/dashboards/amazon_fargate_overview.json"
     },
     "service_checks": "assets/service_checks.json"
   }

@@ -144,6 +144,23 @@ COMMON_TAGS = {
         'kube_container_name:datadog-agent'
     ],
     "container_id://6d8c6a05731b52195998c438fdca271b967b171f6c894f11ba59aa2f4deff10c": ['pod_name:cassandra-0'],
+    "kubernetes_pod_uid://639980e5-2e6c-11ea-8bb1-42010a800074": [
+        'kube_namespace:default',
+        'kube_service:nginx',
+        'kube_stateful_set:web',
+        'namespace:default',
+        'persistentvolumeclaim:www-web-2',
+        'pod_phase:running',
+    ],
+    "kubernetes_pod_uid://639980e5-2e6c-11ea-8bb1-42010a800075": [
+        'kube_namespace:default',
+        'kube_service:nginx',
+        'kube_stateful_set:web',
+        'namespace:default',
+        'persistentvolumeclaim:www-web-2',
+        'persistentvolumeclaim:www2-web-3',
+        'pod_phase:running',
+    ],
 }
 
 METRICS_WITH_DEVICE_TAG = {
@@ -867,3 +884,27 @@ def test_silent_tls_warning(monkeypatch, aggregator):
         check._perform_kubelet_check([])
 
     assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+
+def test_create_pod_tags_by_pvc(monkeypatch, tagger):
+    check = KubeletCheck('kubelet', {}, [{}])
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+    pod_list = check.retrieve_pod_list()
+
+    pod_tags_by_pvc = check._create_pod_tags_by_pvc(pod_list)
+
+    expected_result = {
+        'default/www-web-2': {
+            'kube_namespace:default',
+            'kube_service:nginx',
+            'kube_stateful_set:web',
+            'namespace:default',
+        },
+        'default/www2-web-3': {
+            'kube_namespace:default',
+            'kube_service:nginx',
+            'kube_stateful_set:web',
+            'namespace:default',
+        },
+    }
+    assert pod_tags_by_pvc == expected_result
