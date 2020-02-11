@@ -63,24 +63,22 @@ def string_to_toml_type(s):
 
 
 def check_root():
-    """Check if root has already been set.  Return None if not, a string if yes."""
-    message = ''
+    """Check if root has already been set."""
     existing_root = get_root()
     if existing_root:
-        return message
+        return True
 
     root = os.getenv('DDEV_ROOT', '')
     if root and os.path.isdir(root):
-        message = f'Using root from `DDEV_ROOT` env variable: {root}'
         set_root(root)
-        return message
-    return None
+        return True
+    return False
 
 
 def initialize_root(config, agent=False, core=False, extras=False, here=False):
-    msg = check_root()
-    if msg is not None:
-        return msg if msg else None
+    """Initialize root directory based on config and options"""
+    if check_root():
+        return
 
     repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
     config['repo_choice'] = repo_choice
@@ -101,8 +99,7 @@ def initialize_root(config, agent=False, core=False, extras=False, here=False):
 
 def complete_set_root(args):
     """Set the root directory within the context of a cli completion operation."""
-    msg = check_root()
-    if msg is not None:
+    if check_root():
         return
 
     config = load_config()

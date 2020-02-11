@@ -4,8 +4,17 @@
 import click
 
 from .commands import ALL_COMMANDS
-from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning, set_color, set_debug
+from .commands.console import (
+    CONTEXT_SETTINGS,
+    echo_debug,
+    echo_success,
+    echo_waiting,
+    echo_warning,
+    set_color,
+    set_debug,
+)
 from .config import CONFIG_FILE, config_file_exists, load_config, restore_config
+from .constants import get_root
 from .utils import initialize_root
 
 
@@ -38,12 +47,13 @@ def ddev(ctx, core, extras, agent, here, color, quiet, debug):
     if msg and not quiet:
         echo_warning(msg)
 
+    if debug and not quiet:
+        set_debug()
+        echo_debug(f'Root directory set to: {get_root()}')
+
     if color is not None:
         config['color'] = color
     set_color(config['color'])
-
-    if debug and not quiet:
-        set_debug()
 
     # https://click.palletsprojects.com/en/7.x/api/#click.Context.obj
     ctx.obj = config
