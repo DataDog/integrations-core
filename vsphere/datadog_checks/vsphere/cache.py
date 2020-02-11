@@ -6,6 +6,7 @@ from contextlib import contextmanager
 
 from six import iterkeys
 
+
 class VSphereCache(object):
     """
     Wraps configuration and status for the Morlist and Metadata caches.
