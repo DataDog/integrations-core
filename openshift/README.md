@@ -32,7 +32,7 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 | Live Process monitoring        | ❌                                       | ❌                                           | ✅                                             |
 
 <div class="alert alert-warning">
-**OpenShift 4.0+**: If you used the OpenShift installer on a supported cloud provider, you will need to deploy the Agent with `hostNetwork: true` to get host tags/aliases as access to metadata servers from PODs network is otherwise restricited.
+<b>OpenShift 4.0+</b>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags/aliases as access to metadata servers from PODs network, which otherwise is restricted.
 </div>
 
 #### Restricted SCC operations
@@ -67,12 +67,8 @@ If SELinux is in enforcing mode, it is recommended to grant [the `spc_t` type][7
 - `volumes: hostPath`: Accesses the Docker socket and the host's `proc` and `cgroup` folders, for metric collection.
 - `SELinux type: spc_t`: Accesses the Docker socket and all processes' `proc` and `cgroup` folders, for metric collection. You can read more about this type [in this Red Hat article][7].
 
-<div class="alert alert-warning">
-Do not forget to add [datadog-agent service account][5] to the newly created [datadog-agent SCC][8] by adding `system:serviceaccount:<datadog-agent namespace>:<datadog-agent service account name>` to the `users` section.
-</div>
-
-<div class="alert alert-warning">
-**OpenShift 4.0+**: If you used the OpenShift installer on a supported cloud provider, you will need to modify the provided SCC with `allowHostNetwork: true` to get host tags/aliases as access to metadata servers from PODs network is otherwise restricited.
+<div class="alert alert-info">
+Do not forget to add <a href="https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#configure-rbac-permissions">datadog-agent service account</a> to the newly created <a href="https://github.com/DataDog/datadog-agent/blob/master/Dockerfiles/manifests/openshift/scc.yaml">datadog-agent SCC</a> by adding <code>system:serviceaccount:<datadog-agent namespace>:<datadog-agent service account name></code> to the <code>users</code> section.
 </div>
 
 ### Validation
@@ -83,7 +79,7 @@ See [kube_apiserver_metrics][1]
 
 ### Metrics
 
-{{< get-metrics-from-git "openshift" >}}
+See [metadata.csv][10] for a full list of provided metrics by this integration.
 
 ### Events
 
