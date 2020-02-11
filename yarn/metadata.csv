@@ -51,7 +51,7 @@ yarn.queue.root.used_capacity,gauge,,percent,,The used queue capacity in percent
 yarn.queue.root.capacity,gauge,,percent,,The configured queue capacity in percentage for root queue,0,yarn,q root cap
 yarn.queue.num_pending_applications,gauge,,task,,The number of pending applications in this queue,0,yarn,q pnd apps
 yarn.queue.user_am_resource_limit.memory,gauge,,mebibyte,,The maximum memory resources a user can use for Application Masters (in MB),0,yarn,q usr am res lm m
-yarn.queue.user_am_resource_limit.vCores,gauge,,core,,The maximum vCpus a user can use for Application Masters,0,yarn,q usr am res lm c
+yarn.queue.user_am_resource_limit.vcores,gauge,,core,,The maximum vCpus a user can use for Application Masters,0,yarn,q usr am res lm c
 yarn.queue.absolute_capacity,gauge,,percent,,The absolute capacity percentage this queue can use of entire cluster,0,yarn,q abs cap
 yarn.queue.user_limit_factor,gauge,,,,The minimum user limit percent set in the configuration,0,yarn,q usr lm fac
 yarn.queue.user_limit,gauge,,,,The user limit factor set in the configuration,0,yarn,q usr lm
