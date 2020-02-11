@@ -136,7 +136,6 @@ def test_collect_tags(aggregator, dd_run_check, realtime_instance):
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     dd_run_check(check)
 
-    # Following metrics should match and have instance value tag
     aggregator.assert_metric(
         'vsphere.cpu.usage.avg',
         tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
