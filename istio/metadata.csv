@@ -6,15 +6,15 @@ istio.mesh.request.size.count,gauge,,request,,count of request sizes,0,istio,req
 istio.mesh.request.size.sum,gauge,,request,,sum of request sizes,0,istio,request sizes sum
 istio.mesh.response.size.count,gauge,,response,,count of response sizes,0,istio,response sizes count
 istio.mesh.response.size.sum,gauge,,response,,sum of response sizes,0,istio,response sizes sum
-istio.mixer.adapter.dispatch_count,gauge,,operation,,Total number of adapter dispatches handled by Mixer,0,istio,number of adapter dispatches
+istio.mixer.adapter.dispatch_count,count,,operation,,Total number of adapter dispatches handled by Mixer,0,istio,number of adapter dispatches
 istio.mixer.adapter.dispatch_duration.count,gauge,,operation,,Count of durations for adapter dispatches handled by Mixer,0,istio,
 istio.mixer.adapter.dispatch_duration.sum,gauge,,operation,,Sum of durations for adapter dispatches handled by Mixer,0,istio,
-istio.mixer.adapter.old_dispatch_count,gauge,,operation,,Total number of adapter dispatches handled by Mixer.,0,istio,
+istio.mixer.adapter.old_dispatch_count,count,,operation,,Total number of adapter dispatches handled by Mixer.,0,istio,
 istio.mixer.adapter.old_dispatch_duration.count,gauge,,operation,,Count of times for adapter dispatches handled by Mixer.,0,istio,
 istio.mixer.adapter.old_dispatch_duration.sum,gauge,,operation,,Sum of times for adapter dispatches handled by Mixer.,0,istio,
 istio.mixer.config.resolve_actions.count,gauge,,operation,,Count of actions resolved by Mixer.,0,istio,
 istio.mixer.config.resolve_actions.sum,gauge,,operation,,Sum of actions resolved by Mixer.,0,istio,
-istio.mixer.config.resolve_count,gauge,,operation,,Number of config resolves handled by mixer,0,istio,config resolves
+istio.mixer.config.resolve_count,count,,operation,,Number of config resolves handled by mixer,0,istio,config resolves
 istio.mixer.config.resolve_duration.count,gauge,,second,,Seconds per config resolve,0,istio,seconds per config resolve
 istio.mixer.config.resolve_duration.sum,gauge,,second,,Sum of times for config resolves handled by Mixer.,0,istio,
 istio.mixer.config.resolve_rules.count,gauge,,item,,Number of rules resolved by mixer,0,istio,rules resolved
