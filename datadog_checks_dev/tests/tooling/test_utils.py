@@ -12,7 +12,8 @@ from datadog_checks.dev.tooling.utils import (
     initialize_root,
     parse_agent_req_file,
 )
-from datadog_checks.utils.platform import Platform
+
+from ..common import not_windows_ci
 
 
 def test_parse_agent_req_file():
@@ -54,12 +55,13 @@ def test_initialize_root_good_path(set_root, get_root):
     set_root.assert_called_with(os.path.expanduser('~'))
 
 
+@not_windows_ci
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')
 @mock.patch('datadog_checks.dev.tooling.utils.set_root')
 def test_initialize_root_env_var(set_root, get_root):
     get_root.return_value = ''
 
-    ddev_env = '%temp%' if Platform.is_windows() else '/tmp'
+    ddev_env = '/tmp'
     with mock.patch.dict(os.environ, {'DDEV_ROOT': ddev_env}):
         config = copy_default_config()
         initialize_root(config)
@@ -67,6 +69,7 @@ def test_initialize_root_env_var(set_root, get_root):
         set_root.assert_called_with(os.path.expanduser(ddev_env))
 
 
+@not_windows_ci
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')
 @mock.patch('datadog_checks.dev.tooling.utils.set_root')
 def test_complete_set_root_no_args(set_root, get_root):
@@ -74,7 +77,7 @@ def test_complete_set_root_no_args(set_root, get_root):
 
     with mock.patch('datadog_checks.dev.tooling.utils.load_config') as load_config:
         config = copy_default_config()
-        config['core'] = '%temp%' if Platform.is_windows() else '/tmp'
+        config['core'] = '/tmp'  # ensure we choose a dir that exists
         load_config.return_value = config
 
         args = []
@@ -98,6 +101,7 @@ def test_complete_set_root_here(set_root, get_root):
         set_root.assert_called_with(os.getcwd())
 
 
+@not_windows_ci
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')
 @mock.patch('datadog_checks.dev.tooling.utils.set_root')
 def test_complete_set_root_extras(set_root, get_root):
@@ -105,7 +109,7 @@ def test_complete_set_root_extras(set_root, get_root):
 
     with mock.patch('datadog_checks.dev.tooling.utils.load_config') as load_config:
         config = copy_default_config()
-        config['extras'] = '%temp%' if Platform.is_windows() else '/tmp'
+        config['extras'] = '/tmp'  # ensure we choose a dir that exists
         load_config.return_value = config
 
         args = ['-e']
