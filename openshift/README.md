@@ -31,7 +31,9 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 | Live Container monitoring      | ❌                                       | ❌                                           | ✅                                             |
 | Live Process monitoring        | ❌                                       | ❌                                           | ✅                                             |
 
-> :warning: **OpenShift 4.0+**: If you used the OpenShift installer on a supported cloud provider, you will need to deploy the Agent with `hostNetwork: true` to get host tags/aliases as access to metadata servers from PODs network is otherwise restricited.
+<div class="alert alert-warning">
+**OpenShift 4.0+**: If you used the OpenShift installer on a supported cloud provider, you will need to deploy the Agent with `hostNetwork: true` to get host tags/aliases as access to metadata servers from PODs network is otherwise restricited.
+</div>
 
 #### Restricted SCC operations
 
@@ -77,7 +79,7 @@ See [kube_apiserver_metrics][1]
 
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics specific to OpenShift.
+{{< get-metrics-from-git "openshift" >}}
 
 ### Events
 
