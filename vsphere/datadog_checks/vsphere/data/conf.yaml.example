@@ -148,6 +148,14 @@ instances:
     #
     # collect_tags: false
 
+    ## @param vsphere_tags_prefix - boolean - optional - default: vsphere_
+    ## Tags coming from vSphere will be prefixed with this prefix.
+    ## Examples with the default `vsphere_` prefix:
+    ## - vsphere_os_type:windows            # where `os_type` is the category name and `windows` the tag name
+    ## - vsphere_application_name:my_app    # where `application_name` is the category name and `my_app` the tag name
+    #
+    # vsphere_tags_prefix: vsphere_
+
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name
     ## This requires the VM to have VMware tools installed in it. If the guest hostname is
