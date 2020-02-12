@@ -46,7 +46,7 @@ class VSphereRestAPI(object):
                 server=self.config.hostname,
             )
         except Exception as e:
-            err_msg = "Connection to {} failed, hostname: {}".format(self.config.hostname, e)
+            err_msg = "Connection to vSphere Rest API failed for host {}: {}".format(self.config.hostname, e)
             raise APIConnectionError(err_msg)
 
         self._client = client
@@ -69,6 +69,7 @@ class VSphereRestAPI(object):
         tags = self._get_tags(categories)
         tag_ids = list(tags.keys())
         tag_associations = self._get_tag_associations(tag_ids)
+        self.log.debug("Fetched tag associations: %s", tag_associations)
 
         # Initialise resource_tags
         resource_tags = {resource_type: defaultdict(list) for resource_type in MOR_TYPE_MAPPING.values()}
@@ -78,21 +79,35 @@ class VSphereRestAPI(object):
             for resource_asso in tag_asso.object_ids:
                 resource_type = MOR_TYPE_MAPPING.get(resource_asso.type)
                 if not resource_type:
-                    self.log.debug(
-                        "Invalid resource type `%s`. Valid resource types are: %s",
-                        resource_asso.type,
-                        MOR_TYPE_MAPPING.keys(),
-                    )
                     continue
                 resource_tags[resource_type][resource_asso.id].append(tag)
-
+        self.log.debug("Result resource tags: %s", resource_tags)
         return resource_tags
 
     def _get_tag_associations(self, tag_ids):
+        """
+        :rtype: :class:`list` of :class:`com.vmware.cis.tagging_client.TagAssociation.TagToObjects`
+        :return: tag_associations: the structure of the tag associations is as follow:
+            [
+                TagToObjects(tag_id='tag_id_1', object_ids=[DynamicID(type='VirtualMachine', id='VM4-4-1')]),
+                TagToObjects(tag_id='tag_id_2', object_ids=[DynamicID(type='VirtualMachine', id='VM4-4-1')]),
+                ...
+            ]
+        """
         tag_associations = self._client.tagging.TagAssociation.list_attached_objects_on_tags(tag_ids)
         return tag_associations
 
     def _get_categories(self):
+        """
+        Returns a dict of categories with category id as key and category name as value.
+
+        :return: categories: the structure of the categories is as follow:
+            {
+                <CATEGORY_ID>: <CATEGORY_NAME>,
+                <CATEGORY_ID>: <CATEGORY_NAME>,
+                ...
+            }
+        """
         category_ids = self._client.tagging.Category.list()
         categories = {}
         for category_id in category_ids:
@@ -102,9 +117,9 @@ class VSphereRestAPI(object):
 
     def _get_tags(self, categories):
         """
-        Create tags using vSphere tag category as key and vSphere tag name as value.
+        Create tags using vSphere tags prefix + vSphere tag category name as key and vSphere tag name as value.
 
-            <TAG_CATEGORY>:<TAG_NAME>
+            <VSPHERE_TAGS_PREFIX><TAG_CATEGORY>:<TAG_NAME>
 
         Examples:
             - os_type:windows

@@ -140,11 +140,13 @@ instances:
 
     ## @param collect_tags - boolean - optional - default: false
     ## If true, the vSphere Tags will be collected.
-    ## The final tag sent to Datadog is composed of the vSphere tag category as key and vSphere tag name as value.
-    ##    <TAG_CATEGORY>:<TAG_NAME>
+    ## The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
+    ## vSphere tag name as value:
+    ##    vsphere_<TAG_CATEGORY>:<TAG_NAME>
+    ## `vsphere_` prefix can be configured using `vsphere_tags_prefix` configuration.
     ## Examples:
-    ## - os_type:windows
-    ## - application_name:my_app
+    ## - vsphere_os_type:windows
+    ## - vsphere_application_name:my_app
     #
     # collect_tags: false
 
