@@ -14,12 +14,22 @@ from datadog_checks.base import AgentCheck
 
 
 class RethinkDBCheck(AgentCheck):
+    @contextmanager
+    def _submit_service_check(self):
+        # type: () -> Iterator[None]
+        try:
+            yield
+        except rethinkdb.errors.ReqlDriverError:
+            self.service_check('rethinkdb.can_connect', self.CRITICAL)
+            raise
+        else:
+            self.service_check('rethinkdb.can_connect', self.OK)
+
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
-        with _connect(database='rethinkdb', host='localhost', port=28015) as conn:
-            server = conn.server()  # type: Dict[str, Any]
-            tags = ['server:{}'.format(server['name'])]
-            self.service_check('rethinkdb.can_connect', self.OK, tags=tags)
+        with self._submit_service_check():
+            with _connect(database='rethinkdb', host='localhost', port=28015):
+                pass
 
 
 @contextmanager
