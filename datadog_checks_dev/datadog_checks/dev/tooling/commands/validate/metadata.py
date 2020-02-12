@@ -260,7 +260,10 @@ def metadata(check):
                 normalized_metric_name = normalize_metric_name(row['metric_name'])
                 if row['metric_name'] != normalized_metric_name:
                     errors = True
-                    echo_failure(f"Metric name '{row['metric_name']}' is not valid, it should be normalized as {normalized_metric_name}")
+                    echo_failure(
+                        f"Metric name '{row['metric_name']}' is not valid,"
+                        "it should be normalized as {normalized_metric_name}"
+                    )
 
                 # metric_name header
                 if metric_prefix:
@@ -299,7 +302,10 @@ def metadata(check):
                 # exceeds max allowed length of description
                 elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
                     errors = True
-                    echo_failure(f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: {MAX_DESCRIPTION_LENGTH} for descriptions.")
+                    echo_failure(
+                        f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
+                        "{MAX_DESCRIPTION_LENGTH} for descriptions."
+                    )
                 if row['interval'] and not row['interval'].isdigit():
                     errors = True
                     echo_failure(f"{current_check}: interval should be an int, found '{row['interval']}'")
