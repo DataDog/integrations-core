@@ -1672,3 +1672,101 @@ def test_hp_ilo4(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_proliant(aggregator):
+    instance = common.generate_instance_config([])
+    instance['community_string'] = 'hpe-proliant'
+    instance['profile'] = 'hpe-proliant'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    definition_file_path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'hpe-proliant.yaml')
+    init_config = {'profiles': {'hpe-proliant': {'definition_file': definition_file_path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    cpu_gauges = [
+        "cpqSeCpuSlot",
+        "cpqSeCpuSpeed",
+        "cpqSeCpuStatus",
+        "cpqSeCpuExtSpeed",
+        "cpqSeCpuCore",
+        "cpqSeCPUCoreMaxThreads",
+        "cpqSeCpuPrimary",
+    ]
+    cpu_indexes = [0, 4, 6, 8, 13, 15, 26, 27]
+    for idx in cpu_indexes:
+        tags = ['cpu_index:{}'.format(idx)] + common.CHECK_TAGS
+        for metric in cpu_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    cpu_util_gauges = ["cpqHoCpuUtilMin", "cpqHoCpuUtilFiveMin", "cpqHoCpuUtilThirtyMin", "cpqHoCpuUtilHour"]
+    cpu_unit_idx = [4, 7, 13, 20, 22, 23, 29]
+    for idx in cpu_unit_idx:
+        tags = ['cpu_unit_index:{}'.format(idx)] + common.CHECK_TAGS
+        for metric in cpu_util_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    file_sys_gauges = [
+        "cpqHoFileSysSpaceTotal",
+        "cpqHoFileSysSpaceUsed",
+        "cpqHoFileSysPercentSpaceUsed",
+        "cpqHoFileSysAllocUnitsTotal",
+        "cpqHoFileSysAllocUnitsUsed",
+        "cpqHoFileSysStatus",
+    ]
+    file_sys_idx = [5, 8, 11, 15, 19, 21, 28, 30]
+    for idx in file_sys_idx:
+        tags = ['file_sys_index:{}'.format(idx)] + common.CHECK_TAGS
+        for metric in file_sys_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    memory_gauges = [
+        "cpqSiMemModuleSize",
+        "cpqSiMemModuleType",
+        "cpqSiMemModuleSpeed",
+        "cpqSiMemModuleTechnology",
+        "cpqSiMemModuleECCStatus",
+        "cpqSiMemModuleFrequency",
+        "cpqSiMemModuleCellStatus",
+    ]
+    memory_idx = [(6, 16), (7, 17), (7, 30), (8, 20), (10, 4), (15, 27), (20, 14), (21, 14), (23, 0), (28, 20)]
+    for board_idx, mem_module_index in memory_idx:
+        tags = [
+            'mem_board_index:{}'.format(board_idx),
+            "mem_module_index:{}".format(mem_module_index),
+        ] + common.CHECK_TAGS
+        for metric in memory_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    drive_counts = [
+        "cpqDaPhyDrvUsedReallocs",
+        "cpqDaPhyDrvRefHours",
+        "cpqDaPhyDrvHardReadErrs",
+        "cpqDaPhyDrvRecvReadErrs",
+        "cpqDaPhyDrvHardWriteErrs",
+        "cpqDaPhyDrvRecvWriteErrs",
+        "cpqDaPhyDrvHSeekErrs",
+        "cpqDaPhyDrvSeekErrs",
+    ]
+    drive_gauges = [
+        "cpqDaPhyDrvStatus",
+        "cpqDaPhyDrvFactReallocs",
+        "cpqDaPhyDrvSpinupTime",
+        "cpqDaPhyDrvSize",
+        "cpqDaPhyDrvSmartStatus",
+        "cpqDaPhyDrvCurrentTemperature",
+    ]
+    drive_idx = [(0, 2), (0, 28), (8, 31), (9, 24), (9, 28), (10, 17), (11, 4), (12, 20), (18, 22), (23, 2)]
+    for drive_cntrl_idx, drive_index in drive_idx:
+        tags = ['drive_cntrl_idx:{}'.format(drive_cntrl_idx), "drive_index:{}".format(drive_index)] + common.CHECK_TAGS
+        for metric in drive_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in drive_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
