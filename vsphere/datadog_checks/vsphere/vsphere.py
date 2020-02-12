@@ -63,7 +63,7 @@ class VSphereCheck(AgentCheck):
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
         )
-        self.tags_cache = TagsCache(interval_sec=self.config.refresh_metrics_metadata_cache_interval)
+        self.tags_cache = TagsCache(interval_sec=self.config.refresh_tags_cache_interval)
         self.api = None
         self.api_rest = None
         # Do not override `AgentCheck.hostname`

@@ -17,7 +17,7 @@ from datadog_checks.vsphere.constants import (
     HISTORICAL_RESOURCES,
     MOR_TYPE_AS_STRING,
     REALTIME_RESOURCES,
-)
+    DEFAULT_REFRESH_TAGS_CACHE_INTERVAL)
 
 
 class VSphereConfig(object):
@@ -51,6 +51,9 @@ class VSphereConfig(object):
         )
         self.refresh_metrics_metadata_cache_interval = instance.get(
             'refresh_metrics_metadata_cache_interval', DEFAULT_REFRESH_METRICS_METADATA_CACHE_INTERVAL
+        )
+        self.refresh_tags_cache_interval = instance.get(
+            'refresh_tags_cache_interval', DEFAULT_REFRESH_TAGS_CACHE_INTERVAL
         )
 
         # Utility
