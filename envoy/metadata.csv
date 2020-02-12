@@ -4,9 +4,9 @@ envoy.runtime.override_dir_not_exists,count,,occurrence,,Total number of loads t
 envoy.runtime.override_dir_exists,count,,occurrence,,Total number of loads that did use an override directory,0,envoy,loads with override directory
 envoy.runtime.load_success,count,,success,,Total number of load attempts that were successful,1,envoy,successful loads
 envoy.runtime.num_keys,gauge,,location,,Number of keys currently loaded,0,envoy,keys loaded
-envoy.runtime.admin_overrides_active,gauge,,,,1 if any admin overrides are active otherwise 0,0,envoy
-envoy.runtime.deprecated_feature_use,count,,,,Total number of times deprecated features were used,-1,envoy
-envoy.runtime.num_layers,gauge,,,,Number of layers currently active (without loading errors),0,envoy
+envoy.runtime.admin_overrides_active,gauge,,,,1 if any admin overrides are active otherwise 0,0,envoy,
+envoy.runtime.deprecated_feature_use,count,,,,Total number of times deprecated features were used,-1,envoy,
+envoy.runtime.num_layers,gauge,,,,Number of layers currently active (without loading errors),0,envoy,
 envoy.control_plane.connected_state,gauge,,connection,,A boolean (1 for connected and 0 for disconnected) that indicates the current connection state with management server,0,envoy,
 envoy.control_plane.pending_requests,gauge,,request,,Total number of pending requests when the rate limit was enforced,0,envoy,
 envoy.control_plane.rate_limit_enforced,count,,occurrence,,Total number of times rate limit was enforced for management server requests,0,envoy,

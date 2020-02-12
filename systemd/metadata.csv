@@ -2,7 +2,7 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 systemd.units_total,gauge,,unit,,The total number of units,0,systemd,units_total
 systemd.units_loaded_count,gauge,,unit,,The number of loaded units,0,systemd,units_loaded_count
 systemd.units_monitored_count,gauge,,unit,,The number of monitored units,0,systemd,units_monitored_count
-systemd.units_by_state,gauge,,unit,,Sum by state to count units,0,systemd.units_by_state
+systemd.units_by_state,gauge,,unit,,Sum by state to count units,0,systemd,units_by_state
 systemd.unit.monitored,gauge,,,,Indicates that the unit is monitored (the value is always 1),0,systemd,unit.monitored
 systemd.unit.active,gauge,,,,Whether the unit is currently in active state,0,systemd,unit.active
 systemd.unit.loaded,gauge,,,,Whether the unit is currently in loaded state,0,systemd,unit.loaded
