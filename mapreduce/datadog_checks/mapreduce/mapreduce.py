@@ -198,10 +198,7 @@ class MapReduceCheck(AgentCheck):
 
     def _get_hadoop_version(self):
         if self.agentConfig.get('enable_metadata_collection', True):
-            cluster_info = self._rest_request_to_json(
-                self.rm_address,
-                self.CLUSTER_INFO,
-            )
+            cluster_info = self._rest_request_to_json(self.rm_address, self.CLUSTER_INFO,)
             hadoop_version = cluster_info.get('clusterInfo', {}).get('hadoopVersion', '')
             if hadoop_version:
                 self.set_metadata('version', hadoop_version)
@@ -442,10 +439,7 @@ class MapReduceCheck(AgentCheck):
     def _critical_service(self, service_name, tags, message):
         if service_name:
             self.service_check(
-                service_name,
-                AgentCheck.CRITICAL,
-                tags=tags,
-                message=message,
+                service_name, AgentCheck.CRITICAL, tags=tags, message=message,
             )
 
     def _join_url_dir(self, url, *args):
