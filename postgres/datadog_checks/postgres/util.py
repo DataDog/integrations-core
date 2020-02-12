@@ -5,6 +5,8 @@ import string
 
 from datadog_checks.base import AgentCheck
 
+ALL_SCHEMAS = object()
+
 
 class PartialFormatter(string.Formatter):
     """Follows PEP3101, used to format only specified args in a string.
@@ -18,6 +20,31 @@ class PartialFormatter(string.Formatter):
             return kwargs.get(key, '{' + key + '}')
         else:
             return string.Formatter.get_value(self, key, args, kwargs)
+
+
+def get_schema_field(descriptors):
+    """Return column containg the schema name for that query."""
+    for column, name in descriptors:
+        if name == 'schema':
+            return column
+
+
+def build_relations_filter(relations_config, schema_field):
+    """Build a WHERE clause filtering relations based on relations_config."""
+    relations_filter = []
+    for r in relations_config.values():
+        relation_filter = []
+        if r.get('relation_name'):
+            relation_filter.append("( relname = '{}'".format(r['relation_name']))
+        elif r.get('relation_regex'):
+            relation_filter.append("( relname ~ '{}'".format(r['relation_regex']))
+        if ALL_SCHEMAS not in r['schemas']:
+            schema_filter = ' ,'.join("'{}'".format(s) for s in r['schemas'])
+            relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
+        relation_filter.append(')')
+        relations_filter.append(' '.join(relation_filter))
+
+    return ' OR '.join(relations_filter)
 
 
 fmt = PartialFormatter()

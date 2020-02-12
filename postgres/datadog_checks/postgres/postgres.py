@@ -19,6 +19,7 @@ from .util import (
     ACTIVITY_METRICS_LT_8_3,
     ACTIVITY_QUERY_10,
     ACTIVITY_QUERY_LT_10,
+    ALL_SCHEMAS,
     COMMON_ARCHIVER_METRICS,
     COMMON_BGW_METRICS,
     COMMON_METRICS,
@@ -38,14 +39,14 @@ from .util import (
     REPLICATION_METRICS_10,
     SIZE_METRICS,
     STATIO_METRICS,
+    build_relations_filter,
     fmt,
+    get_schema_field,
 )
 from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, get_raw_version, parse_version, transform_version
 
 MAX_CUSTOM_RESULTS = 100
 TABLE_COUNT_LIMIT = 200
-
-ALL_SCHEMAS = object()
 
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
@@ -346,32 +347,19 @@ class PostgreSql(AgentCheck):
         cols = list(scope['metrics'])  # list of metrics to query, in some order
         # we must remember that order to parse results
 
+        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
+        # to a tag name (e.g. 'schema').
+        descriptors = scope['descriptors']
+
         results = None
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
             if scope['relation'] and len(relations_config) > 0:
-                schema_field = ''
-                for desc in scope['descriptors']:
-                    if desc[1] == 'schema':
-                        schema_field = desc[0]
-                        break
-                relations = []
-                for r in relations_config.values():
-                    relation_filter = []
-                    if r.get('relation_name'):
-                        relation_filter.append("( relname = '{}'".format(r['relation_name']))
-                    elif r.get('relation_regex'):
-                        relation_filter.append("( relname ~ '{}'".format(r['relation_regex']))
-                    if r.get('schemas') and ALL_SCHEMAS not in r['schemas']:
-                        schema_filter = ' ,'.join("'{}'".format(s) for s in r['schemas'])
-                        relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
-                    relation_filter.append(')')
-                    relations.append(' '.join(relation_filter))
-
-                relations = ' OR '.join(relations)
-                self.log.debug("Running query: %s with relations matching: %s", query, relations)
-                cursor.execute(query.format(relations=relations))
+                schema_field = get_schema_field(descriptors)
+                relations_filter = build_relations_filter(relations_config, schema_field)
+                self.log.debug("Running query: %s with relations matching: %s", query, relations_filter)
+                cursor.execute(query.format(relations=relations_filter))
             else:
                 self.log.debug("Running query: %s", query)
                 cursor.execute(query.replace(r'%', r'%%'))
@@ -398,10 +386,6 @@ class PostgreSql(AgentCheck):
                 "Query: %s returned more than %s results (%s). Truncating", query, MAX_CUSTOM_RESULTS, len(results)
             )
             results = results[:MAX_CUSTOM_RESULTS]
-
-        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
-        # to a tag name (e.g. 'schema').
-        descriptors = scope['descriptors']
 
         # Parse and submit results.
 
