@@ -10,6 +10,7 @@ from mock import MagicMock, patch
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
+from datadog_checks.vsphere.api import APIConnectionError
 from datadog_checks.vsphere.config import VSphereConfig
 
 from .common import HERE
@@ -185,3 +186,17 @@ def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_inst
     check.log.error.assert_called_once_with(
         "Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", mock.ANY
     )
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_refresh_tags_cache_should_not_raise_exception(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update({'collect_tags': True})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.log = MagicMock()
+    check.api_rest = MagicMock()
+    check.api_rest.get_resource_tags.side_effect = APIConnectionError("Some error")
+
+    check.refresh_tags_cache()
+
+    # Error logged, but `refresh_tags_cache` should NOT raise any exception
+    check.log.error.assert_called_once_with("Failed to collect tags: %s", mock.ANY)
