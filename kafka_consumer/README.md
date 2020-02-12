@@ -17,6 +17,7 @@ This check fetches the highwater offsets from the Kafka brokers, consumer offset
 The Agent's Kafka consumer check is included in the [Datadog Agent][112] package, so you don't need to install anything else on your Kafka nodes.
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -34,7 +35,9 @@ For containerized environments, see the [Autodiscovery with JMX][116] guide.
 [Run the Agent's status subcommand][117] and look for `kafka_consumer` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][118] for a list of metrics provided by this check.
 
 ### Events
@@ -43,19 +46,20 @@ See [metadata.csv][118] for a list of metrics provided by this check.
 The Datadog Agent emits an event when the value of the `consumer_lag` metric goes below 0, tagging it with `topic`, `partition` and `consumer_group`.
 
 ### Service Checks
+
 The Kafka-consumer check does not include any service checks.
 
 ## Troubleshooting
 
-* [Troubleshooting and Deep Dive for Kafka][119]
-* [Agent failed to retrieve RMIServer stub][1110]
-* [Producer and Consumer metrics don't appear in my Datadog application][1111]
+- [Troubleshooting and Deep Dive for Kafka][119]
+- [Agent failed to retrieve RMIServer stub][1110]
+- [Producer and Consumer metrics don't appear in my Datadog application][1111]
 
 ## Further Reading
 
-* [Monitoring Kafka performance metrics][1112]
-* [Collecting Kafka performance metrics][1113]
-* [Monitoring Kafka with Datadog][1114]
+- [Monitoring Kafka performance metrics][1112]
+- [Collecting Kafka performance metrics][1113]
+- [Monitoring Kafka with Datadog][1114]
 
 [111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png
 [112]: https://app.datadoghq.com/account/settings#agent

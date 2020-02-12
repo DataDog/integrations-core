@@ -8,6 +8,7 @@ import re
 from datadog_checks.utils.common import get_docker_hostname
 
 CHECK_NAME = "couch"
+CHECK_ID = 'test:123'
 
 PORT = "5984"
 HOST = get_docker_hostname()
@@ -17,7 +18,8 @@ PASSWORD = "pawprint"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-COUCH_MAJOR_VERSION = int(re.split(r'\D+', os.getenv('COUCH_VERSION'))[0])
+COUCH_RAW_VERSION = os.getenv('COUCH_VERSION')
+COUCH_MAJOR_VERSION = int(re.split(r'\D+', COUCH_RAW_VERSION)[0])
 
 # Publicly readable databases
 DB_NAMES = ["_replicator", "_users", "kennel"]

@@ -1,6 +1,9 @@
 [run]
 branch = True
 
+# Workaround for bug https://github.com/nedbat/coveragepy/issues/883#issuecomment-570093918
+parallel = True
+
 disable_warnings =
     module-not-measured
 

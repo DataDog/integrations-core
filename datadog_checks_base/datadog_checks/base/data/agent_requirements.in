@@ -15,13 +15,14 @@ ddtrace==0.32.2
 dnspython==1.16.0
 flup==1.0.3.dev-20110405; python_version < '3.0'
 flup-py3==1.0.3; python_version > '3.0'
+futures==3.3.0; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
 httplib2==0.10.3
 in-toto==0.4.2
 ipaddress==1.0.22; python_version < '3.0'
 jaydebeapi==1.1.1
 jpype1==0.7.0
-kafka-python==1.4.7; sys_platform != 'win32'
+kafka-python==2.0.0
 kazoo==2.6.1; sys_platform != 'win32'
 kubernetes==8.0.1
 ldap3==2.5
@@ -66,7 +67,7 @@ serpent==1.27; sys_platform == 'win32'
 service_identity[idna]==18.1.0
 simplejson==3.6.5
 six==1.12.0
-supervisor==4.0.1
+supervisor==4.1.0
 tuf==0.12.2
 typing==3.7.4.1; python_version < '3.0'
 uptime==3.0.1

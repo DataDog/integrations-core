@@ -63,7 +63,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
     ]
 
     commands = [
-        'flake8 --config=../.flake8 --enable-extensions=G .',
+        'flake8 --config=../.flake8 .',
         'black --check --diff .',
         'isort --check-only --diff --recursive .',
     ]

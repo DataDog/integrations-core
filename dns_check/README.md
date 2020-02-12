@@ -15,19 +15,23 @@ Though many metrics-oriented checks are best run on the same host(s) as the moni
 ### Configuration
 
 1. Edit the `dns_check.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your DNS data.
-    See the [sample dns_check.d/conf.yaml][3] for all available configuration options:
+   See the [sample dns_check.d/conf.yaml][3] for all available configuration options:
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-        - name: Example (com)
-          # nameserver: 8.8.8.8   # The nameserver to query, this must be an IP address
-          hostname: example.com # the record to fetch
-          # record_type: AAAA   # default is A
-        - name: Example (org)
-          hostname: example.org
-    ```
+   instances:
+     ## @param name - string - required
+     ## Name of your DNS check instance.
+     ## To create multiple DNS checks, create multiple instances with unique names.
+     #
+     - name: '<INSTANCE_NAME>'
+
+       ## @param hostname - string - required
+       ## Hostname to resolve.
+       #
+       hostname: '<HOSTNAME>'
+   ```
 
     If you omit the `nameserver` option, the check uses whichever nameserver is configured in local network settings.
 
@@ -44,13 +48,15 @@ Though many metrics-oriented checks are best run on the same host(s) as the moni
 See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
+
 The DNS check does not include any events.
 
 ### Service Checks
+
 This agent check tags all service checks it collects with:
 
-  * `nameserver:<nameserver_in_yaml>`
-  * `resolved_hostname:<hostname_in_yaml>`
+- `nameserver:<nameserver_in_yaml>`
+- `resolved_hostname:<hostname_in_yaml>`
 
 `dns.can_resolve`:
 
@@ -59,6 +65,7 @@ Returns CRITICAL if the Agent fails to resolve the request, otherwise returns UP
 Tagged by `hostname` and `record_type`.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent

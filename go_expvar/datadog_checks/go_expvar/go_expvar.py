@@ -40,7 +40,6 @@ DEFAULT_METRIC_NAMESPACE = "go_expvar"
 DEFAULT_GAUGE_MEMSTAT_METRICS = [
     # General statistics
     "Alloc",
-    "TotalAlloc",
     # Main allocation heap statistics
     "HeapAlloc",
     "HeapSys",
@@ -60,9 +59,13 @@ DEFAULT_RATE_MEMSTAT_METRICS = [
     "NumGC",
 ]
 
-DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS] + [
-    {PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS
-]
+DEFAULT_COUNTER_METRICS = ["TotalAlloc"]
+
+DEFAULT_METRICS = (
+    [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS]
+    + [{PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS]
+    + [{PATH: "memstats/%s" % path, TYPE: MONOTONIC_COUNTER} for path in DEFAULT_COUNTER_METRICS]
+)
 
 GO_EXPVAR_URL_PATH = "/debug/vars"
 

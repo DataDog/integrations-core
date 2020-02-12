@@ -20,30 +20,29 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `ambari.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Ambari performance data. See the [sample ambari.d/conf.yaml][3] for all available configuration options.
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-
-          ## @param url - string - required
-          ## The URL of the Ambari Server, include http:// or https://
-          #
-        - url: localhost
-    ```
+   instances:
+     ## @param url - string - required
+     ## The URL of the Ambari Server, include http:// or https://
+     #
+     - url: localhost
+   ```
 
 2. [Restart the Agent][4].
 
 ##### Log collection
 
- **Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
- 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
-     ```yaml
-      logs_enabled: true
+    ```yaml
+    logs_enabled: true
     ```
 
- 2. Edit your `ambari.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Ambari log files.
+2. Edit your `ambari.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Ambari log files.
 
     ```yaml
       logs:
@@ -54,11 +53,12 @@ Follow the instructions below to configure this check for an Agent running on a 
           log_processing_rules:
               - type: multi_line
                 name: new_log_start_with_date
-                pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])  # 2019-04-22 15:47:00,999
+                # 2019-04-22 15:47:00,999
+                pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
       ...
     ```
 
- 3. [Restart the Agent][4].
+3. [Restart the Agent][4].
 
 #### Containerized
 
@@ -67,19 +67,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 ##### Metric collection
 
 | Parameter            | Value                        |
-|----------------------|------------------------------|
+| -------------------- | ---------------------------- |
 | `<INTEGRATION_NAME>` | `ambari`                     |
 | `<INIT_CONFIG>`      | blank or `{}`                |
 | `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][6].
 
 | Parameter      | Value                                                                                                                                                                                             |
-|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "ambari", "service": "<SERVICE_NAME>", "log_processing_rules":{"type":"multi_line","name":"new_log_start_with_date","pattern":"\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])"}}` |
 
 ### Validation
@@ -90,13 +90,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 This integration collects for every host in every cluster the following system metrics:
 
-* boottime
-* cpu
-* disk
-* memory
-* load
-* network
-* process
+- boottime
+- cpu
+- disk
+- memory
+- load
+- network
+- process
 
 If service metrics collection is enabled with `collect_service_metrics` this integration collects for each whitelisted service component the metrics with headers in the white list.
 

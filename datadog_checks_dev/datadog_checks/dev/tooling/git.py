@@ -11,6 +11,19 @@ from ..utils import chdir
 from .constants import get_root
 
 
+def get_git_root():
+    """
+    Get root of git repo from current location.  Returns 'None' if not in a repo.
+    """
+    command = 'git rev-parse --show-toplevel'
+
+    result = run_command(command, capture='both')
+    if result.stdout:
+        return result.stdout.strip()
+    elif result.stderr:
+        return None
+
+
 def get_current_branch():
     """
     Get the current branch name.

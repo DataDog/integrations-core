@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from copy import deepcopy
 from distutils.version import StrictVersion
 
+import mock
 import pytest
 import redis
 
@@ -65,6 +66,18 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
 def test_service_check(aggregator, redis_auth, redis_instance):
     redis_check = Redis('redisdb', {}, {})
     redis_check.check(redis_instance)
+
+    assert len(aggregator.service_checks('redis.can_connect')) == 1
+    sc = aggregator.service_checks('redis.can_connect')[0]
+    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
+
+
+@pytest.mark.integration
+def test_disabled_config_get(aggregator, redis_auth, redis_instance):
+    redis_check = Redis('redisdb', {}, {})
+    with mock.patch.object(redis.client.Redis, 'config_get') as get:
+        get.side_effect = redis.ResponseError()
+        redis_check.check(redis_instance)
 
     assert len(aggregator.service_checks('redis.can_connect')) == 1
     sc = aggregator.service_checks('redis.can_connect')[0]

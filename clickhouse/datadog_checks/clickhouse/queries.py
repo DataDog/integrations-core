@@ -50,6 +50,7 @@ SystemMetrics = Query(
                         'type': 'gauge',
                     },
                     'Merge': {'name': 'merge.active', 'type': 'gauge'},
+                    'MySQLConnection': {'name': 'connection.mysql', 'type': 'gauge'},
                     'OpenFileForRead': {'name': 'file.open.read', 'type': 'gauge'},
                     'OpenFileForWrite': {'name': 'file.open.write', 'type': 'gauge'},
                     'PartMutation': {'name': 'query.mutation', 'type': 'gauge'},

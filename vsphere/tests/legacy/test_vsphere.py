@@ -11,15 +11,15 @@ import pytest
 from mock import MagicMock
 from pyVmomi import vim
 
-from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.cache_config import CacheConfig
-from datadog_checks.vsphere.common import SOURCE_TYPE
-from datadog_checks.vsphere.errors import BadConfigError, ConnectionError
-from datadog_checks.vsphere.vsphere import (
+from datadog_checks.vsphere.legacy.cache_config import CacheConfig
+from datadog_checks.vsphere.legacy.common import SOURCE_TYPE
+from datadog_checks.vsphere.legacy.errors import BadConfigError, ConnectionError
+from datadog_checks.vsphere.legacy.vsphere_legacy import (
     REFRESH_METRICS_METADATA_INTERVAL,
     REFRESH_MORLIST_INTERVAL,
     RESOURCE_TYPE_METRICS,
     SHORT_ROLLUP,
+    VSphereLegacyCheck,
 )
 
 from .utils import MockedMOR, assertMOR, disable_thread_pool, get_mocked_server
@@ -30,7 +30,7 @@ SERVICE_CHECK_TAGS = ["vcenter_server:vsphere_mock", "vcenter_host:None", "foo:b
 def test__init__(instance):
     with pytest.raises(BadConfigError):
         # Must define a unique 'name' per vCenter instance
-        VSphereCheck('vsphere', {}, {}, [{'': ''}])
+        VSphereLegacyCheck('vsphere', {}, [{'': ''}])
 
     init_config = {
         'clean_morlist_interval': 50,
@@ -38,7 +38,7 @@ def test__init__(instance):
         'refresh_metrics_metadata_interval': -42,
         'batch_property_collector_size': -1,
     }
-    check = VSphereCheck('vsphere', init_config, {}, [instance])
+    check = VSphereLegacyCheck('vsphere', init_config, [instance])
     i_key = check._instance_key(instance)
 
     assert check.time_started > 0
@@ -57,12 +57,12 @@ def test__init__(instance):
 
 def test_excluded_host_tags(vsphere, instance, aggregator):
     # Check default value and precedence of instance config over init config
-    check = VSphereCheck('vsphere', {}, {}, [instance])
+    check = VSphereLegacyCheck('vsphere', {}, [instance])
     assert check.excluded_host_tags == []
-    check = VSphereCheck('vsphere', {"excluded_host_tags": ["vsphere_host"]}, {}, [instance])
+    check = VSphereLegacyCheck('vsphere', {"excluded_host_tags": ["vsphere_host"]}, [instance])
     assert check.excluded_host_tags == ["vsphere_host"]
     instance["excluded_host_tags"] = []
-    check = VSphereCheck('vsphere', {"excluded_host_tags": ["vsphere_host"]}, {}, [instance])
+    check = VSphereLegacyCheck('vsphere', {"excluded_host_tags": ["vsphere_host"]}, [instance])
     assert check.excluded_host_tags == []
 
     # Test host tags are excluded from external host metadata, but still stored in the cache for metrics
@@ -78,7 +78,10 @@ def test_excluded_host_tags(vsphere, instance, aggregator):
         mocked_host: {"name": "mocked_host", "parent": None},
     }
 
-    with mock.patch("datadog_checks.vsphere.VSphereCheck._collect_mors_and_attributes", return_value=mocked_mors_attrs):
+    with mock.patch(
+        "datadog_checks.vsphere.legacy.vsphere_legacy.VSphereLegacyCheck._collect_mors_and_attributes",
+        return_value=mocked_mors_attrs,
+    ):
 
         server_instance = vsphere._get_server_instance(instance)
         result = MagicMock()
@@ -117,15 +120,15 @@ def test__is_excluded():
     included_host = MockedMOR(spec="HostSystem", name="foo")
     included_vm = MockedMOR(spec="VirtualMachine", name="foo")
 
-    assert not VSphereCheck._is_excluded(included_host, {"name": included_host.name}, include_regexes, None)
-    assert not VSphereCheck._is_excluded(included_vm, {"name": included_vm.name}, include_regexes, None)
+    assert not VSphereLegacyCheck._is_excluded(included_host, {"name": included_host.name}, include_regexes, None)
+    assert not VSphereLegacyCheck._is_excluded(included_vm, {"name": included_vm.name}, include_regexes, None)
 
     # Not OK!
     excluded_host = MockedMOR(spec="HostSystem", name="bar")
     excluded_vm = MockedMOR(spec="VirtualMachine", name="bar")
 
-    assert VSphereCheck._is_excluded(excluded_host, {"name": excluded_host.name}, include_regexes, None)
-    assert VSphereCheck._is_excluded(excluded_vm, {"name": excluded_vm.name}, include_regexes, None)
+    assert VSphereLegacyCheck._is_excluded(excluded_host, {"name": excluded_host.name}, include_regexes, None)
+    assert VSphereLegacyCheck._is_excluded(excluded_vm, {"name": excluded_vm.name}, include_regexes, None)
 
     # Sample(s)
     include_regexes = None
@@ -133,13 +136,13 @@ def test__is_excluded():
 
     # OK
     included_vm = MockedMOR(spec="VirtualMachine", name="foo", label=True)
-    assert not VSphereCheck._is_excluded(
+    assert not VSphereLegacyCheck._is_excluded(
         included_vm, {"customValue": included_vm.customValue}, include_regexes, include_only_marked
     )
 
     # Not OK
     included_vm = MockedMOR(spec="VirtualMachine", name="foo")
-    assert VSphereCheck._is_excluded(included_vm, {"customValue": []}, include_regexes, include_only_marked)
+    assert VSphereLegacyCheck._is_excluded(included_vm, {"customValue": []}, include_regexes, include_only_marked)
 
 
 def test_vms_in_filtered_host_are_filtered(vsphere, instance):
@@ -165,7 +168,10 @@ def test_vms_in_filtered_host_are_filtered(vsphere, instance):
     }
 
     regex = {'host_include': '^(?!filtered_.+)'}
-    with mock.patch("datadog_checks.vsphere.VSphereCheck._collect_mors_and_attributes", return_value=mocked_mors_attrs):
+    with mock.patch(
+        "datadog_checks.vsphere.legacy.vsphere_legacy.VSphereLegacyCheck._collect_mors_and_attributes",
+        return_value=mocked_mors_attrs,
+    ):
         obj_list = vsphere._get_all_objs(server_instance, regex, False, [])
         assert len(obj_list[vim.VirtualMachine]) == 1
         assert len(obj_list[vim.HostSystem]) == 1
@@ -206,7 +212,10 @@ def test__get_all_objs(vsphere, instance):
         mocked_cluster: {"name": "cluster"},
         mocked_datacenter: {"parent": MockedMOR(spec="Folder", name="unknown folder"), "name": "datacenter"},
     }
-    with mock.patch("datadog_checks.vsphere.VSphereCheck._collect_mors_and_attributes", return_value=mocked_mors_attrs):
+    with mock.patch(
+        "datadog_checks.vsphere.legacy.vsphere_legacy.VSphereLegacyCheck._collect_mors_and_attributes",
+        return_value=mocked_mors_attrs,
+    ):
         obj_list = vsphere._get_all_objs(server_instance, None, False, [])
         assert len(obj_list[vim.VirtualMachine]) == 2
         assert {
@@ -256,7 +265,7 @@ def test__collect_mors_and_attributes(vsphere, instance):
     Test that we check for errors when collecting properties with property collector
     """
     server_instance = vsphere._get_server_instance(instance)
-    with mock.patch("datadog_checks.vsphere.vsphere.vmodl"):
+    with mock.patch("datadog_checks.vsphere.legacy.vsphere_legacy.vmodl"):
         obj = MagicMock(missingSet=None, obj="obj")
         result = MagicMock(token=None, objects=[obj])
         server_instance.content.propertyCollector.RetrievePropertiesEx.return_value = result
@@ -294,7 +303,7 @@ def test__cache_morlist_raw(vsphere, instance):
         ```
     """
     # Samples
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         instance["host_include_only_regex"] = "host[2-9]"
         instance["vm_include_only_regex"] = "vm[^2]"
         instance["include_only_marked"] = True
@@ -343,9 +352,9 @@ def test__cache_morlist_raw(vsphere, instance):
 
 def test_use_guest_hostname(vsphere, instance):
     # Default value
-    with mock.patch("datadog_checks.vsphere.VSphereCheck._get_all_objs") as mock_get_all_objs, mock.patch(
-        "datadog_checks.vsphere.vsphere.vmodl"
-    ):
+    with mock.patch(
+        "datadog_checks.vsphere.legacy.vsphere_legacy.VSphereLegacyCheck._get_all_objs"
+    ) as mock_get_all_objs, mock.patch("datadog_checks.vsphere.legacy.vsphere_legacy.vmodl"):
         vsphere._cache_morlist_raw(instance)
         # Default value
         assert not mock_get_all_objs.call_args[1]["use_guest_hostname"]
@@ -355,7 +364,7 @@ def test_use_guest_hostname(vsphere, instance):
         vsphere._cache_morlist_raw(instance)
         assert mock_get_all_objs.call_args[1]["use_guest_hostname"]
 
-    with mock.patch("datadog_checks.vsphere.vsphere.vmodl"):
+    with mock.patch("datadog_checks.vsphere.legacy.vsphere_legacy.vmodl"):
 
         # Discover hosts and virtual machines
         instance["use_guest_hostname"] = True
@@ -378,7 +387,7 @@ def test__process_mor_objects_queue(vsphere, instance):
 
     vsphere.batch_morlist_size = 1
     i_key = vsphere._instance_key(instance)
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         vsphere._cache_morlist_raw(instance)
         assert sum(vsphere.mor_objects_queue.size(i_key, res_type) for res_type in RESOURCE_TYPE_METRICS) == 11
         vsphere._process_mor_objects_queue(instance)
@@ -404,7 +413,7 @@ def test_collect_realtime_only(vsphere, instance):
     """
     vsphere._process_mor_objects_queue_async = MagicMock()
     instance["collect_realtime_only"] = False
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         vsphere._cache_morlist_raw(instance)
         vsphere._process_mor_objects_queue(instance)
         # Called once to process the 2 datacenters, then 2 clusters, then the datastore
@@ -412,7 +421,7 @@ def test_collect_realtime_only(vsphere, instance):
 
     instance["collect_realtime_only"] = True
     vsphere._process_mor_objects_queue_async.reset_mock()
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         vsphere._cache_morlist_raw(instance)
         vsphere._process_mor_objects_queue(instance)
         assert vsphere._process_mor_objects_queue_async.call_count == 0
@@ -492,7 +501,7 @@ def test_format_metric_name(vsphere):
 
 
 def test_collect_metrics(vsphere, instance):
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         vsphere.batch_morlist_size = 1
         vsphere._collect_metrics_async = MagicMock()
         vsphere._cache_metrics_metadata(instance)
@@ -546,7 +555,7 @@ def test_check(vsphere, instance):
     """
     Test the check() method
     """
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         with mock.patch.object(vsphere, 'set_external_tags') as set_external_tags:
             vsphere.check(instance)
             set_external_tags.assert_called_once()
@@ -613,9 +622,9 @@ def test_check(vsphere, instance):
 
 
 def test_service_check_ko(aggregator, instance):
-    check = disable_thread_pool(VSphereCheck('disk', {}, {}, [instance]))
+    check = disable_thread_pool(VSphereLegacyCheck('disk', {}, [instance]))
 
-    with mock.patch('datadog_checks.vsphere.vsphere.connect.SmartConnect') as SmartConnect:
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.connect.SmartConnect') as SmartConnect:
         # SmartConnect fails
         SmartConnect.side_effect = Exception()
 
@@ -623,7 +632,7 @@ def test_service_check_ko(aggregator, instance):
             check.check(instance)
 
         aggregator.assert_service_check(
-            VSphereCheck.SERVICE_CHECK_NAME, status=VSphereCheck.CRITICAL, count=1, tags=SERVICE_CHECK_TAGS
+            VSphereLegacyCheck.SERVICE_CHECK_NAME, status=VSphereLegacyCheck.CRITICAL, count=1, tags=SERVICE_CHECK_TAGS
         )
 
         aggregator.reset()
@@ -638,19 +647,19 @@ def test_service_check_ko(aggregator, instance):
             check.check(instance)
 
         aggregator.assert_service_check(
-            VSphereCheck.SERVICE_CHECK_NAME, status=VSphereCheck.CRITICAL, count=1, tags=SERVICE_CHECK_TAGS
+            VSphereLegacyCheck.SERVICE_CHECK_NAME, status=VSphereLegacyCheck.CRITICAL, count=1, tags=SERVICE_CHECK_TAGS
         )
 
 
 def test_service_check_ok(aggregator, instance):
-    check = disable_thread_pool(VSphereCheck('disk', {}, {}, [instance]))
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
-        with mock.patch('datadog_checks.vsphere.vsphere.connect.SmartConnect') as SmartConnect:
+    check = disable_thread_pool(VSphereLegacyCheck('disk', {}, [instance]))
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
+        with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.connect.SmartConnect') as SmartConnect:
             SmartConnect.return_value = get_mocked_server()
             check.check(instance)
 
             aggregator.assert_service_check(
-                VSphereCheck.SERVICE_CHECK_NAME, status=VSphereCheck.OK, tags=SERVICE_CHECK_TAGS
+                VSphereLegacyCheck.SERVICE_CHECK_NAME, status=VSphereLegacyCheck.OK, tags=SERVICE_CHECK_TAGS
             )
 
 
@@ -665,7 +674,7 @@ def test__should_cache(instance):
     now = time.time()
     # do not use fixtures for the check instance, some params are set at
     # __init__ time and we need to instantiate the check multiple times
-    check = VSphereCheck('vsphere', {}, {}, [instance])
+    check = VSphereLegacyCheck('vsphere', {}, [instance])
     i_key = check._instance_key(instance)
 
     # first run should always cache
@@ -678,7 +687,7 @@ def test__should_cache(instance):
         'refresh_morlist_interval': 2 * REFRESH_MORLIST_INTERVAL,
         'refresh_metrics_metadata_interval': 2 * REFRESH_METRICS_METADATA_INTERVAL,
     }
-    check = VSphereCheck('vsphere', init_config, {}, [instance])
+    check = VSphereLegacyCheck('vsphere', init_config, [instance])
     # simulate previous runs, set the last execution time in the past
     check.cache_config.set_last(CacheConfig.Morlist, i_key, now - (2 * REFRESH_MORLIST_INTERVAL))
     check.cache_config.set_last(CacheConfig.Metadata, i_key, now - (2 * REFRESH_METRICS_METADATA_INTERVAL))
@@ -735,7 +744,7 @@ def migrated_event():
 
 
 def test_events(aggregator, vsphere, instance):
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         server_instance = vsphere._get_server_instance(instance)
         server_instance.content.eventManager.QueryEvents.return_value = [alarm_event()]
         vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
@@ -746,7 +755,7 @@ def test_events(aggregator, vsphere, instance):
 
 
 def test_events_tags(aggregator, vsphere, instance):
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         server_instance = vsphere._get_server_instance(instance)
         server_instance.content.eventManager.QueryEvents.return_value = [migrated_event()]
         vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
@@ -772,7 +781,7 @@ def test_events_tags(aggregator, vsphere, instance):
 
 
 def test_events_gray_handled(aggregator, vsphere, instance):
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         server_instance = vsphere._get_server_instance(instance)
         event = alarm_event(from_status='gray', message='Went from Gray to Red')
         server_instance.content.eventManager.QueryEvents.return_value = [event]
@@ -793,7 +802,7 @@ def test_events_gray_handled(aggregator, vsphere, instance):
 
 
 def test_events_gray_ignored(aggregator, vsphere, instance):
-    with mock.patch('datadog_checks.vsphere.vsphere.vmodl'):
+    with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         server_instance = vsphere._get_server_instance(instance)
         event = alarm_event(from_status='gray', to_status='green', message='Went from Gray to Green')
         server_instance.content.eventManager.QueryEvents.return_value = [event]

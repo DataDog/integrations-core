@@ -1,50 +1,50 @@
-# Agent Check: Openstack_controller
+# Agent Check: Openstack Controller
 
 ## Overview
 
-This check monitors [Openstack][1] from the controller node.
+This check monitors [OpenStack][1] from the controller node.
 
 ## Setup
+
 ### Installation
 
-The Openstack_controller check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
+The OpenStack Controller check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
-The openstack_controller integration is designed to collect information from all compute nodes and the servers running it. The integration should be run from a single Agent to monitor your openstack environment, and can be deployed on your controller node or an adjacent server that has access to the Keystone and Nova endpoints.
+The OpenStack Controller integration is designed to collect information from all compute nodes and the servers running it. The integration should be run from a single Agent to monitor your OpenStack environment, and can be deployed on your controller node or an adjacent server that has access to the Keystone and Nova endpoints.
 
 #### Prepare OpenStack
 
-Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` file. This user requires admin read only permissions across your environment so that it can be run from a single node and read high level system information about all compute nodes and servers.
+Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` file. This user requires admin read-only permissions across your environment so that it can be run from a single node and read high level system information about all nodes and servers.
 
 #### Agent Configuration
 
-1. Edit the `openstack_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your openstack_controller performance data. See the [sample openstack_controller.d/conf.yaml][2] for all available configuration options:
+1. Edit the `openstack_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your OpenStack Controller performance data. See the [sample openstack_controller.d/conf.yaml][2] for all available configuration options:
 
-    ```yaml
-        init_config:
+   ```yaml
+   init_config:
 
-        instances:
+   instances:
+     ## @param name - string - required
+     ## Unique identifier for this instance.
+     #
+     - name: "<INSTANCE_NAME>"
 
-            ## @param name - string - required
-            ## Unique identifier for this instance.
-            #
-          - name: "<INSTANCE_NAME>"
-
-            ## @param user - object - required
-            ## Password authentication is the only auth method supported
-            ## User expects username, password, and user domain id
-            ## `user` should resolve to a structure like
-            ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
-            ## The check uses the Unscoped token method to collect information about
-            ## all available projects to the user.
-            #
-            user:
-                password: "<PASSWORD>"
-                name: "<USER_NAME>"
-                domain:
-                    id: "<DOMAIN_ID>"
-    ```
+       ## @param user - object - required
+       ## Password authentication is the only auth method supported
+       ## User expects username, password, and user domain id
+       ## `user` should resolve to a structure like
+       ## {'password': '<PASSWORD>', 'name': '<USER_NAME>', 'domain': {'id': '<DOMAIN_ID>'}}
+       ## The check uses the Unscoped token method to collect information about
+       ## all available projects to the user.
+       #
+       user:
+         password: "<PASSWORD>"
+         name: "<USER_NAME>"
+         domain:
+           id: "<DOMAIN_ID>"
+   ```
 
 2. [Restart the Agent][3]
 
@@ -59,6 +59,7 @@ Create a `datadog` user that is used in your `openstack_controller.d/conf.yaml` 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
+
 **openstack.neutron.api.up**
 
 Returns `CRITICAL` if the Agent is unable to query the Neutron API, `UNKNOWN` if there is an issue with the Keystone API. Returns `OK` otherwise.
@@ -79,10 +80,9 @@ Returns `UNKNOWN` if the Agent is unable to get the Hypervisor state, `CRITICAL`
 
 Returns `CRITICAL` if the Network is down. Returns `OK` otherwise.
 
-
 ### Events
 
-Openstack_controller does not include any events.
+OpenStack Controller does not include any events.
 
 ## Troubleshooting
 

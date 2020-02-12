@@ -26,48 +26,46 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `apache.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Apache metrics. See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-
-          ## @param apache_status_url - string - required
-          ## Status url of your Apache server.
-          #
-        - apache_status_url: http://localhost/server-status?auto
-    ```
+   instances:
+     ## @param apache_status_url - string - required
+     ## Status url of your Apache server.
+     #
+     - apache_status_url: http://localhost/server-status?auto
+   ```
 
 2. [Restart the Agent][5].
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Add this configuration block to your `apache.d/conf.yaml` file to start collecting your Apache Logs:
 
-    ```yaml
-      logs:
-          - type: file
-            path: /var/log/apache2/access.log
-            source: apache
-            sourcecategory: http_web_access
-            service: apache
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/apache2/access.log
+       source: apache
+       sourcecategory: http_web_access
+       service: apache
 
-          - type: file
-            path: /var/log/apache2/error.log
-            source: apache
-            sourcecategory: http_web_access
-            service: apache
-    ```
+     - type: file
+       path: /var/log/apache2/error.log
+       source: apache
+       sourcecategory: http_web_access
+       service: apache
+   ```
 
-    Change the `path` and `service` parameter values and configure them for your environment.
-    See the [sample apache.d/conf.yaml][4] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample apache.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
 
@@ -77,20 +75,20 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Metric collection
 
-| Parameter            | Value                                                          |
-|----------------------|----------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `apache`                                                       |
-| `<INIT_CONFIG>`      | blank or `{}`                                                  |
+| Parameter            | Value                                                         |
+| -------------------- | ------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `apache`                                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                                 |
 | `<INSTANCE_CONFIG>`  | `{"apache_status_url": "http://%%host%%/server-status?auto"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
 
 | Parameter      | Value                                               |
-|----------------|-----------------------------------------------------|
+| -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "apache", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
@@ -98,11 +96,13 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 [Run the Agent's status subcommand][8] and look for `apache` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
+
 The Apache check does not include any events.
 
 ### Service Checks
@@ -113,18 +113,19 @@ Returns `CRITICAL` if the Agent cannot connect to the configured `apache_status_
 ## Troubleshooting
 
 ### Apache status URL
+
 If you are having issues with your Apache integration, it is mostly like due to the Agent not being able to access your Apache status URL. Try running curl for the `apache_status_url` listed in [your `apache.d/conf.yaml` file][4] (include your login credentials if applicable).
 
-* [Apache SSL certificate issues][10]
+- [Apache SSL certificate issues][10]
 
 ## Further Reading
+
 Additional helpful documentation, links, and articles:
 
-* [Deploying and configuring Datadog with CloudFormation][11]
-* [Monitoring Apache web server performance][12]
-* [How to collect Apache performance metrics][13]
-* [How to monitor Apache web server with Datadog][14]
-
+- [Deploying and configuring Datadog with CloudFormation][11]
+- [Monitoring Apache web server performance][12]
+- [How to collect Apache performance metrics][13]
+- [How to monitor Apache web server with Datadog][14]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
