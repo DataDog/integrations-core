@@ -1,0 +1,10 @@
+name: RethinkDB
+files:
+- name: rethinkdb.yaml
+  options:
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - template: instances/tags
+    - template: instances/global
