@@ -1,3 +1,5 @@
+# (C) Datadog, Inc. 2020-present
+
 import csv
 import os
 import tempfile
@@ -5,21 +7,33 @@ import tempfile
 import click
 
 from ...utils import (
+    complete_valid_checks,
     get_assets_directory,
     get_check_file,
     get_config_file,
     get_data_directory,
+    get_testable_checks,
     get_valid_integrations,
     has_e2e,
 )
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 
-CSV_COLUMNS = ['name', 'has_dashboard', 'has_logs', 'is_jmx', 'is_prometheus', 'is_http', 'has_e2e', 'tile_only']
-DOGWEB_DASHBOARDS = ('vsphere', 'sqlserver', 'tomcat', 'pusher', 'sigsci', 'marathon', 'ibm_was', 'nginx', 'immunio')
+CSV_COLUMNS = [
+    'name',
+    'has_dashboard',
+    'has_logs',
+    'is_jmx',
+    'is_prometheus',
+    'is_http',
+    'has_e2e',
+    'tile_only',
+    'has_tests',
+]
+DOGWEB_DASHBOARDS = ('sqlserver', 'tomcat', 'pusher', 'sigsci', 'marathon', 'ibm_was', 'nginx', 'immunio')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a catalog with information about integrations')
-@click.argument('checks', nargs=-1, autocompletion=complete_valid_checks,  required=True)
+@click.argument('checks', nargs=-1, autocompletion=complete_valid_checks, required=True)
 @click.option(
     '-f',
     '--file',
@@ -41,6 +55,7 @@ def catalog(checks, out_file):
 
     checking_all = 'all' in checks
     valid_checks = get_valid_integrations()
+    testable_checks = get_testable_checks()
 
     if not checking_all:
         for check in checks:
@@ -50,6 +65,7 @@ def catalog(checks, out_file):
         checks = valid_checks
 
     integration_catalog = []
+
     for check in checks:
         has_logs = False
         is_prometheus = False
@@ -83,6 +99,7 @@ def catalog(checks, out_file):
             'is_http': is_http,
             'has_e2e': has_e2e(check),
             'tile_only': tile_only,
+            'has_tests': not tile_only and check in testable_checks,
         }
         integration_catalog.append(entry)
 
