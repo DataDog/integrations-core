@@ -21,13 +21,16 @@ def test_lab(aggregator):
 
     Example usage:
     $ export TEST_VSPHERE_USER='XXXXX' TEST_VSPHERE_PASS='XXXXX'
-    $ ddev test vsphere:py37 -k test_lab
+    $ TEST_VSPHERE_USE_LAB=1 ddev test vsphere:py38 -k test_lab
 
     """
-    username = os.environ.get('TEST_VSPHERE_USER')
-    password = os.environ.get('TEST_VSPHERE_PASS')
-    if not username or not password:
-        pytest.skip("Skipped! TEST_VSPHERE_USER and TEST_VSPHERE_PASS are needed to run this test")
+    if not os.environ.get('TEST_VSPHERE_USE_LAB'):
+        pytest.skip(
+            "Skipped! Set TEST_VSPHERE_USE_LAB to run this test. "
+            "TEST_VSPHERE_USER and TEST_VSPHERE_PASS must also be set."
+        )
+    username = os.environ['TEST_VSPHERE_USER']
+    password = os.environ['TEST_VSPHERE_PASS']
     instance = {
         'host': 'aws.vcenter.localdomain',
         'username': username,
