@@ -289,6 +289,7 @@ datadog.vsphere.query_metrics.time.max,gauge,,second,,"Time required to run a qu
 datadog.vsphere.query_metrics.time.count,gauge,,second,,"Time required to run a query_metrics operation (count)",-1,vsphere,dd querymetrics count
 datadog.vsphere.query_metrics.time.median,gauge,,second,,"Time required to run a query_metrics operation (med)",-1,vsphere,dd querymetrics med
 datadog.vsphere.query_metrics.time.95percentile,gauge,,second,,"Time required to run a query_metrics operation (95th)",-1,vsphere,dd querymetrics 95th
+datadog.vsphere.query_tags.time,gauge,,second,,"Time required to query vSphere tags",-1,vsphere,dd querytags
 datadog.vsphere.collect_events.time,gauge,,second,,"Time required to collect events",-1,vsphere,dd collectevents
 datadog.vsphere.refresh_infrastructure_cache.time,gauge,,second,,"Time required to refresh the infra cache",-1,vsphere,dd refresh infra cache
 datadog.vsphere.refresh_metrics_metadata_cache.time,gauge,,second,,"Time required to refresh the metrics metadata cache",-1,vsphere,dd refresh metadata cache

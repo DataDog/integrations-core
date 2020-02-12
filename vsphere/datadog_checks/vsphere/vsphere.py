@@ -133,7 +133,7 @@ class VSphereCheck(AgentCheck):
         except APIConnectionError as e:
             self.log.error("Failed to collect tags: %s", e)
             return
-        self.histogram('datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True)
+        self.gauge('datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True)
         self.tags_cache.set_all_tags(mor_tags)
 
     def refresh_infrastructure_cache(self):
