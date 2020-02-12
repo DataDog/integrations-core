@@ -312,7 +312,10 @@ class ConsulCheck(AgentCheck):
                 if sc_id not in sc:
                     tags = ["check:{}".format(check["CheckID"])]
                     if check["ServiceName"]:
-                        tags.append("service:{}".format(check["ServiceName"]))
+                        tags.append('consul_service:{}'.format(check['ServiceName']))
+                        if not instance.get('disable_legacy_service_tag', False):
+                            self._log_deprecation('service_tag', 'consul_service')
+                            tags.append('service:{}'.format(check['ServiceName']))
                     if check["ServiceID"]:
                         tags.append("consul_service_id:{}".format(check["ServiceID"]))
                     sc[sc_id] = {'status': status, 'tags': tags}

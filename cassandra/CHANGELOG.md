@@ -1,5 +1,10 @@
 # CHANGELOG - cassandra
 
+## 1.4.0 / 2020-01-13
+
+* [Added] Add multi_line log_processing_rules. See [#5426](https://github.com/DataDog/integrations-core/pull/5426).
+* [Fixed] Fix broken link to logs multi-line aggregation docs. See [#5353](https://github.com/DataDog/integrations-core/pull/5353).
+
 ## 1.3.1 / 2019-05-14
 
 * [Fixed] Fix example tags section. See [#3431](https://github.com/DataDog/integrations-core/pull/3431).

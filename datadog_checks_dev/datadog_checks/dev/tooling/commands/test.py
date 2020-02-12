@@ -11,18 +11,19 @@ from ...subprocess import run_command
 from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci
 from ..constants import get_root
 from ..testing import construct_pytest_options, fix_coverage_report, get_tox_envs, pytest_coverage_sources
+from ..utils import complete_testable_checks
 from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 
 def display_envs(check_envs):
     for check, envs in check_envs:
-        echo_success('`{}`:'.format(check))
+        echo_success(f'`{check}`:')
         for e in envs:
-            echo_info('    {}'.format(e))
+            echo_info(f'    {e}')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Run tests')
-@click.argument('checks', nargs=-1)
+@click.argument('checks', autocompletion=complete_testable_checks, nargs=-1)
 @click.option('--format-style', '-fs', is_flag=True, help='Run only the code style formatter')
 @click.option('--style', '-s', is_flag=True, help='Run only style checks')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
@@ -95,6 +96,8 @@ def test(
         'TOX_TESTENV_PASSENV': (
             # Used in .coveragerc for whether or not to show missing line numbers for coverage
             'DDEV_COV_MISSING '
+            # Necessary for compilation on Windows: PROGRAMDATA, PROGRAMFILES, PROGRAMFILES(X86)
+            'PROGRAM* '
             # Necessary for getting the user on Windows https://docs.python.org/3/library/getpass.html#getpass.getuser
             'USERNAME '
             # Space-separated list of pytest options
@@ -106,16 +109,16 @@ def test(
     }
 
     if passenv:
-        test_env_vars['TOX_TESTENV_PASSENV'] += ' {}'.format(passenv)
+        test_env_vars['TOX_TESTENV_PASSENV'] += f' {passenv}'
 
-    test_env_vars['TOX_TESTENV_PASSENV'] += ' {}'.format(' '.join(get_ci_env_vars()))
+    test_env_vars['TOX_TESTENV_PASSENV'] += f" {' '.join(get_ci_env_vars())}"
 
     if color is not None:
         test_env_vars['PY_COLORS'] = '1' if color else '0'
 
     if e2e:
         test_env_vars[E2E_PARENT_PYTHON] = sys.executable
-        test_env_vars['TOX_TESTENV_PASSENV'] += ' {}'.format(E2E_PARENT_PYTHON)
+        test_env_vars['TOX_TESTENV_PASSENV'] += f' {E2E_PARENT_PYTHON}'
 
     check_envs = get_tox_envs(checks, style=style, format_style=format_style, benchmark=bench, changed_only=changed)
     tests_ran = False
@@ -153,7 +156,7 @@ def test(
         test_env_vars['PYTEST_ADDOPTS'] = pytest_options
 
         if verbose:
-            echo_info('pytest options: `{}`'.format(test_env_vars['PYTEST_ADDOPTS']))
+            echo_info(f"pytest options: `{test_env_vars['PYTEST_ADDOPTS']}`")
 
         with chdir(os.path.join(root, check), env_vars=test_env_vars):
             if format_style:
@@ -167,7 +170,7 @@ def test(
             else:
                 test_type_display = 'tests'
 
-            wait_text = '{}Running {} for `{}`'.format(output_separator, test_type_display, check)
+            wait_text = f'{output_separator}Running {test_type_display} for `{check}`'
             echo_waiting(wait_text)
             echo_waiting('-' * len(wait_text))
 

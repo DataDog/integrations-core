@@ -1,5 +1,13 @@
 # CHANGELOG - snmp
 
+## 2.3.2 / 2020-01-15
+
+* [Fixed] Tweak behavior related to discovery. See [#5466](https://github.com/DataDog/integrations-core/pull/5466).
+
+## 2.3.1 / 2020-01-13
+
+* [Fixed] Fix usage of old OID list attributes on InstanceConfig. See [#5412](https://github.com/DataDog/integrations-core/pull/5412).
+
 ## 2.3.0 / 2020-01-07
 
 * [Added] Remove MIB requirement in profiles. See [#5397](https://github.com/DataDog/integrations-core/pull/5397).

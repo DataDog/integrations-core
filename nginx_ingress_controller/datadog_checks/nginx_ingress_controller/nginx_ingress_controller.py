@@ -11,11 +11,10 @@ class NginxIngressControllerCheck(OpenMetricsBaseCheck):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         super(NginxIngressControllerCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 "nginx_ingress": {

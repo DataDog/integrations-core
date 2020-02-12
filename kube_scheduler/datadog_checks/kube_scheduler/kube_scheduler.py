@@ -103,11 +103,10 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, OpenMetricsBaseCheck):
         "record_namespace": "kube-system",
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         super(KubeSchedulerCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 "kube_scheduler": {

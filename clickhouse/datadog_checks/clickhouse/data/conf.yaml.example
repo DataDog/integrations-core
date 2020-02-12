@@ -23,10 +23,10 @@ instances:
     #
     # port: 9000
 
-    ## @param username - string - optional - default: default
+    ## @param user - string - optional - default: default
     ## The database user to authenticate as.
     #
-    # username: default
+    # user: default
 
     ## @param password - string - optional
     ## The password of `username`.

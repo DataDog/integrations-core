@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from io import StringIO
 
 import click
-from six import StringIO, iteritems
 
 from ....utils import write_file
 from ...constants import get_agent_integrations_file, get_agent_release_requirements
@@ -15,8 +15,7 @@ from .common import get_agent_tags
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help="Provide a list of updated checks on a given Datadog Agent version, in changelog form",
+    context_settings=CONTEXT_SETTINGS, short_help="Generate a markdown file of integrations in an Agent release",
 )
 @click.option('--since', help="Initial Agent version", default='6.3.0')
 @click.option('--to', help="Final Agent version")
@@ -39,11 +38,11 @@ def integrations(since, to, write, force):
 
     integrations_contents = StringIO()
     for tag in agent_tags:
-        integrations_contents.write('## Datadog Agent version {}\n\n'.format(tag))
+        integrations_contents.write(f'## Datadog Agent version {tag}\n\n')
         # Requirements for current tag
         file_contents = git_show_file(req_file_name, tag)
-        for name, ver in iteritems(parse_agent_req_file(file_contents)):
-            integrations_contents.write('* {}: {}\n'.format(name, ver))
+        for name, ver in parse_agent_req_file(file_contents).items():
+            integrations_contents.write(f'* {name}: {ver}\n')
         integrations_contents.write('\n')
 
     # save the changelog on disk if --write was passed

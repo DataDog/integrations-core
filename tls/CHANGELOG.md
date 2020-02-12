@@ -1,5 +1,13 @@
 # CHANGELOG - TLS
 
+## 1.4.1 / 2020-02-12
+
+* [Fixed] Don't rely on file extension for local cert loading. See [#5694](https://github.com/DataDog/integrations-core/pull/5694).
+
+## 1.4.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
 ## 1.3.0 / 2019-12-02
 
 * [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).

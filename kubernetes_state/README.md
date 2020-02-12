@@ -4,10 +4,11 @@
 
 Get metrics from kubernetes_state service in real time to:
 
-* Visualize and monitor kubernetes_state states
-* Be notified about kubernetes_state failovers and events.
+- Visualize and monitor kubernetes_state states
+- Be notified about kubernetes_state failovers and events.
 
 ## Setup
+
 ### Installation
 
 The Kubernetes-State check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your Kubernetes servers.
@@ -21,13 +22,17 @@ Edit the `kubernetes_state.d/conf.yaml` file, in the `conf.d/` folder at the roo
 [Run the Agent's `status` subcommand][4] and look for `kubernetes_state` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
+
 The Kubernetes-state check does not include any events.
 
 ### Service Checks
+
 **kubernetes_state.node.ready**
 
 Returns `CRITICAL` if a cluster node is not ready.
@@ -58,6 +63,7 @@ Returns `CRITICAL` if a cron job scheduled time is in the past.
 Returns `OK` otherwise.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent

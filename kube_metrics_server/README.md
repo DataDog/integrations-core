@@ -17,6 +17,16 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][3].
 
+#### SSL
+
+If your endpoint is secured, additional configuration is required:
+
+1. Identify the certificate used for securing the metric endpoint.
+
+2. Mount the related certificate file in the Agent pod.
+
+3. Apply your SSL configuration. Refer to the [default configuration file][7] for more information.
+
 ### Validation
 
 [Run the Agent's status subcommand][4] and look for `kube_metrics_server` under the Checks section.
@@ -47,3 +57,4 @@ Need help? Contact [Datadog support][6].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kube_metrics_server/metadata.csv
 [6]: https://docs.datadoghq.com/help
+[7]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example

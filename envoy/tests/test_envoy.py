@@ -40,7 +40,7 @@ def test_success_fixture(aggregator):
 
     num_metrics = len(response('multiple_services').content.decode().splitlines())
     num_metrics -= sum(c.unknown_metrics.values()) + sum(c.unknown_tags.values())
-    assert 4215 <= metrics_collected == num_metrics
+    assert 4412 <= metrics_collected == num_metrics
 
 
 def test_success_fixture_whitelist(aggregator):
@@ -73,7 +73,7 @@ def test_success_fixture_whitelist_blacklist(aggregator):
         c.check(instance)
 
     for metric in aggregator.metric_names:
-        assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out")
+        assert metric.startswith("envoy.cluster.") and not metric.startswith("envoy.cluster.out.")
 
 
 def test_service_check(aggregator):

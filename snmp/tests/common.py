@@ -6,6 +6,7 @@ import copy
 import logging
 import os
 
+from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.utils.common import get_docker_hostname
 
@@ -20,6 +21,7 @@ AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtoco
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
 AUTH_KEY = 'doggiepass'
 PRIV_KEY = 'doggiePRIVkey'
+SNMP_CONTAINER_NAME = 'dd-snmp'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
@@ -175,6 +177,12 @@ def generate_instance_config(metrics, template=None):
     instance_config['metrics'] = metrics
     instance_config['name'] = HOST
     return instance_config
+
+
+def generate_container_instance_config(metrics):
+    conf = copy.deepcopy(SNMP_CONF)
+    conf['ip_address'] = get_container_ip(SNMP_CONTAINER_NAME)
+    return generate_instance_config(metrics, template=conf)
 
 
 def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_key=None, priv=None, priv_key=None):

@@ -1,5 +1,5 @@
 jobs:
-- template: './test-all.yml'
+- template: ./test-all.yml
   parameters:
     checks:
     - checkName: datadog_checks_base
@@ -20,6 +20,9 @@ jobs:
     - checkName: active_directory
       displayName: Active Directory
       os: windows
+    - checkName: activemq
+      displayName: ActiveMQ
+      os: linux
     - checkName: activemq_xml
       displayName: ActiveMQ XML
       os: linux
@@ -28,6 +31,9 @@ jobs:
       os: linux
     - checkName: airflow
       displayName: Airflow
+      os: linux
+    - checkName: amazon_msk
+      displayName: Amazon Kafka
       os: linux
     - checkName: ambari
       displayName: Ambari
@@ -98,6 +104,9 @@ jobs:
     - checkName: ecs_fargate
       displayName: Amazon ECS Fargate
       os: linux
+    - checkName: eks_fargate
+      displayName: EKS Fargate
+      os: linux
     - checkName: elastic
       displayName: Elasticsearch
       os: linux
@@ -110,6 +119,9 @@ jobs:
     - checkName: exchange_server
       displayName: Exchange Server
       os: windows
+    - checkName: external_dns
+      displayName: External DNS
+      os: linux
     - checkName: fluentd
       displayName: fluentd
       os: linux
@@ -301,6 +313,9 @@ jobs:
       os: linux
     - checkName: sap_hana
       displayName: SAP HANA
+      os: linux
+    - checkName: scylla
+      displayName: Scylla
       os: linux
     - checkName: snmp
       displayName: SNMP

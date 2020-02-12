@@ -1,5 +1,9 @@
 # CHANGELOG - directory
 
+## 1.5.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
 ## 1.4.1 / 2019-10-09
 
 * [Fixed] Explain filetagname logic in the example config file. See [#4524](https://github.com/DataDog/integrations-core/pull/4524).

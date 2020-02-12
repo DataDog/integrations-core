@@ -14,7 +14,7 @@ ENV_DIR = path_join(APP_DIR, 'envs')
 
 
 def config_file_name(check):
-    return '{}.yaml'.format(check)
+    return f'{check}.yaml'
 
 
 def locate_env_dir(check, env):
@@ -57,6 +57,19 @@ def get_configured_checks():
         envs.sort()
 
     return envs
+
+
+def get_active_checks():
+    """Check for config files to guess whether a check env is active"""
+    checks = get_configured_checks()
+    active_checks = []
+
+    root_dir = path_join(ENV_DIR)
+    for c in checks:
+        check_dir = path_join(root_dir, c)
+        if os.path.isdir(check_dir) and os.listdir(check_dir):
+            active_checks.append(c)
+    return active_checks
 
 
 def remove_env_root(check):

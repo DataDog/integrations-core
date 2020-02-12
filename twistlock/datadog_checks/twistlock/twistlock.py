@@ -12,6 +12,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 
 from .config import Config
+from .utils import normalize_api_data_inplace
 
 DOCKERIO_PREFIX = "docker.io/"
 
@@ -197,11 +198,10 @@ class TwistlockCheck(AgentCheck):
                 continue
 
             container_tags = []
-            container_info = container.get('info', {})
-            name = container_info.get('name')
+            name = container.get('name')
             if name:
                 container_tags += ["container_name:{}".format(name)]
-            image_name = container_info.get('imageName')
+            image_name = container.get('imageName')
             if image_name:
                 container_tags += ["image_name:{}".format(image_name)]
             container_tags += self.config.tags
@@ -273,7 +273,7 @@ class TwistlockCheck(AgentCheck):
         for severity_type in severity_types:
             summary[severity_type] = 0
 
-        cves = data.get('info', {}).get('cveVulnerabilities', []) or []
+        cves = data.get('vulnerabilities', []) or []
         for cve in cves:
             summary[cve['severity']] += 1
             cve_tags = ['cve:{}'.format(cve['cve'])] + SEVERITY_TAGS.get(cve['severity'], []) + tags
@@ -287,7 +287,7 @@ class TwistlockCheck(AgentCheck):
 
     def _report_compliance_information(self, namespace, data, tags):
         compliance = defaultdict(int)
-        vulns = data.get('info', {}).get('complianceDistribution', {}) or {}
+        vulns = data.get('complianceDistribution', {}) or {}
         severity_types = ["critical", "high", "medium", "low"]
         for severity_type in severity_types:
             compliance[severity_type] += vulns.get(severity_type, 0)
@@ -298,7 +298,7 @@ class TwistlockCheck(AgentCheck):
         # Layer count and size
         layer_count = 0
         layer_sizes = 0
-        for layer in data.get('info', {}).get('history', []):
+        for layer in data.get('history', []):
             layer_count += 1
             layer_sizes += layer.get('sizeBytes', 0)
         self.gauge('{}.size'.format(namespace), float(layer_sizes), tags)
@@ -320,14 +320,15 @@ class TwistlockCheck(AgentCheck):
         qparams = {'project': project} if project else None
         response = self.http.get(url, params=qparams)
         try:
-            j = response.json()
             # it's possible to get a null response from the server
             # {} is a bit easier to deal with
+            j = response.json() or {}
             if 'err' in j:
                 err_msg = "Error in response: {}".format(j.get("err"))
                 self.log.error(err_msg)
                 raise Exception(err_msg)
-            return j or {}
+            normalize_api_data_inplace(j)
+            return j
         except Exception as e:
             self.log.debug("cannot get a response: %s response is: %s", e, response.text)
             raise e

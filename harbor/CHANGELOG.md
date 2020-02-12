@@ -1,5 +1,9 @@
 # CHANGELOG - Harbor
 
+## 1.3.0 / 2020-01-15
+
+* [Added] Refactor authentication to add support for Harbor 1.9 and 1.10. See [#5468](https://github.com/DataDog/integrations-core/pull/5468).
+
 ## 1.2.0 / 2019-12-02
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).

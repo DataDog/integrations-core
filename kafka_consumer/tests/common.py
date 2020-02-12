@@ -5,6 +5,7 @@ import os
 import socket
 
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -13,9 +14,6 @@ KAFKA_CONNECT_STR = '{}:9092'.format(HOST_IP)
 ZK_CONNECT_STR = '{}:2181'.format(HOST)
 TOPICS = ['marvel', 'dc']
 PARTITIONS = [0, 1]
-
-# TODO: Remove
-E2E_METADATA = {'start_commands': ['pip install kafka-python==1.4.7']}
 
 
 def is_supported(flavor):
@@ -29,3 +27,7 @@ def is_supported(flavor):
         return False
 
     return True
+
+
+def is_legacy_check(check):
+    return isinstance(check, LegacyKafkaCheck_0_10_2)

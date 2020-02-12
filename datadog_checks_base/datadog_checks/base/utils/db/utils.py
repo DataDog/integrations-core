@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from itertools import chain
 
+import pytz
+
 # AgentCheck methods to transformer name e.g. set_metadata -> metadata
 SUBMISSION_METHODS = {
     'gauge': 'gauge',
@@ -52,3 +54,12 @@ def create_extra_transformer(column_transformer, source=None):
         transformer = column_transformer
 
     return transformer
+
+
+def normalize_datetime(dt):
+    # Prevent naive datetime objects
+    if dt.tzinfo is None:
+        # The stdlib datetime.timezone.utc doesn't work properly on Windows
+        dt = dt.replace(tzinfo=pytz.utc)
+
+    return dt

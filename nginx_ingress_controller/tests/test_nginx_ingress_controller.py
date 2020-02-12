@@ -33,7 +33,7 @@ def test_nginx_ingress_controller(aggregator, mock_data):
     Testing nginx ingress controller.
     """
 
-    c = NginxIngressControllerCheck(CHECK_NAME, None, {}, [instance])
+    c = NginxIngressControllerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     # nginx metrics
     aggregator.assert_metric(NAMESPACE + '.nginx.connections.current')

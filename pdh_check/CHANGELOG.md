@@ -1,5 +1,9 @@
 # CHANGELOG - pdh_check
 
+## 1.9.0 / 2020-01-21
+
+* [Added] Make the admin share configurable. See [#5485](https://github.com/DataDog/integrations-core/pull/5485).
+
 ## 1.8.0 / 2019-12-02
 
 * [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).

@@ -1,5 +1,21 @@
 # CHANGELOG - redisdb
 
+## 2.0.1 / 2020-02-10
+
+* [Fixed] Handle error in config_get. See [#5676](https://github.com/DataDog/integrations-core/pull/5676).
+
+## 2.0.0 / 2020-02-05
+
+* [Changed] Submit `redis.key.length` metric regardless of `warn_on_missing_keys`. See [#5591](https://github.com/DataDog/integrations-core/pull/5591).
+* [Added] Add aof loading metrics. See [#5431](https://github.com/DataDog/integrations-core/pull/5431). Thanks [tanner-bruce](https://github.com/tanner-bruce).
+
+## 1.15.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Upgrade `redis` to 3.3.11. See [#5150](https://github.com/DataDog/integrations-core/pull/5150).
+* [Added] Report maxclients. See [#5207](https://github.com/DataDog/integrations-core/pull/5207). Thanks [jd](https://github.com/jd).
+
 ## 1.14.0 / 2019-12-02
 
 * [Added] Add active defragmentation gauges. See [#5022](https://github.com/DataDog/integrations-core/pull/5022).

@@ -31,6 +31,11 @@ def instance_basic():
 
 
 @pytest.fixture
+def instance_basic_disable_service_tag():
+    return deepcopy(common.INSTANCE_BASIC_DISABLE_SERVICE_TAG)
+
+
+@pytest.fixture
 def instance_wildcard():
     return deepcopy(common.INSTANCE_WILDCARD)
 

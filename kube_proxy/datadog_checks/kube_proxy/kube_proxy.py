@@ -7,11 +7,10 @@ from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 class KubeProxyCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         super(KubeProxyCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 "kubeproxy": {

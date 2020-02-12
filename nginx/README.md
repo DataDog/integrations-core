@@ -6,15 +6,15 @@
 
 The Datadog Agent can collect many metrics from NGINX instances, including (but not limited to)::
 
-* Total requests
-* Connections (e.g. accepted, handled, active)
+- Total requests
+- Connections (e.g. accepted, handled, active)
 
 For users of NGINX Plus, the commercial version of NGINX, the Agent can collect the significantly more metrics that NGINX Plus provides, like:
 
-* Errors (e.g. 4xx codes, 5xx codes)
-* Upstream servers (e.g. active connections, 5xx codes, health checks, etc.)
-* Caches (e.g. size, hits, misses, etc.)
-* SSL (e.g. handshakes, failed handshakes, etc.)
+- Errors (e.g. 4xx codes, 5xx codes)
+- Upstream servers (e.g. active connections, 5xx codes, health checks, etc.)
+- Caches (e.g. size, hits, misses, etc.)
+- SSL (e.g. handshakes, failed handshakes, etc.)
 
 ## Setup
 
@@ -22,14 +22,14 @@ For users of NGINX Plus, the commercial version of NGINX, the Agent can collect 
 
 The NGINX check pulls metrics from a local NGINX status endpoint, so your `nginx` binaries need to have been compiled with one of two NGINX status modules:
 
-* [stub status module][2] - for open source NGINX
-* [http status module][3] - only for NGINX Plus
+- [stub status module][2] - for open source NGINX
+- [http status module][3] - only for NGINX Plus
 
 #### NGINX Open Source
 
 If you use open source NGINX, your instances may lack the stub status module. Verify that your `nginx` binary includes the module before proceeding to **Configuration**:
 
-```
+```shell
 $ nginx -V 2>&1| grep -o http_stub_status_module
 http_stub_status_module
 ```
@@ -44,7 +44,7 @@ NGINX Plus packages prior to release 13 include the http status module. For NGIN
 
 On each NGINX server, create a `status.conf` file in the directory that contains your other NGINX configuration files (e.g. `/etc/nginx/conf.d/`).
 
-```
+```conf
 server {
   listen 81;
   server_name localhost;
@@ -74,33 +74,32 @@ NGINX Plus users can also utilize `stub_status`, but since that module provides 
 
 For NGINX Plus releases 15+, the `status` module is deprecated. Use the [http_api_module][5] instead. For example, enable the `/api` endpoint in your main NGINX configuration file (`/etc/nginx/conf.d/default.conf`):
 
-  ```
-  server {
-    listen 8080;
-    location /api {
-      api write=on;
-    }
+```conf
+server {
+  listen 8080;
+  location /api {
+    api write=on;
   }
-  ```
+}
+```
 
 To get more detailed metrics with NGINX Plus (such as 2xx / 3xx / 4xx / 5xx response counts per second), set a `status_zone` on the servers you want to monitor. For example:
 
-  ```
-  server {
-    listen 80;
-    status_zone <ZONE_NAME>;
-    ...
-  }
-  ```
+```conf
+server {
+  listen 80;
+  status_zone <ZONE_NAME>;
+  ...
+}
+```
 
 Reload NGINX to enable the status or API endpoint. There's no need for a full restart.
 
-```
+```shell
 sudo nginx -t && sudo nginx -s reload
 ```
 
 ### Configuration
-
 
 #### Host
 
@@ -110,14 +109,14 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Set the `nginx_status_url` parameter to `http://localhost:81/nginx_status/` in your `nginx.d/conf.yaml` file to start gathering your [NGINX metrics](#metrics). See the [sample nginx.d/conf.yaml][6] for all available configuration options.
 
-**NGINX Plus**
+    **NGINX Plus**:
 
-* For NGINX Plus releases 13+, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
-* If you are using `http_api_module`, set the parameter `nginx_status_url` to the server's `/api` location in your `nginx.d/conf.yaml` configuration file, for example:
+      - For NGINX Plus releases 13+, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
+      - If you are using `http_api_module`, set the parameter `nginx_status_url` to the server's `/api` location in your `nginx.d/conf.yaml` configuration file, for example:
 
-  ```
-  nginx_status_url: http://localhost:8080/api
-  ```
+          ```yaml
+          nginx_status_url: http://localhost:8080/api
+          ```
 
 2. Optional - If you are using the NGINX `vhost_traffic_status module`, set the parameter `use_vts` to `true` in your `nginx.d/conf.yaml` configuration file.
 
@@ -125,38 +124,38 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Add this configuration block to your `nginx.d/conf.yaml` file to start collecting your NGINX Logs:
 
-    ```yaml
-      logs:
-        - type: file
-          path: /var/log/nginx/access.log
-          service: nginx
-          source: nginx
-          sourcecategory: http_web_access
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/nginx/access.log
+       service: nginx
+       source: nginx
+       sourcecategory: http_web_access
 
-        - type: file
-          path: /var/log/nginx/error.log
-          service: nginx
-          source: nginx
-          sourcecategory: http_web_access
-    ```
-    Change the `service` and `path` parameter values and configure them for your environment.
-    See the [sample nginx.d/conf.yaml][6] for all available configuration options.
+     - type: file
+       path: /var/log/nginx/error.log
+       service: nginx
+       source: nginx
+       sourcecategory: http_web_access
+   ```
+
+    Change the `service` and `path` parameter values and configure them for your environment. See the [sample nginx.d/conf.yaml][6] for all available configuration options.
 
 3. [Restart the Agent][7].
 
 **Note**: The default NGINX log format does not have a request response time. To include it into your logs, update the NGINX log format by adding the following configuration block in the `http` section of your NGINX configuration file (`/etc/nginx/nginx.conf`):
 
-```
+```conf
 http {
 	#recommended log format
 	log_format nginx '\$remote_addr - \$remote_user [\$time_local] '
@@ -174,7 +173,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 ##### Metric collection
 
 | Parameter            | Value                                                      |
-|----------------------|------------------------------------------------------------|
+| -------------------- | ---------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `nginx`                                                    |
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
 | `<INSTANCE_CONFIG>`  | `{"nginx_status_url": "http://%%host%%:81/nginx_status/"}` |
@@ -183,12 +182,12 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
 
 | Parameter      | Value                                     |
-|----------------|-------------------------------------------|
+| -------------- | ----------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "nginx", "service": "nginx"}` |
 
 ### Validation
@@ -196,6 +195,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 [Run the Agent's status subcommand][10] and look for `nginx` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][11] for a full list of provided metrics by this integration.
@@ -205,7 +205,7 @@ Not all metrics shown are available to users of open source NGINX. Compare the m
 A few open-source NGINX metrics are named differently in NGINX Plus; they refer to the exact same metric, though:
 
 | NGINX                          | NGINX Plus                   |
-|--------------------------------|------------------------------|
+| ------------------------------ | ---------------------------- |
 | `nginx.net.connections`        | `nginx.connections.active`   |
 | `nginx.net.conn_opened_per_s`  | `nginx.connections.accepted` |
 | `nginx.net.conn_dropped_per_s` | `nginx.connections.dropped`  |
@@ -214,17 +214,18 @@ A few open-source NGINX metrics are named differently in NGINX Plus; they refer 
 These metrics don't refer exactly to the same metric, but they are somewhat related:
 
 | NGINX               | NGINX Plus               |
-|---------------------|--------------------------|
+| ------------------- | ------------------------ |
 | `nginx.net.waiting` | `nginx.connections.idle` |
 
 Finally, these metrics have no good equivalent:
 
 | Metric              | Description                                                                               |
-|---------------------|-------------------------------------------------------------------------------------------|
+| ------------------- | ----------------------------------------------------------------------------------------- |
 | `nginx.net.reading` | The current number of connections where nginx is reading the request header.              |
 | `nginx.net.writing` | The current number of connections where nginx is writing the response back to the client. |
 
 ### Events
+
 The NGINX check does not include any events.
 
 ### Service Checks
@@ -234,17 +235,17 @@ Returns `CRITICAL` if the Agent cannot connect to NGINX to collect metrics, othe
 
 ## Troubleshooting
 
-* [Why do my logs not have the expected timestamp?][12]
+- [Why do my logs not have the expected timestamp?][12]
 
 Need help? Contact [Datadog support][13].
 
 ## Further Reading
+
 Additional helpful documentation, links, and articles:
 
-* [How to monitor NGINX][14]
-* [How to collect NGINX metrics][15]
-* [How to monitor NGINX with Datadog][16]
-
+- [How to monitor NGINX][14]
+- [How to collect NGINX metrics][15]
+- [How to monitor NGINX with Datadog][16]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
 [2]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html

@@ -13,16 +13,17 @@ from datetime import datetime, timedelta
 import requests
 from kubeutil import get_connection_info
 from six import iteritems
-from six.moves.urllib.parse import urljoin
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.base.utils.tagging import tagger
+from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
 from .cadvisor import CadvisorScraper
-from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix
+from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix, urljoin
 from .prometheus import CadvisorPrometheusScraperMixin
 
 try:
@@ -68,12 +69,6 @@ WHITELISTED_CONTAINER_STATE_REASONS = {
 
 DEFAULT_GAUGES = {
     'rest_client_requests_total': 'rest.client.requests',
-    'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
-    'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
-    'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
-    'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
-    'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
-    'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
 }
 
 DEPRECATED_GAUGES = {
@@ -163,7 +158,18 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
 
     COUNTER_METRICS = {'kubelet_evictions': 'kubelet.evictions'}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    VOLUME_METRICS = {
+        'kubelet_volume_stats_available_bytes': 'kubelet.volume.stats.available_bytes',
+        'kubelet_volume_stats_capacity_bytes': 'kubelet.volume.stats.capacity_bytes',
+        'kubelet_volume_stats_used_bytes': 'kubelet.volume.stats.used_bytes',
+        'kubelet_volume_stats_inodes': 'kubelet.volume.stats.inodes',
+        'kubelet_volume_stats_inodes_free': 'kubelet.volume.stats.inodes_free',
+        'kubelet_volume_stats_inodes_used': 'kubelet.volume.stats.inodes_used',
+    }
+
+    VOLUME_TAG_KEYS_TO_EXCLUDE = ['persistentvolumeclaim', 'pod_phase']
+
+    def __init__(self, name, init_config, instances):
         self.NAMESPACE = 'kubernetes'
         if instances is not None and len(instances) > 1:
             raise Exception('Kubelet check only supports one configured instance.')
@@ -172,7 +178,7 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         cadvisor_instance = self._create_cadvisor_prometheus_instance(inst)
         kubelet_instance = self._create_kubelet_prometheus_instance(inst)
         generic_instances = [cadvisor_instance, kubelet_instance]
-        super(KubeletCheck, self).__init__(name, init_config, agentConfig, generic_instances)
+        super(KubeletCheck, self).__init__(name, init_config, generic_instances)
 
         self.cadvisor_legacy_port = inst.get('cadvisor_port', CADVISOR_DEFAULT_PORT)
         self.cadvisor_legacy_url = None
@@ -189,8 +195,15 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             k: self._histogram_from_seconds_to_microseconds(v) for k, v in TRANSFORM_VALUE_HISTOGRAMS.items()
         }
 
+        volume_metric_transformers = {k: self.append_pod_tags_to_volume_metrics for k in self.VOLUME_METRICS}
+
         self.transformers = {}
-        for d in [self.CADVISOR_METRIC_TRANSFORMERS, counter_transformers, histogram_transformers]:
+        for d in [
+            self.CADVISOR_METRIC_TRANSFORMERS,
+            counter_transformers,
+            histogram_transformers,
+            volume_metric_transformers,
+        ]:
             self.transformers.update(d)
 
     def _create_kubelet_prometheus_instance(self, instance):
@@ -224,7 +237,55 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         )
         return kubelet_instance
 
+    def _create_pod_tags_by_pvc(self, pods):
+        """
+        Return a map, e.g.
+            {
+                "<kube_namespace>/<persistentvolumeclaim>": [<list_of_pod_tags>],
+                "<kube_namespace1>/<persistentvolumeclaim1>": [<list_of_pod_tags1>],
+            }
+        that can be used to add pod tags to associated volume metrics
+        """
+        pod_tags_by_pvc = defaultdict(set)
+        for pod in pods['items']:
+            # get kubernetes namespace of PVC
+            kube_ns = pod.get('metadata', {}).get('namespace')
+            if not kube_ns:
+                continue
+
+            # get volumes
+            volumes = pod.get('spec', {}).get('volumes')
+            if not volumes:
+                continue
+
+            # get pod id
+            pod_id = pod.get('metadata', {}).get('uid')
+            if not pod_id:
+                self.log.debug('skipping pod with no uid')
+                continue
+
+            # get tags from tagger
+            tags = tagger.tag('kubernetes_pod_uid://%s' % pod_id, tagger.ORCHESTRATOR) or None
+            if not tags:
+                continue
+
+            # remove tags that don't apply to PVCs
+            for excluded_tag in self.VOLUME_TAG_KEYS_TO_EXCLUDE:
+                tags = [t for t in tags if not t.startswith(excluded_tag + ':')]
+
+            # get PVC
+            for v in volumes:
+                pvc_name = v.get('persistentVolumeClaim', {}).get('claimName')
+                if pvc_name:
+                    pod_tags_by_pvc['{}/{}'.format(kube_ns, pvc_name)].update(tags)
+
+        return pod_tags_by_pvc
+
     def check(self, instance):
+        # Kubelet credential defaults are determined dynamically during every
+        # check run so we must make sure that configuration is always reset
+        self.reset_http_config()
+
         kubelet_conn_info = get_connection_info()
         endpoint = kubelet_conn_info.get('url')
         if endpoint is None:
@@ -269,6 +330,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         self.pod_list = self.retrieve_pod_list()
         self.pod_list_utils = PodListUtils(self.pod_list)
 
+        self.pod_tags_by_pvc = self._create_pod_tags_by_pvc(self.pod_list)
+
         self._report_node_metrics(self.instance_tags)
         self._report_pods_running(self.pod_list, self.instance_tags)
         self._report_container_spec_metrics(self.pod_list, self.instance_tags)
@@ -297,15 +360,16 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """
         Perform and return a GET request against kubelet. Support auth and TLS validation.
         """
-        return requests.get(
-            url,
-            timeout=timeout,
-            verify=self.kubelet_credentials.verify(),
-            cert=self.kubelet_credentials.cert_pair(),
-            headers=self.kubelet_credentials.headers(url),
-            params={'verbose': verbose},
-            stream=stream,
-        )
+        with disable_warnings_ctx(InsecureRequestWarning, disable=not self.kubelet_credentials.verify()):
+            return requests.get(
+                url,
+                timeout=timeout,
+                verify=self.kubelet_credentials.verify(),
+                cert=self.kubelet_credentials.cert_pair(),
+                headers=self.kubelet_credentials.headers(url),
+                params={'verbose': verbose},
+                stream=stream,
+            )
 
     def retrieve_pod_list(self):
         try:
@@ -640,3 +704,26 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             # Determine the tags to send
             tags = self._metric_tags(metric.name, val, sample, scraper_config, hostname=custom_hostname)
             self.monotonic_count(metric_name_with_namespace, val, tags=tags, hostname=custom_hostname)
+
+    def append_pod_tags_to_volume_metrics(self, metric, scraper_config, hostname=None):
+        metric_name_with_namespace = '{}.{}'.format(scraper_config['namespace'], self.VOLUME_METRICS[metric.name])
+        for sample in metric.samples:
+            val = sample[self.SAMPLE_VALUE]
+            if not self._is_value_valid(val):
+                self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
+                continue
+            custom_hostname = self._get_hostname(hostname, sample, scraper_config)
+            # Determine the tags to send
+            tags = self._metric_tags(metric.name, val, sample, scraper_config, hostname=custom_hostname)
+            pvc_name, kube_ns = None, None
+            for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
+                if label_name == "persistentvolumeclaim":
+                    pvc_name = label_value
+                elif label_name == "namespace":
+                    kube_ns = label_value
+                if pvc_name and kube_ns:
+                    break
+
+            pod_tags = self.pod_tags_by_pvc.get('{}/{}'.format(kube_ns, pvc_name), {})
+            tags.extend(pod_tags)
+            self.gauge(metric_name_with_namespace, val, tags=list(set(tags)), hostname=custom_hostname)
