@@ -4,12 +4,12 @@
 from typing import Any, Dict
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.rethinkdb import RethinkdbCheck
+from datadog_checks.rethinkdb import RethinkDBCheck
 
 
 def test_check(aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
-    check = RethinkdbCheck('rethinkdb', {}, {})
+    check = RethinkDBCheck('rethinkdb', {}, {})
     check.check(instance)
 
     aggregator.assert_all_metrics_covered()

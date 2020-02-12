@@ -6,7 +6,7 @@ from typing import Any, Dict
 from datadog_checks.base import AgentCheck
 
 
-class RethinkdbCheck(AgentCheck):
+class RethinkDBCheck(AgentCheck):
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
         pass
