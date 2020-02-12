@@ -6,7 +6,7 @@
   "metric_prefix": "rethinkdb.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Collect status, performance and other metrics from a RethinkDB cluster.",
   "guid": "a09f3ed3-c947-413c-a9c6-0dcb641ea890",
   "support": "core",
   "supported_os": [
