@@ -1290,39 +1290,146 @@ def test_dell_poweredge(aggregator):
     init_config = {'profiles': {'dell-poweredge': {'definition_file': path}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
+    import pdb
+    pdb.set_trace()
+    check.check(instance) 
+
+    # Poweredge Specific 
+
+    sys_mem_gauges = [
+        'operatingSystemMemoryAvailablePhysicalSize',
+        'operatingSystemMemoryTotalPageFileSize',
+        'operatingSystemMemoryAvailablePageFileSize',
+        'operatingSystemMemoryTotalVirtualSize',
+        'operatingSystemMemoryAvailableVirtualSize',
+    ]
+    power_supply_gauges = [
+        'powerSupplyStatus',
+        'powerSupplyOutputWatts',
+        'powerSupplyMaximumInputVoltage'
+    ]
+
+    temperature_probe_gauges = [
+        'temperatureProbeStatus',
+        'temperatureProbeReading'
+    ]
+
+    processor_device_gauges = [
+        'processorDeviceStatus',
+        'processorDeviceThreadCount'
+    ]
+
+    cache_device_gauges = [
+        'cacheDeviceStatus',
+        'cacheDeviceMaximumSize',
+        'cacheDeviceCurrentSize'
+    ]
+
+    memory_device_gauges = [
+        'memoryDeviceStatus',
+        'memoryDeviceFailureModes'
+    ]
+    network_device_gauges = [
+        'networkDeviceStatus'
+    ]
+
+    chassis_indexes=[29, 31]
+    for chassis_index in chassis_indexes: 
+        tags=['chassis_index:{}'.format(chassis_index)] + common.CHECK_TAGS
+        for metric in sys_mem_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    indexes = [5 , 17]
+    for index in indexes: 
+        tags=['chassis_index:4', 'index:{}'.format(index) ] + common.CHECK_TAGS
+        for metric in power_supply_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    indexes = [13]
+    for index in indexes: 
+        tags=['chassis_index:18', 'index:{}'.format(index) ] + common.CHECK_TAGS
+        for metric in temperature_probe_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    indexes = [17 , 28]
+    for index in indexes: 
+        tags=['chassis_index:5', 'index:{}'.format(index) ] + common.CHECK_TAGS
+        for metric in processor_device_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    indexes = [15 , 27]
+    for index in indexes: 
+        tags=['chassis_index:11', 'index:{}'.format(index) ] + common.CHECK_TAGS
+        for metric in cache_device_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    serial_numbers = ['forward zombies acted Jaded', 'kept oxen their their oxen oxen']
+    for serial_number in serial_numbers:
+        tags=['serial_number_name:{}'.format(serial_number), 'chassis_index:1'] + common.CHECK_TAGS
+        for metric in memory_device_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
     
-    check.check(instance)
-
-    aggregator.assert_metric('snmp.operatingSystemMemoryAvailablePhysicalSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
-    aggregator.assert_metric('snmp.operatingSystemMemoryTotalPageFileSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
-    aggregator.assert_metric('snmp.operatingSystemMemoryAvailablePageFileSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
-    aggregator.assert_metric('snmp.operatingSystemMemoryTotalVirtualSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
-    aggregator.assert_metric('snmp.operatingSystemMemoryAvailableVirtualSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
-    aggregator.assert_metric('snmp.operatingSystemMemoryExtTotalPhysicalSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) #an octet string (6) but measures kbytes??
-
-    aggregator.assert_metric('snmp.powerSupplyStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    aggregator.assert_metric('snmp.powerSupplyOutputWatts', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    aggregator.assert_metric('snmp.powerSupplyMaximumInputVoltage', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    aggregator.assert_metric('snmp.powerSupplyCurrentInputVoltage', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-
-    aggregator.assert_metric('snmp.temperatureProbeStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    aggregator.assert_metric('snmp.temperatureProbeReading', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    
-    aggregator.assert_metric('snmp.memoryDeviceStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    aggregator.assert_metric('snmp.memoryDeviceFailureModes', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-
-    aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-
-    aggregator.assert_metric('snmp.processorDeviceStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    aggregator.assert_metric('snmp.processorDeviceThreadCount', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
+    ip_addresses = ['66.97.1.103', '62.148.76.32', '45.3.243.155']
+    for ip_address in ip_addresses:
+        tags=['ip_address:{}'.format(ip_address)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, at_least=1) 
 
     
-    aggregator.assert_metric('snmp.cacheDeviceStatus', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    aggregator.assert_metric('snmp.cacheDeviceMaximumSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    aggregator.assert_metric('snmp.cacheDeviceCurrentSize', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1) 
-    
+   # IDRAC Specific 
 
-
-
+    if_counts = [
+        'adapterRxPackets',
+        'adapterTxPackets',
+        'adapterRxBytes',
+        'adapterTxBytes',
+        'adapterRxErrors',
+        'adapterTxErrors',
+        'adapterRxDropped',
+        'adapterTxDropped',
+        'adapterRxMulticast',
+        'adapterCollisions',
+    ]
+    status_gauges = [
+        'systemStateChassisStatus',
+        'systemStatePowerUnitStatusRedundancy',
+        'systemStatePowerSupplyStatusCombined',
+        'systemStateAmperageStatusCombined',
+        'systemStateCoolingUnitStatusRedundancy',
+        'systemStateCoolingDeviceStatusCombined',
+        'systemStateTemperatureStatusCombined',
+        'systemStateMemoryDeviceStatusCombined',
+        'systemStateChassisIntrusionStatusCombined',
+        'systemStatePowerUnitStatusCombined',
+        'systemStateCoolingUnitStatusCombined',
+        'systemStateProcessorDeviceStatusCombined',
+        'systemStateTemperatureStatisticsStatusCombined',
+    ]
+    disk_gauges = [
+        'physicalDiskState',
+        'physicalDiskCapacityInMB',
+        'physicalDiskUsedSpaceInMB',
+        'physicalDiskFreeSpaceInMB',
+    ]
+    interfaces = ['eth0', 'en1']
+    for interface in interfaces:
+        tags = ['adapter:{}'.format(interface)] + common.CHECK_TAGS
+        for count in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+    indexes = ['26', '29']
+    for index in indexes:
+        tags = ['chassis_index:{}'.format(index)] + common.CHECK_TAGS
+        for gauge in status_gauges:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    powers = ['supply1', 'supply2']
+    for power in powers:
+        tags = ['supply_name:{}'.format(power)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags, count=1)
+    disks = ['disk1', 'disk2']
+    for disk in disks:
+        tags = ['disk_name:{}'.format(disk)] + common.CHECK_TAGS
+        for gauge in disk_gauges:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
