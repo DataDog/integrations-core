@@ -148,6 +148,7 @@ def test_collect_tags(aggregator, dd_run_check, realtime_instance):
         tags=['my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
         hostname='10.0.0.104',
     )
+    aggregator.assert_metric('datadog.vsphere.query_tags.time', tags=['vcenter_server:FAKE'])
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
