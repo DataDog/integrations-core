@@ -5,6 +5,7 @@ import os
 
 import pytest
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.vsphere import VSphereCheck
 
 from .common import HERE
@@ -21,12 +22,12 @@ def test_lab(aggregator):
 
     Example usage:
     $ export TEST_VSPHERE_USER='XXXXX' TEST_VSPHERE_PASS='XXXXX'
-    $ TEST_VSPHERE_USE_LAB=1 ddev test vsphere:py38 -k test_lab
+    $ TEST_VSPHERE_RUN_LAB=true ddev test vsphere:py38 -k test_lab
 
     """
-    if not os.environ.get('TEST_VSPHERE_USE_LAB'):
+    if not is_affirmative(os.environ.get('TEST_VSPHERE_RUN_LAB')):
         pytest.skip(
-            "Skipped! Set TEST_VSPHERE_USE_LAB to run this test. "
+            "Skipped! Set TEST_VSPHERE_RUN_LAB to run this test. "
             "TEST_VSPHERE_USER and TEST_VSPHERE_PASS must also be set."
         )
     username = os.environ['TEST_VSPHERE_USER']
