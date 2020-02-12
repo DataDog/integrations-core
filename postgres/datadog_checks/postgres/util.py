@@ -116,7 +116,7 @@ REL_METRICS = {
     'query': """
 SELECT relname,schemaname,{metrics_columns}
   FROM pg_stat_user_tables
- WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
+ WHERE {relations}""",
     'relation': True,
 }
 
@@ -133,7 +133,7 @@ SELECT relname,
        indexrelname,
        {metrics_columns}
   FROM pg_stat_user_indexes
- WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
+ WHERE {relations}""",
     'relation': True,
 }
 
@@ -154,8 +154,8 @@ FROM pg_class C
 LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
 WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND
   nspname !~ '^pg_toast' AND
-  relkind IN ('r') AND
-  ( relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[]) )""",
+  relkind = 'r' AND
+  {relations}""",
 }
 
 COUNT_METRICS = {
@@ -247,7 +247,7 @@ SELECT relname,
        schemaname,
        {metrics_columns}
   FROM pg_statio_user_tables
- WHERE relname = ANY(array[{relations_names}]::text[]) or relname ~ ANY(array[{relations_regexes}]::text[])""",
+ WHERE {relations}""",
     'relation': True,
 }
 

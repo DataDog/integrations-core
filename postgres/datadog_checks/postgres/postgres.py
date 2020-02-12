@@ -351,10 +351,27 @@ class PostgreSql(AgentCheck):
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
             if scope['relation'] and len(relations_config) > 0:
-                rel_names = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_name' in v)
-                rel_regex = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_regex' in v)
-                self.log.debug("Running query: %s with relations matching: %s", query, rel_names + rel_regex)
-                cursor.execute(query.format(relations_names=rel_names, relations_regexes=rel_regex))
+                schema_field = ''
+                for desc in scope['descriptors']:
+                    if desc[1] == 'schema':
+                        schema_field = desc[0]
+                        break
+                relations = []
+                for r in relations_config.values():
+                    relation_filter = []
+                    if r.get('relation_name'):
+                        relation_filter.append("( relname = '{}'".format(r['relation_name']))
+                    elif r.get('relation_regex'):
+                        relation_filter.append("( relname ~ '{}'".format(r['relation_regex']))
+                    if r.get('schemas') and ALL_SCHEMAS not in r['schemas']:
+                        schema_filter = ' ,'.join("'{}'".format(s) for s in r['schemas'])
+                        relation_filter.append('AND {} = ANY(array[{}]::text[])'.format(schema_field, schema_filter))
+                    relation_filter.append(')')
+                    relations.append(' '.join(relation_filter))
+
+                relations = ' OR '.join(relations)
+                self.log.debug("Running query: %s with relations matching: %s", query, relations)
+                cursor.execute(query.format(relations=relations))
             else:
                 self.log.debug("Running query: %s", query)
                 cursor.execute(query.replace(r'%', r'%%'))
