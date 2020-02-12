@@ -260,11 +260,7 @@ def metadata(check):
                 normalized_metric_name = normalize_metric_name(row['metric_name'])
                 if row['metric_name'] != normalized_metric_name:
                     errors = True
-                    echo_failure(
-                        "Metric name '{}' is not valid, it should be normalized as {}".format(
-                            row['metric_name'], normalized_metric_name
-                        )
-                    )
+                    echo_failure(f"Metric name '{row['metric_name']}' is not valid, it should be normalized as {normalized_metric_name}")
 
                 # metric_name header
                 if metric_prefix:
@@ -303,14 +299,10 @@ def metadata(check):
                 # exceeds max allowed length of description
                 elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
                     errors = True
-                    echo_failure(
-                        '{}:{} `{}` exceeds the max length: {} for descriptions.'.format(
-                            current_check, line, row['metric_name'], MAX_DESCRIPTION_LENGTH
-                        )
-                    )
+                    echo_failure(f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: {MAX_DESCRIPTION_LENGTH} for descriptions.")
                 if row['interval'] and not row['interval'].isdigit():
                     errors = True
-                    echo_failure('{}: interval should be an int, found "{}"'.format(current_check, row['interval']))
+                    echo_failure(f"{current_check}: interval should be an int, found '{row['interval']}'")
 
         for header, count in empty_count.items():
             errors = True
@@ -323,8 +315,8 @@ def metadata(check):
             # Don't spam this warning when we're validating everything
             if check:
                 echo_warning(
-                    '{}: `{}` appears {} time(s) and does not match metric_prefix '
-                    'defined in the manifest.'.format(current_check, prefix, count)
+                    f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                    "defined in the manifest."
                 )
 
     if errors:
