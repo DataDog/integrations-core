@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  rethinkdb:
+    tty: true  # Required otherwise RethinkDB won't output any logs.
+    image: ${RETHINKDB_IMAGE}
+    container_name: ${RETHINKDB_CONTAINER_NAME}
+    ports:
+      - ${RETHINKDB_PORT}:28015
