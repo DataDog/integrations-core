@@ -5,5 +5,6 @@ services:
     tty: true  # Required otherwise RethinkDB won't output any logs.
     image: ${RETHINKDB_IMAGE}
     container_name: ${RETHINKDB_CONTAINER_NAME}
+    command: rethinkdb --bind all --server-name ${RETHINKDB_SERVER_NAME}
     ports:
       - ${RETHINKDB_PORT}:28015

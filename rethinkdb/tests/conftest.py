@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.dev import docker_run
 
-from .common import CONTAINER_NAME, HERE, IMAGE, PORT
+from .common import CONTAINER_NAME, HERE, IMAGE, PORT, SERVER_NAME
 
 
 @pytest.fixture(scope='session')
@@ -20,6 +20,7 @@ def dd_environment():
         'RETHINKDB_PORT': str(PORT),
         'RETHINKDB_IMAGE': IMAGE,
         'RETHINKDB_CONTAINER_NAME': CONTAINER_NAME,
+        'RETHINKDB_SERVER_NAME': SERVER_NAME,
     }
 
     with docker_run(compose_file, env_vars=env_vars, log_patterns=[r'Server ready.*']):

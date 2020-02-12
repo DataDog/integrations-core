@@ -12,6 +12,7 @@ CHECK_NAME = 'rethinkdb'
 
 IMAGE = 'rethinkdb:2.4.0'
 CONTAINER_NAME = 'rethinkdb'
+SERVER_NAME = 'server0'
 
 HOST = get_docker_hostname()
 PORT = 28015
