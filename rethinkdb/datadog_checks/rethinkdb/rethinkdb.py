@@ -1,28 +1,16 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
+# Required for `import rethinkdb` to import the Python client instead of this package on Python 2.
+from __future__ import absolute_import
+
 from contextlib import contextmanager
 from typing import Any, Dict, Iterator
 
 import rethinkdb
-import six
 
 from datadog_checks.base import AgentCheck
-
-try:
-    rethinkdb.r
-except AttributeError:
-    if not six.PY2:
-        # This would be unexpected.
-        raise
-
-    # HACK: running `import rethinkdb` on Python 2.7 made it import our `rethinkdb` package,
-    # instead of the RethinkDB Python client package. Let's hack our way around this.
-    # NOTE: we deal with this edge case in an 'except' block (instead of proactively checking for `six.PY2`) so that
-    # IDEs and linters don't get confused.
-    import importlib
-
-    rethinkdb = importlib.import_module('rethinkdb')  # type: ignore
 
 
 class RethinkDBCheck(AgentCheck):
