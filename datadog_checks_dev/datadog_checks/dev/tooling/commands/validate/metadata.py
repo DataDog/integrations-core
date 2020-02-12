@@ -229,7 +229,7 @@ def metadata(check):
             reader._fieldnames = reader.fieldnames
 
             for line, row in enumerate(reader, 2):
-                # determine if number of rows is complete by checking for None values (We can't check the number of columns because DictReader populates missing columns with None https://docs.python.org/3.4/library/csv.html#csv.DictReader) #noqa
+                # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.4/library/csv.html#csv.DictReader) #noqa
                 if None in row.values():
                     errors = True
                     echo_failure(f"{current_check}:{line} {row['metric_name']} Has the wrong amount of columns")
