@@ -17,7 +17,7 @@ from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.stubs import datadog_agent
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
-from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
+from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
@@ -63,6 +63,7 @@ class VSphereCheck(AgentCheck):
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
         )
+        self.tags_cache = TagsCache(interval_sec=self.config.refresh_metrics_metadata_cache_interval)
         self.api = None
         self.api_rest = None
         # Do not override `AgentCheck.hostname`
@@ -120,6 +121,19 @@ class VSphereCheck(AgentCheck):
         # Apparently only when the server restarts?
         # https://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.wssdk.pg.doc_50%2FPG_Ch16_Performance.18.5.html
 
+    def refresh_tags_cache(self):
+        """
+        Fetch the all tags, build tags for each monitored resources and store all of that into the tags_cache.
+        """
+        if not self.api_rest:
+            return
+        try:
+            mor_tags = self.api_rest.get_resource_tags()
+        except APIConnectionError as e:
+            self.log.error("Failed to collect tags: %s", e)
+        else:
+            self.tags_cache.set_all_tags(mor_tags)
+
     def refresh_infrastructure_cache(self):
         """Fetch the complete infrastructure, generate tags for each monitored resources and store all of that
         into the infrastructure_cache. It also computes the resource `hostname` property to be used when submitting
@@ -135,13 +149,6 @@ class VSphereCheck(AgentCheck):
             hostname=self._hostname,
         )
         self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
-
-        rest_tags = {}
-        if self.api_rest:
-            try:
-                rest_tags = self.api_rest.get_resource_tags()
-            except APIConnectionError as e:
-                self.log.error("Failed to collect tags: %s", e)
 
         for mor, properties in iteritems(infrastructure_data):
             if not isinstance(mor, tuple(self.config.collected_resource_types)):
@@ -182,7 +189,6 @@ class VSphereCheck(AgentCheck):
 
             tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
             tags.append('vsphere_type:{}'.format(mor_type_str))
-            tags.extend(rest_tags.get(type(mor), {}).get(mor._moId, []))
             mor_payload = {"tags": tags}
 
             if hostname:
@@ -257,17 +263,18 @@ class VSphereCheck(AgentCheck):
                     instance_tag_key = get_mapped_instance_tag(metric_name)
                     tags.append('{}:{}'.format(instance_tag_key, instance_value))
 
+                vsphere_tags = self.tags_cache.get_mor_tags(results_per_mor.entity)
+                mor_tags = mor_props['tags'] + vsphere_tags
+
                 if resource_type in HISTORICAL_RESOURCES:
                     # Tags are attached to the metrics
-                    tags.extend(mor_props['tags'])
+                    tags.extend(mor_tags)
                     hostname = None
                 else:
                     # Tags are (mostly) submitted as external host tags.
                     hostname = to_string(mor_props.get('hostname'))
                     if self.config.excluded_host_tags:
-                        tags.extend(
-                            [t for t in mor_props['tags'] if t.split(":", 1)[0] in self.config.excluded_host_tags]
-                        )
+                        tags.extend([t for t in mor_tags if t.split(":", 1)[0] in self.config.excluded_host_tags])
 
                 tags.extend(self.config.base_tags)
 
@@ -478,6 +485,11 @@ class VSphereCheck(AgentCheck):
                     DEFAULT_MAX_QUERY_METRICS,
                 )
                 pass
+
+        # Refresh the tags cache
+        if self.api_rest and self.tags_cache.is_expired():
+            with self.tags_cache.update():
+                self.refresh_tags_cache()
 
         # Refresh the metrics metadata cache
         if self.metrics_metadata_cache.is_expired():
