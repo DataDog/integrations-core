@@ -1,2 +1,8 @@
 futures==3.3.0; python_version < '3.0'
-pyvmomi==v6.5.0.2017.5-1
+pyvmomi==6.7.3
+
+# vsphere-automation-sdk-python is currently not available on PyPi
+# TODO: Use PyPi dep when it's available
+# See https://github.com/vmware/vsphere-automation-sdk-python/issues/38
+# efe345a21b4ab7b346b65e1cb58d56412edd1c10 correspond to vSphere Automation SDK 1.20.0
+git+https://github.com/vmware/vsphere-automation-sdk-python@efe345a21b4ab7b346b65e1cb58d56412edd1c10

@@ -5,10 +5,14 @@ import json
 import os
 from datetime import datetime
 
+from com.vmware.cis.tagging_client import CategoryModel, TagAssociation, TagModel
+from com.vmware.vapi.std_client import DynamicID
 from mock import MagicMock
 from pyVmomi import vim
 from six import iteritems
 from tests.common import HERE
+
+from datadog_checks.vsphere.api_rest import VSphereRestAPI
 
 
 class MockedCounter(object):
@@ -29,7 +33,7 @@ class MockedAPI(object):
         return True
 
     def recursive_parse_topology(self, subtree, parent=None):
-        current_mor = MagicMock(spec=getattr(vim, subtree['spec']))
+        current_mor = MagicMock(spec=getattr(vim, subtree['spec']), _moId=subtree['mo_id'])
         children = subtree.get('children', [])
         self.infrastructure_data[current_mor] = {'name': subtree['name'], 'parent': parent}
         if subtree.get('runtime.powerState') == 'on':
@@ -94,3 +98,34 @@ class MockedAPI(object):
 
     def get_latest_event_timestamp(self):
         return datetime.now()
+
+
+class MockedRestAPI(VSphereRestAPI):
+    def __init__(self, *args, **kwargs):
+        super(MockedRestAPI, self).__init__(*args, **kwargs)
+
+        self._client = MagicMock()
+        self._client.tagging.Category.list.return_value = ['cat_id_1', 'cat_id_2']
+        self._client.tagging.Category.get.side_effect = [
+            CategoryModel(name='my_cat_name_1'),
+            CategoryModel(name='my_cat_name_2'),
+        ]
+
+        self._client.tagging.Tag.list.return_value = ['tag_id_1', 'tag_id_2', 'tag_id_3']
+        self._client.tagging.Tag.get.side_effect = [
+            TagModel(name='my_tag_name_1', category_id='cat_id_1'),
+            TagModel(name='my_tag_name_2', category_id='cat_id_2'),
+            TagModel(name='my_tag_name_3', category_id='cat_id_3'),
+        ]
+
+        self._client.tagging.TagAssociation.list_attached_objects_on_tags.return_value = [
+            TagAssociation.TagToObjects(tag_id='tag_id_1', object_ids=[DynamicID(type='VirtualMachine', id='VM4-4-1')]),
+            TagAssociation.TagToObjects(tag_id='tag_id_2', object_ids=[DynamicID(type='VirtualMachine', id='VM4-4-1')]),
+            TagAssociation.TagToObjects(
+                tag_id='tag_id_2', object_ids=[DynamicID(type='HostSystem', id='10.0.0.104-1')]
+            ),
+            TagAssociation.TagToObjects(tag_id='tag_id_2', object_ids=[DynamicID(type='Datastore', id='NFS-Share-1')]),
+        ]
+
+    def smart_connect(self):
+        pass

@@ -88,3 +88,28 @@ class InfrastructureCache(VSphereCache):
         if mor_type not in self._content:
             self._content[mor_type] = {}
         self._content[mor_type][mor] = mor_data
+
+
+class TagsCache(VSphereCache):
+    """
+    A VSphere cache dedicated to store the tags data.
+
+    Data is stored like this:
+
+    _content = {
+        <RESOURCE_TYPE>: {
+            <RESOURCE_MOR_ID>: ['<CATEGORY_NAME>:<TAG_NAME>', ...]
+        },
+        ...
+    }
+    """
+
+    def get_mor_tags(self, mor):
+        """
+        :return: list of mor tags or empty list if mor is not found.
+        """
+        mor_type = type(mor)
+        return self._content.get(mor_type, {}).get(mor._moId, [])
+
+    def set_all_tags(self, mor_tags):
+        self._content = mor_tags
