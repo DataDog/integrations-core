@@ -142,21 +142,25 @@ instances:
     ## If true, the vSphere Tags will be collected.
     ## The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
     ## vSphere tag name as value:
-    ##    vsphere_<TAG_CATEGORY>:<TAG_NAME>
-    ## `vsphere_` prefix can be configured using `vsphere_tags_prefix` configuration.
+    ##    <TAG_CATEGORY>:<TAG_NAME>
     ## Examples:
-    ## - vsphere_os_type:windows
-    ## - vsphere_application_name:my_app
+    ## - os_type:windows
+    ## - application_name:my_app
     #
     # collect_tags: false
 
-    ## @param vsphere_tags_prefix - boolean - optional - default: vsphere_
+    ## @param vsphere_tags_prefix - boolean - optional - default: ''
     ## Tags coming from vSphere will be prefixed with this prefix.
-    ## Examples with the default `vsphere_` prefix:
-    ## - vsphere_os_type:windows            # where `os_type` is the category name and `windows` the tag name
-    ## - vsphere_application_name:my_app    # where `application_name` is the category name and `my_app` the tag name
+    ## Example use cases:
+    ##   - You have vSphere tags that might conflict with tags added by this integration or the Datadog Agent
+    ##   - You want a prefix to better recognise tags coming from vSphere
+    ## Examples with using `vtag_` prefix:
+    ## - vtag_os_type:windows            # where `os_type` is the category name and `windows` the tag name
+    ## - vtag_application_name:my_app    # where `application_name` is the category name and `my_app` the tag name
+    ## It's not recommend to use `vsphere_` as prefix, since it's already used by this integrations
+    ## e.g. vsphere_host, vsphere_type, etc.
     #
-    # vsphere_tags_prefix: vsphere_
+    # vsphere_tags_prefix: ''
 
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name

@@ -129,25 +129,23 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_collect_tags(aggregator, dd_run_check, realtime_instance):
-    realtime_instance.update(
-        {'collect_tags': True, 'excluded_host_tags': ['vsphere_my_cat_name_1', 'vsphere_my_cat_name_2']}
-    )
+    realtime_instance.update({'collect_tags': True, 'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2']})
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     dd_run_check(check)
 
     aggregator.assert_metric(
         'vsphere.cpu.usage.avg',
-        tags=['vsphere_my_cat_name_1:my_tag_name_1', 'vsphere_my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
         hostname='VM4-4',
     )
     aggregator.assert_metric(
         'vsphere.rescpu.samplePeriod.latest',
-        tags=['vsphere_my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        tags=['my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
         hostname='10.0.0.104',
     )
     aggregator.assert_metric(
         'vsphere.datastore.maxTotalLatency.latest',
-        tags=['vsphere_my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        tags=['my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
         hostname='10.0.0.104',
     )
 
