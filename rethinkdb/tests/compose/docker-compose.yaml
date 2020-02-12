@@ -8,3 +8,4 @@ services:
     command: rethinkdb --bind all --server-name ${RETHINKDB_SERVER_NAME}
     ports:
       - ${RETHINKDB_PORT}:28015
+      - 8080:8080  # Not used by tests, but allows accessing the RethinkDB admin web UI at 'localhost:8080' on the host machine.
