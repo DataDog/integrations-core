@@ -1290,12 +1290,9 @@ def test_dell_poweredge(aggregator):
     init_config = {'profiles': {'dell-poweredge': {'definition_file': path}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
-    import pdb
-    pdb.set_trace()
     check.check(instance) 
 
-    # Poweredge Specific 
-
+    # Poweredge 
     sys_mem_gauges = [
         'operatingSystemMemoryAvailablePhysicalSize',
         'operatingSystemMemoryTotalPageFileSize',
@@ -1374,9 +1371,7 @@ def test_dell_poweredge(aggregator):
         tags=['ip_address:{}'.format(ip_address)] + common.CHECK_TAGS
         aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, at_least=1) 
 
-    
-   # IDRAC Specific 
-
+    # Intel Adapter 
     if_counts = [
         'adapterRxPackets',
         'adapterTxPackets',
@@ -1389,6 +1384,17 @@ def test_dell_poweredge(aggregator):
         'adapterRxMulticast',
         'adapterCollisions',
     ]
+
+    interfaces = ['eth0', 'en1']
+    for interface in interfaces:
+        tags = ['adapter:{}'.format(interface)] + common.CHECK_TAGS
+        for count in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+
+    
+   # IDRAC  
     status_gauges = [
         'systemStateChassisStatus',
         'systemStatePowerUnitStatusRedundancy',
@@ -1410,13 +1416,7 @@ def test_dell_poweredge(aggregator):
         'physicalDiskUsedSpaceInMB',
         'physicalDiskFreeSpaceInMB',
     ]
-    interfaces = ['eth0', 'en1']
-    for interface in interfaces:
-        tags = ['adapter:{}'.format(interface)] + common.CHECK_TAGS
-        for count in if_counts:
-            aggregator.assert_metric(
-                'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-            )
+    
     indexes = ['26', '29']
     for index in indexes:
         tags = ['chassis_index:{}'.format(index)] + common.CHECK_TAGS
