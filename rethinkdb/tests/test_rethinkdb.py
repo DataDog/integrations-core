@@ -7,9 +7,10 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.rethinkdb import RethinkDBCheck
 
 
-def test_check(aggregator, instance):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
-    check = RethinkDBCheck('rethinkdb', {}, {})
+def test_check(aggregator):
+    # type: (AggregatorStub) -> None
+    instance = {}  # type: Dict[str, Any]
+    check = RethinkDBCheck('rethinkdb', {}, [instance])
     check.check(instance)
 
     aggregator.assert_all_metrics_covered()
