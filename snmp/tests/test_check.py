@@ -1279,6 +1279,7 @@ def test_cisco_nexus(aggregator):
 
     aggregator.assert_all_metrics_covered()
 
+
 def test_dell_poweredge(aggregator):
     instance = common.generate_instance_config([])
     instance['community_string'] = 'dell-poweredge'
@@ -1290,9 +1291,9 @@ def test_dell_poweredge(aggregator):
     init_config = {'profiles': {'dell-poweredge': {'definition_file': path}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
-    check.check(instance) 
+    check.check(instance)
 
-    # Poweredge 
+    # Poweredge
     sys_mem_gauges = [
         'operatingSystemMemoryAvailablePhysicalSize',
         'operatingSystemMemoryTotalPageFileSize',
@@ -1300,78 +1301,58 @@ def test_dell_poweredge(aggregator):
         'operatingSystemMemoryTotalVirtualSize',
         'operatingSystemMemoryAvailableVirtualSize',
     ]
-    power_supply_gauges = [
-        'powerSupplyStatus',
-        'powerSupplyOutputWatts',
-        'powerSupplyMaximumInputVoltage'
-    ]
+    power_supply_gauges = ['powerSupplyStatus', 'powerSupplyOutputWatts', 'powerSupplyMaximumInputVoltage']
 
-    temperature_probe_gauges = [
-        'temperatureProbeStatus',
-        'temperatureProbeReading'
-    ]
+    temperature_probe_gauges = ['temperatureProbeStatus', 'temperatureProbeReading']
 
-    processor_device_gauges = [
-        'processorDeviceStatus',
-        'processorDeviceThreadCount'
-    ]
+    processor_device_gauges = ['processorDeviceStatus', 'processorDeviceThreadCount']
 
-    cache_device_gauges = [
-        'cacheDeviceStatus',
-        'cacheDeviceMaximumSize',
-        'cacheDeviceCurrentSize'
-    ]
+    cache_device_gauges = ['cacheDeviceStatus', 'cacheDeviceMaximumSize', 'cacheDeviceCurrentSize']
 
-    memory_device_gauges = [
-        'memoryDeviceStatus',
-        'memoryDeviceFailureModes'
-    ]
-    network_device_gauges = [
-        'networkDeviceStatus'
-    ]
+    memory_device_gauges = ['memoryDeviceStatus', 'memoryDeviceFailureModes']
 
-    chassis_indexes=[29, 31]
-    for chassis_index in chassis_indexes: 
-        tags=['chassis_index:{}'.format(chassis_index)] + common.CHECK_TAGS
+    chassis_indexes = [29, 31]
+    for chassis_index in chassis_indexes:
+        tags = ['chassis_index:{}'.format(chassis_index)] + common.CHECK_TAGS
         for metric in sys_mem_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
 
-    indexes = [5 , 17]
-    for index in indexes: 
-        tags=['chassis_index:4', 'index:{}'.format(index) ] + common.CHECK_TAGS
+    indexes = [5, 17]
+    for index in indexes:
+        tags = ['chassis_index:4', 'index:{}'.format(index)] + common.CHECK_TAGS
         for metric in power_supply_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
 
     indexes = [13]
-    for index in indexes: 
-        tags=['chassis_index:18', 'index:{}'.format(index) ] + common.CHECK_TAGS
+    for index in indexes:
+        tags = ['chassis_index:18', 'index:{}'.format(index)] + common.CHECK_TAGS
         for metric in temperature_probe_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
 
-    indexes = [17 , 28]
-    for index in indexes: 
-        tags=['chassis_index:5', 'index:{}'.format(index) ] + common.CHECK_TAGS
+    indexes = [17, 28]
+    for index in indexes:
+        tags = ['chassis_index:5', 'index:{}'.format(index)] + common.CHECK_TAGS
         for metric in processor_device_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
 
-    indexes = [15 , 27]
-    for index in indexes: 
-        tags=['chassis_index:11', 'index:{}'.format(index) ] + common.CHECK_TAGS
+    indexes = [15, 27]
+    for index in indexes:
+        tags = ['chassis_index:11', 'index:{}'.format(index)] + common.CHECK_TAGS
         for metric in cache_device_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
 
     serial_numbers = ['forward zombies acted Jaded', 'kept oxen their their oxen oxen']
     for serial_number in serial_numbers:
-        tags=['serial_number_name:{}'.format(serial_number), 'chassis_index:1'] + common.CHECK_TAGS
+        tags = ['serial_number_name:{}'.format(serial_number), 'chassis_index:1'] + common.CHECK_TAGS
         for metric in memory_device_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
-    
+
     ip_addresses = ['66.97.1.103', '62.148.76.32', '45.3.243.155']
     for ip_address in ip_addresses:
-        tags=['ip_address:{}'.format(ip_address)] + common.CHECK_TAGS
-        aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, at_least=1) 
+        tags = ['ip_address:{}'.format(ip_address)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, at_least=1)
 
-    # Intel Adapter 
+    # Intel Adapter
     if_counts = [
         'adapterRxPackets',
         'adapterTxPackets',
@@ -1393,8 +1374,7 @@ def test_dell_poweredge(aggregator):
                 'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
 
-    
-   # IDRAC  
+    # IDRAC
     status_gauges = [
         'systemStateChassisStatus',
         'systemStatePowerUnitStatusRedundancy',
@@ -1416,7 +1396,7 @@ def test_dell_poweredge(aggregator):
         'physicalDiskUsedSpaceInMB',
         'physicalDiskFreeSpaceInMB',
     ]
-    
+
     indexes = ['26', '29']
     for index in indexes:
         tags = ['chassis_index:{}'.format(index)] + common.CHECK_TAGS
