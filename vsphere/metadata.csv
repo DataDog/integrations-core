@@ -220,7 +220,7 @@ vsphere.storagePath.totalWriteLatency.avg,gauge,,millisecond,,"Average amount of
 vsphere.storagePath.write.avg,gauge,,kibibyte,second,Rate of writing data on the storage path,-1,vsphere,storagePath wr lat
 vsphere.sys.heartbeat.latest,gauge,,,,Number of heartbeats issued per virtual machine,0,vsphere,heartbeat
 vsphere.sys.heartbeat.sum,gauge,,,,Number of heartbeats issued per virtual machine,0,vsphere,heartbeat avg
-vsphere.sys.osUptime.latest,gauge,,second,,"Total time elapsed, in seconds, since last operating system boot-up",0,sys os uptime
+vsphere.sys.osUptime.latest,gauge,,second,,"Total time elapsed, in seconds, since last operating system boot-up",0,vsphere,sys os uptime
 vsphere.sys.resourceCpuAct1.latest,gauge,,percent,,"CPU active average over 1 minute of the system resource group",0,vsphere,sys res cpu act1
 vsphere.sys.resourceCpuAct5.latest,gauge,,percent,,"CPU active average over 5 minutes of the system resource group",0,vsphere,sys res cpu act5
 vsphere.sys.resourceCpuAllocMax.latest,gauge,,megahertz,,"CPU allocation limit (in MHz) of the system resource group",0,vsphere,sys res cpu alloc max
