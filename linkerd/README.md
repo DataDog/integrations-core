@@ -16,8 +16,7 @@ The Linkerd check is included in the [Datadog Agent][2] package, so you don't ne
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-1. Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3].
-See [sample linkerd.d/conf.yaml][4] for all available configuration options.
+1. Edit the `linkerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See [sample linkerd.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -26,8 +25,8 @@ See [sample linkerd.d/conf.yaml][4] for all available configuration options.
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                 |
-|----------------------|-----------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `linkerd`                                                            |
+| -------------------- | --------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `linkerd`                                                             |
 | `<INIT_CONFIG>`      | blank or `{}`                                                         |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:9990/admin/metrics/prometheus"}` |
 
@@ -46,9 +45,11 @@ For linkerd v1, see [finagle metrics docs][9] for a detailed description of some
 Attention: Depending on your linkerd configuration, some metrics might not be exposed by linkerd.
 
 To list the metrics exposed by your current configuration, run
+
 ```bash
 curl <linkerd_prometheus_endpoint>
 ```
+
 Where `linkerd_prometheus_endpoint` is the linkerd prometheus endpoint (you should use the same value as the `prometheus_url` config key in your `linkerd.yaml`)
 
 If you need to use a metric that is not provided by default, you can add an entry to `linkerd.yaml`.
@@ -61,6 +62,7 @@ Simply follow the examples present in the [default configuration][4].
 Returns CRITICAL if the Agent fails to connect to the prometheus endpoint, otherwise returns UP.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][11].
 
 [1]: https://linkerd.io

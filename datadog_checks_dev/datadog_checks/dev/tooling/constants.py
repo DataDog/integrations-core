@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import OrderedDict
 
 import semver
 
@@ -13,23 +12,40 @@ INTEGRATION_REPOS = [
     'integrations-extras',
     'integrations-internal',
 ]
-VERSION_BUMP = OrderedDict(
-    [
-        ('Added', semver.bump_minor),
-        ('Changed', semver.bump_major),
-        ('Deprecated', semver.bump_minor),
-        ('Fixed', semver.bump_patch),
-        ('Removed', semver.bump_major),
-        ('Security', semver.bump_minor),
-        ('major', semver.bump_major),
-        ('minor', semver.bump_minor),
-        ('patch', semver.bump_patch),
-        ('fix', semver.bump_patch),
-        ('rc', lambda v: semver.bump_prerelease(v, 'rc')),
-        ('alpha', lambda v: semver.bump_prerelease(v, 'alpha')),
-        ('beta', lambda v: semver.bump_prerelease(v, 'beta')),
-    ]
-)
+
+REPO_OPTIONS_MAP = {
+    '--core': 'core',
+    '-c': 'core',
+    '--extras': 'extras',
+    '-e': 'extras',
+    '--agent': 'agent',
+    '-a': 'agent',
+    '--here': 'here',
+    '-x': 'here',
+}
+
+REPO_CHOICES = {
+    'core': 'integrations-core',
+    'extras': 'integrations-extras',
+    'internal': 'integrations-internal',
+    'agent': 'datadog-agent',
+}
+
+VERSION_BUMP = {
+    'Added': semver.bump_minor,
+    'Changed': semver.bump_major,
+    'Deprecated': semver.bump_minor,
+    'Fixed': semver.bump_patch,
+    'Removed': semver.bump_major,
+    'Security': semver.bump_minor,
+    'major': semver.bump_major,
+    'minor': semver.bump_minor,
+    'patch': semver.bump_patch,
+    'fix': semver.bump_patch,
+    'rc': lambda v: semver.bump_prerelease(v, 'rc'),
+    'alpha': lambda v: semver.bump_prerelease(v, 'alpha'),
+    'beta': lambda v: semver.bump_prerelease(v, 'beta'),
+}
 
 AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'ntp'}
 
@@ -65,7 +81,7 @@ NOT_TILES = [
 # If a file changes in a PR with any of these file extensions,
 # a test will run against the check containing the file
 TESTABLE_FILE_EXTENSIONS = ('.py', '.ini', '.in', '.txt', '.yml', '.yaml')
-NON_TESTABLE_FILES = ('auto_conf.yaml', 'metrics.yaml')
+NON_TESTABLE_FILES = ('auto_conf.yaml', 'metrics.yaml', 'agent_requirements.in')
 
 REQUIREMENTS_IN = 'requirements.in'
 

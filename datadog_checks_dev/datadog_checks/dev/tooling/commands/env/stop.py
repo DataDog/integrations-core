@@ -8,14 +8,15 @@ import click
 from ....utils import running_on_ci
 from ...e2e import create_interface, get_configured_checks, get_configured_envs, stop_environment
 from ...e2e.agent import DEFAULT_SAMPLING_WAIT_TIME
+from ...testing import complete_active_checks, complete_configured_envs
 from ..console import CONTEXT_SETTINGS, DEFAULT_INDENT, abort, echo_failure, echo_info, echo_success, echo_waiting
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Stop environments')
-@click.argument('check')
-@click.argument('env', required=False)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Stop environments.')
+@click.argument('check', autocompletion=complete_active_checks)
+@click.argument('env', autocompletion=complete_configured_envs, required=False)
 def stop(check, env):
-    """Stop environments."""
+    """Stop environments, use "all" as check argument to stop everything."""
     all_checks = check == 'all'
     checks = get_configured_checks() if all_checks else [check]
     on_ci = running_on_ci()
@@ -31,12 +32,12 @@ def stop(check, env):
         if all_checks:
             envs = get_configured_envs(check)
             if envs:
-                echo_success('{}:'.format(check))
+                echo_success(f'{check}:')
         else:
             envs = [env] if env else get_configured_envs(check)
 
         for env in envs:
-            echo_info('{}:'.format(env), indent=env_indent)
+            echo_info(f'{env}:', indent=env_indent)
             environment = create_interface(check, env)
 
             if on_ci and 'sampling_start_time' in environment.metadata:

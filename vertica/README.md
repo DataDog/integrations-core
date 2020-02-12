@@ -18,13 +18,13 @@ Edit the `vertica.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 Create a database user for the Datadog Agent. From [vsql][11], connect to the database as a superuser. Then run the `CREATE USER` statement.
 
-```
+```text
 CREATE USER datadog IDENTIFIED BY '<PASSWORD>';
 ```
 
 The user used to connect to the database must be granted the [SYSMONITOR][3] role in order to access the monitoring system tables.
 
-```
+```text
 GRANT SYSMONITOR TO datadog WITH ADMIN OPTION;
 ```
 
@@ -34,23 +34,23 @@ Additionally, as the metrics for current license usage use the values from the m
 
 #### Log Collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-```
-logs_enabled: true
-```
+    ```yaml
+    logs_enabled: true
+    ```
 
 2. Add this configuration block to your `vertica.d/conf.yaml` file to start collecting your Vertica logs:
 
-```
-logs:
-  - source: vertica
-    type: file
-    path: /<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log
-    service: vertica
-```
+    ```yaml
+    logs:
+      - source: vertica
+        type: file
+        path: "/<CATALOG_PATH>/<DATABASE_NAME>/<NODE_NAME>_catalog/vertica.log"
+        service: vertica
+    ```
 
 3. [Restart the Agent][7].
 

@@ -1,16 +1,21 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
 import click
 
-from ..compat import PermissionError
-from ..utils import dir_exists
 from .commands import ALL_COMMANDS
-from .commands.console import CONTEXT_SETTINGS, echo_success, echo_waiting, echo_warning, set_color
+from .commands.console import (
+    CONTEXT_SETTINGS,
+    echo_debug,
+    echo_success,
+    echo_waiting,
+    echo_warning,
+    set_color,
+    set_debug,
+)
 from .config import CONFIG_FILE, config_file_exists, load_config, restore_config
-from .constants import set_root
+from .constants import get_root
+from .utils import initialize_root
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, invoke_without_command=True)
@@ -19,10 +24,11 @@ from .constants import set_root
 @click.option('--agent', '-a', is_flag=True, help='Work on `datadog-agent`.')
 @click.option('--here', '-x', is_flag=True, help='Work on the current location.')
 @click.option('--color/--no-color', default=None, help='Whether or not to display colored output (default true).')
-@click.option('--quiet', '-q', is_flag=True)
+@click.option('--quiet', '-q', help='Silence output', is_flag=True)
+@click.option('--debug', '-d', help='Include debug output', is_flag=True)
 @click.version_option()
 @click.pass_context
-def ddev(ctx, core, extras, agent, here, color, quiet):
+def ddev(ctx, core, extras, agent, here, color, quiet, debug):
     if not quiet and not config_file_exists():
         echo_waiting('No config file found, creating one with default settings now...')
 
@@ -32,32 +38,26 @@ def ddev(ctx, core, extras, agent, here, color, quiet):
         # TODO: Remove IOError (and noqa: B014) when Python 2 is removed
         # In Python 3, IOError have been merged into OSError
         except (IOError, OSError, PermissionError):  # noqa: B014
-            echo_warning(
-                'Unable to create config file located at `{}`. ' 'Please check your permissions.'.format(CONFIG_FILE)
-            )
+            echo_warning(f'Unable to create config file located at `{CONFIG_FILE}`. Please check your permissions.')
 
     # Load and store configuration for sub-commands.
     config = load_config()
 
-    repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
-    config['repo_choice'] = repo_choice
+    msg = initialize_root(config, agent, core, extras, here)
+    if not quiet:
+        if msg:
+            echo_warning(msg)
+
+        if debug:
+            set_debug()
+            echo_debug(f'Root directory set to: {get_root()}')
 
     if color is not None:
         config['color'] = color
+    set_color(config['color'])
 
     # https://click.palletsprojects.com/en/7.x/api/#click.Context.obj
     ctx.obj = config
-
-    root = os.path.expanduser(config.get(repo_choice, ''))
-    if here or not dir_exists(root):
-        if not here and not quiet:
-            repo = 'datadog-agent' if repo_choice == 'agent' else 'integrations-{}'.format(repo_choice)
-            echo_warning('`{}` directory `{}` does not exist, defaulting to the current location.'.format(repo, root))
-
-        root = os.getcwd()
-
-    set_root(root)
-    set_color(config['color'])
 
     if not ctx.invoked_subcommand:
         click.echo(ctx.get_help())

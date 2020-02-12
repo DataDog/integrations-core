@@ -2,6 +2,8 @@
 
 ## Testing Airflow StatsD emitter with Agent DogStatsD
 
+/!\ Works only on Linux. Docker `network_mode` only works as expected on Linux.
+
 On a machine/VM with the desired Agent version installed and DogStatsD activated (enabled by default).
 
 ```

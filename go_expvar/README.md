@@ -39,7 +39,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 For containerized environments, see the [Autodiscovery Integration Templates][12] for guidance on applying the parameters below.
 
 | Parameter            | Value                                    |
-|----------------------|------------------------------------------|
+| -------------------- | ---------------------------------------- |
 | `<INTEGRATION_NAME>` | `go_expvar`                              |
 | `<INIT_CONFIG>`      | blank or `{}`                            |
 | `<INSTANCE_CONFIG>`  | `{"expvar_url": "http://%%host%%:8080"}` |
@@ -68,7 +68,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-* [Instrument your Go apps with Expvar and Datadog][15]
+- [Instrument your Go apps with Expvar and Datadog][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/go_expvar/images/go_graph.png
 [2]: https://github.com/DataDog/datadog-go

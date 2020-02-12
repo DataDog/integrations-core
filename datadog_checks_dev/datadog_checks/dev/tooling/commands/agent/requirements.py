@@ -29,18 +29,18 @@ def requirements(ctx):
     entries = []
     for check in checks:
         if check in AGENT_V5_ONLY:
-            echo_info('Check `{}` is only shipped with Agent 5, skipping'.format(check))
+            echo_info(f'Check `{check}` is only shipped with Agent 5, skipping')
             continue
 
         try:
             version = get_version_string(check)
-            entries.append('{}\n'.format(get_agent_requirement_line(check, version)))
+            entries.append(f'{get_agent_requirement_line(check, version)}\n')
         except Exception as e:
-            echo_failure('Error generating line: {}'.format(e))
+            echo_failure(f'Error generating line: {e}')
             continue
 
     lines = sorted(entries)
 
     req_file = get_agent_release_requirements()
     write_file_lines(req_file, lines)
-    echo_success('Successfully wrote to `{}`!'.format(req_file))
+    echo_success(f'Successfully wrote to `{req_file}`!')

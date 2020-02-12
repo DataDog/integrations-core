@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
 import yaml
-from six import PY2
 
 from datadog_checks.dev.tooling.config_validator.validator import validate_config
 from datadog_checks.dev.tooling.config_validator.validator_errors import SEVERITY_ERROR, SEVERITY_WARNING
@@ -12,6 +11,7 @@ from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 
 from ....utils import basepath, file_exists, path_join, read_file, write_file
 from ...utils import (
+    complete_valid_checks,
     get_config_files,
     get_config_spec,
     get_data_directory,
@@ -27,7 +27,7 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
-@click.argument('check', required=False)
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--sync', is_flag=True, help='Generate example configuration files based on specifications')
 @click.pass_context
 def config(ctx, check, sync):
@@ -55,12 +55,6 @@ def config(ctx, check, sync):
                 display()
             continue
 
-        # Just use six to make it easier to search for occurrences of text we need to remove when we drop Python 2
-        if PY2:
-            check_display_queue.append(
-                lambda **kwargs: echo_failure('Dictionary key order is only guaranteed in Python 3.7.0+', **kwargs)
-            )
-
         file_counter.append(None)
 
         # source is the default file name
@@ -85,7 +79,7 @@ def config(ctx, check, sync):
                 files_failed[spec_path] = True
                 check_display_queue.append(
                     lambda **kwargs: echo_failure(
-                        'Spec  name `{}` should be `{}`'.format(spec.data['name'], display_name), **kwargs
+                        f"Spec  name `{spec.data['name']}` should be `{display_name}`", **kwargs
                     )
                 )
 
@@ -106,12 +100,12 @@ def config(ctx, check, sync):
                             files_failed[example_file_path] = True
                             check_display_queue.append(
                                 lambda example_file=example_file, **kwargs: echo_failure(
-                                    'File `{}` needs to be synced'.format(example_file), **kwargs
+                                    f'File `{example_file}` needs to be synced', **kwargs
                                 )
                             )
 
         if check_display_queue:
-            echo_info('{}:'.format(check))
+            echo_info(f'{check}:')
             for display in check_display_queue:
                 display(indent=True)
 
@@ -124,16 +118,16 @@ def config(ctx, check, sync):
         click.echo()
 
     if files_failed:
-        echo_failure('Files with errors: {}'.format(files_failed))
+        echo_failure(f'Files with errors: {files_failed}')
 
     if files_warned:
-        echo_warning('Files with warnings: {}'.format(files_warned))
+        echo_warning(f'Files with warnings: {files_warned}')
 
     if files_passed:
         if files_failed or files_warned:
-            echo_success('Files valid: {}'.format(files_passed))
+            echo_success(f'Files valid: {files_passed}')
         else:
-            echo_success('All {} configuration files are valid!'.format(num_files))
+            echo_success(f'All {num_files} configuration files are valid!')
 
     if files_failed:
         abort()
@@ -154,7 +148,7 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
             # We must convert to text here to free Exception object before it goes out of scope
             error = str(e)
 
-            check_display_queue.append(lambda: echo_info('{}:'.format(file_name), indent=True))
+            check_display_queue.append(lambda: echo_info(f'{file_name}:', indent=True))
             check_display_queue.append(lambda: echo_failure('Invalid YAML -', indent=FILE_INDENT))
             check_display_queue.append(lambda: echo_info(error, indent=FILE_INDENT * 2))
             continue
@@ -184,5 +178,5 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
                 file_display_queue.append(lambda: echo_failure('No default instance', indent=FILE_INDENT))
 
         if file_display_queue:
-            check_display_queue.append(lambda x=file_name: echo_info('{}:'.format(x), indent=True))
+            check_display_queue.append(lambda x=file_name: echo_info(f'{x}:', indent=True))
             check_display_queue.extend(file_display_queue)

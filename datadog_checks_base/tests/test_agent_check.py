@@ -12,6 +12,7 @@ from six import PY3
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base import __version__ as base_package_version
+from datadog_checks.base import to_string
 from datadog_checks.base.checks.base import datadog_agent
 
 
@@ -372,10 +373,25 @@ class TestEvents:
             "msg_title": "new test event",
             "aggregation_key": "test.event",
             "msg_text": "test event test event",
-            "tags": None,
+            "tags": ["foo", "bar"],
+            "timestamp": 1,
         }
         check.event(event)
-        aggregator.assert_event('test event test event')
+        aggregator.assert_event('test event test event', tags=["foo", "bar"])
+
+    @pytest.mark.parametrize('msg_text', [u'test-π', 'test-π', b'test-\xcf\x80'])
+    def test_encoding(self, aggregator, msg_text):
+        check = AgentCheck()
+        event = {
+            'event_type': 'new.event',
+            'msg_title': 'new test event',
+            'aggregation_key': 'test.event',
+            'msg_text': msg_text,
+            'tags': ['∆', u'Ω-bar'],
+            'timestamp': 1,
+        }
+        check.event(event)
+        aggregator.assert_event(to_string(msg_text), tags=['∆', 'Ω-bar'])
 
     def test_namespace(self, aggregator):
         check = AgentCheck()
@@ -385,10 +401,11 @@ class TestEvents:
             'msg_title': 'new test event',
             'aggregation_key': 'test.event',
             'msg_text': 'test event test event',
-            'tags': None,
+            'tags': ['foo', 'bar'],
+            'timestamp': 1,
         }
         check.event(event)
-        aggregator.assert_event('test event test event', source_type_name='test')
+        aggregator.assert_event('test event test event', source_type_name='test', tags=['foo', 'bar'])
 
 
 class TestServiceChecks:
@@ -494,16 +511,6 @@ class TestTags:
         normalized_tags = check._normalize_tags_type(tags, device_name)
         assert len(normalized_tags) == 1
 
-    def test__to_bytes(self):
-        if PY3:
-            pytest.skip('Method only exists on Python 2')
-        check = AgentCheck()
-        assert isinstance(check._to_bytes(b"tag:foo"), bytes)
-        assert isinstance(check._to_bytes(u"tag:☣"), bytes)
-        in_str = mock.MagicMock(side_effect=Exception)
-        in_str.encode.side_effect = Exception
-        assert check._to_bytes(in_str) is None
-
     def test_none_value(self, caplog):
         check = AgentCheck()
         tags = [None, 'tag:foo']
@@ -605,6 +612,38 @@ class TestLimits:
         for _ in range(0, 42):
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
+        assert len(aggregator.metrics("metric")) == 10
+
+    def test_metric_limit_instance_config_string(self, aggregator):
+        instances = [{"max_returned_metrics": "4"}]
+        check = AgentCheck("test", {}, instances)
+        assert check.get_warnings() == []
+
+        for _ in range(0, 4):
+            check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 0
+        assert len(aggregator.metrics("metric")) == 4
+
+        check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 1
+        assert len(aggregator.metrics("metric")) == 4
+
+    @pytest.mark.parametrize(
+        "max_returned_metrics",
+        (
+            pytest.param("I am not a int-convertible string", id="value-error"),
+            pytest.param(None, id="type-error-1"),
+            pytest.param(["A list is not an int"], id="type-error-2"),
+        ),
+    )
+    def test_metric_limit_instance_config_invalid_int(self, aggregator, max_returned_metrics):
+        instances = [{"max_returned_metrics": max_returned_metrics}]
+        check = LimitedCheck("test", {}, instances)
+        assert len(check.get_warnings()) == 1
+
+        # Should have fell back to the default metric limit.
+        for _ in range(12):
+            check.gauge("metric", 0)
         assert len(aggregator.metrics("metric")) == 10
 
 

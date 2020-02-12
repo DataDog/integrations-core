@@ -259,7 +259,7 @@ class TestCheckDockerDaemon(AgentCheckTest):
             images = [i["RepoTags"][0] for i in self.docker_client.images(c.split(":")[0]) if i["RepoTags"] and i["RepoTags"][0].startswith(c)]
             if len(images) == 0:
                 for line in self.docker_client.pull(c, stream=True):
-                    print line
+                    print(line)
 
         self.containers = []
         for c in CONTAINERS_TO_RUN:

@@ -5,14 +5,13 @@ import json
 import os
 import re
 from ast import literal_eval
-from collections import OrderedDict
 
 import requests
 import semver
-from six import string_types
 
-from ..utils import file_exists, read_file, write_file
-from .constants import NOT_CHECKS, VERSION_BUMP, get_root
+from ..utils import dir_exists, file_exists, read_file, write_file
+from .config import load_config
+from .constants import NOT_CHECKS, REPO_CHOICES, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
@@ -22,9 +21,9 @@ VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
 def format_commit_id(commit_id):
     if commit_id:
         if commit_id.isdigit():
-            return 'PR #{}'.format(commit_id)
+            return f'PR #{commit_id}'
         else:
-            return 'commit hash `{}`'.format(commit_id)
+            return f'commit hash `{commit_id}`'
     return commit_id
 
 
@@ -39,7 +38,7 @@ def get_current_agent_version():
 
     most_recent = sorted(versions)[-1]
 
-    return "{}.{}".format(most_recent[0], most_recent[1])
+    return f"{most_recent[0]}.{most_recent[1]}"
 
 
 def is_package(d):
@@ -61,6 +60,62 @@ def string_to_toml_type(s):
         s = literal_eval(s)
 
     return s
+
+
+def check_root():
+    """Check if root has already been set."""
+    existing_root = get_root()
+    if existing_root:
+        return True
+
+    root = os.getenv('DDEV_ROOT', '')
+    if root and os.path.isdir(root):
+        set_root(root)
+        return True
+    return False
+
+
+def initialize_root(config, agent=False, core=False, extras=False, here=False):
+    """Initialize root directory based on config and options"""
+    if check_root():
+        return
+
+    repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
+    config['repo_choice'] = repo_choice
+    config['repo_name'] = REPO_CHOICES[repo_choice]
+
+    message = None
+    root = os.path.expanduser(config.get(repo_choice, ''))
+    if here or not dir_exists(root):
+        if not here:
+            repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
+            message = f'`{repo}` directory `{root}` does not exist, defaulting to the current location.'
+
+        root = os.getcwd()
+
+    set_root(root)
+    return message
+
+
+def complete_set_root(args):
+    """Set the root directory within the context of a cli completion operation."""
+    if check_root():
+        return
+
+    config = load_config()
+
+    kwargs = {REPO_OPTIONS_MAP[arg]: True for arg in args if arg in REPO_OPTIONS_MAP}
+    initialize_root(config, **kwargs)
+
+
+def complete_testable_checks(ctx, args, incomplete):
+    complete_set_root(args)
+    return sorted(k for k in get_testable_checks() if k.startswith(incomplete))
+
+
+def complete_valid_checks(ctx, args, incomplete):
+    complete_set_root(args)
+    return [k for k in get_valid_checks() if k.startswith(incomplete)]
 
 
 def get_version_file(check_name):
@@ -148,6 +203,10 @@ def get_metric_sources():
     return {path for path in os.listdir(get_root()) if file_exists(get_metadata_file(path))}
 
 
+def read_metric_data_file(check_name):
+    return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
+
+
 def read_version_file(check_name):
     return read_file(get_version_file(check_name))
 
@@ -172,13 +231,13 @@ def load_manifest(check_name):
     """
     manifest_path = get_manifest_file(check_name)
     if file_exists(manifest_path):
-        return json.loads(read_file(manifest_path).strip(), object_pairs_hook=OrderedDict)
+        return json.loads(read_file(manifest_path).strip())
     return {}
 
 
 def write_manifest(manifest, check_name):
     manifest_path = get_manifest_file(check_name)
-    write_file(manifest_path, '{}\n'.format(json.dumps(manifest, indent=2)))
+    write_file(manifest_path, f'{json.dumps(manifest, indent=2)}\n')
 
 
 def get_bump_function(changelog_types):
@@ -202,7 +261,7 @@ def parse_agent_req_file(contents):
         datadog-active-directory==1.1.1; sys_platform == 'win32'
 
     """
-    catalog = OrderedDict()
+    catalog = {}
     for line in contents.splitlines():
         toks = line.split('==', 1)
         if len(toks) != 2 or not toks[0] or not toks[1]:
@@ -218,6 +277,6 @@ def parse_agent_req_file(contents):
 
 
 def parse_version_parts(version):
-    if not isinstance(version, string_types):
+    if not isinstance(version, str):
         return []
     return [int(v) for v in version.split('.') if v.isdigit()]

@@ -14,11 +14,11 @@ In `datadog.yaml`, configure your `cri_socket_path` for the Agent to query Conta
 
 #### Installation on containers
 
-If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable to the Containerd socket automatically enables the `Containerd` Check with the default configuration.
+If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` environment variable to the Containerd socket automatically enables the `Containerd` integration with the default configuration.
 
-For example, to install the integration on Kubernetes, edit your `datadog-agent.yaml` to map the Containerd socket from the host node to the daemonset and set the `DD_CRI_SOCKET_PATH` to the daemonset mountPath:
+For example, to install the integration on Kubernetes, edit your daemonset to mount the Containerd socket from the host node to the Agent container and set the `DD_CRI_SOCKET_PATH` env var to the daemonset mountPath:
 
-```
+```yaml
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -28,24 +28,30 @@ spec:
     spec:
       containers:
         - name: datadog-agent
-          ...
+          # ...
           env:
             - name: DD_CRI_SOCKET_PATH
-              value: "/var/run/containerd/containerd.sock"
+              value: /var/run/containerd/containerd.sock
           volumeMounts:
             - name: containerdsocket
               mountPath: /var/run/containerd/containerd.sock
+            - mountPath: /host/var/run
+              name: var-run
+              readOnly: true
           volumes:
             - hostPath:
                 path: /var/run/containerd/containerd.sock
               name: containerdsocket
+            - hostPath:
+                path: /var/run
+              name: var-run
 ```
+
+**Note:** The `/var/run` directory must be mounted from the host to run the integration without issues.
 
 ### Configuration
 
-1. Edit the `containerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your Containerd performance data.
-   See the [sample containerd.d/conf.yaml][1] for all available configuration options.
+1. Edit the `containerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Containerd performance data. See the [sample containerd.d/conf.yaml][1] for all available configuration options.
 
 2. [Restart the Agent][2]
 

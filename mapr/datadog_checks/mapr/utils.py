@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import socket
 
 
-def get_stream_id_for_topic(topic_name, rng=2):
+def get_stream_id_for_topic(topic_name, rng=1):
     """To distribute load, all the topics are not in the same stream. Each topic named is hashed
     to obtain an id which is in turn the name of the stream.
     This uses the djb2 algorithm, as described here

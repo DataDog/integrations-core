@@ -44,6 +44,10 @@ class Redis(AgentCheck):
         'aof_rewrite_in_progress': 'redis.aof.rewrite',
         'aof_current_size': 'redis.aof.size',
         'aof_buffer_length': 'redis.aof.buffer_length',
+        'loading_total_bytes': 'redis.aof.loading_total_bytes',
+        'loading_loaded_bytes': 'redis.aof.loading_loaded_bytes',
+        'loading_loaded_perc': 'redis.aof.loading_loaded_perc',
+        'loading_eta_seconds': 'redis.aof.loading_eta_seconds',
         # Network
         'connected_clients': 'redis.net.clients',
         'connected_slaves': 'redis.net.slaves',
@@ -187,7 +191,12 @@ class Redis(AgentCheck):
             latency_ms = round_value((time.time() - start) * 1000, 2)
             tags = sorted(tags + ["redis_role:%s" % info["role"]])
             self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
-            config = conn.config_get("maxclients")
+            try:
+                config = conn.config_get("maxclients")
+            except redis.ResponseError:
+                # config_get is disabled on some environments
+                self.log.debug("Error querying config")
+                config = {}
             status = AgentCheck.OK
             self.service_check('redis.can_connect', status, tags=tags)
             self._collect_metadata(info)
@@ -270,13 +279,13 @@ class Redis(AgentCheck):
         databases = list(conn.info('keyspace'))
         if not databases:
             self.warning("Redis database is empty")
-            if warn_on_missing_keys:
-                for key in key_list:
-                    key_tags = ['key:{}'.format(key)]
-                    if instance_db:
-                        key_tags.append('redis_db:db{}'.format(instance_db))
-                    key_tags.extend(tags)
-                    self.gauge('redis.key.length', 0, tags=key_tags)
+            for key in key_list:
+                key_tags = ['key:{}'.format(key)]
+                if instance_db:
+                    key_tags.append('redis_db:db{}'.format(instance_db))
+                key_tags.extend(tags)
+                self.gauge('redis.key.length', 0, tags=key_tags)
+                if warn_on_missing_keys:
                     self.warning("%s key not found in redis", key)
             return
 
@@ -360,13 +369,14 @@ class Redis(AgentCheck):
         # Warn if a key is missing from the entire redis instance.
         # Send 0 if the key is missing/empty from the entire redis instance.
         for key, total in iteritems(lengths_overall):
-            if total == 0 and warn_on_missing_keys:
+            if total == 0:
                 key_tags = ['key:{}'.format(key)]
                 if instance_db:
                     key_tags.append('redis_db:db{}'.format(instance_db))
                 key_tags.extend(tags)
                 self.gauge('redis.key.length', 0, tags=key_tags)
-                self.warning("%s key not found in redis", key)
+                if warn_on_missing_keys:
+                    self.warning("%s key not found in redis", key)
 
     def _check_replication(self, info, tags):
         # Save the replication delay for each slave

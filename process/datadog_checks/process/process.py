@@ -109,6 +109,7 @@ class ProcessCheck(AgentCheck):
 
         refresh_ad_cache = self.should_refresh_ad_cache(name)
 
+        encountered_process_names = set()
         matching_pids = set()
 
         for proc in psutil.process_iter():
@@ -119,16 +120,19 @@ class ProcessCheck(AgentCheck):
             found = False
             for string in search_string:
                 try:
+                    proc_name = proc.name()
+                    encountered_process_names.add(proc_name)
+
                     # FIXME 8.x: All has been deprecated
                     # from the doc, should be removed
                     if string == 'All':
                         found = True
                     if exact_match:
                         if os.name == 'nt':
-                            if proc.name().lower() == string.lower():
+                            if proc_name.lower() == string.lower():
                                 found = True
                         else:
-                            if proc.name() == string:
+                            if proc_name == string:
                                 found = True
 
                     else:
@@ -158,9 +162,9 @@ class ProcessCheck(AgentCheck):
 
         if not matching_pids:
             self.log.debug(
-                "Unable to find process named '%s' from among processes:\n%s",
+                "Unable to find process named %s among processes: %s",
                 search_string,
-                ', '.join(repr(p) for p in psutil.process_iter()),
+                ', '.join(sorted(encountered_process_names)),
             )
 
         self.pid_cache[name] = matching_pids

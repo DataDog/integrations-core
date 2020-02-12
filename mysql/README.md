@@ -6,16 +6,17 @@
 
 The Datadog Agent can collect many metrics from MySQL databases, including (but not limited to):
 
-* Query throughput
-* Query performance (e.g. average query run time, slow queries, etc.)
-* Connections (e.g. currently open connections, aborted connections, errors, etc.)
-* InnoDB (e.g. buffer pool metrics, etc.)
+- Query throughput
+- Query performance (e.g. average query run time, slow queries, etc.)
+- Connections (e.g. currently open connections, aborted connections, errors, etc.)
+- InnoDB (e.g. buffer pool metrics, etc.)
 
 You can also create your own metrics using custom SQL queries.
 
 **Note:** This integration is also compatible with [MariaDB][2], as it serves as a ["drop-in replacement"][3] for MySQL.
 
 ## Setup
+
 ### Installation
 
 The MySQL check is included in the [Datadog Agent][4] package. No additional installation is needed on your MySQL server.
@@ -24,29 +25,29 @@ The MySQL check is included in the [Datadog Agent][4] package. No additional ins
 
 On each MySQL server, create a database user for the Datadog Agent:
 
-```
+```shell
 mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
 For mySQL 8.0+ create the `datadog` user with the native password hashing method:
 
-```
+```shell
 mysql> CREATE USER 'datadog'@'localhost' IDENTIFIED WITH mysql_native_password by '<UNIQUEPASSWORD>';
 Query OK, 0 rows affected (0.00 sec)
 ```
 
 **Note**: `@'localhost'` is only for local connections - use the hostname/IP of your Agent for remote connections. For more information, see the [MySQL documentation][5].
 
+Verify the user was created successfully using the following commands - replace `<UNIQUEPASSWORD>` with the password you created above:
 
-Verify the user was created successfully using the following commands - replace ```<UNIQUEPASSWORD>``` with the password you created above:
-
-```
+```shell
 mysql -u datadog --password=<UNIQUEPASSWORD> -e "show status" | \
 grep Uptime && echo -e "\033[0;32mMySQL user - OK\033[0m" || \
 echo -e "\033[0;31mCannot connect to MySQL\033[0m"
 ```
-```
+
+```shell
 mysql -u datadog --password=<UNIQUEPASSWORD> -e "show slave status" && \
 echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
 echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
@@ -54,7 +55,7 @@ echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
 
 The Agent needs a few privileges to collect metrics. Grant the user the following limited privileges ONLY:
 
-```
+```shell
 mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected, 1 warning (0.00 sec)
 
@@ -64,14 +65,14 @@ Query OK, 0 rows affected (0.00 sec)
 
 For MySQL 8.0+ set `max_user_connections` with:
 
-```
+```shell
 mysql> ALTER USER 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
 ```
 
 If enabled, metrics can be collected from the `performance_schema` database by granting an additional privilege:
 
-```
+```shell
 mysql> show databases like 'performance_schema';
 +-------------------------------+
 | Database (performance_schema) |
@@ -94,24 +95,24 @@ Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
 
 ##### Metric collection
 
-* Add this configuration block to your `mysql.d/conf.yaml` to collect your [MySQL metrics](#metrics):
+- Add this configuration block to your `mysql.d/conf.yaml` to collect your [MySQL metrics](#metrics):
 
-  ```
+  ```yaml
   init_config:
 
   instances:
     - server: 127.0.0.1
       user: datadog
-      pass: '<YOUR_CHOSEN_PASSWORD>' # from the CREATE USER step earlier
-      port: <YOUR_MYSQL_PORT> # e.g. 3306
+      pass: "<YOUR_CHOSEN_PASSWORD>" # from the CREATE USER step earlier
+      port: "<YOUR_MYSQL_PORT>" # e.g. 3306
       options:
-          replication: false
-          galera_cluster: true
-          extra_status_metrics: true
-          extra_innodb_metrics: true
-          extra_performance_metrics: true
-          schema_size_metrics: false
-          disable_innodb_metrics: false
+        replication: false
+        galera_cluster: true
+        extra_status_metrics: true
+        extra_innodb_metrics: true
+        extra_performance_metrics: true
+        schema_size_metrics: false
+        disable_innodb_metrics: false
   ```
 
 **Note**: Wrap your password in single quotes in case a special character is present.
@@ -126,80 +127,81 @@ See our [sample mysql.yaml][9] for all available configuration options, includin
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. By default MySQL logs everything in `/var/log/syslog` which requires root access to read. To make the logs more accessible, follow these steps:
 
-    - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
-    - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error, and slow query logs:
+   - Edit `/etc/mysql/conf.d/mysqld_safe_syslog.cnf` and remove or comment the lines.
+   - Edit `/etc/mysql/my.cnf` and add following lines to enable general, error, and slow query logs:
 
-      ```conf
-        [mysqld_safe]
-        log_error = /var/log/mysql/mysql_error.log
+     ```conf
+       [mysqld_safe]
+       log_error = /var/log/mysql/mysql_error.log
 
-        [mysqld]
-        general_log = on
-        general_log_file = /var/log/mysql/mysql.log
-        log_error = /var/log/mysql/mysql_error.log
-        slow_query_log = on
-        slow_query_log_file = /var/log/mysql/mysql_slow.log
-        long_query_time = 2
-      ```
+       [mysqld]
+       general_log = on
+       general_log_file = /var/log/mysql/mysql.log
+       log_error = /var/log/mysql/mysql_error.log
+       slow_query_log = on
+       slow_query_log_file = /var/log/mysql/mysql_slow.log
+       long_query_time = 2
+     ```
 
-    - Save the file and restart MySQL using following commands:
-      `service mysql restart`
-    - Make sure the Agent has read access on the `/var/log/mysql` directory and all of the files within. Double-check your logrotate configuration to make sure those files are taken into account and that the permissions are correctly set there as well.
-    - In `/etc/logrotate.d/mysql-server` there should be something similar to:
+   - Save the file and restart MySQL using following commands:
+     `service mysql restart`
+   - Make sure the Agent has read access on the `/var/log/mysql` directory and all of the files within. Double-check your logrotate configuration to make sure those files are taken into account and that the permissions are correctly set there as well.
+   - In `/etc/logrotate.d/mysql-server` there should be something similar to:
 
-      ```
-        /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql_slow.log {
-                daily
-                rotate 7
-                missingok
-                create 644 mysql adm
-                Compress
-        }
-      ```
+     ```text
+       /var/log/mysql.log /var/log/mysql/mysql.log /var/log/mysql/mysql_slow.log {
+               daily
+               rotate 7
+               missingok
+               create 644 mysql adm
+               Compress
+       }
+     ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 3. Add this configuration block to your `mysql.d/conf.yaml` file to start collecting your MySQL logs:
 
-    ```yaml
-      logs:
-          - type: file
-            path: "<ERROR_LOG_FILE_PATH>"
-            source: mysql
-            sourcecategory: database
-            service: "<SERVICE_NAME>"
+   ```yaml
+   logs:
+     - type: file
+       path: "<ERROR_LOG_FILE_PATH>"
+       source: mysql
+       sourcecategory: database
+       service: "<SERVICE_NAME>"
 
-          - type: file
-            path: "<SLOW_QUERY_LOG_FILE_PATH>"
-            source: mysql
-            sourcecategory: database
-            service: "<SERVICE_NAME>"
-            log_processing_rules:
-              - type: multi_line
-                name: new_slow_query_log_entry
-                pattern: "# Time:"
-                # If mysqld was started with `--log-short-format`, use:
-                # pattern: "# Query_time:"
+     - type: file
+       path: "<SLOW_QUERY_LOG_FILE_PATH>"
+       source: mysql
+       sourcecategory: database
+       service: "<SERVICE_NAME>"
+       log_processing_rules:
+         - type: multi_line
+           name: new_slow_query_log_entry
+           pattern: "# Time:"
+           # If mysqld was started with `--log-short-format`, use:
+           # pattern: "# Query_time:"
 
-          - type: file
-            path: "<GENERAL_LOG_FILE_PATH>"
-            source: mysql
-            sourcecategory: database
-            service: "<SERVICE_NAME>"
-            # For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
-            # log_processing_rules:
-            #   - type: multi_line
-            #     name: new_log_start_with_date
-            #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-    ```
+     - type: file
+       path: "<GENERAL_LOG_FILE_PATH>"
+       source: mysql
+       sourcecategory: database
+       service: "<SERVICE_NAME>"
+       # For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
+       # log_processing_rules:
+       #   - type: multi_line
+       #     name: new_log_start_with_date
+       #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+   ```
+
     See our [sample mysql.yaml][9] for all available configuration options, including those for custom metrics.
 
 4. [Restart the Agent][10].
@@ -211,22 +213,21 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 ##### Metric collection
 
 | Parameter            | Value                                                                  |
-|----------------------|------------------------------------------------------------------------|
+| -------------------- | ---------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `mysql`                                                                |
 | `<INIT_CONFIG>`      | blank or `{}`                                                          |
 | `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "user": "datadog","pass": "<UNIQUEPASSWORD>"}` |
-
 
 See the [Autodiscovery template variables documentation][12] to learn how to pass `<UNIQUEPASSWORD>` as an Environment variable instead of a label.
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][13].
 
 | Parameter      | Value                                     |
-|----------------|-------------------------------------------|
+| -------------- | ----------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "mysql", "service": "mysql"}` |
 
 ### Validation
@@ -234,6 +235,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 [Run the Agent's status subcommand][14] and look for `mysql` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][15] for a list of metrics provided by this integration.
@@ -243,7 +245,7 @@ The check does not collect all metrics by default. Set the following boolean con
 `extra_status_metrics` adds the following metrics:
 
 | Metric name                                  | Metric type |
-|----------------------------------------------|-------------|
+| -------------------------------------------- | ----------- |
 | mysql.binlog.cache_disk_use                  | GAUGE       |
 | mysql.binlog.cache_use                       | GAUGE       |
 | mysql.performance.handler_commit             | RATE        |
@@ -281,7 +283,7 @@ The check does not collect all metrics by default. Set the following boolean con
 `extra_innodb_metrics` adds the following metrics:
 
 | Metric name                                 | Metric type |
-|---------------------------------------------|-------------|
+| ------------------------------------------- | ----------- |
 | mysql.innodb.active_transactions            | GAUGE       |
 | mysql.innodb.buffer_pool_data               | GAUGE       |
 | mysql.innodb.buffer_pool_pages_data         | GAUGE       |
@@ -371,14 +373,14 @@ The check does not collect all metrics by default. Set the following boolean con
 `extra_performance_metrics` adds the following metrics:
 
 | Metric name                                     | Metric type |
-|-------------------------------------------------|-------------|
+| ----------------------------------------------- | ----------- |
 | mysql.performance.query_run_time.avg            | GAUGE       |
 | mysql.performance.digest_95th_percentile.avg_us | GAUGE       |
 
 `schema_size_metrics` adds the following metric:
 
 | Metric name            | Metric type |
-|------------------------|-------------|
+| ---------------------- | ----------- |
 | mysql.info.schema.size | GAUGE       |
 
 ### Events
@@ -395,17 +397,18 @@ Returns `CRITICAL` if the Agent cannot connect to MySQL to collect metrics, othe
 
 ## Troubleshooting
 
-* [Connection Issues with the SQL Server Integration][17]
-* [MySQL Localhost Error - Localhost VS 127.0.0.1][18]
-* [Can I use a named instance in the SQL Server integration?][19]
-* [Can I set up the dd-agent MySQL check on my Google CloudSQL?][20]
-* [How to collect metrics from custom MySQL queries][21]
-* [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI][22]
-* [How can I collect more metrics from my SQL Server integration?][23]
-* [Database user lacks privileges][24]
-* [How to collect metrics with a SQL Stored Procedure?][25]
+- [Connection Issues with the SQL Server Integration][17]
+- [MySQL Localhost Error - Localhost VS 127.0.0.1][18]
+- [Can I use a named instance in the SQL Server integration?][19]
+- [Can I set up the dd-agent MySQL check on my Google CloudSQL?][20]
+- [How to collect metrics from custom MySQL queries][21]
+- [Can I collect SQL Server performance metrics beyond what is available in the sys.dm_os_performance_counters table? Try WMI][22]
+- [How can I collect more metrics from my SQL Server integration?][23]
+- [Database user lacks privileges][24]
+- [How to collect metrics with a SQL Stored Procedure?][25]
 
 ## Further Reading
+
 Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd.png

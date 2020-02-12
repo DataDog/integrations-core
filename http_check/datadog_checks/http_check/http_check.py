@@ -3,22 +3,26 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
+import copy
 import re
 import socket
 import ssl
 import time
 from datetime import datetime
 
-import _strptime  # noqa
 import requests
-from six import string_types
+from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+from datadog_checks.base import AgentCheck, ensure_unicode
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path
+
+# Apply thread-safety fix, see https://bugs.python.org/issue7980
+if PY2:
+    import _strptime  # noqa
 
 DEFAULT_EXPIRE_DAYS_WARNING = 14
 DEFAULT_EXPIRE_DAYS_CRITICAL = 7
@@ -34,7 +38,7 @@ class HTTPCheck(AgentCheck):
     SC_STATUS = 'http.can_connect'
     SC_SSL_CERT = 'http.ssl_cert'
 
-    HTTP_CONFIG_REMAPPER = {
+    DEFAULT_HTTP_CONFIG_REMAPPER = {
         'client_cert': {'name': 'tls_cert'},
         'client_key': {'name': 'tls_private_key'},
         'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': True},
@@ -45,15 +49,11 @@ class HTTPCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(HTTPCheck, self).__init__(name, init_config, instances)
 
+        self.HTTP_CONFIG_REMAPPER = copy.deepcopy(self.DEFAULT_HTTP_CONFIG_REMAPPER)
+
         self.ca_certs = init_config.get('ca_certs')
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
-
-        self.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = self.ca_certs
-
-        if is_affirmative(self.instance.get('disable_ssl_validation', True)):
-            # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
-            self.http.options['verify'] = False
 
     def check(self, instance):
         (

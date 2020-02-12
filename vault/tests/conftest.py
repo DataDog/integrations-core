@@ -10,7 +10,7 @@ import requests
 
 from datadog_checks.dev import LazyFunction, TempDir, docker_run, run_command
 from datadog_checks.dev.conditions import WaitFor
-from datadog_checks.dev.utils import ON_WINDOWS, create_file
+from datadog_checks.dev.utils import ON_WINDOWS, create_file, running_on_ci
 from datadog_checks.vault import Vault
 
 from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES
@@ -77,7 +77,7 @@ class ApplyPermissions(LazyFunction):
             user = getpass.getuser()
             chown_args = ['chown', user, self.token_file]
 
-            if user != 'root':
+            if user != 'root' and running_on_ci():
                 chown_args.insert(0, 'sudo')
 
             run_command(chown_args, check=True)

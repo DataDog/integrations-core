@@ -1,5 +1,10 @@
 # CHANGELOG - Linkerd
 
+## 2.4.0 / 2020-01-13
+
+* [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
+* [Fixed] Raise exception to report when openmetrics process fails. See [#5392](https://github.com/DataDog/integrations-core/pull/5392).
+
 ## 2.3.0 / 2019-06-24
 
 * [Added] Support v2. See [#3911](https://github.com/DataDog/integrations-core/pull/3911).

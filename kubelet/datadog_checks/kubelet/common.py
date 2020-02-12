@@ -54,6 +54,15 @@ def get_pod_by_uid(uid, podlist):
     return None
 
 
+def urljoin(*args):
+    """
+    Joins given arguments into an url. Trailing but not leading slashes are
+    stripped for each argument.
+    :return: string
+    """
+    return '/'.join(arg.strip('/') for arg in args)
+
+
 def is_static_pending_pod(pod):
     """
     Return if the pod is a static pending pod

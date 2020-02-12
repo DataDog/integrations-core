@@ -23,98 +23,98 @@ Follow the instructions below to configure this check for an Agent running on a 
 1. **Make sure that [JMX Remote is enabled][4] on your ActiveMQ server.**
 2. Configure the agent to connect to ActiveMQ. Edit `activemq.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample activemq.d/conf.yaml][6] for all available configuration options.
 
-      ```yaml
-      instances:
-        - host: localhost
-          port: 1616
-          user: username
-          password: password
-          name: activemq_instance
-      # List of metrics to be collected by the integration
-      # You should not have to modify this.
-      init_config:
-        conf:
-          - include:
-            Type: Queue
-            attribute:
-              AverageEnqueueTime:
-                alias: activemq.queue.avg_enqueue_time
-                metric_type: gauge
-              ConsumerCount:
-                alias: activemq.queue.consumer_count
-                metric_type: gauge
-              ProducerCount:
-                alias: activemq.queue.producer_count
-                metric_type: gauge
-              MaxEnqueueTime:
-                alias: activemq.queue.max_enqueue_time
-                metric_type: gauge
-              MinEnqueueTime:
-                alias: activemq.queue.min_enqueue_time
-                metric_type: gauge
-              MemoryPercentUsage:
-                alias: activemq.queue.memory_pct
-                metric_type: gauge
-              QueueSize:
-                alias: activemq.queue.size
-                metric_type: gauge
-              DequeueCount:
-                alias: activemq.queue.dequeue_count
-                metric_type: counter
-              DispatchCount:
-                alias: activemq.queue.dispatch_count
-                metric_type: counter
-              EnqueueCount:
-                alias: activemq.queue.enqueue_count
-                metric_type: counter
-              ExpiredCount:
-                alias: activemq.queue.expired_count
-                type: counter
-              InFlightCount:
-                alias: activemq.queue.in_flight_count
-                metric_type: counter
+   ```yaml
+   instances:
+     - host: localhost
+       port: 1616
+       user: username
+       password: password
+       name: activemq_instance
+   # List of metrics to be collected by the integration
+   # You should not have to modify this.
+   init_config:
+     conf:
+       - include:
+         Type: Queue
+         attribute:
+           AverageEnqueueTime:
+             alias: activemq.queue.avg_enqueue_time
+             metric_type: gauge
+           ConsumerCount:
+             alias: activemq.queue.consumer_count
+             metric_type: gauge
+           ProducerCount:
+             alias: activemq.queue.producer_count
+             metric_type: gauge
+           MaxEnqueueTime:
+             alias: activemq.queue.max_enqueue_time
+             metric_type: gauge
+           MinEnqueueTime:
+             alias: activemq.queue.min_enqueue_time
+             metric_type: gauge
+           MemoryPercentUsage:
+             alias: activemq.queue.memory_pct
+             metric_type: gauge
+           QueueSize:
+             alias: activemq.queue.size
+             metric_type: gauge
+           DequeueCount:
+             alias: activemq.queue.dequeue_count
+             metric_type: counter
+           DispatchCount:
+             alias: activemq.queue.dispatch_count
+             metric_type: counter
+           EnqueueCount:
+             alias: activemq.queue.enqueue_count
+             metric_type: counter
+           ExpiredCount:
+             alias: activemq.queue.expired_count
+             type: counter
+           InFlightCount:
+             alias: activemq.queue.in_flight_count
+             metric_type: counter
 
-          - include:
-            Type: Broker
-            attribute:
-              StorePercentUsage:
-                alias: activemq.broker.store_pct
-                metric_type: gauge
-              TempPercentUsage:
-                alias: activemq.broker.temp_pct
-                metric_type: gauge
-              MemoryPercentUsage:
-                alias: activemq.broker.memory_pct
-                metric_type: gauge
-      ```
+       - include:
+         Type: Broker
+         attribute:
+           StorePercentUsage:
+             alias: activemq.broker.store_pct
+             metric_type: gauge
+           TempPercentUsage:
+             alias: activemq.broker.temp_pct
+             metric_type: gauge
+           MemoryPercentUsage:
+             alias: activemq.broker.memory_pct
+             metric_type: gauge
+   ```
 
 3. [Restart the agent][7]
 
 ##### Log collection
 
- **Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
- 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
- 2. Add this configuration block to your `activemq.d/conf.yaml` file to start collecting your Riak logs:
+2. Add this configuration block to your `activemq.d/conf.yaml` file to start collecting your Riak logs:
 
-     ```
-      logs:
-        - type: file
-          path: <ACTIVEMQ_BASEDIR>/data/activemq.log
-          source: activemq
-          service: <SERVICE_NAME>
-        - type: file
-          path: <ACTIVEMQ_BASEDIR>/data/audit.log
-          source: activemq
-          service: <SERVICE_NAME>
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: "<ACTIVEMQ_BASEDIR>/data/activemq.log"
+       source: activemq
+       service: "<SERVICE_NAME>"
+     - type: file
+       path: "<ACTIVEMQ_BASEDIR>/data/audit.log"
+       source: activemq
+       service: "<SERVICE_NAME>"
+   ```
 
- 3. [Restart the Agent][7].
+3. [Restart the Agent][7].
 
 #### Containerized
 
@@ -122,20 +122,20 @@ For containerized environments, see the [Autodiscovery Integration Templates][13
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                       |
-|----------------------|---------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `activemq`                                                                                   |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                               |
-| `<INSTANCE_CONFIG>`  | <pre>{"host": "%%host%%",<br> "port":"1099"}</pre> |
+| Parameter            | Value                                |
+| -------------------- | ------------------------------------ |
+| `<INTEGRATION_NAME>` | `activemq`                           |
+| `<INIT_CONFIG>`      | blank or `{}`                        |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%","port":"1099"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][13].
 
-| Parameter      | Value                                               |
-|----------------|-----------------------------------------------------|
+| Parameter      | Value                                                  |
+| -------------- | ------------------------------------------------------ |
 | `<LOG_CONFIG>` | `{"source": "activemq", "service": "<YOUR_APP_NAME>"}` |
 
 ### Validation
@@ -143,25 +143,30 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 [Run the Agent's status subcommand][8] and look for `activemq` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Events
+
 The ActiveMQ check does not include any events.
 
 ### Service Checks
+
 **activemq.can_connect**:<br>
 Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored ActiveMQ instance, otherwise returns `OK`.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][10].
 
 ## Further Reading
+
 Additional helpful documentation, links, and articles:
 
-* [ActiveMQ architecture and key metrics][11]
-* [Monitor ActiveMQ metrics and performance][12]
-
+- [ActiveMQ architecture and key metrics][11]
+- [Monitor ActiveMQ metrics and performance][12]
 
 [1]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
 [2]: https://app.datadoghq.com/account/settings#agent

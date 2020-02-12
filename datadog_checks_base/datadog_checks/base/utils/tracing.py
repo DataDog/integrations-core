@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import functools
 
-import wrapt
 from ddtrace import tracer
 
 from ..config import is_affirmative
@@ -14,16 +14,34 @@ except ImportError:
     datadog_agent = None
 
 
-@wrapt.decorator
-def traced(wrapped, instance, args, kwargs):
-    if datadog_agent is None:
-        return wrapped(*args, **kwargs)
+def traced(fn):
+    """
+    Traced decorator is intended to be used on a method of AgentCheck subclasses.
 
-    trace_check = is_affirmative(instance.init_config.get('trace_check'))
-    integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
+    Example:
 
-    if integration_tracing and trace_check:
-        with tracer.trace('integration.check', service='integrations-tracing', resource=instance.name):
-            return wrapped(*args, **kwargs)
+        class MyCheck(AgentCheck):
 
-    return wrapped(*args, **kwargs)
+            @traced
+            def check(self, instance):
+                self.gauge('dummy.metric', 10)
+
+            @traced
+            def submit(self):
+                self.gauge('dummy.metric', 10)
+    """
+
+    @functools.wraps(fn)
+    def traced_wrapper(self, *args, **kwargs):
+        if datadog_agent is None:
+            return fn(self, *args, **kwargs)
+
+        trace_check = is_affirmative(self.init_config.get('trace_check'))
+        integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
+
+        if integration_tracing and trace_check:
+            with tracer.trace('integration.check', service='integrations-tracing', resource=self.name):
+                return fn(self, *args, **kwargs)
+        return fn(self, *args, **kwargs)
+
+    return traced_wrapper

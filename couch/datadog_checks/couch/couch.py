@@ -68,6 +68,11 @@ class CouchDb(AgentCheck):
 
             try:
                 version = self.get(self.get_server(instance), tags, True)['version']
+                if version is not None:
+                    self.set_metadata('version', version)
+                else:
+                    self.log.debug("Could not parse CouchDB version: %s", version)
+
             except Exception as e:
                 raise errors.ConnectionError("Unable to talk to the server: {}".format(e))
 
@@ -169,6 +174,7 @@ class CouchDB1:
                 couchdb['databases'][dbName] = None
                 if (e.response.status_code == 403) or (e.response.status_code == 401):
                     self.db_blacklist[server].append(dbName)
+
                     self.warning(
                         'Database %s is not readable by the configured user. '
                         'It will be added to the blacklist. Please restart the agent to clear.',

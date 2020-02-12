@@ -493,25 +493,32 @@ class TestAuth:
 
             m.assert_called_once_with(aws_host='uri', aws_region='us-east-1', aws_service='es')
 
-    def test_config_aws_no_host(self):
-        instance = {'auth_type': 'aws'}
+    @pytest.mark.parametrize(
+        'case, instance, match',
+        [
+            ('no host', {'auth_type': 'aws'}, '^AWS auth requires the setting `aws_host`$'),
+            ('no region', {'auth_type': 'aws', 'aws_host': 'uri'}, '^AWS auth requires the setting `aws_region`$'),
+            (
+                'no service',
+                {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'us-east-1'},
+                '^AWS auth requires the setting `aws_service`$',
+            ),
+            ('empty host', {'auth_type': 'aws', 'aws_host': ''}, '^AWS auth requires the setting `aws_host`$'),
+            (
+                'empty region',
+                {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': ''},
+                '^AWS auth requires the setting `aws_region`$',
+            ),
+            (
+                'empty service',
+                {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'us-east-1', 'aws_service': ''},
+                '^AWS auth requires the setting `aws_service`$',
+            ),
+        ],
+    )
+    def test_config_aws_invalid_cases(self, case, instance, match):
         init_config = {}
-
-        with pytest.raises(ConfigurationError, match='^AWS auth requires the setting `aws_host`$'):
-            RequestsWrapper(instance, init_config)
-
-    def test_config_aws_no_region(self):
-        instance = {'auth_type': 'aws', 'aws_host': 'uri'}
-        init_config = {}
-
-        with pytest.raises(ConfigurationError, match='^AWS auth requires the setting `aws_region`$'):
-            RequestsWrapper(instance, init_config)
-
-    def test_config_aws_no_service(self):
-        instance = {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'us-east-1'}
-        init_config = {}
-
-        with pytest.raises(ConfigurationError, match='^AWS auth requires the setting `aws_service`$'):
+        with pytest.raises(ConfigurationError, match=match):
             RequestsWrapper(instance, init_config)
 
 
@@ -777,6 +784,22 @@ class TestIgnoreTLSWarning:
 
         assert http.ignore_tls_warning is True
 
+    def test_init_config_flag(self):
+        instance = {}
+        init_config = {'tls_ignore_warning': True}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.ignore_tls_warning is True
+
+    def test_instance_and_init_flag(self):
+        instance = {'tls_ignore_warning': False}
+        init_config = {'tls_ignore_warning': True}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.ignore_tls_warning is False
+
     def test_default_no_ignore(self):
         instance = {}
         init_config = {}
@@ -812,6 +835,42 @@ class TestIgnoreTLSWarning:
             http.get('https://www.google.com', verify=False)
 
         assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    def test_init_ignore(self):
+        instance = {}
+        init_config = {'tls_ignore_warning': True}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(None) as record:
+            http.get('https://www.google.com', verify=False)
+
+        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    def test_default_init_no_ignore(self):
+        instance = {}
+        init_config = {'tls_ignore_warning': False}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(InsecureRequestWarning):
+            http.get('https://www.google.com', verify=False)
+
+    def test_instance_ignore(self):
+        instance = {'tls_ignore_warning': True}
+        init_config = {'tls_ignore_warning': False}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(None) as record:
+            http.get('https://www.google.com', verify=False)
+
+        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    def test_instance_no_ignore(self):
+        instance = {'tls_ignore_warning': False}
+        init_config = {'tls_ignore_warning': True}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(InsecureRequestWarning):
+            http.get('https://www.google.com', verify=False)
 
 
 class TestSession:
@@ -1144,6 +1203,6 @@ class TestAPI:
 
 class TestIntegration:
     def test_session_timeout(self):
-        http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.300})
+        http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08})
         with pytest.raises(requests.exceptions.Timeout):
-            http.get('https://httpstat.us/200?sleep=500')
+            http.get('https://httpbin.org/delay/0.10')

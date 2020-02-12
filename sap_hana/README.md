@@ -18,57 +18,57 @@ To query certain views, specific privileges must be granted to the chosen HANA m
 
 1. Connect to the system database and run the following command to create a user:
 
-    ```
-    CREATE RESTRICTED USER <USER> PASSWORD <PASSWORD>
-    ```
+   ```shell
+   CREATE RESTRICTED USER <USER> PASSWORD <PASSWORD>
+   ```
 
 2. Run the following command to allow the user to connect to the system:
 
-    ```
-    ALTER USER <USER> ENABLE CLIENT CONNECT
-    ```
+   ```shell
+   ALTER USER <USER> ENABLE CLIENT CONNECT
+   ```
 
 3. (optional) To avoid service interruption you may want to make the password long-lived:
 
-    ```
-    ALTER USER <USER> DISABLE PASSWORD LIFETIME
-    ```
+   ```shell
+   ALTER USER <USER> DISABLE PASSWORD LIFETIME
+   ```
 
 ##### Granting privileges
 
 1. Run the following command to create a monitoring role (we'll call it `DD_MONITOR` for these examples):
 
-    ```
-    CREATE ROLE DD_MONITOR
-    ```
+   ```shell
+   CREATE ROLE DD_MONITOR
+   ```
 
 2. Run the following command to grant read-only access to all system views:
 
-    ```
-    GRANT CATALOG READ TO DD_MONITOR
-    ```
+   ```shell
+   GRANT CATALOG READ TO DD_MONITOR
+   ```
 
 3. Then run the following commands to grant select privileges on each system view:
 
-    ```
-    GRANT SELECT ON SYS.M_DATABASE TO DD_MONITOR
-    GRANT SELECT ON SYS.M_DATABASES TO DD_MONITOR
-    GRANT SELECT ON SYS_DATABASES.M_BACKUP_PROGRESS TO DD_MONITOR
-    GRANT SELECT ON SYS_DATABASES.M_CONNECTIONS TO DD_MONITOR
-    GRANT SELECT ON SYS_DATABASES.M_DISK_USAGE TO DD_MONITOR
-    GRANT SELECT ON SYS_DATABASES.M_LICENSES TO DD_MONITOR
-    GRANT SELECT ON SYS_DATABASES.M_RS_MEMORY TO DD_MONITOR
-    GRANT SELECT ON SYS_DATABASES.M_SERVICE_COMPONENT_MEMORY TO DD_MONITOR
-    GRANT SELECT ON SYS_DATABASES.M_SERVICE_MEMORY TO DD_MONITOR
-    GRANT SELECT ON SYS_DATABASES.M_SERVICE_STATISTICS TO DD_MONITOR
-    GRANT SELECT ON SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS TO DD_MONITOR
-    ```
+   ```shell
+   GRANT SELECT ON SYS.M_DATABASE TO DD_MONITOR
+   GRANT SELECT ON SYS.M_DATABASES TO DD_MONITOR
+   GRANT SELECT ON SYS_DATABASES.M_BACKUP_PROGRESS TO DD_MONITOR
+   GRANT SELECT ON SYS_DATABASES.M_CONNECTIONS TO DD_MONITOR
+   GRANT SELECT ON SYS_DATABASES.M_DISK_USAGE TO DD_MONITOR
+   GRANT SELECT ON SYS_DATABASES.M_LICENSES TO DD_MONITOR
+   GRANT SELECT ON SYS_DATABASES.M_RS_MEMORY TO DD_MONITOR
+   GRANT SELECT ON SYS_DATABASES.M_SERVICE_COMPONENT_MEMORY TO DD_MONITOR
+   GRANT SELECT ON SYS_DATABASES.M_SERVICE_MEMORY TO DD_MONITOR
+   GRANT SELECT ON SYS_DATABASES.M_SERVICE_STATISTICS TO DD_MONITOR
+   GRANT SELECT ON SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS TO DD_MONITOR
+   ```
 
 4. Finally, run the following command to assign the monitoring role to the desired user:
 
-    ```
-    GRANT DD_MONITOR TO <USER>
-    ```
+   ```shell
+   GRANT DD_MONITOR TO <USER>
+   ```
 
 ### Configuration
 

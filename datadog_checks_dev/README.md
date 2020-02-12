@@ -20,7 +20,7 @@ Using a virtual environment is recommended.
 ## Installation
 
 `datadog-checks-dev` is distributed on [PyPI][6] as a universal wheel
-and is available on Linux, macOS, and Windows, and supports Python 2.7/3.7+ and PyPy.
+and is available on Linux, macOS, and Windows, and supports Python 3.7+ and PyPy.
 
 ```console
 $ pip install "datadog-checks-dev[cli]"

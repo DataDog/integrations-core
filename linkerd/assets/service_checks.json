@@ -1,10 +1,15 @@
 [
     {
         "agent_version": "6.0.0",
-        "integration":"linkerd",
+        "integration": "Linkerd",
         "check": "linkerd.prometheus.health",
-        "statuses": ["ok", "critical"],
-        "groups": ["endpoint"],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "endpoint"
+        ],
         "name": "Linkerd prometheus health",
         "description": "Returns `CRITICAL` if the agent fails to connect to the prometheus endpoint, otherwise `OK`."
     }

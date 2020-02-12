@@ -51,7 +51,7 @@ def test_check_iptables(aggregator, mock_iptables):
     Testing Kube_proxy in iptables mode.
     """
 
-    c = KubeProxyCheck(CHECK_NAME, None, {}, [instance])
+    c = KubeProxyCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     aggregator.assert_metric(NAMESPACE + '.cpu.time')
     aggregator.assert_metric(NAMESPACE + '.mem.resident')
@@ -74,7 +74,7 @@ def test_check_userspace(aggregator, mock_userspace):
     """
     Testing Kube_proxy in userspace mode.
     """
-    c = KubeProxyCheck(CHECK_NAME, None, {}, [instance])
+    c = KubeProxyCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     aggregator.assert_metric(NAMESPACE + '.cpu.time')
     aggregator.assert_metric(NAMESPACE + '.mem.resident')

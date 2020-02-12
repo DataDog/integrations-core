@@ -37,7 +37,7 @@ class Apache(AgentCheck):
         'connect_timeout': {'name': 'connect_timeout', 'default': 5},
     }
 
-    VERSION_REGEX = re.compile(r'^Apache/([0-9]+\.[0-9]+\.[0-9]+)( \(.*\))?$')
+    VERSION_REGEX = re.compile(r'Apache/(\d+(?:\.\d+)*)')
 
     def __init__(self, name, init_config, instances):
         super(Apache, self).__init__(name, init_config, instances)
@@ -128,8 +128,8 @@ class Apache(AgentCheck):
 
     def _submit_metadata(self, value):
         """Possible formats:
-            Apache | Apache/X | Apache/X.Y | Apache/X.Y.Z | Apache/X.Y.Z (<OS>)
-            Incomplete versions are ignored.
+            Apache | Apache/X | Apache/X.Y | Apache/X.Y.Z | Apache/X.Y.Z (<OS>) | Apache/X.Y.Z (<OS>) <not specified>
+            https://httpd.apache.org/docs/2.4/mod/core.html#servertokens
         """
         match = self.VERSION_REGEX.match(value)
 
@@ -137,6 +137,7 @@ class Apache(AgentCheck):
             self.log.info("Cannot parse the complete Apache version from %s.", value)
             return
 
-        version = match.groups()[0]
-        self.set_metadata('version', version)
+        version = match.group(1)
+        version_parts = {name: part for name, part in zip(('major', 'minor', 'patch'), version.split('.'))}
+        self.set_metadata('version', version, scheme='parts', final_scheme='semver', part_map=version_parts)
         self.log.debug("found apache version %s", version)

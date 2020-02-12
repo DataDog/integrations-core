@@ -6,12 +6,29 @@ import re
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_EXTENSIONS, get_root
+from .e2e import get_active_checks, get_configured_envs
 from .git import files_changed
-from .utils import get_testable_checks
+from .utils import complete_set_root, get_testable_checks
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
 PYTHON_MAJOR_PATTERN = r'py(\d)'
+
+
+def complete_envs(ctx, args, incomplete):
+    complete_set_root(args)
+    return sorted(e for e in get_available_tox_envs(args[-1], e2e_only=True) if e.startswith(incomplete))
+
+
+# this test makes more sense under tooling/utils, but that causes circular import
+def complete_active_checks(ctx, args, incomplete):
+    complete_set_root(args)
+    return [k for k in get_active_checks() if k.startswith(incomplete)]
+
+
+def complete_configured_envs(ctx, args, incomplete):
+    complete_set_root(args)
+    return [e for e in get_configured_envs(args[-1]) if e.startswith(incomplete)]
 
 
 def get_tox_envs(
@@ -143,7 +160,7 @@ def coverage_sources(check):
     elif check == 'datadog_checks_downloader':
         package_path = 'datadog_checks/downloader'
     else:
-        package_path = 'datadog_checks/{}'.format(check)
+        package_path = f'datadog_checks/{check}'
 
     return package_path, 'tests'
 
@@ -152,7 +169,7 @@ def fix_coverage_report(check, report_file):
     report = read_file_binary(report_file)
 
     # Make every check's `tests` directory path unique so they don't get combined in UI
-    report = report.replace(b'"tests/', '"{}/tests/'.format(check).encode('utf-8'))
+    report = report.replace(b'"tests/', f'"{check}/tests/'.encode('utf-8'))
 
     write_file_binary(report_file, report)
 
@@ -172,7 +189,7 @@ def construct_pytest_options(
     e2e=False,
 ):
     # Prevent no verbosity
-    pytest_options = '--verbosity={}'.format(verbose or 1)
+    pytest_options = f'--verbosity={verbose or 1}'
 
     if not verbose:
         pytest_options += ' --tb=short'
@@ -198,10 +215,10 @@ def construct_pytest_options(
             # junit report file must contain the env name to handle multiple envs
             # $TOX_ENV_NAME is a tox injected variable
             # See https://tox.readthedocs.io/en/latest/config.html#injected-environment-variables
-            ' --junit-xml=.junit/test-{test_group}-$TOX_ENV_NAME.xml'
+            f' --junit-xml=.junit/test-{test_group}-$TOX_ENV_NAME.xml'
             # Junit test results class prefix
-            ' --junit-prefix={check}'
-        ).format(check=check, test_group=test_group)
+            f' --junit-prefix={check}'
+        )
 
     if coverage:
         pytest_options += (
@@ -216,19 +233,19 @@ def construct_pytest_options(
         )
 
     if marker:
-        pytest_options += ' -m "{}"'.format(marker)
+        pytest_options += f' -m "{marker}"'
 
     if test_filter:
-        pytest_options += ' -k "{}"'.format(test_filter)
+        pytest_options += f' -k "{test_filter}"'
 
     if pytest_args:
-        pytest_options += ' {}'.format(pytest_args)
+        pytest_options += f' {pytest_args}'
 
     return pytest_options
 
 
 def pytest_coverage_sources(*checks):
-    return ' '.join(' '.join('--cov={}'.format(source) for source in coverage_sources(check)) for check in checks)
+    return ' '.join(' '.join(f'--cov={source}' for source in coverage_sources(check)) for check in checks)
 
 
 def testable_files(files):

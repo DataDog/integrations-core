@@ -39,62 +39,62 @@ from .common import (
     REGISTRIES_PRE_1_8_FIXTURE,
     SYSTEM_INFO_FIXTURE,
     URL,
-    USERS_URL,
     VERSION_1_6,
     VERSION_1_8,
     VOLUME_INFO_FIXTURE,
 )
 
-UNTRACKED_FILES = [
-    os.path.join('common', 'config', 'core', 'certificates'),
-    os.path.join('common', 'config', 'custom-ca-bundle.crt'),
-    os.path.join('common', 'config', 'ui', 'certificates'),
-    os.path.join('data', 'ca_download'),
-    os.path.join('data', 'chart_storage'),
-    os.path.join('data', 'config'),
-    os.path.join('data', 'job_logs'),
-    os.path.join('data', 'psc'),
-    os.path.join('data', 'redis'),
-    os.path.join('data', 'registry'),
-]
-
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
+def dd_environment(e2e_instance):
     compose_file = get_docker_compose_file()
+    expected_log = "http server Running on" if HARBOR_VERSION < [1, 10, 0] else "API server is serving at"
     conditions = [
-        CheckDockerLogs(compose_file, "http server Running on", wait=3),
-        lambda: time.sleep(2),
+        CheckDockerLogs(compose_file, expected_log, wait=3),
+        lambda: time.sleep(4),
         CreateSimpleUser(),
     ]
     with docker_run(compose_file, conditions=conditions):
-        yield instance
+        yield e2e_instance
 
 
 class CreateSimpleUser(LazyFunction):
     def __call__(self, *args, **kwargs):
-        with requests.session() as session:
-            harbor_api = HarborAPI(URL, session)
-            harbor_api.authenticate('admin', 'Harbor12345')
-            harbor_api._make_post_request(
-                USERS_URL,
-                json={
-                    "username": "NotAnAdmin",
-                    "email": "NotAnAdmin@goharbor.io",
-                    "password": "Str0ngPassw0rd",
-                    "realname": "Not An Admin",
-                },
-            )
+        requests.post(
+            URL + '/api/users',
+            auth=("admin", "Harbor12345"),
+            json={
+                "username": "NotAnAdmin",
+                "email": "NotAnAdmin@goharbor.io",
+                "password": "Str0ngPassw0rd",
+                "realname": "Not An Admin",
+            },
+            verify=False,
+        )
 
 
 @pytest.fixture(scope='session')
 def instance():
-    return INSTANCE.copy()
+    content = INSTANCE.copy()
+    if os.environ.get('HARBOR_USE_SSL'):
+        content['tls_ca_cert'] = os.path.join(HERE, 'compose', 'common', 'cert', 'ca.crt')
+    return content
 
 
 @pytest.fixture(scope='session')
 def admin_instance():
-    return ADMIN_INSTANCE.copy()
+    content = ADMIN_INSTANCE.copy()
+    if os.environ.get('HARBOR_USE_SSL'):
+        content['tls_ca_cert'] = os.path.join(HERE, 'compose', 'common', 'cert', 'ca.crt')
+    return content
+
+
+@pytest.fixture(scope='session')
+def e2e_instance():
+    content = INSTANCE.copy()
+    if os.environ.get('HARBOR_USE_SSL'):
+        content['tls_ca_cert'] = "/home/harbor/tests/compose/common/cert/ca.crt"
+    return content
 
 
 @pytest.fixture
@@ -110,7 +110,7 @@ def harbor_api(harbor_check, admin_instance, patch_requests):
 
 @pytest.fixture
 def patch_requests():
-    with patch.object(requests.Session, 'request', side_effect=mocked_requests):
+    with patch("requests.api.request", side_effect=mocked_requests):
         yield
 
 
