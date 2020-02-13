@@ -28,8 +28,9 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
+@click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.pass_context
-def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_file):
+def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
@@ -38,8 +39,8 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
         abort(f'Check `{check}` is not an Agent-based Integration')
 
     # sanity check on the version provided
-    cur_version = old_version or get_version_string(check)
-    if parse_version_info(version.lstrip('v')) <= parse_version_info(cur_version.lstrip('v')):
+    cur_version = old_version or get_version_string(check, tag_prefix=tag_prefix)
+    if parse_version_info(version.lstrip(tag_prefix)) <= parse_version_info(cur_version.lstrip(tag_prefix)):
         abort(f'Current version is {cur_version}, cannot bump to {version}')
 
     if not quiet:
