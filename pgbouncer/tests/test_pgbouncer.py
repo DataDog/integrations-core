@@ -26,7 +26,7 @@ def test_check(instance, aggregator):
     cur.execute('SELECT * FROM persons;')
 
     # run the check
-    check = PgBouncer('pgbouncer', {}, {})
+    check = PgBouncer('pgbouncer', {}, [instance])
     check.check(instance)
 
     assert_metric_coverage(aggregator)
