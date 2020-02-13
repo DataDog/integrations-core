@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   snmp:
-    image: "datadog/docker-library:snmp"
+    image: "florianveauxdd/snmp:florian-test"
     ports:
       - "1161:1161/udp"
     command: --args-from-file=/usr/snmpsim/data/args_list.txt
