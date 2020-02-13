@@ -40,7 +40,9 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
 
     # sanity check on the version provided
     cur_version = old_version or get_version_string(check, tag_prefix=tag_prefix)
-    if parse_version_info(version.replace(tag_prefix, '', 1)) <= parse_version_info(cur_version.replace(tag_prefix, '', 1)):
+    if parse_version_info(version.replace(tag_prefix, '', 1)) <= parse_version_info(
+        cur_version.replace(tag_prefix, '', 1)
+    ):
         abort(f'Current version is {cur_version}, cannot bump to {version}')
 
     if not quiet:
