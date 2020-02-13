@@ -229,7 +229,9 @@ class RabbitMQ(AgentCheck):
 
     def check(self, instance):
         self.log.error("Hello")
-        base_url, max_detailed, specified, custom_tags, suppress_warning, disable_node_metrics = self._get_config(instance)
+        base_url, max_detailed, specified, custom_tags, suppress_warning, disable_node_metrics = self._get_config(
+            instance
+        )
         try:
             with warnings.catch_warnings():
                 vhosts = self._get_vhosts(instance, base_url)

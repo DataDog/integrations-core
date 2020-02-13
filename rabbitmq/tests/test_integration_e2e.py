@@ -233,3 +233,21 @@ def test_connections(aggregator, check):
         aggregator.assert_metric('rabbitmq.connections', tags=['rabbitmq_vhost:test2'], value=0, count=1)
         aggregator.assert_metric('rabbitmq.connections', count=2)
         aggregator.assert_metric('rabbitmq.connections.state', tags=['rabbitmq_conn_state:running'], value=0, count=0)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_nodes(aggregator, check):
+
+    # default, node metrics are collected
+    check.check(common.CONFIG)
+
+    for m in metrics.COMMON_METRICS:
+        aggregator.assert_metric(m, count=1)
+
+    aggregator.reset()
+
+    # default, node metrics disabled
+    check.check(common.CONFIG_NO_NODES)
+
+    for m in metrics.COMMON_METRICS:
+        aggregator.assert_metric(m, count=0)
