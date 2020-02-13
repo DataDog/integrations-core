@@ -83,7 +83,7 @@ See [kube_apiserver_metrics][1]
 
 ### Metrics
 
-See [metadata.csv][10] for a full list of provided metrics by this integration.
+See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Events
 
