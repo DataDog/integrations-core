@@ -246,8 +246,12 @@ def test_nodes(aggregator, check):
 
     aggregator.reset()
 
-    # default, node metrics disabled
+    # node metrics collection disabled in config, node metrics should not appear
     check.check(common.CONFIG_NO_NODES)
 
     for m in metrics.COMMON_METRICS:
         aggregator.assert_metric(m, count=0)
+
+    # check to ensure other metrics are being collected
+    for m in metrics.Q_METRICS:
+        aggregator.assert_metric(m, count=1)
