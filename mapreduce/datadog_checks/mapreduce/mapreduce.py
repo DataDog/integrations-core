@@ -433,9 +433,6 @@ class MapReduceCheck(AgentCheck):
         except ValueError as e:
             self._critical_service(service_name, service_check_tags, str(e))
             raise
-        except AttributeError:
-            self._critical_service(service_name, service_check_tags, "No response from {}".format(url))
-            raise
 
         return response_json
 

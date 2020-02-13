@@ -28,6 +28,7 @@ YARN_APPS_URL_BASE = '{}/{}'.format(RM_URI, MapReduceCheck.YARN_APPS_PATH)
 MR_JOBS_URL = '{}/proxy/{}/{}'.format(RM_URI, APP_ID, MapReduceCheck.MAPREDUCE_JOBS_PATH)
 MR_JOB_COUNTERS_URL = '{}/{}/{}'.format(MR_JOBS_URL, JOB_ID, 'counters')
 MR_TASKS_URL = '{}/{}/{}'.format(MR_JOBS_URL, JOB_ID, 'tasks')
+CLUSTER_INFO_URL = '{}/{}'.format(RM_URI, MapReduceCheck.CLUSTER_INFO)
 
 TEST_USERNAME = 'admin'
 TEST_PASSWORD = 'password'
