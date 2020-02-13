@@ -15,6 +15,7 @@ from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.mapreduce import MapReduceCheck
 
 from .common import (
+    CLUSTER_INFO_URL,
     CONTAINER_NAME,
     HERE,
     HOST,
@@ -25,7 +26,7 @@ from .common import (
     TEST_PASSWORD,
     TEST_USERNAME,
     YARN_APPS_URL_BASE,
-    CLUSTER_INFO_URL)
+)
 
 
 @pytest.fixture(scope="session")
@@ -90,7 +91,7 @@ def requests_get_mock(*args, **kwargs):
     # The parameter that creates the query params (kwargs) is an unordered dict,
     #   so the query params can be in any order
     if url.startswith(YARN_APPS_URL_BASE):
-        query = url[len(YARN_APPS_URL_BASE):]
+        query = url[len(YARN_APPS_URL_BASE) :]
         if query in ["?states=RUNNING&applicationTypes=MAPREDUCE", "?applicationTypes=MAPREDUCE&states=RUNNING"]:
             return _mock_response(os.path.join(HERE, "fixtures", "apps_metrics"))
         else:
