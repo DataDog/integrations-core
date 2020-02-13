@@ -228,7 +228,6 @@ class RabbitMQ(AgentCheck):
         return vhosts
 
     def check(self, instance):
-        self.log.error("Hello")
         base_url, max_detailed, specified, custom_tags, suppress_warning, disable_node_metrics = self._get_config(
             instance
         )
@@ -307,7 +306,6 @@ class RabbitMQ(AgentCheck):
     def _get_data(self, url):
         try:
             r = self.http.get(url)
-            self.log.error(url)
             r.raise_for_status()
             return r.json()
         except RequestException as e:
