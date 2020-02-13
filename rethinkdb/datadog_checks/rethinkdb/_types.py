@@ -1,8 +1,18 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 """
-Types used to represent JSON documents returned by RethinkDB queries. Used for type checking our own code.
+Declarations used for type checking our code, including our manipulation of JSON documents returned by RethinkDB.
 """
 
 from typing import Any, List, Literal, Tuple, TypedDict
+
+# Lightweight shim to decouple collection functions from the check class.
+Metric = TypedDict(
+    'Metric', {'type': Literal['rate', 'gauge', 'monotonic_count'], 'name': str, 'value': float, 'tags': List[str]}
+)
+
 
 # Configuration documents.
 # See: https://rethinkdb.com/docs/system-tables/#configuration-tables
@@ -10,6 +20,7 @@ from typing import Any, List, Literal, Tuple, TypedDict
 Server = TypedDict('Server', {'id': str, 'name': str, 'cache_size_mb': str, 'tags': List[str]})
 
 Table = TypedDict('Table', {'id': str, 'name': str, 'db': str})  # TODO: more fields
+
 
 # System statistics documents.
 # See: https://rethinkdb.com/docs/system-stats/
@@ -44,7 +55,9 @@ TableStats = TypedDict(
     'TableStats', {'id': Tuple[Literal['table'], str], 'table': str, 'db': str, 'query_engine': TableQueryEngine},
 )
 
-# ReQL commands.
+
+# ReQL command results.
+# See: https://rethinkdb.com/api/python/
 
 # NOTE: Ideally 'left' and 'right' would be generics here, but this isn't supported by 'TypedDict' yet.
 # See: https://github.com/python/mypy/issues/3863
