@@ -38,6 +38,12 @@ instances:
     #
     # tag_families: false
 
+    ## @param disable_node_metrics - boolean - optional - default: false
+    ## Use the disable_node_metrics paramater if you'd like to collect all
+    ## metrics except the ones pertaining to nodes
+    #
+    # disable_node_metrics: false
+
     ## @param nodes - list of strings - optional
     ## Use the `nodes` parameters to specify the nodes you'd like to
     ## collect metrics on (up to 100 nodes).
@@ -119,7 +125,7 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
-    
+
     ## @param username - string - optional
     ## If the API endpoint is behind basic auth, enter here the required username.
     #
