@@ -16,3 +16,64 @@ SERVER_NAME = 'server0'
 
 HOST = get_docker_hostname()
 PORT = 28015
+
+SYSTEM_STATISTICS_METRICS = (
+    'rethinkdb.stats.cluster.queries_per_sec',
+    'rethinkdb.stats.cluster.read_docs_per_sec',
+    'rethinkdb.stats.cluster.written_docs_per_sec',
+    'rethinkdb.stats.server.queries_per_sec',
+    'rethinkdb.stats.server.queries_total',
+    'rethinkdb.stats.server.read_docs_per_sec',
+    'rethinkdb.stats.server.read_docs_total',
+    'rethinkdb.stats.server.written_docs_per_sec',
+    'rethinkdb.stats.server.written_docs_total',
+    'rethinkdb.stats.server.client_connections',
+    'rethinkdb.stats.server.clients_active',  # NOTE: sent, but not documented on the RethinkDB website.
+    # WIP
+    # TODO: add a database, tables and replicas to the Docker Compose setup.
+    # 'rethinkdb.stats.table.read_docs_per_sec',
+    # 'rethinkdb.stats.table.written_docs_per_sec',
+    # 'rethinkdb.stats.table_server.read_docs_per_sec',
+    # 'rethinkdb.stats.table_server.read_docs_total',
+    # 'rethinkdb.stats.table_server.written_docs_per_sec',
+    # 'rethinkdb.stats.table_server.written_docs_total',
+    # 'rethinkdb.stats.table_server.cache.in_use_bytes',
+    # 'rethinkdb.stats.table_server.disk.read_bytes_per_sec',
+    # 'rethinkdb.stats.table_server.disk.read_bytes_total',
+    # 'rethinkdb.stats.table_server.disk.written_bytes_per_sec',
+    # 'rethinkdb.stats.table_server.disk.written_bytes_total',
+    # 'rethinkdb.stats.table_server.disk.space_usage.metadata_bytes',
+    # 'rethinkdb.stats.table_server.disk.space_usage.data_bytes',
+    # 'rethinkdb.stats.table_server.disk.space_usage.garbage_bytes',
+    # 'rethinkdb.stats.table_server.disk.space_usage.preallocated_bytes',
+)
+
+STATUS_METRICS = (
+    'rethinkdb.table_status.ready_for_outdated_reads' 'rethinkdb.table_status.ready_for_reads',
+    'rethinkdb.table_status.ready_for_writes',
+    'rethinkdb.table_status.all_replicas_ready',
+    'rethinkdb.table_status.shards.total',
+    'rethinkdb.table_status.shards.replicas.total',
+    'rethinkdb.table_status.shards.replicas.state',
+    'rethinkdb.server_status.network.time_connected',
+    'rethinkdb.server_status.network.connected_to',
+    'rethinkdb.server_status.process.time_started',
+)
+
+SYSTEM_JOBS_METRICS = (
+    'rethinkdb.jobs.duration_sec',
+)
+
+SYSTEM_CURRENT_ISSUES_METRICS = (
+    'rethinkdb.current_issues.log_write_error',
+    'rethinkdb.current_issues.server_name_collision',
+    'rethinkdb.current_issues.db_name_collision',
+    'rethinkdb.current_issues.table_name_collision',
+    'rethinkdb.current_issues.outdated_index',
+    'rethinkdb.current_issues.table_availability',
+    'rethinkdb.current_issues.memory_error',
+    'rethinkdb.current_issues.non_transitive_error',
+)
+
+# WIP
+METRICS = SYSTEM_STATISTICS_METRICS
