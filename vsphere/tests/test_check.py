@@ -4,14 +4,17 @@
 import json
 import os
 
+import mock
 import pytest
-from mock import MagicMock
-from tests.common import HERE
-from tests.mocked_api import MockedAPI
+from mock import MagicMock, patch
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
+from datadog_checks.vsphere.api import APIConnectionError
 from datadog_checks.vsphere.config import VSphereConfig
+
+from .common import HERE
+from .mocked_api import MockedAPI
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
@@ -123,3 +126,77 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
         aggregator.assert_metric(
             'vsphere.disk.read.avg', tags=['vcenter_server:FAKE'] + [instance_tag], hostname='VM4-1', count=1
         )
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_collect_tags(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update({'collect_tags': True, 'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2']})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4',
+    )
+    aggregator.assert_metric(
+        'vsphere.rescpu.samplePeriod.latest',
+        tags=['my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='10.0.0.104',
+    )
+    aggregator.assert_metric(
+        'vsphere.datastore.maxTotalLatency.latest',
+        tags=['my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='10.0.0.104',
+    )
+    aggregator.assert_metric('datadog.vsphere.query_tags.time', tags=['vcenter_server:FAKE'])
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_tag_prefix(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update(
+        {
+            'collect_tags': True,
+            'vsphere_tags_prefix': 'ABC_',
+            'excluded_host_tags': ['ABC_my_cat_name_1', 'ABC_my_cat_name_2'],
+        }
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=['ABC_my_cat_name_1:my_tag_name_1', 'ABC_my_cat_name_2:my_tag_name_2', 'vcenter_server:FAKE'],
+        hostname='VM4-4',
+    )
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update({'collect_tags': True})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.log = MagicMock()
+
+    with patch('datadog_checks.vsphere.api_rest.create_vsphere_client') as client:
+        client.side_effect = Exception("Some error")
+        dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='10.0.0.104')
+
+    check.log.error.assert_called_once_with(
+        "Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", mock.ANY
+    )
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_refresh_tags_cache_should_not_raise_exception(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update({'collect_tags': True})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.log = MagicMock()
+    check.api_rest = MagicMock()
+    check.api_rest.get_resource_tags.side_effect = APIConnectionError("Some error")
+
+    check.refresh_tags_cache()
+
+    # Error logged, but `refresh_tags_cache` should NOT raise any exception
+    check.log.error.assert_called_once_with("Failed to collect tags: %s", mock.ANY)

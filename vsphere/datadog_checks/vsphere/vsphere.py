@@ -16,7 +16,8 @@ from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.stubs import datadog_agent
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
-from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
+from datadog_checks.vsphere.api_rest import VSphereRestAPI
+from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
@@ -62,7 +63,9 @@ class VSphereCheck(AgentCheck):
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
         )
+        self.tags_cache = TagsCache(interval_sec=self.config.refresh_tags_cache_interval)
         self.api = None
+        self.api_rest = None
         # Do not override `AgentCheck.hostname`
         self._hostname = None
         self.thread_pool = ThreadPoolExecutor(max_workers=self.config.threads_count)
@@ -79,6 +82,12 @@ class VSphereCheck(AgentCheck):
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
             raise
+
+        if self.config.should_collect_tags:
+            try:
+                self.api_rest = VSphereRestAPI(self.config, self.log)
+            except APIConnectionError as e:
+                self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
 
     def refresh_metrics_metadata_cache(self):
         """Request the list of counters (metrics) from vSphere and store them in a cache."""
@@ -111,6 +120,21 @@ class VSphereCheck(AgentCheck):
         # TODO: Later - Understand how much data actually changes between check runs
         # Apparently only when the server restarts?
         # https://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.wssdk.pg.doc_50%2FPG_Ch16_Performance.18.5.html
+
+    def refresh_tags_cache(self):
+        """
+        Fetch the all tags, build tags for each monitored resources and store all of that into the tags_cache.
+        """
+        if not self.api_rest:
+            return
+        t0 = Timer()
+        try:
+            mor_tags = self.api_rest.get_resource_tags()
+        except APIConnectionError as e:
+            self.log.error("Failed to collect tags: %s", e)
+            return
+        self.gauge('datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True)
+        self.tags_cache.set_all_tags(mor_tags)
 
     def refresh_infrastructure_cache(self):
         """Fetch the complete infrastructure, generate tags for each monitored resources and store all of that
@@ -168,6 +192,7 @@ class VSphereCheck(AgentCheck):
             tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
             tags.append('vsphere_type:{}'.format(mor_type_str))
             mor_payload = {"tags": tags}
+
             if hostname:
                 mor_payload['hostname'] = hostname
 
@@ -240,17 +265,18 @@ class VSphereCheck(AgentCheck):
                     instance_tag_key = get_mapped_instance_tag(metric_name)
                     tags.append('{}:{}'.format(instance_tag_key, instance_value))
 
+                vsphere_tags = self.tags_cache.get_mor_tags(results_per_mor.entity)
+                mor_tags = mor_props['tags'] + vsphere_tags
+
                 if resource_type in HISTORICAL_RESOURCES:
                     # Tags are attached to the metrics
-                    tags.extend(mor_props['tags'])
+                    tags.extend(mor_tags)
                     hostname = None
                 else:
                     # Tags are (mostly) submitted as external host tags.
                     hostname = to_string(mor_props.get('hostname'))
                     if self.config.excluded_host_tags:
-                        tags.extend(
-                            [t for t in mor_props['tags'] if t.split(":", 1)[0] in self.config.excluded_host_tags]
-                        )
+                        tags.extend([t for t in mor_tags if t.split(":", 1)[0] in self.config.excluded_host_tags])
 
                 tags.extend(self.config.base_tags)
 
@@ -461,6 +487,11 @@ class VSphereCheck(AgentCheck):
                     DEFAULT_MAX_QUERY_METRICS,
                 )
                 pass
+
+        # Refresh the tags cache
+        if self.api_rest and self.tags_cache.is_expired():
+            with self.tags_cache.update():
+                self.refresh_tags_cache()
 
         # Refresh the metrics metadata cache
         if self.metrics_metadata_cache.is_expired():

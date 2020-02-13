@@ -17,6 +17,7 @@ flup==1.0.3.dev-20110405; python_version < '3.0'
 flup-py3==1.0.3; python_version > '3.0'
 futures==3.3.0; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
+git+https://github.com/vmware/vsphere-automation-sdk-python@efe345a21b4ab7b346b65e1cb58d56412edd1c10
 httplib2==0.10.3
 in-toto==0.4.2
 ipaddress==1.0.22; python_version < '3.0'
@@ -52,7 +53,7 @@ python-binary-memcached==0.26.1; sys_platform != 'win32'
 python-dateutil==2.8.0
 python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
 pytz==2019.3
-pyvmomi==v6.5.0.2017.5-1
+pyvmomi==6.7.3
 pywin32==227; sys_platform == 'win32'
 pyyaml==5.1
 redis==3.3.11

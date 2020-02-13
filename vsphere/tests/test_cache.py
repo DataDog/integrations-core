@@ -1,12 +1,19 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import logging
+
 import pytest
 from mock import MagicMock, patch
+from pyVmomi import vim
 from six import iteritems
+from tests.mocked_api import MockedRestAPI
 
-from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, VSphereCache
+from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache, VSphereCache
+from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
+
+logger = logging.getLogger()
 
 
 def test_generic_cache_usage():
@@ -80,3 +87,21 @@ def test_infrastructure_cache():
 
     for k, v in iteritems(mors):
         assert cache.get_mor_props(k) == v
+
+
+@pytest.mark.usefixtures("mock_type")
+def test_tags_cache(realtime_instance):
+    cache = TagsCache(float('inf'))
+    config = VSphereConfig(realtime_instance, logger)
+    mock_api = MockedRestAPI(config, log=logger)
+
+    with cache.update():
+        cache.set_all_tags(mock_api.get_resource_tags())
+
+    vm_mor = vim.VirtualMachine(moId='VM4-4-1')
+    vm2_mor = vim.VirtualMachine(moId='i-dont-have-tags')
+    datastore = vim.Datastore(moId='NFS-Share-1')
+
+    assert cache.get_mor_tags(vm_mor) == ['my_cat_name_1:my_tag_name_1', 'my_cat_name_2:my_tag_name_2']
+    assert cache.get_mor_tags(datastore) == ['my_cat_name_2:my_tag_name_2']
+    assert cache.get_mor_tags(vm2_mor) == []
