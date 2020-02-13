@@ -21,9 +21,9 @@ def test_integration(aggregator, check, instance, datadog_agent):
     version_metadata = {
         'version.raw': '2.7.1',
         'version.scheme': 'semver',
-        'version.major': 2,
-        'version.minor': 7,
-        'version.patch': 1,
+        'version.major': '2',
+        'version.minor': '7',
+        'version.patch': '1',
     }
     datadog_agent.assert_metadata('test:123', version_metadata)
 
