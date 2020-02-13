@@ -115,6 +115,9 @@ class RethinkDBCheck(AgentCheck):
         pass  # TODO
 
     # TODO: version metadata.
+    # TODO: custom queries. (Hint: look at `QueryManager`.)
+    # TODO: allow not sending default metrics.
+    # TODO: decide if and how to deal with `identifier_format`: https://rethinkdb.com/api/python/table/#description
 
 
 def _query_server_stats(conn):
