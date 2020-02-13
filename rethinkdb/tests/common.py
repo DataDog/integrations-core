@@ -61,18 +61,22 @@ STATUS_METRICS = (
 )
 
 SYSTEM_JOBS_METRICS = (
-    'rethinkdb.jobs.duration_sec',
+    'rethinkdb.jobs.query.duration',
+    'rethinkdb.jobs.index_construction.duration',
+    'rethinkdb.jobs.index_construction.progress',
+    'rethinkdb.jobs.backfill.duration',
+    'rethinkdb.jobs.backfill.progress',
 )
 
 SYSTEM_CURRENT_ISSUES_METRICS = (
-    'rethinkdb.current_issues.log_write_error',
-    'rethinkdb.current_issues.server_name_collision',
-    'rethinkdb.current_issues.db_name_collision',
-    'rethinkdb.current_issues.table_name_collision',
-    'rethinkdb.current_issues.outdated_index',
-    'rethinkdb.current_issues.table_availability',
-    'rethinkdb.current_issues.memory_error',
-    'rethinkdb.current_issues.non_transitive_error',
+    'rethinkdb.current_issues.log_write_error.total',
+    'rethinkdb.current_issues.server_name_collision.total',
+    'rethinkdb.current_issues.db_name_collision.total',
+    'rethinkdb.current_issues.table_name_collision.total',
+    'rethinkdb.current_issues.outdated_index.total',
+    'rethinkdb.current_issues.table_availability.total',
+    'rethinkdb.current_issues.memory_error.total',
+    'rethinkdb.current_issues.non_transitive_error.total',
 )
 
 # WIP
