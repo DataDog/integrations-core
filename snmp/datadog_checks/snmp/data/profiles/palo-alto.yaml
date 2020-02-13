@@ -71,7 +71,40 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.25461.2.1.2.3.8
       name: panSessionActiveSslProxyUtilization
-
+  #
+  # Connections per Second (CPS) values per zone
+  #
+  - MIB: PAN-COMMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.10
+      name: panZoneTable
+    symbols:
+      - OID: 1.3.6.1.4.1.25461.2.1.2.3.10.1.1
+        name: panZoneName
+      - OID: 1.3.6.1.4.1.25461.2.1.2.3.10.1.2
+        name: panZoneActiveTcpCps
+      - OID: 1.3.6.1.4.1.25461.2.1.2.3.10.1.3
+        name: panZoneActiveUdpCps
+      - OID: 1.3.6.1.4.1.25461.2.1.2.3.10.1.4
+        name: panZoneActiveOtherIpCps
+  #
+  # Connections per Second (CPS) values per interface
+  #
+  - MIB: PAN-COMMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.11
+      name: panIfTable
+    symbols:
+      - OID: 1.3.6.1.4.1.25461.2.1.2.3.11.1.1
+        name: ifIndex
+      - OID: 1.3.6.1.4.1.25461.2.1.2.3.11.1.2
+        name: ifDescr
+      - OID: 1.3.6.1.4.1.25461.2.1.2.3.11.1.3
+        name: panIfActiveTcpCps
+      - OID: 1.3.6.1.4.1.25461.2.1.2.3.11.1.4
+        name: panIfActiveUdpCps
+      - OID: 1.3.6.1.4.1.25461.2.1.2.3.11.1.5
+        name: panIfActiveOtherIpCps
   #
   # GlobalProtect gateway utilization
   #
@@ -81,10 +114,106 @@ metrics:
       name: panGPGWUtilizationPct
   - MIB: PAN-COMMON-MIB
     symbol:
-     OID: 1.3.6.1.4.1.25461.2.1.2.5.1.2
+      OID: 1.3.6.1.4.1.25461.2.1.2.5.1.2
       name: panGPGWUtilizationMaxTunnels
   - MIB: PAN-COMMON-MIB
     symbol:
       OID: 1.3.6.1.4.1.25461.2.1.2.5.1.3
       name: panGPGWUtilizationActiveTunnels
-
+  #
+  # Device Logging Stats
+  #
+  - MIB: PAN-COMMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.25461.2.1.2.7.2
+      name: panDeviceLoggingLogTypeStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.2.1.1
+        name: panDeviceLoggingDevice
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.2.1.2
+        name: panDeviceLoggingDeviceIndex
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.2.1.3
+        name: panDeviceLoggingLogType
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.2.1.4
+        name: panDeviceLoggingLogLastLogCreated
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.2.1.5
+        name: panDeviceLoggingLogLastLogFwded
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.2.1.6
+        name: panDeviceLoggingLogLastSeqNumberFwded
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.2.1.7
+        name: panDeviceLoggingLogLastSeqNumberAck
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.2.1.8
+        name: panDeviceLoggingLogTotalLogsFwded
+  #
+  # Device Logging Usage
+  #
+  - MIB: PAN-COMMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.25461.2.1.2.7.3
+      name: panDeviceLoggingLogUsageTable
+    symbols:
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.3.1.1
+        name: panDeviceLoggingLogUsageLogType
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.3.1.2
+        name: panDeviceLoggingDiskUsageDiskSpace
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.3.1.3
+        name: panDeviceLoggingDiskUsageRetention
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.3.1.4
+        name: panDeviceLoggingDiskQuotaPct
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.3.1.5
+        name: panDeviceLoggingDiskQuota
+  #
+  # Device Logging Forward Counts
+  #
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.8
+      name: panSessionActiveSslProxyUtilization
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.7.4.1
+      name: panDeviceLoggingExtFwdCount
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.7.4.2
+      name: panDeviceLoggingExtFwdQueueDrop
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.7.4.3
+      name: panDeviceLoggingExtFwdStatsSendErr
+  #
+  # Device Logging Forward Stats
+  #
+  - MIB: PAN-COMMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.25461.2.1.2.7.4.4
+      name: panDeviceLoggingExtFwdStatsTable
+    symbols:
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.4.4.1.1
+        name: panDeviceLoggingExtFwdStatsTableType
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.4.4.1.2
+        name: panDeviceLoggingExtFwdStatsTableEnqueueCount
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.4.4.1.3
+        name: panDeviceLoggingExtFwdStatsTableSendCount
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.4.4.1.4
+        name: panDeviceLoggingExtFwdStatsTableDropCount
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.4.4.1.5
+        name: panDeviceLoggingExtFwdStatsTableQueueDepth
+      - OID: .3.6.1.4.1.25461.2.1.2.7.4.4.1.6
+        name: panDeviceLoggingExtFwdStatsTable1minAvgSendRate
+  #
+  # Device Logging Collector
+  #
+  - MIB: PAN-COMMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.25461.2.1.2.7.5
+      name: panDeviceLoggingCollectorConnectionTable
+    symbols:
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.5.1.1
+        name: panDeviceLoggingCollectorConnectionType
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.5.1.2
+        name: panDeviceLoggingCollectorConnectionIP
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.5.1.3
+        name: panDeviceLoggingCollectorConnectionHostname
+      - OID: 1.3.6.1.4.1.25461.2.1.2.7.5.1.4
+        name: panDeviceLoggingCollectorConnectionStatus
