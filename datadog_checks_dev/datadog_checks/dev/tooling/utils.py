@@ -211,7 +211,7 @@ def read_version_file(check_name):
     return read_file(get_version_file(check_name))
 
 
-def get_version_string(check_name):
+def get_version_string(check_name, tag_prefix='v'):
     """
     Get the version string for the given check.
     """
@@ -222,7 +222,7 @@ def get_version_string(check_name):
         if version:
             return version.group(1)
     else:
-        return get_latest_tag()
+        return get_latest_tag(tag_prefix=tag_prefix)
 
 
 def load_manifest(check_name):
