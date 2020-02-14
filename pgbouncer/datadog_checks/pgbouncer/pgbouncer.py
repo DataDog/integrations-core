@@ -8,6 +8,7 @@ from six.moves.urllib.parse import urlparse
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.errors import CheckException, ConfigurationError
+from datadog_checks.pgbouncer.metrics import DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
 
 
 class ShouldRestartException(Exception):
@@ -16,6 +17,7 @@ class ShouldRestartException(Exception):
 
 class PgBouncer(AgentCheck):
     """Collects metrics from pgbouncer"""
+
     DB_NAME = 'pgbouncer'
     SERVICE_CHECK_NAME = 'pgbouncer.can_connect'
 
@@ -55,7 +57,7 @@ class PgBouncer(AgentCheck):
         """Query pgbouncer for various metrics
         """
 
-        metric_scope = [self.STATS_METRICS, self.POOLS_METRICS, self.DATABASES_METRICS]
+        metric_scope = [STATS_METRICS, POOLS_METRICS, DATABASES_METRICS]
 
         try:
             with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
@@ -108,7 +110,13 @@ class PgBouncer(AgentCheck):
             return {'dsn': "user={} dbname={}".format(self.user, self.DB_NAME)}
 
         if self.port:
-            return {'host': self.host, 'user': self.user, 'password': self.password, 'database': self.DB_NAME, 'port': self.port}
+            return {
+                'host': self.host,
+                'user': self.user,
+                'password': self.password,
+                'database': self.DB_NAME,
+                'port': self.port,
+            }
 
         return {'host': self.host, 'user': self.user, 'password': self.password, 'database': self.DB_NAME}
 
@@ -131,10 +139,7 @@ class PgBouncer(AgentCheck):
             message = u'Cannot establish connection to {}'.format(redacted_url)
 
             self.service_check(
-                self.SERVICE_CHECK_NAME,
-                AgentCheck.CRITICAL,
-                tags=self._get_service_checks_tags(),
-                message=message,
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_checks_tags(), message=message,
             )
             raise
 
@@ -162,8 +167,5 @@ class PgBouncer(AgentCheck):
         redacted_dsn = self._get_redacted_dsn()
         message = u'Established connection to {}'.format(redacted_dsn)
         self.service_check(
-            self.SERVICE_CHECK_NAME,
-            AgentCheck.OK,
-            tags=self._get_service_checks_tags(),
-            message=message,
+            self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags(), message=message,
         )
