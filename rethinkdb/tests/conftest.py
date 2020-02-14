@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.dev import docker_run
 
-from .common import HERE, IMAGE, CONNECT_SERVER_PORT, PROXY_PORT
+from .common import CONNECT_SERVER_PORT, HERE, IMAGE, PROXY_PORT
 
 
 @pytest.fixture(scope='session')

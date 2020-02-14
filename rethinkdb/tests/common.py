@@ -15,6 +15,7 @@ IMAGE = 'rethinkdb:2.4.0'
 HOST = get_docker_hostname()
 
 SERVERS = ['server0', 'server1', 'server2']
+SERVER_TAGS = {'server0': ['default', 'us'], 'server1': ['default', 'us'], 'server2': ['default', 'eu']}
 CONNECT_SERVER_NAME = 'server0'
 CONNECT_SERVER_PORT = 28015
 PROXY_PORT = 28018

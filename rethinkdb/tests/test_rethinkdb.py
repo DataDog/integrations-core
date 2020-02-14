@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.rethinkdb import RethinkDBCheck
 
-from .common import CLUSTER_STATISTICS_METRICS, SERVER_STATISTICS_METRICS, SERVERS, CONNECT_SERVER
+from .common import CLUSTER_STATISTICS_METRICS, CONNECT_SERVER_NAME, SERVER_STATISTICS_METRICS, SERVER_TAGS, SERVERS
 
 
 @pytest.mark.integration
@@ -24,8 +24,10 @@ def test_check(aggregator):
 
     for metric in SERVER_STATISTICS_METRICS:
         for server in SERVERS:
-            aggregator.assert_metric(metric, tags=['server:{}'.format(server)])
+            tags = ['server:{}'.format(server)] + SERVER_TAGS[server]
+            aggregator.assert_metric(metric, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_service_check('rethinkdb.can_connect', count=1, tags=['server:{}'.format(CONNECT_SERVER)])
+    service_check_tags = ['server:{}'.format(CONNECT_SERVER_NAME)]
+    aggregator.assert_service_check('rethinkdb.can_connect', count=1, tags=service_check_tags)

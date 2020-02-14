@@ -62,3 +62,6 @@ TableStats = TypedDict(
 # NOTE: Ideally 'left' and 'right' would be generics here, but this isn't supported by 'TypedDict' yet.
 # See: https://github.com/python/mypy/issues/3863
 EqJoinRow = TypedDict('EqJoinRow', {'left': Any, 'right': Any})
+
+# See: https://rethinkdb.com/api/python/server
+ConnectionServer = TypedDict('ConnectionServer', {'id': str, 'name': str, 'proxy': bool})

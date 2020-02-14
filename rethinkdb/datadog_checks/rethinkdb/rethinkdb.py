@@ -6,14 +6,14 @@
 from __future__ import absolute_import
 
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Iterator
+from typing import Any, Callable, Dict, Iterator, List
 
 import rethinkdb
 
 from datadog_checks.base import AgentCheck
 
 from ._default_metrics import collect_default_metrics
-from ._types import Metric
+from ._types import ConnectionServer, Metric
 
 
 class RethinkDBCheck(AgentCheck):
@@ -25,8 +25,9 @@ class RethinkDBCheck(AgentCheck):
 
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
-        with self.__submit_service_check():
+        with self.__submit_service_check() as on_connection_established:
             with rethinkdb.r.connect(db='rethinkdb', host='localhost', port=28015) as conn:
+                on_connection_established(conn)
                 for metric in collect_default_metrics(conn):
                     self.__submit_metric(metric)
 
@@ -34,14 +35,22 @@ class RethinkDBCheck(AgentCheck):
 
     @contextmanager
     def __submit_service_check(self):
-        # type: () -> Iterator[None]
+        # type: () -> Iterator[Callable[[rethinkdb.net.Connection], None]]
+        tags = []  # type: List[str]
+
+        def on_connection_established(conn):
+            # type: (rethinkdb.net.Connection) -> None
+            server = conn.server()  # type: ConnectionServer
+            tags.append('server:{}'.format(server['name']))
+            # TODO: add a 'proxy' tag if server is a proxy?
+
         try:
-            yield
+            yield on_connection_established
         except rethinkdb.errors.ReqlDriverError:
-            self.service_check('rethinkdb.can_connect', self.CRITICAL)
+            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=tags)
             raise
         else:
-            self.service_check('rethinkdb.can_connect', self.OK)
+            self.service_check('rethinkdb.can_connect', self.OK, tags=tags)
 
     def __submit_metric(self, metric):
         # type: (Metric) -> None
