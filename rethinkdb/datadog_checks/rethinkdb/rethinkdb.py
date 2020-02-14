@@ -12,6 +12,7 @@ import rethinkdb
 
 from datadog_checks.base import AgentCheck
 
+from ._config import Config
 from ._default_metrics import collect_default_metrics
 from ._types import ConnectionServer, Metric
 
@@ -23,15 +24,24 @@ class RethinkDBCheck(AgentCheck):
     A set of default metrics is collected from system tables.
     """
 
+    # NOTE: use of private names (double underscores, e.g. '__member') prevents name clashes with the base class.
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__config = Config(self.instance)  # type: Config  # (Mypy is confused without this hint... :wtf:)
+
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
+        self.log.debug('check config=%r', self.__config)
+
+        host = self.__config.host
+        port = self.__config.port
+
         with self.__submit_service_check() as on_connection_established:
-            with rethinkdb.r.connect(db='rethinkdb', host='localhost', port=28015) as conn:
+            with rethinkdb.r.connect(db='rethinkdb', host=host, port=port) as conn:
                 on_connection_established(conn)
                 for metric in collect_default_metrics(conn):
                     self.__submit_metric(metric)
-
-    # NOTE: usage of private methods (double underscores) prevents name clashes with the base class.
 
     @contextmanager
     def __submit_service_check(self):
@@ -46,9 +56,12 @@ class RethinkDBCheck(AgentCheck):
 
         try:
             yield on_connection_established
-        except rethinkdb.errors.ReqlDriverError:
+        except rethinkdb.errors.ReqlDriverError as exc:
+            self.log.error('Could not connect to RethinkDB server: %r', exc)
             self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=tags)
-            raise
+        except Exception as exc:
+            self.log.error('Unexpected error while executing RethinkDB check: %r', exc)
+            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=tags)
         else:
             self.service_check('rethinkdb.can_connect', self.OK, tags=tags)
 

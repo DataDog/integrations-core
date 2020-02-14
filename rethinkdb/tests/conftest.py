@@ -8,12 +8,21 @@ import pytest
 
 from datadog_checks.dev import docker_run
 
-from .common import CONNECT_SERVER_PORT, HERE, IMAGE, PROXY_PORT
+from .common import CONNECT_SERVER_PORT, HERE, HOST, IMAGE, PROXY_PORT
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
-    # type: () -> Iterator[Dict[str, Any]]
+def instance():
+    # type: () -> Dict[str, Any]
+    return {
+        'host': HOST,
+        'port': CONNECT_SERVER_PORT,
+    }
+
+
+@pytest.fixture(scope='session')
+def dd_environment(instance):
+    # type: (Dict[str, Any]) -> Iterator[Dict[str, Any]]
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     env_vars = {
@@ -30,6 +39,5 @@ def dd_environment():
     ]  # type: List[str]
 
     with docker_run(compose_file, env_vars=env_vars, log_patterns=log_patterns):
-        instance = {}  # type: Dict[str, Any]
         config = {'instances': [instance]}
         yield config

@@ -13,9 +13,8 @@ from .common import CLUSTER_STATISTICS_METRICS, CONNECT_SERVER_NAME, SERVER_STAT
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator):
-    # type: (AggregatorStub) -> None
-    instance = {}  # type: Dict[str, Any]
+def test_check(aggregator, instance):
+    # type: (AggregatorStub, Dict[str, Any]) -> None
     check = RethinkDBCheck('rethinkdb', {}, [instance])
     check.check(instance)
 
@@ -30,4 +29,4 @@ def test_check(aggregator):
     aggregator.assert_all_metrics_covered()
 
     service_check_tags = ['server:{}'.format(CONNECT_SERVER_NAME)]
-    aggregator.assert_service_check('rethinkdb.can_connect', count=1, tags=service_check_tags)
+    aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1, tags=service_check_tags)
