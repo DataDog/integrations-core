@@ -108,6 +108,8 @@ class InstanceConfig:
 
         self._context_data = hlapi.ContextData(*self.get_context_data(instance))
 
+        self._uptime_metric_added = False
+
     def resolve_oid(self, oid):
         return self._resolver.resolve_oid(oid)
 
@@ -355,3 +357,18 @@ class InstanceConfig:
             all_oids.insert(0, oids)
 
         return all_oids, bulk_oids, parsed_metrics
+
+    def add_uptime_metric(self):
+        if self._uptime_metric_added:
+            return
+        uptime_oid = '1.3.6.1.2.1.1.3.0'
+        oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(uptime_oid))
+        if not self.all_oids:
+            self.all_oids.append([oid_object])
+        else:
+            self.all_oids[0].append(oid_object)
+        self._resolver.register(to_oid_tuple(uptime_oid), 'sysUpTimeInstance')
+
+        parsed_metric = ParsedMetric('sysUpTimeInstance', [], 'gauge')
+        self.parsed_metrics.append(parsed_metric)
+        self._uptime_metric_added = True
