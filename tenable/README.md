@@ -1,5 +1,3 @@
-# Agent Check: Nessus
-
 ## Overview
 
 This integration monitors [Tenable Nessus][1] logs through the Datadog Agent.

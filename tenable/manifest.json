@@ -16,7 +16,7 @@
   ],
   "public_title": "Datadog-Tenable Integration",
   "categories": [
-    ""
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
