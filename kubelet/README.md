@@ -7,19 +7,21 @@ This integration gets container metrics from kubelet
 - Visualize and monitor kubelet stats
 - Be notified about kubelet failovers and events.
 
-## Installation
+## Setup
+
+### Installation
 
 The Kubelet check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
 
-## Configuration
+### Configuration
 
 Edit the `kubelet.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2], to point to your server and port, set tags to send along with metrics.
 
-## Validation
+### Validation
 
 [Run the Agent's `status` subcommand][3] and look for `kubelet` under the Checks section.
 
-## Compatibility
+### Compatibility
 
 The kubelet check can run in two modes:
 
@@ -48,7 +50,12 @@ The check will still be able to collect:
 - pod limits and requests
 - node capacity metrics
 
+## Troubleshooting
+
+Need help? Contact [Datadog support][5].
+
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [4]: https://docs.openshift.org/3.7/install_config/master_node_configuration.html#node-configuration-files
+[5]: https://docs.datadoghq.com/help
