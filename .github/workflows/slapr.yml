@@ -17,8 +17,8 @@ jobs:
         SLACK_CHANNEL_ID: "${{ secrets.SLACK_CHANNEL_ID }}"
         SLACK_API_TOKEN: "${{ secrets.SLACK_API_TOKEN }}"
         SLAPR_BOT_USER_ID: "${{ secrets.SLAPR_BOT_USER_ID }}"
-        SLAPR_EMOJI_REVIEW_STARTED: review_started
-        SLAPR_EMOJI_APPROVED: approved
-        SLAPR_EMOJI_CHANGE_REQUESTED: change_requested
-        SLAPR_EMOJI_MERGED: merged
-        SLAPR_EMOJI_CLOSED: closed
+        SLAPR_EMOJI_REVIEW_STARTED: "review_started"
+        SLAPR_EMOJI_APPROVED: "pr-approved-"
+        SLAPR_EMOJI_CHANGE_REQUESTED: "change_requested"
+        SLAPR_EMOJI_MERGED: "merged"
+        SLAPR_EMOJI_CLOSED: "closed"
