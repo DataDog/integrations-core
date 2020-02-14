@@ -53,7 +53,7 @@ flink.jobmanager.taskSlotsTotal,gauge,,,,The total number of task slots,0,flink,
 flink.jobmanager.job.restartingTime,gauge,,millisecond,,The time it took to restart the job or how long the current restart has been in progress,0,flink,jobmanager job restart time
 flink.jobmanager.job.uptime,gauge,,millisecond,,The time that the job has been running without interruption. Returns -1 for completed jobs,0,flink,jobmanager job uptime
 flink.jobmanager.job.downtime,gauge,,millisecond,,For jobs currently in a failing/recovering situation- the time elapsed during this outage. Returns 0 for running jobs and -1 for completed jobs,-1,flink,jobmanager job downtime
-flink.jobmanager.job.numRestarts,gauge,,,,The total number of restarts since this job was submitted, including full restarts and fine-grained restarts.	,-1,flink,jobmanager job restarts
+flink.jobmanager.job.numRestarts,gauge,,,,"The total number of restarts since this job was submitted, including full restarts and fine-grained restarts",-1,flink,jobmanager job restarts
 flink.jobmanager.job.lastCheckpointDuration,gauge,,millisecond,,The time it took to complete the last checkpoint,0,flink,jobmanager job checkpointt duration
 flink.jobmanager.job.lastCheckpointSize,gauge,,byte,,The total size of the last checkpoint,0,flink,jobmanager job checkpoint size
 flink.jobmanager.job.lastCheckpointExternalPath,gauge,,,,The path where the last external checkpoint was stored,0,flink,jobmanager job checkpoint path
