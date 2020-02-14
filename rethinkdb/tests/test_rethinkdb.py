@@ -13,7 +13,16 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.rethinkdb import RethinkDBCheck
 from datadog_checks.rethinkdb._types import Instance, Metric
 
-from .common import CLUSTER_STATISTICS_METRICS, CONNECT_SERVER_NAME, SERVER_STATISTICS_METRICS, SERVER_TAGS, SERVERS
+from .common import (
+    CLUSTER_STATISTICS_METRICS,
+    CONNECT_SERVER_NAME,
+    DATABASE,
+    HEROES_TABLE,
+    SERVER_STATISTICS_METRICS,
+    SERVER_TAGS,
+    SERVERS,
+    TABLE_STATISTICS_METRICS,
+)
 
 
 @pytest.mark.integration
@@ -30,6 +39,11 @@ def test_check(aggregator, instance):
         for server in SERVERS:
             tags = ['server:{}'.format(server)] + SERVER_TAGS[server]
             aggregator.assert_metric(metric, tags=tags)
+
+    for metric in TABLE_STATISTICS_METRICS:
+        tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
+        aggregator.assert_metric(metric, tags=tags)
+        # TODO: test shards/replicas.
 
     aggregator.assert_all_metrics_covered()
 

@@ -16,9 +16,39 @@ HOST = get_docker_hostname()
 
 SERVERS = ['server0', 'server1', 'server2']
 SERVER_TAGS = {'server0': ['default', 'us'], 'server1': ['default', 'us'], 'server2': ['default', 'eu']}
+
 CONNECT_SERVER_NAME = 'server0'
 CONNECT_SERVER_PORT = 28015
+
 PROXY_PORT = 28018
+
+DATABASE = 'doghouse'
+
+HEROES_TABLE = 'heroes'
+# TODO: add some indexes
+HEROES_TABLE_OPTIONS = {'shards': 2, 'replicas': 3}
+HEROES_INITIAL_DOCUMENTS = [
+    {
+        "hero": "Magneto",
+        "name": "Max Eisenhardt",
+        "aka": ["Magnus", "Erik Lehnsherr", "Lehnsherr"],
+        "magazine_titles": ["Alpha Flight", "Avengers", "Avengers West Coast"],
+        "appearances_count": 42,
+    },
+    {
+        "hero": "Professor Xavier",
+        "name": "Charles Francis Xavier",
+        "magazine_titles": ["Alpha Flight", "Avengers", "Bishop", "Defenders"],
+        "appearances_count": 72,
+    },
+    {
+        "hero": "Storm",
+        "name": "Ororo Monroe",
+        "magazine_titles": ["Amazing Spider-Man vs. Wolverine", "Excalibur", "Fantastic Four", "Iron Fist"],
+        "appearances_count": 72,
+    },
+]
+NUM_FAMOUS_HEROES = 2
 
 CLUSTER_STATISTICS_METRICS = (
     'rethinkdb.stats.cluster.queries_per_sec',
@@ -38,11 +68,10 @@ SERVER_STATISTICS_METRICS = (
 )
 
 # WIP
-# TODO: add a database, tables and replicas to the Docker Compose setup.
 
 TABLE_STATISTICS_METRICS = (
-    # 'rethinkdb.stats.table.read_docs_per_sec',
-    # 'rethinkdb.stats.table.written_docs_per_sec',
+    'rethinkdb.stats.table.read_docs_per_sec',
+    'rethinkdb.stats.table.written_docs_per_sec',
 )
 
 REPLICA_STATISTICS_METRICS = (

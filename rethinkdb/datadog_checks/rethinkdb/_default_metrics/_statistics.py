@@ -10,8 +10,8 @@ from typing import Iterator
 
 import rethinkdb
 
-from .._queries import query_cluster_stats, query_servers_with_stats
-from .._types import Metric, Table, TableStats
+from .._queries import query_cluster_stats, query_servers_with_stats, query_tables_with_stats
+from .._types import Metric
 
 logger = logging.getLogger(__name__)
 
@@ -133,11 +133,8 @@ def _collect_servers_statistics(conn):
 
 def _collect_table_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
-    tables = rethinkdb.r.table('table_config').run(conn)  # type: Iterator[Table]
-
-    for table in tables:
-        # TODO: get rid of N+1 query problem.
-        stats = rethinkdb.r.table('stats').get(['table', table['id']]).run(conn)  # type: TableStats
+    for table, stats in query_tables_with_stats(conn):
+        logger.debug('table_statistics table=%r, stats=%r', table, stats)
 
         name = table['name']
         database = table['db']

@@ -8,7 +8,7 @@ from typing import Iterator, Tuple
 
 import rethinkdb
 
-from ._types import ClusterStats, EqJoinRow, Server, ServerStats
+from ._types import ClusterStats, EqJoinRow, Server, ServerStats, Table, TableStats
 
 
 def query_cluster_stats(conn):
@@ -33,7 +33,7 @@ def query_servers_with_stats(conn):
     def _join_on_server_id(server_stats):
         # type: (rethinkdb.ast.RqlQuery) -> str
         server_stats_id = server_stats['id']  # ['server', '<ID>']
-        return server_stats_id.nth(1)
+        return server_stats_id.nth(1)  # '<ID>'
 
     rows = (
         rethinkdb.r.table('stats').eq_join(_join_on_server_id, rethinkdb.r.table('server_config')).run(conn)
@@ -43,3 +43,24 @@ def query_servers_with_stats(conn):
         stats = row['left']  # type: ServerStats
         server = row['right']  # type: Server
         yield server, stats
+
+
+def query_tables_with_stats(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Table, TableStats]]
+    """
+    Retrieve each table in the cluster along with its statistics.
+    """
+
+    def _join_on_table_id(table_stats):
+        # type: (rethinkdb.ast.RqlQuery) -> str
+        table_stats_id = table_stats['id']  # ['table', '<ID>']
+        return table_stats_id.nth(1)  # '<ID>'
+
+    rows = (
+        rethinkdb.r.table('stats').eq_join(_join_on_table_id, rethinkdb.r.table('table_config')).run(conn)
+    )  # type: Iterator[EqJoinRow]
+
+    for row in rows:
+        stats = row['left']  # type: TableStats
+        table = row['right']  # type: Table
+        yield table, stats
