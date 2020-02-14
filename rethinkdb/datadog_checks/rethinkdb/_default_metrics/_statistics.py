@@ -5,12 +5,15 @@
 from __future__ import absolute_import
 
 import itertools
+import logging
 from typing import Iterator
 
 import rethinkdb
 
 from .._queries import query_cluster_stats, query_servers_with_stats
 from .._types import Metric, Table, TableStats
+
+logger = logging.getLogger(__name__)
 
 
 def collect_statistics(conn):
@@ -34,6 +37,7 @@ def collect_statistics(conn):
 def _collect_cluster_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     stats = query_cluster_stats(conn)
+    logger.debug('cluster_statistics stats=%r', stats)
 
     query_engine = stats['query_engine']
 
@@ -62,6 +66,8 @@ def _collect_cluster_statistics(conn):
 def _collect_servers_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     for server, stats in query_servers_with_stats(conn):
+        logger.debug('server_statistics server=%r, stats=%r', server, stats)
+
         name = server['name']
         server_tags = server['tags']
         query_engine = stats['query_engine']
