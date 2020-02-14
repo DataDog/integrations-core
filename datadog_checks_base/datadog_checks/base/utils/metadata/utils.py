@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import binary_type, text_type
 
+from datadog_checks.base import AgentCheck
+
 
 def is_primitive(obj):
     # https://github.com/python/cpython/blob/4f82a53c5d34df00bf2d563c2417f5e2638d1004/Lib/json/encoder.py#L357-L377
@@ -15,7 +17,13 @@ def is_metadata_collection_enabled(func):
     :param func:
     :return:
     """
-    def _decorator(self, *args, **kwargs):
+
+    def _decorator(
+        self,  # type: AgentCheck
+        *args,
+        **kwargs
+    ):
         if self.agentConfig.get('enable_metadata_collection', True):
             return func(self, *args, **kwargs)
+
     return _decorator
