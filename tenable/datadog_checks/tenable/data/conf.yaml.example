@@ -1,11 +1,7 @@
 init_config:
 
 instances:
-## @param nessus_status_url - string - required
-## For every instance, you need an `nessus_status_url` and can optionally
-## supply a list of tags.
-#
-- nessus_url: http://localhost:8834
+  - 
 
 ## Log Section (Available for Agent >=6.0)
 ##
@@ -17,7 +13,6 @@ instances:
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
-#
 # logs:
 #  - type: file
 #    path: /opt/nessus/var/nessus/logs/backend.log
