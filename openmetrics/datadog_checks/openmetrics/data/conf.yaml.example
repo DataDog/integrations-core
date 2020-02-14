@@ -142,3 +142,13 @@ instances:
     ## Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
     #
     # bearer_token_path: "<TOKEN_PATH>"
+
+    ## @param ignore_metrics - list of strings - optional
+    ## List of metrics to be ignored, the "*" wildcard can be used to match multiple metric names.
+    #
+    # ignore_metrics:
+    #  - <IGNORED_METRIC_NAME>
+    #  - <PREFIX_*>
+    #  - <*_SUFFIX>
+    #  - <PREFIX_*_SUFFIX>
+    #  - <*_SUBSTRING_*>
