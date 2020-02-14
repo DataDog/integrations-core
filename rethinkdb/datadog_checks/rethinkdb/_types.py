@@ -58,13 +58,49 @@ TableStats = TypedDict(
     'TableStats', {'id': Tuple[Literal['table'], str], 'table': str, 'db': str, 'query_engine': TableQueryEngine},
 )
 
+ReplicaQueryEngine = TypedDict(
+    'ReplicaQueryEngine',
+    {'read_docs_per_sec': int, 'read_docs_total': int, 'writen_docs_per_sec': int, 'written_docs_total': int},
+)
+
+ReplicaCache = TypedDict('ReplicaCache', {'in_use_bytes': int})
+
+ReplicaDiskSpaceUsage = TypedDict(
+    'ReplicaDiskSpaceUsage', {'metadata_bytes': int, 'data_bytes': int, 'garbage_bytes': int, 'preallocated_bytes': int}
+)
+
+ReplicaDisk = TypedDict(
+    'ReplicaDisk',
+    {
+        'read_bytes_per_sec': int,
+        'read_bytes_total': int,
+        'written_bytes_per_sec': int,
+        'written_bytes_total': int,
+        'space_usage': ReplicaDiskSpaceUsage,
+    },
+)
+
+ReplicaStorageEngine = TypedDict('ReplicaStorageEngine', {'cache': ReplicaCache, 'disk': ReplicaDisk})
+
+ReplicaStats = TypedDict(
+    'ReplicaStats',
+    {
+        'id': Tuple[Literal['table_server'], str, str],
+        'server': str,
+        'table': str,
+        'db': str,
+        'query_engine': ReplicaQueryEngine,
+        'storage_engine': ReplicaStorageEngine,
+    },
+)
+
 
 # ReQL command results.
 # See: https://rethinkdb.com/api/python/
 
 # NOTE: Ideally 'left' and 'right' would be generics here, but this isn't supported by 'TypedDict' yet.
 # See: https://github.com/python/mypy/issues/3863
-EqJoinRow = TypedDict('EqJoinRow', {'left': Any, 'right': Any})
+JoinRow = TypedDict('JoinRow', {'left': Any, 'right': Any})
 
 # See: https://rethinkdb.com/api/python/server
 ConnectionServer = TypedDict('ConnectionServer', {'id': str, 'name': str, 'proxy': bool})

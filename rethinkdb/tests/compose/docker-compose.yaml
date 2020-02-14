@@ -16,7 +16,7 @@ services:
     tty: true
     image: ${RETHINKDB_IMAGE}
     container_name: rethinkdb-server1
-    command: rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server1 --server-tag us
+    command: rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server1 --server-tag us --server-tag primary
     links:
       - rethinkdb-server0
     depends_on:

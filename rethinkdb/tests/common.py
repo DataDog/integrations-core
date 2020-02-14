@@ -15,7 +15,7 @@ IMAGE = 'rethinkdb:2.4.0'
 HOST = get_docker_hostname()
 
 SERVERS = ['server0', 'server1', 'server2']
-SERVER_TAGS = {'server0': ['default', 'us'], 'server1': ['default', 'us'], 'server2': ['default', 'eu']}
+SERVER_TAGS = {'server0': ['default', 'us'], 'server1': ['default', 'primary', 'us'], 'server2': ['default', 'eu']}
 
 CONNECT_SERVER_NAME = 'server0'
 CONNECT_SERVER_PORT = 28015
@@ -26,7 +26,8 @@ DATABASE = 'doghouse'
 
 HEROES_TABLE = 'heroes'
 # TODO: add some indexes
-HEROES_TABLE_OPTIONS = {'shards': 2, 'replicas': 3}
+HEROES_TABLE_OPTIONS = {'shards': 1, 'replicas': {'primary': 1, 'eu': 1}, 'primary_replica_tag': 'primary'}
+HEROES_TABLE_REPLICAS = ['server1', 'server2']
 HEROES_INITIAL_DOCUMENTS = [
     {
         "hero": "Magneto",
@@ -75,7 +76,7 @@ TABLE_STATISTICS_METRICS = (
 )
 
 REPLICA_STATISTICS_METRICS = (
-    # 'rethinkdb.stats.table_server.read_docs_per_sec',
+    'rethinkdb.stats.table_server.read_docs_per_sec',
     # 'rethinkdb.stats.table_server.read_docs_total',
     # 'rethinkdb.stats.table_server.written_docs_per_sec',
     # 'rethinkdb.stats.table_server.written_docs_total',

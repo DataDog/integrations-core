@@ -18,6 +18,8 @@ from .common import (
     CONNECT_SERVER_NAME,
     DATABASE,
     HEROES_TABLE,
+    HEROES_TABLE_REPLICAS,
+    REPLICA_STATISTICS_METRICS,
     SERVER_STATISTICS_METRICS,
     SERVER_TAGS,
     SERVERS,
@@ -33,17 +35,29 @@ def test_check(aggregator, instance):
     check.check(instance)
 
     for metric in CLUSTER_STATISTICS_METRICS:
-        aggregator.assert_metric(metric, tags=[])
+        aggregator.assert_metric(metric, count=1, tags=[])
 
     for metric in SERVER_STATISTICS_METRICS:
         for server in SERVERS:
             tags = ['server:{}'.format(server)] + SERVER_TAGS[server]
-            aggregator.assert_metric(metric, tags=tags)
+            aggregator.assert_metric(metric, count=1, tags=tags)
 
     for metric in TABLE_STATISTICS_METRICS:
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
-        aggregator.assert_metric(metric, tags=tags)
-        # TODO: test shards/replicas.
+        aggregator.assert_metric(metric, count=1, tags=tags)
+
+    for metric in REPLICA_STATISTICS_METRICS:
+        for server in HEROES_TABLE_REPLICAS:
+            tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(server)]
+            tags.extend(SERVER_TAGS[server])
+            aggregator.assert_metric(metric, count=1, tags=tags)
+
+        for server in SERVERS:
+            if server not in HEROES_TABLE_REPLICAS:
+                tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(server)]
+                tags.extend(SERVER_TAGS[server])
+                # Make sure servers that aren't replicas for the table don't yield metrics.
+                aggregator.assert_metric(metric, count=0, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 
