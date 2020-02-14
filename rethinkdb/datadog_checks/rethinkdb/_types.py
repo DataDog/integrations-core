@@ -10,7 +10,7 @@ from typing import Any, List, Literal, Tuple, TypedDict
 
 # Lightweight shim to decouple collection functions from the check class.
 Metric = TypedDict(
-    'Metric', {'type': Literal['rate', 'gauge', 'monotonic_count'], 'name': str, 'value': float, 'tags': List[str]}
+    'Metric', {'type': Literal['gauge', 'monotonic_count'], 'name': str, 'value': float, 'tags': List[str]}
 )
 
 

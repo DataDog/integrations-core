@@ -38,21 +38,21 @@ def _collect_cluster_statistics(conn):
     query_engine = stats['query_engine']
 
     yield {
-        'type': 'rate',
+        'type': 'gauge',
         'name': 'rethinkdb.stats.cluster.queries_per_sec',
         'value': query_engine['queries_per_sec'],
         'tags': [],
     }
 
     yield {
-        'type': 'rate',
+        'type': 'gauge',
         'name': 'rethinkdb.stats.cluster.read_docs_per_sec',
         'value': query_engine['read_docs_per_sec'],
         'tags': [],
     }
 
     yield {
-        'type': 'rate',
+        'type': 'gauge',
         'name': 'rethinkdb.stats.cluster.written_docs_per_sec',
         'value': query_engine['written_docs_per_sec'],
         'tags': [],
@@ -83,7 +83,7 @@ def _collect_servers_statistics(conn):
         }
 
         yield {
-            'type': 'rate',
+            'type': 'gauge',
             'name': 'rethinkdb.stats.server.queries_per_sec',
             'value': query_engine['queries_per_sec'],
             'tags': tags,
@@ -97,7 +97,7 @@ def _collect_servers_statistics(conn):
         }
 
         yield {
-            'type': 'rate',
+            'type': 'gauge',
             'name': 'rethinkdb.stats.server.read_docs_per_sec',
             'value': query_engine['read_docs_per_sec'],
             'tags': tags,
@@ -111,7 +111,7 @@ def _collect_servers_statistics(conn):
         }
 
         yield {
-            'type': 'rate',
+            'type': 'gauge',
             'name': 'rethinkdb.stats.server.written_docs_per_sec',
             'value': query_engine['written_docs_per_sec'],
             'tags': tags,
@@ -140,14 +140,14 @@ def _collect_table_statistics(conn):
         tags = ['table:{}'.format(name), 'database:{}'.format(database)]
 
         yield {
-            'type': 'rate',
+            'type': 'gauge',
             'name': 'rethinkdb.stats.table.read_docs_per_sec',
             'value': query_engine['read_docs_per_sec'],
             'tags': tags,
         }
 
         yield {
-            'type': 'rate',
+            'type': 'gauge',
             'name': 'rethinkdb.stats.table.written_docs_per_sec',
             'value': query_engine['written_docs_per_sec'],
             'tags': tags,
