@@ -2,14 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Dict
-
 from datadog_checks.base import ConfigurationError
+
+from ._types import Instance
 
 
 class Config:
+    """
+    Hold instance configuration for a RethinkDB check.
+
+    Encapsulates the validation of an `instance` dictionary while improving type information.
+    """
+
     def __init__(self, instance):
-        # type: (Dict[str, Any]) -> None
+        # type: (Instance) -> None
         host = instance.get('host', 'localhost')
         port = instance.get('port', 28015)
 

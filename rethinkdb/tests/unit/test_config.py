@@ -9,6 +9,8 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.rethinkdb._config import Config
 
+pytestmark = pytest.mark.unit
+
 
 def test_default_config():
     # type: () -> None

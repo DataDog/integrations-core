@@ -7,13 +7,14 @@ from typing import Any, Dict, Iterator, List
 import pytest
 
 from datadog_checks.dev import docker_run
+from datadog_checks.rethinkdb._types import Instance
 
 from .common import CONNECT_SERVER_PORT, HERE, HOST, IMAGE, PROXY_PORT
 
 
 @pytest.fixture(scope='session')
 def instance():
-    # type: () -> Dict[str, Any]
+    # type: () -> Instance
     return {
         'host': HOST,
         'port': CONNECT_SERVER_PORT,
@@ -22,7 +23,7 @@ def instance():
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
-    # type: (Dict[str, Any]) -> Iterator[Dict[str, Any]]
+    # type: (Instance) -> Iterator[Dict[str, Any]]
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     env_vars = {

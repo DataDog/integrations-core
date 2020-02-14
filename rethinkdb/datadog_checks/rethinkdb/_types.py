@@ -13,6 +13,9 @@ Metric = TypedDict(
     'Metric', {'type': Literal['gauge', 'monotonic_count'], 'name': str, 'value': float, 'tags': List[str]}
 )
 
+# Expected shape of an `instance` dictionary.
+Instance = TypedDict('Instance', {'host': str, 'port': int}, total=False)
+
 
 # Configuration documents.
 # See: https://rethinkdb.com/docs/system-tables/#configuration-tables
