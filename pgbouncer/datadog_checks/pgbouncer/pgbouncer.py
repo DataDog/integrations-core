@@ -38,17 +38,16 @@ class PgBouncer(AgentCheck):
                 raise ConfigurationError("Please specify a user to connect to PgBouncer as.")
         self.connection = None
 
-    def _get_service_checks_tags(self, host, port, database_url, tags=None):
-        if tags is None:
-            tags = []
-
-        if database_url:
-            parsed_url = urlparse(database_url)
+    def _get_service_checks_tags(self):
+        host = self.host
+        port = self.port
+        if self.database_url:
+            parsed_url = urlparse(self.database_url)
             host = parsed_url.hostname
             port = parsed_url.port
 
         service_checks_tags = ["host:%s" % host, "port:%s" % port, "db:%s" % self.DB_NAME]
-        service_checks_tags.extend(tags)
+        service_checks_tags.extend(self.tags)
         service_checks_tags = list(set(service_checks_tags))
 
         return service_checks_tags
