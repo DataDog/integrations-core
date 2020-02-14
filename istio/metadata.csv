@@ -25,9 +25,9 @@ istio.mixer.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation d
 istio.mixer.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,istio,
 istio.mixer.go.info,gauge,,,,Information about the Go environment.,0,istio,
 istio.mixer.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,istio,
-istio.mixer.go.memstats.alloc_bytes_total,gauge,,byte,,Total number of bytes allocated even if freed.,0,istio,
+istio.mixer.go.memstats.alloc_bytes_total,count,,byte,,Total number of bytes allocated even if freed.,0,istio,
 istio.mixer.go.memstats.buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table.,0,istio,bytes used by profiling
-istio.mixer.go.memstats.frees_total,gauge,,,,Total number of frees.,0,istio,
+istio.mixer.go.memstats.frees_total,count,,,,Total number of frees.,0,istio,
 istio.mixer.go.memstats.gc_cpu_fraction,gauge,,percent,,CPU taken up by GC,0,istio,CPU taken up by gc
 istio.mixer.go.memstats.gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata.,0,istio,
 istio.mixer.go.memstats.heap_alloc_bytes,gauge,,byte,,Bytes allocated to the heap,0,istio,
@@ -37,8 +37,8 @@ istio.mixer.go.memstats.heap_objects,gauge,,object,,Number of objects in the hea
 istio.mixer.go.memstats.heap_released_bytes,gauge,,byte,,Number of bytes released to the system in the last gc,0,istio,
 istio.mixer.go.memstats.heap_sys_bytes,gauge,,byte,,Number of bytes used by the heap,0,istio,
 istio.mixer.go.memstats.last_gc_time_seconds,gauge,,second,,Length of last GC,0,istio,gc time
-istio.mixer.go.memstats.lookups_total,gauge,,operation,,Number of lookups,0,istio,lookups total
-istio.mixer.go.memstats.mallocs_total,gauge,,operation,,Number of mallocs,0,istio,mallocs total
+istio.mixer.go.memstats.lookups_total,count,,operation,,Number of lookups,0,istio,lookups total
+istio.mixer.go.memstats.mallocs_total,count,,operation,,Number of mallocs,0,istio,mallocs total
 istio.mixer.go.memstats.mcache_inuse_bytes,gauge,,byte,,Number of bytes in use by mcache structures.,0,istio,
 istio.mixer.go.memstats.mcache_sys_bytes,gauge,,byte,,Number of bytes used for mcache structures obtained from system.,0,istio,
 istio.mixer.go.memstats.mspan_inuse_bytes,gauge,,byte,,Number of bytes in use by mspan structures.,0,istio,
@@ -83,9 +83,9 @@ istio.pilot.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation d
 istio.pilot.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,istio,
 istio.pilot.go.info,gauge,,,,Information about the Go environment.,0,istio,
 istio.pilot.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,istio,
-istio.pilot.go.memstats.alloc_bytes_total,gauge,,byte,,Total number of bytes allocated even if freed.,0,istio,
+istio.pilot.go.memstats.alloc_bytes_total,count,,byte,,Total number of bytes allocated even if freed.,0,istio,
 istio.pilot.go.memstats.buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table.,0,istio,bytes used by profiling
-istio.pilot.go.memstats.frees_total,gauge,,,,Total number of frees.,0,istio,
+istio.pilot.go.memstats.frees_total,count,,,,Total number of frees.,0,istio,
 istio.pilot.go.memstats.gc_cpu_fraction,gauge,,percent,,CPU taken up by GC,0,istio,CPU taken up by gc
 istio.pilot.go.memstats.gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata.,0,istio,
 istio.pilot.go.memstats.heap_alloc_bytes,gauge,,byte,,Bytes allocated to the heap,0,istio,
@@ -95,8 +95,8 @@ istio.pilot.go.memstats.heap_objects,gauge,,object,,Number of objects in the hea
 istio.pilot.go.memstats.heap_released_bytes,gauge,,byte,,Number of bytes released to the system in the last gc,0,istio,
 istio.pilot.go.memstats.heap_sys_bytes,gauge,,byte,,Number of bytes used by the heap,0,istio,
 istio.pilot.go.memstats.last_gc_time_seconds,gauge,,second,,Length of last GC,0,istio,gc time
-istio.pilot.go.memstats.lookups_total,gauge,,operation,,Number of lookups,0,istio,lookups total
-istio.pilot.go.memstats.mallocs_total,gauge,,operation,,Number of mallocs,0,istio,mallocs total
+istio.pilot.go.memstats.lookups_total,count,,operation,,Number of lookups,0,istio,lookups total
+istio.pilot.go.memstats.mallocs_total,count,,operation,,Number of mallocs,0,istio,mallocs total
 istio.pilot.go.memstats.mcache_inuse_bytes,gauge,,byte,,Number of bytes in use by mcache structures.,0,istio,
 istio.pilot.go.memstats.mcache_sys_bytes,gauge,,byte,,Number of bytes used for mcache structures obtained from system.,0,istio,
 istio.pilot.go.memstats.mspan_inuse_bytes,gauge,,byte,,Number of bytes in use by mspan structures.,0,istio,
@@ -146,9 +146,9 @@ istio.galley.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation 
 istio.galley.go.goroutines,gauge,,thread,,Number of goroutines that currently exist.,0,istio,
 istio.galley.go.info,gauge,,,,Information about the Go environment.,0,istio,
 istio.galley.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes allocated and still in use.,0,istio,
-istio.galley.go.memstats.alloc_bytes_total,gauge,,byte,,Total number of bytes allocated even if freed.,0,istio,
+istio.galley.go.memstats.alloc_bytes_total,count,,byte,,Total number of bytes allocated even if freed.,0,istio,
 istio.galley.go.memstats.buck_hash_sys_bytes,gauge,,byte,,Number of bytes used by the profiling bucket hash table.,0,istio,bytes used by profiling
-istio.galley.go.memstats.frees_total,gauge,,,,Total number of frees.,0,istio,
+istio.galley.go.memstats.frees_total,count,,,,Total number of frees.,0,istio,
 istio.galley.go.memstats.gc_cpu_fraction,gauge,,percent,,CPU taken up by GC,0,istio,CPU taken up by gc
 istio.galley.go.memstats.gc_sys_bytes,gauge,,byte,,Number of bytes used for garbage collection system metadata.,0,istio,
 istio.galley.go.memstats.heap_alloc_bytes,gauge,,byte,,Bytes allocated to the heap,0,istio,
@@ -158,8 +158,8 @@ istio.galley.go.memstats.heap_objects,gauge,,object,,Number of objects in the he
 istio.galley.go.memstats.heap_released_bytes,gauge,,byte,,Number of bytes released to the system in the last gc,0,istio,
 istio.galley.go.memstats.heap_sys_bytes,gauge,,byte,,Number of bytes used by the heap,0,istio,
 istio.galley.go.memstats.last_gc_time_seconds,gauge,,second,,Length of last GC,0,istio,gc time
-istio.galley.go.memstats.lookups_total,gauge,,operation,,Number of lookups,0,istio,lookups total
-istio.galley.go.memstats.mallocs_total,gauge,,operation,,Number of mallocs,0,istio,mallocs total
+istio.galley.go.memstats.lookups_total,count,,operation,,Number of lookups,0,istio,lookups total
+istio.galley.go.memstats.mallocs_total,count,,operation,,Number of mallocs,0,istio,mallocs total
 istio.galley.go.memstats.mcache_inuse_bytes,gauge,,byte,,Number of bytes in use by mcache structures.,0,istio,
 istio.galley.go.memstats.mcache_sys_bytes,gauge,,byte,,Number of bytes used for mcache structures obtained from system.,0,istio,
 istio.galley.go.memstats.mspan_inuse_bytes,gauge,,byte,,Number of bytes in use by mspan structures.,0,istio,
