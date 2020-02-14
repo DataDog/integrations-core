@@ -1,5 +1,7 @@
 init_config:
 
+instances:
+
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
