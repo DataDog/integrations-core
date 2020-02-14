@@ -11,7 +11,7 @@ import datadog_checks
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, OVERVIEW_TYPE, RabbitMQException
 
-from . import common
+from . import common, metrics
 
 pytestmark = pytest.mark.unit
 
@@ -147,3 +147,25 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
         http_wargs.update(expected_http_kwargs)
 
         r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)
+
+
+@pytest.mark.unit
+def test_nodes_unit(aggregator, check):
+
+    # default, node metrics are collected
+    check.check(common.CONFIG)
+
+    for m in metrics.COMMON_METRICS:
+        aggregator.assert_metric(m, count=1)
+
+    aggregator.reset()
+
+    # node metrics collection disabled in config, node metrics should not appear
+    check.check(common.CONFIG_NO_NODES)
+
+    for m in metrics.COMMON_METRICS:
+        aggregator.assert_metric(m, count=0)
+
+    # check to ensure other metrics are being collected
+    for m in metrics.Q_METRICS:
+        aggregator.assert_metric(m, count=1)
