@@ -6,7 +6,7 @@
 from __future__ import absolute_import
 
 from contextlib import contextmanager
-from typing import Callable, Iterator, List
+from typing import Any, Callable, Iterator, List
 
 import rethinkdb
 
@@ -27,9 +27,10 @@ class RethinkDBCheck(AgentCheck):
     # NOTE: use of private names (double underscores, e.g. '__member') prevents name clashes with the base class.
 
     def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
         super(RethinkDBCheck, self).__init__(*args, **kwargs)
 
-        self.__config = Config(self.instance)  # type: Config  # (Mypy is confused without this hint... :wtf:)
+        self.__config = Config(self.instance)
 
         # NOTE: this list is exposed for testing purposes.
         self._metric_collectors = []  # type: List[Callable[[rethinkdb.net.Connection], Iterator[Metric]]]
