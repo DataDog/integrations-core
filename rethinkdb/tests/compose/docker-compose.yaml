@@ -1,11 +1,45 @@
 version: "3"
 
 services:
-  rethinkdb:
+  # 3-node RethinkDB cluster with 1 proxy node.
+
+  rethinkdb-server0:
     tty: true  # Required otherwise RethinkDB won't output any logs.
     image: ${RETHINKDB_IMAGE}
-    container_name: ${RETHINKDB_CONTAINER_NAME}
-    command: rethinkdb --bind all --server-name ${RETHINKDB_SERVER_NAME}
+    container_name: rethinkdb-server0
+    command: rethinkdb --bind all --server-name server0 --server-tag default --server-tag us
     ports:
-      - ${RETHINKDB_PORT}:28015
-      - 8080:8080  # Not used by tests, but allows accessing the RethinkDB admin web UI at 'localhost:8080' on the host machine.
+      - ${RETHINKDB_CONNECT_SERVER_PORT}:28015  # Client driver port.
+      - 8080:8080  # Port for the web UI. Debugging only (not used by tests).
+
+  rethinkdb-server1:
+    tty: true
+    image: ${RETHINKDB_IMAGE}
+    container_name: rethinkdb-server1
+    command: rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server1 --server-tag us
+    links:
+      - rethinkdb-server0
+    depends_on:
+      - rethinkdb-server0
+
+  rethinkdb-server2:
+    tty: true
+    image: ${RETHINKDB_IMAGE}
+    container_name: rethinkdb-server2
+    command: rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server2 --server-tag us
+    links:
+      - rethinkdb-server0
+    depends_on:
+      - rethinkdb-server0
+
+  rethinkdb-proxy0:
+    tty: true
+    image: ${RETHINKDB_IMAGE}
+    container_name: rethinkdb-proxy0
+    command: rethinkdb proxy --join rethinkdb-server0:29015 --bind all
+    links:
+      - rethinkdb-server0
+    depends_on:
+      - rethinkdb-server0
+    ports:
+      - ${RETHINKDB_PROXY_PORT}:28015
