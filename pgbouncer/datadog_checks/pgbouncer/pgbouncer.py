@@ -52,9 +52,8 @@ class PgBouncer(AgentCheck):
 
         return service_checks_tags
 
-    def _collect_stats(self, db, instance_tags):
-        """Query pgbouncer for various metrics
-        """
+    def _collect_stats(self, db):
+        """Query pgbouncer for various metrics"""
 
         metric_scope = [STATS_METRICS, POOLS_METRICS, DATABASES_METRICS]
 
@@ -82,7 +81,7 @@ class PgBouncer(AgentCheck):
                             if row['database'] == self.DB_NAME:
                                 continue
 
-                            tags = list(instance_tags)
+                            tags = list(self.tags)
                             tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
                             for (column, (name, reporter)) in metrics:
                                 if column in row:
@@ -119,9 +118,10 @@ class PgBouncer(AgentCheck):
 
         return {'host': self.host, 'user': self.user, 'password': self.password, 'database': self.DB_NAME}
 
-    def _get_connection(self, use_cached=True):
+    def _get_connection(self, use_cached=None):
         """Get and memoize connections to instances"""
-        if self.connection and self.use_cached and use_cached:
+        use_cached = use_cached if use_cached is not None else self.use_cached
+        if self.connection and use_cached:
             return self.connection
         try:
             connect_kwargs = self._get_connect_kwargs()
@@ -157,11 +157,11 @@ class PgBouncer(AgentCheck):
     def check(self, instance):
         try:
             db = self._get_connection()
-            self._collect_stats(db, self.tags)
+            self._collect_stats(db)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
             db = self._get_connection(use_cached=False)
-            self._collect_stats(db, self.tags)
+            self._collect_stats(db)
 
         redacted_dsn = self._get_redacted_dsn()
         message = u'Established connection to {}'.format(redacted_dsn)
