@@ -1,20 +1,6 @@
 init_config:
 
 instances:
-## @param nessus_status_url - string - required
-## For every instance, you need an `nessus_status_url` and can optionally
-## supply a list of tags.
-#
-- nessus_url: http://localhost:8834
-
-## @param tags - list of key:value elements - optional
-## List of tags to attach to every metric, event, and service check emitted by this Integration.
-##
-## Learn more about tagging: https://docs.datadoghq.com/tagging/
-#
-# tags:
-#   - <KEY_1>:<VALUE_1>
-#   - <KEY_2>:<VALUE_2>
 
 ## Log Section (Available for Agent >=6.0)
 ##
