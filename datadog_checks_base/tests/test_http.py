@@ -124,8 +124,9 @@ class TestHeaders:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
 
+        extra_headers = {"foo": "bar"}
         with mock.patch("requests.get") as get:
-            http.get("http://example.com/hello", extra_headers={"foo": "bar"})
+            http.get("http://example.com/hello", extra_headers=extra_headers)
 
             expected_options = {'foo': 'bar', 'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
             get.assert_called_with(
@@ -137,6 +138,10 @@ class TestHeaders:
                 timeout=(10.0, 10.0),
                 verify=True,
             )
+
+        # make sure the original headers are not modified
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+        assert extra_headers == {"foo": "bar"}
 
 
 class TestVerify:

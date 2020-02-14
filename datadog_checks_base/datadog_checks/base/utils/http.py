@@ -306,6 +306,7 @@ class RequestsWrapper(object):
 
         extra_headers = options.pop('extra_headers', None)
         if extra_headers is not None:
+            new_options['headers'] = new_options['headers'].copy()
             new_options['headers'].update(extra_headers)
 
         with ExitStack() as stack:
