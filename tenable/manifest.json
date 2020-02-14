@@ -6,7 +6,7 @@
   "metric_prefix": "tenable.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Track nessus backend and webserver logs",
   "guid": "303a1ba9-5136-4d23-9785-e36ea0d6caab",
   "support": "core",
   "supported_os": [
