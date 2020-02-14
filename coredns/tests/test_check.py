@@ -7,6 +7,7 @@ from datadog_checks.coredns import CoreDNSCheck
 from datadog_checks.dev.utils import ON_WINDOWS
 
 from .common import CHECK_NAME, METRICS, NAMESPACE
+from .utils import _assert_metric
 
 
 class TestCoreDNS:
@@ -26,7 +27,7 @@ class TestCoreDNS:
         metrics = METRICS + [NAMESPACE + '.cache_hits_count']
 
         for metric in metrics:
-            aggregator.assert_metric(metric)
+            _assert_metric(aggregator, metric)
 
     @pytest.mark.skipif(ON_WINDOWS, reason='No `dig` utility on Windows')
     def test_docker(self, aggregator, dd_environment, dockerinstance):
@@ -38,4 +39,4 @@ class TestCoreDNS:
         check.check(dockerinstance)
 
         for metric in METRICS:
-            aggregator.assert_metric(metric)
+            _assert_metric(aggregator, metric)

@@ -20,7 +20,7 @@ coredns.request_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,cored
 coredns.request_size.bytes.count,count,,byte,,size of the request in bytes,0,coredns,request size
 coredns.response_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,coredns,response size
 coredns.response_size.bytes.count,count,,byte,,size of the request in bytes,0,coredns,response size
-coredns.cache_size.count,count,,entry,,,1,coredns,cache size
+coredns.cache_size.count,gauge,,entry,,,1,coredns,cache size
 coredns.panic_count.count,count,,entry,,,1,coredns,total number of panics
 coredns.go.gc_duration_seconds.count,count,,second,,Count of the GC invocation durations.,0,coredns,
 coredns.go.gc_duration_seconds.sum,gauge,,second,,Sum of the GC invocation durations.,0,coredns,
