@@ -25,18 +25,13 @@ def query_servers_with_stats(conn):
     Retrieve each server in the cluster along with its statistics.
     """
 
-    # A naive approach would be to query 'server_config', then for each server find the row in 'stats' that
-    # corresponds to each server's ID. This would lead to the N+1 query problem.
-    # Instead, we make a single (but more complex) query by joining 'stats' with 'server_config' on the server ID.
     # See: https://rethinkdb.com/api/python/eq_join/
 
-    def _join_on_server_id(server_stats):
-        # type: (rethinkdb.ast.RqlQuery) -> str
-        server_stats_id = server_stats['id']  # ['server', '<ID>']
-        return server_stats_id.nth(1)  # '<ID>'
+    # stats['id'] = ['server', '<SERVER_ID>'] -> '<SERVER_ID>' (= server_config['id'])
+    server_id = rethinkdb.r.row['id'].nth(1)
 
     rows = (
-        rethinkdb.r.table('stats').eq_join(_join_on_server_id, rethinkdb.r.table('server_config')).run(conn)
+        rethinkdb.r.table('stats').eq_join(server_id, rethinkdb.r.table('server_config')).run(conn)
     )  # type: Iterator[EqJoinRow]
 
     for row in rows:
@@ -51,13 +46,13 @@ def query_tables_with_stats(conn):
     Retrieve each table in the cluster along with its statistics.
     """
 
-    def _join_on_table_id(table_stats):
-        # type: (rethinkdb.ast.RqlQuery) -> str
-        table_stats_id = table_stats['id']  # ['table', '<ID>']
-        return table_stats_id.nth(1)  # '<ID>'
+    # See: https://rethinkdb.com/api/python/eq_join/
+
+    # stats['id'] = ['table', '<TABLE_ID>'] -> '<TABLE_ID>' (= table_config['id'])
+    table_id = rethinkdb.r.row['id'].nth(1)
 
     rows = (
-        rethinkdb.r.table('stats').eq_join(_join_on_table_id, rethinkdb.r.table('table_config')).run(conn)
+        rethinkdb.r.table('stats').eq_join(table_id, rethinkdb.r.table('table_config')).run(conn)
     )  # type: Iterator[EqJoinRow]
 
     for row in rows:
