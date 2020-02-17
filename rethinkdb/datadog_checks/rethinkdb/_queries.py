@@ -8,7 +8,17 @@ from typing import Iterator, Tuple
 
 import rethinkdb
 
-from ._types import ClusterStats, JoinRow, ReplicaStats, Server, ServerStats, Table, TableStats, TableStatus
+from ._types import (
+    ClusterStats,
+    JoinRow,
+    ReplicaStats,
+    Server,
+    ServerStats,
+    ServerStatus,
+    Table,
+    TableStats,
+    TableStatus,
+)
 
 
 def query_cluster_stats(conn):
@@ -105,3 +115,11 @@ def query_table_status(conn):
     Retrieve the status of each table in the cluster.
     """
     return rethinkdb.r.table('table_status').run(conn)
+
+
+def query_server_status(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[ServerStatus]
+    """
+    Retrieve the status of each server in the cluster.
+    """
+    return rethinkdb.r.table('server_status').run(conn)

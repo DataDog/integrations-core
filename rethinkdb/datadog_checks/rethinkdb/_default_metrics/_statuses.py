@@ -9,7 +9,7 @@ from typing import Iterator
 
 import rethinkdb
 
-from .._queries import query_table_status
+from .._queries import query_server_status, query_table_status
 from .._types import Metric, ReplicaState
 
 
@@ -110,4 +110,37 @@ def _collect_table_status_metrics(conn):
 
 def _collect_server_status_metrics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
-    return iter(())  # TODO
+    for server in query_server_status(conn):
+        name = server['name']
+        network = server['network']
+        process = server['process']
+
+        tags = ['server:{}'.format(name)]
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.server_status.network.time_connected',
+            'value': network['time_connected'].timestamp(),
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.server_status.network.connected_to.total',
+            'value': len([other for other, connected in network['connected_to'].items() if connected]),
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.server_status.network.connected_to.pending.total',
+            'value': len([other for other, connected in network['connected_to'].items() if not connected]),
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.server_status.process.time_started',
+            'value': process['time_started'].timestamp(),
+            'tags': tags,
+        }

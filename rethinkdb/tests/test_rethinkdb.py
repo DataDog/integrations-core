@@ -23,6 +23,7 @@ from .common import (
     HEROES_TABLE_SHARD_REPLICAS,
     REPLICA_STATISTICS_METRICS,
     SERVER_STATISTICS_METRICS,
+    SERVER_STATUS_METRICS,
     SERVER_TAGS,
     SERVERS,
     TABLE_STATISTICS_METRICS,
@@ -85,6 +86,11 @@ def test_check(aggregator, instance):
             for metric in TABLE_STATUS_REPLICA_STATE_METRICS:
                 value = 1 if metric.endswith('.ready') else 0  # All servers in our test cluster are available.
                 aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, value=value, count=1, tags=tags)
+
+    for metric in SERVER_STATUS_METRICS:
+        for server in SERVERS:
+            tags = ['server:{}'.format(server)]
+            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 

@@ -6,7 +6,8 @@
 Declarations used for type checking our code, including our manipulation of JSON documents returned by RethinkDB.
 """
 
-from typing import Any, List, Literal, Tuple, TypedDict
+import datetime as dt
+from typing import Any, Dict, List, Literal, Tuple, TypedDict
 
 # Lightweight shim to decouple collection functions from the check class.
 Metric = TypedDict(
@@ -110,6 +111,12 @@ TableStatusFlags = TypedDict(
 TableStatus = TypedDict(
     'TableStatus', {'id': str, 'name': str, 'db': str, 'status': TableStatusFlags, 'shards': List[Shard]}
 )
+
+# vvv NOTE: only fields of interest are listed here.
+ServerNetwork = TypedDict('ServerNetwork', {'time_connected': dt.datetime, 'connected_to': Dict[str, bool]})
+ServerProcess = TypedDict('ServerProcess', {'time_started': dt.datetime, 'version': str})
+# ^^^
+ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': ServerNetwork, 'process': ServerProcess})
 
 # ReQL command results.
 # See: https://rethinkdb.com/api/python/

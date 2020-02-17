@@ -118,7 +118,8 @@ TABLE_STATUS_REPLICA_STATE_METRICS = (
 
 SERVER_STATUS_METRICS = (
     'rethinkdb.server_status.network.time_connected',
-    'rethinkdb.server_status.network.connected_to',
+    'rethinkdb.server_status.network.connected_to.total',
+    'rethinkdb.server_status.network.connected_to.pending.total',
     'rethinkdb.server_status.process.time_started',
 )
 
