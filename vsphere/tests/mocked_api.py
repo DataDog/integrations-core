@@ -100,7 +100,7 @@ class MockedAPI(object):
 
 class MockResponse(Response):
     def __init__(self, json_data, status_code):
-        super().__init__()
+        super(MockResponse, self).__init__()
         self.json_data = json_data
         self.status_code = status_code
 
