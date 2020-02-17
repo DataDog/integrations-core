@@ -25,7 +25,6 @@ PROXY_PORT = 28018
 DATABASE = 'doghouse'
 
 HEROES_TABLE = 'heroes'
-# TODO: add some indexes
 HEROES_TABLE_OPTIONS = {'shards': 1, 'replicas': {'primary': 1, 'eu': 1}, 'primary_replica_tag': 'primary'}
 HEROES_TABLE_REPLICAS = {'server1', 'server2'}
 HEROES_INITIAL_DOCUMENTS = [
