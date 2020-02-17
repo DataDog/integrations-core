@@ -244,6 +244,7 @@ class WinWMICheck(AgentCheck):
 
         if instance_key not in self.wmi_samplers:
             wmi_sampler = WMISampler(self.log, wmi_class, properties, **kwargs)
+            wmi_sampler.__enter__()
             self.wmi_samplers[instance_key] = wmi_sampler
 
         return self.wmi_samplers[instance_key]

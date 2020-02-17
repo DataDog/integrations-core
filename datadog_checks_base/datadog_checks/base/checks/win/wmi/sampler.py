@@ -147,62 +147,12 @@ class WMISampler(object):
         self._runSampleEvent = Event()
         self._sampleCompleteEvent = Event()
 
-        thread = Thread(target=self._query_sample_loop, name=class_name)
-        thread.daemon = True
-        thread.start()
-
-    def _query_sample_loop(self):
-        try:
-            pythoncom.CoInitialize()
-        except Exception as e:
-            self.logger.info("exception in CoInitialize: %s", e)
-            raise
-
-        additional_args = []
-        if self.provider != ProviderArchitecture.DEFAULT:
-            context = Dispatch("WbemScripting.SWbemNamedValueSet")
-            context.Add("__ProviderArchitecture", self.provider)
-            additional_args = [None, "", 128, context]
-
-        locator = Dispatch("WbemScripting.SWbemLocator")
-
-        while True:
-            self._runSampleEvent.wait()
-            if self._stopping:
-                self.logger.debug("_query_sample_loop stopping")
-                return
-
-            self._runSampleEvent.clear()
-
-            try:
-                # Create a new WMI connection.
-                self.logger.debug(
-                    u"Connecting to WMI server (host=%s, namespace=%s, provider=%s, username=%s).",
-                    self.host,
-                    self.namespace,
-                    self.provider,
-                    self.username,
-                )
-                connection = locator.ConnectServer(
-                    self.host, self.namespace, self.username, self.password, *additional_args
-                )
-
-                if self.is_raw_perf_class and not self._previous_sample:
-                    self._current_sample = self._query(connection)
-
-                self._previous_sample = self._current_sample
-                self._current_sample = self._query(connection)
-
-            except Exception as e:
-                self.logger.error("exception in _query_sample_loop: %s", e)
-            finally:
-                connection = None
-                self._sampleCompleteEvent.set()
-
     def __enter__(self):
         """
-        I am the context manager
+        Start internal thread for sampling
         """
+        thread = Thread(target = self._query_sample_loop, name = self.class_name, daemon = True)
+        thread.start()
         return self
 
     def __exit__(self, type, value, traceback):
@@ -211,7 +161,45 @@ class WMISampler(object):
         """
         self._stopping = True
         self._runSampleEvent.set()
-        return True
+        self._sampleCompleteEvent.wait()
+
+    def _query_sample_loop(self):
+        try:
+            # Initialize COM for the current (dedicated) thread
+            # WARNING: any python COM object (locator, connection, etc) created in a thread
+            # shouldn't be used in other threads (can lead to memory/handle leaks if done
+            # without a deep knowledge of COM's threading model). 
+            pythoncom.CoInitialize()
+        except Exception as e:
+            self.logger.info("exception in CoInitialize: %s", e)
+            raise
+
+        # As we're now using a dedicated thread for sampling it should be OK to re-use the locator
+        locator = self._create_locator()
+
+        while True:
+            self._runSampleEvent.wait()
+            if self._stopping:
+                self.logger.debug("_query_sample_loop stopping")
+                self._sampleCompleteEvent.set()
+                return
+
+            self._runSampleEvent.clear()
+
+            try:
+                if self.is_raw_perf_class and not self._previous_sample:
+                    self._current_sample = self._query(locator)
+
+                self._previous_sample = self._current_sample
+                self._current_sample = self._query(locator)
+
+            except Exception as e:
+                self.logger.error("exception in _query_sample_loop: %s", e)
+            finally:
+                self._sampleCompleteEvent.set()
+
+    def _create_locator(self):
+        return Dispatch("WbemScripting.SWbemLocator")
 
     @property
     def provider(self):
@@ -369,6 +357,25 @@ class WMISampler(object):
 
         return formatted_wmi_object
 
+    def _get_connection(self, locator):
+        additional_args = []
+        if self.provider != ProviderArchitecture.DEFAULT:
+            context = Dispatch("WbemScripting.SWbemNamedValueSet")
+            context.Add("__ProviderArchitecture", self.provider)
+            additional_args = [None, "", 128, context]
+
+        # Create a new WMI connection.
+        self.logger.debug(
+            u"Connecting to WMI server (host=%s, namespace=%s, provider=%s, username=%s).",
+            self.host,
+            self.namespace,
+            self.provider,
+            self.username,
+        )
+        return locator.ConnectServer(
+            self.host, self.namespace, self.username, self.password, *additional_args
+        )
+
     @staticmethod
     def _format_filter(filters, and_props=[]):
         """
@@ -453,7 +460,7 @@ class WMISampler(object):
 
         return " WHERE {clause}".format(clause=build_where_clause(filters))
 
-    def _query(self, connection):  # pylint: disable=E0202
+    def _query(self, locator):  # pylint: disable=E0202
         """
         Query WMI using WMI Query Language (WQL) & parse the results.
 
@@ -480,6 +487,7 @@ class WMISampler(object):
                 self._property_counter_types = CaseInsensitiveDict()
                 query_flags |= flag_use_amended_qualifiers
 
+            connection = self._get_connection(locator)
             raw_results = connection.ExecQuery(wql, "WQL", query_flags)
 
             results = self._parse_results(raw_results, includes_qualifiers=includes_qualifiers)
@@ -487,6 +495,9 @@ class WMISampler(object):
         except pywintypes.com_error:
             self.logger.warning(u"Failed to execute WMI query (%s)", wql, exc_info=True)
             results = []
+        finally:
+            # Paranoia - release reference to COM object now
+            connection = None
 
         return results
 
