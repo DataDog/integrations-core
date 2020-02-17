@@ -14,7 +14,7 @@ IMAGE = 'rethinkdb:2.4.0'
 
 HOST = get_docker_hostname()
 
-SERVERS = ['server0', 'server1', 'server2']
+SERVERS = {'server0', 'server1', 'server2'}
 SERVER_TAGS = {'server0': ['default', 'us'], 'server1': ['default', 'primary', 'us'], 'server2': ['default', 'eu']}
 
 CONNECT_SERVER_NAME = 'server0'
@@ -27,7 +27,7 @@ DATABASE = 'doghouse'
 HEROES_TABLE = 'heroes'
 # TODO: add some indexes
 HEROES_TABLE_OPTIONS = {'shards': 1, 'replicas': {'primary': 1, 'eu': 1}, 'primary_replica_tag': 'primary'}
-HEROES_TABLE_REPLICAS = ['server1', 'server2']
+HEROES_TABLE_REPLICAS = {'server1', 'server2'}
 HEROES_INITIAL_DOCUMENTS = [
     {
         "hero": "Magneto",
@@ -68,8 +68,6 @@ SERVER_STATISTICS_METRICS = (
     'rethinkdb.stats.server.clients_active',  # NOTE: sent, but not documented on the RethinkDB website.
 )
 
-# WIP
-
 TABLE_STATISTICS_METRICS = (
     'rethinkdb.stats.table.read_docs_per_sec',
     'rethinkdb.stats.table.written_docs_per_sec',
@@ -77,18 +75,18 @@ TABLE_STATISTICS_METRICS = (
 
 REPLICA_STATISTICS_METRICS = (
     'rethinkdb.stats.table_server.read_docs_per_sec',
-    # 'rethinkdb.stats.table_server.read_docs_total',
-    # 'rethinkdb.stats.table_server.written_docs_per_sec',
-    # 'rethinkdb.stats.table_server.written_docs_total',
-    # 'rethinkdb.stats.table_server.cache.in_use_bytes',
-    # 'rethinkdb.stats.table_server.disk.read_bytes_per_sec',
-    # 'rethinkdb.stats.table_server.disk.read_bytes_total',
-    # 'rethinkdb.stats.table_server.disk.written_bytes_per_sec',
-    # 'rethinkdb.stats.table_server.disk.written_bytes_total',
-    # 'rethinkdb.stats.table_server.disk.metadata_bytes',
-    # 'rethinkdb.stats.table_server.disk.data_bytes',
-    # 'rethinkdb.stats.table_server.disk.garbage_bytes',
-    # 'rethinkdb.stats.table_server.disk.preallocated_bytes',
+    'rethinkdb.stats.table_server.read_docs_total',
+    'rethinkdb.stats.table_server.written_docs_per_sec',
+    'rethinkdb.stats.table_server.written_docs_total',
+    'rethinkdb.stats.table_server.cache.in_use_bytes',
+    'rethinkdb.stats.table_server.disk.read_bytes_per_sec',
+    'rethinkdb.stats.table_server.disk.read_bytes_total',
+    'rethinkdb.stats.table_server.disk.written_bytes_per_sec',
+    'rethinkdb.stats.table_server.disk.written_bytes_total',
+    'rethinkdb.stats.table_server.disk.metadata_bytes',
+    'rethinkdb.stats.table_server.disk.data_bytes',
+    'rethinkdb.stats.table_server.disk.garbage_bytes',
+    'rethinkdb.stats.table_server.disk.preallocated_bytes',
 )
 
 TABLE_STATUS_METRICS = (

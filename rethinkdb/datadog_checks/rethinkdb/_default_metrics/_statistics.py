@@ -167,7 +167,7 @@ def _collect_replicas_statistics(conn):
         table_name = table['name']
         server_tags = server['tags']
         query_engine = stats['query_engine']
-        # storage_engine = stats['storage_engine']
+        storage_engine = stats['storage_engine']
 
         tags = [
             'table:{}'.format(table_name),
@@ -182,4 +182,86 @@ def _collect_replicas_statistics(conn):
             'tags': tags,
         }
 
-        # TODO: add the rest of metrics
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.read_docs_total',
+            'value': query_engine['read_docs_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.written_docs_per_sec',
+            'value': query_engine['written_docs_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.written_docs_total',
+            'value': query_engine['written_docs_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.cache.in_use_bytes',
+            'value': storage_engine['cache']['in_use_bytes'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.read_bytes_per_sec',
+            'value': storage_engine['disk']['read_bytes_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.read_bytes_total',
+            'value': storage_engine['disk']['read_bytes_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.written_bytes_per_sec',
+            'value': storage_engine['disk']['written_bytes_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.written_bytes_total',
+            'value': storage_engine['disk']['written_bytes_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.metadata_bytes',
+            'value': storage_engine['disk']['space_usage']['metadata_bytes'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.data_bytes',
+            'value': storage_engine['disk']['space_usage']['data_bytes'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.garbage_bytes',
+            'value': storage_engine['disk']['space_usage']['garbage_bytes'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.preallocated_bytes',
+            'value': storage_engine['disk']['space_usage']['preallocated_bytes'],
+            'tags': tags,
+        }

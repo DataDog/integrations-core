@@ -46,18 +46,20 @@ def test_check(aggregator, instance):
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
         aggregator.assert_metric(metric, count=1, tags=tags)
 
+    assert len(HEROES_TABLE_REPLICAS) > 0
+    NON_REPLICA_SERVERS = SERVERS - HEROES_TABLE_REPLICAS
+    assert len(NON_REPLICA_SERVERS) > 0
+
     for metric in REPLICA_STATISTICS_METRICS:
         for server in HEROES_TABLE_REPLICAS:
             tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(server)]
             tags.extend(SERVER_TAGS[server])
             aggregator.assert_metric(metric, count=1, tags=tags)
 
-        for server in SERVERS:
-            if server not in HEROES_TABLE_REPLICAS:
-                tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(server)]
-                tags.extend(SERVER_TAGS[server])
-                # Make sure servers that aren't replicas for the table don't yield metrics.
-                aggregator.assert_metric(metric, count=0, tags=tags)
+        for server in NON_REPLICA_SERVERS:
+            tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(server)]
+            tags.extend(SERVER_TAGS[server])
+            aggregator.assert_metric(metric, count=0, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 

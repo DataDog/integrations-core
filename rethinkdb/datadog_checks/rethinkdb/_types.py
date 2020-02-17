@@ -60,7 +60,7 @@ TableStats = TypedDict(
 
 ReplicaQueryEngine = TypedDict(
     'ReplicaQueryEngine',
-    {'read_docs_per_sec': int, 'read_docs_total': int, 'writen_docs_per_sec': int, 'written_docs_total': int},
+    {'read_docs_per_sec': int, 'read_docs_total': int, 'written_docs_per_sec': int, 'written_docs_total': int},
 )
 
 ReplicaCache = TypedDict('ReplicaCache', {'in_use_bytes': int})
