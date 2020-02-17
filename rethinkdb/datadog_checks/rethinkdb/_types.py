@@ -7,7 +7,7 @@ Declarations used for type checking our code, including our manipulation of JSON
 """
 
 import datetime as dt
-from typing import Any, Dict, List, Literal, Tuple, TypedDict
+from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 
 # Lightweight shim to decouple collection functions from the check class.
 Metric = TypedDict(
@@ -117,6 +117,52 @@ ServerNetwork = TypedDict('ServerNetwork', {'time_connected': dt.datetime, 'conn
 ServerProcess = TypedDict('ServerProcess', {'time_started': dt.datetime, 'version': str})
 # ^^^
 ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': ServerNetwork, 'process': ServerProcess})
+
+
+# System jobs documents.
+# See: https://rethinkdb.com/docs/system-jobs/
+
+QueryInfo = TypedDict('QueryInfo', {'client_address': str, 'client_port': int, 'query': str, 'user': str})
+QueryJob = TypedDict(
+    'QueryJob',
+    {
+        'type': Literal['query'],
+        'id': Tuple[Literal['query'], str],
+        'duration_sec': float,
+        'info': QueryInfo,
+        'servers': List[str],
+    },
+)
+
+IndexConstructionInfo = TypedDict('IndexConstructionInfo', {'db': str, 'table': str, 'index': str, 'progress': int})
+IndexConstructionJob = TypedDict(
+    'IndexConstructionJob',
+    {
+        'type': Literal['index_construction'],
+        'id': Tuple[Literal['index_construction'], str],
+        'duration_sec': float,
+        'info': IndexConstructionInfo,
+        'servers': List[str],
+    },
+)
+
+BackfillInfo = TypedDict(
+    'BackfillInfo', {'db': str, 'destination_server': str, 'source_server': str, 'table': str, 'progress': int}
+)
+BackfillJob = TypedDict(
+    'BackfillJob',
+    {
+        'type': Literal['backfill'],
+        'id': Tuple[Literal['backfill'], str],
+        'duration_sec': float,
+        'info': BackfillInfo,
+        'servers': List[str],
+    },
+)
+
+# NOTE: this is a union type tagged by the 'type' key.
+# See: https://mypy.readthedocs.io/en/latest/literal_types.html#intelligent-indexing
+Job = Union[QueryJob, IndexConstructionJob, BackfillJob]
 
 # ReQL command results.
 # See: https://rethinkdb.com/api/python/

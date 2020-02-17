@@ -10,6 +10,7 @@ import rethinkdb
 
 from ._types import (
     ClusterStats,
+    Job,
     JoinRow,
     ReplicaStats,
     Server,
@@ -123,3 +124,11 @@ def query_server_status(conn):
     Retrieve the status of each server in the cluster.
     """
     return rethinkdb.r.table('server_status').run(conn)
+
+
+def query_system_jobs(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Job]
+    """
+    Retrieve all the currently running system jobs.
+    """
+    return rethinkdb.r.table('jobs').run(conn)

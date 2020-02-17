@@ -15,7 +15,12 @@ IMAGE = 'rethinkdb:2.4.0'
 HOST = get_docker_hostname()
 
 SERVERS = {'server0', 'server1', 'server2'}
-SERVER_TAGS = {'server0': ['default', 'us'], 'server1': ['default', 'primary', 'us'], 'server2': ['default', 'eu']}
+SERVER_TAGS = {
+    'server0': ['default', 'us', 'initial'],
+    'server1': ['default', 'us', 'primary'],
+    'server2': ['default', 'eu'],
+    'server3': ['default', 'eu'],
+}
 
 CONNECT_SERVER_NAME = 'server0'
 CONNECT_SERVER_PORT = 28015
@@ -25,15 +30,23 @@ PROXY_PORT = 28018
 DATABASE = 'doghouse'
 
 HEROES_TABLE = 'heroes'
-HEROES_TABLE_NUM_SHARDS = 1
-HEROES_TABLE_OPTIONS = {
-    'shards': HEROES_TABLE_NUM_SHARDS,
-    'replicas': {'primary': 1, 'eu': 1},
-    'primary_replica_tag': 'primary',
+
+HEROES_TABLE_INITIAL_CONFIG = {'shards': 1, 'replicas': {'initial': 1}, 'primary_replica_tag': 'initial'}
+HEROES_TABLE_SERVER_INITIAL = 'server0'
+
+HEROES_TABLE_REPLICATED_PRIMARY_REPLICA_TAG = 'primary'
+HEROES_TABLE_REPLICATED_CONFIG = {
+    'shards': 1,
+    'replicas': {'primary': 1, 'eu': 2},
+    'primary_replica_tag': HEROES_TABLE_REPLICATED_PRIMARY_REPLICA_TAG,
 }
-HEROES_TABLE_REPLICAS = {'server1', 'server2'}
-HEROES_TABLE_SHARD_REPLICAS = {0: {'server1', 'server2'}}
-HEROES_INITIAL_DOCUMENTS = [
+HEROES_TABLE_SERVERS_REPLICATED = {'server1', 'server2', 'server3'}
+HEROES_TABLE_REPLICAS_FOR_SHARDS = {0: HEROES_TABLE_SERVERS_REPLICATED}
+
+# This should be big enough so that a backfill job lasts long enough for us to see it during a check.
+HEROES_NUM_DOCUMENTS = 90000
+
+_HEROES_TEMPLATE_DOCUMENTS = [
     {
         "hero": "Magneto",
         "name": "Max Eisenhardt",
@@ -54,7 +67,10 @@ HEROES_INITIAL_DOCUMENTS = [
         "appearances_count": 72,
     },
 ]
-NUM_FAMOUS_HEROES = 2
+
+assert HEROES_NUM_DOCUMENTS % len(_HEROES_TEMPLATE_DOCUMENTS) == 0
+HEROES_DOCUMENTS = _HEROES_TEMPLATE_DOCUMENTS * (HEROES_NUM_DOCUMENTS // 3)
+NUM_FAMOUS_HEROES = len(HEROES_DOCUMENTS) * 2 / 3
 
 CLUSTER_STATISTICS_METRICS = (
     'rethinkdb.stats.cluster.queries_per_sec',
@@ -102,12 +118,12 @@ TABLE_STATUS_METRICS = (
     'rethinkdb.table_status.shards.total',
 )
 
-TABLE_STATUS_REPLICA_COUNT_METRICS = (
+TABLE_STATUS_SHARDS_METRICS = (
     'rethinkdb.table_status.shards.replicas.total',
     'rethinkdb.table_status.shards.replicas.primary.total',
 )
 
-TABLE_STATUS_REPLICA_STATE_METRICS = (
+TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS = (
     'rethinkdb.table_status.shards.replicas.state.ready',
     'rethinkdb.table_status.shards.replicas.state.transitioning',
     'rethinkdb.table_status.shards.replicas.state.backfilling',
@@ -123,10 +139,15 @@ SERVER_STATUS_METRICS = (
     'rethinkdb.server_status.process.time_started',
 )
 
-JOBS_METRICS = (
-    'rethinkdb.jobs.query.duration',
+QUERY_JOBS_METRICS = ('rethinkdb.jobs.query.duration',)
+
+# TODO: trigger index construction
+INDEX_CONSTRUCTION_JOBS_METRICS = (
     'rethinkdb.jobs.index_construction.duration',
     'rethinkdb.jobs.index_construction.progress',
+)
+
+BACKFILL_JOBS_METRICS = (
     'rethinkdb.jobs.backfill.duration',
     'rethinkdb.jobs.backfill.progress',
 )
