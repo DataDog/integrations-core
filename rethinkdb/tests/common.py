@@ -85,10 +85,10 @@ REPLICA_STATISTICS_METRICS = (
     # 'rethinkdb.stats.table_server.disk.read_bytes_total',
     # 'rethinkdb.stats.table_server.disk.written_bytes_per_sec',
     # 'rethinkdb.stats.table_server.disk.written_bytes_total',
-    # 'rethinkdb.stats.table_server.disk.space_usage.metadata_bytes',
-    # 'rethinkdb.stats.table_server.disk.space_usage.data_bytes',
-    # 'rethinkdb.stats.table_server.disk.space_usage.garbage_bytes',
-    # 'rethinkdb.stats.table_server.disk.space_usage.preallocated_bytes',
+    # 'rethinkdb.stats.table_server.disk.metadata_bytes',
+    # 'rethinkdb.stats.table_server.disk.data_bytes',
+    # 'rethinkdb.stats.table_server.disk.garbage_bytes',
+    # 'rethinkdb.stats.table_server.disk.preallocated_bytes',
 )
 
 TABLE_STATUS_METRICS = (
