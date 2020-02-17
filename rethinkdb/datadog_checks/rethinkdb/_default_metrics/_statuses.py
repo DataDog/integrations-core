@@ -4,7 +4,9 @@
 
 from __future__ import absolute_import
 
+import datetime as dt
 import itertools
+import time
 from typing import Iterator
 
 import rethinkdb
@@ -120,7 +122,7 @@ def _collect_server_status_metrics(conn):
         yield {
             'type': 'gauge',
             'name': 'rethinkdb.server_status.network.time_connected',
-            'value': network['time_connected'].timestamp(),
+            'value': _to_timestamp(network['time_connected']),
             'tags': tags,
         }
 
@@ -141,6 +143,15 @@ def _collect_server_status_metrics(conn):
         yield {
             'type': 'gauge',
             'name': 'rethinkdb.server_status.process.time_started',
-            'value': process['time_started'].timestamp(),
+            'value': _to_timestamp(process['time_started']),
             'tags': tags,
         }
+
+
+def _to_timestamp(datetime):
+    # type: (dt.datetime) -> float
+    try:
+        return datetime.timestamp()  # type: ignore  # (Mypy is run in --py2 mode.)
+    except AttributeError:
+        # Python 2.
+        return time.mktime(datetime.now().timetuple())
