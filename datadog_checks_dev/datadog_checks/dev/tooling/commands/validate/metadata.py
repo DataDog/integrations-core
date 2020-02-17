@@ -229,8 +229,8 @@ def metadata(check):
             reader._fieldnames = reader.fieldnames
 
             for line, row in enumerate(reader, 2):
-                # Number of rows is correct. Since metric is first in the list, should be safe to access
-                if len(row) != len(ALL_HEADERS):
+                # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
+                if None in row.values():
                     errors = True
                     echo_failure(f"{current_check}:{line} {row['metric_name']} Has the wrong amount of columns")
                     continue
