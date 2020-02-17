@@ -557,7 +557,7 @@ class AgentCheck(object):
         )
 
     def is_metadata_collection_enabled(self):
-        return self.agentConfig.get('enable_metadata_collection', True)
+        return is_affirmative(datadog_agent.get_config('enable_metadata_collection'))
 
     def set_external_tags(self, external_tags):
         # Example of external_tags format
