@@ -86,7 +86,7 @@ class VSphereCheck(AgentCheck):
         if self.config.should_collect_tags:
             try:
                 self.api_rest = VSphereRestAPI(self.config, self.log)
-            except APIConnectionError as e:
+            except Exception as e:
                 self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
 
     def refresh_metrics_metadata_cache(self):
@@ -130,7 +130,7 @@ class VSphereCheck(AgentCheck):
         t0 = Timer()
         try:
             mor_tags = self.api_rest.get_resource_tags()
-        except APIConnectionError as e:
+        except Exception as e:
             self.log.error("Failed to collect tags: %s", e)
             return
         self.gauge('datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True)

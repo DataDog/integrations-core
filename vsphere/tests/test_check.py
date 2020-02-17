@@ -6,7 +6,7 @@ import os
 
 import mock
 import pytest
-from mock import MagicMock, patch
+from mock import MagicMock
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
@@ -177,8 +177,7 @@ def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_inst
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.log = MagicMock()
 
-    with patch('datadog_checks.vsphere.api_rest.create_vsphere_client') as client:
-        client.side_effect = Exception("Some error")
+    with mock.patch('requests.post', side_effect=Exception, autospec=True):
         dd_run_check(check)
 
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='10.0.0.104')

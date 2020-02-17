@@ -7,8 +7,8 @@ import pytest
 from mock import MagicMock, patch
 from pyVmomi import vim
 from six import iteritems
-from tests.mocked_api import MockedRestAPI
 
+from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache, VSphereCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
@@ -89,11 +89,11 @@ def test_infrastructure_cache():
         assert cache.get_mor_props(k) == v
 
 
-@pytest.mark.usefixtures("mock_type")
+@pytest.mark.usefixtures("mock_type", "mock_rest_api")
 def test_tags_cache(realtime_instance):
     cache = TagsCache(float('inf'))
     config = VSphereConfig(realtime_instance, logger)
-    mock_api = MockedRestAPI(config, log=logger)
+    mock_api = VSphereRestAPI(config, log=logger)
 
     with cache.update():
         cache.set_all_tags(mock_api.get_resource_tags())

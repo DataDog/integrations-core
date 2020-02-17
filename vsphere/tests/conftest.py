@@ -5,7 +5,7 @@ import os
 
 import pytest
 from mock import MagicMock, Mock, patch
-from tests.mocked_api import MockedAPI, MockedRestAPI
+from tests.mocked_api import MockedAPI, mock_http_rest_api
 
 
 @pytest.fixture()
@@ -66,5 +66,5 @@ def mock_api():
 
 @pytest.fixture
 def mock_rest_api():
-    with patch('datadog_checks.vsphere.vsphere.VSphereRestAPI', MockedRestAPI):
+    with patch('requests.api.request', mock_http_rest_api):
         yield

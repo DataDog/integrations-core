@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 from collections import defaultdict
 
-import requests
 from pyVmomi import vim
-from vmware.vapi.vsphere.client import create_vsphere_client
 
-from .api import APIConnectionError, smart_retry
+from datadog_checks.base.utils.http import RequestsWrapper
+
+from .api import APIResponseError, smart_retry
 
 MOR_TYPE_MAPPING = {
     'HostSystem': vim.HostSystem,
@@ -26,30 +27,14 @@ class VSphereRestAPI(object):
     def __init__(self, config, log):
         self.config = config
         self.log = log
-
-        self._client = None
+        self._client = VSphereRestClient(config, log)
         self.smart_connect()
 
     def smart_connect(self):
         """
-        Create a vSphere client.
+        Connect to vSphere client.
         """
-        session = requests.Session()
-        session.verify = self.config.ssl_verify
-        session.cert = self.config.ssl_capath
-
-        try:
-            client = create_vsphere_client(
-                session=session,
-                username=self.config.username,
-                password=self.config.password,
-                server=self.config.hostname,
-            )
-        except Exception as e:
-            err_msg = "Connection to vSphere Rest API failed for host {}: {}".format(self.config.hostname, e)
-            raise APIConnectionError(err_msg)
-
-        self._client = client
+        self._client.connect_session()
 
     @smart_retry
     def get_resource_tags(self):
@@ -68,34 +53,21 @@ class VSphereRestAPI(object):
         categories = self._get_categories()
         tags = self._get_tags(categories)
         tag_ids = list(tags.keys())
-        tag_associations = self._get_tag_associations(tag_ids)
+        tag_associations = self._client.tagging_tag_association_list_attached_objects_on_tags(tag_ids)
         self.log.debug("Fetched tag associations: %s", tag_associations)
 
         # Initialise resource_tags
         resource_tags = {resource_type: defaultdict(list) for resource_type in MOR_TYPE_MAPPING.values()}
 
         for tag_asso in tag_associations:
-            tag = tags[tag_asso.tag_id]
-            for resource_asso in tag_asso.object_ids:
-                resource_type = MOR_TYPE_MAPPING.get(resource_asso.type)
+            tag = tags[tag_asso['tag_id']]
+            for resource_asso in tag_asso['object_ids']:
+                resource_type = MOR_TYPE_MAPPING.get(resource_asso['type'])
                 if not resource_type:
                     continue
-                resource_tags[resource_type][resource_asso.id].append(tag)
+                resource_tags[resource_type][resource_asso['id']].append(tag)
         self.log.debug("Result resource tags: %s", resource_tags)
         return resource_tags
-
-    def _get_tag_associations(self, tag_ids):
-        """
-        :rtype: :class:`list` of :class:`com.vmware.cis.tagging_client.TagAssociation.TagToObjects`
-        :return: tag_associations: the structure of the tag associations is as follow:
-            [
-                TagToObjects(tag_id='tag_id_1', object_ids=[DynamicID(type='VirtualMachine', id='VM4-4-1')]),
-                TagToObjects(tag_id='tag_id_2', object_ids=[DynamicID(type='VirtualMachine', id='VM4-4-1')]),
-                ...
-            ]
-        """
-        tag_associations = self._client.tagging.TagAssociation.list_attached_objects_on_tags(tag_ids)
-        return tag_associations
 
     def _get_categories(self):
         """
@@ -108,11 +80,11 @@ class VSphereRestAPI(object):
                 ...
             }
         """
-        category_ids = self._client.tagging.Category.list()
+        category_ids = self._client.tagging_category_list()
         categories = {}
         for category_id in category_ids:
-            cat = self._client.tagging.Category.get(category_id)
-            categories[category_id] = cat.name
+            cat = self._client.tagging_category_get(category_id)
+            categories[category_id] = cat['name']
         return categories
 
     def _get_tags(self, categories):
@@ -128,10 +100,104 @@ class VSphereRestAPI(object):
         Taging best practices:
         https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/techpaper/performance/tagging-vsphere67-perf.pdf
         """
-        tag_ids = self._client.tagging.Tag.list()
+        tag_ids = self._client.tagging_tags_list()
         tags = {}
         for tag_id in tag_ids:
-            tag = self._client.tagging.Tag.get(tag_id)
-            cat_name = categories.get(tag.category_id, 'unknown_category')
-            tags[tag_id] = "{}{}:{}".format(self.config.vsphere_tags_prefix, cat_name, tag.name)
+            tag = self._client.tagging_tags_get(tag_id)
+            cat_name = categories.get(tag['category_id'], 'unknown_category')
+            tags[tag_id] = "{}{}:{}".format(self.config.vsphere_tags_prefix, cat_name, tag['name'])
         return tags
+
+
+class VSphereRestClient(object):
+    """
+    Custom vSphere Rest API Client
+    """
+
+    JSON_REQUEST_HEADERS = {'Content-Type': 'application/json'}
+
+    def __init__(self, config, log):
+        self.log = log
+        http_config = {
+            'username': config.username,
+            'password': config.password,
+            'tls_ca_cert': config.ssl_capath,
+            'tls_verify': config.ssl_verify,
+        }
+        self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
+        self._http = RequestsWrapper(http_config, {})
+
+    def connect_session(self):
+        session_token = self.session_create("session")
+
+        if not session_token:
+            raise APIResponseError("Failed to retrieve session token")
+
+        self._http.options['headers']['vmware-api-session-id'] = session_token
+
+    def session_create(self, tag_ids):
+        """
+        Create session token
+        Doc:
+        https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/session.create-operation.html
+        """
+        session_token = self._request_json("session", method="post", extra_headers=self.JSON_REQUEST_HEADERS,)
+        return session_token
+
+    def tagging_category_list(self):
+        """
+        Get list of categories
+        Doc:
+        https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/tagging/category.list-operation.html
+        """
+        return self._request_json("tagging/category")
+
+    def tagging_category_get(self, category_id):
+        """
+        Get one category
+        Doc:
+        https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/tagging/category.get-operation.html
+        """
+        return self._request_json("tagging/category/id:{}".format(category_id))
+
+    def tagging_tags_list(self):
+        """
+        Get list of tags
+        Doc:
+        https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/tagging/tag.list-operation.html
+        """
+        return self._request_json("tagging/tag")
+
+    def tagging_tags_get(self, tag_id):
+        """
+        Get one tag
+        Doc:
+        https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/tagging/tag.get-operation.html
+        """
+        return self._request_json("tagging/tag/id:{}".format(tag_id))
+
+    def tagging_tag_association_list_attached_objects_on_tags(self, tag_ids):
+        """
+        Get tag associations for vSphere resources
+        Doc:
+        https://vmware.github.io/vsphere-automation-sdk-rest/6.5/operations/com/vmware/cis/tagging/tag_association.list_attached_objects_on_tags-operation.html
+        """
+        payload = {"tag_ids": tag_ids}
+        tag_associations = self._request_json(
+            "tagging/tag-association?~action=list-attached-objects-on-tags",
+            method="post",
+            data=json.dumps(payload),
+            extra_headers=self.JSON_REQUEST_HEADERS,
+        )
+        return tag_associations
+
+    def _request_json(self, endpoint, method='get', **options):
+        url = self._api_base_url + endpoint
+        resp = getattr(self._http, method)(url, **options)
+        resp.raise_for_status()
+
+        data = resp.json()
+        if 'value' not in data:
+            raise APIResponseError("Missing `value` element in response for url: {}".format(url))
+
+        return data['value']
