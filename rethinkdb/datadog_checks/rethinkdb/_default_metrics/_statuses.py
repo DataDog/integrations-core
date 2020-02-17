@@ -152,6 +152,6 @@ def _to_timestamp(datetime):
     # type: (dt.datetime) -> float
     try:
         return datetime.timestamp()  # type: ignore  # (Mypy is run in --py2 mode.)
-    except AttributeError:
+    except AttributeError:  # pragma: no cover
         # Python 2.
         return time.mktime(datetime.now().timetuple())

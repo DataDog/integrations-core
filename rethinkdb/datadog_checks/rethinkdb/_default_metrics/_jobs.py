@@ -22,12 +22,14 @@ def collect_jobs(conn):
     for job in query_system_jobs(conn):
         duration = job['duration_sec']
         servers = job['servers']
+
         tags = ['server:{}'.format(server) for server in servers]
 
         if job['type'] == 'query':
             client_address = job['info']['client_address']
+            client_port = job['info']['client_port']
 
-            query_tags = tags + ['client_address:{}'.format(client_address)]
+            query_tags = tags + ['client_address:{}'.format(client_address), 'client_port:{}'.format(client_port)]
 
             yield {
                 'type': 'gauge',
@@ -39,8 +41,14 @@ def collect_jobs(conn):
         elif job['type'] == 'index_construction':
             database = job['info']['db']
             table = job['info']['table']
+            index = job['info']['index']
+            progress = job['info']['progress']
 
-            index_construction_tags = tags + ['database:{}'.format(database), 'table:{}'.format(table)]
+            index_construction_tags = tags + [
+                'database:{}'.format(database),
+                'table:{}'.format(table),
+                'index:{}'.format(index),
+            ]
 
             yield {
                 'type': 'gauge',
@@ -52,7 +60,7 @@ def collect_jobs(conn):
             yield {
                 'type': 'gauge',
                 'name': 'rethinkdb.jobs.index_construction.progress',
-                'value': job['info']['progress'],
+                'value': progress,
                 'tags': index_construction_tags,
             }
 
@@ -61,6 +69,7 @@ def collect_jobs(conn):
             destination_server = job['info']['destination_server']
             source_server = job['info']['source_server']
             table = job['info']['table']
+            progress = job['info']['progress']
 
             backfill_tags = tags + [
                 'database:{}'.format(database),
@@ -79,6 +88,9 @@ def collect_jobs(conn):
             yield {
                 'type': 'gauge',
                 'name': 'rethinkdb.jobs.backfill.progress',
-                'value': job['info']['progress'],
+                'value': progress,
                 'tags': backfill_tags,
             }
+
+        else:
+            continue  # pragma: no cover

@@ -9,9 +9,10 @@ from typing import Dict, Iterator, List
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.rethinkdb._types import Instance
 
+from .cluster import setup_cluster
 from .common import CONNECT_SERVER_PORT, HERE, HOST, IMAGE, PROXY_PORT
 
 E2E_METADATA = {'start_commands': ['pip install rethinkdb==2.4.4']}
@@ -37,6 +38,8 @@ def dd_environment(instance):
         'RETHINKDB_PROXY_PORT': str(PROXY_PORT),
     }  # type: Dict[str, str]
 
+    conditions = [WaitFor(setup_cluster)]
+
     log_patterns = [
         r'Server ready, "server0".*',
         r'Connected to server "server1".*',
@@ -44,6 +47,6 @@ def dd_environment(instance):
         r'Connected to proxy.*',
     ]  # type: List[str]
 
-    with docker_run(compose_file, env_vars=env_vars, log_patterns=log_patterns):
+    with docker_run(compose_file, conditions=conditions, env_vars=env_vars, log_patterns=log_patterns):
         config = {'instances': [instance]}
         yield config, E2E_METADATA

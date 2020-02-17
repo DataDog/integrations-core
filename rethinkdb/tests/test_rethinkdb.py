@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 
 import copy
-from typing import Iterator, List, TypedDict
+from typing import Iterator
 
 import pytest
 import rethinkdb
@@ -14,14 +14,12 @@ from datadog_checks.rethinkdb import RethinkDBCheck
 from datadog_checks.rethinkdb._types import Instance, Metric
 
 from .common import (
-    BACKFILL_JOBS_METRICS,
     CLUSTER_STATISTICS_METRICS,
     CONNECT_SERVER_NAME,
     DATABASE,
     HEROES_TABLE,
     HEROES_TABLE_REPLICAS_BY_SHARD,
-    HEROES_TABLE_SERVER_INITIAL,
-    HEROES_TABLE_SERVERS_REPLICATED,
+    HEROES_TABLE_SERVERS,
     QUERY_JOBS_METRICS,
     REPLICA_STATISTICS_METRICS,
     SERVER_STATISTICS_METRICS,
@@ -33,9 +31,6 @@ from .common import (
     TABLE_STATUS_SHARDS_METRICS,
     TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS,
 )
-from .cluster import setup_cluster_ensuring_all_default_metrics_are_emitted
-
-Context = TypedDict('Context', {'backfilling_servers': List[str]})
 
 
 @pytest.mark.integration
@@ -43,22 +38,12 @@ Context = TypedDict('Context', {'backfilling_servers': List[str]})
 def test_check(aggregator, instance):
     # type: (AggregatorStub, Instance) -> None
     check = RethinkDBCheck('rethinkdb', {}, [instance])
-
-    with setup_cluster_ensuring_all_default_metrics_are_emitted():
-        check.check(instance)
-
-    context = {'backfilling_servers': []}  # type: Context
+    check.check(instance)
 
     _assert_statistics_metrics(aggregator)
-    _assert_table_status_metrics(aggregator, context=context)
-
-    assert context['backfilling_servers'], (
-        'Expected backfilling to be ongoing for at least one replica. '
-        'Aborting, as otherwise backfill metrics would not be covered.'
-    )
-
+    _assert_table_status_metrics(aggregator)
     _assert_server_status_metrics(aggregator)
-    _assert_system_jobs_metrics(aggregator, context=context)
+    _assert_system_jobs_metrics(aggregator)
 
     aggregator.assert_all_metrics_covered()
 
@@ -85,14 +70,14 @@ def _assert_statistics_metrics(aggregator):
         aggregator.assert_metric(metric, count=1, tags=tags)
 
     # Replicas (table/server pairs).
-    for replica_server in HEROES_TABLE_SERVERS_REPLICATED:
+    for replica_server in HEROES_TABLE_SERVERS:
         for metric in REPLICA_STATISTICS_METRICS:
             tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(replica_server)]
             tags.extend(SERVER_TAGS[replica_server])
             aggregator.assert_metric(metric, count=1, tags=tags)
 
     # Ensure non-replica servers haven't yielded replica statistics.
-    for non_replica_server in SERVERS - HEROES_TABLE_SERVERS_REPLICATED:
+    for non_replica_server in SERVERS - HEROES_TABLE_SERVERS:
         for metric in REPLICA_STATISTICS_METRICS:
             tags = [
                 'table:{}'.format(HEROES_TABLE),
@@ -103,8 +88,8 @@ def _assert_statistics_metrics(aggregator):
             aggregator.assert_metric(metric, count=0, tags=tags)
 
 
-def _assert_table_status_metrics(aggregator, context):
-    # type: (AggregatorStub, Context) -> None
+def _assert_table_status_metrics(aggregator):
+    # type: (AggregatorStub) -> None
 
     # Status of tables.
     for metric in TABLE_STATUS_METRICS:
@@ -127,17 +112,9 @@ def _assert_table_status_metrics(aggregator, context):
             ]
 
             for metric in TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS:
-                # Due to 'setup_cluster()', RethinkDB should currently be backfilling data from
-                # the initial server to the new replicas.
-                value = 1 if metric.endswith('.state.backfilling') else 0
-                try:
-                    aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, value=value, count=1, tags=tags)
-                except AssertionError:  # pragma: no cover
-                    # Depending on timing, the server may already be ready. Fine! Re-assert to limit flakiness.
-                    value = 1 if metric.endswith('.state.ready') else 0
-                    aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
-                else:
-                    context['backfilling_servers'].append(server)
+                # Assumption: all replicas in the cluster are ready, i.e. no rebalancing is in progress.
+                value = 1 if metric.endswith('.state.ready') else 0
+                aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, value=value, count=1, tags=tags)
 
 
 def _assert_server_status_metrics(aggregator):
@@ -148,25 +125,16 @@ def _assert_server_status_metrics(aggregator):
             aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
 
 
-def _assert_system_jobs_metrics(aggregator, context):
-    # type: (AggregatorStub, Context) -> None
-
-    # Query jobs.
+def _assert_system_jobs_metrics(aggregator):
+    # type: (AggregatorStub) -> None
     for metric in QUERY_JOBS_METRICS:
+        # NOTE: these metrics are emitted because the query issued to collect system jobs metrics is
+        # included in system jobs themselves.
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
 
-    # Backfill jobs.
-    for metric in BACKFILL_JOBS_METRICS:
-        for server in context['backfilling_servers']:
-            tags = [
-                'database:{}'.format(DATABASE),
-                'table:{}'.format(HEROES_TABLE),
-                'destination_server:{}'.format(server),
-                'source_server:{}'.format(HEROES_TABLE_SERVER_INITIAL),
-                'server:{}'.format(server),
-                'server:{}'.format(HEROES_TABLE_SERVER_INITIAL),
-            ]
-            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
+    # NOTE: other system jobs metrics are not covered here because they are only emitted when the cluster is
+    # changing (eg. an index is being created, or data is being rebalanced across servers), which is hard to
+    # test without introducing flakiness.
 
 
 @pytest.mark.integration

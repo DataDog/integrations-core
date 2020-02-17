@@ -7,7 +7,7 @@ services:
     tty: true  # Required otherwise RethinkDB won't output any logs.
     image: ${RETHINKDB_IMAGE}
     container_name: rethinkdb-server0
-    command: rethinkdb --bind all --server-name server0 --server-tag us --server-tag initial
+    command: rethinkdb --bind all --server-name server0 --server-tag us
     ports:
       - ${RETHINKDB_CONNECT_SERVER_PORT}:28015  # Client driver port.
       - 8080:8080  # Port for the web UI. Debugging only (not used by tests).
@@ -27,16 +27,6 @@ services:
     image: ${RETHINKDB_IMAGE}
     container_name: rethinkdb-server2
     command: rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server2 --server-tag eu
-    links:
-      - rethinkdb-server0
-    depends_on:
-      - rethinkdb-server0
-
-  rethinkdb-server3:
-    tty: true
-    image: ${RETHINKDB_IMAGE}
-    container_name: rethinkdb-server3
-    command: rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server3 --server-tag eu
     links:
       - rethinkdb-server0
     depends_on:
