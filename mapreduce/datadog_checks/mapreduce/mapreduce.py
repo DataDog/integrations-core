@@ -198,10 +198,12 @@ class MapReduceCheck(AgentCheck):
 
     def _get_hadoop_version(self):
         if self.agentConfig.get('enable_metadata_collection', True):
-            cluster_info = self._rest_request_to_json(self.rm_address, self.CLUSTER_INFO)
-            hadoop_version = cluster_info.get('clusterInfo', {}).get('hadoopVersion', '')
-            if hadoop_version:
+            try:
+                cluster_info = self._rest_request_to_json(self.rm_address, self.CLUSTER_INFO)
+                hadoop_version = cluster_info.get('clusterInfo', {}).get('hadoopVersion', '')
                 self.set_metadata('version', hadoop_version)
+            except Exception as e:
+                self.log.warning("There was an error retrieving hadoop version {}", e)
 
     def _get_running_app_ids(self):
         """
