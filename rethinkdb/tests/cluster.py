@@ -8,27 +8,23 @@ from typing import Iterator
 import rethinkdb
 from rethinkdb import r
 
-from ..common import (
+from .common import (
     CONNECT_SERVER_PORT,
     DATABASE,
     HEROES_DOCUMENTS,
     HEROES_TABLE,
-    HEROES_TABLE_INITIAL_CONFIG,
     HEROES_TABLE_REPLICATED_CONFIG,
+    HEROES_TABLE_SINGLE_SERVER_CONFIG,
     HOST,
-    NUM_FAMOUS_HEROES,
     PROXY_PORT,
 )
 
 
 @contextmanager
-def setup_cluster_ensuring_all_default_metrics_are_defined():
+def setup_cluster_ensuring_all_default_metrics_are_emitted():
     # type: () -> Iterator[None]
     """
-    Configure a cluster for integration testing purposes.
-
-    This helper should make it so that all default metrics are defined within the context block,
-    including ones for transient activity such as system jobs.
+    Configure a cluster so that all default metrics will be emitted if running a check within this context.
     """
     with _setup_database():
         _create_test_table()
@@ -55,7 +51,7 @@ def _create_test_table():
     # type: () -> None
     with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
         # See: https://rethinkdb.com/api/python/table_create/
-        response = r.db(DATABASE).table_create(HEROES_TABLE, **HEROES_TABLE_INITIAL_CONFIG).run(conn)
+        response = r.db(DATABASE).table_create(HEROES_TABLE, **HEROES_TABLE_SINGLE_SERVER_CONFIG).run(conn)
         assert response['tables_created'] == 1
 
 
@@ -63,15 +59,11 @@ def _setup_test_table_replication():
     # type: () -> None
     def _wait_backfill_started(conn):
         # type: (rethinkdb.net.Connection) -> None
-        for change in r.db('rethinkdb').table('jobs').filter({'type': 'backfill'}).changes().run(conn):
-            assert change is not None
-            # Stop on the first backfill job event.
-            break
+        changes = r.db('rethinkdb').table('jobs').filter({'type': 'backfill'}).changes().run(conn)  # type: Iterator
+        next(changes)
 
     with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
-        # Existing data in tables will be rebalanced, triggering a backfill job on the RethinkDB server side.
-        # We do all of this instead of setting up replication initially so that metrics associated to this job
-        # are collected during tests.
+        # See: https://rethinkdb.com/api/python/reconfigure
         r.db(DATABASE).table(HEROES_TABLE).reconfigure(**HEROES_TABLE_REPLICATED_CONFIG).run(conn)
         _wait_backfill_started(conn)
 
@@ -89,7 +81,7 @@ def _simulate_client_writes():
         documents = HEROES_DOCUMENTS
 
         # See: https://rethinkdb.com/api/python/insert
-        # NOTE: 'durability="soft"' speeds up the write by not waiting for data to be committed to disk.
+        # NOTE: 'durability="soft"' speeds up writes by not waiting for data to be committed to disk.
         response = (
             r.db(DATABASE).table(table).insert(documents).run(conn, durability="soft", array_limit=len(documents))
         )
@@ -108,6 +100,3 @@ def _simulate_client_reads():
     with r.connect(db=DATABASE, host=HOST, port=PROXY_PORT) as conn:
         all_heroes = list(r.table('heroes').run(conn))
         assert len(all_heroes) == len(HEROES_DOCUMENTS)
-
-        famous_heroes = list(r.table('heroes').filter(r.row['appearances_count'] >= 50).run(conn))
-        assert len(famous_heroes) == NUM_FAMOUS_HEROES

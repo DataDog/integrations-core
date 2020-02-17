@@ -19,7 +19,7 @@ from .common import (
     CONNECT_SERVER_NAME,
     DATABASE,
     HEROES_TABLE,
-    HEROES_TABLE_REPLICAS_FOR_SHARDS,
+    HEROES_TABLE_REPLICAS_BY_SHARD,
     HEROES_TABLE_SERVER_INITIAL,
     HEROES_TABLE_SERVERS_REPLICATED,
     QUERY_JOBS_METRICS,
@@ -33,7 +33,7 @@ from .common import (
     TABLE_STATUS_SHARDS_METRICS,
     TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS,
 )
-from .utils.cluster import setup_cluster_ensuring_all_default_metrics_are_defined
+from .cluster import setup_cluster_ensuring_all_default_metrics_are_emitted
 
 Context = TypedDict('Context', {'backfilling_servers': List[str]})
 
@@ -44,7 +44,7 @@ def test_check(aggregator, instance):
     # type: (AggregatorStub, Instance) -> None
     check = RethinkDBCheck('rethinkdb', {}, [instance])
 
-    with setup_cluster_ensuring_all_default_metrics_are_defined():
+    with setup_cluster_ensuring_all_default_metrics_are_emitted():
         check.check(instance)
 
     context = {'backfilling_servers': []}  # type: Context
@@ -112,7 +112,7 @@ def _assert_table_status_metrics(aggregator, context):
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
 
     # Status of shards.
-    for shard, servers in HEROES_TABLE_REPLICAS_FOR_SHARDS.items():
+    for shard, servers in HEROES_TABLE_REPLICAS_BY_SHARD.items():
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'shard:{}'.format(shard)]
 
         for metric in TABLE_STATUS_SHARDS_METRICS:
