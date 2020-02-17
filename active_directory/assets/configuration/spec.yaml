@@ -1,0 +1,68 @@
+name: Active Directory
+files:
+- name: active_directory.yaml
+  options:
+  - template: instances
+    options:
+    - name: host
+      required: true
+      description: |
+        Host that the Datadog active directory check connects to.
+        "." means the current host
+      value:
+        example: .
+        type: string
+    - name: username
+      required: false
+      description: Username from the credentials needed to connect to the host.
+      value:
+        type: string
+    - name: password
+      required: false
+      description: Password from the credentials needed to connect to the host.
+      value:
+        type: string
+    - name: additional_metrics
+      required: false
+      description: |
+        The additional metrics is a list of items that represent additional counters to collect.
+        Each item is a list of strings, formatted as follows:
+
+        ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
+
+        <COUNTERSET_NAME> is the name of the PDH Counter Set (the name of the counter)
+        <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example
+                                "Default Web Site".  Specify 'none' For all instances of
+                                the counter.
+        <COUNTER_NAME> is the individual counter to report
+        <METRIC_NAME> is the name you want to show up in Datadog
+        <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge,
+                      rate, histogram or counter
+      value:
+        example: ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
+        type: array
+        items:
+          type: string
+    - name: counter_data_types
+      required: false
+      description: |
+        counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> element that
+        allows the precision with which counters are queried on a per metric basis
+        <METRIC_NAME>: Name of your metric
+        <DATA_TYPE>  : Type of your metric, can be int, float
+      value:
+          example: |
+            - <METRIC_NAME>,<DATA_TYPE>
+            - active_directory.dra.inbound.bytes.total,int
+            - active_directory.ldap.bind_time,float
+          type: array
+          items:
+            - type: string
+    - template: instances/tags
+    - template: instances/global
+  - template: logs
+    example:
+    - type: file
+      path: /path/to/active_directory/file.log
+      source: ruby
+      service: <SERVICE_NAME>
