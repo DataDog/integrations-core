@@ -10,6 +10,7 @@ disable_warnings =
 # All paths are relative to each tox.ini
 omit =
     */test_bench.py
+    */test_e2e.py
 
     # Vendored dependencies
     */datadog_checks/*/vendor/*
