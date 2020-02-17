@@ -13,6 +13,7 @@ from .._env import (
     AGENT_COLLECTOR_SEPARATOR,
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
+    SKIP_ENVIRONMENT,
     TESTING_PLUGIN,
     e2e_active,
     e2e_testing,
@@ -128,6 +129,19 @@ def dd_environment_runner(request):
     else:  # no cov
         # Exit testing and pass data back up to command
         pytest.exit(message)
+
+
+@pytest.fixture(scope='session', autouse=True)
+def dd_environment_skipper(request):
+    # Skip the runner if the environment variable is specified
+    do_skip = os.getenv(SKIP_ENVIRONMENT) == 'true'
+    if not do_skip:
+        return
+    # Since the scope is `session` there should only ever be one definition
+    fixture_def = request._fixturemanager._arg2fixturedefs[E2E_FIXTURE_NAME][0]
+
+    # Make the underlying function a no-op
+    fixture_def.func = lambda: None
 
 
 @pytest.fixture

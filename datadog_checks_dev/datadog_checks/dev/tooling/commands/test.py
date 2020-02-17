@@ -6,7 +6,7 @@ import sys
 
 import click
 
-from ..._env import E2E_PARENT_PYTHON
+from ..._env import E2E_PARENT_PYTHON, SKIP_ENVIRONMENT
 from ...subprocess import run_command
 from ...utils import chdir, file_exists, get_ci_env_vars, remove_path, running_on_ci
 from ..constants import get_root
@@ -40,6 +40,7 @@ def display_envs(check_envs):
 @click.option('--passenv', help='Additional environment variables to pass down')
 @click.option('--changed', is_flag=True, help='Only test changed checks')
 @click.option('--cov-keep', is_flag=True, help='Keep coverage reports')
+@click.option('--skip-env', is_flag=True, help='Skip dd_environment start')
 @click.option('--pytest-args', '-pa', help='Additional arguments to pytest')
 @click.pass_context
 def test(
@@ -61,6 +62,7 @@ def test(
     passenv,
     changed,
     cov_keep,
+    skip_env,
     pytest_args,
 ):
     """Run tests for Agent-based checks.
@@ -107,6 +109,13 @@ def test(
         ),
         'DDEV_COV_MISSING': coverage_show_missing_lines,
     }
+
+    if skip_env:
+        os.putenv(SKIP_ENVIRONMENT, 'true')
+        if passenv is None:
+            passenv = SKIP_ENVIRONMENT
+        else:
+            passenv += f' SKIP_ENVIRONMENT'
 
     if passenv:
         test_env_vars['TOX_TESTENV_PASSENV'] += f' {passenv}'
