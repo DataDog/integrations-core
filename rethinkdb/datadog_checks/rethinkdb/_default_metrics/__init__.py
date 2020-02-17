@@ -13,7 +13,7 @@ from .._types import Metric
 from ._current_issues import collect_current_issues
 from ._jobs import collect_jobs
 from ._statistics import collect_statistics
-from ._statuses import collect_statuses
+from ._statuses import collect_status_metrics
 
 
 def collect_default_metrics(conn):
@@ -24,7 +24,7 @@ def collect_default_metrics(conn):
     See: https://rethinkdb.com/docs/system-tables/
     """
     metrics = itertools.chain(
-        collect_statistics(conn), collect_statuses(conn), collect_jobs(conn), collect_current_issues(conn)
+        collect_statistics(conn), collect_status_metrics(conn), collect_jobs(conn), collect_current_issues(conn)
     )
 
     for metric in metrics:

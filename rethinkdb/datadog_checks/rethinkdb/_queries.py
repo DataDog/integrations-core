@@ -8,7 +8,7 @@ from typing import Iterator, Tuple
 
 import rethinkdb
 
-from ._types import ClusterStats, JoinRow, ReplicaStats, Server, ServerStats, Table, TableStats
+from ._types import ClusterStats, JoinRow, ReplicaStats, Server, ServerStats, Table, TableStats, TableStatus
 
 
 def query_cluster_stats(conn):
@@ -97,3 +97,11 @@ def query_replica_stats(conn):
         table = join_row['right']  # type: Table
         server = row['right']  # type: Server
         yield table, server, stats
+
+
+def query_table_status(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[TableStatus]
+    """
+    Retrieve the status of each table in the cluster.
+    """
+    return rethinkdb.r.table('table_status').run(conn)

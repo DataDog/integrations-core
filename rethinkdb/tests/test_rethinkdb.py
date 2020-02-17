@@ -18,12 +18,17 @@ from .common import (
     CONNECT_SERVER_NAME,
     DATABASE,
     HEROES_TABLE,
+    HEROES_TABLE_NUM_SHARDS,
     HEROES_TABLE_REPLICAS,
+    HEROES_TABLE_SHARD_REPLICAS,
     REPLICA_STATISTICS_METRICS,
     SERVER_STATISTICS_METRICS,
     SERVER_TAGS,
     SERVERS,
     TABLE_STATISTICS_METRICS,
+    TABLE_STATUS_METRICS,
+    TABLE_STATUS_REPLICA_COUNT_METRICS,
+    TABLE_STATUS_REPLICA_STATE_METRICS,
 )
 
 
@@ -60,6 +65,26 @@ def test_check(aggregator, instance):
             tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(server)]
             tags.extend(SERVER_TAGS[server])
             aggregator.assert_metric(metric, count=0, tags=tags)
+
+    for metric in TABLE_STATUS_METRICS:
+        tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
+
+    for shard in range(HEROES_TABLE_NUM_SHARDS):
+        tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'shard:{}'.format(shard)]
+        for metric in TABLE_STATUS_REPLICA_COUNT_METRICS:
+            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
+
+        for server in HEROES_TABLE_SHARD_REPLICAS[shard]:
+            tags = [
+                'table:{}'.format(HEROES_TABLE),
+                'database:{}'.format(DATABASE),
+                'shard:{}'.format(shard),
+                'server:{}'.format(server),
+            ]
+            for metric in TABLE_STATUS_REPLICA_STATE_METRICS:
+                value = 1 if metric.endswith('.ready') else 0  # All servers in our test cluster are available.
+                aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, value=value, count=1, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 

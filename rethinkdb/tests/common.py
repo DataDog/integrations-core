@@ -25,8 +25,14 @@ PROXY_PORT = 28018
 DATABASE = 'doghouse'
 
 HEROES_TABLE = 'heroes'
-HEROES_TABLE_OPTIONS = {'shards': 1, 'replicas': {'primary': 1, 'eu': 1}, 'primary_replica_tag': 'primary'}
+HEROES_TABLE_NUM_SHARDS = 1
+HEROES_TABLE_OPTIONS = {
+    'shards': HEROES_TABLE_NUM_SHARDS,
+    'replicas': {'primary': 1, 'eu': 1},
+    'primary_replica_tag': 'primary',
+}
 HEROES_TABLE_REPLICAS = {'server1', 'server2'}
+HEROES_TABLE_SHARD_REPLICAS = {0: {'server1', 'server2'}}
 HEROES_INITIAL_DOCUMENTS = [
     {
         "hero": "Magneto",
@@ -94,8 +100,20 @@ TABLE_STATUS_METRICS = (
     'rethinkdb.table_status.ready_for_writes',
     'rethinkdb.table_status.all_replicas_ready',
     'rethinkdb.table_status.shards.total',
+)
+
+TABLE_STATUS_REPLICA_COUNT_METRICS = (
     'rethinkdb.table_status.shards.replicas.total',
-    'rethinkdb.table_status.shards.replicas.state',
+    'rethinkdb.table_status.shards.replicas.primary.total',
+)
+
+TABLE_STATUS_REPLICA_STATE_METRICS = (
+    'rethinkdb.table_status.shards.replicas.state.ready',
+    'rethinkdb.table_status.shards.replicas.state.transitioning',
+    'rethinkdb.table_status.shards.replicas.state.backfilling',
+    'rethinkdb.table_status.shards.replicas.state.disconnected',
+    'rethinkdb.table_status.shards.replicas.state.waiting_for_primary',
+    'rethinkdb.table_status.shards.replicas.state.waiting_for_quorum',
 )
 
 SERVER_STATUS_METRICS = (

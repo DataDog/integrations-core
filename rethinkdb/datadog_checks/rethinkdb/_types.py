@@ -95,6 +95,22 @@ ReplicaStats = TypedDict(
 )
 
 
+# Status documents.
+# See: https://rethinkdb.com/docs/system-tables/#status-tables
+
+ReplicaState = Literal[
+    'ready', 'transitioning', 'backfilling', 'disconnected', 'waiting_for_primary', 'waiting_for_quorum'
+]
+ShardReplica = TypedDict('ShardReplica', {'server': str, 'state': ReplicaState})
+Shard = TypedDict('Shard', {'primary_replicas': List[str], 'replicas': List[ShardReplica]})
+TableStatusFlags = TypedDict(
+    'TableStatusFlags',
+    {'ready_for_outdated_reads': bool, 'ready_for_reads': bool, 'ready_for_writes': bool, 'all_replicas_ready': bool},
+)
+TableStatus = TypedDict(
+    'TableStatus', {'id': str, 'name': str, 'db': str, 'status': TableStatusFlags, 'shards': List[Shard]}
+)
+
 # ReQL command results.
 # See: https://rethinkdb.com/api/python/
 
