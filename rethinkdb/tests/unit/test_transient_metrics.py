@@ -31,7 +31,7 @@ def test_jobs_metrics():
         'duration_sec': 0.21,
         'info': {
             'client_address': 'localhost',
-            'client_port': 8080,
+            'client_port': 28015,
             'query': "r.table('heroes').run(conn)",
             'user': 'johndoe',
         },
@@ -75,7 +75,7 @@ def test_jobs_metrics():
             'type': 'gauge',
             'name': 'rethinkdb.jobs.query.duration',
             'value': 0.21,
-            'tags': ['server:server0', 'client_address:localhost', 'client_port:8080'],
+            'tags': ['server:server0', 'client_address:localhost', 'client_port:28015'],
         },
         {
             'type': 'gauge',
