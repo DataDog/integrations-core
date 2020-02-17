@@ -515,21 +515,22 @@ class OpenMetricsScraperMixin(object):
         # If targeted metric, store labels
         self._store_labels(metric, scraper_config)
 
-        if metric.name in scraper_config['_ignored_metrics']:
-            self._send_telemetry_counter(
-                self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
-            )
-            return  # Ignore the metric
-
-        for ignore_pattern in scraper_config['_ignored_patterns']:
-            if fnmatchcase(metric.name, ignore_pattern):
-                # Metric must be ignored
-                # Cache the ignored metric name to avoid calling fnmatchcase in the next check run
-                scraper_config['_ignored_metrics'].add(metric.name)
+        if scraper_config['ignore_metrics']:
+            if metric.name in scraper_config['_ignored_metrics']:
                 self._send_telemetry_counter(
                     self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
                 )
                 return  # Ignore the metric
+
+            for ignore_pattern in scraper_config['_ignored_patterns']:
+                if fnmatchcase(metric.name, ignore_pattern):
+                    # Metric must be ignored
+                    # Cache the ignored metric name to avoid calling fnmatchcase in the next check run
+                    scraper_config['_ignored_metrics'].add(metric.name)
+                    self._send_telemetry_counter(
+                        self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
+                    )
+                    return  # Ignore the metric
 
         self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, len(metric.samples), scraper_config)
 
