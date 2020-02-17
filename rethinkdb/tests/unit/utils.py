@@ -12,21 +12,9 @@ class MockConnectionInstance(object):
 
     # Implement the connection instance interface used by RethinkDB.
 
-    def client_address(self):
-        # type: () -> str
-        return 'testserver'
-
-    def client_port(self):
-        # type: () -> int
-        return 28015
-
     def connect(self, timeout):
         # type: (float) -> MockConnection
         return self._parent
-
-    def reconnect(self, timeout):
-        # type: (float) -> MockConnection
-        return self.connect(timeout)
 
     def is_open(self):
         # type: () -> bool

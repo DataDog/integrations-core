@@ -91,6 +91,3 @@ def collect_jobs(conn):
                 'value': progress,
                 'tags': backfill_tags,
             }
-
-        else:
-            continue  # pragma: no cover
