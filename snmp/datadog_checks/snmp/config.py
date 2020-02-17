@@ -361,6 +361,7 @@ class InstanceConfig:
     def add_uptime_metric(self):
         if self._uptime_metric_added:
             return
+        # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = '1.3.6.1.2.1.1.3.0'
         oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(uptime_oid))
         if not self.all_oids:
