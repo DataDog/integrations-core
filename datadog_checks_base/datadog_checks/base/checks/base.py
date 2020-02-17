@@ -556,6 +556,9 @@ class AgentCheck(object):
             'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
         )
 
+    def is_metadata_collection_enabled(self):
+        return self.agentConfig.get('enable_metadata_collection', True)
+
     def set_external_tags(self, external_tags):
         # Example of external_tags format
         # [
