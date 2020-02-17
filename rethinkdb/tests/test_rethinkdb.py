@@ -53,23 +53,18 @@ def test_check(aggregator, instance):
 
 def _assert_statistics_metrics(aggregator):
     # type: (AggregatorStub) -> None
-
-    # Cluster.
     for metric in CLUSTER_STATISTICS_METRICS:
         aggregator.assert_metric(metric, count=1, tags=[])
 
-    # Servers.
     for server in SERVERS:
         for metric in SERVER_STATISTICS_METRICS:
             tags = ['server:{}'.format(server)] + SERVER_TAGS[server]
             aggregator.assert_metric(metric, count=1, tags=tags)
 
-    # Tables.
     for metric in TABLE_STATISTICS_METRICS:
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
         aggregator.assert_metric(metric, count=1, tags=tags)
 
-    # Replicas (table/server pairs).
     for replica_server in HEROES_TABLE_SERVERS:
         for metric in REPLICA_STATISTICS_METRICS:
             tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(replica_server)]
@@ -90,13 +85,10 @@ def _assert_statistics_metrics(aggregator):
 
 def _assert_table_status_metrics(aggregator):
     # type: (AggregatorStub) -> None
-
-    # Status of tables.
     for metric in TABLE_STATUS_METRICS:
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
 
-    # Status of shards.
     for shard, servers in HEROES_TABLE_REPLICAS_BY_SHARD.items():
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'shard:{}'.format(shard)]
 

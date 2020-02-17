@@ -5,7 +5,7 @@
 from __future__ import absolute_import
 
 import os
-from typing import Dict, Iterator, List
+from typing import Iterator
 
 import pytest
 
@@ -36,7 +36,7 @@ def dd_environment(instance):
         'RETHINKDB_IMAGE': IMAGE,
         'RETHINKDB_CONNECT_SERVER_PORT': str(CONNECT_SERVER_PORT),
         'RETHINKDB_PROXY_PORT': str(PROXY_PORT),
-    }  # type: Dict[str, str]
+    }
 
     conditions = [WaitFor(setup_cluster)]
 
@@ -45,7 +45,7 @@ def dd_environment(instance):
         r'Connected to server "server1".*',
         r'Connected to server "server2".*',
         r'Connected to proxy.*',
-    ]  # type: List[str]
+    ]
 
     with docker_run(compose_file, conditions=conditions, env_vars=env_vars, log_patterns=log_patterns):
         config = {'instances': [instance]}
