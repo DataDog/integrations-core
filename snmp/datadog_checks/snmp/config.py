@@ -128,10 +128,25 @@ class InstanceConfig:
         return self._resolver.resolve_oid(oid)
 
     def refresh_with_profile(self, profile, warning, log):
-        self.metrics.extend(profile['definition']['metrics'])
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)
-        tag_oids, self.parsed_metric_tags = self.parse_metric_tags(profile['definition'].get('metric_tags', []))
+        metrics = profile['definition']['metrics']
+        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
+
+        metric_tags = profile['definition'].get('metric_tags', [])
+        tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
+
+        # NOTE: `profile` may contain metrics and metric tags that have already been ingested in this configuration.
+        # As a result, multiple copies of metrics/tags will be fetched and submitted to Datadog, which is inefficient
+        # and possibly problematic.
+        # In the future we'll probably want to implement de-duplication.
+
+        self.metrics.extend(metrics)
+        self.all_oids.extend(all_oids)
+        self.bulk_oids.extend(bulk_oids)
+        self.parsed_metrics.extend(parsed_metrics)
+        self.parsed_metric_tags.extend(parsed_metric_tags)
         if tag_oids:
+            # NOTE: counter-intuitively, we must '.append()' the list of tag OIDs instead of '.extend()'ing,
+            # because `.all_oids` is a list of lists of OIDs (batches).
             self.all_oids.append(tag_oids)
 
     def call_cmd(self, cmd, *args, **kwargs):

@@ -591,9 +591,12 @@ def test_profile_sys_object_prefix(aggregator):
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
-    for metric in common.SUPPORTED_METRIC_TYPES:
+    metrics_from_all_matching_profiles = common.SUPPORTED_METRIC_TYPES + common.CAST_METRICS
+
+    for metric in metrics_from_all_matching_profiles:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 

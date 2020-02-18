@@ -244,7 +244,7 @@ def test_cache_building(write_mock, read_mock):
         for _ in range(30):
             if write_mock.call_count:
                 break
-            time.sleep(1)
+            time.sleep(0.5)
     finally:
         check._running = False
 
