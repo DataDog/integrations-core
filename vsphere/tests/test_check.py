@@ -157,11 +157,7 @@ def test_collect_tags(aggregator, dd_run_check, realtime_instance):
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_tag_prefix(aggregator, dd_run_check, realtime_instance):
     realtime_instance.update(
-        {
-            'collect_tags': True,
-            'vsphere_tags_prefix': 'ABC_',
-            'excluded_host_tags': ['ABC_my_cat_name_1', 'ABC_my_cat_name_2'],
-        }
+        {'collect_tags': True, 'tags_prefix': 'ABC_', 'excluded_host_tags': ['ABC_my_cat_name_1', 'ABC_my_cat_name_2']}
     )
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     dd_run_check(check)

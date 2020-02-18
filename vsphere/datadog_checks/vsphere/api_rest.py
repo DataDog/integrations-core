@@ -105,7 +105,7 @@ class VSphereRestAPI(object):
         for tag_id in tag_ids:
             tag = self._client.tagging_tags_get(tag_id)
             cat_name = categories.get(tag['category_id'], 'unknown_category')
-            tags[tag_id] = "{}{}:{}".format(self.config.vsphere_tags_prefix, cat_name, tag['name'])
+            tags[tag_id] = "{}{}:{}".format(self.config.tags_prefix, cat_name, tag['name'])
         return tags
 
 
