@@ -188,7 +188,8 @@ class DockerInterface(object):
 
     def update_os_version(self):
         command = ['docker', 'exec', self.container_name]
-        command.extend(["bash", "-c", "'echo 10 > /etc/debian_version || true'"])
+        print(">>> update_os_version")
+        command.extend(["bash", "-c", "'cat /etc/debian_version || true && echo 10 > /etc/debian_version || true'"])
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
