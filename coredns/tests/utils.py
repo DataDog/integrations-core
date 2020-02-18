@@ -10,3 +10,10 @@ def _assert_metric(aggregator, metric):
         aggregator.assert_metric(metric, metric_type=aggregator.MONOTONIC_COUNT)
     else:
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
+
+
+def _assert_metric_e2e(aggregator, metric):
+    if metric in COUNT_METRICS:
+        aggregator.assert_metric(metric, metric_type=aggregator.COUNT)
+    else:
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
