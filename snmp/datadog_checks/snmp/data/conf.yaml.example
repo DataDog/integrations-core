@@ -314,4 +314,5 @@ instances:
     #    tag: snmp_host
     #  - # From an OID:
     #    OID: 1.3.6.1.2.1.1.5
-    #    name: snmp_host
+    #    symbol: sysName
+    #    tag: snmp_host
