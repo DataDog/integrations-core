@@ -7,6 +7,7 @@ import json
 import threading
 import time
 from collections import defaultdict
+from typing import Dict, List, Optional
 
 import pysnmp.proto.rfc1902 as snmp_type
 from pyasn1.codec.ber import decoder
@@ -68,7 +69,7 @@ class SnmpCheck(AgentCheck):
         self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
 
         self.profiles = init_config.get('profiles', {})
-        self.profiles_by_oid = {}
+        self.profiles_by_oid = {}  # type: Dict[str, str]
         self._load_profiles()
 
         self.instance['name'] = self._get_instance_key(self.instance)
@@ -85,7 +86,6 @@ class SnmpCheck(AgentCheck):
                 raise ConfigurationError("Couldn't read profile '{}': {}".format(name, exc))
 
             self.profiles[name] = {'definition': definition}
-
             sys_object_oid = definition.get('sysobjectid')
             if sys_object_oid is not None:
                 self.profiles_by_oid[sys_object_oid] = name
@@ -116,6 +116,7 @@ class SnmpCheck(AgentCheck):
         return key
 
     def discover_instances(self):
+        # type: () -> None
         config = self._config
         discovery_interval = config.instance.get('discovery_interval', 3600)
         while self._running:
@@ -129,19 +130,23 @@ class SnmpCheck(AgentCheck):
                 instance['ip_address'] = host
 
                 host_config = self._build_config(instance)
+
                 try:
                     sys_object_oid = self.fetch_sysobject_oid(host_config)
                 except Exception as e:
                     self.log.debug("Error scanning host %s: %s", host, e)
                     continue
+
                 try:
-                    profile = self._profile_for_sysobject_oid(sys_object_oid)
+                    profiles = self._profiles_for_sysobject_oid(sys_object_oid)
                 except ConfigurationError:
                     if not (host_config.all_oids or host_config.bulk_oids):
                         self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
-                    host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                    for profile in profiles:
+                        host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+
                 config.discovered_instances[host] = host_config
 
                 write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
@@ -273,17 +278,15 @@ class SnmpCheck(AgentCheck):
         self.log.debug('Returned vars: %s', var_binds)
         return var_binds[0][1].prettyPrint()
 
-    def _profile_for_sysobject_oid(self, sys_object_oid):
-        """Return, if any, a matching profile for sys_object_oid.
+    def _profiles_for_sysobject_oid(self, sys_object_oid):
+        # type: (str) -> List[str]
+        """Return all profiles that match the given sysObjectID."""
+        profiles = [profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)]
 
-        If several profiles match, it will return the longer match, ie the
-        closest one to the sys_object_oid.
-        """
-        oids = [oid for oid in self.profiles_by_oid if fnmatch.fnmatch(sys_object_oid, oid)]
-        oids.sort()
-        if not oids:
+        if not profiles:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
-        return self.profiles_by_oid[oids[-1]]
+
+        return profiles
 
     def _consume_binds_iterator(self, binds_iterator, config):
         all_binds = []
@@ -350,20 +353,25 @@ class SnmpCheck(AgentCheck):
             self._check_with_config(config)
 
     def _check_with_config(self, config):
+        # type: (InstanceConfig) -> Optional[str]
         # Reset errors
         instance = config.instance
         error = results = None
+        tags = config.tags
         try:
             if not (config.all_oids or config.bulk_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
-                profile = self._profile_for_sysobject_oid(sys_object_oid)
-                config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                profiles = self._profiles_for_sysobject_oid(sys_object_oid)
+                for profile in profiles:
+                    config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
 
             if config.all_oids or config.bulk_oids:
                 self.log.debug('Querying device %s', config.ip_address)
                 config.add_uptime_metric()
                 results, error = self.fetch_results(config, config.all_oids, config.bulk_oids)
-                self.report_metrics(config.parsed_metrics, results, config.tags)
+                tags = self.extract_metric_tags(config.parsed_metric_tags, results)
+                tags.extend(config.tags)
+                self.report_metrics(config.parsed_metrics, results, tags)
         except CheckException as e:
             error = str(e)
             self.warning(error)
@@ -373,15 +381,20 @@ class SnmpCheck(AgentCheck):
             self.warning(error)
         finally:
             # Report service checks
-            sc_tags = ['snmp_device:{}'.format(instance['ip_address'])]
-            sc_tags.extend(instance.get('tags', []))
             status = self.OK
             if error:
                 status = self.CRITICAL
                 if results:
                     status = self.WARNING
-            self.service_check(self.SC_STATUS, status, tags=sc_tags, message=error)
+            self.service_check(self.SC_STATUS, status, tags=tags, message=error)
         return error
+
+    def extract_metric_tags(self, metric_tags, results):
+        extracted_tags = []
+        for tag in metric_tags:
+            [(_, tag_value)] = list(results[tag.symbol].items())
+            extracted_tags.append('{}:{}'.format(tag.name, tag_value))
+        return extracted_tags
 
     def report_metrics(self, metrics, results, tags):
         """

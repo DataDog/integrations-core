@@ -2499,10 +2499,6 @@
         "hostname": "10.0.0.104"
     },
     {
-        "name": "vsphere.host.count",
-        "value": 4
-    },
-    {
         "name": "vsphere.mem.active.avg",
         "value": 10484.0,
         "hostname": "$VM3-2"
@@ -10744,6 +10740,66 @@
     },
     {
         "name": "vsphere.vm.count",
-        "value": 23
+        "value": 20.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.104",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.count",
+        "value": 2.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:Discovered virtual machine",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.103",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.vm.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:vm",
+            "vsphere_host:10.0.0.103",
+            "vsphere_type:vm"
+        ]
+    },
+    {
+        "name": "vsphere.host.count",
+        "value": 2.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_compute:Cluster2",
+            "vsphere_datacenter:Dätacenter",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:host",
+            "vsphere_type:host"
+        ]
+    },
+    {
+        "name": "vsphere.host.count",
+        "value": 2.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_compute:Cluster2",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_folder:host",
+            "vsphere_type:host"
+        ]
     }
 ]
