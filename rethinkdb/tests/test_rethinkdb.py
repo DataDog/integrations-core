@@ -152,7 +152,7 @@ def test_connected_but_check_failed(aggregator, instance):
         raise RuntimeError('Oops!')
 
     check = RethinkDBCheck('rethinkdb', {}, [instance])
-    check._metric_collectors.append(collect_and_fail)
+    check.config.metric_streams.append(collect_and_fail)
     check.check(instance)
 
     service_check_tags = ['server:{}'.format(CONNECT_SERVER_NAME)]

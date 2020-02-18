@@ -5,7 +5,6 @@
 from __future__ import absolute_import
 
 import datetime as dt
-import itertools
 import time
 from typing import Iterator
 
@@ -15,21 +14,13 @@ from .._queries import query_server_status, query_table_status
 from .._types import Metric, ReplicaState
 
 
-def collect_status_metrics(conn):
+def collect_table_status(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     """
-    Collect metrics about server and table statuses.
+    Collect metrics about server statuses.
 
-    See: https://rethinkdb.com/docs/system-tables/#status-tables
+    See: https://rethinkdb.com/docs/system-tables/#server_status
     """
-    metrics = itertools.chain(_collect_table_status_metrics(conn), _collect_server_status_metrics(conn))
-
-    for metric in metrics:
-        yield metric
-
-
-def _collect_table_status_metrics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     for table_status in query_table_status(conn):
         table = table_status['name']
         database = table_status['db']
@@ -110,8 +101,13 @@ def _collect_table_status_metrics(conn):
                 yield _replica_state('waiting_for_quorum')
 
 
-def _collect_server_status_metrics(conn):
+def collect_server_status(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+    """
+    Collect metrics about table statuses.
+
+    See: https://rethinkdb.com/docs/system-tables/#table_status
+    """
     for server in query_server_status(conn):
         name = server['name']
         network = server['network']

@@ -1,10 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""
+Collect metrics about system statistics.
+
+See: https://rethinkdb.com/docs/system-stats/
+"""
 
 from __future__ import absolute_import
 
-import itertools
 import logging
 from typing import Iterator
 
@@ -16,25 +20,7 @@ from .._types import Metric
 logger = logging.getLogger(__name__)
 
 
-def collect_statistics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
-    """
-    Collect metrics about system statistics.
-
-    See: https://rethinkdb.com/docs/system-stats/
-    """
-    metrics = itertools.chain(
-        _collect_cluster_statistics(conn),
-        _collect_servers_statistics(conn),
-        _collect_table_statistics(conn),
-        _collect_replicas_statistics(conn),
-    )
-
-    for metric in metrics:
-        yield metric
-
-
-def _collect_cluster_statistics(conn):
+def collect_cluster_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     stats = query_cluster_stats(conn)
     logger.debug('cluster_statistics stats=%r', stats)
@@ -63,7 +49,7 @@ def _collect_cluster_statistics(conn):
     }
 
 
-def _collect_servers_statistics(conn):
+def collect_server_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     for server, stats in query_servers_with_stats(conn):
         logger.debug('server_statistics server=%r, stats=%r', server, stats)
@@ -131,7 +117,7 @@ def _collect_servers_statistics(conn):
         }
 
 
-def _collect_table_statistics(conn):
+def collect_table_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     for table, stats in query_tables_with_stats(conn):
         logger.debug('table_statistics table=%r, stats=%r', table, stats)
@@ -157,7 +143,7 @@ def _collect_table_statistics(conn):
         }
 
 
-def _collect_replicas_statistics(conn):
+def collect_replica_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     for table, server, stats in query_replica_stats(conn):
         logger.debug('replica_statistics table=%r server=%r stats=%r', table, server, stats)

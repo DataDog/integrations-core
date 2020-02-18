@@ -14,8 +14,20 @@ Metric = TypedDict(
     'Metric', {'type': Literal['gauge', 'monotonic_count'], 'name': str, 'value': float, 'tags': List[str]}
 )
 
-# Expected shape of an `instance` dictionary.
-Instance = TypedDict('Instance', {'host': str, 'port': int}, total=False)
+DefaultMetricGroup = Literal[
+    'cluster_statistics',
+    'server_statistics',
+    'table_statistics',
+    'replica_statistics',
+    'table_status',
+    'server_status',
+    'system_jobs',
+    'current_issues',
+]
+
+Instance = TypedDict(
+    'Instance', {'host': str, 'port': int, 'default_metrics': Union[bool, Dict[DefaultMetricGroup, bool]]}, total=False
+)
 
 
 # Configuration documents.

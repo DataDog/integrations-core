@@ -12,7 +12,7 @@ from .._queries import query_system_jobs
 from .._types import Metric
 
 
-def collect_jobs(conn):
+def collect_system_jobs(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect metrics about system jobs.

@@ -13,7 +13,6 @@ import rethinkdb
 from datadog_checks.base import AgentCheck
 
 from ._config import Config
-from ._default_metrics import collect_default_metrics
 from ._types import ConnectionServer, Instance, Metric
 
 
@@ -24,31 +23,26 @@ class RethinkDBCheck(AgentCheck):
     A set of default metrics is collected from system tables.
     """
 
-    # NOTE: use of private names (double underscores, e.g. '__member') prevents name clashes with the base class.
-
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         super(RethinkDBCheck, self).__init__(*args, **kwargs)
-
-        self.__config = Config(self.instance)
-
-        # NOTE: this list is exposed for testing purposes.
-        self._metric_collectors = []  # type: List[Callable[[rethinkdb.net.Connection], Iterator[Metric]]]
-        self._metric_collectors.append(collect_default_metrics)
+        self.config = Config(self.instance)
 
     def check(self, instance):
         # type: (Instance) -> None
-        config = self.__config
+        config = self.config
         self.log.debug('check config=%r', config)
 
         host = config.host
         port = config.port
+        metric_streams = config.metric_streams
 
-        with self.__submit_service_check() as on_connection_established:
+        with self.submit_service_check() as on_connection_established:
             with rethinkdb.r.connect(db='rethinkdb', host=host, port=port) as conn:
                 on_connection_established(conn)
-                for metric in self.__collect_metrics(conn):
-                    self.__submit_metric(metric)
+                for metric_stream in metric_streams:
+                    for metric in metric_stream(conn):
+                        self.submit_metric(metric)
 
     def __collect_metrics(self, conn):
         # type: (rethinkdb.net.Connection) -> Iterator[Metric]
@@ -57,7 +51,7 @@ class RethinkDBCheck(AgentCheck):
                 yield metric
 
     @contextmanager
-    def __submit_service_check(self):
+    def submit_service_check(self):
         # type: () -> Iterator[Callable[[rethinkdb.net.Connection], None]]
         tags = []  # type: List[str]
 
@@ -80,7 +74,7 @@ class RethinkDBCheck(AgentCheck):
             self.log.debug('service_check OK')
             self.service_check('rethinkdb.can_connect', self.OK, tags=tags)
 
-    def __submit_metric(self, metric):
+    def submit_metric(self, metric):
         # type: (Metric) -> None
         self.log.debug('submit_metric metric=%r', metric)
         submit = getattr(self, metric['type'])  # type: Callable
