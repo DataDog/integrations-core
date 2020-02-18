@@ -38,11 +38,11 @@ instances:
     #
     # tag_families: false
 
-    ## @param disable_node_metrics - boolean - optional - default: false
-    ## Use the disable_node_metrics paramater if you'd like to collect all
-    ## metrics except the ones pertaining to nodes
+    ## @param collect_node_metrics - boolean - optional - default: true
+    ## Use the collect_node_metrics paramater if you'd like to collect
+    ## metrics pertaining to nodes
     #
-    # disable_node_metrics: false
+    # collect_node_metrics: true
 
     ## @param nodes - list of strings - optional
     ## Use the `nodes` parameters to specify the nodes you'd like to
