@@ -31,6 +31,7 @@ class VSphereConfig(object):
         self.password = instance['password']
         self.ssl_verify = is_affirmative(instance.get('ssl_verify', True))
         self.ssl_capath = instance.get('ssl_capath')
+        self.tls_ignore_warning = instance.get('tls_ignore_warning', False)
 
         # vSphere options
         self.collection_level = instance.get("collection_level", 1)
