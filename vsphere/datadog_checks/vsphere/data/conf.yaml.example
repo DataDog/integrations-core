@@ -149,8 +149,8 @@ instances:
     #
     # collect_tags: false
 
-    ## @param vsphere_tags_prefix - boolean - optional - default: ''
-    ## Tags coming from vSphere will be prefixed with this prefix.
+    ## @param tags_prefix - boolean - optional - default: ''
+    ## Custom tags attached to vSphere resources will be prefixed with this prefix when collected.
     ## Example use cases:
     ##   - You have vSphere tags that might conflict with tags added by this integration or the Datadog Agent
     ##   - You want a prefix to better recognise tags coming from vSphere
@@ -160,7 +160,7 @@ instances:
     ## It's not recommend to use `vsphere_` as prefix, since it's already used by this integration
     ## e.g. vsphere_host, vsphere_type, etc.
     #
-    # vsphere_tags_prefix: ''
+    # tags_prefix: ''
 
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name
