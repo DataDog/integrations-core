@@ -209,7 +209,7 @@ class SnmpCheck(AgentCheck):
 
     def fetch_oids(self, config, oids, enforce_constraints):
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
-        # It returns the wrong value when the OID passeed is referring to a specific leaf.
+        # It returns the wrong value when the OID passed is referring to a specific leaf.
         # For example:
         # snmpgetnext -v2c -c public localhost:11111 1.3.6.1.2.1.25.4.2.1.7.222
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
@@ -361,6 +361,7 @@ class SnmpCheck(AgentCheck):
 
             if config.all_oids or config.bulk_oids:
                 self.log.debug('Querying device %s', config.ip_address)
+                config.add_uptime_metric()
                 results, error = self.fetch_results(config, config.all_oids, config.bulk_oids)
                 self.report_metrics(config.parsed_metrics, results, config.tags)
         except CheckException as e:
