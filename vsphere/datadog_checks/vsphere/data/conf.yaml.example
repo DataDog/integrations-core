@@ -62,7 +62,7 @@ instances:
     # ssl_capath: "<DIRECTORY_PATH>"
 
     ## @param tls_ignore_warning - boolean - optional - default: false
-    ## If `tls_verify` is disabled, security warnings are logged by the check when making http requests.
+    ## If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
     ## Disable those by setting `tls_ignore_warning` to true.
     #
     # tls_ignore_warning: false
