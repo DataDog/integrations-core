@@ -1435,3 +1435,124 @@ def test_dell_poweredge(aggregator):
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_hp_ilo4(aggregator):
+    instance = common.generate_instance_config([])
+    instance['community_string'] = 'hp_ilo4'
+    instance['profile'] = 'hp-ilo4'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    definition_file_path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'hp-ilo4.yaml')
+    init_config = {'profiles': {'hp-ilo4': {'definition_file': definition_file_path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    status_gauges = [
+        'cpqHeCritLogCondition',
+        'cpqHeCorrMemLogStatus',
+        'cpqHeCorrMemLogCondition',
+        'cpqHeAsrStatus',
+        'cpqHeAsrPost',
+        'cpqHeAsrCondition',
+        'cpqHeAsrNetworkAccessStatus',
+        'cpqHeThermalCondition',
+        'cpqHeThermalTempStatus',
+        'cpqHeThermalSystemFanStatus',
+        'cpqHeThermalCpuFanStatus',
+        'cpqNicVtVirusActivity',
+        'cpqSm2CntlrServerPowerState',
+        'cpqSm2CntlrBatteryStatus',
+        'cpqSm2CntlrRemoteSessionStatus',
+        'cpqSm2CntlrInterfaceStatus',
+    ]
+
+    cpqhlth_counts = ['cpqHeSysUtilLifeTime', 'cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
+
+    cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin', 'cpqHePowerMeterCurrReading']
+
+    cpqsm2_gauges = [
+        'cpqSm2CntlrBatteryPercentCharged',
+        'cpqSm2CntlrSelfTestErrors',
+        'cpqSm2EventTotalEntries',
+    ]
+
+    EMBEDDED = 2
+    PCMCIA = 3
+    card_locations = [EMBEDDED, PCMCIA]
+    network_card_counts = [
+        'cpqSm2NicXmitBytes',
+        'cpqSm2NicXmitTotalPackets',
+        'cpqSm2NicXmitDiscardPackets',
+        'cpqSm2NicXmitErrorPackets',
+        'cpqSm2NicXmitQueueLength',
+        'cpqSm2NicRecvBytes',
+        'cpqSm2NicRecvTotalPackets',
+        'cpqSm2NicRecvDiscardPackets',
+        'cpqSm2NicRecvErrorPackets',
+        'cpqSm2NicRecvUnknownPackets',
+    ]
+
+    interfaces = ['eth0', 'en1']
+    phys_adapter_counts = [
+        'cpqNicIfPhysAdapterGoodTransmits',
+        'cpqNicIfPhysAdapterGoodReceives',
+        'cpqNicIfPhysAdapterBadTransmits',
+        'cpqNicIfPhysAdapterBadReceives',
+        'cpqNicIfPhysAdapterInOctets',
+        'cpqNicIfPhysAdapterOutOctets',
+    ]
+    phys_adapter_gauges = ['cpqNicIfPhysAdapterSpeed', 'cpqNicIfPhysAdapterSpeedMbps']
+
+    temperature_sensors = [1, 13, 28]
+    batteries = [1, 3, 4, 5]
+
+    for metric in status_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in cpqhlth_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in cpqhlth_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in cpqsm2_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+
+    for index in temperature_sensors:
+        tags = ['temperature_index:{}'.format(index)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.cpqHeTemperatureCelsius', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.cpqHeTemperatureCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for index in batteries:
+        tags = ['battery_index:{}'.format(index)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.cpqHeSysBatteryCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.cpqHeSysBatteryStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for location in card_locations:
+        tags = ['nic_stats_location:{}'.format(location)] + common.CHECK_TAGS
+        for metric in network_card_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        for metric in phys_adapter_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in phys_adapter_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
