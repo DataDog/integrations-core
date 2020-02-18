@@ -61,6 +61,12 @@ instances:
     #
     # ssl_capath: "<DIRECTORY_PATH>"
 
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If `tls_verify` is disabled, security warnings are logged by the check when making http requests.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    #
+    # tls_ignore_warning: false
+
     ## @param resource_filters - list of objects - optional - default: no filter
     ## Each filter in the list is composed of three parameters.
     ## 'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter
