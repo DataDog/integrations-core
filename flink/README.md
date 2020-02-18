@@ -60,7 +60,7 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent >6.0_
 
 1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties`, `log4j-cli.properties`, `log4j-yarn-session.properties`, or `log4j-console.properties files`. See [flink's defaults][13] for default configurations. For example, a `log4j.properties` would contain this configuration by default:
 
