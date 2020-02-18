@@ -107,16 +107,16 @@ class PgBouncer(AgentCheck):
             # Use ident method
             return {'dsn': "user={} dbname={}".format(self.user, self.DB_NAME)}
 
-        if self.port:
-            return {
+        args = {
                 'host': self.host,
                 'user': self.user,
                 'password': self.password,
                 'database': self.DB_NAME,
-                'port': self.port,
             }
+        if self.port:
+            args['port'] = self.port
 
-        return {'host': self.host, 'user': self.user, 'password': self.password, 'database': self.DB_NAME}
+        return args
 
     def _get_connection(self, use_cached=None):
         """Get and memoize connections to instances"""
@@ -125,14 +125,8 @@ class PgBouncer(AgentCheck):
             return self.connection
         try:
             connect_kwargs = self._get_connect_kwargs()
-
             connection = pg.connect(**connect_kwargs)
             connection.set_isolation_level(pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-
-        # re-raise the CheckExceptions raised by _get_connect_kwargs()
-        except CheckException:
-            raise
-
         except Exception:
             redacted_url = self._get_redacted_dsn()
             message = u'Cannot establish connection to {}'.format(redacted_url)
