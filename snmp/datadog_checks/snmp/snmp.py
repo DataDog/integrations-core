@@ -281,13 +281,13 @@ class SnmpCheck(AgentCheck):
 
     def _profiles_for_sysobject_oid(self, sys_object_oid):
         # type: (str) -> List[str]
-        """Return all profiles that match the given sys_object_id."""
-        oids = [oid for oid in self.profiles_by_oid if fnmatch.fnmatch(sys_object_oid, oid)]
+        """Return all profiles that match the given sysObjectID."""
+        profiles = [profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)]
 
-        if not oids:
+        if not profiles:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
 
-        return [self.profiles_by_oid[oid] for oid in oids]
+        return profiles
 
     def _consume_binds_iterator(self, binds_iterator, config):
         all_binds = []
