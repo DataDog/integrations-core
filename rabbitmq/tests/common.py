@@ -32,7 +32,7 @@ CONFIG_NO_NODES = {
     'queues': ['test1'],
     'tags': ["tag1:1", "tag2"],
     'exchanges': ['test1'],
-    'disable_node_metrics': True,
+    'collect_node_metrics': False,
 }
 
 CONFIG_REGEX = {

@@ -150,9 +150,10 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
 
 
 @pytest.mark.unit
-def test_nodes_unit(aggregator, check):
+def test_nodes(aggregator, check):
 
     # default, node metrics are collected
+    check = RabbitMQ('rabbitmq', {}, instances=[common.CONFIG])
     check.check(common.CONFIG)
 
     for m in metrics.COMMON_METRICS:
@@ -160,7 +161,12 @@ def test_nodes_unit(aggregator, check):
 
     aggregator.reset()
 
+
+@pytest.mark.unit
+def test_disable_nodes(aggregator, check):
+
     # node metrics collection disabled in config, node metrics should not appear
+    check = RabbitMQ('rabbitmq', {}, instances=[common.CONFIG_NO_NODES])
     check.check(common.CONFIG_NO_NODES)
 
     for m in metrics.COMMON_METRICS:

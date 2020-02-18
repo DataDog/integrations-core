@@ -159,7 +159,7 @@ class RabbitMQ(AgentCheck):
         if not base_url.endswith('/'):
             base_url += '/'
 
-        disable_nodes = instance.get('disable_node_metrics')
+        collect_nodes = instance.get('collect_node_metrics', True)
         custom_tags = instance.get('tags', [])
         parsed_url = urlparse(base_url)
         if not parsed_url.scheme or "://" not in parsed_url.geturl():
@@ -200,7 +200,7 @@ class RabbitMQ(AgentCheck):
                 if type(filter_objects) != list:
                     raise TypeError("{0} / {0}_regexes parameter must be a list".format(object_type))
 
-        return base_url, max_detailed, specified, custom_tags, suppress_warning, disable_nodes
+        return base_url, max_detailed, specified, custom_tags, suppress_warning, collect_nodes
 
     def _collect_metadata(self, base_url):
         # Rabbit versions follow semantic versioning https://www.rabbitmq.com/changelog.html
@@ -228,7 +228,7 @@ class RabbitMQ(AgentCheck):
         return vhosts
 
     def check(self, instance):
-        base_url, max_detailed, specified, custom_tags, suppress_warning, disable_node_metrics = self._get_config(
+        base_url, max_detailed, specified, custom_tags, suppress_warning, collect_node_metrics = self._get_config(
             instance
         )
         try:
@@ -264,7 +264,7 @@ class RabbitMQ(AgentCheck):
                     limit_vhosts,
                     custom_tags,
                 )
-                if not disable_node_metrics:
+                if collect_node_metrics:
                     self.get_stats(
                         instance,
                         base_url,
