@@ -1,64 +1,77 @@
 {
     "spec": "Folder",
     "name": "Datacenters",
+    "mo_id": "Datacenters-1",
     "children": [
         {
             "spec": "Datacenter",
             "name": "Dätacenter",
+            "mo_id": "Dätacenter-1",
             "children": [
                 {
                     "spec": "Folder",
                     "name": "vm",
+                    "mo_id": "vm-1",
                     "children": [
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-4",
+                            "mo_id": "VM1-4-1",
                             "runtime.powerState": "off"
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-6ê",
+                            "mo_id": "VM1-6ê-1",
                             "runtime.powerState": "off",
                             "guest.hostName": "ubuntu-test"
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM2-1",
+                            "mo_id": "VM2-1-1",
                             "runtime.powerState": "off"
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-3",
+                            "mo_id": "VM1-3-1",
                             "runtime.powerState": "off"
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM2-2",
+                            "mo_id": "VM2-2-1",
                             "runtime.powerState": "off"
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-5",
+                            "mo_id": "VM1-5-1",
                             "runtime.powerState": "off"
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-2",
+                            "mo_id": "VM1-2-1",
                             "runtime.powerState": "off"
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM-0",
+                            "mo_id": "VM-0-1",
                             "runtime.powerState": "off"
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "migrationTest",
+                            "mo_id": "migrationTest-1",
                             "runtime.powerState": "off"
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-1ä",
+                            "mo_id": "VM1-1ä-1",
                             "runtime.powerState": "off"
                         }
                     ]
@@ -66,18 +79,22 @@
                 {
                     "spec": "Folder",
                     "name": "host",
+                    "mo_id": "host-1",
                     "children": [
                         {
                             "spec": "ClusterComputeResource",
                             "name": "Cluster2",
+                            "mo_id": "Cluster2-1",
                             "children": [
                                 {
                                     "spec": "HostSystem",
-                                    "name": "10.0.0.101"
+                                    "name": "10.0.0.101",
+                                    "mo_id": "10.0.0.101-1"
                                 },
                                 {
                                     "spec": "HostSystem",
-                                    "name": "10.0.0.102"
+                                    "name": "10.0.0.102",
+                                    "mo_id": "10.0.0.102-1"
                                 }
                             ]
                         }
@@ -86,22 +103,27 @@
                 {
                     "spec": "Folder",
                     "name": "datastore",
+                    "mo_id": "datastore-1",
                     "children": [
                         {
                             "spec": "Datastore",
-                            "name": "NFS Share"
+                            "name": "NFS Share",
+                            "mo_id": "NFS Share-1"
                         },
                         {
                             "spec": "StoragePod",
                             "name": "Datastores",
+                            "mo_id": "Datastores-1",
                             "children": [
                                 {
                                     "spec": "Datastore",
-                                    "name": "Datastore 1"
+                                    "name": "Datastore 1",
+                                    "mo_id": "Datastore-1-1"
                                 },
                                 {
                                     "spec": "Datastore",
-                                    "name": "Datastore 2"
+                                    "name": "Datastore 2",
+                                    "mo_id": "Datastore-2-1"
                                 }
                             ]
                         }
@@ -109,151 +131,177 @@
                 },
                 {
                     "spec": "Folder",
-                    "name": "network"
+                    "name": "network",
+                    "mo_id": "network-1"
                 }
             ]
         },
         {
             "spec": "Datacenter",
             "name": "Datacenter2",
+            "mo_id": "Datacenter2-1",
             "children": [
                 {
                     "spec": "Folder",
                     "name": "vm",
+                    "mo_id": "vm-1",
                     "children": [
                         {
                             "spec": "Folder",
                             "name": "Discovered virtual machine",
+                            "mo_id": "Discovered virtual machine-1",
                             "children": [
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-2",
+                                    "mo_id": "VM4-2-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-20",
+                                    "mo_id": "VM4-20-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-4",
+                                    "mo_id": "VM4-4-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-14",
+                                    "mo_id": "VM4-14-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-9",
+                                    "mo_id": "VM4-9-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-15",
+                                    "mo_id": "VM4-15-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-5",
+                                    "mo_id": "VM4-5-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-3",
+                                    "mo_id": "VM4-3-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-12",
+                                    "mo_id": "VM4-12-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-11",
+                                    "mo_id": "VM4-11-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-6",
+                                    "mo_id": "VM4-6-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-13",
+                                    "mo_id": "VM4-13-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-1",
+                                    "mo_id": "VM4-1-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-19",
+                                    "mo_id": "VM4-19-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-18",
+                                    "mo_id": "VM4-18-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-7",
+                                    "mo_id": "VM4-7-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-17",
+                                    "mo_id": "VM4-17-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-10",
+                                    "mo_id": "VM4-10-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-16",
+                                    "mo_id": "VM4-16-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-8",
+                                    "mo_id": "VM4-8-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.104"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM3-1",
+                                    "mo_id": "VM3-1-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.103"
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "$VM3-2",
+                                    "mo_id": "$VM3-2-1",
                                     "runtime.powerState": "on",
                                     "runtime.host": "10.0.0.103"
                                 }
@@ -262,6 +310,7 @@
                         {
                             "spec": "VirtualMachine",
                             "name": "$VM5",
+                            "mo_id": "$VM5-1",
                             "runtime.powerState": "on",
                             "runtime.host": "10.0.0.103"
                         }
@@ -270,58 +319,70 @@
                 {
                     "spec": "Folder",
                     "name": "host",
+                    "mo_id": "host-1",
                     "children": [
                         {
                             "spec": "ClusterComputeResource",
                             "name": "Cluster2",
+                            "mo_id": "Cluster2-1",
                             "children": [
                                 {
                                     "spec": "HostSystem",
-                                    "name": "10.0.0.103"
+                                    "name": "10.0.0.103",
+                                    "mo_id": "10.0.0.103-1"
                                 },
                                 {
                                     "spec": "HostSystem",
-                                    "name": "10.0.0.104"
+                                    "name": "10.0.0.104",
+                                    "mo_id": "10.0.0.104-1"
                                 }
                             ]
                         },
                         {
                             "spec": "ClusterComputeResource",
-                            "name": "datastore-cluster"
+                            "name": "datastore-cluster",
+                            "mo_id": "datastore-cluster-1"
                         },
                         {
                             "spec": "Folder",
-                            "name": "test"
+                            "name": "test",
+                            "mo_id": "test-1"
                         }
                     ]
                 },
                 {
                     "spec": "Folder",
                     "name": "datastore",
+                    "mo_id": "datastore-1",
                     "children": [
                         {
                             "spec": "Datastore",
-                            "name": "NFS Share"
+                            "name": "NFS Share",
+                            "mo_id": "NFS-Share-1"
                         },
                         {
                             "spec": "Datastore",
-                            "name": "Datastore 3"
+                            "name": "Datastore 3",
+                            "mo_id": "Datastore 3-1"
                         },
                         {
                             "spec": "Datastore",
-                            "name": "Datastore 4"
+                            "name": "Datastore 4",
+                            "mo_id": "Datastore 4-1"
                         }
                     ]
                 },
                 {
                     "spec": "Folder",
-                    "name": "network"
+                    "name": "network",
+                    "mo_id": "network-1"
                 }
             ]
         },
         {
             "spec": "Folder",
-            "name": "test"
+            "name": "test",
+            "mo_id": "test-1"
         }
     ]
 }
