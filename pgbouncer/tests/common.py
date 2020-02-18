@@ -4,7 +4,6 @@
 import re
 
 import psycopg2
-from datadog_checks.pgbouncer import PgBouncer
 
 from datadog_checks.utils.common import get_docker_hostname
 

@@ -7,7 +7,7 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
-from datadog_checks.errors import CheckException, ConfigurationError
+from datadog_checks.errors import ConfigurationError
 from datadog_checks.pgbouncer.metrics import DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
 
 
@@ -108,11 +108,11 @@ class PgBouncer(AgentCheck):
             return {'dsn': "user={} dbname={}".format(self.user, self.DB_NAME)}
 
         args = {
-                'host': self.host,
-                'user': self.user,
-                'password': self.password,
-                'database': self.DB_NAME,
-            }
+            'host': self.host,
+            'user': self.user,
+            'password': self.password,
+            'database': self.DB_NAME,
+        }
         if self.port:
             args['port'] = self.port
 
