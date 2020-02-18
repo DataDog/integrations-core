@@ -380,12 +380,12 @@ class InstanceConfig:
         oids = []
         parsed_metric_tags = []
         for tag in metric_tags:
-            if not ('symbol' in tag and 'name' in tag):
-                raise ConfigurationError("A metric tag needs to specify a symbol and a name: {}".format(tag))
+            if not ('symbol' in tag and 'tag' in tag):
+                raise ConfigurationError("A metric tag needs to specify a symbol and a tag: {}".format(tag))
             if not ('OID' in tag or 'MIB' in tag):
                 raise ConfigurationError("A metric tag needs to specify an OID or a MIB: {}".format(tag))
             symbol = tag['symbol']
-            tag_name = tag['name']
+            tag_name = tag['tag']
             if 'MIB' in tag:
                 mib = tag['MIB']
                 identity = hlapi.ObjectIdentity(mib, symbol)

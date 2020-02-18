@@ -386,8 +386,8 @@ class SnmpCheck(AgentCheck):
     def extract_metric_tags(self, metric_tags, results):
         extracted_tags = []
         for tag in metric_tags:
-            result = list(results[tag.symbol].items())[0]
-            extracted_tags.append('{}:{}'.format(tag.name, result[1]))
+            [(_, tag_value)] = list(results[tag.symbol].items())
+            extracted_tags.append('{}:{}'.format(tag.name, tag_value))
         return extracted_tags
 
     def report_metrics(self, metrics, results, tags):

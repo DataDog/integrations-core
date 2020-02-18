@@ -309,14 +309,14 @@ instances:
     ##
     ## - MIB: SNMPv2-MIB
     ##   symbol: sysName
-    ##   name: snmp_host
+    ##   tag: snmp_host
     ##
     ## Or:
     ##
     ## - OID: 1.3.6.1.2.1.1.5
-    ##   name: snmp_host
+    ##   tag: snmp_host
     #
     # metric_tags:
     #  - MIB: SNMPv2-MIB
     #    symbol: sysName
-    #    name: snmp_host
+    #    tag: snmp_host
