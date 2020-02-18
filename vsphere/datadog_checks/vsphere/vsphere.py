@@ -416,7 +416,8 @@ class VSphereCheck(AgentCheck):
                 if not hostname:
                     continue
 
-                tags = [t for t in mor_props['tags'] if t.split(':')[0] not in self.config.excluded_host_tags]
+                mor_tags = mor_props['tags'] + self.tags_cache.get_mor_tags(mor)
+                tags = [t for t in mor_tags if t.split(':')[0] not in self.config.excluded_host_tags]
                 tags.extend(self.config.base_tags)
                 external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
 

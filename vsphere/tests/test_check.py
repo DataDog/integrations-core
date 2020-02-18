@@ -11,6 +11,7 @@ from mock import MagicMock
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
+from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.config import VSphereConfig
 
 from .common import HERE
@@ -49,11 +50,15 @@ def test_historical_metrics(aggregator, dd_run_check, historical_instance):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("mock_type")
+@pytest.mark.usefixtures("mock_type", 'mock_rest_api')
 def test_external_host_tags(aggregator, realtime_instance):
+    realtime_instance['collect_tags'] = True
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     config = VSphereConfig(realtime_instance, MagicMock())
     check.api = MockedAPI(config)
+    check.api_rest = VSphereRestAPI(config, MagicMock())
+    with check.tags_cache.update():
+        check.refresh_tags_cache()
     with check.infrastructure_cache.update():
         check.refresh_infrastructure_cache()
 
