@@ -726,6 +726,115 @@ def test_different_tables(aggregator):
     aggregator.assert_metric_has_tag_prefix('snmp.ifInOctets', 'speed')
 
 
+def test_metric_tag_symbol(aggregator):
+    metrics = common.SUPPORTED_METRIC_TYPES
+    instance = common.generate_instance_config(metrics)
+    instance['metric_tags'] = [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}]
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    tags = list(common.CHECK_TAGS)
+    tags.append('snmp_host:41ba948911b9')
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_metric_tag_oid(aggregator):
+    metrics = common.SUPPORTED_METRIC_TYPES
+    instance = common.generate_instance_config(metrics)
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}]
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    tags = list(common.CHECK_TAGS)
+    tags.append('snmp_host:41ba948911b9')
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_metric_tag_profile_manual(aggregator):
+    instance = common.generate_instance_config([])
+    instance['profile'] = 'profile1'
+    definition = {
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+        'metrics': common.SUPPORTED_METRIC_TYPES,
+    }
+    init_config = {'profiles': {'profile1': {'definition': definition}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    tags = list(common.CHECK_TAGS)
+    tags.append('snmp_host:41ba948911b9')
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_metric_tag_profile_sysoid(aggregator):
+    instance = common.generate_instance_config([])
+    definition = {
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+        'metrics': common.SUPPORTED_METRIC_TYPES,
+        'sysobjectid': '1.3.6.1.4.1.8072.3.2.10',
+    }
+    init_config = {'profiles': {'profile1': {'definition': definition}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    tags = list(common.CHECK_TAGS)
+    tags.append('snmp_host:41ba948911b9')
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_metric_tags_misconfiguration():
+    metrics = common.SUPPORTED_METRIC_TYPES
+    instance = common.generate_instance_config(metrics)
+
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'tag': 'snmp_host'}]
+    with pytest.raises(ConfigurationError):
+        common.create_check(instance)
+
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName'}]
+    with pytest.raises(ConfigurationError):
+        common.create_check(instance)
+
+    instance['metric_tags'] = [{'tag': 'sysName', 'symbol': 'sysName'}]
+    with pytest.raises(ConfigurationError):
+        common.create_check(instance)
+
+
 def test_f5(aggregator):
     instance = common.generate_instance_config([])
     # We need the full path as we're not in installed mode
