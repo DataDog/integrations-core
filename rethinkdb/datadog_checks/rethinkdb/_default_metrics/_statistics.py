@@ -14,7 +14,7 @@ from typing import Iterator
 
 import rethinkdb
 
-from .._queries import query_cluster_stats, query_replica_stats, query_servers_with_stats, query_tables_with_stats
+from .._queries import query_cluster_stats, query_replicas_with_stats, query_servers_with_stats, query_tables_with_stats
 from .._types import Metric
 
 logger = logging.getLogger(__name__)
@@ -145,7 +145,7 @@ def collect_table_statistics(conn):
 
 def collect_replica_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
-    for table, server, stats in query_replica_stats(conn):
+    for table, server, stats in query_replicas_with_stats(conn):
         logger.debug('replica_statistics table=%r server=%r stats=%r', table, server, stats)
 
         database = stats['db']

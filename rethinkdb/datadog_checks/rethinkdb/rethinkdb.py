@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from typing import Any, Callable, Iterator, List
 
 import rethinkdb
+from rethinkdb import r
 
 from datadog_checks.base import AgentCheck
 
@@ -34,7 +35,7 @@ class RethinkDBCheck(AgentCheck):
         service_check_tags = []  # type: List[str]
 
         try:
-            with rethinkdb.r.connect(db='rethinkdb', host=host, port=port) as conn:
+            with r.connect(host=host, port=port) as conn:
                 server = conn.server()  # type: ConnectionServer
                 self.log.debug('connected server=%r', server)
                 service_check_tags.append('server:{}'.format(server['name']))

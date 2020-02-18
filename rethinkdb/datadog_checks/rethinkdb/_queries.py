@@ -1,12 +1,20 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""
+Definition of RethinkDB queries used by the RethinkDB integration.
+
+Useful reference documentation:
+- Python ReQL command reference: https://rethinkdb.com/api/python/
+- Usage of `eq_join`: https://rethinkdb.com/api/python/eq_join/
+"""
 
 from __future__ import absolute_import
 
 from typing import Iterator, Tuple
 
 import rethinkdb
+from rethinkdb import r
 
 from ._types import (
     ClusterStats,
@@ -27,7 +35,7 @@ def query_cluster_stats(conn):
     """
     Retrieve statistics about the cluster.
     """
-    return rethinkdb.r.table('stats').get(['cluster']).run(conn)
+    return r.db('rethinkdb').table('stats').get(['cluster']).run(conn)
 
 
 def query_servers_with_stats(conn):
@@ -35,24 +43,19 @@ def query_servers_with_stats(conn):
     """
     Retrieve each server in the cluster along with its statistics.
     """
-
-    # See: https://rethinkdb.com/api/python/eq_join/
-
     # For servers: stats['id'] = ['server', '<SERVER_ID>']
-    is_server_stats_row = rethinkdb.r.row['id'].nth(0) == 'server'
-    server_id = rethinkdb.r.row['id'].nth(1)
+    is_server_stats_row = r.row['id'].nth(0) == 'server'
+    server_id = r.row['id'].nth(1)
 
-    rows = (
-        rethinkdb.r.table('stats')
-        .filter(is_server_stats_row)
-        .eq_join(server_id, rethinkdb.r.table('server_config'))
-        .run(conn)
-    )  # type: Iterator[JoinRow]
+    stats = r.db('rethinkdb').table('stats')
+    server_config = r.db('rethinkdb').table('server_config')
+
+    rows = stats.filter(is_server_stats_row).eq_join(server_id, server_config).run(conn)  # type: Iterator[JoinRow]
 
     for row in rows:
-        stats = row['left']  # type: ServerStats
+        server_stats = row['left']  # type: ServerStats
         server = row['right']  # type: Server
-        yield server, stats
+        yield server, server_stats
 
 
 def query_tables_with_stats(conn):
@@ -60,54 +63,49 @@ def query_tables_with_stats(conn):
     """
     Retrieve each table in the cluster along with its statistics.
     """
-
-    # See: https://rethinkdb.com/api/python/eq_join/
-
     # For tables: stats['id'] = ['table', '<TABLE_ID>']
+    is_table_stats_row = r.row['id'].nth(0) == 'table'
+    table_id = r.row['id'].nth(1)
 
-    is_table_stats_row = rethinkdb.r.row['id'].nth(0) == 'table'
-    table_id = rethinkdb.r.row['id'].nth(1)
+    stats = r.db('rethinkdb').table('stats')
+    table_config = r.db('rethinkdb').table('table_config')
 
-    rows = (
-        rethinkdb.r.table('stats')
-        .filter(is_table_stats_row)
-        .eq_join(table_id, rethinkdb.r.table('table_config'))
-        .run(conn)
-    )  # type: Iterator[JoinRow]
+    rows = stats.filter(is_table_stats_row).eq_join(table_id, table_config).run(conn)  # type: Iterator[JoinRow]
 
     for row in rows:
-        stats = row['left']  # type: TableStats
+        table_stats = row['left']  # type: TableStats
         table = row['right']  # type: Table
-        yield table, stats
+        yield table, table_stats
 
 
-def query_replica_stats(conn):
+def query_replicas_with_stats(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Table, Server, ReplicaStats]]
     """
     Retrieve each replica (table/server pair) in the cluster along with its statistics.
     """
 
     # For replicas: stats['id'] = ['table_server', '<TABLE_ID>', 'SERVER_ID']
+    is_table_server_stats_row = r.row['id'].nth(0) == 'table_server'
+    table_id = r.row['id'].nth(1)
+    server_id = r.row['left']['id'].nth(2)
 
-    is_table_server_stats_row = rethinkdb.r.row['id'].nth(0) == 'table_server'
-    table_id = rethinkdb.r.row['id'].nth(1)
-    server_id = rethinkdb.r.row['left']['id'].nth(2)
+    stats = r.db('rethinkdb').table('stats')
+    server_config = r.db('rethinkdb').table('server_config')
+    table_config = r.db('rethinkdb').table('table_config')
 
     rows = (
-        rethinkdb.r.table('stats')
-        .filter(is_table_server_stats_row)
-        .eq_join(table_id, rethinkdb.r.table('table_config'))
-        .eq_join(server_id, rethinkdb.r.table('server_config'))
-        # TODO: filter entries where
+        stats.filter(is_table_server_stats_row)
+        .eq_join(table_id, table_config)
+        .eq_join(server_id, server_config)
         .run(conn)
     )  # type: Iterator[JoinRow]
 
     for row in rows:
         join_row = row['left']  # type: JoinRow
-        stats = join_row['left']  # type: ReplicaStats
+        replica_stats = join_row['left']  # type: ReplicaStats
         table = join_row['right']  # type: Table
         server = row['right']  # type: Server
-        yield table, server, stats
+        yield table, server, replica_stats
 
 
 def query_table_status(conn):
@@ -115,7 +113,7 @@ def query_table_status(conn):
     """
     Retrieve the status of each table in the cluster.
     """
-    return rethinkdb.r.table('table_status').run(conn)
+    return r.db('rethinkdb').table('table_status').run(conn)
 
 
 def query_server_status(conn):
@@ -123,7 +121,7 @@ def query_server_status(conn):
     """
     Retrieve the status of each server in the cluster.
     """
-    return rethinkdb.r.table('server_status').run(conn)
+    return r.db('rethinkdb').table('server_status').run(conn)
 
 
 def query_system_jobs(conn):
@@ -131,4 +129,4 @@ def query_system_jobs(conn):
     """
     Retrieve all the currently running system jobs.
     """
-    return rethinkdb.r.table('jobs').run(conn)
+    return r.db('rethinkdb').table('jobs').run(conn)
