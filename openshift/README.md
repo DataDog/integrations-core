@@ -32,7 +32,7 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 | Live Process monitoring        | ❌                                       | ❌                                           | ✅                                             |
 
 <div class="alert alert-warning">
-<bold>OpenShift 4.0+</bold>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags/aliases as access to metadata servers from PODs network, which otherwise is restricted.
+<bold>OpenShift 4.0+</bold>: If you used the OpenShift installer on a supported cloud provider, you must deploy the Agent with <code>hostNetwork: true</code> in the <code>datadog.yaml</code> configuration file to get host tags and aliases. Access to metadata servers from the PODs network is otherwise restricted.
 </div>
 
 #### Restricted SCC operations
