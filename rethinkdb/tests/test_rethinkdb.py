@@ -137,7 +137,9 @@ def test_cannot_connect_unknown_host(aggregator, instance):
     instance['host'] = 'doesnotexist'
 
     check = RethinkDBCheck('rethinkdb', {}, [instance])
-    check.check(instance)
+
+    with pytest.raises(rethinkdb.errors.ReqlDriverError):
+        check.check(instance)
 
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=[])
 
@@ -146,14 +148,19 @@ def test_cannot_connect_unknown_host(aggregator, instance):
 @pytest.mark.usefixtures('dd_environment')
 def test_connected_but_check_failed(aggregator, instance):
     # type: (AggregatorStub, Instance) -> None
+    class Failure(Exception):
+        pass
+
     def collect_and_fail(conn):
         # type: (rethinkdb.net.Connection) -> Iterator[Metric]
         yield {'type': 'gauge', 'name': 'rethinkdb.some.metric', 'value': 42, 'tags': []}
-        raise RuntimeError('Oops!')
+        raise Failure
 
     check = RethinkDBCheck('rethinkdb', {}, [instance])
-    check.config.metric_streams.append(collect_and_fail)
-    check.check(instance)
+    check.config.metric_streams = [collect_and_fail]
+
+    with pytest.raises(Failure):
+        check.check(instance)
 
     service_check_tags = ['server:{}'.format(CONNECT_SERVER_NAME)]
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=service_check_tags)

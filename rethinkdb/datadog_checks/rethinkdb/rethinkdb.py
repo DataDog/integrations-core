@@ -28,6 +28,35 @@ class RethinkDBCheck(AgentCheck):
         super(RethinkDBCheck, self).__init__(*args, **kwargs)
         self.config = Config(self.instance)
 
+    @contextmanager
+    def connect(self, host, port):
+        # type: (str, int) -> Iterator[rethinkdb.net.Connection]
+        service_check_tags = []  # type: List[str]
+
+        try:
+            with rethinkdb.r.connect(db='rethinkdb', host=host, port=port) as conn:
+                server = conn.server()  # type: ConnectionServer
+                self.log.debug('connected server=%r', server)
+                service_check_tags.append('server:{}'.format(server['name']))
+                yield conn
+        except rethinkdb.errors.ReqlDriverError as exc:
+            self.log.error('Could not connect to RethinkDB server: %r', exc)
+            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=service_check_tags)
+            raise
+        except Exception as exc:
+            self.log.error('Unexpected error while executing RethinkDB check: %r', exc)
+            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=service_check_tags)
+            raise
+        else:
+            self.log.debug('service_check OK')
+            self.service_check('rethinkdb.can_connect', self.OK, tags=service_check_tags)
+
+    def submit_metric(self, metric):
+        # type: (Metric) -> None
+        self.log.debug('submit_metric metric=%r', metric)
+        submit = getattr(self, metric['type'])  # type: Callable
+        submit(metric['name'], value=metric['value'], tags=metric['tags'])
+
     def check(self, instance):
         # type: (Instance) -> None
         config = self.config
@@ -37,48 +66,10 @@ class RethinkDBCheck(AgentCheck):
         port = config.port
         metric_streams = config.metric_streams
 
-        with self.submit_service_check() as on_connection_established:
-            with rethinkdb.r.connect(db='rethinkdb', host=host, port=port) as conn:
-                on_connection_established(conn)
-                for metric_stream in metric_streams:
-                    for metric in metric_stream(conn):
-                        self.submit_metric(metric)
-
-    def __collect_metrics(self, conn):
-        # type: (rethinkdb.net.Connection) -> Iterator[Metric]
-        for collect in self._metric_collectors:
-            for metric in collect(conn):
-                yield metric
-
-    @contextmanager
-    def submit_service_check(self):
-        # type: () -> Iterator[Callable[[rethinkdb.net.Connection], None]]
-        tags = []  # type: List[str]
-
-        def on_connection_established(conn):
-            # type: (rethinkdb.net.Connection) -> None
-            server = conn.server()  # type: ConnectionServer
-            self.log.debug('connected server=%r', server)
-            tags.append('server:{}'.format(server['name']))
-            # TODO: add a 'proxy' tag if server is a proxy?
-
-        try:
-            yield on_connection_established
-        except rethinkdb.errors.ReqlDriverError as exc:
-            self.log.error('Could not connect to RethinkDB server: %r', exc)
-            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=tags)
-        except Exception as exc:
-            self.log.error('Unexpected error while executing RethinkDB check: %r', exc)
-            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=tags)
-        else:
-            self.log.debug('service_check OK')
-            self.service_check('rethinkdb.can_connect', self.OK, tags=tags)
-
-    def submit_metric(self, metric):
-        # type: (Metric) -> None
-        self.log.debug('submit_metric metric=%r', metric)
-        submit = getattr(self, metric['type'])  # type: Callable
-        submit(metric['name'], value=metric['value'], tags=metric['tags'])
+        with self.connect(host, port) as conn:
+            for metric_stream in metric_streams:
+                for metric in metric_stream(conn):
+                    self.submit_metric(metric)
 
     # TODO: version metadata.
     # TODO: custom queries. (Hint: look at `QueryManager`.)
