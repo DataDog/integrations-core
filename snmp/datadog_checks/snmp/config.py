@@ -114,8 +114,17 @@ class InstanceConfig:
         return self._resolver.resolve_oid(oid)
 
     def refresh_with_profile(self, profile, warning, log):
-        self.metrics.extend(profile['definition']['metrics'])
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)
+        metrics = profile['definition']['metrics']
+        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
+
+        # NOTE: `profile` may contain metrics that have already been ingested in this configuration. As a result,
+        # multiple copies of metrics will be fetched and submitted to Datadog, which is inefficient and possibly
+        # problematic. In the future we'll probably want to implement de-duplication of parsed metrics.
+
+        self.metrics.extend(metrics)
+        self.all_oids.extend(all_oids)
+        self.bulk_oids.extend(bulk_oids)
+        self.parsed_metrics.extend(parsed_metrics)
 
     def call_cmd(self, cmd, *args, **kwargs):
         return cmd(self._snmp_engine, self._auth_data, self._transport, self._context_data, *args, **kwargs)
