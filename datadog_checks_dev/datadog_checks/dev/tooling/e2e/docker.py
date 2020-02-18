@@ -186,6 +186,11 @@ class DockerInterface(object):
             command.extend(('-r', f'{self.check_mount_dir}/{REQUIREMENTS_IN}'))
         run_command(command, capture=True, check=True)
 
+    def update_os_version(self):
+        command = ['docker', 'exec', self.container_name]
+        command.extend(["bash", "-c", "'echo 10 > /etc/debian_version'"])
+        run_command(command, capture=True, check=True)
+
     def update_base_package(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))

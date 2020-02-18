@@ -266,6 +266,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         if environment.ENV_TYPE == 'local' and not click.confirm(editable_warning.format(environment.check)):
             echo_success('skipping')
         else:
+            environment.update_os_version()
             environment.update_check()
             echo_success('success!')
 
