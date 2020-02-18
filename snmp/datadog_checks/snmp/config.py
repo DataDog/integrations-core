@@ -40,6 +40,15 @@ class ParsedTableMetric(object):
         self.forced_type = forced_type
 
 
+class ParsedMetricTag(object):
+
+    __slots__ = ('name', 'symbol')
+
+    def __init__(self, name, symbol):
+        self.name = name
+        self.symbol = symbol
+
+
 class InstanceConfig:
     """Parse and hold configuration about a single instance."""
 
@@ -52,6 +61,7 @@ class InstanceConfig:
         self.instance = instance
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
+        metric_tags = instance.get('metric_tags', [])
 
         profile = instance.get('profile')
 
@@ -62,6 +72,7 @@ class InstanceConfig:
             if profile not in profiles:
                 raise ConfigurationError("Unknown profile '{}'".format(profile))
             self.metrics.extend(profiles[profile]['definition']['metrics'])
+            metric_tags.extend(profiles[profile]['definition'].get('metric_tags', []))
 
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path)
@@ -105,6 +116,9 @@ class InstanceConfig:
         self._auth_data = self.get_auth_data(instance)
 
         self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)
+        tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
+        if tag_oids:
+            self.all_oids.append(tag_oids)
 
         self._context_data = hlapi.ContextData(*self.get_context_data(instance))
 
@@ -117,14 +131,23 @@ class InstanceConfig:
         metrics = profile['definition']['metrics']
         all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
 
-        # NOTE: `profile` may contain metrics that have already been ingested in this configuration. As a result,
-        # multiple copies of metrics will be fetched and submitted to Datadog, which is inefficient and possibly
-        # problematic. In the future we'll probably want to implement de-duplication of parsed metrics.
+        metric_tags = profile['definition'].get('metric_tags', [])
+        tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
+
+        # NOTE: `profile` may contain metrics and metric tags that have already been ingested in this configuration.
+        # As a result, multiple copies of metrics/tags will be fetched and submitted to Datadog, which is inefficient
+        # and possibly problematic.
+        # In the future we'll probably want to implement de-duplication.
 
         self.metrics.extend(metrics)
         self.all_oids.extend(all_oids)
         self.bulk_oids.extend(bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
+        self.parsed_metric_tags.extend(parsed_metric_tags)
+        if tag_oids:
+            # NOTE: counter-intuitively, we must '.append()' the list of tag OIDs instead of '.extend()'ing,
+            # because `.all_oids` is a list of lists of OIDs (batches).
+            self.all_oids.append(tag_oids)
 
     def call_cmd(self, cmd, *args, **kwargs):
         return cmd(self._snmp_engine, self._auth_data, self._transport, self._context_data, *args, **kwargs)
@@ -366,6 +389,29 @@ class InstanceConfig:
             all_oids.insert(0, oids)
 
         return all_oids, bulk_oids, parsed_metrics
+
+    def parse_metric_tags(self, metric_tags):
+        """Parse configuration for global metric_tags."""
+        oids = []
+        parsed_metric_tags = []
+        for tag in metric_tags:
+            if not ('symbol' in tag and 'tag' in tag):
+                raise ConfigurationError("A metric tag needs to specify a symbol and a tag: {}".format(tag))
+            if not ('OID' in tag or 'MIB' in tag):
+                raise ConfigurationError("A metric tag needs to specify an OID or a MIB: {}".format(tag))
+            symbol = tag['symbol']
+            tag_name = tag['tag']
+            if 'MIB' in tag:
+                mib = tag['MIB']
+                identity = hlapi.ObjectIdentity(mib, symbol)
+            else:
+                oid = tag['OID']
+                identity = hlapi.ObjectIdentity(oid)
+                self._resolver.register(to_oid_tuple(oid), symbol)
+            object_type = hlapi.ObjectType(identity)
+            oids.append(object_type)
+            parsed_metric_tags.append(ParsedMetricTag(tag_name, symbol))
+        return oids, parsed_metric_tags
 
     def add_uptime_metric(self):
         if self._uptime_metric_added:

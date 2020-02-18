@@ -138,6 +138,30 @@ instances:
     #   cluster:
     #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
 
+    ## @param collect_tags - boolean - optional - default: false
+    ## If true, the vSphere Tags will be collected.
+    ## The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
+    ## vSphere tag name as value:
+    ##    <TAG_CATEGORY>:<TAG_NAME>
+    ## Examples:
+    ## - os_type:windows
+    ## - application_name:my_app
+    #
+    # collect_tags: false
+
+    ## @param vsphere_tags_prefix - boolean - optional - default: ''
+    ## Tags coming from vSphere will be prefixed with this prefix.
+    ## Example use cases:
+    ##   - You have vSphere tags that might conflict with tags added by this integration or the Datadog Agent
+    ##   - You want a prefix to better recognise tags coming from vSphere
+    ## Examples with using `vtag_` prefix:
+    ## - vtag_os_type:windows            # where `os_type` is the category name and `windows` the tag name
+    ## - vtag_application_name:my_app    # where `application_name` is the category name and `my_app` the tag name
+    ## It's not recommend to use `vsphere_` as prefix, since it's already used by this integration
+    ## e.g. vsphere_host, vsphere_type, etc.
+    #
+    # vsphere_tags_prefix: ''
+
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name
     ## This requires the VM to have VMware tools installed in it. If the guest hostname is
@@ -197,6 +221,11 @@ instances:
     ## Consider increasing this value if your environment is large, as caching can take some time to complete.
     #
     # refresh_infrastructure_cache_interval: 300
+
+    ## @param refresh_tags_cache_interval - integer - optional - default: 300
+    ## Number of seconds between each refresh of the tags cache
+    #
+    # refresh_tags_cache_interval: 300
 
     ## @param refresh_metrics_metadata_cache_interval - integer - optional - default: 1800
     ## Number of seconds between each refresh of the metrics metadata cache

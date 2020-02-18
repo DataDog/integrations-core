@@ -11,7 +11,9 @@ from datadog_checks.vsphere.constants import (
     DEFAULT_METRICS_PER_QUERY,
     DEFAULT_REFRESH_INFRASTRUCTURE_CACHE_INTERVAL,
     DEFAULT_REFRESH_METRICS_METADATA_CACHE_INTERVAL,
+    DEFAULT_REFRESH_TAGS_CACHE_INTERVAL,
     DEFAULT_THREAD_COUNT,
+    DEFAULT_VSPHERE_TAG_PREFIX,
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL_RESOURCES,
     MOR_TYPE_AS_STRING,
@@ -41,6 +43,8 @@ class VSphereConfig(object):
         self.metrics_per_query = instance.get("metrics_per_query", DEFAULT_METRICS_PER_QUERY)
         self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
         self.should_collect_events = instance.get("collect_events", self.collection_type == 'realtime')
+        self.should_collect_tags = is_affirmative(instance.get("collect_tags", False))
+        self.vsphere_tags_prefix = instance.get("vsphere_tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]
         self.refresh_infrastructure_cache_interval = instance.get(
@@ -48,6 +52,9 @@ class VSphereConfig(object):
         )
         self.refresh_metrics_metadata_cache_interval = instance.get(
             'refresh_metrics_metadata_cache_interval', DEFAULT_REFRESH_METRICS_METADATA_CACHE_INTERVAL
+        )
+        self.refresh_tags_cache_interval = instance.get(
+            'refresh_tags_cache_interval', DEFAULT_REFRESH_TAGS_CACHE_INTERVAL
         )
 
         # Utility

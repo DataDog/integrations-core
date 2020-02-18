@@ -37,6 +37,7 @@ def test_lab(aggregator):
         'use_legacy_check_version': False,
         'collect_metric_instance_values': True,
         'ssl_verify': False,
+        'collect_tags': True,
     }
     check = VSphereCheck('vsphere', {}, [instance])
     check.initiate_api_connection()
