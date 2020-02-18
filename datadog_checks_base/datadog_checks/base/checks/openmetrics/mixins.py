@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from fnmatch import fnmatchcase
+from fnmatch import fnmatchcase, translate
 from math import isinf, isnan
 from os.path import isfile
+from re import compile
 
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
@@ -148,13 +149,17 @@ class OpenMetricsScraperMixin(object):
         config['ignore_metrics'] = instance.get('ignore_metrics', default_instance.get('ignore_metrics', []))
         config['_ignored_metrics'] = set()
         config['_ignored_patterns'] = set()
+        config['_ignored_re'] = None
 
         # Separate ignored metric names and ignored patterns in different sets for faster lookup later
         for metric in config['ignore_metrics']:
             if '*' in metric:
-                config['_ignored_patterns'].add(metric)
+                config['_ignored_patterns'].add(translate(metric))
             else:
                 config['_ignored_metrics'].add(metric)
+
+        if config['_ignored_patterns']:
+            config['_ignored_re'] = compile('|'.join(config['_ignored_patterns']))
 
         # If you want to send the buckets as tagged values when dealing with histograms,
         # set send_histograms_buckets to True, set to False otherwise.
@@ -522,15 +527,14 @@ class OpenMetricsScraperMixin(object):
                 )
                 return  # Ignore the metric
 
-            for ignore_pattern in scraper_config['_ignored_patterns']:
-                if fnmatchcase(metric.name, ignore_pattern):
-                    # Metric must be ignored
-                    # Cache the ignored metric name to avoid calling fnmatchcase in the next check run
-                    scraper_config['_ignored_metrics'].add(metric.name)
-                    self._send_telemetry_counter(
-                        self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
-                    )
-                    return  # Ignore the metric
+            if scraper_config['_ignored_re'] and scraper_config['_ignored_re'].search(metric.name):
+                # Metric must be ignored
+                # Cache the ignored metric name to avoid calling fnmatchcase in the next check run
+                scraper_config['_ignored_metrics'].add(metric.name)
+                self._send_telemetry_counter(
+                    self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
+                )
+                return  # Ignore the metric
 
         self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, len(metric.samples), scraper_config)
 
