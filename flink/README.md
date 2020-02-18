@@ -17,11 +17,11 @@ No additional installation is needed on your server.
 1. Configure the [Datadog HTTP Reporter][4] in Flink.
 
     Copy `<FLINK_HOME>/opt/flink-metrics-datadog-1.9.2.jar` into your `<FLINK_HOME>/lib` folder.
-    In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<API_KEY>` with your Datadog API key:
+    In your `<FLINK_HOME>/conf/flink-conf.yaml`, add these lines, replacing `<DATADOG_API_KEY>` with your Datadog [API key][10]:
 
     ```yaml
     metrics.reporter.dghttp.class: org.apache.flink.metrics.datadog.DatadogHttpReporter
-    metrics.reporter.dghttp.apikey: <API_KEY>
+    metrics.reporter.dghttp.apikey: <DATADOG_API_KEY>
     ```
 
 2. Re-map system scopes in your `<FLINK_HOME>/conf/flink-conf.yaml`.
@@ -44,7 +44,7 @@ No additional installation is needed on your server.
     metrics.reporter.dghttp.tags: <KEY1>:<VALUE1>, <KEY1>:<VALUE2>
     ```
 
-    **Note**: By default, any variables in metric names will be sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
+    **Note**: By default, any variables in metric names are sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
 
 4. Restart Flink to start sending your Flink metrics to the Agent.
 
@@ -79,3 +79,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/flink/metadata.csv
 [9]: https://docs.datadoghq.com/help
+[10]: https://app.datadoghq.com/account/settings#api
