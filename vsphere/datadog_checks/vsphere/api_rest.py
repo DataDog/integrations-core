@@ -91,7 +91,7 @@ class VSphereRestAPI(object):
         """
         Create tags using vSphere tags prefix + vSphere tag category name as key and vSphere tag name as value.
 
-            <VSPHERE_TAGS_PREFIX><TAG_CATEGORY>:<TAG_NAME>
+            <TAGS_PREFIX><TAG_CATEGORY>:<TAG_NAME>
 
         Examples:
             - os_type:windows

@@ -176,7 +176,7 @@ def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_inst
     check.log = MagicMock()
 
     with mock.patch('requests.post', side_effect=Exception, autospec=True):
-        dd_run_check(check)
+        dd_run_check(check)V
 
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='10.0.0.104')
 
