@@ -4,6 +4,8 @@
 import time
 from contextlib import contextmanager
 
+from six import iterkeys
+
 
 class VSphereCache(object):
     """
@@ -81,7 +83,7 @@ class InfrastructureCache(VSphereCache):
         return self._content.get(mor_type, {}).get(mor, default)
 
     def get_mors(self, resource_type):
-        return self._content.get(resource_type, {}).keys()
+        return iterkeys(self._content.get(resource_type, {}))
 
     def set_mor_data(self, mor, mor_data):
         mor_type = type(mor)

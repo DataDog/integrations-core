@@ -27,7 +27,9 @@ def test_realtime_metrics(aggregator, dd_run_check, realtime_instance):
     with open(fixture_file, 'r') as f:
         data = json.load(f)
         for metric in data:
-            aggregator.assert_metric(metric['name'], metric.get('value'), hostname=metric.get('hostname'))
+            aggregator.assert_metric(
+                metric['name'], metric.get('value'), hostname=metric.get('hostname'), tags=metric.get('tags')
+            )
 
     aggregator.assert_all_metrics_covered()
 

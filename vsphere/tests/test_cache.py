@@ -83,7 +83,7 @@ def test_infrastructure_cache():
             cache.set_mor_data(k, v)
 
     for r in ALL_RESOURCES_WITH_METRICS:
-        assert len(cache.get_mors(r)) == 2
+        assert len(list(cache.get_mors(r))) == 2
 
     for k, v in iteritems(mors):
         assert cache.get_mor_props(k) == v
