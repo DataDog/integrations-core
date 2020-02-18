@@ -1504,7 +1504,7 @@ def test_hp_ilo4(aggregator):
         'cpqNicIfPhysAdapterInOctets',
         'cpqNicIfPhysAdapterOutOctets',
     ]
-    phys_adapter_rates = ['cpqNicIfPhysAdapterSpeed', 'cpqNicIfPhysAdapterSpeedMbps']
+    phys_adapter_gauges = ['cpqNicIfPhysAdapterSpeed', 'cpqNicIfPhysAdapterSpeedMbps']
 
     temperature_sensors = [1, 13, 28]
     batteries = [1, 3, 4, 5]
@@ -1552,7 +1552,7 @@ def test_hp_ilo4(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
-        for metric in phys_adapter_rates:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+        for metric in phys_adapter_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
