@@ -1,6 +1,6 @@
 # Profile for Dell Poweredge devices
 
-# MIBs can be downloaded after searching for a server and looking for keyboard "MIB": 
+# MIBs can be downloaded after searching for a server and looking for keyboard "MIB":
 # Example: https://www.dell.com/support/home/us/en/04/product-support/product/poweredge-r730/drivers
 
 # Status metrics (e.g: powerSupplyStatus, temperatureProbeStatus, etc.) output one of the following: other(1), unknown(2), ok(3), nonCritical(4), critical(5), nonRecoverable(6)
@@ -11,7 +11,7 @@ metrics:
   - MIB: MIB-Dell-10892
     table:
       OID: 1.3.6.1.4.1.674.10892.1.400.20
-      name: operatingSystemMemoryTable 
+      name: operatingSystemMemoryTable
     symbols:
       - OID: 1.3.6.1.4.1.674.10892.1.400.20.1.6
         name: operatingSystemMemoryAvailablePhysicalSize
@@ -28,8 +28,9 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.1.400.20.1.1
           name: operatingSystemMemorychassisIndex
         tag: chassis_index
+
   - MIB: MIB-Dell-10892
-    forced_type: gauge   # Sent as integers 
+    forced_type: gauge   # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.600.12
       name: powerSupplyTable
@@ -51,8 +52,9 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.1.600.12.1.2
           name: powerSupplyIndex
         tag: index
+
   - MIB: MIB-Dell-10892
-    forced_type: gauge   # Sent as integers 
+    forced_type: gauge   # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.700.20
       name: temperatureProbeTable
@@ -70,8 +72,9 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.1.700.20.1.2
           name: temperatureProbeIndex
         tag: index
+
   - MIB: MIB-Dell-10892
-    forced_type: gauge   # Sent as integers 
+    forced_type: gauge   # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.1100.30
       name: processorDeviceTable
@@ -89,8 +92,9 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.1.1100.30.1.2
           name: processorDeviceIndex
         tag: index
+
   - MIB: MIB-Dell-10892
-    forced_type: gauge   # Sent as integers 
+    forced_type: gauge   # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.1100.40
       name: cacheDeviceTable
@@ -110,8 +114,9 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.1.1100.40.1.2
           name: cacheDeviceIndex
         tag: index
+
   - MIB: MIB-Dell-10892
-    forced_type: gauge   # Sent as integers 
+    forced_type: gauge   # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.1100.50
       name: memoryDeviceTable
@@ -136,8 +141,9 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.1.1100.50.1.23
           name: memoryDeviceSerialNumberName
         tag: serial_number_name
+
   - MIB: MIB-Dell-10892
-    forced_type: gauge   # Sent as integers 
+    forced_type: gauge   # Sent as integers
     table:
       OID: 1.3.6.1.4.1.674.10892.1.1100.90
       name: networkDeviceTable
@@ -148,9 +154,10 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.674.10892.1.1100.90.1.11
           name: networkDeviceIPAddress
-        tag: ip_address 
-  
+        tag: ip_address
+
   # iDRAC Specific
+
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.4.200.10
@@ -187,6 +194,7 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.1
           name: systemStatechassisIndex
         tag: chassis_index
+
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4
@@ -205,6 +213,7 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.2
           name: physicalDiskName
         tag: disk_name
+
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9
@@ -217,6 +226,7 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.2
           name: enclosurePowerSupplyName
         tag: supply_name
+
   - MIB: INTEL-LAN-ADAPTERS-MIB
     table:
       OID: 1.3.6.1.4.1.343.2.7.2.2.1.3

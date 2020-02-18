@@ -1,6 +1,7 @@
 # Profile for F5 BIG-IP devices
-#
+
 sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*
+
 metrics:
   # Memory stats
   - MIB: F5-BIGIP-SYSTEM-MIB
@@ -68,51 +69,7 @@ metrics:
           OID: 1.3.6.1.4.1.3375.2.1.7.5.2.1.3
           name: sysMultiHostCpuId
         tag: cpu
-  # Basic interface stats
-  - MIB: IF-MIB
-    forced_type: monotonic_count
-    table:
-      OID: 1.3.6.1.2.1.2.2
-      name: ifTable
-    symbols:
-      - OID: 1.3.6.1.2.1.2.2.1.14
-        name: ifInErrors
-      - OID: 1.3.6.1.2.1.2.2.1.20
-        name: ifOutErrors
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.2.1.2.2.1.2
-          name: ifDescr
-        tag: interface
-  - MIB: IF-MIB
-    table:
-      OID: 1.3.6.1.2.1.2.2
-      name: ifTable
-    symbols:
-      - OID: 1.3.6.1.2.1.2.2.1.7
-        name: ifAdminStatus
-      - OID: 1.3.6.1.2.1.2.2.1.8
-        name: ifOperStatus
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.2.1.2.2.1.2
-          name: ifDescr
-        tag: interface
-  - MIB: IF-MIB
-    table:
-      OID: 1.3.6.1.2.1.31.1.1
-      name: ifXTable
-    forced_type: monotonic_count
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.2.1.31.1.1.1.1
-          name: ifName
-        tag: interface
-    symbols:
-      - OID: 1.3.6.1.2.1.31.1.1.1.6
-        name: ifHCInOctets
-      - OID: 1.3.6.1.2.1.31.1.1.1.10
-        name: ifHCOutOctets
+
   # TCP stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol:
@@ -150,6 +107,7 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.12.9
       name: sysTcpStatConnfails
+
   # UDP stats
   - MIB: F5-BIGIP-SYSTEM-MIB
     symbol:

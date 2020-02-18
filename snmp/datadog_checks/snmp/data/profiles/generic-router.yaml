@@ -1,6 +1,7 @@
 # Generic profile for routers
-#
+
 sysobjectid: 1.3.6.1.4.*
+
 metrics:
   - MIB: IF-MIB
     table: ifTable

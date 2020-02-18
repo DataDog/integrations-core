@@ -778,9 +778,6 @@ def test_f5(aggregator):
         'sysMultiHostCpuSoftirq',
         'sysMultiHostCpuIowait',
     ]
-    if_gauges = ['ifAdminStatus', 'ifOperStatus']
-    if_counts = ['ifHCInOctets', 'ifInErrors', 'ifHCOutOctets', 'ifOutErrors']
-    interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     for metric in gauges:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
@@ -796,22 +793,6 @@ def test_f5(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + common.CHECK_TAGS, count=1
         )
-    for metric in if_counts:
-        for interface in interfaces:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric),
-                metric_type=aggregator.MONOTONIC_COUNT,
-                tags=['interface:{}'.format(interface)] + common.CHECK_TAGS,
-                count=1,
-            )
-    for metric in if_gauges:
-        for interface in interfaces:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric),
-                metric_type=aggregator.GAUGE,
-                tags=['interface:{}'.format(interface)] + common.CHECK_TAGS,
-                count=1,
-            )
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
@@ -1028,60 +1009,9 @@ def test_3850(aggregator):
 
     check.check(instance)
 
-    tcp_counts = [
-        'tcpActiveOpens',
-        'tcpPassiveOpens',
-        'tcpAttemptFails',
-        'tcpEstabResets',
-        'tcpHCInSegs',
-        'tcpHCOutSegs',
-        'tcpRetransSegs',
-        'tcpInErrs',
-        'tcpOutRsts',
-    ]
-    tcp_gauges = ['tcpCurrEstab']
-    udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
-    if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
-    ifx_counts = [
-        'ifHCInOctets',
-        'ifHCInUcastPkts',
-        'ifHCInMulticastPkts',
-        'ifHCInBroadcastPkts',
-        'ifHCOutOctets',
-        'ifHCOutUcastPkts',
-        'ifHCOutMulticastPkts',
-        'ifHCOutBroadcastPkts',
-    ]
-    if_gauges = ['ifAdminStatus', 'ifOperStatus']
     # We're not covering all interfaces
-    interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 48)]
-    for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
-        for metric in if_counts:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-            )
-        for metric in if_gauges:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
-    for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
-        for metric in ifx_counts:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-            )
-    for metric in tcp_counts:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
-        )
-    for metric in tcp_gauges:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
-        )
-    for metric in udp_counts:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
-        )
+
     sensors = [1006, 1007, 1008, 2006, 2007, 2008]
     for sensor in sensors:
         tags = ['sensor_id:{}'.format(sensor), 'sensor_type:8'] + common.CHECK_TAGS
@@ -1216,68 +1146,11 @@ def test_cisco_nexus(aggregator):
 
     check.check(instance)
 
-    tcp_counts = [
-        'tcpActiveOpens',
-        'tcpPassiveOpens',
-        'tcpAttemptFails',
-        'tcpEstabResets',
-        'tcpHCInSegs',
-        'tcpHCOutSegs',
-        'tcpRetransSegs',
-        'tcpInErrs',
-        'tcpOutRsts',
-    ]
-    tcp_gauges = ['tcpCurrEstab']
-    udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
-    if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
-    ifx_counts = [
-        'ifHCInOctets',
-        'ifHCInUcastPkts',
-        'ifHCInMulticastPkts',
-        'ifHCInBroadcastPkts',
-        'ifHCOutOctets',
-        'ifHCOutUcastPkts',
-        'ifHCOutMulticastPkts',
-        'ifHCOutBroadcastPkts',
-    ]
-    if_gauges = ['ifAdminStatus', 'ifOperStatus']
-
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
-
-    for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
-        for metric in if_counts:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-            )
-        for metric in if_gauges:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
-
-    for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
-        for metric in ifx_counts:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-            )
-
-    for metric in tcp_counts:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
-        )
-
-    for metric in tcp_gauges:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
-        )
-
-    for metric in udp_counts:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
-        )
 
     sensors = [1, 9, 11, 12, 12, 14, 17, 26, 29, 31]
     for sensor in sensors:

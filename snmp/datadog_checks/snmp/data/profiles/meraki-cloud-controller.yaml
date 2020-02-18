@@ -1,6 +1,7 @@
 # Profile for Meraki Cloud devices
-#
+
 sysobjectid: 1.3.6.1.4.1.29671.*
+
 metrics:
   - MIB: MERAKI-CLOUD-CONTROLLER-MIB
     table:
@@ -25,6 +26,7 @@ metrics:
           OID: 1.3.6.1.4.1.29671.1.1.4.1.11
           name: devNetworkName
         tag: network
+
   - MIB: MERAKI-CLOUD-CONTROLLER-MIB
     table:
       OID: 1.3.6.1.4.1.29671.1.1.5
