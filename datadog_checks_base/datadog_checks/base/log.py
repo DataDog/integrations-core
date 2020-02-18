@@ -104,6 +104,8 @@ def init_logging():
     # Forward to Go backend
     logging.addLevelName(TRACE_LEVEL, 'TRACE')
     logging.setLoggerClass(AgentLogger)
+    logging.captureWarnings(True)  # Capture warnings as logs so it's easier for log parsers to handle them.
+
     rootLogger = logging.getLogger()
     rootLogger.addHandler(AgentLogHandler())
     rootLogger.setLevel(_get_py_loglevel(datadog_agent.get_config('log_level')))

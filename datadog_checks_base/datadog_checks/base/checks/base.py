@@ -50,8 +50,6 @@ if datadog_agent.get_config('disable_unsafe_yaml'):
 
     monkey_patch_pyyaml()
 
-# Let's capture warnings as logs so it's easier for log parser to handle them.
-logging.captureWarnings(True)
 
 # Metric types for which it's only useful to submit once per set of tags
 ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MONOTONIC_COUNT]
