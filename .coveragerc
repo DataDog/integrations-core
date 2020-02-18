@@ -1,12 +1,16 @@
 [run]
 branch = True
 
+# Workaround for bug https://github.com/nedbat/coveragepy/issues/883#issuecomment-570093918
+parallel = True
+
 disable_warnings =
     module-not-measured
 
 # All paths are relative to each tox.ini
 omit =
     */test_bench.py
+    */test_e2e.py
 
     # Vendored dependencies
     */datadog_checks/*/vendor/*

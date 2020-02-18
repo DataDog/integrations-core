@@ -1458,6 +1458,75 @@ def test_ignore_metric(aggregator, mocked_prometheus_check, ref_gauge):
     aggregator.assert_metric('prometheus.process.vm.bytes', count=0)
 
 
+def test_ignore_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that metric that matched the ignored metrics pattern is properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['ignore_metrics'] = ['process_virtual_*']
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=0)
+
+
+def test_ignore_metrics_multiple_wildcards(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
+):
+    """
+    Test that metrics that matched an ignored metrics pattern is properly discarded.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['_dry_run'] = False
+    instance['metrics'] = [
+        {
+            # Ignored
+            'go_memstats_mspan_inuse_bytes': 'go_memstats.mspan.inuse_bytes',
+            'go_memstats_mallocs_total': 'go_memstats.mallocs.total',
+            'go_memstats_mspan_sys_bytes': 'go_memstats.mspan.sys_bytes',
+            'go_memstats_alloc_bytes': 'go_memstats.alloc_bytes',
+            'go_memstats_gc_sys_bytes': 'go_memstats.gc.sys_bytes',
+            'go_memstats_buck_hash_sys_bytes': 'go_memstats.buck_hash.sys_bytes',
+            # Not ignored
+            'go_memstats_mcache_sys_bytes': 'go_memstats.mcache.sys_bytes',
+            'go_memstats_heap_released_bytes_total': 'go_memstats.heap.released.bytes_total',
+        }
+    ]
+    instance['ignore_metrics'] = [
+        'go_memstats_mallocs_total',
+        'go_memstats_mspan_*',
+        '*alloc*',
+        '*gc_sys_bytes',
+        'go_memstats_*_hash_sys_bytes',
+    ]
+
+    config = check.create_scraper_configuration(instance)
+
+    mock_response = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
+    )
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check.process(config)
+
+        # Make sure metrics are ignored
+        aggregator.assert_metric('prometheus.go_memstats.mspan.inuse_bytes', count=0)
+        aggregator.assert_metric('prometheus.go_memstats.mallocs.total', count=0)
+        aggregator.assert_metric('prometheus.go_memstats.mspan.sys_bytes', count=0)
+        aggregator.assert_metric('prometheus.go_memstats.alloc_bytes', count=0)
+        aggregator.assert_metric('prometheus.go_memstats.gc.sys_bytes', count=0)
+        aggregator.assert_metric('prometheus.go_memstats.buck_hash.sys_bytes', count=0)
+
+        # Make sure we don't ignore other metrics
+        aggregator.assert_metric('prometheus.go_memstats.mcache.sys_bytes', count=1)
+        aggregator.assert_metric('prometheus.go_memstats.heap.released.bytes_total', count=1)
+        aggregator.assert_all_metrics_covered()
+
+
 def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join on text format """
     check = mocked_prometheus_check

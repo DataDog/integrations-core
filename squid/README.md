@@ -5,11 +5,13 @@
 This check monitors [Squid][9] metrics from the Cache Manager through the Datadog Agent.
 
 ## Setup
+
 ### Installation
 
 The Agent's Squid check is included in the [Datadog Agent][2] package. No additional installation is needed on your Squid server.
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -22,51 +24,52 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-    logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Uncomment and edit this configuration block at the bottom of your `squid.d/conf.yaml` file:
 
-    ```yaml
-    logs:
-          - type: file
-            path: /var/log/squid/cache.log
-            service: "<SERVICE-NAME>"
-            source: squid
-          - type: file
-            path: /var/log/squid/access.log
-            service: "<SERVICE-NAME>"
-            source: squid
-      ```
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/squid/cache.log
+       service: "<SERVICE-NAME>"
+       source: squid
+     - type: file
+       path: /var/log/squid/access.log
+       service: "<SERVICE-NAME>"
+       source: squid
+   ```
 
     Change the `path` and `service` parameter values and configure them for your environment.
 
 3. [Restart the Agent][5].
 
 #### Containerized
+
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
 
 ##### Metric collection
 
 | Parameter            | Value                                                                  |
-|----------------------|------------------------------------------------------------------------|
+| -------------------- | ---------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `squid`                                                                |
 | `<INIT_CONFIG>`      | blank or `{}`                                                          |
 | `<INSTANCE_CONFIG>`  | `{"name": "<SQUID_INSTANCE_NAME>", "host": "%%host%%", "port":"3128"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
 
 | Parameter      | Value                                               |
-|----------------|-----------------------------------------------------|
+| -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "squid", "service": "<YOUR_APP_NAME>"}` |
 
 ### Validation
@@ -89,8 +92,8 @@ The Squid check does not include any events.
 Returns `CRITICAL` if the Agent cannot connect to Squid to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][8].
 
+Need help? Contact [Datadog support][8].
 
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent

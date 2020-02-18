@@ -4,9 +4,10 @@
 
 ## Overview
 
-This check monitors the uptime, status, and number of processes running under supervisord.
+This check monitors the uptime, status, and number of processes running under Supervisor.
 
 ## Setup
+
 ### Installation
 
 The Supervisor check is included in the [Datadog Agent][2] package, so you don't need to install anything else on servers where Supervisor is running.
@@ -19,9 +20,9 @@ The Agent can collect data from Supervisor via HTTP server or UNIX socket. The A
 
 ##### HTTP server
 
-Add a block like this to supervisor's main configuration file (e.g. `/etc/supervisor.conf`):
+Add a block like this to Supervisor's main configuration file (e.g. `/etc/supervisor.conf`):
 
-```
+```text
 [inet_http_server]
 port=localhost:9001
 username=user  # optional
@@ -32,7 +33,7 @@ password=pass  # optional
 
 Add blocks like these to `/etc/supervisor.conf` (if they're not already there):
 
-```
+```text
 [supervisorctl]
 serverurl=unix:///var/run//supervisor.sock
 
@@ -41,11 +42,11 @@ file=/var/run/supervisor.sock
 chmod=777
 ```
 
-If supervisor is running as root, make sure `chmod` is set so that non-root users (i.e. dd-agent) can read the socket.
+If Supervisor is running as root, make sure `chmod` is set so that non-root users (i.e. dd-agent) can read the socket.
 
 ---
 
-Reload supervisord.
+Reload `supervisord`.
 
 #### Host
 
@@ -53,42 +54,43 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample supervisord.d/conf.yaml][4] for all available configuration options:
 
-```
+```yaml
 init_config:
 
 instances:
-  - name: supervisord0 # used to tag service checks and metrics, i.e. supervisor_server:supervisord0
+  # used to tag service checks and metrics, i.e. supervisor_server:supervisord0
+  - name: supervisord0
     host: localhost
     port: 9001
-
- #To collect from the socket instead
- #- name: supervisord0
- #  host: http://127.0.0.1
- #  socket: unix:///var/run//supervisor.sock
+  #To collect from the socket instead
+  #- name: supervisord0
+  #  host: http://127.0.0.1
+  #  socket: unix:///var/run//supervisor.sock
 ```
 
-Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of supervisord. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
+Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of Supervisor. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
 
 Configuration Options
 
-* `name` (Required) - An arbitrary name to identify the supervisord server.
-* `host` (Optional) - Defaults to localhost. The host where supervisord server is running.
-* `port` (Optional) - Defaults to 9001. The port number.
-* `user` (Optional) - Username
-* `pass` (Optional) - Password
-* `proc_names` (Optional) - Dictionary of process names to monitor
-* `server_check` (Optional) - Defaults to true. Service check for connection to supervisord server.
-* `socket` (Optional) - If using supervisorctl to communicate with supervisor, a socket is needed.
+- `name` (Required) - An arbitrary name to identify the `supervisord` server.
+- `host` (Optional) - Defaults to localhost. The host where the `supervisord` server is running.
+- `port` (Optional) - Defaults to 9001. The port number.
+- `user` (Optional) - Username
+- `pass` (Optional) - Password
+- `proc_names` (Optional) - Dictionary of process names to monitor
+- `server_check` (Optional) - Defaults to true. Service check for connection to the `supervisord` server.
+- `socket` (Optional) - If using `supervisorctl` to communicate with Supervisor, a socket is needed.
 
 See the [example check configuration][4] for comprehensive descriptions of other check options.
 
 [Restart the Agent][5] to start sending Supervisor metrics to Datadog.
 
 #### Containerized
+
 For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                          |
-|----------------------|--------------------------------------------------------------------------------|
+| -------------------- | ------------------------------------------------------------------------------ |
 | `<INTEGRATION_NAME>` | `supervisord`                                                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                  |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
@@ -104,7 +106,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][10
 See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
-The Supervisord check does not include any events.
+
+The Supervisor check does not include any events.
 
 ### Service Checks
 
@@ -119,7 +122,7 @@ The Agent submits this service check for all child processes of supervisord (if 
 This table shows the `supervisord.process.status` that results from each supervisord status:
 
 | supervisord status | supervisord.process.status |
-|--------------------|----------------------------|
+| ------------------ | -------------------------- |
 | STOPPED            | CRITICAL                   |
 | STARTING           | UNKNOWN                    |
 | RUNNING            | OK                         |
@@ -130,12 +133,12 @@ This table shows the `supervisord.process.status` that results from each supervi
 | UNKNOWN            | UNKNOWN                    |
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-* [Supervisor monitors your processes. Datadog monitors Supervisor.][9]
-
+- [Supervisor monitors your processes. Datadog monitors Supervisor.][9]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/supervisord/images/supervisorevent.png
 [2]: https://app.datadoghq.com/account/settings#agent

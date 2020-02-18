@@ -12,9 +12,7 @@ The integration relies on the `--enable-metrics` option of CRI-O that is disable
 
 ### Configuration
 
-1. Edit the `crio.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your CRI-O performance data.
-   See the [sample crio.d/conf.yaml][3] for all available configuration options.
+1. Edit the `crio.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your CRI-O performance data. See the [sample crio.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4].
 

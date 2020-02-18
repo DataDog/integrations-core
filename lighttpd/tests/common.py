@@ -11,6 +11,7 @@ HOST = get_docker_hostname()
 STATUS_URL = 'http://{}:9449/server-status'.format(HOST)
 FLAVOR = os.getenv('FLAVOR', 'auth')
 COMPOSE_FILE = os.path.join(HERE, 'docker', FLAVOR, 'docker-compose.yaml')
+LIGHTTPD_VERSION = os.getenv('LIGHTTPD_VERSION')
 
 INSTANCES = {
     'auth': {

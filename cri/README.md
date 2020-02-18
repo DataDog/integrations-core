@@ -20,7 +20,7 @@ If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` envi
 
 For example, to install the integration on Kubernetes, edit your daemonset to mount the CRI socket from the host node to the Agent container and set the `DD_CRI_SOCKET_PATH` env var to the daemonset mountPath:
 
-```
+```yaml
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -30,10 +30,10 @@ spec:
     spec:
       containers:
         - name: datadog-agent
-          ...
+          # ...
           env:
             - name: DD_CRI_SOCKET_PATH
-              value: "/var/run/crio/crio.sock"
+              value: /var/run/crio/crio.sock
           volumeMounts:
             - name: crisocket
               mountPath: /var/run/crio/crio.sock
@@ -53,9 +53,7 @@ spec:
 
 ### Configuration
 
-1. Edit the `cri.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your crio performance data.
-   See the [sample cri.d/conf.yaml][1] for all available configuration options.
+1. Edit the `cri.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your crio performance data. See the [sample cri.d/conf.yaml][1] for all available configuration options.
 
 2. [Restart the Agent][2]
 

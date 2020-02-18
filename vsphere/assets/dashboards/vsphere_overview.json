@@ -1,0 +1,880 @@
+{
+    "board_title": "VMware vSphere - Overview",
+    "read_only": false,
+    "guid": 583,
+    "isIntegration": false,
+    "description": "This dashboard provides a high-level view of your VMware vSphere environment, with in-depth resource utilization metrics from your hosts and VMs, along with the status of your vCenter Server. For further reading on monitoring vSphere: \n\n- [How to monitor vSphere and application metrics with Datadog](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/) \n\n- [Datadog's vSphere integration docs](https://docs.datadoghq.com/integrations/vsphere/#pagetitle). \n\nClone this template dashboard to make changes and add your own graph widgets. ",
+    "board_bgtype": "board_graph",
+    "created": "2020-02-05T16:39:17.081662+00:00",
+    "new_id": "m7e-3hv-p6n",
+    "created_by": {
+        "access_role": "adm", 
+        "disabled": false, 
+        "email": "support@datadoghq.com", 
+        "handle": "support@datadoghq.com", 
+        "is_admin": true, 
+        "name": "Datadog", 
+        "role": null, 
+        "title": null, 
+        "verified": true
+    }, 
+    "original_title": "VMware vSphere - Overview",
+    "modified": "2020-02-10T15:43:28.499024+00:00",
+    "originalHeight": 80,
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": "vcenter_server",
+            "name": "vcenter_server"
+        },
+        {
+            "default": "*",
+            "prefix": "vsphere_datacenter",
+            "name": "vcenter_datacenter"
+        },
+        {
+            "default": "*",
+            "prefix": "host",
+            "name": "host"
+        }
+    ],
+    "author_info": {
+        "author_name": "Datadog"
+    },
+    "disableEditing": false,
+    "originalWidth": "calc(100% - 32px)",
+    "widgets": [
+        {
+            "board_id": 506294,
+            "sizing": "fit",
+            "generated_title": "",
+            "title_size": 16,
+            "title": true,
+            "url": "/static/images/saas_logos/bot/vsphere@2x.png",
+            "type": "image",
+            "title_align": "left",
+            "title_text": "",
+            "height": 10,
+            "width": 47,
+            "y": 1,
+            "x": 0,
+            "add_timeframe": true,
+            "margin": "",
+            "isShared": false
+        },
+        {
+            "board_id": 506294,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "type": "event_stream",
+            "generated_title": "Events that match \"sources:vsphere $vcenter_server.value $vcenter_datacenter.value\"",
+            "tags_execution": "and",
+            "height": 60,
+            "width": 47,
+            "add_timeframe": true,
+            "query": "sources:vsphere $vcenter_server.value $vcenter_datacenter.value",
+            "title_text": "vSphere events",
+            "error": null,
+            "y": 32,
+            "x": 0,
+            "isShared": false,
+            "scaleFactor": 1,
+            "event_size": "l",
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            }
+        },
+        {
+            "board_id": 506294,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Top List",
+            "title_text": "Most % memory loaded VMs (Top 25)",
+            "height": 24,
+            "tile_def": {
+                "viz": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.mem.usage.avg{vsphere_type:vm,$vcenter_server,$vcenter_datacenter} by {host}, 25, 'mean', 'desc')",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": null,
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_green",
+                                "comparator": "<=",
+                                "value": "70"
+                            },
+                            {
+                                "palette": "white_on_yellow",
+                                "comparator": "<=",
+                                "value": "90"
+                            },
+                            {
+                                "palette": "white_on_red",
+                                "comparator": ">",
+                                "value": "90"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 9,
+            "x": 98,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "toplist",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "board_id": 506294,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Top List",
+            "title_text": "Most % CPU loaded VMs (Top 25)",
+            "height": 24,
+            "tile_def": {
+                "viz": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.cpu.usage.avg{$vcenter_datacenter,$vcenter_server,vsphere_type:vm} by {host}, 25, 'mean', 'desc')",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": null,
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_green",
+                                "comparator": "<=",
+                                "value": "70"
+                            },
+                            {
+                                "palette": "white_on_yellow",
+                                "comparator": "<=",
+                                "value": "90"
+                            },
+                            {
+                                "palette": "white_on_red",
+                                "comparator": ">",
+                                "value": "90"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 36,
+            "x": 98,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "toplist",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "board_id": 506294,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Top List",
+            "title_text": "Most % memory loaded hosts (Top 10)",
+            "height": 24,
+            "tile_def": {
+                "viz": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.mem.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}, 10, 'mean', 'desc')",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": null,
+                        "conditional_formats": [
+                            {
+                                "palette": "white_on_green",
+                                "comparator": "<=",
+                                "value": "70"
+                            },
+                            {
+                                "palette": "white_on_yellow",
+                                "comparator": "<=",
+                                "value": "90"
+                            },
+                            {
+                                "palette": "white_on_red",
+                                "comparator": ">",
+                                "value": "90"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 36,
+            "x": 49,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "toplist",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "board_id": 506294,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Avg of vsphere.cpu.usage.avg over $vcenter_server,$vcenter_datacenter,vsphere...",
+            "title_text": "Most % CPU loaded hosts (Top 10)",
+            "height": 24,
+            "tile_def": {
+                "viz": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.cpu.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}, 10, 'mean', 'desc')",
+                        "conditional_formats": [
+                            {
+                                "requestIndex": 0,
+                                "palette": "white_on_green",
+                                "comparator": "<=",
+                                "value": "70"
+                            },
+                            {
+                                "requestIndex": 0,
+                                "palette": "white_on_yellow",
+                                "comparator": "<=",
+                                "value": "90"
+                            },
+                            {
+                                "requestIndex": 0,
+                                "palette": "white_on_red",
+                                "comparator": ">",
+                                "value": "90"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 9,
+            "x": 49,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "toplist",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "board_id": 506294,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Timeseries",
+            "title_text": "Disk I/O rates per VM (Top 25)",
+            "height": 13,
+            "tile_def": {
+                "viz": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.disk.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:vm} by {host}, 25, 'mean', 'desc')",
+                        "aggregator": "avg",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": "line",
+                        "conditional_formats": []
+                    }
+                ],
+                "autoscale": true
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 63,
+            "x": 98,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "timeseries",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "board_id": 506294,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Avg of vsphere.mem.vmmemctl.avg over $vcenter_server,$vcenter_datacenter,vsph...",
+            "title_text": "Memory ballooning by host (Top 25)",
+            "height": 13,
+            "tile_def": {
+                "viz": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.mem.vmmemctl.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}, 25, 'mean', 'desc')",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "markers": [],
+                "yaxis": {
+                    "min": "auto",
+                    "max": "auto",
+                    "scale": "linear",
+                    "label": "",
+                    "includeZero": true
+                }
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 79,
+            "x": 49,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "timeseries",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "board_id": 506294,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Avg of vsphere.net.usage.avg over $vcenter_server,$vcenter_datacenter,vsphere...",
+            "title_text": "Total network utilization of VMs (Top 25)",
+            "height": 13,
+            "tile_def": {
+                "viz": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:vm}, 25, 'mean', 'desc')",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "markers": [],
+                "yaxis": {
+                    "min": "auto",
+                    "max": "auto",
+                    "scale": "linear",
+                    "label": "",
+                    "includeZero": true
+                }
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 79,
+            "x": 98,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "timeseries",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "board_id": 506294,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Sum of vsphere.net.usage.avg over $vcenter_server,$vcenter_datacenter,vsphere...",
+            "title_text": "Total network utilization of hosts",
+            "height": 13,
+            "tile_def": {
+                "viz": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(sum:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}, 25, 'mean', 'desc')",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "markers": [],
+                "yaxis": {
+                    "min": "auto",
+                    "max": "auto",
+                    "scale": "linear",
+                    "label": "",
+                    "includeZero": true
+                }
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 63,
+            "x": 49,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "timeseries",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "board_id": "m7e-3hv-p6n",
+            "tick": true,
+            "font_size": "14",
+            "title": false,
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "tick_edge": "bottom",
+            "text_align": "center",
+            "auto_refresh": false,
+            "bgcolor": "gray",
+            "add_timeframe": true,
+            "html": "# ESXi hosts",
+            "type": "note",
+            "y": 1,
+            "x": 49,
+            "height": 6,
+            "tick_pos": "50%",
+            "width": 47,
+            "isShared": false
+        },
+        {
+            "x": 32,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Sum of vsphere.host.count over $vcenter_server,$vcenter_datacenter,$host",
+            "title_text": "Host Count",
+            "height": 7,
+            "tile_def": {
+                "viz": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:vsphere.host.count{$vcenter_server,$vcenter_datacenter,$host}",
+                        "aggregator": "last",
+                        "conditional_formats": []
+                    }
+                ],
+                "autoscale": true,
+                "precision": "0"
+            },
+            "width": 15,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 12,
+            "autoscale": true,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "query_value",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "x": 16,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Sum of vsphere.vm.count over $vcenter_server,$vcenter_datacenter,$host",
+            "title_text": "VM Count",
+            "height": 7,
+            "tile_def": {
+                "viz": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:vsphere.vm.count{$vcenter_server,$vcenter_datacenter,$host}",
+                        "aggregator": "last",
+                        "conditional_formats": []
+                    }
+                ],
+                "autoscale": true,
+                "precision": "0"
+            },
+            "width": 15,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 12,
+            "autoscale": true,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "query_value",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "height": 9,
+            "text_size": "auto",
+            "check": "vsphere.can_connect",
+            "board_id": "m7e-3hv-p6n",
+            "group": null,
+            "title": true,
+            "title_align": "center",
+            "text_align": "center",
+            "width": 15,
+            "group_by": [
+                "$vcenter_server"
+            ],
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "type": "check_status",
+            "isShared": false,
+            "tags": [
+                "*"
+            ],
+            "time": {},
+            "title_text": "vSphere status",
+            "title_size": 16,
+            "scaleFactor": 1,
+            "add_timeframe": true,
+            "error": null,
+            "y": 12,
+            "x": 0,
+            "grouping": "cluster"
+        },
+        {
+            "x": 0,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Sum of vsphere.datastore.count over $vcenter_server,$vcenter_datacenter,$host",
+            "title_text": "Datastore Count",
+            "height": 7,
+            "tile_def": {
+                "viz": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:vsphere.datastore.count{$vcenter_server,$vcenter_datacenter,$host}",
+                        "aggregator": "last",
+                        "conditional_formats": []
+                    }
+                ],
+                "precision": "0"
+            },
+            "width": 15,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 22,
+            "autoscale": true,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "query_value",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "x": 16,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Sum of vsphere.cluster.count over $vcenter_server,$vcenter_datacenter,$host",
+            "title_text": "Cluster Count",
+            "height": 7,
+            "tile_def": {
+                "viz": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:vsphere.cluster.count{$vcenter_server,$vcenter_datacenter,$host}",
+                        "aggregator": "last",
+                        "conditional_formats": []
+                    }
+                ],
+                "autoscale": true,
+                "precision": "0"
+            },
+            "width": 15,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 22,
+            "autoscale": true,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "query_value",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "x": 32,
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Sum of vsphere.datacenter.count over $vcenter_server,$vcenter_datacenter,$host",
+            "title_text": "Datacenter Count",
+            "height": 7,
+            "tile_def": {
+                "viz": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:vsphere.datacenter.count{$vcenter_server,$vcenter_datacenter,$host}",
+                        "aggregator": "last",
+                        "conditional_formats": []
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "width": 15,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 22,
+            "autoscale": true,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "query_value",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "height": 6,
+            "viz": "note",
+            "tick_pos": "50%",
+            "title": false,
+            "background_color": "gray",
+            "text_align": "center",
+            "content": "# ESXi hosts",
+            "bgcolor": "gray",
+            "html": "# Virtual Machines",
+            "legend_size": "0",
+            "type": "note",
+            "isShared": false,
+            "refresh_every": 30000,
+            "auto_refresh": false,
+            "tick": true,
+            "scaleFactor": 1,
+            "legend": false,
+            "add_timeframe": true,
+            "font_size": "14",
+            "tick_edge": "bottom",
+            "y": 1,
+            "x": 98,
+            "width": 47
+        },
+        {
+            "height": 6,
+            "viz": "note",
+            "tick_pos": "50%",
+            "title": false,
+            "background_color": "gray",
+            "text_align": "center",
+            "content": "# Virtual Machines",
+            "bgcolor": "gray",
+            "html": "# Datastores",
+            "legend_size": "0",
+            "type": "note",
+            "isShared": false,
+            "refresh_every": 30000,
+            "auto_refresh": false,
+            "tick": true,
+            "scaleFactor": 1,
+            "legend": false,
+            "add_timeframe": true,
+            "font_size": "14",
+            "tick_edge": "bottom",
+            "y": 1,
+            "x": 147,
+            "width": 47
+        },
+        {
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Avg of vsphere.disk.used.latest over $vcenter_server,$vcenter_datacenter,vsph...",
+            "title_text": "Datastore used space in % (Top 10)",
+            "height": 34,
+            "tile_def": {
+                "viz": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.disk.used.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore} by {vsphere_datastore}/avg:vsphere.disk.capacity.latest{$vcenter_server,$vcenter_datacenter,vsphere_type:datastore} by {vsphere_datastore}*100,10,'mean','desc')",
+                        "conditional_formats": [
+                            {
+                                "requestIndex": 0,
+                                "palette": "white_on_green",
+                                "comparator": "<=",
+                                "value": "270"
+                            },
+                            {
+                                "requestIndex": 0,
+                                "palette": "white_on_yellow",
+                                "comparator": "<=",
+                                "value": 90
+                            },
+                            {
+                                "requestIndex": 0,
+                                "palette": "white_on_red",
+                                "comparator": ">",
+                                "value": 90
+                            }
+                        ]
+                    }
+                ]
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 9,
+            "x": 147,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "toplist",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "board_id": "m7e-3hv-p6n",
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Avg of vsphere.datastore.numberReadAveraged.avg over vsphere_type:datastore,$...",
+            "title_text": "Number of reads per datastore (Top 25)",
+            "height": 13,
+            "tile_def": {
+                "viz": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.datastore.numberReadAveraged.avg{vsphere_type:datastore,$vcenter_server,$vcenter_datacenter} by {vsphere_datastore}, 25, 'mean', 'desc')",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "markers": [],
+                "yaxis": {
+                    "min": "auto",
+                    "max": "auto",
+                    "scale": "linear",
+                    "label": "",
+                    "includeZero": true
+                }
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 46,
+            "x": 147,
+            "add_timeframe": true,
+            "type": "timeseries",
+            "legend": false,
+            "isShared": false
+        },
+        {
+            "title_align": "left",
+            "title_size": 16,
+            "time": {},
+            "title": true,
+            "generated_title": "Avg of vsphere.disk.numberWriteAveraged.avg over vsphere_type:datastore,$vcen...",
+            "title_text": "Number of write per datastore (Top 25)",
+            "height": 13,
+            "tile_def": {
+                "viz": "timeseries",
+                "requests": [
+                    {
+                        "q": "top(avg:vsphere.disk.numberWriteAveraged.avg{vsphere_type:datastore,$vcenter_server,$vcenter_datacenter} by {vsphere_datastore}, 25, 'mean', 'desc')",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "markers": [],
+                "yaxis": {
+                    "max": "auto",
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "includeZero": true
+                }
+            },
+            "width": 47,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "error": null,
+            "y": 63,
+            "x": 147,
+            "legend_size": "0",
+            "add_timeframe": true,
+            "type": "timeseries",
+            "legend": false,
+            "isShared": false
+        }
+    ],
+    "disableCog": false,
+    "id": 969848,
+    "title_edited": false,
+    "isShared": false
+}

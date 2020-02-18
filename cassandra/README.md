@@ -4,10 +4,10 @@
 
 ## Overview
 
-Get metrics from Cassandra service in real time to:
+Get metrics from Cassandra in real time to:
 
-* Visualize and monitor Cassandra states
-* Be notified about Cassandra failovers and events.
+- Visualize and monitor Cassandra states.
+- Be notified about Cassandra failovers and events.
 
 ## Setup
 
@@ -25,38 +25,37 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Metric Collection
 
-1. The default configuration of your `cassandra.d/conf.yaml` file activate the collection of your [Cassandra metrics](#metrics). See the [sample  cassandra.d/conf.yaml][5] for all available configuration options.
+1. The default configuration of your `cassandra.d/conf.yaml` file activate the collection of your [Cassandra metrics](#metrics). See the [sample cassandra.d/conf.yaml][5] for all available configuration options.
 
 2. [Restart the Agent][6].
 
 ##### Log Collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Add this configuration block to your `cassandra.d/conf.yaml` file to start collecting your Cassandra logs:
 
-    ```yaml
-      logs:
-        - type: file
-          path: /var/log/cassandra/*.log
-          source: cassandra
-          sourcecategory: database
-          service: myapplication
-          log_processing_rules:
-             - type: multi_line
-               name: log_start_with_date
-               # pattern to match: DEBUG [ScheduledTasks:1] 2019-12-30
-               pattern: [A-Z]+ +\[[^\]]+\] +\d{4}-\d{2}-\d{2}
-    ```
+   ```yaml
+     logs:
+       - type: file
+         path: /var/log/cassandra/*.log
+         source: cassandra
+         sourcecategory: database
+         service: myapplication
+         log_processing_rules:
+            - type: multi_line
+              name: log_start_with_date
+              # pattern to match: DEBUG [ScheduledTasks:1] 2019-12-30
+              pattern: [A-Z]+ +\[[^\]]+\] +\d{4}-\d{2}-\d{2}
+   ```
 
-    Change the `path` and `service` parameter values and configure them for your environment.
-    See the [sample  cassandra.d/conf.yaml][5] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample cassandra.d/conf.yaml][5] for all available configuration options.
 
     To make sure that stacktraces are properly aggregated as one single log, a [multiline processing rule][7] can be added.
 
@@ -72,12 +71,12 @@ For containerized environments, see the [Autodiscovery with JMX][9] guide.
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
 
 | Parameter      | Value                                                  |
-|----------------|--------------------------------------------------------|
+| -------------- | ------------------------------------------------------ |
 | `<LOG_CONFIG>` | `{"source": "cassandra", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
@@ -105,9 +104,9 @@ Need help? Contact [Datadog support][4].
 
 ## Further Reading
 
-* [How to monitor Cassandra performance metrics][13]
-* [How to collect Cassandra metrics][14]
-* [Monitoring Cassandra with Datadog][15]
+- [How to monitor Cassandra performance metrics][13]
+- [How to collect Cassandra metrics][14]
+- [Monitoring Cassandra with Datadog][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent

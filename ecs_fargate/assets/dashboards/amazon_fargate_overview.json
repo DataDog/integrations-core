@@ -2,7 +2,7 @@
     "author_info": {
         "author_name": "Datadog"
     }, 
-    "board_title": "ECS-Fargate", 
+    "board_title": "Amazon Fargate Overview", 
     "created": "2020-01-22T22:21:55.684065+00:00", 
     "created_by": {
         "access_role": "adm", 
@@ -15,7 +15,7 @@
         "title": null, 
         "verified": true
     }, 
-    "description": "## ECS-Fargate\n\nThis dashboard displays key metrics from your AWS ECS Fargate cluster, such as cpu, memory, and IO usage.\n\nFurther reading on ECS-Fargate:\n\n- [Datadog ECS-Fargate integration docs](https://docs.datadoghq.com/integrations/ecs_fargate/)\n- [Integration setup docs](https://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/?tab=rediswebui)\n", 
+    "description": "## Amazon Fargate\n\nThis dashboard displays key metrics from your AWS ECS Fargate cluster, such as cpu, memory, and IO usage.\n\nFurther reading on ECS-Fargate:\n\n- [Datadog ECS-Fargate integration docs](https://docs.datadoghq.com/integrations/ecs_fargate/)\n- [Integration setup docs](https://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/?tab=rediswebui)\n", 
     "disableCog": false, 
     "disableEditing": false, 
     "id": 954592, 

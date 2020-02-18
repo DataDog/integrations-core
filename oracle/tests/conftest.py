@@ -7,9 +7,17 @@ from datadog_checks.dev import WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.oracle import Oracle
 
-from .common import CLIENT_LIB, COMPOSE_FILE, CONTAINER_NAME, HOST, ORACLE_DATABASE_VERSION, PASSWORD, PORT, USER
-
-CHECK_NAME = "oracle"
+from .common import (
+    CHECK_NAME,
+    CLIENT_LIB,
+    COMPOSE_FILE,
+    CONTAINER_NAME,
+    HOST,
+    ORACLE_DATABASE_VERSION,
+    PASSWORD,
+    PORT,
+    USER,
+)
 
 INSTANT_CLIENT_URL = (
     "https://ddintegrations.blob.core.windows.net/oracle/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip"
@@ -42,8 +50,8 @@ E2E_METADATA_JDBC_CLIENT = {
 
 
 @pytest.fixture
-def check():
-    return Oracle(CHECK_NAME, {}, {})
+def check(instance):
+    return Oracle(CHECK_NAME, {}, [instance])
 
 
 @pytest.fixture

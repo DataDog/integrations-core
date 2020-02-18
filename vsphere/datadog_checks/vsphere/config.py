@@ -60,7 +60,11 @@ class VSphereConfig(object):
 
         # Filters
         self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", {}))
-        self.metric_filters = self._parse_metric_filters(instance.get("metric_filters", {}))
+        self.metric_filters = self._parse_metric_regex_filters(instance.get("metric_filters", {}))
+        # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
+        self.collect_per_instance_filters = self._parse_metric_regex_filters(
+            instance.get("collect_per_instance_filters", {})
+        )
 
         self.validate_config()
 
@@ -147,7 +151,7 @@ class VSphereConfig(object):
 
         return formatted_resource_filters
 
-    def _parse_metric_filters(self, all_metric_filters):
+    def _parse_metric_regex_filters(self, all_metric_filters):
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
         metric_filters = {}
         for resource_type, filters in iteritems(all_metric_filters):

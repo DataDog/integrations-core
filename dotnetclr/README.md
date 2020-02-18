@@ -4,10 +4,11 @@
 
 Get metrics from the .NET CLR service in real time to:
 
-* Visualize and monitor .NET CLR states.
-* Be notified about .NET CLR failovers and events.
+- Visualize and monitor .NET CLR states.
+- Be notified about .NET CLR failovers and events.
 
 ## Setup
+
 ### Installation
 
 The .NET CLR check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
@@ -15,7 +16,6 @@ The .NET CLR check is included in the [Datadog Agent][2] package. No additional 
 ### Configuration
 
 1. Edit the `dotnetclr.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your .NET CLR performance data. See the [sample dotnetclr.d/conf.yaml][4] for all available configuration options.
-
 2. [Restart the Agent][5].
 
 ## Validation
@@ -23,6 +23,7 @@ The .NET CLR check is included in the [Datadog Agent][2] package. No additional 
 [Run the Agent's status subcommand][6] and look for `dotnetclr` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][7] for a list of all metrics provided by this integration.
@@ -36,6 +37,7 @@ The .NET CLR check does not include any service checks.
 The .NET CLR check does not include any events.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][8].
 
 [2]: https://app.datadoghq.com/account/settings#agent
