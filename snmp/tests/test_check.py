@@ -771,8 +771,10 @@ def test_metric_tag_oid(aggregator):
 def test_metric_tag_profile_manual(aggregator):
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'
-    definition = {'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'name': 'snmp_host'}],
-                  'metrics': common.SUPPORTED_METRIC_TYPES}
+    definition = {
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'name': 'snmp_host'}],
+        'metrics': common.SUPPORTED_METRIC_TYPES,
+    }
     init_config = {'profiles': {'profile1': {'definition': definition}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
@@ -793,9 +795,11 @@ def test_metric_tag_profile_manual(aggregator):
 
 def test_metric_tag_profile_sysoid(aggregator):
     instance = common.generate_instance_config([])
-    definition = {'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'name': 'snmp_host'}],
-                  'metrics': common.SUPPORTED_METRIC_TYPES,
-                  'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
+    definition = {
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'name': 'snmp_host'}],
+        'metrics': common.SUPPORTED_METRIC_TYPES,
+        'sysobjectid': '1.3.6.1.4.1.8072.3.2.10',
+    }
     init_config = {'profiles': {'profile1': {'definition': definition}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
