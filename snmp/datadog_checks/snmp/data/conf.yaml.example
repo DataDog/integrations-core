@@ -114,6 +114,10 @@ init_config:
       definition_file: idrac.yaml
     cisco-nexus:
       definition_file: cisco-nexus.yaml
+    dell-poweredge:
+      definition_file: dell-poweredge.yaml
+    hp-ilo4:
+      definition_file: hp-ilo4.yaml
 
 instances:
   -
