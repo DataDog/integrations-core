@@ -7,7 +7,7 @@
 * [Added] Upgrade kafka-python to 2.0.0. See [#5696](https://github.com/DataDog/integrations-core/pull/5696).
 * [Fixed] Refactor initialization of metric limits. See [#5566](https://github.com/DataDog/integrations-core/pull/5566).
 * [Added] Support `tls_ignore_warning` at init_config level. See [#5657](https://github.com/DataDog/integrations-core/pull/5657).
-* [Changed] vSphere new implementation. See [#5251](https://github.com/DataDog/integrations-core/pull/5251).
+* [Changed] Add the 'futures' dependency for Python 2. See [#5251](https://github.com/DataDog/integrations-core/pull/5251).
 * [Added] Upgrade supervisor dependency. See [#5627](https://github.com/DataDog/integrations-core/pull/5627).
 * [Added] Update in-toto and its deps. See [#5599](https://github.com/DataDog/integrations-core/pull/5599).
 * [Added] Refactor traced decorator and remove wrapt import. See [#5586](https://github.com/DataDog/integrations-core/pull/5586).
