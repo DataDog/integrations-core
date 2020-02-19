@@ -140,7 +140,7 @@ class InstanceConfig:
                 network_address = network_address.decode('utf-8')
             self.ip_network = ipaddress.ip_network(network_address)
 
-        ignored_ip_addresses = instance.get('ignored_ip_addresses')
+        ignored_ip_addresses = instance.get('ignored_ip_addresses', [])
 
         if not isinstance(ignored_ip_addresses, list):
             raise ConfigurationError(
