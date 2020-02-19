@@ -182,8 +182,8 @@ class DockerInterface(object):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))
         command.extend(('install', '-e', self.check_mount_dir))
-        if file_exists(path_join(get_root(), self.check, REQUIREMENTS_IN)):
-            command.extend(('-r', f'{self.check_mount_dir}/{REQUIREMENTS_IN}'))
+        # if file_exists(path_join(get_root(), self.check, REQUIREMENTS_IN)):
+        #     command.extend(('-r', f'{self.check_mount_dir}/{REQUIREMENTS_IN}'))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
