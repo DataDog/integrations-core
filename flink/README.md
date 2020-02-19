@@ -35,7 +35,7 @@ No additional installation is needed on your server.
     metrics.scope.operator: flink.operator
     ```
 
-    **Note**: The system scopes must be remapped for your Flink metrics to be supported, otherwise they will be submitted as custom metrics.
+    **Note**: The system scopes must be remapped for your Flink metrics to be supported, otherwise they are submitted as custom metrics.
 
 3. Configure additional [tags][4] in `<FLINK_HOME>/conf/flink-conf.yaml`.
     Here is an example of custom tags:
@@ -62,7 +62,7 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 
 _Available for Agent >6.0_
 
-1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties`, `log4j-cli.properties`, `log4j-yarn-session.properties`, or `log4j-console.properties files`. See [flink's defaults][13] for default configurations. For example, a `log4j.properties` would contain this configuration by default:
+1. Flink uses the `log4j` logger by default. To activate logging to a file and customize the format edit the `log4j.properties`, `log4j-cli.properties`, `log4j-yarn-session.properties`, or `log4j-console.properties` file. See [Flink's documentation][13] for default configurations. For example `log4j.properties` contains this configuration by default:
 
     ```
       log4j.appender.file=org.apache.log4j.FileAppender
@@ -88,7 +88,7 @@ _Available for Agent >6.0_
       logs_enabled: true
     ```
 
-4. Add the following configuration block to your `flink.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample flink.d/conf.yaml][12] for all available configuration options.
+4. Uncomment and edit the logs configuration block in your `flink.d/conf.yaml` file. Change the `path` and `service` parameter values based on your environment. See the [sample flink.d/conf.yaml][12] for all available configuration options.
 
     ```yaml
       logs:
