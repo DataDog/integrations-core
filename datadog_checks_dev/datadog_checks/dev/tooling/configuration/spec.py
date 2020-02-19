@@ -582,6 +582,6 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
     else:
         loader.errors.append(
             '{}, {}, {}{}: Unknown type `{}`, valid types are {}'.format(
-                loader.source, file_name, sections_display, option_name, value_type, VALID_TYPES
+                loader.source, file_name, sections_display, option_name, value_type, ' | '.join(sorted(VALID_TYPES))
             )
         )
