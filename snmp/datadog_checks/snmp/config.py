@@ -59,7 +59,10 @@ class ParsedMetricTag(object):
 
 def _no_op(*args, **kwargs):
     # type: (*Any, **Any) -> None
-    pass
+    """
+    A 'do-nothing' replacement for the `warning()` and `log()` AgentCheck functions, suitable for when those
+    functions are not available (e.g. in unit tests).
+    """
 
 
 class InstanceConfig:
