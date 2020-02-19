@@ -27,12 +27,8 @@ def test_parse_metrics(hlapi_mock):
     metrics = [{"foo": "bar"}]
     config = InstanceConfig(
         {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]},
-        check.warning,
-        check.log,
-        [],
-        None,
-        {},
-        {},
+        warning=check.warning,
+        log=check.log,
     )
     hlapi_mock.reset_mock()
     with pytest.raises(Exception):
@@ -193,7 +189,7 @@ def test_removing_host():
     check = SnmpCheck('snmp', {}, [instance])
     warnings = []
     check.warning = warnings.append
-    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, None, [], '', {}, {})
+    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance)
     msg = 'No SNMP response received before timeout for instance 1.1.1.1'
 
     check.check(instance)
@@ -254,7 +250,7 @@ def test_cache_building(write_mock, read_mock):
 
     check = SnmpCheck('snmp', {}, [instance])
 
-    check._config.discovered_instances['192.168.0.1'] = InstanceConfig(discovered_instance, None, None, [], '', {}, {})
+    check._config.discovered_instances['192.168.0.1'] = InstanceConfig(discovered_instance)
     check._start_discovery()
 
     try:
