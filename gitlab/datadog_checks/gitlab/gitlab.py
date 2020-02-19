@@ -94,6 +94,21 @@ class GitlabCheck(OpenMetricsBaseCheck):
         gitlab_host = parsed_url.hostname
         gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
         return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)]
+        
+    def _get_api_token(self, url):
+        auth_enabled = self.http.options.get('auth')
+        if auth_enabled:
+            params = {
+                'grant_type': 'password',
+                'username': auth_enabled[0],
+                'password': auth_enabled[1],
+            }
+            endpoint = "{}/oauth/token".format(url)
+            response = self.http.post(endpoint, params=params)
+            response.raise_for_status()
+            token = response.json().get('access_token')
+            self.log.info("Gitlab api token generated.")
+            return token
 
     # Validates an health endpoint
     #
@@ -132,17 +147,9 @@ class GitlabCheck(OpenMetricsBaseCheck):
                 )
                 raise Exception("Http status code {} on check_url {}".format(r.status_code, check_url))
             else:
-                if self.agentConfig.get('collect_metadata', True):
+                if self.is_metadata_collection_enabled():
                     try:
-                        params = {
-                            'grant_type': 'password',
-                            'username': self.http.options['auth'][0],
-                            'password': self.http.options['auth'][1],
-                        }
-
-                        response = self.http.post("{}/oauth/token".format(url), params=params)
-                        response.raise_for_status()
-                        token = response.json().get('access_token')
+                        token = self._get_api_token(url)
                         param = {'access_token': token}
                         response = self.http.get("{}/api/v4/version".format(url), params=param)
                         response.raise_for_status()
@@ -150,7 +157,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
                         self.set_metadata('version', version)
                         self.log.info("Set version %s for gitlab", version)
                     except Exception as e:
-                        self.log.info("Unable to retrieve version metadata for gitlab: %s", e)
+                        self.log.info("Authorization for gitlab not valid; token not created: %s", e)
 
                 r.raise_for_status()
 
