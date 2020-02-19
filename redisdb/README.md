@@ -92,7 +92,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 APM for containerized apps is supported on hosts running Agent v6+ but requires extra configuration to begin collecting traces.
 
-Required environment variables on the agent container:
+Required environment variables on the Agent container:
 
 | Parameter            | Value                                                                      |
 | -------------------- | -------------------------------------------------------------------------- |
