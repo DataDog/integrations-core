@@ -130,6 +130,20 @@ def test_parse_metrics(hlapi_mock):
     hlapi_mock.reset_mock()
 
 
+def test_ignore_ip_addresses():
+    # type: () -> None
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.1.0/29'
+    instance['ignored_ip_addresses'] = ['192.168.1.2', '192.168.1.3', '192.168.1.5']
+
+    config = InstanceConfig(
+        instance, warning=None, log=None, global_metrics={}, mibs_path='', profiles={}, profiles_by_oid={}
+    )
+
+    assert list(config.network_hosts()) == ['192.168.1.1', '192.168.1.4', '192.168.1.6']
+
+
 def test_profile_error():
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'

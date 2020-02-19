@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
 from collections import defaultdict
+from typing import Iterator, List
 
 from pyasn1.type.univ import OctetString
 from pysnmp import hlapi
@@ -109,6 +110,8 @@ class InstanceConfig:
             if isinstance(network_address, bytes):
                 network_address = network_address.decode('utf-8')
             self.ip_network = ipaddress.ip_network(network_address)
+
+        self.ignored_ip_addresses = instance.get('ignored_ip_addresses', [])  # type: List[str]
 
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
@@ -237,6 +240,22 @@ class InstanceConfig:
                 context_name = instance['context_name']
 
         return context_engine_id, context_name
+
+    def network_hosts(self):
+        # type: () -> Iterator[str]
+        if self.ip_network is None:
+            raise RuntimeError('Expected ip_network to be set to iterate over network hosts.')
+
+        for ip_address in self.ip_network.hosts():
+            host = str(ip_address)
+
+            if host in self.discovered_instances:
+                continue
+
+            if host in self.ignored_ip_addresses:
+                continue
+
+            yield host
 
     def parse_metrics(self, metrics, warning, log):
         """Parse configuration and returns data to be used for SNMP queries.

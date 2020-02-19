@@ -121,10 +121,7 @@ class SnmpCheck(AgentCheck):
         discovery_interval = config.instance.get('discovery_interval', 3600)
         while self._running:
             start_time = time.time()
-            for host in config.ip_network.hosts():
-                host = str(host)
-                if host in config.discovered_instances:
-                    continue
+            for host in config.network_hosts():
                 instance = config.instance.copy()
                 instance.pop('network_address')
                 instance['ip_address'] = host
