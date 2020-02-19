@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
 from collections import defaultdict
-from typing import Iterator, List
+from typing import Iterator, Set
 
 from pyasn1.type.univ import OctetString
 from pysnmp import hlapi
@@ -111,7 +111,14 @@ class InstanceConfig:
                 network_address = network_address.decode('utf-8')
             self.ip_network = ipaddress.ip_network(network_address)
 
-        self.ignored_ip_addresses = instance.get('ignored_ip_addresses', [])  # type: List[str]
+        ignored_ip_addresses = instance.get('ignored_ip_addresses')
+
+        if not isinstance(ignored_ip_addresses, list):
+            raise ConfigurationError(
+                'ignored_ip_addresses should be a list (got {})'.format(type(ignored_ip_addresses))
+            )
+
+        self.ignored_ip_addresses = set(ignored_ip_addresses)  # type: Set[str]
 
         if not self.metrics and not profiles_by_oid:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
