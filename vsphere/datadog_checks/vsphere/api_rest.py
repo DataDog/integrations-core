@@ -123,6 +123,7 @@ class VSphereRestClient(object):
             'password': config.password,
             'tls_ca_cert': config.ssl_capath,
             'tls_verify': config.ssl_verify,
+            'tls_ignore_warning': config.tls_ignore_warning,
         }
         self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
         self._http = RequestsWrapper(http_config, {})
