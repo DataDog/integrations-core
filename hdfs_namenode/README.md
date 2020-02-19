@@ -67,6 +67,30 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 | `<INIT_CONFIG>`      | blank or `{}`                                         |
 | `<INSTANCE_CONFIG>`  | `{"hdfs_namenode_jmx_uri": "https://%%host%%:50070"}` |
 
+#### Log collection
+
+**Available for Agent >6.0**
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in the `datadog.yaml` file with:
+
+    ```yaml
+      logs_enabled: true
+    ```
+
+2. Add this configuration block to your `hdfs_namenode.d/conf.yaml` file to start collecting your NameNode logs:
+
+    ```yaml
+      logs:
+        - type: file
+          path: /var/log/hadoop-hdfs/*.log
+          source: hdfs_namenode
+          service: <SERVICE_NAME>
+    ```
+
+    Change the `path` and `service` parameter values and configure them for your environment.
+
+3. [Restart the Agent][6].
+
 ### Validation
 
 [Run the Agent's status subcommand][117] and look for `hdfs_namenode` under the Checks section.

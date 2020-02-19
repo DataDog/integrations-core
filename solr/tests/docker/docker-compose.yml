@@ -1,0 +1,12 @@
+version: '3'
+services:
+  solr:
+    image: solr
+    ports:
+     - 8983:8983
+     - 18983:18983
+    command:
+      - solr-precreate
+      - gettingstarted
+    environment:
+     - ENABLE_REMOTE_JMX_OPTS=true

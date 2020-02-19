@@ -11,6 +11,19 @@ from ..utils import chdir
 from .constants import get_root
 
 
+def get_git_root():
+    """
+    Get root of git repo from current location.  Returns 'None' if not in a repo.
+    """
+    command = 'git rev-parse --show-toplevel'
+
+    result = run_command(command, capture='both')
+    if result.stdout:
+        return result.stdout.strip()
+    elif result.stderr:
+        return None
+
+
 def get_current_branch():
     """
     Get the current branch name.
@@ -107,14 +120,15 @@ def git_tag_list(pattern=None):
     return list(filter(regex.search, result))
 
 
-def get_latest_tag(pattern=None):
+def get_latest_tag(pattern=None, tag_prefix='v'):
     """
     Return the highest numbered tag (most recent)
     Filters on pattern first, otherwise based off all tags
     Removes prefixed `v` if applicable
     """
-    all_tags = sorted((parse_version_info(t.lstrip('v')), t) for t in git_tag_list(r'^v?\d+\.\d+\.\d+$'))
-
+    all_tags = sorted(
+        (parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(rf'^({tag_prefix})?\d+\.\d+\.\d+$')
+    )
     # reverse so we have descendant order
     return list(reversed(all_tags))[0][1]
 

@@ -5,12 +5,12 @@ import click
 
 from ...git import git_tag
 from ...release import get_release_tag_string
-from ...utils import get_valid_checks, get_version_string
+from ...utils import complete_valid_checks, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Tag the git repo with the current release of a check')
-@click.argument('check')
+@click.argument('check', autocompletion=complete_valid_checks)
 @click.argument('version', required=False)
 @click.option('--push/--no-push', default=True)
 @click.option('--dry-run', '-n', is_flag=True)

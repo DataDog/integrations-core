@@ -12,12 +12,25 @@ INTEGRATION_REPOS = [
     'integrations-extras',
     'integrations-internal',
 ]
+
+REPO_OPTIONS_MAP = {
+    '--core': 'core',
+    '-c': 'core',
+    '--extras': 'extras',
+    '-e': 'extras',
+    '--agent': 'agent',
+    '-a': 'agent',
+    '--here': 'here',
+    '-x': 'here',
+}
+
 REPO_CHOICES = {
     'core': 'integrations-core',
     'extras': 'integrations-extras',
     'internal': 'integrations-internal',
     'agent': 'datadog-agent',
 }
+
 VERSION_BUMP = {
     'Added': semver.bump_minor,
     'Changed': semver.bump_major,
@@ -68,7 +81,7 @@ NOT_TILES = [
 # If a file changes in a PR with any of these file extensions,
 # a test will run against the check containing the file
 TESTABLE_FILE_EXTENSIONS = ('.py', '.ini', '.in', '.txt', '.yml', '.yaml')
-NON_TESTABLE_FILES = ('auto_conf.yaml', 'metrics.yaml')
+NON_TESTABLE_FILES = ('auto_conf.yaml', 'metrics.yaml', 'agent_requirements.in')
 
 REQUIREMENTS_IN = 'requirements.in'
 

@@ -146,6 +146,15 @@ class OpenMetricsScraperMixin(object):
         # very high cardinality. Metrics included in this list will be silently
         # skipped without a 'Unable to handle metric' debug line in the logs
         config['ignore_metrics'] = instance.get('ignore_metrics', default_instance.get('ignore_metrics', []))
+        config['_ignored_metrics'] = set()
+        config['_ignored_patterns'] = set()
+
+        # Separate ignored metric names and ignored patterns in different sets for faster lookup later
+        for metric in config['ignore_metrics']:
+            if '*' in metric:
+                config['_ignored_patterns'].add(metric)
+            else:
+                config['_ignored_metrics'].add(metric)
 
         # If you want to send the buckets as tagged values when dealing with histograms,
         # set send_histograms_buckets to True, set to False otherwise.
@@ -506,11 +515,21 @@ class OpenMetricsScraperMixin(object):
         # If targeted metric, store labels
         self._store_labels(metric, scraper_config)
 
-        if metric.name in scraper_config['ignore_metrics']:
+        if metric.name in scraper_config['_ignored_metrics']:
             self._send_telemetry_counter(
                 self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
             )
             return  # Ignore the metric
+
+        for ignore_pattern in scraper_config['_ignored_patterns']:
+            if fnmatchcase(metric.name, ignore_pattern):
+                # Metric must be ignored
+                # Cache the ignored metric name to avoid calling fnmatchcase in the next check run
+                scraper_config['_ignored_metrics'].add(metric.name)
+                self._send_telemetry_counter(
+                    self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
+                )
+                return  # Ignore the metric
 
         self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, len(metric.samples), scraper_config)
 

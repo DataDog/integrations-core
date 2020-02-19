@@ -85,7 +85,7 @@ class MaprCheck(AgentCheck):
             conn = self.get_connection()
         except Exception:
             self.service_check(
-                SERVICE_CHECK, AgentCheck.CRITICAL, self.base_tags + ['topic_path:{}'.format(self.topic_path)]
+                SERVICE_CHECK, AgentCheck.CRITICAL, self.base_tags + ['topic:{}'.format(self.topic_path)]
             )
             raise
         else:

@@ -66,7 +66,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 | Parameter            | Value                                                                                                                    |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `php-fpm`                                                                                                                |
+| `<INTEGRATION_NAME>` | `php_fpm`                                                                                                                |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                            |
 | `<INSTANCE_CONFIG>`  | `{"status_url":"http://%%host%%/status", "ping_url":"http://%%host%%/ping", "use_fastcgi": false, "ping_reply": "pong"}` |
 

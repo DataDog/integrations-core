@@ -6,7 +6,7 @@ import click
 from .... import EnvVars
 from ...e2e import create_interface, get_configured_envs
 from ...e2e.agent import DEFAULT_PYTHON_VERSION
-from ...testing import get_tox_envs
+from ...testing import complete_active_checks, get_tox_envs
 from ..console import CONTEXT_SETTINGS, DEBUG_OUTPUT, echo_info, echo_warning
 from ..test import test as test_command
 from .start import start
@@ -14,7 +14,7 @@ from .stop import stop
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Test an environment')
-@click.argument('checks', nargs=-1)
+@click.argument('checks', autocompletion=complete_active_checks, nargs=-1)
 @click.option(
     '--agent',
     '-a',

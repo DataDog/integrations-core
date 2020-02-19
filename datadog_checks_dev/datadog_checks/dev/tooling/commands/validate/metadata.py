@@ -8,8 +8,8 @@ from io import open
 
 import click
 
-from ...utils import get_metadata_file, get_metric_sources, load_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
+from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
@@ -184,7 +184,7 @@ def normalize_metric_name(metric_name):
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
-@click.argument('check', required=False)
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 def metadata(check):
     """Validates metadata.csv files
 
@@ -229,8 +229,8 @@ def metadata(check):
             reader._fieldnames = reader.fieldnames
 
             for line, row in enumerate(reader, 2):
-                # Number of rows is correct. Since metric is first in the list, should be safe to access
-                if len(row) != len(ALL_HEADERS):
+                # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
+                if None in row.values():
                     errors = True
                     echo_failure(f"{current_check}:{line} {row['metric_name']} Has the wrong amount of columns")
                     continue
@@ -261,9 +261,8 @@ def metadata(check):
                 if row['metric_name'] != normalized_metric_name:
                     errors = True
                     echo_failure(
-                        "Metric name '{}' is not valid, it should be normalized as {}".format(
-                            row['metric_name'], normalized_metric_name
-                        )
+                        f"Metric name '{row['metric_name']}' is not valid,"
+                        "it should be normalized as {normalized_metric_name}"
                     )
 
                 # metric_name header
@@ -304,13 +303,12 @@ def metadata(check):
                 elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
                     errors = True
                     echo_failure(
-                        '{}:{} `{}` exceeds the max length: {} for descriptions.'.format(
-                            current_check, line, row['metric_name'], MAX_DESCRIPTION_LENGTH
-                        )
+                        f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
+                        "{MAX_DESCRIPTION_LENGTH} for descriptions."
                     )
                 if row['interval'] and not row['interval'].isdigit():
                     errors = True
-                    echo_failure('{}: interval should be an int, found "{}"'.format(current_check, row['interval']))
+                    echo_failure(f"{current_check}: interval should be an int, found '{row['interval']}'")
 
         for header, count in empty_count.items():
             errors = True
@@ -323,9 +321,11 @@ def metadata(check):
             # Don't spam this warning when we're validating everything
             if check:
                 echo_warning(
-                    '{}: `{}` appears {} time(s) and does not match metric_prefix '
-                    'defined in the manifest.'.format(current_check, prefix, count)
+                    f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                    "defined in the manifest."
                 )
 
     if errors:
         abort()
+
+    echo_success('Validated!')

@@ -58,6 +58,7 @@ def test_type_support(aggregator):
     for metric in common.UNSUPPORTED_METRICS:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -96,6 +97,7 @@ def test_snmpget(aggregator):
     for metric in common.PLAY_WITH_GET_NEXT_METRICS:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -152,6 +154,7 @@ def test_scalar(aggregator):
     for metric in common.SCALAR_OBJECTS:
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -211,6 +214,7 @@ def test_table(aggregator):
         for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
             tag = mtag['tag']
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -232,6 +236,7 @@ def test_resolved_table(aggregator):
         for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
             tag = mtag['tag']
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
@@ -269,6 +274,7 @@ def test_table_v3_MD5_DES(aggregator):
         for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
             tag = mtag['tag']
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -307,6 +313,7 @@ def test_table_v3_MD5_AES(aggregator):
         for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
             tag = mtag['tag']
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -344,6 +351,7 @@ def test_table_v3_SHA_DES(aggregator):
         for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
             tag = mtag['tag']
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -381,6 +389,7 @@ def test_table_v3_SHA_AES(aggregator):
         for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
             tag = mtag['tag']
             aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -409,6 +418,7 @@ def test_bulk_table(aggregator):
         metric_name = "snmp." + symbol
         aggregator.assert_metric(metric_name, at_least=1)
         aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -443,6 +453,7 @@ def test_forcedtype_metric(aggregator):
             aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0, metric_type=aggregator.GAUGE)
         elif metric.get('forced_type') == 'gauge':
             aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -478,6 +489,7 @@ def test_scalar_with_tags(aggregator):
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
         tags = common.CHECK_TAGS + metric.get('metric_tags')
         aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -510,6 +522,7 @@ def test_cast_metrics(aggregator):
     check.check(instance)
     aggregator.assert_metric('snmp.cpuload1', value=0.06)
     aggregator.assert_metric('snmp.cpuload2', value=0.06)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     aggregator.all_metrics_asserted()
 
@@ -524,6 +537,7 @@ def test_profile(aggregator):
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -541,6 +555,7 @@ def test_profile_by_file(aggregator):
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -559,6 +574,7 @@ def test_profile_sys_object(aggregator):
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -575,9 +591,13 @@ def test_profile_sys_object_prefix(aggregator):
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
-    for metric in common.SUPPORTED_METRIC_TYPES:
+    metrics_from_all_matching_profiles = common.SUPPORTED_METRIC_TYPES + common.CAST_METRICS
+
+    for metric in metrics_from_all_matching_profiles:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=1)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -662,6 +682,7 @@ def test_discovery(aggregator):
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=check_tags, count=1)
 
+    aggregator.assert_metric('snmp.sysUpTimeInstance')
     aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
     aggregator.assert_all_metrics_covered()
 
@@ -706,6 +727,115 @@ def test_different_tables(aggregator):
 
     check.check(instance)
     aggregator.assert_metric_has_tag_prefix('snmp.ifInOctets', 'speed')
+
+
+def test_metric_tag_symbol(aggregator):
+    metrics = common.SUPPORTED_METRIC_TYPES
+    instance = common.generate_instance_config(metrics)
+    instance['metric_tags'] = [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}]
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    tags = list(common.CHECK_TAGS)
+    tags.append('snmp_host:41ba948911b9')
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_metric_tag_oid(aggregator):
+    metrics = common.SUPPORTED_METRIC_TYPES
+    instance = common.generate_instance_config(metrics)
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}]
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    tags = list(common.CHECK_TAGS)
+    tags.append('snmp_host:41ba948911b9')
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_metric_tag_profile_manual(aggregator):
+    instance = common.generate_instance_config([])
+    instance['profile'] = 'profile1'
+    definition = {
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+        'metrics': common.SUPPORTED_METRIC_TYPES,
+    }
+    init_config = {'profiles': {'profile1': {'definition': definition}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    tags = list(common.CHECK_TAGS)
+    tags.append('snmp_host:41ba948911b9')
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_metric_tag_profile_sysoid(aggregator):
+    instance = common.generate_instance_config([])
+    definition = {
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+        'metrics': common.SUPPORTED_METRIC_TYPES,
+        'sysobjectid': '1.3.6.1.4.1.8072.3.2.10',
+    }
+    init_config = {'profiles': {'profile1': {'definition': definition}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    tags = list(common.CHECK_TAGS)
+    tags.append('snmp_host:41ba948911b9')
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+
+    aggregator.all_metrics_asserted()
+
+
+def test_metric_tags_misconfiguration():
+    metrics = common.SUPPORTED_METRIC_TYPES
+    instance = common.generate_instance_config(metrics)
+
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'tag': 'snmp_host'}]
+    with pytest.raises(ConfigurationError):
+        common.create_check(instance)
+
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName'}]
+    with pytest.raises(ConfigurationError):
+        common.create_check(instance)
+
+    instance['metric_tags'] = [{'tag': 'sysName', 'symbol': 'sysName'}]
+    with pytest.raises(ConfigurationError):
+        common.create_check(instance)
 
 
 def test_f5(aggregator):
@@ -794,6 +924,7 @@ def test_f5(aggregator):
                 tags=['interface:{}'.format(interface)] + common.CHECK_TAGS,
                 count=1,
             )
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -992,6 +1123,7 @@ def test_f5_router(aggregator):
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
 
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -1086,6 +1218,7 @@ def test_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -1275,6 +1408,263 @@ def test_cisco_nexus(aggregator):
     for cpu in cpus:
         tags = ['cpu:{}'.format(cpu)] + common.CHECK_TAGS
         for metric in cpu_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+def test_dell_poweredge(aggregator):
+    instance = common.generate_instance_config([])
+    instance['community_string'] = 'dell-poweredge'
+    instance['profile'] = 'dell-poweredge'
+    instance['enforce_mib_constraints'] = False
+
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'dell-poweredge.yaml')
+
+    init_config = {'profiles': {'dell-poweredge': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    # Poweredge
+    sys_mem_gauges = [
+        'operatingSystemMemoryAvailablePhysicalSize',
+        'operatingSystemMemoryTotalPageFileSize',
+        'operatingSystemMemoryAvailablePageFileSize',
+        'operatingSystemMemoryTotalVirtualSize',
+        'operatingSystemMemoryAvailableVirtualSize',
+    ]
+    power_supply_gauges = ['powerSupplyStatus', 'powerSupplyOutputWatts', 'powerSupplyMaximumInputVoltage']
+
+    temperature_probe_gauges = ['temperatureProbeStatus', 'temperatureProbeReading']
+
+    processor_device_gauges = ['processorDeviceStatus', 'processorDeviceThreadCount']
+
+    cache_device_gauges = ['cacheDeviceStatus', 'cacheDeviceMaximumSize', 'cacheDeviceCurrentSize']
+
+    memory_device_gauges = ['memoryDeviceStatus', 'memoryDeviceFailureModes']
+
+    chassis_indexes = [29, 31]
+    for chassis_index in chassis_indexes:
+        tags = ['chassis_index:{}'.format(chassis_index)] + common.CHECK_TAGS
+        for metric in sys_mem_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    indexes = [5, 17]
+    for index in indexes:
+        tags = ['chassis_index:4', 'index:{}'.format(index)] + common.CHECK_TAGS
+        for metric in power_supply_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    indexes = [13]
+    for index in indexes:
+        tags = ['chassis_index:18', 'index:{}'.format(index)] + common.CHECK_TAGS
+        for metric in temperature_probe_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    indexes = [17, 28]
+    for index in indexes:
+        tags = ['chassis_index:5', 'index:{}'.format(index)] + common.CHECK_TAGS
+        for metric in processor_device_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    indexes = [15, 27]
+    for index in indexes:
+        tags = ['chassis_index:11', 'index:{}'.format(index)] + common.CHECK_TAGS
+        for metric in cache_device_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    serial_numbers = ['forward zombies acted Jaded', 'kept oxen their their oxen oxen']
+    for serial_number in serial_numbers:
+        tags = ['serial_number_name:{}'.format(serial_number), 'chassis_index:1'] + common.CHECK_TAGS
+        for metric in memory_device_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    ip_addresses = ['66.97.1.103', '62.148.76.32', '45.3.243.155']
+    for ip_address in ip_addresses:
+        tags = ['ip_address:{}'.format(ip_address)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, at_least=1)
+
+    # Intel Adapter
+    if_counts = [
+        'adapterRxPackets',
+        'adapterTxPackets',
+        'adapterRxBytes',
+        'adapterTxBytes',
+        'adapterRxErrors',
+        'adapterTxErrors',
+        'adapterRxDropped',
+        'adapterTxDropped',
+        'adapterRxMulticast',
+        'adapterCollisions',
+    ]
+
+    interfaces = ['eth0', 'en1']
+    for interface in interfaces:
+        tags = ['adapter:{}'.format(interface)] + common.CHECK_TAGS
+        for count in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+
+    # IDRAC
+    status_gauges = [
+        'systemStateChassisStatus',
+        'systemStatePowerUnitStatusRedundancy',
+        'systemStatePowerSupplyStatusCombined',
+        'systemStateAmperageStatusCombined',
+        'systemStateCoolingUnitStatusRedundancy',
+        'systemStateCoolingDeviceStatusCombined',
+        'systemStateTemperatureStatusCombined',
+        'systemStateMemoryDeviceStatusCombined',
+        'systemStateChassisIntrusionStatusCombined',
+        'systemStatePowerUnitStatusCombined',
+        'systemStateCoolingUnitStatusCombined',
+        'systemStateProcessorDeviceStatusCombined',
+        'systemStateTemperatureStatisticsStatusCombined',
+    ]
+    disk_gauges = [
+        'physicalDiskState',
+        'physicalDiskCapacityInMB',
+        'physicalDiskUsedSpaceInMB',
+        'physicalDiskFreeSpaceInMB',
+    ]
+
+    indexes = ['26', '29']
+    for index in indexes:
+        tags = ['chassis_index:{}'.format(index)] + common.CHECK_TAGS
+        for gauge in status_gauges:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    powers = ['supply1', 'supply2']
+    for power in powers:
+        tags = ['supply_name:{}'.format(power)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.enclosurePowerSupplyState', metric_type=aggregator.GAUGE, tags=tags, count=1)
+    disks = ['disk1', 'disk2']
+    for disk in disks:
+        tags = ['disk_name:{}'.format(disk)] + common.CHECK_TAGS
+        for gauge in disk_gauges:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_hp_ilo4(aggregator):
+    instance = common.generate_instance_config([])
+    instance['community_string'] = 'hp_ilo4'
+    instance['profile'] = 'hp-ilo4'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    definition_file_path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'hp-ilo4.yaml')
+    init_config = {'profiles': {'hp-ilo4': {'definition_file': definition_file_path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    status_gauges = [
+        'cpqHeCritLogCondition',
+        'cpqHeCorrMemLogStatus',
+        'cpqHeCorrMemLogCondition',
+        'cpqHeAsrStatus',
+        'cpqHeAsrPost',
+        'cpqHeAsrCondition',
+        'cpqHeAsrNetworkAccessStatus',
+        'cpqHeThermalCondition',
+        'cpqHeThermalTempStatus',
+        'cpqHeThermalSystemFanStatus',
+        'cpqHeThermalCpuFanStatus',
+        'cpqNicVtVirusActivity',
+        'cpqSm2CntlrServerPowerState',
+        'cpqSm2CntlrBatteryStatus',
+        'cpqSm2CntlrRemoteSessionStatus',
+        'cpqSm2CntlrInterfaceStatus',
+    ]
+
+    cpqhlth_counts = ['cpqHeSysUtilLifeTime', 'cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
+
+    cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin', 'cpqHePowerMeterCurrReading']
+
+    cpqsm2_gauges = [
+        'cpqSm2CntlrBatteryPercentCharged',
+        'cpqSm2CntlrSelfTestErrors',
+        'cpqSm2EventTotalEntries',
+    ]
+
+    EMBEDDED = 2
+    PCMCIA = 3
+    card_locations = [EMBEDDED, PCMCIA]
+    network_card_counts = [
+        'cpqSm2NicXmitBytes',
+        'cpqSm2NicXmitTotalPackets',
+        'cpqSm2NicXmitDiscardPackets',
+        'cpqSm2NicXmitErrorPackets',
+        'cpqSm2NicXmitQueueLength',
+        'cpqSm2NicRecvBytes',
+        'cpqSm2NicRecvTotalPackets',
+        'cpqSm2NicRecvDiscardPackets',
+        'cpqSm2NicRecvErrorPackets',
+        'cpqSm2NicRecvUnknownPackets',
+    ]
+
+    interfaces = ['eth0', 'en1']
+    phys_adapter_counts = [
+        'cpqNicIfPhysAdapterGoodTransmits',
+        'cpqNicIfPhysAdapterGoodReceives',
+        'cpqNicIfPhysAdapterBadTransmits',
+        'cpqNicIfPhysAdapterBadReceives',
+        'cpqNicIfPhysAdapterInOctets',
+        'cpqNicIfPhysAdapterOutOctets',
+    ]
+    phys_adapter_gauges = ['cpqNicIfPhysAdapterSpeed', 'cpqNicIfPhysAdapterSpeedMbps']
+
+    temperature_sensors = [1, 13, 28]
+    batteries = [1, 3, 4, 5]
+
+    for metric in status_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in cpqhlth_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in cpqhlth_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+
+    for metric in cpqsm2_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1
+        )
+
+    for index in temperature_sensors:
+        tags = ['temperature_index:{}'.format(index)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.cpqHeTemperatureCelsius', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.cpqHeTemperatureCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for index in batteries:
+        tags = ['battery_index:{}'.format(index)] + common.CHECK_TAGS
+        aggregator.assert_metric('snmp.cpqHeSysBatteryCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.cpqHeSysBatteryStatus', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for location in card_locations:
+        tags = ['nic_stats_location:{}'.format(location)] + common.CHECK_TAGS
+        for metric in network_card_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common.CHECK_TAGS
+        for metric in phys_adapter_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in phys_adapter_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()

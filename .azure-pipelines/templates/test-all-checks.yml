@@ -323,6 +323,9 @@ jobs:
     - checkName: snmp
       displayName: SNMP
       os: linux
+    - checkName: solr
+      displayName: Solr
+      os: linux
     - checkName: spark
       displayName: Spark
       os: linux

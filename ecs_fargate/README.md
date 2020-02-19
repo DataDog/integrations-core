@@ -173,13 +173,13 @@ Datadog's default CloudWatch crawler polls metrics once every 10 minutes. If you
 
 ### Log Collection
 
-You can monitor Fargate logs by using the AWS FireLens integration built on Datadogs Fluentbit output plugin to send logs to Datadog, or by using the `awslogs` log driver and a Lambda function to route logs to Datadog. Datadog reccomends using AWS FireLens because you can configure Fluent Bit directly in your Fargate tasks.
+You can monitor Fargate logs by using the AWS FireLens integration built on Datadogs Fluentbit output plugin to send logs to Datadog, or by using the `awslogs` log driver and a Lambda function to route logs to Datadog. Datadog recommends using AWS FireLens because you can configure Fluent Bit directly in your Fargate tasks.
 
 #### Fluent Bit and FireLens
 
 Configure the AWS FireLens integration built on Datadog's Fluent Bit output plugin to connect your FireLens monitored log data to Datadog Logs.
 
-1. Enable Fluent Bit in the FireLens log router container in your Fargate task. For more information about enabling FireLens, see the dedicated [AWS Firelens docs][20]. For more information about Fargate container definitons, see the [AWS docs on Container Definitions][21]. AWS reccomends that you use [the regional Docker image][22]. Here is an example snippet of a task definition where the Fluent Bit image is configured:
+1. Enable Fluent Bit in the FireLens log router container in your Fargate task. For more information about enabling FireLens, see the dedicated [AWS Firelens docs][20]. For more information about Fargate container definitons, see the [AWS docs on Container Definitions][21]. AWS recommends that you use [the regional Docker image][22]. Here is an example snippet of a task definition where the Fluent Bit image is configured:
 
    ```json
    {
