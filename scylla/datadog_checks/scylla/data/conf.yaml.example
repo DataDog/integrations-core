@@ -137,7 +137,7 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /path/to/scylla.log
+#     path: <LOG_FILE_PATH>
 #     source: scylla
 #     sourcecategory: database
 #     service: <SERVICE>
