@@ -25,3 +25,9 @@ steps:
 
 - script: openssl version
   displayName: 'openssl version'
+
+- script: nm /usr/lib/x86_64-linux-gnu/libssl.a | grep -i SSLv23
+  displayName: 'grep -i SSLv23'
+
+- script: nm /usr/lib/x86_64-linux-gnu/libcrypto.a | grep -i sk_free
+  displayName: 'grep -i sk_free'
