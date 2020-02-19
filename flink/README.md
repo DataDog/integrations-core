@@ -78,6 +78,8 @@ _Available for Agent >6.0_
       %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
     ```
 
+    An example of a valid timestamp is: `2020-02-03 18:43:12,251`.
+
     Clone and edit the [integration pipeline][11] if you have a different format.
 
 3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
