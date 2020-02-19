@@ -22,7 +22,7 @@ The Scylla check is included in the [Datadog Agent][2] package. No additional in
 
 ##### Log collection
 
-Scylla has different modes of outputting logs depending on the environment its running in.  See the [Scylla documentation][8] for more specifics on how the application generates logs.
+Scylla has different modes of outputting logs depending on the environment it's running in.  See the [Scylla documentation][8] for more specifics on how the application generates logs.
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
