@@ -39,7 +39,8 @@ files:
         <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge,
                       rate, histogram or counter
       value:
-        example: ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
+        example:
+        - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
         type: array
         items:
           type: string
