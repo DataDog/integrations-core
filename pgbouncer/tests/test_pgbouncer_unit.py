@@ -3,8 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
-from psycopg2._psycopg import DatabaseError
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.pgbouncer import PgBouncer
 
@@ -12,7 +10,7 @@ from datadog_checks.pgbouncer import PgBouncer
 @pytest.mark.unit
 def test_critical_service_check(instance, aggregator):
     check = PgBouncer('pgbouncer', {}, [instance])
-    with pytest.raises(DatabaseError):
+    with pytest.raises(Exception):
         check.check(instance)
     aggregator.assert_service_check(PgBouncer.SERVICE_CHECK_NAME, status=PgBouncer.CRITICAL)
 
