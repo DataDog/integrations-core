@@ -15,7 +15,7 @@
         "title": null,
         "verified": true
     },
-    "description": "## Flink Overview\n\nThis dashboard provides a high-level overview of your Flink jobmanagers and taskmanagers so you can monitor metrics related to jobs, memory, and checkpoints.\n\nFor further reading on monitoring Flink, see: [Official Flink integration docs](https://docs.datadoghq.com/integrations/flink/)\n",
+    "description": "## Flink Overview\n\nThis dashboard provides a high-level overview of your Flink jobmanagers and taskmanagers so you can monitor metrics related to jobs, memory, and checkpoints.\n\nFor further reading on monitoring Flink, see the [Datadog Flink integration docs](https://docs.datadoghq.com/integrations/flink/).\n",
     "disableCog": false,
     "disableEditing": false,
     "id": 976462,
