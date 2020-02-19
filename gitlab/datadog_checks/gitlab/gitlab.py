@@ -132,6 +132,13 @@ class GitlabCheck(OpenMetricsBaseCheck):
                 )
                 raise Exception("Http status code {} on check_url {}".format(r.status_code, check_url))
             else:
+                self.log.error(self.http.options)
+                if self.agentConfig.get('collect_metadata', True):
+                    token = self.http.post("{}/api/v4/oauth/token".format(url), auth=('root', 'testroot'))
+
+                    response = self.http.get("{}/api/v4/version".format(url), auth=('root', 'testroot'))
+
+                    self.log.error(response.content)
                 r.raise_for_status()
 
         except requests.exceptions.Timeout:
@@ -151,6 +158,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
                 tags=service_check_tags,
             )
             raise
+
         else:
             self.service_check(service_check_name, OpenMetricsBaseCheck.OK, tags=service_check_tags)
         self.log.debug("gitlab check %s succeeded", check_type)
