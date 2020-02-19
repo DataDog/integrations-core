@@ -1,0 +1,738 @@
+{
+  "board_title": "Scylla",
+  "read_only": false,
+  "author_info": {
+    "author_name": "Datadog"
+  },
+  "description": "This dashboard provides a high-level overview of your Scylla cluster to help you monitor its performance and resource usage. \n\nClone this template dashboard to make changes and add your own graphs and widgets.\n\n",
+  "created": "2020-02-07T21:22:26.961963+00:00",
+  "created_by": {
+    "access_role": "adm",
+    "disabled": false,
+    "email": "support@datadoghq.com",
+    "handle": "support@datadoghq.com",
+    "is_admin": true,
+    "name": "Datadog",
+    "role": null,
+    "verified": true,
+  },
+  "new_id": "xie-6ja-hxz",
+  "modified": "2020-02-18T23:24:50.944728+00:00",
+  "originalHeight": 80,
+  "template_variables": [
+    {
+      "default": "*",
+      "prefix": "host",
+      "name": "host"
+    }
+  ],
+  "isIntegration": false,
+  "disableEditing": false,
+  "originalWidth": "calc(100% - 32px)",
+  "widgets": [
+    {
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "title_align": "left",
+      "title_text": "Node status",
+      "height": 37,
+      "tile_def": {
+        "viz": "query_table",
+        "requests": [
+          {
+            "aggregator": "last",
+            "conditional_formats": [
+              {
+                "palette": "white_on_gray",
+                "comparator": "<=",
+                "value": 0
+              },
+              {
+                "palette": "white_on_green",
+                "comparator": "<=",
+                "value": 3
+              },
+              {
+                "palette": "white_on_red",
+                "comparator": ">",
+                "value": 3
+              }
+            ],
+            "q": "avg:scylla.node.operation_mode{*} by {server}",
+            "alias": "Operation Mode",
+            "limit": 50,
+            "order": "desc"
+          }
+        ]
+      },
+      "viz": "query_table",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      },
+      "error": null,
+      "y": 14,
+      "x": 1,
+      "isShared": false,
+      "type": "query_table",
+      "width": 30,
+      "add_timeframe": true
+    },
+    {
+      "sizing": "fit",
+      "title": false,
+      "url": "data:image/png;base64,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",
+      "type": "image",
+      "height": 12,
+      "width": 30,
+      "y": 1,
+      "x": 1,
+      "add_timeframe": true,
+      "margin": "",
+      "isShared": false
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "max": "100",
+        "min": "0"
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:scylla.reactor.utilization{$host} by {server,shard}",
+            "style": {
+              "width": "normal",
+              "palette": "dog_classic",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "max": "100",
+          "min": "0"
+        }
+      },
+      "width": 38,
+      "title_text": "CPU utilization (%)",
+      "error": null,
+      "y": 8,
+      "x": 72,
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "sum:scylla.transport.requests_served{$host} by {server,shard}.as_count()",
+            "style": {
+              "width": "normal",
+              "palette": "dog_classic",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Requests served",
+      "error": null,
+      "y": 8,
+      "x": 33,
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "tick_pos": "50%",
+      "show_tick": true,
+      "title": false,
+      "refresh_every": 30000,
+      "type": "note",
+      "tick_edge": "bottom",
+      "text_align": "center",
+      "height": 5,
+      "content": "Read Performance",
+      "bgcolor": "gray",
+      "html": "Read Performance",
+      "y": 28,
+      "x": 33,
+      "font_size": "18",
+      "tick": true,
+      "background_color": "gray",
+      "width": 38,
+      "auto_refresh": false,
+      "add_timeframe": true
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "sum:scylla.storage.proxy.coordinator_write_latency.sum{$host} by {server}/sum:scylla.storage.proxy.coordinator_write_latency.count{$host,upper_bound:none} by {server}",
+            "style": {
+              "width": "normal",
+              "palette": "purple",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Average write latency",
+      "error": null,
+      "y": 54,
+      "x": 72,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "sum:scylla.storage.proxy.coordinator_read_latency.sum{$host} by {server}/sum:scylla.storage.proxy.coordinator_read_latency.count{$host,upper_bound:none} by {server}",
+            "style": {
+              "width": "normal",
+              "palette": "green",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Average read latency",
+      "error": null,
+      "y": 54,
+      "x": 33,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:scylla.cache.row_hits{$host} by {server}.as_count()",
+            "style": {
+              "width": "normal",
+              "palette": "cool",
+              "type": "solid"
+            },
+            "type": "bars"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Cache hits",
+      "error": null,
+      "y": 8,
+      "x": 112,
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:scylla.cache.row_misses{$host} by {server}.as_count()",
+            "style": {
+              "width": "normal",
+              "palette": "warm",
+              "type": "solid"
+            },
+            "type": "bars"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Cache misses",
+      "error": null,
+      "y": 27,
+      "x": 112,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:scylla.storage.proxy.coordinator_read_timeouts{$host} by {server}.as_count()",
+            "style": {
+              "width": "normal",
+              "palette": "green",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Read timeouts",
+      "error": null,
+      "y": 73,
+      "x": 33,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:scylla.storage.proxy.coordinator_write_timeouts{$host} by {server}.as_count()",
+            "style": {
+              "width": "normal",
+              "palette": "purple",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Write timeouts",
+      "error": null,
+      "y": 73,
+      "x": 72,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "sum:scylla.storage.proxy.coordinator_total_write_attempts_local_node{$host} by {server,shard}.as_count()",
+            "style": {
+              "width": "normal",
+              "palette": "purple",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Write requests",
+      "error": null,
+      "y": 35,
+      "x": 72,
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "sum:scylla.storage.proxy.coordinator_reads_local_node{$host} by {server,shard}.as_count()",
+            "style": {
+              "width": "normal",
+              "palette": "green",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Read requests",
+      "error": null,
+      "y": 35,
+      "x": 33,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    },
+    {
+      "isShared": false,
+      "tick_pos": "50%",
+      "show_tick": true,
+      "title": false,
+      "refresh_every": 30000,
+      "type": "note",
+      "tick_edge": "bottom",
+      "text_align": "center",
+      "height": 5,
+      "content": "Write Performance",
+      "bgcolor": "gray",
+      "html": "Write Performance",
+      "y": 28,
+      "x": 72,
+      "font_size": "18",
+      "tick": true,
+      "background_color": "gray",
+      "width": 38,
+      "auto_refresh": false,
+      "add_timeframe": true
+    },
+    {
+      "isShared": false,
+      "tick_pos": "50%",
+      "show_tick": true,
+      "title": false,
+      "refresh_every": 30000,
+      "type": "note",
+      "tick_edge": "bottom",
+      "text_align": "center",
+      "height": 5,
+      "content": "Resource Utilization",
+      "bgcolor": "gray",
+      "html": "Resource Utilization",
+      "scaleFactor": 1,
+      "y": 1,
+      "x": 33,
+      "font_size": "18",
+      "tick": true,
+      "background_color": "gray",
+      "width": 77,
+      "auto_refresh": false,
+      "add_timeframe": true
+    },
+    {
+      "isShared": false,
+      "tick_pos": "50%",
+      "show_tick": true,
+      "title": false,
+      "refresh_every": 30000,
+      "type": "note",
+      "tick_edge": "bottom",
+      "text_align": "center",
+      "height": 5,
+      "content": "Cache",
+      "bgcolor": "gray",
+      "html": "Cache",
+      "y": 1,
+      "x": 112,
+      "font_size": "18",
+      "tick": true,
+      "background_color": "gray",
+      "width": 38,
+      "auto_refresh": false,
+      "add_timeframe": true
+    },
+    {
+      "isShared": false,
+      "title_align": "left",
+      "title_size": "16",
+      "time": {},
+      "title": true,
+      "yaxis": {
+        "min": "auto",
+        "max": "auto",
+        "scale": "linear",
+        "label": "",
+        "includeZero": true
+      },
+      "markers": [],
+      "height": 16,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "sum:scylla.cache.bytes_used{$host} by {server}, sum:scylla.cache.bytes_used{$host} by {server}/1000000",
+            "style": {
+              "width": "normal",
+              "palette": "warm",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "markers": [],
+        "yaxis": {
+          "min": "auto",
+          "max": "auto",
+          "scale": "linear",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 38,
+      "title_text": "Cache MB used",
+      "error": null,
+      "y": 46,
+      "x": 112,
+      "legend_size": "0",
+      "add_timeframe": true,
+      "type": "timeseries",
+      "legend": false,
+      "viz": "timeseries",
+      "sharedGlobalTime": {
+        "live_span": "1h"
+      }
+    }
+  ],
+  "disableCog": false,
+  "id": 973385,
+  "isShared": false
+}
