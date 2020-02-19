@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import requests
 from six.moves.urllib.parse import urlparse
-import json
+
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
@@ -134,12 +134,19 @@ class GitlabCheck(OpenMetricsBaseCheck):
             else:
                 if self.agentConfig.get('collect_metadata', True):
                     try:
-                        params = {'grant_type': 'password', 'username': self.http.options['auth'][0], 'password': self.http.options['auth'][1]}
+                        params = {
+                            'grant_type': 'password',
+                            'username': self.http.options['auth'][0],
+                            'password': self.http.options['auth'][1],
+                        }
+
                         response = self.http.post("{}/oauth/token".format(url), params=params)
-                        token = json.loads(response.content).get('access_token')
+                        response.raise_for_status()
+                        token = response.json().get('access_token')
                         param = {'access_token': token}
                         response = self.http.get("{}/api/v4/version".format(url), params=param)
-                        version = json.loads(response.content).get('version')
+                        response.raise_for_status()
+                        version = response.json().get('version')
                         self.set_metadata('version', version)
                         self.log.info("Set version %s for gitlab", version)
                     except Exception as e:
