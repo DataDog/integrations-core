@@ -30,7 +30,7 @@ Scylla has different modes of outputting logs depending on the environment it's 
        logs_enabled: true
      ```
 
-2. Add the following configuration block to your `scylla.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample scylla.d/conf.yaml][9] for all available configuration options.
+2. Uncomment and edit the logs configuration block in your `scylla.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample scylla.d/conf.yaml][9] for all available configuration options.
 
       ```yaml
        logs:
@@ -47,7 +47,7 @@ Scylla has different modes of outputting logs depending on the environment it's 
 
 3. [Restart the Agent][4].
 
-See [Datadog's documentation][10] for additional information on how to configure the agent for log collection in docker environments.
+See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Docker environments.
   
 ### Validation
 
