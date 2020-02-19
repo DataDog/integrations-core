@@ -340,6 +340,12 @@ instances:
     #   Host: <ALTERNATIVE_HOSTNAME>
     #   X-Auth-Token: <AUTH_TOKEN>
 
+    ## @param host_header_ssl - boolean - optional - default: false
+    ## If set to true, the Host header will be used to match 
+    ## against SSL Certificate CN or SAN.
+    #
+    # host_header_ssl: false
+
     ## @param timeout - integer - optional - default: 10
     ## The timeout for connecting to services.
     #
