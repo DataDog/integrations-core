@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import requests
 from six.moves.urllib.parse import urlparse
-
+import json
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
@@ -132,13 +132,19 @@ class GitlabCheck(OpenMetricsBaseCheck):
                 )
                 raise Exception("Http status code {} on check_url {}".format(r.status_code, check_url))
             else:
-                self.log.error(self.http.options)
                 if self.agentConfig.get('collect_metadata', True):
-                    token = self.http.post("{}/api/v4/oauth/token".format(url), auth=('root', 'testroot'))
+                    try:
+                        params = {'grant_type': 'password', 'username': self.http.options['auth'][0], 'password': self.http.options['auth'][1]}
+                        response = self.http.post("{}/oauth/token".format(url), params=params)
+                        token = json.loads(response.content).get('access_token')
+                        param = {'access_token': token}
+                        response = self.http.get("{}/api/v4/version".format(url), params=param)
+                        version = json.loads(response.content).get('version')
+                        self.set_metadata('version', version)
+                        self.log.info("Set version %s for gitlab", version)
+                    except Exception as e:
+                        self.log.info("Unable to retrieve version metadata for gitlab: %s", e)
 
-                    response = self.http.get("{}/api/v4/version".format(url), auth=('root', 'testroot'))
-
-                    self.log.error(response.content)
                 r.raise_for_status()
 
         except requests.exceptions.Timeout:
