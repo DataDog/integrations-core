@@ -153,6 +153,7 @@ class SnmpCheck(AgentCheck):
                 else:
                     for profile in profiles:
                         host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                    host_config.add_profile_tag(profile)
 
                 config.discovered_instances[host] = host_config
 
@@ -292,11 +293,17 @@ class SnmpCheck(AgentCheck):
 
     def _profiles_for_sysobject_oid(self, sys_object_oid):
         # type: (str) -> List[str]
-        """Return all profiles that match the given sysObjectID."""
+        """
+        Return all profiles that match the given sysObjectID.
+
+        Profiles are sorted from the most generic to the closest match.
+        """
         profiles = [profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)]
 
         if not profiles:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
+
+        profiles.sort(key=lambda profile: self.profiles[profile]['definition']['sysobjectid'])
 
         return profiles
 
@@ -380,6 +387,7 @@ class SnmpCheck(AgentCheck):
                 profiles = self._profiles_for_sysobject_oid(sys_object_oid)
                 for profile in profiles:
                     config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                config.add_profile_tag(profile)
 
             if config.all_oids or config.bulk_oids:
                 self.log.debug('Querying device %s', config.ip_address)
