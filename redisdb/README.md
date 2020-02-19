@@ -82,7 +82,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][13].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
@@ -107,13 +107,13 @@ Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the 
 
 ### Validation
 
-[Run the Agent's status subcommand][7] and look for `redisdb` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `redisdb` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -129,7 +129,7 @@ Returns `CRITICAL` if this Redis instance is unable to connect to its master ins
 
 ## Troubleshooting
 
-- [Redis Integration Error: "unknown command 'CONFIG'"][9]
+- [Redis Integration Error: "unknown command 'CONFIG'"][10]
 
 ### Agent cannot connect
 
@@ -157,7 +157,7 @@ Configure a `password` in `redisdb.yaml`.
 
 Additional helpful documentation, links, and articles:
 
-- [How to monitor Redis performance metrics][11]
+- [How to monitor Redis performance metrics][12]
 
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
