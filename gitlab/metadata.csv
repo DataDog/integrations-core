@@ -1,4 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+gitlab.banzai_cached_render_real_duration_seconds,histogram,,second,Duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration 
+
+
+
+
 gitlab.go_gc_duration_seconds,gauge,,request,second,A summary of the GC invocation durations,0,gitlab,gc duration
 gitlab.go_gc_duration_seconds_sum,gauge,,request,second,Sum of the GC invocation durations,0,gitlab,sum gc duration
 gitlab.go_gc_duration_seconds_count,gauge,,request,second,Count of the GC invocation durations,0,gitlab,count gc duration
