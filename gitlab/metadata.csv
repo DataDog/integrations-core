@@ -1,5 +1,28 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-gitlab.banzai_cached_render_real_duration_seconds,histogram,,second,Duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration 
+gitlab.banzai_cached_render_real_duration_seconds.count,count,,second,,Count of duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration count
+gitlab.banzai_cached_render_real_duration_seconds.sum,gauge,,second,,Sum of duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration sum
+
+gitlab.banzai_cacheless_render_real_duration_seconds.count,,count,,second,,Count of duration of rendering Markdown into HTML when cached output does not exist,0,gitlab,cachless render duration count
+gitlab.banzai_cacheless_render_real_duration_seconds,gauge,,second,,Sum of duration of rendering Markdown into HTML when cached output does not exist,0,gitlab,cachless render duration sum
+
+gitlab.cache_misses_total,count,,second,,Cache read miss count,0,gitlab,cache read miss 
+gitlab.cache_operation_duration_seconds.count,,count,,second,,Count of cache access time,0,gitlab,cache access time count
+gitlab.cache_operation_duration_seconds.sum,,gauge,,second,,Sum of cache access time,0,gitlab,cache access time sum
+
+gitlab.cache_operations_total,count,,,,Count of cache operations by controller/action,0,gitlab,cache operations total 
+gitlab.database_transaction_seconds.count,count,,seconds,,Count of cache operations by controller/action,0,gitlab,cache operations total count
+gitlab.database_transaction_seconds.sum,gauge,,seconds,,Sum of cache operations by controller/action,0,gitlab,cache operations total sum
+
+gitlab.method_call_duration_seconds.count,count,,seconds,,Count of method calls real duration,0,gitlab,method call count 
+gitlab.method_call_duration_seconds.sum,gauge,,seconds,,Sum of method calls real duration,0,gitlab,method call sum 
+
+gitlab.page_out_of_bounds,count,,,,Counter for the PageLimiter pagination limit being hit,-1,gitlab,page out of bounds
+
+gitlab.rails_queue_duration_seconds.count,count,,seconds,,Counter for latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue dur count
+gitlab.rails_queue_duration_seconds.sum,gauge,,seconds,,Sum of latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue dur count
+
+gitlab.sql_duration_seconds.count,count,,seconds,,Total SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT	,0,gitlab,rails queue dur count
+gitlab.sql_duration_seconds.sum,gauge,,seconds,,Sum of SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT	,0,gitlab,rails queue dur count
 
 
 
