@@ -8,7 +8,7 @@ Follow the instructions below configure this integration for an Agent running on
 
 ### Installation
 
-To install the Nessus integration configuration on your Agent:
+To install the Tenable integration configuration on your Agent:
 
 **Note**: This step will not be necessary in the next Agent version
 
@@ -16,7 +16,7 @@ To install the Nessus integration configuration on your Agent:
 
 ### Configuration
 
-1. Edit the `nessus.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your nessus logs. See the [sample nessus.d/conf.yaml][3] for available configuration options.
+1. Edit the `tenable.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Tenable nessus logs. See the [sample tenable.d/conf.yaml][3] for available configuration options.
 
 2. [Restart the Agent][4].
 
@@ -24,15 +24,15 @@ To install the Nessus integration configuration on your Agent:
 
 ### Logs
 
-The agent tails the nessus `webserver` and `backend` logs to collect data on nessus scans
+The agent tails the Tenable nessus `webserver` and `backend` logs to collect data on nessus scans
 
 ### Metrics
 
-Nessus does not include any metrics.
+This integration does not include any metrics.
 
 ### Events
 
-Nessus does not include any events.
+This integration does not include any events.
 
 ## Troubleshooting
 
