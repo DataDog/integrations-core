@@ -159,7 +159,7 @@ class RabbitMQ(AgentCheck):
         if not base_url.endswith('/'):
             base_url += '/'
 
-        collect_nodes = instance.get('collect_node_metrics', True)
+        collect_nodes = is_affirmative(instance.get('collect_node_metrics', True))
         custom_tags = instance.get('tags', [])
         parsed_url = urlparse(base_url)
         if not parsed_url.scheme or "://" not in parsed_url.geturl():
