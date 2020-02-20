@@ -184,7 +184,7 @@ def normalize_metric_name(metric_name):
 
 
 def check_duplicate_values(current_check, line, row, header_name, duplicates, fail=None):
-    """Check if the given column value has been seen before. 
+    """Check if the given column value has been seen before.
     Output a warning and return True if so.
     """
     if row[header_name] and row[header_name] not in duplicates:
@@ -198,8 +198,11 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
             echo_warning(message)
     return False
 
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
-@click.option('--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions')
+@click.option(
+    '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
+)
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 def metadata(check, check_duplicates):
     """Validates metadata.csv files
@@ -269,7 +272,9 @@ def metadata(check, check_duplicates):
 
                     continue
 
-                errors = errors or check_duplicate_values(current_check, line, row, 'metric_name', duplicate_name_set, fail=True)
+                errors = errors or check_duplicate_values(
+                    current_check, line, row, 'metric_name', duplicate_name_set, fail=True
+                )
 
                 if check_duplicates:
                     check_duplicate_values(current_check, line, row, 'short_name', duplicate_short_name_set)
