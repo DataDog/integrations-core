@@ -1687,6 +1687,8 @@ def test_proliant(aggregator):
 
     check.check(instance)
 
+    common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant']
+
     cpu_gauges = [
         "cpqSeCpuSlot",
         "cpqSeCpuSpeed",
@@ -1698,14 +1700,14 @@ def test_proliant(aggregator):
     ]
     cpu_indexes = [0, 4, 6, 8, 13, 15, 26, 27]
     for idx in cpu_indexes:
-        tags = ['cpu_index:{}'.format(idx)] + common.CHECK_TAGS
+        tags = ['cpu_index:{}'.format(idx)] + common_tags
         for metric in cpu_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     cpu_util_gauges = ["cpqHoCpuUtilMin", "cpqHoCpuUtilFiveMin", "cpqHoCpuUtilThirtyMin", "cpqHoCpuUtilHour"]
     cpu_unit_idx = [4, 7, 13, 20, 22, 23, 29]
     for idx in cpu_unit_idx:
-        tags = ['cpu_unit_index:{}'.format(idx)] + common.CHECK_TAGS
+        tags = ['cpu_unit_index:{}'.format(idx)] + common_tags
         for metric in cpu_util_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
@@ -1719,7 +1721,7 @@ def test_proliant(aggregator):
     ]
     file_sys_idx = [5, 8, 11, 15, 19, 21, 28, 30]
     for idx in file_sys_idx:
-        tags = ['file_sys_index:{}'.format(idx)] + common.CHECK_TAGS
+        tags = ['file_sys_index:{}'.format(idx)] + common_tags
         for metric in file_sys_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
@@ -1737,7 +1739,7 @@ def test_proliant(aggregator):
         tags = [
             'mem_board_index:{}'.format(board_idx),
             "mem_module_index:{}".format(mem_module_index),
-        ] + common.CHECK_TAGS
+        ] + common_tags
         for metric in memory_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
@@ -1761,7 +1763,7 @@ def test_proliant(aggregator):
     ]
     drive_idx = [(0, 2), (0, 28), (8, 31), (9, 24), (9, 28), (10, 17), (11, 4), (12, 20), (18, 22), (23, 2)]
     for drive_cntrl_idx, drive_index in drive_idx:
-        tags = ['drive_cntrl_idx:{}'.format(drive_cntrl_idx), "drive_index:{}".format(drive_index)] + common.CHECK_TAGS
+        tags = ['drive_cntrl_idx:{}'.format(drive_cntrl_idx), "drive_index:{}".format(drive_index)] + common_tags
         for metric in drive_counts:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
