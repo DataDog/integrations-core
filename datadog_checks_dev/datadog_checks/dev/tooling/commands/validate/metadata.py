@@ -189,9 +189,7 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
     """
     if row[header_name] and row[header_name] not in duplicates:
         duplicates.add(row[header_name])
-    elif row[header_name] == '':
-        pass
-    else:
+    elif row[header_name] != '':
         if fail:
             echo_failure(f"{current_check}:{line} `{row[header_name]}` is a duplicate {header_name}")
             return True
