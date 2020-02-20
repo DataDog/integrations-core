@@ -12,5 +12,5 @@
 # logs:
 #   - type: file
 #     path: /var/log/flink.log
-#     source: <SOURCE>
+#     source: flink
 #     service: <SERVICE>
