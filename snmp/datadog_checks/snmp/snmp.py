@@ -419,6 +419,9 @@ class SnmpCheck(AgentCheck):
         # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
         extracted_tags = []
         for tag in metric_tags:
+            if tag.symbol not in results:
+                self.log.debug('Ignoring tag %s', tag.symbol)
+                continue
             [(_, tag_value)] = list(results[tag.symbol].items())
             extracted_tags.append('{}:{}'.format(tag.name, tag_value))
         return extracted_tags
