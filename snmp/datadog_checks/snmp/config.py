@@ -98,12 +98,6 @@ class InstanceConfig:
         if is_affirmative(instance.get('use_global_metrics', True)):
             self.metrics.extend(global_metrics)
 
-        if profile:
-            if profile not in profiles:
-                raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.metrics.extend(profiles[profile]['definition']['metrics'])
-            metric_tags.extend(profiles[profile]['definition'].get('metric_tags', []))
-
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path)
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
@@ -149,7 +143,7 @@ class InstanceConfig:
 
         self.ignored_ip_addresses = set(ignored_ip_addresses)  # type: Set[str]
 
-        if not self.metrics and not profiles_by_oid:
+        if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
         self._auth_data = self.get_auth_data(instance)
@@ -158,6 +152,12 @@ class InstanceConfig:
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.append(tag_oids)
+
+        if profile:
+            if profile not in profiles:
+                raise ConfigurationError("Unknown profile '{}'".format(profile))
+            self.refresh_with_profile(profiles[profile], warning, log)
+            self.add_profile_tag(profile)
 
         self._context_data = hlapi.ContextData(*self.get_context_data(instance))
 
@@ -189,6 +189,9 @@ class InstanceConfig:
             # NOTE: counter-intuitively, we must '.append()' the list of tag OIDs instead of '.extend()'ing,
             # because `.all_oids` is a list of lists of OIDs (batches).
             self.all_oids.append(tag_oids)
+
+    def add_profile_tag(self, profile_name):
+        self.tags.append('snmp_profile:{}'.format(profile_name))
 
     def call_cmd(self, cmd, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Iterator[Any]
