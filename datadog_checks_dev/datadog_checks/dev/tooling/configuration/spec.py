@@ -323,6 +323,16 @@ def options_validator(options, loader, file_name, *sections):
             options_validator(nested_options, loader, file_name, *previous_sections)
 
 
+VALID_TYPES = {
+    'string',
+    'integer',
+    'number',
+    'boolean',
+    'array',
+    'object',
+}
+
+
 def value_validator(value, loader, file_name, sections_display, option_name, depth=0):
     if 'type' not in value:
         loader.errors.append(
@@ -571,7 +581,7 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
             )
     else:
         loader.errors.append(
-            '{}, {}, {}{}: Unknown type `{}`'.format(
-                loader.source, file_name, sections_display, option_name, value_type
+            '{}, {}, {}{}: Unknown type `{}`, valid types are {}'.format(
+                loader.source, file_name, sections_display, option_name, value_type, ' | '.join(sorted(VALID_TYPES))
             )
         )
