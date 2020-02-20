@@ -196,7 +196,10 @@ SystemEvents = Query(
                     'RejectedInserts': {'name': 'table.mergetree.insert.block.rejected', 'type': 'monotonic_gauge'},
                     'ReplicaYieldLeadership': {'name': 'table.replicated.leader.yield', 'type': 'monotonic_gauge'},
                     'ReplicatedDataLoss': {'name': 'table.replicated.part.loss', 'type': 'monotonic_gauge'},
-                    'ReplicatedPartFailedFetches': {'name': 'table.mergetree.replicated.fetch.replica.fail', 'type': 'monotonic_gauge'},
+                    'ReplicatedPartFailedFetches': {
+                        'name': 'table.mergetree.replicated.fetch.replica.fail',
+                        'type': 'monotonic_gauge',
+                    },
                     'ReplicatedPartFetches': {
                         'name': 'table.mergetree.replicated.fetch.replica',
                         'type': 'monotonic_gauge',
