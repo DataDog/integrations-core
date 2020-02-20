@@ -48,7 +48,6 @@ def assert_collection(aggregator, tags, runs=1):
         'vault.expire.num_leases',
         'vault.runtime.alloc.bytes',
         'vault.runtime.free.count',
-        'vault.runtime.gc.pause_ns',
         'vault.runtime.heap.objects',
         'vault.runtime.malloc.count',
         'vault.runtime.num_goroutines',
