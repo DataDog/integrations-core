@@ -65,12 +65,10 @@ class RethinkDBCheck(AgentCheck):
 
         host = config.host
         port = config.port
-        metric_streams = config.metric_streams
 
         with self.connect(host, port) as conn:
-            for metric_stream in metric_streams:
-                for metric in metric_stream(conn):
-                    self.submit_metric(metric)
+            for metric in config.collect_metrics(conn):
+                self.submit_metric(metric)
 
     # TODO: version metadata.
     # TODO: custom queries. (Hint: look at `QueryManager`.)
