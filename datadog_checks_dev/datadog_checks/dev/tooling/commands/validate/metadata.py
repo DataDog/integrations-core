@@ -190,11 +190,12 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
     if row[header_name] and row[header_name] not in duplicates:
         duplicates.add(row[header_name])
     elif row[header_name] != '':
+        message = f"{current_check}:{line} `{row[header_name]}` is a duplicate {header_name}"
         if fail:
-            echo_failure(f"{current_check}:{line} `{row[header_name]}` is a duplicate {header_name}")
+            echo_failure(message)
             return True
         else:
-            echo_warning(f"{current_check}:{line} `{row[header_name]}` is a duplicate {header_name}")
+            echo_warning(message)
     return False
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
