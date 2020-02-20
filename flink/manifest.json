@@ -21,7 +21,7 @@
     "dataflow"
   ],
   "type": "check",
-  "is_public": true,
+  "is_public": false,
   "integration_id": "flink",
   "assets": {
     "dashboards": {},
