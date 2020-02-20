@@ -10,7 +10,7 @@ import rethinkdb
 
 from datadog_checks.base import ConfigurationError
 
-from ._default_metrics import collect_default_metrics
+from ._metrics import collect_default_metrics
 from ._types import Instance, Metric
 
 

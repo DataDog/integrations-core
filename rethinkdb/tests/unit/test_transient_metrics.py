@@ -9,7 +9,7 @@ Unit tests for metrics that are hard to test using integration tests, eg. becaus
 import pytest
 from rethinkdb import r
 
-from datadog_checks.rethinkdb._default_metrics import collect_system_jobs
+from datadog_checks.rethinkdb._metrics import collect_system_jobs
 from datadog_checks.rethinkdb._types import BackfillJob, IndexConstructionJob, QueryJob
 
 from .utils import MockConnection, patch_connection_type
