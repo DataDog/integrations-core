@@ -153,7 +153,8 @@ class SnmpCheck(AgentCheck):
                 else:
                     for profile in profiles:
                         host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
-                    host_config.add_profile_tag(profile)
+                    most_specific_profile = profiles[-1]
+                    host_config.add_profile_tag(most_specific_profile)
 
                 config.discovered_instances[host] = host_config
 
@@ -387,7 +388,8 @@ class SnmpCheck(AgentCheck):
                 profiles = self._profiles_for_sysobject_oid(sys_object_oid)
                 for profile in profiles:
                     config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
-                config.add_profile_tag(profile)
+                most_specific_profile = profiles[-1]
+                config.add_profile_tag(most_specific_profile)
 
             if config.all_oids or config.bulk_oids:
                 self.log.debug('Querying device %s', config.ip_address)
