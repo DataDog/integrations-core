@@ -39,8 +39,7 @@ instances:
     # tag_families: false
 
     ## @param collect_node_metrics - boolean - optional - default: true
-    ## Node metrics are collected by default. Disable the collect_node_metrics option to skip node metric collection.
-    ## metrics pertaining to nodes
+    ## Node metrics are collected by default. Setting this parameter to false skips node metric collection.
     #
     # collect_node_metrics: true
 
