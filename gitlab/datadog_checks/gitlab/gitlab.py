@@ -63,6 +63,9 @@ class GitlabCheck(OpenMetricsBaseCheck):
         for check_type in self.ALLOWED_SERVICE_CHECKS:
             self._check_health_endpoint(instance, check_type, custom_tags)
 
+        if self.is_metadata_collection_enabled():
+            self.submit_version(instance)
+
     def _create_gitlab_prometheus_instance(self, instance, init_config):
         """
         Set up the gitlab instance so it can be used in OpenMetricsBaseCheck
@@ -94,7 +97,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
         gitlab_host = parsed_url.hostname
         gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
         return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)]
-        
+
     def _get_api_token(self, url):
         auth_enabled = self.http.options.get('auth')
         if auth_enabled:
@@ -109,6 +112,23 @@ class GitlabCheck(OpenMetricsBaseCheck):
             token = response.json().get('access_token')
             self.log.info("Gitlab api token generated.")
             return token
+
+    def submit_version(self, instance):
+        try:
+            url = instance.get('gitlab_url', None)
+            token = instance.get('api_token', None)
+            if token is None:
+                self.log.info(
+                    "Gitlab token not found; please add one in your config to enable version metadata collection."
+                )
+                return
+            param = {'access_token': token}
+            response = self.http.get("{}/api/v4/version".format(url), params=param)
+            version = response.json().get('version')
+            self.set_metadata('version', version)
+            self.log.debug("Set version %s for Gitlab", version)
+        except Exception as e:
+            self.log.info("Gitlab version metadata not collected: %s", e)
 
     # Validates an health endpoint
     #
@@ -147,18 +167,6 @@ class GitlabCheck(OpenMetricsBaseCheck):
                 )
                 raise Exception("Http status code {} on check_url {}".format(r.status_code, check_url))
             else:
-                if self.is_metadata_collection_enabled():
-                    try:
-                        token = self._get_api_token(url)
-                        param = {'access_token': token}
-                        response = self.http.get("{}/api/v4/version".format(url), params=param)
-                        response.raise_for_status()
-                        version = response.json().get('version')
-                        self.set_metadata('version', version)
-                        self.log.info("Set version %s for gitlab", version)
-                    except Exception as e:
-                        self.log.info("Authorization for gitlab not valid; token not created: %s", e)
-
                 r.raise_for_status()
 
         except requests.exceptions.Timeout:
