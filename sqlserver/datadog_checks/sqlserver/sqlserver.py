@@ -74,7 +74,8 @@ DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
 DM_OS_WAIT_STATS_TABLE = "sys.dm_os_wait_stats"
 DM_OS_MEMORY_CLERKS_TABLE = "sys.dm_os_memory_clerks"
 DM_OS_VIRTUAL_FILE_STATS = "sys.dm_io_virtual_file_stats"
-
+DM_OS_SCHEDULERS = "sys.dm_os_schedulers"
+DM_OS_TASKS = "sys.dm_os_tasks"
 
 class SQLConnectionError(Exception):
     """
@@ -117,6 +118,8 @@ class SQLServer(AgentCheck):
         DM_OS_WAIT_STATS_TABLE,
         DM_OS_MEMORY_CLERKS_TABLE,
         DM_OS_VIRTUAL_FILE_STATS,
+        DM_OS_SCHEDULERS,
+        DM_OS_TASKS,
     ]
 
     def __init__(self, name, init_config, instances):
@@ -205,6 +208,7 @@ class SQLServer(AgentCheck):
         Store the list of metrics to collect by instance_key.
         Will also create and cache cursors to query the db.
         """
+
         metrics_to_collect = []
         for name, counter_name, instance_name in self.METRICS:
             try:
@@ -224,6 +228,7 @@ class SQLServer(AgentCheck):
                 continue
 
         # Load any custom metrics from conf.d/sqlserver.yaml
+
         for row in custom_metrics:
             db_table = row.get('table', DEFAULT_PERFORMANCE_TABLE)
             if db_table not in self.valid_tables:
@@ -254,7 +259,10 @@ class SQLServer(AgentCheck):
         wait_stat_metrics = []
         vfs_metrics = []
         clerk_metrics = []
+        scheduler_metrics = []
+        task_metrics = []
         self.log.debug("metrics to collect %s", metrics_to_collect)
+
         for m in metrics_to_collect:
             if type(m) is SqlSimpleMetric:
                 self.log.debug("Adding simple metric %s", m.sql_name)
@@ -272,12 +280,20 @@ class SQLServer(AgentCheck):
             elif type(m) is SqlOsMemoryClerksStat:
                 self.log.debug("Adding SqlOsMemoryClerksStat metric %s", m.sql_name)
                 clerk_metrics.append(m.sql_name)
+            elif type(m) is SqlOsSchedulers:
+                self.log.debug("Adding SqlOsSchedulers metric %s", m.datadog_name)
+                scheduler_metrics.append(m.datadog_name)
+            elif type(m) is SqlOsTasks:
+                self.log.debug("Adding SqlOsTasks metric %s", m.datadog_name)
+                task_metrics.append(m.datadog_name)
 
         self.instance_per_type_metrics["SqlSimpleMetric"] = simple_metrics
         self.instance_per_type_metrics["SqlFractionMetric"] = fraction_metrics
         self.instance_per_type_metrics["SqlOsWaitStat"] = wait_stat_metrics
         self.instance_per_type_metrics["SqlIoVirtualFileStat"] = vfs_metrics
         self.instance_per_type_metrics["SqlOsMemoryClerksStat"] = clerk_metrics
+        self.instance_per_type_metrics["SqlOsSchedulers"] = scheduler_metrics
+        self.instance_per_type_metrics["SqlOsTasks"] = task_metrics
 
     def typed_metric(self, cfg_inst, table, base_name, user_type, sql_type, column):
         """
@@ -307,6 +323,8 @@ class SQLServer(AgentCheck):
                 DM_OS_WAIT_STATS_TABLE: (self.gauge, SqlOsWaitStat),
                 DM_OS_MEMORY_CLERKS_TABLE: (self.gauge, SqlOsMemoryClerksStat),
                 DM_OS_VIRTUAL_FILE_STATS: (self.gauge, SqlIoVirtualFileStat),
+                DM_OS_SCHEDULERS: (self.gauge, SqlOsSchedulers),
+                DM_OS_TASKS: (self.gauge, SqlOsTasks),
             }
             metric_type, cls = table_type_mapping[table]
 
@@ -490,6 +508,12 @@ class SQLServer(AgentCheck):
                 clerk_rows, clerk_cols = SqlOsMemoryClerksStat.fetch_all_values(
                     cursor, self.instance_per_type_metrics["SqlOsMemoryClerksStat"], self.log  # noqa: E501
                 )
+                scheduler_rows, scheduler_cols = SqlOsSchedulers.fetch_all_values(
+                    cursor, self.instance_per_type_metrics["SqlOsSchedulers"], self.log
+                )
+                task_rows, task_cols = SqlOsTasks.fetch_all_values(
+                    cursor, self.instance_per_type_metrics["SqlOsTasks"], self.log
+                )
 
                 for metric in metrics_to_collect:
                     try:
@@ -503,6 +527,11 @@ class SQLServer(AgentCheck):
                             metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
                         elif type(metric) is SqlOsMemoryClerksStat:
                             metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
+                            metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
+                        elif type(metric) is SqlOsSchedulers:
+                            metric.fetch_metric(cursor, scheduler_rows, scheduler_cols, custom_tags)
+                        elif type(metric) is SqlOsTasks:
+                            metric.fetch_metric(cursor, task_rows, task_cols, custom_tags)
 
                     except Exception as e:
                         self.log.warning("Could not fetch metric %s : %s", metric.datadog_name, e)
@@ -938,6 +967,64 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
                 continue
 
             metric_tags = ['memory_node_id:{}'.format(str(node_id))]
+            metric_tags.extend(tags)
+            metric_name = '{}.{}'.format(self.datadog_name, self.column)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+class SqlOsSchedulers(SqlServerMetric):
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        if not counters_list:
+            return None, None
+
+        query_base = "select * from sys.dm_os_schedulers"
+        cursor.execute(query_base)
+        rows = cursor.fetchall()
+        columns = [i[0] for i in cursor.description]
+        return rows, columns
+
+    def fetch_metric(self, cursor, rows, columns, tags):
+        tags = tags + self.tags
+        scheduler_address_column_index = columns.index("scheduler_address")
+        value_column_index = columns.index(self.column)
+        scheduler_index = columns.index("scheduler_id")
+        parent_node_index = columns.index("parent_node_id")
+
+        for row in rows:
+            column_val = row[value_column_index]
+            scheduler_id = row[scheduler_index]
+            parent_node_id = row[parent_node_index]
+            scheduler_address = row[scheduler_address_column_index]
+
+            metric_tags = ['scheduler_id:{}'.format(str(scheduler_id)), 'parent_node_id:{}'.format(str(parent_node_id))]
+            metric_tags.extend(tags)
+            metric_name = '{}.{}'.format(self.datadog_name, self.column)
+            self.report_function(metric_name, column_val, tags=metric_tags)
+
+class SqlOsTasks(SqlServerMetric):
+    @classmethod
+    def fetch_all_values(cls, cursor, counters_list, logger):
+        if not counters_list:
+            return None, None
+
+        query_base = "select * from sys.dm_os_tasks"
+        cursor.execute(query_base)
+        rows = cursor.fetchall()
+        columns = [i[0] for i in cursor.description]
+        return rows, columns
+
+    def fetch_metric(self, cursor, rows, columns, tags):
+        tags = tags + self.tags
+        session_id_column_index = columns.index("session_id")
+        scheduler_id_column_index = columns.index("scheduler_id")
+        value_column_index = columns.index(self.column)
+
+        for row in rows:
+            column_val = row[value_column_index]
+            session_id = row[session_id_column_index]
+            scheduler_id = row[scheduler_id_column_index]
+
+            metric_tags = ['session_id:{}'.format(str(session_id)), 'scheduler_id:{}'.format(str(scheduler_id))]
             metric_tags.extend(tags)
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, column_val, tags=metric_tags)
