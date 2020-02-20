@@ -18,12 +18,29 @@ gitlab.method_call_duration_seconds.sum,gauge,,seconds,,Sum of method calls real
 
 gitlab.page_out_of_bounds,count,,,,Counter for the PageLimiter pagination limit being hit,-1,gitlab,page out of bounds
 
-gitlab.rails_queue_duration_seconds.count,count,,seconds,,Counter for latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue dur count
-gitlab.rails_queue_duration_seconds.sum,gauge,,seconds,,Sum of latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue dur count
+gitlab.rails_queue_duration_seconds.count,count,,seconds,,Counter for latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration count
+gitlab.rails_queue_duration_seconds.sum,gauge,,seconds,,Sum of latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration sum
 
-gitlab.sql_duration_seconds.count,count,,seconds,,Total SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT	,0,gitlab,rails queue dur count
-gitlab.sql_duration_seconds.sum,gauge,,seconds,,Sum of SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT	,0,gitlab,rails queue dur count
+gitlab.sql_duration_seconds.count,count,,seconds,,Total SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT,0,gitlab,sql duration count
+gitlab.sql_duration_seconds.sum,gauge,,seconds,,Sum of SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT,0,gitlab,sql duration sum
 
+gitlab.transaction_allocated_memory_bytes.count,count,,bytes,,Count of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory count
+gitlab.transaction_allocated_memory_bytes.sum,gauge,,bytes,,Sum of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory sum
+
+gitlab.transaction_cache_count_total,count,,,,Counter for total Rails cache calls (aggregate),0,gitlab,transaction cache calls
+
+gitlab.transaction_cache_duration_total,count,,seconds,,Counter for total time (seconds) spent in Rails cache calls (aggregate),0,gitlab,transaction cache duration
+
+gitlab.transaction_cache_read_hit_count_total,count,,,,Counter for cache hits for Rails cache calls,0,gitlab,transaction cache hits
+
+gitlab.transaction_cache_read_miss_count_total,count,,,,Counter for cache misses for Rails cache calls,0,gitlab,transaction cache misses
+gitlab.transaction_duration_seconds.count,count,,,,Count of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration count
+gitlab.transaction_duration_seconds.sum,gauge,,,,Sum of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration sum
+
+gitlab.transaction_event_build_found_total,count,,,,Counter for build found for API /jobs/request,0,gitlab,build found count
+gitlab.transaction_event_build_invalid_total,count,,,,Counter for build invalid due to concurrency conflict for API /jobs/request,-1,gitlab,build invalid count
+
+gitlab.transaction_event_build_not_found_cached_total,count,,,,Counter for build invalid due to concurrency conflict for API /jobs/request,-1,gitlab,build invalid count
 
 
 
