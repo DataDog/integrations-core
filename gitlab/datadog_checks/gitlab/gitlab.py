@@ -98,21 +98,6 @@ class GitlabCheck(OpenMetricsBaseCheck):
         gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
         return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)]
 
-    def _get_api_token(self, url):
-        auth_enabled = self.http.options.get('auth')
-        if auth_enabled:
-            params = {
-                'grant_type': 'password',
-                'username': auth_enabled[0],
-                'password': auth_enabled[1],
-            }
-            endpoint = "{}/oauth/token".format(url)
-            response = self.http.post(endpoint, params=params)
-            response.raise_for_status()
-            token = response.json().get('access_token')
-            self.log.info("Gitlab api token generated.")
-            return token
-
     def submit_version(self, instance):
         try:
             url = instance.get('gitlab_url', None)
