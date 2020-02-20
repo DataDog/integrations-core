@@ -2692,6 +2692,7 @@ def test_template_array():
         'tls_private_key',
         'tls_ca_cert',
         'headers',
+        'host_header_ssl',
         'extra_headers',
         'timeout',
         'connect_timeout',
