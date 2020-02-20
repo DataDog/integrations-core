@@ -25,7 +25,9 @@ pytestmark = pytest.mark.unit
 
 
 @mock.patch("datadog_checks.snmp.config.hlapi")
-def test_parse_metrics(hlapi_mock):
+@mock.patch("datadog_checks.snmp.config.lcd")
+def test_parse_metrics(lcd_mock, hlapi_mock):
+    lcd_mock.configure.return_value = ('addr', None)
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
     check = SnmpCheck('snmp', {}, [instance])
     # Unsupported metric
