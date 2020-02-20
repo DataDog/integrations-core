@@ -2,7 +2,7 @@
   "name": "Pages with error faced by bots",
   "type": "logs",
   "page": "analytics",
-  "query": "source:nginx @http.useragent_details.browser.family:*bot* @http.status_code:[400 TO 500]",
+  "query": "source:nginx @http.useragent_details.browser.family:*bot* @http.status_code:[400 TO 599]",
   "timerange": {
     "interval_ms": 3600000
   },
