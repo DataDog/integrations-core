@@ -2669,7 +2669,7 @@ def test_template_array():
 
     options = spec.data['files'][0]['options'][0]['options']
     option_names = [option['name'] for option in options]
-    assert option_names == [
+    assert sorted(option_names) == sorted([
         'foo',
         'proxy',
         'skip_proxy',
@@ -2700,7 +2700,7 @@ def test_template_array():
         'log_requests',
         'persist_connections',
         'bar',
-    ]
+    ])
 
 
 def test_template_array_empty():
