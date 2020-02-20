@@ -1527,6 +1527,53 @@ def test_ignore_metrics_multiple_wildcards(
         aggregator.assert_all_metrics_covered()
 
 
+def test_match_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that a matched metric is properly collected.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=1)
+
+
+def test_match_metrics_multiple_wildcards(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
+):
+    """
+    Test that matched metric patterns are properly collected.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['_dry_run'] = False
+    instance['metrics'] = [
+        {'go_memstats_mcache_*': '', 'go_memstats_heap_released_bytes_total': 'go_memstats.heap.released.bytes_total'},
+        '*_lookups_total*',
+        'go_memstats_alloc*',
+    ]
+
+    config = check.create_scraper_configuration(instance)
+
+    mock_response = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
+    )
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check.process(config)
+
+        aggregator.assert_metric('prometheus.go_memstats_mcache_inuse_bytes', count=1)
+        aggregator.assert_metric('prometheus.go_memstats_mcache_sys_bytes', count=1)
+        aggregator.assert_metric('prometheus.go_memstats.heap.released.bytes_total', count=1)
+        aggregator.assert_metric('prometheus.go_memstats_alloc_bytes', count=1)
+        aggregator.assert_metric('prometheus.go_memstats_alloc_bytes_total', count=1)
+        aggregator.assert_metric('prometheus.go_memstats_lookups_total', count=1)
+        aggregator.assert_all_metrics_covered()
+
+
 def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join on text format """
     check = mocked_prometheus_check
