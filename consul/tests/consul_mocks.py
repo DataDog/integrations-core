@@ -55,7 +55,7 @@ def _get_random_ip():
     return "10.0.2.{}".format(rand_int)
 
 
-def mock_get_all_nodes(instance):
+def mock_get_all_nodes():
     return [
         {
             'Address': _get_random_ip(),
@@ -80,11 +80,11 @@ def mock_get_all_nodes(instance):
     ]
 
 
-def mock_get_peers_in_cluster(instance):
+def mock_get_peers_in_cluster():
     return ["10.0.2.14:8300", "10.0.2.15:8300", "10.0.2.16:8300"]
 
 
-def mock_get_services_in_cluster(instance):
+def mock_get_services_in_cluster():
     return {
         "service-1": ["az-us-east-1a"],
         "service-2": ["az-us-east-1a"],
@@ -103,7 +103,7 @@ def mock_get_n_services_in_cluster(n):
     return dct
 
 
-def mock_get_local_config(instance, instance_state):
+def mock_get_local_config():
     return {
         "Config": {
             "AdvertiseAddr": "10.0.2.15",
@@ -121,7 +121,7 @@ def mock_get_local_config(instance, instance_state):
     }
 
 
-def mock_get_nodes_in_cluster(instance):
+def mock_get_nodes_in_cluster():
     return [
         {"Address": "10.0.2.15", "Node": "node-1"},
         {"Address": "10.0.2.25", "Node": "node-2"},
@@ -129,7 +129,7 @@ def mock_get_nodes_in_cluster(instance):
     ]
 
 
-def mock_get_nodes_with_service(instance, service):
+def mock_get_nodes_with_service(service):
     return [
         {
             "Checks": [
@@ -160,7 +160,7 @@ def mock_get_nodes_with_service(instance, service):
     ]
 
 
-def mock_get_nodes_with_service_warning(instance, service):
+def mock_get_nodes_with_service_warning(service):
     return [
         {
             "Checks": [
@@ -191,7 +191,7 @@ def mock_get_nodes_with_service_warning(instance, service):
     ]
 
 
-def mock_get_nodes_with_service_critical(instance, service):
+def mock_get_nodes_with_service_critical(service):
     return [
         {
             "Checks": [
@@ -232,7 +232,7 @@ def mock_get_nodes_with_service_critical(instance, service):
     ]
 
 
-def mock_get_coord_datacenters(instance):
+def mock_get_coord_datacenters():
     return [
         {
             "Datacenter": "dc1",
@@ -283,7 +283,7 @@ def mock_get_coord_datacenters(instance):
     ]
 
 
-def mock_get_coord_nodes(instance):
+def mock_get_coord_nodes():
     return [
         {
             "Node": "host-1",
@@ -324,7 +324,7 @@ def mock_get_coord_nodes(instance):
     ]
 
 
-def mock_get_health_check(instance, endpoint):
+def mock_get_health_check(_):
     return [
         {
             "ModifyIndex": 75214492,
@@ -401,9 +401,9 @@ def mock_get_health_check(instance, endpoint):
     ]
 
 
-def mock_get_cluster_leader_A(instance):
+def mock_get_cluster_leader_A():
     return '10.0.2.15:8300'
 
 
-def mock_get_cluster_leader_B(instance):
+def mock_get_cluster_leader_B():
     return 'My New Leader'
