@@ -1736,10 +1736,7 @@ def test_proliant(aggregator):
     ]
     memory_idx = [(6, 16), (7, 17), (7, 30), (8, 20), (10, 4), (15, 27), (20, 14), (21, 14), (23, 0), (28, 20)]
     for board_idx, mem_module_index in memory_idx:
-        tags = [
-            'mem_board_index:{}'.format(board_idx),
-            "mem_module_index:{}".format(mem_module_index),
-        ] + common_tags
+        tags = ['mem_board_index:{}'.format(board_idx), "mem_module_index:{}".format(mem_module_index)] + common_tags
         for metric in memory_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
