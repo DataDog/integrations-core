@@ -106,4 +106,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/openshift/metadata.csv
 [11]: https://docs.datadoghq.com/help
-[12]: /agent/kubernetes/daemonset_setup/#log-collection
+[12]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
