@@ -40,6 +40,6 @@ Need help? Contact [Datadog support][5].
 
 [1]: https://www.tenable.com/products/nessus
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[3]: https://github.com/DataDog/integrations-core/blob/master/teanble/datadog_checks/tenable/data/conf.yaml.example
+[3]: https://github.com/DataDog/integrations-core/blob/master/tenable/datadog_checks/tenable/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/help
