@@ -1,0 +1,30 @@
+{{
+  "display_name": "{integration_name}",
+  "maintainer": "{email}",
+  "manifest_version": "1.0.0",
+  "name": "{check_name}",
+  "metric_prefix": "{check_name}.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "{guid}",
+  "support": "{support_type}",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-{integration_name} Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "{check_name_kebab}",
+  "assets": {{
+    "dashboards": {{}},
+    "saved_views": {{}},
+    "monitors": {{}},
+    "service_checks": "assets/service_checks.json"
+  }}
+}}
