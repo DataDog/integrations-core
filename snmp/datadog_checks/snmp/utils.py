@@ -1,4 +1,5 @@
 import os
+from typing import Any, Dict
 
 import yaml
 
@@ -6,6 +7,7 @@ from .compat import get_config
 
 
 def get_profile_definition(profile):
+    # type: (Dict[str, Any]) -> Dict[str, Any]
     """
     Return the definition of an SNMP profile,
     either from the filesystem or from the profile configuration itself.
@@ -28,6 +30,7 @@ def get_profile_definition(profile):
 
 
 def _read_profile_definition(definition_file):
+    # type: (str) -> Dict[str, Any]
     confd = get_config('confd_path')
 
     if not os.path.isabs(definition_file):

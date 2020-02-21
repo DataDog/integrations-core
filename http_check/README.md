@@ -48,7 +48,7 @@ See the [sample http_check.d/conf.yaml][3] for a full list and description of av
 | `tls_verify`                     | Instructs the check to validate the TLS certificate of services when reaching to `url`.                                                                                                                                                          |
 | `tls_ignore_warning`             | If `tls_verify` is set to `true`, it disables any security warnings from the SSL connection.                                                                                                                                                     |
 | `tls_ca_cert`                    | This setting allows you to override the default certificate path as specified in `init_config`                                                                                                                                                   |
-| `check_certificate_expiration`   | When `check_certificate_expiration` is enabled, the service check checks the expiration date of the SSL certificate. Note that this causes the SSL certificate to be validated, regardless of the value of the `disable_ssl_validation` setting. |
+| `check_certificate_expiration`   | When `check_certificate_expiration` is enabled, the service check checks the expiration date of the SSL certificate. Note that this causes the SSL certificate to be validated, regardless of the value of the `tls_verify` setting. |
 | `days_warning` & `days_critical` | When `check_certificate_expiration` is enabled, these settings raise a warning or critical alert when the SSL certificate is within the specified number of days from expiration.                                                                |
 | `ssl_server_name`                | When `check_certificate_expiration` is enabled, this setting specifies the hostname of the service to connect to and it also overrides the host to match with if check_hostname is enabled.                                                      |
 | `check_hostname`                 | If set to `true` the check log a warning if the checked `url` hostname is different than the SSL certificate hostname.                                                                                                                           |
@@ -84,7 +84,7 @@ Returns `DOWN` when any of the following occur:
 - the response code is 4xx/5xx, or it doesn't match the pattern provided in the `http_response_status_code`
 - the response body does _not_ contain the pattern in `content_match`
 - `reverse_content_match` is true and the response body _does_ contain the pattern in `content_match`
-- `uri` contains `https` and `disable_ssl_validation` is false, and the SSL connection cannot be validated
+- `uri` contains `https` and `tls_verify` is true, and the SSL connection cannot be validated
 
 Otherwise, returns `UP`.
 

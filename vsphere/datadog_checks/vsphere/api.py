@@ -38,6 +38,10 @@ class APIConnectionError(Exception):
     pass
 
 
+class APIResponseError(Exception):
+    pass
+
+
 class VSphereAPI(object):
     """Abstraction class over the vSphere SOAP api using the pyvmomi library"""
 

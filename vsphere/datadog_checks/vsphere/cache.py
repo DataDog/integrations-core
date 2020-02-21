@@ -4,6 +4,8 @@
 import time
 from contextlib import contextmanager
 
+from six import iterkeys
+
 
 class VSphereCache(object):
     """
@@ -81,10 +83,35 @@ class InfrastructureCache(VSphereCache):
         return self._content.get(mor_type, {}).get(mor, default)
 
     def get_mors(self, resource_type):
-        return self._content.get(resource_type, {}).keys()
+        return iterkeys(self._content.get(resource_type, {}))
 
     def set_mor_data(self, mor, mor_data):
         mor_type = type(mor)
         if mor_type not in self._content:
             self._content[mor_type] = {}
         self._content[mor_type][mor] = mor_data
+
+
+class TagsCache(VSphereCache):
+    """
+    A VSphere cache dedicated to store the tags data.
+
+    Data is stored like this:
+
+    _content = {
+        <RESOURCE_TYPE>: {
+            <RESOURCE_MOR_ID>: ['<CATEGORY_NAME>:<TAG_NAME>', ...]
+        },
+        ...
+    }
+    """
+
+    def get_mor_tags(self, mor):
+        """
+        :return: list of mor tags or empty list if mor is not found.
+        """
+        mor_type = type(mor)
+        return self._content.get(mor_type, {}).get(mor._moId, [])
+
+    def set_all_tags(self, mor_tags):
+        self._content = mor_tags
