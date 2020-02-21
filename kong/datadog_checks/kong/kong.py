@@ -1,17 +1,17 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import requests
 import simplejson as json
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.headers import headers
 
 
 class Kong(AgentCheck):
 
     METRIC_PREFIX = 'kong.'
+
+    HTTP_CONFIG_REMAPPER = {'ssl_validation': {'name': 'tls_verify'}}
 
     """ collects metrics for Kong """
 
@@ -29,7 +29,6 @@ class Kong(AgentCheck):
             raise Exception('missing "kong_status_url" value')
         tags = instance.get('tags', [])
         url = instance.get('kong_status_url')
-        ssl_validation = instance.get('ssl_validation', True)
 
         parsed_url = urlparse(url)
         host = parsed_url.hostname
@@ -39,7 +38,7 @@ class Kong(AgentCheck):
 
         try:
             self.log.debug("Querying URL: %s", url)
-            response = requests.get(url, headers=headers(self.agentConfig), verify=ssl_validation)
+            response = self.http.get(url)
             self.log.debug("Kong status `response`: %s", response)
             response.raise_for_status()
         except Exception:
