@@ -93,6 +93,11 @@ Setup Example:
 ```
 
 By default, the plugin is configured to send logs through HTTPS (port 443) using gzip compression.
+You can change this behavior by using the following parameters:
+
+- `use_http`: Set this to `false` if you want to use TCP forwarding and update the `host` and `port` accordingly (default is `true`)
+- `use_compression`: Compression is only available for HTTP. Disable it by setting this to `false` (default is `true`)
+- `compression_level`: Set the compression level from HTTP. The range is from 1 to 9, 9 being the best ratio (default is `6`)
 
 Additional parameters can be used to change the endpoint used in order to go through a proxy:
 
@@ -101,6 +106,7 @@ Additional parameters can be used to change the endpoint used in order to go thr
 - `ssl_port`: Port used when logs are forwarded in a secure TCP/SSL connection to Datadog (default is `443`)
 - `use_ssl`: If `true`, the Agent initializes a secure TCP/SSL connection to Datadog. (default value is `true`)
 - `no_ssl_validation`: If you need to disable SSL hostname validation (default value is `false`)
+
 
 This also can be used to send logs to **Datadog EU** by setting:
 
