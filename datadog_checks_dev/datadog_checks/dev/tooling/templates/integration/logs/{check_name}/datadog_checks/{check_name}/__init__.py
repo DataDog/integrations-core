@@ -1,1 +1,4 @@
-{license_header}__path__ = __import__('pkgutil').extend_path(__path__, __name__)  # type: ignore
+{license_header}from .__about__ import __version__
+from .{check_name} import {check_class}
+
+__all__ = ['__version__', '{check_class}']
