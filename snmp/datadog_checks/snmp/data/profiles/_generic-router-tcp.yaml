@@ -1,7 +1,5 @@
 # Generic TCP metrics for routers.
 
-sysobjectid: 1.3.6.1.4.*
-
 metrics:
   - MIB: TCP-MIB
     symbol: tcpActiveOpens
