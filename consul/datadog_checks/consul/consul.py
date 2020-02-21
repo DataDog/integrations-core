@@ -259,7 +259,7 @@ class ConsulCheck(AgentCheck):
 
         for tag in tags:
             service_tags.append('consul_{}_service_tag:{}'.format(service, tag))
-            service_tags.append('consul_service_tag:{}'.format(tag))
+            service_tags.append('consul_service:{}'.format(tag))
 
         return service_tags
 
