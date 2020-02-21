@@ -29,15 +29,43 @@ def get_profile_definition(profile):
     return profile['definition']
 
 
+def _get_profiles_root():
+    # NOTE: this separate helper function exists for mocking purposes.
+    confd = get_config('confd_path')
+    return os.path.join(confd, 'snmp.d', 'profiles')
+
+
 def _read_profile_definition(definition_file):
     # type: (str) -> Dict[str, Any]
-    confd = get_config('confd_path')
-
     if not os.path.isabs(definition_file):
-        definition_file = os.path.join(confd, 'snmp.d', 'profiles', definition_file)
+        definition_file = os.path.join(_get_profiles_root(), definition_file)
 
     with open(definition_file) as f:
         return yaml.safe_load(f)
+
+
+def recursively_expand_base_profiles(definition):
+    # type: (Dict[str, Any]) -> None
+    """
+    Update `definition` in-place with the contents of base profile files listed in the 'extends' section.
+
+    Base profiles should be referenced by filename, which can be relative (built-in profile)
+    or absolute (custom profile).
+
+    Raises:
+    * Exception: if any definition file referred in the 'extends' section was not found or is malformed.
+    """
+    extends = definition.get('extends', [])
+
+    for filename in extends:
+        base_definition = _read_profile_definition(filename)
+        recursively_expand_base_profiles(base_definition)
+
+        base_metrics = base_definition.get('metrics', [])
+        existing_metrics = definition.get('metrics', [])
+        definition['metrics'] = base_metrics + existing_metrics  # NOTE: base metrics must be added first.
+
+        definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
 
 
 def to_oid_tuple(oid):

@@ -22,7 +22,7 @@ from datadog_checks.base.errors import CheckException
 
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
-from .utils import get_profile_definition, oid_pattern_specificity
+from .utils import get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -86,6 +86,11 @@ class SnmpCheck(AgentCheck):
                 definition = get_profile_definition(profile)
             except Exception as exc:
                 raise ConfigurationError("Couldn't read profile '{}': {}".format(name, exc))
+
+            try:
+                recursively_expand_base_profiles(definition)
+            except Exception as exc:
+                raise ConfigurationError("Failed to expand base profiles in profile '{}': {}".format(name, exc))
 
             self.profiles[name] = {'definition': definition}
             sys_object_oid = definition.get('sysobjectid')
