@@ -78,6 +78,7 @@
                 "vsphere_cluster:Cluster2",
                 "vsphere_compute:Cluster2",
                 "vsphere_type:host",
+                "my_cat_name_2:my_tag_name_2",
                 "vcenter_server:FAKE"
             ]
         }
@@ -301,6 +302,8 @@
                 "vsphere_folder:vm",
                 "vsphere_folder:Discovered virtual machine",
                 "vsphere_type:vm",
+                "my_cat_name_1:my_tag_name_1",
+                "my_cat_name_2:my_tag_name_2",
                 "vcenter_server:FAKE"
             ]
         }
