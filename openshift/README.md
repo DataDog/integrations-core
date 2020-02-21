@@ -73,6 +73,13 @@ If SELinux is in enforcing mode, it is recommended to grant [the `spc_t` type][7
 
 > :warning: **OpenShift 4.0+**: If you used the OpenShift installer on a supported cloud provider, you will need to modify the provided SCC with `allowHostNetwork: true` to get host tags/aliases as access to metadata servers from PODs network is otherwise restricited.
 
+**Note**: The Docker socket is owned by the root group, so you may need to elevate the Agent's privileges to pull in Docker metrics. To run the Agent process as a root user, you can configure your SCC with the following:
+
+```yaml
+runAsUser:
+  type: RunAsAny
+```
+
 ### Validation
 
 See [kube_apiserver_metrics][1]
