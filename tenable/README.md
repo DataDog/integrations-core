@@ -12,7 +12,7 @@ To install the Tenable integration configuration on your Agent:
 
 **Note**: This step will not be necessary in the next Agent version
 
-1. [Install][13] the 1.0 release (`tenable==1.0.0`).
+1. [Install][2] the 1.0 release (`tenable==1.0.0`).
 
 ### Configuration
 
@@ -39,7 +39,7 @@ This integration does not include any events.
 Need help? Contact [Datadog support][5].
 
 [1]: https://www.tenable.com/products/nessus
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/guide/integration-management/#install
 [3]: https://github.com/DataDog/integrations-core/blob/master/tenable/datadog_checks/tenable/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/help
