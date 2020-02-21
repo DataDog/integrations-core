@@ -173,7 +173,7 @@ class PgBouncer(AgentCheck):
         self._set_metadata()
 
     def _set_metadata(self):
-        if self.agentConfig.get('enable_metadata_collection', True):
+        if self.is_metadata_collection_enabled():
             pgbouncer_version = self.get_version()
             self.set_metadata('version', pgbouncer_version)
 
