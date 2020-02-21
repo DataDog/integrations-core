@@ -7,19 +7,19 @@ files:
     - name: host
       required: true
       description: |
-        Host that the Datadog active directory check connects to.
+        The host the Datadog Active Directory check connects to.
         "." means the current host
       value:
         example: .
         type: string
     - name: username
       required: false
-      description: Username from the credentials needed to connect to the host.
+      description: The username from the credentials needed to connect to the host.
       value:
         type: string
     - name: password
       required: false
-      description: Password from the credentials needed to connect to the host.
+      description: The password from the credentials needed to connect to the host.
       value:
         type: string
     - name: additional_metrics
@@ -30,14 +30,14 @@ files:
 
         ['<COUNTERSET_NAME>', <COUNTER_INSTANCE_NAME>, '<COUNTER_NAME>', <METRIC_NAME>, <METRIC_TYPE>]
 
-        <COUNTERSET_NAME> is the name of the PDH Counter Set (the name of the counter)
+        <COUNTERSET_NAME> is the name of the PDH counter set (the name of the counter).
         <COUNTER_INSTANCE_NAME> is the specific counter instance to collect, for example
-                                "Default Web Site".  Specify 'none' For all instances of
+                                "Default Web Site".  Specify 'none' for all instances of
                                 the counter.
-        <COUNTER_NAME> is the individual counter to report
-        <METRIC_NAME> is the name you want to show up in Datadog
-        <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge,
-                      rate, histogram or counter
+        <COUNTER_NAME> is the individual counter to report.
+        <METRIC_NAME> is the name that displays in Datadog.
+        <METRIC_TYPE> is from the standard choices for all Agent checks, such as gauge,
+                      rate, histogram, or count.
       value:
         example:
         - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
@@ -47,10 +47,10 @@ files:
     - name: counter_data_types
       required: false
       description: |
-        counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> element that
-        allows the precision with which counters are queried on a per metric basis
-        <METRIC_NAME>: Name of your metric
-        <DATA_TYPE>  : Type of your metric, can be int, float
+        counter_data_types is a list of <METRIC_NAME>,<DATA_TYPE> elements that
+        allow the precision in which counters are queried on a per metric basis.
+        <METRIC_NAME>: The name of your metric
+        <DATA_TYPE>  : The type of your metric (int or float)
       value:
           example: |
             - <METRIC_NAME>,<DATA_TYPE>
