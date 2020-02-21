@@ -1,7 +1,10 @@
 # Profile for Cisco 3850 devices
 #
 extends:
-  - generic-router.yaml
+  - _base.yaml
+  - _generic-router-if.yaml
+  - _generic-router-tcp.yaml
+  - _generic-router-udp.yaml
 
 sysobjectid: 1.3.6.1.4.1.9.1.1745
 

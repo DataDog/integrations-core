@@ -165,7 +165,7 @@ class InstanceConfig:
 
     def refresh_with_profile(self, profile, warning, log):
         # type: (Dict[str, Any], Callable[..., None], Callable[..., None]) -> None
-        metrics = profile['definition']['metrics']
+        metrics = profile['definition'].get('metrics', [])
         all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
 
         metric_tags = profile['definition'].get('metric_tags', [])

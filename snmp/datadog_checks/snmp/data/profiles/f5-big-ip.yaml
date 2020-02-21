@@ -1,6 +1,7 @@
 # Profile for F5 BIG-IP devices
 #
 extends:
+  - _base.yaml
   - _generic-router-if.yaml  # F5-specific variants of the other metrics are provided in this profile.
 
 sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*

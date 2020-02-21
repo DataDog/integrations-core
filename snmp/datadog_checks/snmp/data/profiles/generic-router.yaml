@@ -3,14 +3,8 @@
 sysobjectid: 1.3.6.1.4.*
 
 extends:
+  - _base.yaml
   - _generic-router-if.yaml
   - _generic-router-ip.yaml
   - _generic-router-tcp.yaml
   - _generic-router-udp.yaml
-
-metrics: []
-
-metric_tags:
-  - MIB: SNMPv2-MIB
-    symbol: sysName
-    tag: snmp_host

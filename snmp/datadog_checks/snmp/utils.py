@@ -30,7 +30,7 @@ def get_profile_definition(profile):
 
 
 def _get_profiles_root():
-    # NOTE: this separate method exists for mocking purposes.
+    # NOTE: this separate helper function exists for mocking purposes.
     confd = get_config('confd_path')
     return os.path.join(confd, 'snmp.d', 'profiles')
 
@@ -63,7 +63,7 @@ def recursively_expand_base_profiles(definition):
 
         base_metrics = base_definition.get('metrics', [])
         existing_metrics = definition.get('metrics', [])
-        definition['metrics'] = base_metrics + existing_metrics  # Base metrics should be first in the list.
+        definition['metrics'] = base_metrics + existing_metrics  # NOTE: base metrics must be added first.
 
         definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
 
