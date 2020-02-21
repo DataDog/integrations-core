@@ -921,9 +921,24 @@ def test_f5(aggregator):
         'sysMultiHostCpuIowait',
     ]
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
-    if_counts = ['ifHCInOctets', 'ifInErrors', 'ifHCOutOctets', 'ifOutErrors']
+    if_counts = [
+        'ifHCInOctets',
+        'ifInErrors',
+        'ifHCOutOctets',
+        'ifOutErrors',
+        'ifHCInBroadcastPkts',
+        'ifHCOutUcastPkts',
+        'ifHCOutMulticastPkts',
+        'ifOutDiscards',
+        'ifHCInUcastPkts',
+        'ifHCInMulticastPkts',
+        'ifHCOutBroadcastPkts',
+        'ifInDiscards',
+    ]
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
-    tags = common.CHECK_TAGS + ['snmp_profile:f5-big-ip']
+    tags = ['snmp_profile:f5-big-ip', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
+    tags += common.CHECK_TAGS
+
     for metric in gauges:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     for metric in counts:
