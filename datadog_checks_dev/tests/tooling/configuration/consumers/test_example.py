@@ -242,8 +242,9 @@ def test_section_example_indent():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## service - required - Name of the service that generated the log
         ## source  - required - Attribute that defines which Integration sent the logs
+        ## service - required - Name of the service that generated the log.
+        ##                      Overrides any `service` defined in the `init_config` section.
         ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
         ## tags - optional - Add tags to the collected logs
         ##
@@ -841,6 +842,13 @@ def test_template_recursion():
             # tags:
             #   - <KEY_1>:<VALUE_1>
             #   - <KEY_2>:<VALUE_2>
+
+            ## @param service - string - optional
+            ## Attach tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+            ##
+            ## Overrides any `service` defined in the `init_config` section.
+            #
+            # service: <SERVICE>
 
             ## @param min_collection_interval - number - optional - default: 15
             ## This changes the collection interval of the check. For more information, see:
