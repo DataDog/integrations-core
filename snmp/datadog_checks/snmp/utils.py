@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 import yaml
 
@@ -38,3 +38,31 @@ def _read_profile_definition(definition_file):
 
     with open(definition_file) as f:
         return yaml.safe_load(f)
+
+
+def to_oid_tuple(oid):
+    # type: (str) -> Tuple[int, ...]
+    """Return a OID tuple from a OID string.
+
+    Example:
+    '1.3.6.1.4.1' -> (1, 3, 6, 1, 4, 1)
+    """
+    return tuple(map(int, oid.lstrip('.').split('.')))
+
+
+def oid_pattern_specificity(pattern):
+    # type: (str) -> Tuple[int, Tuple[int, ...]]
+    """Return a measure of the specificity of an OID pattern.
+
+    Suitable for use as a key function when sorting OID patterns.
+    """
+    wildcard_key = -1  # Must be less than all digits, so that e.G. '1.*' is less specific than '1.n' for n = 0...9.
+
+    parts = tuple(
+        wildcard_key if digit == '*' else int(digit) for digit in pattern.lstrip('.').split('.')
+    )
+
+    return (
+        len(parts),  # Shorter OIDs are less specific than longer OIDs, regardless of their contents.
+        parts,  # For same-length OIDs, compare their contents (integer parts).
+    )
