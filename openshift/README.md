@@ -33,6 +33,10 @@ Starting with version 6.1, the Datadog Agent supports monitoring OpenShift Origi
 
 > :warning: **OpenShift 4.0+**: If you used the OpenShift installer on a supported cloud provider, you will need to deploy the Agent with `hostNetwork: true` to get host tags/aliases as access to metadata servers from PODs network is otherwise restricited.
 
+#### Log collection
+
+Refer to the [Kubernetes Log Collection][12] documentation for further information.
+
 #### Restricted SCC operations
 
 This mode does not require granting special permissions to the [`datadog-agent` daemonset][4], other than the [RBAC][5] permissions needed to access the kubelet and the APIserver. You can get started with this [kubelet-only template][6].
@@ -102,3 +106,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/openshift/metadata.csv
 [11]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection

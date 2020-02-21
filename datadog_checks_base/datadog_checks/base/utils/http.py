@@ -302,14 +302,21 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
+        new_options = self.populate_options(options)
+
+        extra_headers = options.pop('extra_headers', None)
+        if extra_headers is not None:
+            new_options['headers'] = new_options['headers'].copy()
+            new_options['headers'].update(extra_headers)
+
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
 
             if persist:
-                return getattr(self.session, method)(url, **self.populate_options(options))
+                return getattr(self.session, method)(url, **new_options)
             else:
-                return getattr(requests, method)(url, **self.populate_options(options))
+                return getattr(requests, method)(url, **new_options)
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options

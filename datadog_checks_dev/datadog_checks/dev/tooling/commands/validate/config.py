@@ -95,6 +95,7 @@ def config(ctx, check, sync):
                 else:
                     if not file_exists(example_file_path) or read_file(example_file_path) != contents:
                         if sync:
+                            echo_info(f"Writing config file to `{example_file_path}`")
                             write_file(example_file_path, contents)
                         else:
                             files_failed[example_file_path] = True

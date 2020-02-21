@@ -95,6 +95,12 @@ Follow the instructions below to configure this check for an Agent running on a 
        ## Password associated with the Datadog user.
        #
        password: "<PASSWORD>"
+           
+       ## @param dbname - string - optional - default: postgres
+       ## Name of the PostgresSQL database to monitor. 
+       ## Note: If omitted, the default system postgres database is queried.
+       #
+       dbname: "<DB_NAME>"
    ```
 
 2. [Restart the Agent][4].
