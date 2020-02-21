@@ -105,6 +105,7 @@ class WMISampler(object):
 
         # Sampling state
         self._sampling = False
+        self._stopping = False
 
         self.logger = logger
 
@@ -146,12 +147,35 @@ class WMISampler(object):
         self._runSampleEvent = Event()
         self._sampleCompleteEvent = Event()
 
-        thread = Thread(target=self._query_sample_loop, name=class_name)
-        thread.daemon = True
+    def start(self):
+        """
+        Start internal thread for sampling
+        """
+        thread = Thread(target=self._query_sample_loop, name=self.class_name)
+        thread.daemon = True  # Python 2 does not support daemon as Thread constructor parameter
         thread.start()
+
+    def stop(self):
+        """
+        Dispose of the internal thread
+        """
+        self._stopping = True
+        self._runSampleEvent.set()
+        self._sampleCompleteEvent.wait()
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.stop()
 
     def _query_sample_loop(self):
         try:
+            # Initialize COM for the current (dedicated) thread
+            # WARNING: any python COM object (locator, connection, etc) created in a thread
+            # shouldn't be used in other threads (can lead to memory/handle leaks if done
+            # without a deep knowledge of COM's threading model).
             pythoncom.CoInitialize()
         except Exception as e:
             self.logger.info("exception in CoInitialize: %s", e)
@@ -159,6 +183,11 @@ class WMISampler(object):
 
         while True:
             self._runSampleEvent.wait()
+            if self._stopping:
+                self.logger.debug("_query_sample_loop stopping")
+                self._sampleCompleteEvent.set()
+                return
+
             self._runSampleEvent.clear()
             if self.is_raw_perf_class and not self._previous_sample:
                 self._current_sample = self._query()
@@ -335,11 +364,6 @@ class WMISampler(object):
             self.username,
         )
 
-        # Initialize COM for the current thread
-        # WARNING: any python COM object (locator, connection, etc) created in a thread
-        # shouldn't be used in other threads (can lead to memory/handle leaks if done
-        # without a deep knowledge of COM's threading model). Because of this and given
-        # that we run each query in its own thread, we don't cache connections
         additional_args = []
 
         if self.provider != ProviderArchitecture.DEFAULT:
