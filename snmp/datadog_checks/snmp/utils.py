@@ -58,9 +58,7 @@ def oid_pattern_specificity(pattern):
     """
     wildcard_key = -1  # Must be less than all digits, so that e.G. '1.*' is less specific than '1.n' for n = 0...9.
 
-    parts = tuple(
-        wildcard_key if digit == '*' else int(digit) for digit in pattern.lstrip('.').split('.')
-    )
+    parts = tuple(wildcard_key if digit == '*' else int(digit) for digit in pattern.lstrip('.').split('.'))
 
     return (
         len(parts),  # Shorter OIDs are less specific than longer OIDs, regardless of their contents.
