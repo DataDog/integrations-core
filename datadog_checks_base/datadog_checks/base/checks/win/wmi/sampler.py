@@ -151,7 +151,7 @@ class WMISampler(object):
         """
         Start internal thread for sampling
         """
-        thread = Thread(target = self._query_sample_loop, name = self.class_name, daemon = True)
+        thread = Thread(target=self._query_sample_loop, name=self.class_name, daemon=True)
         thread.start()
         return self
 
@@ -168,7 +168,7 @@ class WMISampler(object):
             # Initialize COM for the current (dedicated) thread
             # WARNING: any python COM object (locator, connection, etc) created in a thread
             # shouldn't be used in other threads (can lead to memory/handle leaks if done
-            # without a deep knowledge of COM's threading model). 
+            # without a deep knowledge of COM's threading model).
             pythoncom.CoInitialize()
         except Exception as e:
             self.logger.info("exception in CoInitialize: %s", e)
@@ -372,9 +372,7 @@ class WMISampler(object):
             self.provider,
             self.username,
         )
-        return locator.ConnectServer(
-            self.host, self.namespace, self.username, self.password, *additional_args
-        )
+        return locator.ConnectServer(self.host, self.namespace, self.username, self.password, *additional_args)
 
     @staticmethod
     def _format_filter(filters, and_props=[]):
