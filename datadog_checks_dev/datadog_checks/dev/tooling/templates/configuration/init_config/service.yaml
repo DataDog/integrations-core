@@ -2,6 +2,6 @@ name: service
 value:
   type: string
 description: |
-  Attach tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+  Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
 
   Additionally, this sets the default `service` for every log source.

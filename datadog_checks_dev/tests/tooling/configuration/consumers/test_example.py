@@ -243,7 +243,7 @@ def test_section_example_indent():
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
         ## source  - required - Attribute that defines which Integration sent the logs
-        ## service - required - Name of the service that generated the log.
+        ## service - required - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
         ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
         ## tags - optional - Add tags to the collected logs
@@ -844,7 +844,7 @@ def test_template_recursion():
             #   - <KEY_2>:<VALUE_2>
 
             ## @param service - string - optional
-            ## Attach tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+            ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
             ##
             ## Overrides any `service` defined in the `init_config` section.
             #
