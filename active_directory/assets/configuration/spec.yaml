@@ -43,7 +43,9 @@ files:
         - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
         type: array
         items:
-          type: string
+          type: array
+            items:
+              type: string
     - name: counter_data_types
       required: false
       description: |
