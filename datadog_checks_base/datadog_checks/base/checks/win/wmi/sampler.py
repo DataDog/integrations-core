@@ -151,7 +151,8 @@ class WMISampler(object):
         """
         Start internal thread for sampling
         """
-        thread = Thread(target=self._query_sample_loop, name=self.class_name, daemon=True)
+        thread = Thread(target=self._query_sample_loop, name=self.class_name)
+        thread.daemon = True  # Python 2 does not support daemon as Thread constructor parameter
         thread.start()
         return self
 
