@@ -147,22 +147,28 @@ class WMISampler(object):
         self._runSampleEvent = Event()
         self._sampleCompleteEvent = Event()
 
-    def __enter__(self):
+    def start(self):
         """
         Start internal thread for sampling
         """
         thread = Thread(target=self._query_sample_loop, name=self.class_name)
         thread.daemon = True  # Python 2 does not support daemon as Thread constructor parameter
         thread.start()
-        return self
 
-    def __exit__(self, type, value, traceback):
+    def stop(self):
         """
         Dispose of the internal thread
         """
         self._stopping = True
-        self._runSampleEvent.set()
-        self._sampleCompleteEvent.wait()
+        self._run_sample_event.set()
+        self._sample_complete_event.wait()
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.stop()
 
     def _query_sample_loop(self):
         try:
