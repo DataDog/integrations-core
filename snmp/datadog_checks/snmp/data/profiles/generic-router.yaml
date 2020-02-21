@@ -149,3 +149,7 @@ metrics:
   - MIB: UDP-MIB
     symbol: udpHCOutDatagrams
     forced_type: monotonic_count
+metric_tags:
+  - MIB: SNMPv2-MIB
+    symbol: sysName
+    tag: snmp_host

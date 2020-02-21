@@ -1109,7 +1109,8 @@ def test_f5_router(aggregator):
         'ipSystemStatsHCOutMcastPkts',
     ]
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
-    common_tags = common.CHECK_TAGS + ['snmp_profile:router']
+    common_tags = ['snmp_profile:router', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
+    common_tags.extend(common.CHECK_TAGS)
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
         for metric in if_counts:
