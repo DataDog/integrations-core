@@ -27,6 +27,9 @@
   "type": "check",
   "integration_id": "kong",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Kong Overview": "assets/dashboards/kong_overview.json"
