@@ -14,7 +14,6 @@ instances:
     #   - scylla.alien
     #   - scylla.batchlog
     #   - scylla.commitlog
-    #   - scylla.compaction
     #   - scylla.cql
     #   - scylla.database
     #   - scylla.execution

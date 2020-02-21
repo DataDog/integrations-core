@@ -345,6 +345,7 @@ INSTANCE_METRIC_GROUP_MAP = {
 
 INSTANCE_DEFAULT_GROUPS = [
     'scylla.cache',
+    'scylla.compaction_manager',
     'scylla.gossip',
     'scylla.node',
     'scylla.reactor',

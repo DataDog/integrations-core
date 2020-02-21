@@ -26,8 +26,9 @@ instances:
     #
     password: <UNIQUEPASSWORD>
 
-    ## @param dbname - string - optional
-    ## Name of the PostgresSQL
+    ## @param dbname - string - optional - default: postgres
+    ## Name of the PostgresSQL database to monitor. 
+    ## Note: If omitted, the default system postgres database is queried.
     #
     # dbname: <DB_NAME>
 
@@ -62,6 +63,7 @@ instances:
 
     ## @param relations - list of objects (or strings) - optional
     ## The list of relations/tables must be specified here to track per-relation (table) metrics.
+    ## If enabled, `dbname` should be specified to collect database-specific relations metrics. 
     ## You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
     ## from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
     ## Each relation generates many metrics (10 + 10 per index)

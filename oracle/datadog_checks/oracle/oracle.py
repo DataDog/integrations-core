@@ -1,15 +1,15 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import OrderedDict
+import itertools
 from contextlib import closing
 
 import cx_Oracle
 import jaydebeapi as jdb
 import jpype
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
 
@@ -17,69 +17,71 @@ EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
 
 
-class OracleConfigError(Exception):
-    pass
-
-
 class Oracle(AgentCheck):
+    __NAMESPACE__ = 'oracle'
 
     ORACLE_DRIVER_CLASS = "oracle.jdbc.OracleDriver"
     JDBC_CONNECT_STRING = "jdbc:oracle:thin:@//{}/{}"
     CX_CONNECT_STRING = "{}/{}@//{}/{}"
 
-    SERVICE_CHECK_NAME = 'oracle.can_connect'
-    SYS_METRICS = {
-        'Buffer Cache Hit Ratio': 'oracle.buffer_cachehit_ratio',
-        'Cursor Cache Hit Ratio': 'oracle.cursor_cachehit_ratio',
-        'Library Cache Hit Ratio': 'oracle.library_cachehit_ratio',
-        'Shared Pool Free %': 'oracle.shared_pool_free',
-        'Physical Reads Per Sec': 'oracle.physical_reads',
-        'Physical Writes Per Sec': 'oracle.physical_writes',
-        'Enqueue Timeouts Per Sec': 'oracle.enqueue_timeouts',
-        'GC CR Block Received Per Second': 'oracle.gc_cr_block_received',
-        'Global Cache Blocks Corrupted': 'oracle.cache_blocks_corrupt',
-        'Global Cache Blocks Lost': 'oracle.cache_blocks_lost',
-        'Logons Per Sec': 'oracle.logons',
-        'Average Active Sessions': 'oracle.active_sessions',
-        'Long Table Scans Per Sec': 'oracle.long_table_scans',
-        'SQL Service Response Time': 'oracle.service_response_time',
-        'User Rollbacks Per Sec': 'oracle.user_rollbacks',
-        'Total Sorts Per User Call': 'oracle.sorts_per_user_call',
-        'Rows Per Sort': 'oracle.rows_per_sort',
-        'Disk Sort Per Sec': 'oracle.disk_sorts',
-        'Memory Sorts Ratio': 'oracle.memory_sorts_ratio',
-        'Database Wait Time Ratio': 'oracle.database_wait_time_ratio',
-        'Session Limit %': 'oracle.session_limit_usage',
-        'Session Count': 'oracle.session_count',
-        'Temp Space Used': 'oracle.temp_space_used',
-    }
+    SERVICE_CHECK_NAME = 'can_connect'
 
-    PROCESS_METRICS = OrderedDict(
-        [
-            ('PGA_USED_MEM', 'oracle.process.pga_used_memory'),
-            ('PGA_ALLOC_MEM', 'oracle.process.pga_allocated_memory'),
-            ('PGA_FREEABLE_MEM', 'oracle.process.pga_freeable_memory'),
-            ('PGA_MAX_MEM', 'oracle.process.pga_maximum_memory'),
-        ]
-    )
+    def __init__(self, name, init_config, instances):
+        super(Oracle, self).__init__(name, init_config, instances)
+        (
+            self._server,
+            self._user,
+            self._password,
+            self._service,
+            self._jdbc_driver,
+            self._tags,
+            only_custom_queries,
+        ) = self._get_config(self.instance)
 
-    def check(self, instance):
-        server, user, password, service, jdbc_driver, tags, custom_queries, only_custom_queries = self._get_config(
-            instance
-        )
+        self.check_initializations.append(self.validate_config)
 
-        if not server or not user:
-            raise OracleConfigError("Oracle host and user are needed")
+        self._connection = None
 
-        service_check_tags = ['server:%s' % server]
-        service_check_tags.extend(tags)
+        manager_queries = []
+        if not only_custom_queries:
+            manager_queries.extend([queries.ProcessMetrics, queries.SystemMetrics, queries.TableSpaceMetrics])
 
-        with closing(self._get_connection(server, user, password, service, jdbc_driver, service_check_tags)) as con:
-            if not only_custom_queries:
-                self._get_sys_metrics(con, tags)
-                self._get_process_metrics(con, tags)
-                self._get_tablespace_metrics(con, tags)
-            self._get_custom_metrics(con, custom_queries, tags)
+        self._fix_custom_queries()
+
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=manager_queries, tags=self._tags,)
+        self.check_initializations.append(self._query_manager.compile_queries)
+
+    def _fix_custom_queries(self):
+        """
+        For backward compatibility reasons, if a custom query specifies a
+        `metric_prefix`, change the submission name to contain it.
+        """
+        custom_queries = self.instance.get('custom_queries', [])
+        global_custom_queries = self.init_config.get('global_custom_queries', [])
+        for query in itertools.chain(custom_queries, global_custom_queries):
+            prefix = query.get('metric_prefix')
+            if prefix and prefix != self.__NAMESPACE__:
+                if prefix.startswith(self.__NAMESPACE__ + '.'):
+                    prefix = prefix[len(self.__NAMESPACE__) + 1 :]
+                for column in query.get('columns', []):
+                    if column.get('type') != 'tag':
+                        column['name'] = '{}.{}'.format(prefix, column['name'])
+
+    def validate_config(self):
+        if not self._server or not self._user:
+            raise ConfigurationError("Oracle host and user are needed")
+
+    def execute_query_raw(self, query):
+        with closing(self._connection.cursor()) as cursor:
+            cursor.execute(query)
+            # JDBC doesn't support iter protocol
+            return cursor.fetchall()
+
+    def check(self, _):
+        self.create_connection()
+        with closing(self._connection):
+            self._query_manager.execute()
+            self._connection = None
 
     def _get_config(self, instance):
         server = instance.get('server')
@@ -88,14 +90,14 @@ class Oracle(AgentCheck):
         service = instance.get('service_name')
         jdbc_driver = instance.get('jdbc_driver_path')
         tags = instance.get('tags') or []
-        custom_queries = instance.get('custom_queries', [])
         only_custom_queries = instance.get('only_custom_queries', False)
-        if is_affirmative(instance.get('use_global_custom_queries', True)):
-            custom_queries.extend(self.init_config.get('global_custom_queries', []))
 
-        return server, user, password, service, jdbc_driver, tags, custom_queries, only_custom_queries
+        return server, user, password, service, jdbc_driver, tags, only_custom_queries
 
-    def _get_connection(self, server, user, password, service, jdbc_driver, tags):
+    def create_connection(self):
+        service_check_tags = ['server:%s' % self._server]
+        service_check_tags.extend(self._tags)
+
         try:
             # Check if the instantclient is available
             cx_Oracle.clientversion()
@@ -103,15 +105,15 @@ class Oracle(AgentCheck):
             # Fallback to JDBC
             use_oracle_client = False
             self.log.debug('Oracle instant client unavailable, falling back to JDBC: %s', e)
-            connect_string = self.JDBC_CONNECT_STRING.format(server, service)
+            connect_string = self.JDBC_CONNECT_STRING.format(self._server, self._service)
         else:
             use_oracle_client = True
             self.log.debug('Running cx_Oracle version %s', cx_Oracle.version)
-            connect_string = self.CX_CONNECT_STRING.format(user, password, server, service)
+            connect_string = self.CX_CONNECT_STRING.format(self._user, self._password, self._server, self._service)
 
         try:
             if use_oracle_client:
-                con = cx_Oracle.connect(connect_string)
+                connection = cx_Oracle.connect(connect_string)
             else:
                 try:
                     if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():
@@ -119,7 +121,9 @@ class Oracle(AgentCheck):
                         jpype.java.lang.Thread.currentThread().setContextClassLoader(
                             jpype.java.lang.ClassLoader.getSystemClassLoader()
                         )
-                    con = jdb.connect(self.ORACLE_DRIVER_CLASS, connect_string, [user, password], jdbc_driver)
+                    connection = jdb.connect(
+                        self.ORACLE_DRIVER_CLASS, connect_string, [self._user, self._password], self._jdbc_driver
+                    )
                 except Exception as e:
                     if "Class {} not found".format(self.ORACLE_DRIVER_CLASS) in str(e):
                         msg = """Cannot run the Oracle check until either the Oracle instant client or the JDBC Driver
@@ -137,142 +141,9 @@ class Oracle(AgentCheck):
                     raise
 
             self.log.debug("Connected to Oracle DB")
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
         except Exception as e:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
             self.log.error(e)
             raise
-        return con
-
-    def _get_custom_metrics(self, con, custom_queries, global_tags):
-        for custom_query in custom_queries:
-            metric_prefix = custom_query.get('metric_prefix')
-            if not metric_prefix:
-                self.log.error('custom query field `metric_prefix` is required')
-                continue
-            metric_prefix = metric_prefix.rstrip('.')
-
-            query = custom_query.get('query')
-            if not query:
-                self.log.error('custom query field `query` is required for metric_prefix `%s`', metric_prefix)
-                continue
-
-            columns = custom_query.get('columns')
-            if not columns:
-                self.log.error('custom query field `columns` is required for metric_prefix `%s`', metric_prefix)
-                continue
-
-            with closing(con.cursor()) as cursor:
-                cursor.execute(query)
-                for row in cursor.fetchall():
-                    if len(columns) != len(row):
-                        self.log.error(
-                            'query result for metric_prefix %s: expected %s columns, got %s',
-                            metric_prefix,
-                            len(columns),
-                            len(row),
-                        )
-                        break
-
-                    metric_info = []
-                    query_tags = list(custom_query.get('tags', []))
-                    query_tags.extend(global_tags)
-
-                    errored = True
-                    for column, value in zip(columns, row):
-                        # Columns can be ignored via configuration.
-                        if column:
-                            name = column.get('name')
-                            if not name:
-                                self.log.error('column field `name` is required for metric_prefix `%s`', metric_prefix)
-                                break
-
-                            column_type = column.get('type')
-                            if not column_type:
-                                self.log.error(
-                                    'column field `type` is required for column `%s` of metric_prefix `%s`',
-                                    name,
-                                    metric_prefix,
-                                )
-                                break
-
-                            if column_type == 'tag':
-                                query_tags.append('{}:{}'.format(name, value))
-                            else:
-                                if not hasattr(self, column_type):
-                                    self.log.error(
-                                        'invalid submission method `%s` for column `%s` of metric_prefix `%s`',
-                                        column_type,
-                                        name,
-                                        metric_prefix,
-                                    )
-                                    break
-                                try:
-                                    metric_info.append(('{}.{}'.format(metric_prefix, name), float(value), column_type))
-                                except (ValueError, TypeError):
-                                    self.log.error(
-                                        'non-numeric value `%s` for metric column `%s` of metric_prefix `%s`',
-                                        value,
-                                        name,
-                                        metric_prefix,
-                                    )
-                                    break
-
-                    # Only submit metrics if there were absolutely no errors - all or nothing.
-                    else:
-                        errored = False
-                        for info in metric_info:
-                            metric, value, method = info
-                            getattr(self, method)(metric, value, tags=query_tags)
-
-                    if errored:
-                        # If we failed to parse one row of the results, there is no reason to continue
-                        break
-
-    def _get_sys_metrics(self, con, tags):
-        with closing(con.cursor()) as cur:
-            cur.execute(queries.SYSTEM)
-            for row in cur.fetchall():
-                metric_name = row[0]
-                metric_value = row[1]
-                if metric_name in self.SYS_METRICS:
-                    self.gauge(self.SYS_METRICS[metric_name], metric_value, tags=tags)
-
-    def _get_process_metrics(self, con, tags):
-        with closing(con.cursor()) as cur:
-            cur.execute(queries.PROCESS.format(','.join(self.PROCESS_METRICS.keys())))
-            for row in cur.fetchall():
-                # Oracle program name
-                program_tag = ['program:{}'.format(row[0])]
-
-                # Get the metrics
-                for i, metric_name in enumerate(self.PROCESS_METRICS.values(), 1):
-                    metric_value = row[i]
-                    self.gauge(metric_name, metric_value, tags=tags + program_tag)
-
-    def _get_tablespace_metrics(self, con, tags):
-        with closing(con.cursor()) as cur:
-            cur.execute(queries.TABLESPACE)
-            for tablespace_name, used_bytes, max_bytes, used_percent in cur.fetchall():
-                tablespace_tags = ['tablespace:{}'.format(tablespace_name)]
-                tablespace_tags.extend(tags)
-                if used_bytes is None:
-                    # mark tablespace as offline if null
-                    offline = 1
-                    used = 0
-                else:
-                    offline = 0
-                    used = float(used_bytes)
-                if max_bytes is None:
-                    size = 0
-                else:
-                    size = float(max_bytes)
-                if used_percent is None:
-                    in_use = 0
-                else:
-                    in_use = float(used_percent)
-
-                self.gauge('oracle.tablespace.used', used, tags=tablespace_tags)
-                self.gauge('oracle.tablespace.size', size, tags=tablespace_tags)
-                self.gauge('oracle.tablespace.in_use', in_use, tags=tablespace_tags)
-                self.gauge('oracle.tablespace.offline', offline, tags=tablespace_tags)
+        self._connection = connection

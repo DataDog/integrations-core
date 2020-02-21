@@ -8,12 +8,12 @@ Amazon EKS on AWS Fargate is a managed Kubernetes service that automates certain
 
 These steps cover the setup of the Datadog Agent v7.17+ in a container within Amazon EKS on AWS Fargate. Refer to the [Datadog-Amazon EKS integration documentation][1] if you are not using AWS Fargate.
 
-AWS Fargate pods are not physical pod, which means they exclude [host-based system-checks][2], like CPU, memory, etc. In order to collect data from your AWS Fargate pods, you must run the Agent as a sidecar of your application pod with custom RBAC, which enables these features:
+AWS Fargate pods are not physical pods, which means they exclude [host-based system-checks][2], like CPU, memory, etc. In order to collect data from your AWS Fargate pods, you must run the Agent as a sidecar of your application pod with custom RBAC, which enables these features:
 
-* Kubernetes metrics collection from the pod running your application containers and the Agent
-* [Autodiscovery][3]
-* Configuration of custom Agent Checks to target containers in the same pod
-* APM and DogStatsD for containers in the same pod
+- Kubernetes metrics collection from the pod running your application containers and the Agent
+- [Autodiscovery][3]
+- Configuration of custom Agent Checks to target containers in the same pod
+- APM and DogStatsD for containers in the same pod
 
 ### EC2 Node
 
@@ -23,10 +23,10 @@ If you don't specify through [AWS Fargate Profile][4] that your pods should run 
 
 To get the best observability coverage monitoring workloads in AWS EKS Fargate, install the Datadog integrations for:
 
-* [Kubernetes][8]
-* [AWS][9]
-* [EKS][10]
-* [EC2][11] (if you are running an EC2-type node)
+- [Kubernetes][8]
+- [AWS][9]
+- [EKS][10]
+- [EC2][11] (if you are running an EC2-type node)
 
 Also, set up integrations for any other AWS services you are running with EKS (for example, [ELB][12]).
 
@@ -40,9 +40,9 @@ If the Agent is running as a sidecar, it can communicate only with containers on
 
 To collect data from your applications running in AWS EKS Fargate over a Fargate node, follow these setup steps:
 
-* [Set up AWS EKS Fargate RBAC rules](#aws-eks-fargate-rbac).
-* [Deploy the Agent as a sidecar](#running-the-agent-as-a-side-car).
-* Set up Datadog [metrics](#metrics-collection), [events](#events-collection), and [traces](#traces-collection) collection.
+- [Set up AWS EKS Fargate RBAC rules](#aws-eks-fargate-rbac).
+- [Deploy the Agent as a sidecar](#running-the-agent-as-a-side-car).
+- Set up Datadog [metrics](#metrics-collection), [events](#events-collection), and [traces](#traces-collection) collection.
 
 #### AWS EKS Fargate RBAC
 

@@ -6,11 +6,12 @@
 
 Enable the Datadog-Ceph integration to:
 
-  * Track disk usage across storage pools
-  * Receive service checks in case of issues
-  * Monitor I/O performance metrics
+- Track disk usage across storage pools
+- Receive service checks in case of issues
+- Monitor I/O performance metrics
 
 ## Setup
+
 ### Installation
 
 The Ceph check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Ceph servers.
@@ -25,34 +26,34 @@ init_config:
 
 instances:
   - ceph_cmd: /path/to/your/ceph # default is /usr/bin/ceph
-    use_sudo: true               # only if the ceph binary needs sudo on your nodes
+    use_sudo: true # only if the ceph binary needs sudo on your nodes
 ```
 
 If you enabled `use_sudo`, add a line like the following to your `sudoers` file:
 
-```
+```text
 dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 ```
 
 #### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Next, edit `ceph.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Ceph log files.
 
-    ```
-      logs:
-        - type: file
-          path: /var/log/ceph/*.log
-          source: ceph
-          service: <APPLICATION_NAME>
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/ceph/*.log
+       source: ceph
+       service: "<APPLICATION_NAME>"
+   ```
 
 3. [Restart the Agent][10].
 
@@ -61,6 +62,7 @@ dd-agent ALL=(ALL) NOPASSWD:/path/to/your/ceph
 [Run the Agent's status subcommand][6] and look for `ceph` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
@@ -68,6 +70,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 **Note**: If you are running ceph luminous or later, you will not see the metric `ceph.osd.pct_used`.
 
 ### Events
+
 The Ceph check does not include any events.
 
 ### Service Checks
@@ -132,12 +135,12 @@ Returns `OK` requests are taking a normal time to process. Otherwise, returns `W
 Returns `OK` requests are taking a normal time to process. Otherwise, returns `WARNING` if the severity is `HEALTH_WARN`, else `CRITICAL`.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-* [Monitor Ceph: From node status to cluster-wide performance][9]
-
+- [Monitor Ceph: From node status to cluster-wide performance][9]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ceph/images/ceph_dashboard.png
 [3]: https://app.datadoghq.com/account/settings#agent

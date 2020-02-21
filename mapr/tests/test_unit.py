@@ -33,7 +33,7 @@ def test_get_stream_id():
 
 
 @pytest.mark.unit
-@pytest.mark.usefixtures("mock_fqdn")
+@pytest.mark.usefixtures("mock_fqdn", "mock_ticket_file_readable")
 def test_whitelist(instance):
     instance['metric_whitelist'] = [r'mapr\.fs.*', r'mapr\.db.*']
     check = MaprCheck('mapr', {}, [instance])
@@ -46,7 +46,7 @@ def test_whitelist(instance):
 
 
 @pytest.mark.unit
-@pytest.mark.usefixtures("mock_fqdn")
+@pytest.mark.usefixtures("mock_fqdn", "mock_ticket_file_readable")
 def test_submit_gauge(instance, aggregator):
     check = MaprCheck('mapr', {}, [instance])
     check.submit_metric(KAFKA_METRIC)
@@ -64,7 +64,7 @@ def test_submit_gauge(instance, aggregator):
 
 
 @pytest.mark.unit
-@pytest.mark.usefixtures("mock_fqdn")
+@pytest.mark.usefixtures("mock_fqdn", "mock_ticket_file_readable")
 def test_submit_gauge_additional_tags(instance, aggregator):
     instance['tags'] = ["foo:bar", "baz:biz"]
     check = MaprCheck('mapr', {}, [instance])
@@ -84,7 +84,7 @@ def test_submit_gauge_additional_tags(instance, aggregator):
 
 
 @pytest.mark.unit
-@pytest.mark.usefixtures("mock_fqdn")
+@pytest.mark.usefixtures("mock_fqdn", "mock_ticket_file_readable")
 def test_submit_bucket(instance, aggregator):
     check = MaprCheck('mapr', {}, [instance])
     check.submit_metric(DISTRIBUTION_METRIC)
@@ -103,7 +103,7 @@ def test_submit_bucket(instance, aggregator):
 
 
 @pytest.mark.usefixtures("mock_getconnection")
-@pytest.mark.usefixtures("mock_fqdn")
+@pytest.mark.usefixtures("mock_fqdn", "mock_ticket_file_readable")
 def test_check(aggregator, instance):
     check = MaprCheck('mapr', {}, [instance])
     check.check(instance)

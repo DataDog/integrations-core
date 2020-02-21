@@ -7,9 +7,11 @@
 Get metrics from Oracle Database servers in real time to visualize and monitor availability and performance.
 
 ## Setup
+
 ### Installation
 
 #### Prerequisite
+
 To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver. Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
 ##### JDBC Driver
@@ -25,34 +27,34 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
 
     If you are using Linux, after the Instant Client libraries are installed ensure the runtime linker can find the libraries. For example, using `ldconfig`:
 
-    ```
-    # Put the library location in an ld configuration file.
+   ```shell
+   # Put the library location in an ld configuration file.
 
-    sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
-        /etc/ld.so.conf.d/oracle-instantclient.conf"
+   sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
+       /etc/ld.so.conf.d/oracle-instantclient.conf"
 
-    # Update the bindings.
+   # Update the bindings.
 
-    sudo ldconfig
-    ```
+   sudo ldconfig
+   ```
 
 2. Decompress those libraries in a given directory available to all users on the given machine (i.e. `/opt/oracle`):
 
-    ```
-    mkdir -p /opt/oracle/ && cd /opt/oracle/
-    unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
-    unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
-    ```
+   ```shell
+   mkdir -p /opt/oracle/ && cd /opt/oracle/
+   unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
+   unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
+   ```
 
 3. Update your `LD_LIBRARY_PATH` to include the location of the Instant Client libraries when starting/restarting the agent:
 
-    ```
-    export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
-    ```
+   ```shell
+   export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
+   ```
 
 **Note:** Agent 6 uses Upstart or systemd to orchestrate the `datadog-agent` service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][5] or [systemd][6] for more information on how to configure these settings.
 
-The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files (`/int/init/datadog-agent.conf`) on a system using Upstart.
+The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files (`/etc/init/datadog-agent.conf`) on a system using Upstart.
 
 ```conf
 description "Datadog Agent"
@@ -86,7 +88,7 @@ end script
 
 Create a read-only `datadog` user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
 
-```
+```text
 -- Enable Oracle Script.
 ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 
@@ -104,58 +106,25 @@ GRANT SELECT ON sys.dba_tablespace_usage_metrics TO datadog;
 
 **Note**: If you're using Oracle 11g, there's no need to run the following line:
 
-```
+```text
 ALTER SESSION SET "_ORACLE_SCRIPT"=true;
 ```
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `oracle.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7]. Update the `server` and `port` to set the masters to monitor. See the [sample oracle.d/conf.yaml][3] for all available configuration options.
 
-    ```yaml
-      init_config:
-
-      instances:
-
-          ## @param server - string - required
-          ## The IP address or hostname of the Oracle Database Server.
-          #
-        - server: localhost:1521
-
-          ## @param service_name - string - required
-          ## The Oracle Database service name. To view the services available on your server,
-          ## run the following query:
-          ## `SELECT value FROM v$parameter WHERE name='service_names'`
-          #
-          service_name: "<SERVICE_NAME>"
-
-          ## @param user - string - required
-          ## The username for the user account.
-          #
-          user: datadog
-
-          ## @param password - string - required
-          ## The password for the user account.
-          #
-          password: "<PASSWORD>"
-    ```
-
-2. [Restart the Agent][8].
-
-#### Only custom queries
- To skip default metric checks for an instance and only run custom queries with an existing metrics gathering user, insert the tag `only_custom_queries` with a value of true. This allows a configured instance of the Oracle integration to skip the system, process, and tablespace metrics from running, and allows custom queries to be run without having the permissions described in the [Datadog user creation](#datadog-user-creation) section. If this configuration entry is omitted, the user you specify is required to have those table permissions to run a custom query.
-
- ```yaml
+   ```yaml
    init_config:
 
    instances:
-
-       ## @param server - string - required
-       ## The IP address or hostname of the Oracle Database Server.
-       #
+     ## @param server - string - required
+     ## The IP address or hostname of the Oracle Database Server.
+     #
      - server: localhost:1521
 
        ## @param service_name - string - required
@@ -168,25 +137,59 @@ Follow the instructions below to configure this check for an Agent running on a 
        ## @param user - string - required
        ## The username for the user account.
        #
-       user: <USER>
+       user: datadog
 
        ## @param password - string - required
        ## The password for the user account.
        #
        password: "<PASSWORD>"
+   ```
 
-       ## @param only_custom_queries - string - optional
-       ## Set this parameter to any value if you want to only run custom
-       ## queries for this instance.
-       #
-       only_custom_queries: true
- ```
+2. [Restart the Agent][8].
+
+#### Only custom queries
+
+To skip default metric checks for an instance and only run custom queries with an existing metrics gathering user, insert the tag `only_custom_queries` with a value of true. This allows a configured instance of the Oracle integration to skip the system, process, and tablespace metrics from running, and allows custom queries to be run without having the permissions described in the [Datadog user creation](#datadog-user-creation) section. If this configuration entry is omitted, the user you specify is required to have those table permissions to run a custom query.
+
+```yaml
+init_config:
+
+instances:
+  ## @param server - string - required
+  ## The IP address or hostname of the Oracle Database Server.
+  #
+  - server: localhost:1521
+
+    ## @param service_name - string - required
+    ## The Oracle Database service name. To view the services available on your server,
+    ## run the following query:
+    ## `SELECT value FROM v$parameter WHERE name='service_names'`
+    #
+    service_name: "<SERVICE_NAME>"
+
+    ## @param user - string - required
+    ## The username for the user account.
+    #
+    user: <USER>
+
+    ## @param password - string - required
+    ## The password for the user account.
+    #
+    password: "<PASSWORD>"
+
+    ## @param only_custom_queries - string - optional
+    ## Set this parameter to any value if you want to only run custom
+    ## queries for this instance.
+    #
+    only_custom_queries: true
+```
+
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                                     |
-|----------------------|-----------------------------------------------------------------------------------------------------------|
+| -------------------- | --------------------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `oracle`                                                                                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                             |
 | `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "user":"datadog", "password":"<PASSWORD>"}` |
@@ -200,7 +203,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 Providing custom queries is also supported. Each query must have 3 parameters:
 
 | Parameter       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `metric_prefix` | This is what each metric starts with.                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `query`         | This is the SQL to execute. It can be a simple statement or a multi-line script. All rows of the result are evaluated.                                                                                                                                                                                                                                                                                                                        |
 | `columns`       | This is a list representing each column, ordered sequentially from left to right. There are 2 required pieces of data: <br> a. `type` - This is the submission method (`gauge`, `count`, etc.). <br> b. name - This is the suffix to append to the `metric_prefix` in order to form the full metric name. If `type` is `tag`, this column is instead considered as a tag which is applied to every metric collected by this particular query. |
@@ -218,21 +221,21 @@ is what the following example configuration would become:
 
 ```yaml
 - metric_prefix: oracle.custom_query
-  query: |  # Use the pipe if you require a multi-line script.
-   SELECT columns
-   FROM tester.test_table
-   WHERE conditions
+  query: | # Use the pipe if you require a multi-line script.
+    SELECT columns
+    FROM tester.test_table
+    WHERE conditions
   columns:
-  # Put this for any column you wish to skip:
-  - {}
-  - name: metric1
-    type: gauge
-  - name: tag1
-    type: tag
-  - name: metric2
-    type: count
+    # Put this for any column you wish to skip:
+    - {}
+    - name: metric1
+      type: gauge
+    - name: tag1
+      type: tag
+    - name: metric2
+      type: count
   tags:
-  - tester:oracle
+    - tester:oracle
 ```
 
 See the [sample oracle.d/conf.yaml][3] for all available configuration options.
@@ -240,16 +243,20 @@ See the [sample oracle.d/conf.yaml][3] for all available configuration options.
 ## Data Collected
 
 ### Metrics
+
 See [metadata.csv][11] for a list of metrics provided by this integration.
 
 ### Events
+
 The Oracle Database check does not include any events.
 
 ### Service Checks
+
 **oracle.can_connect**
 Verifies the database is available and accepting connections.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][12].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png

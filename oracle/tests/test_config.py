@@ -4,29 +4,30 @@
 
 import pytest
 
-from datadog_checks.oracle import OracleConfigError
+from datadog_checks.base import ConfigurationError
+from datadog_checks.oracle import Oracle
+
+from .common import CHECK_NAME
 
 
 def test__get_config(check, instance):
     """
     Test the _get_config method
     """
-    server, user, password, service, jdbc_driver, tags, custom_queries, only_custom_queries = check._get_config(
-        instance
-    )
+    _, user, password, service, jdbc_driver, tags, only_custom_queries = check._get_config(instance)
     assert user == 'system'
     assert password == 'oracle'
     assert service == 'xe'
     assert jdbc_driver is None
     assert tags == ['optional:tag1']
-    assert custom_queries == []
     assert only_custom_queries is False
 
 
-def test_check_misconfig(check, instance):
+def test_check_misconfig(instance):
     """
     Test bad config values
     """
     instance['server'] = None
-    with pytest.raises(OracleConfigError):
-        check.check(instance)
+    check = Oracle(CHECK_NAME, {}, [instance])
+    with pytest.raises(ConfigurationError):
+        check.validate_config()

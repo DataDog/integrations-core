@@ -6,17 +6,18 @@
 
 Collect Etcd metrics to:
 
-* Monitor the health of your Etcd cluster.
-* Know when host configurations may be out of sync.
-* Correlate the performance of Etcd with the rest of your applications.
+- Monitor the health of your Etcd cluster.
+- Know when host configurations may be out of sync.
+- Correlate the performance of Etcd with the rest of your applications.
 
 ## Setup
 
 ### Installation
 
-The etcd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Etcd instance(s).
+The Etcd check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Etcd instance(s).
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -29,7 +30,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 | Parameter            | Value                             |
-|----------------------|-----------------------------------|
+| -------------------- | --------------------------------- |
 | `<INTEGRATION_NAME>` | `etcd`                            |
 | `<INIT_CONFIG>`      | blank or `{}`                     |
 | `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%:2379"}` |
@@ -39,6 +40,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 [Run the Agent's `status` subcommand][7] and look for `etcd` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][8] for a list of metrics provided by this integration.
@@ -46,6 +48,7 @@ See [metadata.csv][8] for a list of metrics provided by this integration.
 Etcd metrics are tagged with `etcd_state:leader` or `etcd_state:follower`, depending on the node status, so you can easily aggregate metrics by status.
 
 ### Events
+
 The Etcd check does not include any events.
 
 ### Service Checks
@@ -59,11 +62,12 @@ Returns 'Critical' if the Agent cannot collect metrics from your Etcd API endpoi
 Returns 'Critical' if a member node is not healthy. Returns 'Unknown' if the Agent can't reach the `/health` endpoint, or if the health status is missing.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][9].
 
 ## Further Reading
-To get a better idea of how (or why) to integrate etcd with Datadog, check out our [blog post][10] about it.
 
+To get a better idea of how (or why) to integrate Etcd with Datadog, check out our [blog post][10] about it.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/etcd/images/etcd_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent

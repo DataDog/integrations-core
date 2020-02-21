@@ -1,5 +1,10 @@
 # CHANGELOG - mapr
 
+## 1.2.0 / 2020-02-10
+
+* [Fixed] Fix service check "topic" tag. See [#5679](https://github.com/DataDog/integrations-core/pull/5679).
+* [Added] Improve logging and documentation. See [#5644](https://github.com/DataDog/integrations-core/pull/5644).
+
 ## 1.1.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
