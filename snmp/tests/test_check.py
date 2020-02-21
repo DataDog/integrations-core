@@ -18,8 +18,20 @@ from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
+from .utils import mock_profiles_root
 
 pytestmark = pytest.mark.usefixtures("dd_environment")
+
+
+@pytest.fixture(autouse=True)
+def host_profiles_root():
+    # By default, we resolve profiles relative to the `snmp.d` directory.
+    # But this directory is only created by the Agent when the integration is installed, so we have
+    # to replace it with the path within the Python package.
+    package_profiles_root = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles')
+
+    with mock_profiles_root(package_profiles_root):
+        yield
 
 
 def test_command_generator():
@@ -859,12 +871,11 @@ def test_metric_tags_misconfiguration():
 
 def test_f5(aggregator):
     instance = common.generate_instance_config([])
-    # We need the full path as we're not in installed mode
-    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'f5-big-ip.yaml')
+
     instance['community_string'] = 'f5'
     instance['enforce_mib_constraints'] = False
 
-    init_config = {'profiles': {'f5-big-ip': {'definition_file': path}}}
+    init_config = {'profiles': {'f5-big-ip': {'definition_file': 'f5-big-ip.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
@@ -942,13 +953,12 @@ def test_f5(aggregator):
 
 def test_router(aggregator):
     instance = common.generate_instance_config([])
-    # We need the full path as we're not in installed mode
-    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'generic-router.yaml')
+
     instance['community_string'] = 'network'
     instance['profile'] = 'router'
     instance['enforce_mib_constraints'] = False
 
-    init_config = {'profiles': {'router': {'definition_file': path}}}
+    init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
@@ -1078,15 +1088,13 @@ def test_router(aggregator):
 
 def test_f5_router(aggregator):
     instance = common.generate_instance_config([])
-    # We need the full path as we're not in installed mode
-    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'generic-router.yaml')
 
     # Use the generic profile against the f5 device
     instance['community_string'] = 'f5'
     instance['profile'] = 'router'
     instance['enforce_mib_constraints'] = False
 
-    init_config = {'profiles': {'router': {'definition_file': path}}}
+    init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
@@ -1142,13 +1150,12 @@ def test_f5_router(aggregator):
 
 def test_3850(aggregator):
     instance = common.generate_instance_config([])
-    # We need the full path as we're not in installed mode
-    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'cisco-3850.yaml')
+
     instance['community_string'] = '3850'
     instance['profile'] = 'cisco-3850'
     instance['enforce_mib_constraints'] = False
 
-    init_config = {'profiles': {'cisco-3850': {'definition_file': path}}}
+    init_config = {'profiles': {'cisco-3850': {'definition_file': 'cisco-3850.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
@@ -1180,7 +1187,7 @@ def test_3850(aggregator):
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
     # We're not covering all interfaces
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 48)]
-    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-3850']
+    common_tags = common.CHECK_TAGS + ['snmp_host:Cat-3850-4th-Floor.companyname.local', 'snmp_profile:cisco-3850']
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
         for metric in if_counts:
@@ -1236,11 +1243,11 @@ def test_3850(aggregator):
 
 def test_meraki_cloud_controller(aggregator):
     instance = common.generate_instance_config([])
-    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'meraki-cloud-controller.yaml')
+
     instance['community_string'] = 'meraki-cloud-controller'
     instance['profile'] = 'meraki'
     instance['enforce_mib_constraints'] = False
-    init_config = {'profiles': {'meraki': {'definition_file': path}}}
+    init_config = {'profiles': {'meraki': {'definition_file': 'meraki-cloud-controller.yaml'}}}
 
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
@@ -1262,13 +1269,12 @@ def test_meraki_cloud_controller(aggregator):
 
 def test_idrac(aggregator):
     instance = common.generate_instance_config([])
-    # We need the full path as we're not in installed mode
-    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'idrac.yaml')
+
     instance['community_string'] = 'idrac'
     instance['profile'] = 'idrac'
     instance['enforce_mib_constraints'] = False
 
-    init_config = {'profiles': {'idrac': {'definition_file': path}}}
+    init_config = {'profiles': {'idrac': {'definition_file': 'idrac.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
@@ -1338,9 +1344,7 @@ def test_cisco_nexus(aggregator):
     instance['profile'] = 'cisco-nexus'
     instance['enforce_mib_constraints'] = False
 
-    # We need the full path as we're not in installed mode
-    definition_file_path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'cisco-nexus.yaml')
-    init_config = {'profiles': {'cisco-nexus': {'definition_file': definition_file_path}}}
+    init_config = {'profiles': {'cisco-nexus': {'definition_file': 'cisco-nexus.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
@@ -1373,7 +1377,7 @@ def test_cisco_nexus(aggregator):
 
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-nexus']
+    common_tags = common.CHECK_TAGS + ['snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus']
 
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
@@ -1437,9 +1441,7 @@ def test_dell_poweredge(aggregator):
     instance['profile'] = 'dell-poweredge'
     instance['enforce_mib_constraints'] = False
 
-    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'dell-poweredge.yaml')
-
-    init_config = {'profiles': {'dell-poweredge': {'definition_file': path}}}
+    init_config = {'profiles': {'dell-poweredge': {'definition_file': 'dell-poweredge.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
@@ -1574,9 +1576,7 @@ def test_hp_ilo4(aggregator):
     instance['profile'] = 'hp-ilo4'
     instance['enforce_mib_constraints'] = False
 
-    # We need the full path as we're not in installed mode
-    definition_file_path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'hp-ilo4.yaml')
-    init_config = {'profiles': {'hp-ilo4': {'definition_file': definition_file_path}}}
+    init_config = {'profiles': {'hp-ilo4': {'definition_file': 'hp-ilo4.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
@@ -1691,9 +1691,7 @@ def test_proliant(aggregator):
     instance['profile'] = 'hpe-proliant'
     instance['enforce_mib_constraints'] = False
 
-    # We need the full path as we're not in installed mode
-    definition_file_path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'hpe-proliant.yaml')
-    init_config = {'profiles': {'hpe-proliant': {'definition_file': definition_file_path}}}
+    init_config = {'profiles': {'hpe-proliant': {'definition_file': 'hpe-proliant.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
