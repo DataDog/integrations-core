@@ -65,6 +65,8 @@ Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 _Available for Agent versions >6.0_
 
+By default Haproxy sends logs over UDP to port 514. The Agent can listen for these logs on this port, however, binding to a port number under 1024 requires elevated permissions. Follow the instructions below to set this up. Alternatively, you can use a different port and skip step 3.
+
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
    ```yaml
@@ -84,7 +86,26 @@ _Available for Agent versions >6.0_
 
     Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml][5] for all available configuration options.
 
-3. [Restart the Agent][6].
+3. Grant access to port 514 using the `setcap` command:
+
+    ```bash
+    sudo setcap CAP_NET_BIND_SERVICE=+ep /opt/datadog-agent/bin/agent/agent
+    ```
+    
+    Verify the setup is correct by running the `getcap` command:
+    
+    ```bash
+    sudo getcap /opt/datadog-agent/bin/agent/agent
+    ```
+    
+    With the expected output:
+    ```bash
+    /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
+    ```
+    
+    **Note:** Re-run this `setcap` command every time you upgrade the Agent.
+    
+4. [Restart the Agent][6].
 
 #### Containerized
 
