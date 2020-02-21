@@ -36,7 +36,7 @@ flink.taskmanager.Status.JVM.ClassLoader.ClassesUnloaded,count,,,,The total numb
 flink.taskmanager.Status.Shuffle.Netty.AvailableMemorySegments,gauge,,,,The number of unused memory segments,0,flink,taskmanager shuffle available memory
 flink.taskmanager.Status.Shuffle.Netty.TotalMemorySegments,gauge,,,,The number of allocated memory segments,0,flink,taskmanager ahuffle allocated memory
 flink.task.Shuffle.Netty.Input.Buffers.inputQueueLength,gauge,,buffer,,The number of queued input buffers,0,flink,task input buffers queued
-flink.task.Shuffle.Netty.Input.Buffers.inPoolUsage,gauge,,buffer,,An estimate of the input buffers usage,0,flink,task input buffers used
+flink.task.Shuffle.Netty.Input.Buffers.inPoolUsage,gauge,,,,An estimate of the input buffers usage,0,flink,task input buffers used
 flink.task.Shuffle.Netty.Output.Buffers.outputQueueLength,gauge,,buffer,,The number of queued output buffers,0,flink,task output buffers queued
 flink.task.Shuffle.Netty.Output.Buffers.outPoolUsage,gauge,,,,An estimate of the output buffers usage,0,flink,task output buffers used
 flink.task.Shuffle.Netty.Input.numBytesInLocal,count,,byte,,The total number of bytes this task has read from a local source,0,flink,task bytes read local
@@ -76,7 +76,7 @@ flink.task.numLateRecordsDropped,count,,record,,The number of records this task 
 flink.task.currentInputWatermark,gauge,,millisecond,,The last watermark this task has received. For tasks with 2 inputs this is the minimum of the last received watermarks,0,flink,task input watermark
 flink.operator.numRecordsIn,count,,record,,The total number of records this operator has received,0,flink,operator records in
 flink.operator.numRecordsInPerSecond,gauge,,record,second,The number of records this operator receives per second,0,flink,operator records in per second
-flink.operator.numRecordsOut,count,,,record,The total number of records this operator has emitted,0,flink,operator records out
+flink.operator.numRecordsOut,count,,record,,The total number of records this operator has emitted,0,flink,operator records out
 flink.operator.numRecordsOutPerSec,gauge,,record,second,The total number of records this operator has emitted per second,0,flink,operator records out per second
 flink.operator.numLateRecordsDropped,count,,record,,The number of records this operator has dropped due to arriving late,-1,flink,operator records dropped
 flink.operator.currentInputWatermark,gauge,,millisecond,,The last watermark this operator has received. For tasks with 2 inputs this is the minimum of the last received watermarks,0,flink,operator input watermark
