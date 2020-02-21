@@ -160,8 +160,8 @@ class WMISampler(object):
         Dispose of the internal thread
         """
         self._stopping = True
-        self._run_sample_event.set()
-        self._sample_complete_event.wait()
+        self._runSampleEvent.set()
+        self._sampleCompleteEvent.wait()
 
     def __enter__(self):
         self.start()
