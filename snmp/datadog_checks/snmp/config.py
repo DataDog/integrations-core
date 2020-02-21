@@ -12,11 +12,7 @@ from pysnmp.smi import builder, view
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .resolver import OIDResolver
-
-
-def to_oid_tuple(oid_string):
-    """Return a OID tuple from a OID string."""
-    return tuple(map(int, oid_string.lstrip('.').split('.')))
+from .utils import to_oid_tuple
 
 
 class ParsedMetric(object):

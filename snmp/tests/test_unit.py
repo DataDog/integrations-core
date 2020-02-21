@@ -4,6 +4,7 @@
 
 import os
 import time
+from typing import List
 
 import mock
 import pytest
@@ -13,6 +14,7 @@ from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
 from datadog_checks.snmp.resolver import OIDTrie
+from datadog_checks.snmp.utils import oid_pattern_specificity
 
 from . import common
 
@@ -273,3 +275,21 @@ def test_trie():
     assert trie.match((1, 2, 3)) == ((1, 2, 3), 'foo')
     assert trie.match((1, 2, 3, 4)) == ((1, 2, 3), 'foo')
     assert trie.match((2, 3, 4)) == ((), None)
+
+
+@pytest.mark.parametrize(
+    'oids, expected',
+    [
+        (['1.3.4.1'], ['1.3.4.1']),
+        (['1.3.4.*', '1.3.4.1'], ['1.3.4.*', '1.3.4.1']),
+        (['1.3.4.1', '1.3.4.*'], ['1.3.4.*', '1.3.4.1']),
+        (['1.3.4.1.2', '1.3.4'], ['1.3.4', '1.3.4.1.2']),
+        (
+            ['1.3.6.1.4.1.3375.2.1.3.4.43', '1.3.6.1.4.1.8072.3.2.10'],
+            ['1.3.6.1.4.1.8072.3.2.10', '1.3.6.1.4.1.3375.2.1.3.4.43'],
+        ),
+    ],
+)
+def test_oid_pattern_specificity(oids, expected):
+    # type: (List[str], List[str]) -> None
+    assert sorted(oids, key=oid_pattern_specificity) == expected

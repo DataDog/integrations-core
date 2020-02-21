@@ -581,30 +581,40 @@ def test_profile_sys_object(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_profile_sys_object_prefix(aggregator):
+@pytest.mark.parametrize(
+    'most_specific_oid, least_specific_oid',
+    [
+        pytest.param('1.3.6.1.4.1.8072.3.2.10', '1.3.6.1.4.1.5082.4', id='literal-literal'),
+        pytest.param('1.3.6.1.4.1.8072.3.2.10', '1.3.6.1.4.1.8072.3.2.9', id='literal-literal-same-length'),
+        pytest.param('1.3.6.1.4.1.8072.3.2.10', '1.3.6.1.4.1.*', id='literal-wildcard'),
+        pytest.param('1.3.6.1.4.1.*', '1.3.6.1.4.1.2.3.4.5', id='wildcard-literal'),
+        pytest.param('1.3.6.1.4.1.8072.3.2.*', '1.3.6.1.4.1.*', id='wildcard-wildcard'),
+    ],
+)
+def test_profile_sys_object_prefix(aggregator, most_specific_oid, least_specific_oid):
     instance = common.generate_instance_config([])
+
+    most_specific_profile = {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': most_specific_oid}
+    least_specific_profile = {'metrics': common.CAST_METRICS, 'sysobjectid': least_specific_oid}
+
     init_config = {
-        'profiles': {
-            'profile1': {
-                'definition': {'metrics': common.SUPPORTED_METRIC_TYPES, 'sysobjectid': '1.3.6.1.4.1.8072.3.2.10'}
-            },
-            'profile2': {'definition': {'metrics': common.CAST_METRICS, 'sysobjectid': '1.3.6.1.4.*'}},
-        }
+        'profiles': {'most': {'definition': most_specific_profile}, 'least': {'definition': least_specific_profile}}
     }
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:profile1']
+    matching_profile_tags = common.CHECK_TAGS + ['snmp_profile:most']
+    ignored_profile_tags = common.CHECK_TAGS + ['snmp_profile:least']
 
-    for metric in common.SUPPORTED_METRIC_TYPES:
+    for metric in most_specific_profile['metrics']:
         metric_name = "snmp." + metric['name']
-        aggregator.assert_metric(metric_name, tags=common_tags, count=1)
+        aggregator.assert_metric(metric_name, tags=matching_profile_tags, count=1)
 
-    for metric in common.CAST_METRICS:
+    for metric in least_specific_profile['metrics']:
         metric_name = "snmp." + metric['name']
-        aggregator.assert_metric(metric_name, tags=common_tags, count=1)
+        aggregator.assert_metric(metric_name, tags=ignored_profile_tags, count=0)
 
-    aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', tags=matching_profile_tags, count=1)
     aggregator.assert_all_metrics_covered()
 
 
