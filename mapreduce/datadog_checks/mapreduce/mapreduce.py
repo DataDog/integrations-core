@@ -197,7 +197,7 @@ class MapReduceCheck(AgentCheck):
         return job_counter
 
     def _get_hadoop_version(self):
-        if self.agentConfig.get('enable_metadata_collection', True):
+        if self.is_metadata_collection_enabled():
             try:
                 cluster_info = self._rest_request_to_json(self.rm_address, self.CLUSTER_INFO)
                 hadoop_version = cluster_info.get('clusterInfo', {}).get('hadoopVersion', '')
