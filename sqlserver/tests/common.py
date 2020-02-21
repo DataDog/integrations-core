@@ -29,22 +29,8 @@ LOCAL_SERVER = 'localhost,{}'.format(PORT)
 HERE = get_here()
 CHECK_NAME = "sqlserver"
 
-CUSTOM_METRICS = [
-                   'sqlserver.clr.execution',
-                   'sqlserver.exec.in_progress',
-                   'sqlserver.scheduler.current_workers_count',
-                   'sqlserver.scheduler.active_workers_count',
-                   'sqlserver.scheduler.current_tasks_count',
-                   'sqlserver.scheduler.runnable_tasks_count',
-                   'sqlserver.scheduler.work_queue_count',
-                   'sqlserver.task.context_switches_count',
-                   'sqlserver.task.pending_io_count',
-                   'sqlserver.task.pending_io_byte_count',
-                   'sqlserver.task.pending_io_byte_average',
-                 ]
-EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS] + CUSTOM_METRICS
-DM_OS_SCHEDULERS = "sys.dm_os_schedulers"
-DM_OS_TASKS = "sys.dm_os_tasks"
+CUSTOM_METRICS = ['sqlserver.clr.execution', 'sqlserver.exec.in_progress']
+EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS] + [m[0] for m in SQLServer.ADDITIONAL] + CUSTOM_METRICS
 
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
@@ -79,22 +65,6 @@ INIT_CONFIG = {
             'name': 'sqlserver.db.commit_table_entries',
             'type': 'gauge',
             'counter_name': 'Log Flushes/sec',
-            'instance_name': 'ALL',
-            'tag_by': 'db',
-        },
-        {
-            'name': 'sqlserver.scheduler',
-            'table': DM_OS_SCHEDULERS,
-            'type': 'gauge',
-            'columns': ['current_workers_count', 'active_workers_count', 'current_tasks_count', 'runnable_tasks_count', 'work_queue_count', 'num_reads'],
-            'instance_name': 'ALL',
-            'tag_by': 'db',
-        },
-        {
-            'name': 'sqlserver.task',
-            'table': DM_OS_TASKS,
-            'type': 'gauge',
-            'columns': ['context_switches_count', 'pending_io_count', 'pending_io_byte_count', 'pending_io_byte_average'],
             'instance_name': 'ALL',
             'tag_by': 'db',
         },

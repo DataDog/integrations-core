@@ -77,6 +77,7 @@ DM_OS_VIRTUAL_FILE_STATS = "sys.dm_io_virtual_file_stats"
 DM_OS_SCHEDULERS = "sys.dm_os_schedulers"
 DM_OS_TASKS = "sys.dm_os_tasks"
 
+
 class SQLConnectionError(Exception):
     """
     Exception raised for SQL instance connection issues
@@ -106,6 +107,19 @@ class SQLServer(AgentCheck):
         ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
         ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
     ]
+
+    ADDITIONAL = [
+        ('sqlserver.scheduler.current_tasks_count', DM_OS_SCHEDULERS, 'current_tasks_count'),
+        ('sqlserver.scheduler.current_workers_count', DM_OS_SCHEDULERS, 'current_workers_count'),
+        ('sqlserver.scheduler.active_workers_count', DM_OS_SCHEDULERS, 'active_workers_count'),
+        ('sqlserver.scheduler.runnable_tasks_count', DM_OS_SCHEDULERS, 'runnable_tasks_count'),
+        ('sqlserver.scheduler.work_queue_count', DM_OS_SCHEDULERS, 'work_queue_count'),
+        ('sqlserver.task.context_switches_count', DM_OS_TASKS, 'context_switches_count'),
+        ('sqlserver.task.pending_io_count', DM_OS_TASKS, 'pending_io_count'),
+        ('sqlserver.task.pending_io_byte_count', DM_OS_TASKS, 'pending_io_byte_count'),
+        ('sqlserver.task.pending_io_byte_average', DM_OS_TASKS, 'pending_io_byte_average'),
+    ]
+
     valid_connectors = []
     valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'SQLNCLI11']
     default_adoprovider = 'SQLOLEDB'
@@ -210,6 +224,7 @@ class SQLServer(AgentCheck):
         """
 
         metrics_to_collect = []
+
         for name, counter_name, instance_name in self.METRICS:
             try:
                 sql_type, base_name = self.get_sql_type(counter_name)
@@ -226,6 +241,16 @@ class SQLServer(AgentCheck):
             except Exception:
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 continue
+
+        # Load metrics from scheduler and task tables
+
+        for name, table, column in self.ADDITIONAL:
+            row = {}
+            row['name'] = name
+            row['table'] = table
+            row['column'] = column
+
+            metrics_to_collect.append(self.typed_metric(instance, row, table, base_name, None, sql_type, column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
 
@@ -261,6 +286,7 @@ class SQLServer(AgentCheck):
         clerk_metrics = []
         scheduler_metrics = []
         task_metrics = []
+
         self.log.debug("metrics to collect %s", metrics_to_collect)
 
         for m in metrics_to_collect:
@@ -971,6 +997,7 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
             metric_name = '{}.{}'.format(self.datadog_name, self.column)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
+
 class SqlOsSchedulers(SqlServerMetric):
     @classmethod
     def fetch_all_values(cls, cursor, counters_list, logger):
@@ -985,7 +1012,6 @@ class SqlOsSchedulers(SqlServerMetric):
 
     def fetch_metric(self, cursor, rows, columns, tags):
         tags = tags + self.tags
-        scheduler_address_column_index = columns.index("scheduler_address")
         value_column_index = columns.index(self.column)
         scheduler_index = columns.index("scheduler_id")
         parent_node_index = columns.index("parent_node_id")
@@ -994,12 +1020,12 @@ class SqlOsSchedulers(SqlServerMetric):
             column_val = row[value_column_index]
             scheduler_id = row[scheduler_index]
             parent_node_id = row[parent_node_index]
-            scheduler_address = row[scheduler_address_column_index]
 
             metric_tags = ['scheduler_id:{}'.format(str(scheduler_id)), 'parent_node_id:{}'.format(str(parent_node_id))]
             metric_tags.extend(tags)
-            metric_name = '{}.{}'.format(self.datadog_name, self.column)
+            metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
+
 
 class SqlOsTasks(SqlServerMetric):
     @classmethod
@@ -1026,5 +1052,5 @@ class SqlOsTasks(SqlServerMetric):
 
             metric_tags = ['session_id:{}'.format(str(session_id)), 'scheduler_id:{}'.format(str(scheduler_id))]
             metric_tags.extend(tags)
-            metric_name = '{}.{}'.format(self.datadog_name, self.column)
+            metric_name = '{}'.format(self.datadog_name)
             self.report_function(metric_name, column_val, tags=metric_tags)

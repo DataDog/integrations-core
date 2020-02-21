@@ -112,7 +112,7 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
 
     cursor.commit()
     cursor.close()
-    
+
     sqlserver_check.check(instance_docker)
 
     expected_tags = instance_docker.get('tags', []) + sp_tags.split(',')
