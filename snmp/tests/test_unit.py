@@ -27,12 +27,8 @@ def test_parse_metrics(hlapi_mock):
     metrics = [{"foo": "bar"}]
     config = InstanceConfig(
         {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]},
-        check.warning,
-        check.log,
-        [],
-        None,
-        {},
-        {},
+        warning=check.warning,
+        log=check.log,
     )
     hlapi_mock.reset_mock()
     with pytest.raises(Exception):
@@ -130,6 +126,23 @@ def test_parse_metrics(hlapi_mock):
     hlapi_mock.reset_mock()
 
 
+def test_ignore_ip_addresses():
+    # type: () -> None
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.1.0/29'
+    instance['ignored_ip_addresses'] = ['192.168.1.2', '192.168.1.3', '192.168.1.5']
+
+    check = SnmpCheck('snmp', {}, [instance])
+    assert list(check._config.network_hosts()) == ['192.168.1.1', '192.168.1.4', '192.168.1.6']
+
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    string_not_in_a_list = '192.168.1.0/29'
+    instance['ignored_ip_addresses'] = string_not_in_a_list
+    with pytest.raises(ConfigurationError):
+        SnmpCheck('snmp', {}, [instance])
+
+
 def test_profile_error():
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'
@@ -176,7 +189,7 @@ def test_removing_host():
     check = SnmpCheck('snmp', {}, [instance])
     warnings = []
     check.warning = warnings.append
-    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, None, [], '', {}, {})
+    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance)
     msg = 'No SNMP response received before timeout for instance 1.1.1.1'
 
     check.check(instance)
@@ -237,7 +250,7 @@ def test_cache_building(write_mock, read_mock):
 
     check = SnmpCheck('snmp', {}, [instance])
 
-    check._config.discovered_instances['192.168.0.1'] = InstanceConfig(discovered_instance, None, None, [], '', {}, {})
+    check._config.discovered_instances['192.168.0.1'] = InstanceConfig(discovered_instance)
     check._start_discovery()
 
     try:

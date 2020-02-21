@@ -132,6 +132,13 @@ instances:
     #
     # network_address: <NETWORK_ADRESS>
 
+    ## @param ignored_ip_addresses - list of string - optional
+    ## A list of IP addresses to ignore when scanning the network.
+    #
+    # ignored_ip_addresses:
+    #   - <IP_ADDRESS_1>
+    #   - <IP_ADDRESS_2>
+
     ## @param port - integer - optional - default: 161
     ## Default SNMP port.
     #

@@ -7,7 +7,7 @@ import json
 import threading
 import time
 from collections import defaultdict
-from typing import Dict, List, Optional
+from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Tuple, Union
 
 import pysnmp.proto.rfc1902 as snmp_type
 from pyasn1.codec.ber import decoder
@@ -21,7 +21,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
-from .config import InstanceConfig, ParsedTableMetric
+from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .utils import get_profile_definition
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
@@ -57,25 +57,27 @@ class SnmpCheck(AgentCheck):
     _NON_REPEATERS = 0
     _MAX_REPETITIONS = 25
 
-    def __init__(self, name, init_config, instances):
-        super(SnmpCheck, self).__init__(name, init_config, instances)
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(SnmpCheck, self).__init__(*args, **kwargs)
 
         # Set OID batch size
-        self.oid_batch_size = int(init_config.get('oid_batch_size', DEFAULT_OID_BATCH_SIZE))
+        self.oid_batch_size = int(self.init_config.get('oid_batch_size', DEFAULT_OID_BATCH_SIZE))
 
         # Load Custom MIB directory
-        self.mibs_path = init_config.get('mibs_folder')
+        self.mibs_path = self.init_config.get('mibs_folder')
 
-        self.ignore_nonincreasing_oid = is_affirmative(init_config.get('ignore_nonincreasing_oid', False))
+        self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
 
-        self.profiles = init_config.get('profiles', {})
+        self.profiles = self.init_config.get('profiles', {})  # type: Dict[str, Dict[str, Any]]
         self.profiles_by_oid = {}  # type: Dict[str, str]
         self._load_profiles()
 
-        self.instance['name'] = self._get_instance_key(self.instance)
+        self.instance['name'] = self._get_instance_name(self.instance)
         self._config = self._build_config(self.instance)
 
     def _load_profiles(self):
+        # type: () -> None
         """
         Load the configured SNMP profiles and index them by sysObjectID, if possible.
         """
@@ -91,40 +93,45 @@ class SnmpCheck(AgentCheck):
                 self.profiles_by_oid[sys_object_oid] = name
 
     def _build_config(self, instance):
+        # type: (dict) -> InstanceConfig
         return InstanceConfig(
             instance,
-            self.warning,
-            self.log,
-            self.init_config.get('global_metrics', []),
-            self.mibs_path,
-            self.profiles,
-            self.profiles_by_oid,
+            warning=self.warning,
+            log=self.log,
+            global_metrics=self.init_config.get('global_metrics', []),
+            mibs_path=self.mibs_path,
+            profiles=self.profiles,
+            profiles_by_oid=self.profiles_by_oid,
         )
 
-    def _get_instance_key(self, instance):
-        key = instance.get('name')
-        if key:
-            return key
+    def _get_instance_name(self, instance):
+        # type: (Dict[str, Any]) -> Optional[str]
+        name = instance.get('name')
+        if name:
+            return name
 
-        ip = instance.get('ip_address')
-        port = instance.get('port')
+        ip = instance.get('ip_address')  # type: Optional[str]
+        port = instance.get('port')  # type: Optional[int]
+
         if ip and port:
-            key = '{host}:{port}'.format(host=ip, port=port)
+            return '{host}:{port}'.format(host=ip, port=port)
+        elif ip:
+            return ip
         else:
-            key = ip
-
-        return key
+            return None
 
     def discover_instances(self):
         # type: () -> None
         config = self._config
+
+        if config.ip_network is None:
+            raise RuntimeError("Expected config.ip_network to be set to start discovery")
+
         discovery_interval = config.instance.get('discovery_interval', 3600)
+
         while self._running:
             start_time = time.time()
-            for host in config.ip_network.hosts():
-                host = str(host)
-                if host in config.discovered_instances:
-                    continue
+            for host in config.network_hosts():
                 instance = config.instance.copy()
                 instance.pop('network_address')
                 instance['ip_address'] = host
@@ -146,6 +153,8 @@ class SnmpCheck(AgentCheck):
                 else:
                     for profile in profiles:
                         host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                    most_specific_profile = profiles[-1]
+                    host_config.add_profile_tag(most_specific_profile)
 
                 config.discovered_instances[host] = host_config
 
@@ -159,11 +168,13 @@ class SnmpCheck(AgentCheck):
                 time.sleep(discovery_interval - time_elapsed)
 
     def raise_on_error_indication(self, error_indication, ip_address):
+        # type: (Any, Optional[str]) -> None
         if error_indication:
             message = '{} for instance {}'.format(error_indication, ip_address)
             raise CheckException(message)
 
     def fetch_results(self, config, all_oids, bulk_oids):
+        # type: (InstanceConfig, list, list) -> Tuple[dict, Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -172,11 +183,12 @@ class SnmpCheck(AgentCheck):
         dict[oid/metric_name][row index] = value
         In case of scalar objects, the row index is just 0
         """
-        results = defaultdict(dict)
+        results = defaultdict(dict)  # type: DefaultDict[str, dict]
         enforce_constraints = config.enforce_constraints
 
         all_binds = []
-        error = None
+        error = None  # type: Optional[str]
+
         for to_fetch in all_oids:
             binds, current_error = self.fetch_oids(config, to_fetch, enforce_constraints=enforce_constraints)
             all_binds.extend(binds)
@@ -213,6 +225,7 @@ class SnmpCheck(AgentCheck):
         return results, error
 
     def fetch_oids(self, config, oids, enforce_constraints):
+        # type: (InstanceConfig, list, bool) -> Tuple[List[Any], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passed is referring to a specific leaf.
         # For example:
@@ -269,6 +282,7 @@ class SnmpCheck(AgentCheck):
         return all_binds, error
 
     def fetch_sysobject_oid(self, config):
+        # type: (InstanceConfig) -> str
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
@@ -280,17 +294,25 @@ class SnmpCheck(AgentCheck):
 
     def _profiles_for_sysobject_oid(self, sys_object_oid):
         # type: (str) -> List[str]
-        """Return all profiles that match the given sysObjectID."""
+        """
+        Return all profiles that match the given sysObjectID.
+
+        Profiles are sorted from the most generic to the closest match.
+        """
         profiles = [profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)]
 
         if not profiles:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
 
+        profiles.sort(key=lambda profile: self.profiles[profile]['definition']['sysobjectid'])
+
         return profiles
 
     def _consume_binds_iterator(self, binds_iterator, config):
-        all_binds = []
-        error = None
+        # type: (Iterator[Any], InstanceConfig) -> Tuple[List[Any], Optional[str]]
+        all_binds = []  # type: List[Any]
+        error = None  # type: Optional[str]
+
         for error_indication, error_status, _, var_binds_table in binds_iterator:
             self.log.debug('Returned vars: %s', var_binds_table)
 
@@ -310,6 +332,7 @@ class SnmpCheck(AgentCheck):
         return all_binds, error
 
     def _start_discovery(self):
+        # type: () -> None
         cache = read_persistent_cache(self.check_id)
         if cache:
             hosts = json.loads(cache)
@@ -331,6 +354,7 @@ class SnmpCheck(AgentCheck):
         self._thread.start()
 
     def check(self, instance):
+        # type: (Dict[str, Any]) -> None
         config = self._config
         if config.ip_network:
             if self._thread is None:
@@ -364,6 +388,8 @@ class SnmpCheck(AgentCheck):
                 profiles = self._profiles_for_sysobject_oid(sys_object_oid)
                 for profile in profiles:
                     config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                most_specific_profile = profiles[-1]
+                config.add_profile_tag(most_specific_profile)
 
             if config.all_oids or config.bulk_oids:
                 self.log.debug('Querying device %s', config.ip_address)
@@ -390,13 +416,20 @@ class SnmpCheck(AgentCheck):
         return error
 
     def extract_metric_tags(self, metric_tags, results):
+        # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
         extracted_tags = []
         for tag in metric_tags:
             [(_, tag_value)] = list(results[tag.symbol].items())
             extracted_tags.append('{}:{}'.format(tag.name, tag_value))
         return extracted_tags
 
-    def report_metrics(self, metrics, results, tags):
+    def report_metrics(
+        self,
+        metrics,  # type: List[Union[ParsedMetric, ParsedTableMetric]]
+        results,  # type: Dict[str, dict]
+        tags,  # type: List[str]
+    ):
+        # type: (...) -> None
         """
         For each of the metrics specified gather the tags requested in the
         instance conf for each row.
@@ -423,7 +456,14 @@ class SnmpCheck(AgentCheck):
                 metric_tags = tags + metric.metric_tags
                 self.submit_metric(name, val, metric.forced_type, metric_tags)
 
-    def get_index_tags(self, index, results, index_tags, column_tags):
+    def get_index_tags(
+        self,
+        index,  # type: Dict[int, float]
+        results,  # type: Dict[str, dict]
+        index_tags,  # type: List[Tuple[str, int]]
+        column_tags,  # type: List[Tuple[str, str]]
+    ):
+        # type: (...) -> List[str]
         """
         Gather the tags for this row of the table (index) based on the
         results (all the results from the query).
@@ -435,7 +475,8 @@ class SnmpCheck(AgentCheck):
            could be a potential result, to use as a tage
            cf. ifDescr in the IF-MIB::ifTable for example
         """
-        tags = []
+        tags = []  # type: List[str]
+
         for idx_tag in index_tags:
             tag_group = idx_tag[0]
             try:
@@ -444,21 +485,24 @@ class SnmpCheck(AgentCheck):
                 self.log.warning('Not enough indexes, skipping tag %s', tag_group)
                 continue
             tags.append('{}:{}'.format(tag_group, tag_value))
+
         for col_tag in column_tags:
             tag_group = col_tag[0]
             try:
-                tag_value = results[col_tag[1]][index]
+                column_value = results[col_tag[1]][index]
             except KeyError:
                 self.log.warning('Column %s not present in the table, skipping this tag', col_tag[1])
                 continue
-            if reply_invalid(tag_value):
+            if reply_invalid(column_value):
                 self.log.warning("Can't deduct tag from column for tag %s", tag_group)
                 continue
-            tag_value = tag_value.prettyPrint()
+            tag_value = column_value.prettyPrint()
             tags.append('{}:{}'.format(tag_group, tag_value))
+
         return tags
 
     def submit_metric(self, name, snmp_value, forced_type, tags):
+        # type: (str, Any, Optional[str], List[str]) -> None
         """
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.
@@ -469,6 +513,8 @@ class SnmpCheck(AgentCheck):
             return
 
         metric_name = self.normalize(name, prefix='snmp')
+
+        value = 0.0  # type: float
 
         if forced_type:
             forced_type = forced_type.lower()
