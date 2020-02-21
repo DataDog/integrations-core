@@ -118,6 +118,8 @@ init_config:
       definition_file: dell-poweredge.yaml
     hp-ilo4:
       definition_file: hp-ilo4.yaml
+    hpe-proliant:
+      definition_file: hpe-proliant.yaml
 
 instances:
   -
