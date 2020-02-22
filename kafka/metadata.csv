@@ -24,11 +24,11 @@ kafka.replication.isr_shrinks.rate,gauge,10,node,second,Rate of replicas leaving
 kafka.replication.isr_expands.rate,gauge,10,node,second,Rate of replicas joining the ISR pool.,-1,kafka,rep isr expands
 kafka.replication.leader_elections.rate,gauge,10,event,second,Leader election rate.,0,kafka,rep leader elect
 kafka.replication.unclean_leader_elections.rate,gauge,10,event,second,Unclean leader election rate.,-1,kafka,rep leader dirty elect
-kafka.replication.under_replicated_partitions,gauge,10,,,Number of unreplicated partitions.,-1,kafka,rep under replicated part
+kafka.replication.under_replicated_partitions,gauge,10,,,Number of under replicated partitions.,-1,kafka,rep under replicated part
 kafka.session.zookeeper.disconnect.rate,gauge,10,event,second,Zookeeper client disconnect rate.,-1,kafka,zookeeper disconnect rate
 kafka.session.zookeeper.expire.rate,gauge,10,event,second,Zookeeper client session expiration rate.,-1,kafka,zookeeper expiration rate
 kafka.session.zookeeper.readonly.rate,gauge,10,event,second,Zookeeper client readonly rate.,0,kafka,zookeeper readonly rate
-kafka.session.zookeeper.sync.rate,gauge,10,event,second,Zookeeeper client sync rate.,1,kafka,zookeeper sync rate
+kafka.session.zookeeper.sync.rate,gauge,10,event,second,Zookeeper client sync rate.,1,kafka,zookeeper sync rate
 kafka.log.flush_rate.rate,gauge,10,flush,second,Log flush rate.,0,kafka,log flush rate
 kafka.consumer.delayed_requests,gauge,10,request,,Number of delayed consumer requests.,-1,kafka,con delayed req
 kafka.consumer.expires_per_second,gauge,10,eviction,second,Rate of delayed consumer request expiration.,-1,kafka,con expire rate
