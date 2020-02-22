@@ -1,5 +1,9 @@
 # CHANGELOG - rabbitmq
 
+## 1.13.0 / 2020-02-22
+
+* [Added] Add option to disable node metrics in rabbitmq. See [#5750](https://github.com/DataDog/integrations-core/pull/5750).
+
 ## 1.12.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
