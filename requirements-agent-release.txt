@@ -35,6 +35,7 @@ datadog-envoy==1.13.0
 datadog-etcd==2.2.1
 datadog-exchange-server==1.6.0; sys_platform == 'win32'
 datadog-external-dns==1.0.0
+datadog-flink==1.0.0
 datadog-fluentd==1.5.0
 datadog-gearmand==1.4.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.7.1
@@ -101,6 +102,7 @@ datadog-redisdb==2.0.1
 datadog-riak==1.7.0
 datadog-riakcs==2.2.0
 datadog-sap-hana==1.1.0
+datadog-scylla==1.0.0
 datadog-snmp==2.4.0
 datadog-solr==1.2.0
 datadog-spark==1.11.4
@@ -113,6 +115,7 @@ datadog-system-core==1.5.3
 datadog-system-swap==1.6.3
 datadog-tcp-check==2.3.3
 datadog-teamcity==1.7.0
+datadog-tenable==1.0.0
 datadog-tls==1.4.1
 datadog-tokumx==2.2.0
 datadog-tomcat==1.2.0
