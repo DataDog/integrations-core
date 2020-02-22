@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.11.4 / 2020-02-22
+
+* [Fixed] Update documentation in example config. See [#5508](https://github.com/DataDog/integrations-core/pull/5508).
+
 ## 1.11.3 / 2020-01-30
 
 * [Fixed] Handle warning message from proxy. See [#5525](https://github.com/DataDog/integrations-core/pull/5525).
