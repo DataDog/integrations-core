@@ -1,5 +1,9 @@
 # CHANGELOG - Openstack_controller
 
+## 1.8.0 / 2020-02-22
+
+* [Added] Refactor traced decorator and remove wrapt import. See [#5586](https://github.com/DataDog/integrations-core/pull/5586).
+
 ## 1.7.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

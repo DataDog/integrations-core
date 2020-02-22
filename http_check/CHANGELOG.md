@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 4.6.4 / 2020-02-22
+
+* [Fixed] Apply strptime thread-safety fix only on Python 2. See [#5618](https://github.com/DataDog/integrations-core/pull/5618).
+
 ## 4.6.3 / 2020-01-24
 
 * [Fixed] Document that tls_verify is False by default. See [#5547](https://github.com/DataDog/integrations-core/pull/5547).

@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 2.3.0 / 2020-02-22
+
+* [Added] Update in-toto and its deps. See [#5599](https://github.com/DataDog/integrations-core/pull/5599).
+
 ## 2.2.0 / 2020-01-10
 
 * [Added] Update TUF dependency. See [#5441](https://github.com/DataDog/integrations-core/pull/5441).

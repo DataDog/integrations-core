@@ -1,5 +1,9 @@
 # CHANGELOG - supervisord
 
+## 1.4.0 / 2020-02-22
+
+* [Added] Upgrade supervisor dependency. See [#5627](https://github.com/DataDog/integrations-core/pull/5627).
+
 ## 1.3.0 / 2019-12-02
 
 * [Added] Add version metadata. See [#4979](https://github.com/DataDog/integrations-core/pull/4979).
