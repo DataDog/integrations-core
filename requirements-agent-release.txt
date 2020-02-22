@@ -108,7 +108,7 @@ datadog-sqlserver==1.16.1; sys_platform != 'darwin'
 datadog-squid==1.5.0
 datadog-ssh-check==1.10.0
 datadog-statsd==1.3.0
-datadog-supervisord==1.3.0
+datadog-supervisord==1.4.0
 datadog-system-core==1.5.3
 datadog-system-swap==1.6.3
 datadog-tcp-check==2.3.3
