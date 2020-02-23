@@ -267,8 +267,8 @@ instances:
     #   X-Auth-Token: <AUTH_TOKEN>
 
     ## @param host_header_ssl - boolean - optional - default: false
-    ## If set to true, the Host header will be used to match 
-    ## against SSL Certificate CN or SAN.
+    ## If set to true, the Host header is used to match 
+    ## against the SSL Certificate CN or SAN.
     ## Requires persist_connections set to true.
     #
     # host_header_ssl: false
