@@ -71,7 +71,7 @@ class JiraClient:
 
         # documentation to create a Jira issue: https://developer.atlassian.com/cloud/jira/platform/rest/v3/?_ga=2.39263651.1896629564.1578666825-1018831208.1578519746#api-rest-api-3-issue-post # noqa
         data = {
-            'fields': {'project': {'key': 'AR'}, 'summary': name, 'description': body, 'issuetype': {'name': 'Task'}, }
+            'fields': {'project': {'key': 'AR'}, 'summary': name, 'description': body, 'issuetype': {'name': 'Task'}}
         }
 
         if member:
