@@ -10,6 +10,8 @@ from typing import Iterator
 
 import rethinkdb
 
+from datadog_checks.base import AgentCheck
+
 from .._queries import query_server_status, query_table_status
 from .._types import Metric, ReplicaState
 
@@ -28,30 +30,30 @@ def collect_table_status(conn):
         tags = ['table:{}'.format(table), 'database:{}'.format(database)]
 
         yield {
-            'type': 'gauge',
+            'type': 'service_check',
             'name': 'rethinkdb.table_status.ready_for_outdated_reads',
-            'value': 1 if table_status['status']['ready_for_outdated_reads'] else 0,
+            'value': AgentCheck.OK if table_status['status']['ready_for_outdated_reads'] else AgentCheck.WARNING,
             'tags': tags,
         }
 
         yield {
-            'type': 'gauge',
+            'type': 'service_check',
             'name': 'rethinkdb.table_status.ready_for_reads',
-            'value': 1 if table_status['status']['ready_for_reads'] else 0,
+            'value': AgentCheck.OK if table_status['status']['ready_for_reads'] else AgentCheck.WARNING,
             'tags': tags,
         }
 
         yield {
-            'type': 'gauge',
+            'type': 'service_check',
             'name': 'rethinkdb.table_status.ready_for_writes',
-            'value': 1 if table_status['status']['ready_for_writes'] else 0,
+            'value': AgentCheck.OK if table_status['status']['ready_for_writes'] else AgentCheck.WARNING,
             'tags': tags,
         }
 
         yield {
-            'type': 'gauge',
+            'type': 'service_check',
             'name': 'rethinkdb.table_status.all_replicas_ready',
-            'value': 1 if table_status['status']['all_replicas_ready'] else 0,
+            'value': AgentCheck.OK if table_status['status']['all_replicas_ready'] else AgentCheck.WARNING,
             'tags': tags,
         }
 

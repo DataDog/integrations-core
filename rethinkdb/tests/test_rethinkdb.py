@@ -27,6 +27,7 @@ from .common import (
     SERVERS,
     TABLE_STATISTICS_METRICS,
     TABLE_STATUS_METRICS,
+    TABLE_STATUS_SERVICE_CHECKS,
     TABLE_STATUS_SHARDS_METRICS,
     TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS,
 )
@@ -51,6 +52,10 @@ def test_check(aggregator, instance):
 
     service_check_tags = ['server:{}'.format(CONNECT_SERVER_NAME)]
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1, tags=service_check_tags)
+
+    for service_check in TABLE_STATUS_SERVICE_CHECKS:
+        tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
+        aggregator.assert_service_check(service_check, RethinkDBCheck.OK, count=1, tags=tags)
 
 
 def _assert_statistics_metrics(aggregator):

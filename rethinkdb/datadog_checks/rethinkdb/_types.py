@@ -11,7 +11,8 @@ from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 
 # Lightweight shim to decouple collection functions from the check class.
 Metric = TypedDict(
-    'Metric', {'type': Literal['gauge', 'monotonic_count'], 'name': str, 'value': float, 'tags': List[str]}
+    'Metric',
+    {'type': Literal['gauge', 'monotonic_count', 'service_check'], 'name': str, 'value': float, 'tags': List[str]},
 )
 
 Instance = TypedDict('Instance', {'host': str, 'port': int}, total=False)

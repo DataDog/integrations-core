@@ -102,13 +102,14 @@ REPLICA_STATISTICS_METRICS = (
     'rethinkdb.stats.table_server.disk.preallocated_bytes',
 )
 
-TABLE_STATUS_METRICS = (
+TABLE_STATUS_SERVICE_CHECKS = (
     'rethinkdb.table_status.ready_for_outdated_reads',
     'rethinkdb.table_status.ready_for_reads',
     'rethinkdb.table_status.ready_for_writes',
     'rethinkdb.table_status.all_replicas_ready',
-    'rethinkdb.table_status.shards.total',
 )
+
+TABLE_STATUS_METRICS = ('rethinkdb.table_status.shards.total',)
 
 TABLE_STATUS_SHARDS_METRICS = (
     'rethinkdb.table_status.shards.replicas.total',

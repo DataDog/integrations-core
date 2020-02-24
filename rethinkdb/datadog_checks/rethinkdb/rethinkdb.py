@@ -30,33 +30,36 @@ class RethinkDBCheck(AgentCheck):
         self.config = Config(self.instance)
 
     @contextmanager
-    def connect(self, host, port):
+    def connect_submitting_service_check(self, host, port):
         # type: (str, int) -> Iterator[rethinkdb.net.Connection]
-        service_check_tags = []  # type: List[str]
+        tags = []  # type: List[str]
 
         try:
             with r.connect(host=host, port=port) as conn:
                 server = conn.server()  # type: ConnectionServer
                 self.log.debug('connected server=%r', server)
-                service_check_tags.append('server:{}'.format(server['name']))
+                tags.append('server:{}'.format(server['name']))
                 yield conn
         except rethinkdb.errors.ReqlDriverError as exc:
             self.log.error('Could not connect to RethinkDB server: %r', exc)
-            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=service_check_tags)
+            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=tags)
             raise
         except Exception as exc:
             self.log.error('Unexpected error while executing RethinkDB check: %r', exc)
-            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=service_check_tags)
+            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=tags)
             raise
         else:
             self.log.debug('service_check OK')
-            self.service_check('rethinkdb.can_connect', self.OK, tags=service_check_tags)
+            self.service_check('rethinkdb.can_connect', self.OK, tags=tags)
 
     def submit_metric(self, metric):
         # type: (Metric) -> None
         self.log.debug('submit_metric metric=%r', metric)
-        submit = getattr(self, metric['type'])  # type: Callable
-        submit(metric['name'], value=metric['value'], tags=metric['tags'])
+        if metric['type'] == 'service_check':
+            self.service_check(metric['name'], metric['value'], tags=metric['tags'])
+        else:
+            submit = getattr(self, metric['type'])  # type: Callable
+            submit(metric['name'], value=metric['value'], tags=metric['tags'])
 
     def check(self, instance):
         # type: (Instance) -> None
@@ -66,7 +69,7 @@ class RethinkDBCheck(AgentCheck):
         host = config.host
         port = config.port
 
-        with self.connect(host, port) as conn:
+        with self.connect_submitting_service_check(host, port) as conn:
             for metric in config.collect_metrics(conn):
                 self.submit_metric(metric)
 
