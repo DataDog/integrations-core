@@ -8,6 +8,7 @@ from ipaddress import ip_address, ip_network
 
 import requests
 from requests import auth as requests_auth
+from requests_toolbelt.adapters import host_header_ssl
 from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
@@ -48,6 +49,7 @@ STANDARD_FIELDS = {
     'connect_timeout': None,
     'extra_headers': None,
     'headers': None,
+    'host_header_ssl': False,
     'kerberos_auth': None,
     'kerberos_cache': None,
     'kerberos_delegate': False,
@@ -91,6 +93,7 @@ KERBEROS_STRATEGIES = {}
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        'host_header_ssl',
         'ignore_tls_warning',
         'log_requests',
         'logger',
@@ -171,6 +174,10 @@ class RequestsWrapper(object):
 
         if config['extra_headers']:
             update_headers(headers, config['extra_headers'])
+
+        # Set host_header_ssl only if there is a Host header
+        if 'Host' in headers:
+            self.host_header_ssl = is_affirmative(config['host_header_ssl'])
 
         # http://docs.python-requests.org/en/master/user/authentication/
         auth_type = config['auth_type'].lower()
@@ -338,6 +345,11 @@ class RequestsWrapper(object):
     def session(self):
         if self._session is None:
             self._session = requests.Session()
+
+            # Enables HostHeaderSSLAdapter
+            # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
+            if self.host_header_ssl:
+                self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
 
             # Attributes can't be passed to the constructor
             for option, value in iteritems(self.options):
