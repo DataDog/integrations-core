@@ -25,7 +25,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base>=9.6.0'
+CHECKS_BASE_REQ = 'datadog_checks_base>=10.1.0'
 
 setup(
     name='datadog-kong',
