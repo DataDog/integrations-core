@@ -13,6 +13,7 @@ cryptography==2.8
 cx-oracle==7.2.0
 ddtrace==0.32.2
 dnspython==1.16.0
+enum34==1.1.6; python_version < '3.0'
 flup==1.0.3.dev-20110405; python_version < '3.0'
 flup-py3==1.0.3; python_version > '3.0'
 futures==3.3.0; python_version < '3.0'

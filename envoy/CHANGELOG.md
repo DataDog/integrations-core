@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.13.0 / 2020-02-22
+
+* [Added] Add support for more metrics in Envoy integration. See [#5537](https://github.com/DataDog/integrations-core/pull/5537). Thanks [csssuf](https://github.com/csssuf).
+
 ## 1.12.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).

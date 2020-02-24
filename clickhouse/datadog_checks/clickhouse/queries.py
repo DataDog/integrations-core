@@ -106,6 +106,8 @@ SystemEvents = Query(
                     'CompileFunction': {'name': 'compilation.llvm.attempt', 'type': 'monotonic_gauge'},
                     'CompileSuccess': {'name': 'compilation.success', 'type': 'monotonic_gauge'},
                     'CompiledFunctionExecute': {'name': 'compilation.function.execute', 'type': 'monotonic_gauge'},
+                    'CompressedReadBufferBlocks': {'name': 'read.compressed.block', 'type': 'monotonic_gauge'},
+                    'CompressedReadBufferBytes': {'name': 'read.compressed.raw.size', 'type': 'monotonic_gauge'},
                     'ContextLock': {'name': 'lock.context.acquisition', 'type': 'monotonic_gauge'},
                     'CreatedHTTPConnections': {'name': 'connection.http.create', 'type': 'monotonic_gauge'},
                     'DelayedInserts': {'name': 'table.mergetree.insert.delayed', 'type': 'monotonic_gauge'},
@@ -184,6 +186,7 @@ SystemEvents = Query(
                     'ReadBufferFromFileDescriptorRead': {'name': 'file.read', 'type': 'monotonic_gauge'},
                     'ReadBufferFromFileDescriptorReadBytes': {'name': 'file.read.size', 'type': 'monotonic_gauge'},
                     'ReadBufferFromFileDescriptorReadFailed': {'name': 'file.read.fail', 'type': 'monotonic_gauge'},
+                    'ReadCompressedBytes': {'name': 'read.compressed.size', 'type': 'monotonic_gauge'},
                     'RealTimeMicroseconds': {
                         'name': 'thread.process_time',
                         'type': 'temporal_percent',
@@ -193,6 +196,10 @@ SystemEvents = Query(
                     'RejectedInserts': {'name': 'table.mergetree.insert.block.rejected', 'type': 'monotonic_gauge'},
                     'ReplicaYieldLeadership': {'name': 'table.replicated.leader.yield', 'type': 'monotonic_gauge'},
                     'ReplicatedDataLoss': {'name': 'table.replicated.part.loss', 'type': 'monotonic_gauge'},
+                    'ReplicatedPartFailedFetches': {
+                        'name': 'table.mergetree.replicated.fetch.replica.fail',
+                        'type': 'monotonic_gauge',
+                    },
                     'ReplicatedPartFetches': {
                         'name': 'table.mergetree.replicated.fetch.replica',
                         'type': 'monotonic_gauge',
@@ -201,6 +208,7 @@ SystemEvents = Query(
                         'name': 'table.mergetree.replicated.fetch.merged',
                         'type': 'monotonic_gauge',
                     },
+                    'ReplicatedPartMerges': {'name': 'table.mergetree.replicated.merge', 'type': 'monotonic_gauge'},
                     'Seek': {'name': 'file.seek', 'type': 'monotonic_gauge'},
                     'SelectQuery': {'name': 'query.select', 'type': 'monotonic_gauge'},
                     'SelectedMarks': {'name': 'table.mergetree.mark.selected', 'type': 'monotonic_gauge'},

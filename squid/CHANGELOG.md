@@ -1,5 +1,9 @@
 # CHANGELOG - Squid
 
+## 1.5.0 / 2020-02-22
+
+* [Added] Add version metadata. See [#5603](https://github.com/DataDog/integrations-core/pull/5603).
+
 ## 1.4.1 / 2019-11-07
 
 * [Fixed] Adding log section. See [#4824](https://github.com/DataDog/integrations-core/pull/4824).

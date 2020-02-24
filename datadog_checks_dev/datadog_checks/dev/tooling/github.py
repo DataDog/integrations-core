@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+from typing import Optional
 
 import requests
 
@@ -89,11 +90,12 @@ def from_contributor(pr_payload):
         return False
 
 
-def parse_pr_number(log_line):
+def parse_pr_number(log_line: str) -> Optional[str]:
     """If there are multiple matches, the PR id is always the latest one"""
     matches = re.findall(PR_PATTERN, log_line)
     if matches:
         return matches[-1]
+    return None
 
 
 def parse_pr_numbers(git_log_lines):

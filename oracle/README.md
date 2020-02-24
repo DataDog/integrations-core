@@ -54,7 +54,7 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
 
 **Note:** Agent 6 uses Upstart or systemd to orchestrate the `datadog-agent` service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][5] or [systemd][6] for more information on how to configure these settings.
 
-The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files (`/int/init/datadog-agent.conf`) on a system using Upstart.
+The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files (`/etc/init/datadog-agent.conf`) on a system using Upstart.
 
 ```conf
 description "Datadog Agent"

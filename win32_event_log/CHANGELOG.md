@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 2.3.1 / 2020-02-22
+
+* [Fixed] Fix thread leak in WMI sampler. See [#5659](https://github.com/DataDog/integrations-core/pull/5659). Thanks [rlaveycal](https://github.com/rlaveycal).
+
 ## 2.3.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

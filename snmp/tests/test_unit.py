@@ -4,17 +4,21 @@
 
 import os
 import time
+from typing import List
 
 import mock
 import pytest
+import yaml
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
 from datadog_checks.snmp.resolver import OIDTrie
+from datadog_checks.snmp.utils import oid_pattern_specificity, recursively_expand_base_profiles
 
 from . import common
+from .utils import mock_profiles_root
 
 pytestmark = pytest.mark.unit
 
@@ -27,12 +31,8 @@ def test_parse_metrics(hlapi_mock):
     metrics = [{"foo": "bar"}]
     config = InstanceConfig(
         {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]},
-        check.warning,
-        check.log,
-        [],
-        None,
-        {},
-        {},
+        warning=check.warning,
+        log=check.log,
     )
     hlapi_mock.reset_mock()
     with pytest.raises(Exception):
@@ -130,6 +130,23 @@ def test_parse_metrics(hlapi_mock):
     hlapi_mock.reset_mock()
 
 
+def test_ignore_ip_addresses():
+    # type: () -> None
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.1.0/29'
+    instance['ignored_ip_addresses'] = ['192.168.1.2', '192.168.1.3', '192.168.1.5']
+
+    check = SnmpCheck('snmp', {}, [instance])
+    assert list(check._config.network_hosts()) == ['192.168.1.1', '192.168.1.4', '192.168.1.6']
+
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    string_not_in_a_list = '192.168.1.0/29'
+    instance['ignored_ip_addresses'] = string_not_in_a_list
+    with pytest.raises(ConfigurationError):
+        SnmpCheck('snmp', {}, [instance])
+
+
 def test_profile_error():
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'
@@ -176,7 +193,7 @@ def test_removing_host():
     check = SnmpCheck('snmp', {}, [instance])
     warnings = []
     check.warning = warnings.append
-    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance, None, None, [], '', {}, {})
+    check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance)
     msg = 'No SNMP response received before timeout for instance 1.1.1.1'
 
     check.check(instance)
@@ -237,7 +254,7 @@ def test_cache_building(write_mock, read_mock):
 
     check = SnmpCheck('snmp', {}, [instance])
 
-    check._config.discovered_instances['192.168.0.1'] = InstanceConfig(discovered_instance, None, None, [], '', {}, {})
+    check._config.discovered_instances['192.168.0.1'] = InstanceConfig(discovered_instance)
     check._start_discovery()
 
     try:
@@ -260,3 +277,59 @@ def test_trie():
     assert trie.match((1, 2, 3)) == ((1, 2, 3), 'foo')
     assert trie.match((1, 2, 3, 4)) == ((1, 2, 3), 'foo')
     assert trie.match((2, 3, 4)) == ((), None)
+
+
+@pytest.mark.parametrize(
+    'oids, expected',
+    [
+        (['1.3.4.1'], ['1.3.4.1']),
+        (['1.3.4.*', '1.3.4.1'], ['1.3.4.*', '1.3.4.1']),
+        (['1.3.4.1', '1.3.4.*'], ['1.3.4.*', '1.3.4.1']),
+        (['1.3.4.1.2', '1.3.4'], ['1.3.4', '1.3.4.1.2']),
+        (
+            ['1.3.6.1.4.1.3375.2.1.3.4.43', '1.3.6.1.4.1.8072.3.2.10'],
+            ['1.3.6.1.4.1.8072.3.2.10', '1.3.6.1.4.1.3375.2.1.3.4.43'],
+        ),
+    ],
+)
+def test_oid_pattern_specificity(oids, expected):
+    # type: (List[str], List[str]) -> None
+    assert sorted(oids, key=oid_pattern_specificity) == expected
+
+
+def test_profile_extends():
+    # type: () -> None
+    base = {
+        'metrics': [
+            {'MIB': 'TCP-MIB', 'symbol': 'tcpActiveOpens', 'forced_type': 'monotonic_count'},
+            {'MIB': 'UDP-MIB', 'symbol': 'udpHCInDatagrams', 'forced_type': 'monotonic_count'},
+        ],
+        'metric_tags': [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+    }
+
+    profile1 = {
+        'extends': ['base.yaml'],
+        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'tcpPassiveOpens', 'forced_type': 'monotonic_count'}],
+    }
+
+    with temp_dir() as tmp:
+        with mock_profiles_root(tmp):
+            with open(os.path.join(tmp, 'base.yaml'), 'w') as f:
+                f.write(yaml.safe_dump(base))
+
+            with open(os.path.join(tmp, 'profile1.yaml'), 'w') as f:
+                f.write(yaml.safe_dump(profile1))
+
+            definition = {'extends': ['profile1.yaml']}
+
+            recursively_expand_base_profiles(definition)
+
+            assert definition == {
+                'extends': ['profile1.yaml'],
+                'metrics': [
+                    {'MIB': 'TCP-MIB', 'symbol': 'tcpActiveOpens', 'forced_type': 'monotonic_count'},
+                    {'MIB': 'UDP-MIB', 'symbol': 'udpHCInDatagrams', 'forced_type': 'monotonic_count'},
+                    {'MIB': 'TCP-MIB', 'symbol': 'tcpPassiveOpens', 'forced_type': 'monotonic_count'},
+                ],
+                'metric_tags': [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+            }

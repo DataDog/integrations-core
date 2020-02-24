@@ -25,6 +25,7 @@ def test_get_nodes_with_service(aggregator):
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
         'consul_service-1_service_tag:az-us-east-1a',
+        'consul_service:az-us-east-1a',
     ]
 
     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
@@ -76,6 +77,7 @@ def test_get_nodes_with_service_warning(aggregator):
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
         'consul_service-1_service_tag:az-us-east-1a',
+        'consul_service:az-us-east-1a',
     ]
     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=expected_tags)
@@ -100,6 +102,7 @@ def test_get_nodes_with_service_critical(aggregator):
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
         'consul_service-1_service_tag:az-us-east-1a',
+        'consul_service:az-us-east-1a',
     ]
     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=expected_tags)
