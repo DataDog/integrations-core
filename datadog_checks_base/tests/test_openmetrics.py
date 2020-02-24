@@ -4,6 +4,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import io
 import logging
 import math
 import os
@@ -173,6 +174,21 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
         messages.sort(key=lambda x: x.name)
         assert len(messages) == 40
         assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
+
+
+def test_poll_octet_stream(mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
+    """Tests poll using the text format"""
+    check = mocked_prometheus_check
+
+    mock_response = requests.Response()
+    mock_response.raw = io.BytesIO(bytes(text_data, encoding='utf-8'))
+    mock_response.status_code = 200
+    mock_response.headers = {'Content-Type': 'application/octet-stream'}
+
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        response = check.poll(mocked_prometheus_scraper_config)
+        messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
+        assert len(messages) == 40
 
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
