@@ -9,7 +9,7 @@ from requests.auth import HTTPBasicAuth
 
 class JiraClient:
     API_URL = 'https://datadoghq.atlassian.net/rest/api'
-    CREATE_ENDPOINT = API_URL + '/3/issue'
+    CREATE_ENDPOINT = API_URL + '/2/issue'
 
     def __init__(self, config):
         jira_email = config['jira']['user']
@@ -74,11 +74,7 @@ class JiraClient:
             'fields': {
                 'project': {'key': 'AR'},
                 'summary': name,
-                'description': {
-                    'type': 'doc',
-                    'version': 1,
-                    'content': [{'type': 'paragraph', 'content': [{'type': 'text', 'text': body}]}],
-                },
+                'description': body,
                 'issuetype': {'name': 'Task'},
             }
         }
