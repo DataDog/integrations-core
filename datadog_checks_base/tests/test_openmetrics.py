@@ -16,6 +16,8 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Histo
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
+from datadog_checks.base import ensure_bytes
+from datadog_checks.base.errors import CheckException
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 
@@ -176,19 +178,31 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
         assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
 
 
-def test_poll_octet_stream(mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
+@pytest.mark.parametrize(
+    'headers, expected_error',
+    [
+        pytest.param({'Content-Type': 'application/octet-stream'}, 'Missing content-type provided', id='octet_stream'),
+        pytest.param({}, 'Missing content-type', id='missing'),
+    ],
+)
+def test_invalid_content_type(
+    mocked_prometheus_check, mocked_prometheus_scraper_config, text_data, headers, expected_error
+):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
 
     mock_response = requests.Response()
-    mock_response.raw = io.BytesIO(bytes(text_data, encoding='utf-8'))
+    mock_response.raw = io.BytesIO(ensure_bytes(text_data))
     mock_response.status_code = 200
-    mock_response.headers = {'Content-Type': 'application/octet-stream'}
+    mock_response.headers = headers
 
     with mock.patch('requests.get', return_value=mock_response, __name__="get"):
         response = check.poll(mocked_prometheus_scraper_config)
-        messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
-        assert len(messages) == 40
+
+        with pytest.raises(CheckException) as excinfo:
+            next(check.parse_metric_family(response, mocked_prometheus_scraper_config))
+
+        assert expected_error in str(excinfo.value)
 
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):

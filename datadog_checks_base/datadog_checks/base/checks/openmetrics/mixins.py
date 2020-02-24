@@ -359,21 +359,26 @@ class OpenMetricsScraperMixin(object):
         :param response: requests.Response
         :return: core.Metric
         """
-        if response.encoding is None:
-            response.encoding = 'utf-8'
-        input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
-        if scraper_config['_text_filter_blacklist']:
-            input_gen = self._text_filter_input(input_gen, scraper_config)
+        content_type = response.headers.get('Content-Type')
+        if not content_type:
+            raise CheckException('Missing content-type')
 
-        for metric in text_fd_to_metric_families(input_gen):
-            self._send_telemetry_counter(
-                self.TELEMETRY_COUNTER_METRICS_INPUT_COUNT, len(metric.samples), scraper_config
-            )
-            metric.type = scraper_config['type_overrides'].get(metric.name, metric.type)
-            if metric.type not in self.METRIC_TYPES:
-                continue
-            metric.name = self._remove_metric_prefix(metric.name, scraper_config)
-            yield metric
+        if content_type.startswith('text/plain'):
+            input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
+            if scraper_config['_text_filter_blacklist']:
+                input_gen = self._text_filter_input(input_gen, scraper_config)
+
+            for metric in text_fd_to_metric_families(input_gen):
+                self._send_telemetry_counter(
+                    self.TELEMETRY_COUNTER_METRICS_INPUT_COUNT, len(metric.samples), scraper_config
+                )
+                metric.type = scraper_config['type_overrides'].get(metric.name, metric.type)
+                if metric.type not in self.METRIC_TYPES:
+                    continue
+                metric.name = self._remove_metric_prefix(metric.name, scraper_config)
+                yield metric
+        else:
+            raise CheckException('Missing content-type provided: {}'.format(content_type))
 
     def _text_filter_input(self, input_gen, scraper_config):
         """
