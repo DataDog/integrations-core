@@ -175,9 +175,8 @@ class RequestsWrapper(object):
         if config['extra_headers']:
             update_headers(headers, config['extra_headers'])
 
-        # Set host_header_ssl only if there is a Host header
-        if 'Host' in headers:
-            self.host_header_ssl = is_affirmative(config['host_header_ssl'])
+        # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
+        self.host_header_ssl = is_affirmative(config.get('host_header_ssl')) and ('Host' in headers)
 
         # http://docs.python-requests.org/en/master/user/authentication/
         auth_type = config['auth_type'].lower()
