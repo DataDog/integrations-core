@@ -553,7 +553,6 @@ class SQLServer(AgentCheck):
                             metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
                         elif type(metric) is SqlOsMemoryClerksStat:
                             metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
-                            metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
                         elif type(metric) is SqlOsSchedulers:
                             metric.fetch_metric(cursor, scheduler_rows, scheduler_cols, custom_tags)
                         elif type(metric) is SqlOsTasks:
