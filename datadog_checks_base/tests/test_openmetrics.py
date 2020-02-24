@@ -16,6 +16,7 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Histo
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
+from datadog_checks.base import ensure_bytes
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 
@@ -30,6 +31,7 @@ class MockResponse:
     def __init__(self, content, content_type):
         self.content = content
         self.headers = {'Content-Type': content_type}
+        self.encoding = 'utf-8'
 
     def iter_lines(self, **_):
         for elt in self.content.split("\n"):
@@ -181,7 +183,7 @@ def test_poll_octet_stream(mocked_prometheus_check, mocked_prometheus_scraper_co
     check = mocked_prometheus_check
 
     mock_response = requests.Response()
-    mock_response.raw = io.BytesIO(bytes(text_data, encoding='utf-8'))
+    mock_response.raw = io.BytesIO(ensure_bytes(text_data))
     mock_response.status_code = 200
     mock_response.headers = {'Content-Type': 'application/octet-stream'}
 

@@ -119,6 +119,7 @@ class MockResponse:
         self.content = content if isinstance(content, list) else [content]
         self.headers = {'Content-Type': content_type}
         self.status = status
+        self.encoding = 'utf-8'
 
     def iter_lines(self, **_):
         content = self.content.pop(0)
