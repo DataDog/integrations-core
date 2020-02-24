@@ -121,6 +121,12 @@ instances:
     # services_exclude:
     #   - ".*"
 
+    ## @param disable_legacy_service_tag - boolean - optional - default: false
+    ## Whether or not to stop submitting the tag `service` that has been renamed
+    ## to `consul_service` and disable the associated deprecation warning.
+    #
+    # disable_legacy_service_tag: false
+
     ## @param active_tag - boolean - optional - default: false
     ## Includes the 'active' tag to metrics to denote whether a backend belongs to the
     ## "active" pool of connections normally used for servicing requests.
