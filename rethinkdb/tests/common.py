@@ -116,15 +116,6 @@ TABLE_STATUS_SHARDS_METRICS = (
     'rethinkdb.table_status.shards.replicas.primary.total',
 )
 
-TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS = (
-    'rethinkdb.table_status.shards.replicas.state.ready',
-    'rethinkdb.table_status.shards.replicas.state.transitioning',
-    'rethinkdb.table_status.shards.replicas.state.backfilling',
-    'rethinkdb.table_status.shards.replicas.state.disconnected',
-    'rethinkdb.table_status.shards.replicas.state.waiting_for_primary',
-    'rethinkdb.table_status.shards.replicas.state.waiting_for_quorum',
-)
-
 SERVER_STATUS_METRICS = (
     'rethinkdb.server_status.network.time_connected',
     'rethinkdb.server_status.network.connected_to.total',
@@ -153,6 +144,5 @@ METRICS = (
     + REPLICA_STATISTICS_METRICS
     + TABLE_STATUS_METRICS
     + TABLE_STATUS_SHARDS_METRICS
-    + TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS
     + SERVER_STATUS_METRICS
 )

@@ -13,7 +13,7 @@ import rethinkdb
 from datadog_checks.base import AgentCheck
 
 from .._queries import query_server_status, query_table_status
-from .._types import Metric, ReplicaState
+from .._types import Metric
 
 
 def collect_table_status(conn):
@@ -80,27 +80,6 @@ def collect_table_status(conn):
                 'value': len(shard['primary_replicas']),
                 'tags': shard_tags,
             }
-
-            for replica in shard['replicas']:
-                server = replica['server']
-                replica_tags = shard_tags + ['server:{}'.format(server)]
-
-                # Helper function to benefit from type checking on 'ReplicaState' literals.
-                def _replica_state(state):
-                    # type: (ReplicaState) -> Metric
-                    return {
-                        'type': 'gauge',
-                        'name': 'rethinkdb.table_status.shards.replicas.state.{}'.format(state),
-                        'value': 1 if replica['state'] == state else 0,
-                        'tags': replica_tags,
-                    }
-
-                yield _replica_state('ready')
-                yield _replica_state('transitioning')
-                yield _replica_state('backfilling')
-                yield _replica_state('disconnected')
-                yield _replica_state('waiting_for_primary')
-                yield _replica_state('waiting_for_quorum')
 
 
 def collect_server_status(conn):

@@ -99,10 +99,7 @@ ReplicaStats = TypedDict(
 # Status documents.
 # See: https://rethinkdb.com/docs/system-tables/#status-tables
 
-ReplicaState = Literal[
-    'ready', 'transitioning', 'backfilling', 'disconnected', 'waiting_for_primary', 'waiting_for_quorum'
-]
-ShardReplica = TypedDict('ShardReplica', {'server': str, 'state': ReplicaState})
+ShardReplica = TypedDict('ShardReplica', {'server': str, 'state': str})
 Shard = TypedDict('Shard', {'primary_replicas': List[str], 'replicas': List[ShardReplica]})
 TableStatusFlags = TypedDict(
     'TableStatusFlags',

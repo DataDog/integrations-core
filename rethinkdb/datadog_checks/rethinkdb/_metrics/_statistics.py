@@ -145,20 +145,22 @@ def collect_table_statistics(conn):
 
 def collect_replica_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
-    for table, server, stats in query_replicas_with_stats(conn):
-        logger.debug('replica_statistics table=%r server=%r stats=%r', table, server, stats)
+    for table, server, replica, stats in query_replicas_with_stats(conn):
+        logger.debug('replica_statistics table=%r server=%r replica=%r stats=%r', table, server, replica, stats)
 
-        database = stats['db']
+        database = table['db']
         server_name = server['name']
         table_name = table['name']
         server_tags = server['tags']
         query_engine = stats['query_engine']
         storage_engine = stats['storage_engine']
+        state = replica['state']
 
         tags = [
             'table:{}'.format(table_name),
             'database:{}'.format(database),
             'server:{}'.format(server_name),
+            'state:{}'.format(state),
         ] + server_tags
 
         yield {

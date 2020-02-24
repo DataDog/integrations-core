@@ -24,6 +24,7 @@ from ._types import (
     Server,
     ServerStats,
     ServerStatus,
+    ShardReplica,
     Table,
     TableStats,
     TableStatus,
@@ -79,33 +80,64 @@ def query_tables_with_stats(conn):
 
 
 def query_replicas_with_stats(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Table, Server, ReplicaStats]]
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Table, Server, ShardReplica, ReplicaStats]]
     """
     Retrieve each replica (table/server pair) in the cluster along with its statistics.
     """
 
-    # For replicas: stats['id'] = ['table_server', '<TABLE_ID>', 'SERVER_ID']
-    is_table_server_stats_row = r.row['id'].nth(0) == 'table_server'
-    table_id = r.row['id'].nth(1)
-    server_id = r.row['left']['id'].nth(2)
+    # NOTE: To reduce bandwidth usage, we make heavy use of the `.pluck()` operation (i.e. ask RethinkDB for a specific
+    # set of fields, instead of sending entire objects, which can be expensive when joining data as we do here.)
+    # See: https://rethinkdb.com/api/python/pluck/
 
     stats = r.db('rethinkdb').table('stats')
     server_config = r.db('rethinkdb').table('server_config')
     table_config = r.db('rethinkdb').table('table_config')
+    table_status = r.db('rethinkdb').table(
+        'table_status',
+        # Required so that 'server' fields in 'replicas' entries refer contain UUIDs instead of names.
+        # This way, we can join server information more efficiently, as we don't have to lookup UUIDs from names.
+        # See: https://rethinkdb.com/api/python/table/#description
+        identifier_format='uuid',
+    )
 
-    rows = (
-        stats.filter(is_table_server_stats_row)
-        .eq_join(table_id, table_config)
-        .eq_join(server_id, server_config)
-        .run(conn)
-    )  # type: Iterator[JoinRow]
+    query = (
+        # Start from table statuses, as they contain the list of replicas for each shard of the table.
+        # See: https://rethinkdb.com/docs/system-tables/#table_status
+        table_status.pluck('id', {'shards': ['replicas']})
+        .merge({'table': r.row['id']})
+        .without('id')
+        # Flatten each table status entry into one entry per shard and replica.
+        .concat_map(lambda row: row['shards'].map(lambda shard: row.merge(shard.pluck('replicas'))))
+        .without('shards')
+        .concat_map(
+            lambda row: row['replicas'].map(lambda replica: row.merge({'replica': replica.pluck('server', 'state')}))
+        )
+        .without('replicas')
+        # Grab table information for each replica.
+        # See: https://rethinkdb.com/docs/system-tables#table_config
+        .merge({'table': table_config.get(r.row['table']).pluck('id', 'db', 'name')})
+        # Grab relevant server information for each replica.
+        # See: https://rethinkdb.com/docs/system-tables#server_config
+        .merge({'server': server_config.get(r.row['replica']['server']).pluck('id', 'name', 'tags')})
+        # Grab statistics for each replica.
+        # See: https://rethinkdb.com/docs/system-stats/#replica-tableserver-pair
+        .merge(
+            {
+                'stats': stats.get(['table_server', r.row['table']['id'], r.row['server']['id']]).pluck(
+                    'query_engine', 'storage_engine'
+                )
+            }
+        )
+    )
+
+    rows = query.run(conn)  # type: Iterator[dict]
 
     for row in rows:
-        join_row = row['left']  # type: JoinRow
-        replica_stats = join_row['left']  # type: ReplicaStats
-        table = join_row['right']  # type: Table
-        server = row['right']  # type: Server
-        yield table, server, replica_stats
+        table = row['table']  # type: Table
+        server = row['server']  # type: Server
+        replica = row['replica']  # type: ShardReplica
+        replica_stats = row['stats']  # type: ReplicaStats
+        yield table, server, replica, replica_stats
 
 
 def query_table_status(conn):

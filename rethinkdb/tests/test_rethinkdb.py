@@ -29,7 +29,6 @@ from .common import (
     TABLE_STATUS_METRICS,
     TABLE_STATUS_SERVICE_CHECKS,
     TABLE_STATUS_SHARDS_METRICS,
-    TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS,
 )
 
 
@@ -74,7 +73,12 @@ def _assert_statistics_metrics(aggregator):
 
     for replica_server in HEROES_TABLE_SERVERS:
         for metric in REPLICA_STATISTICS_METRICS:
-            tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(replica_server)]
+            tags = [
+                'table:{}'.format(HEROES_TABLE),
+                'database:{}'.format(DATABASE),
+                'server:{}'.format(replica_server),
+                'state:ready',  # Assumption: cluster is stable (not currently rebalancing).
+            ]
             tags.extend(SERVER_TAGS[replica_server])
             aggregator.assert_metric(metric, count=1, tags=tags)
 
@@ -96,24 +100,11 @@ def _assert_table_status_metrics(aggregator):
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
 
-    for shard, servers in HEROES_TABLE_REPLICAS_BY_SHARD.items():
+    for shard in HEROES_TABLE_REPLICAS_BY_SHARD:
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'shard:{}'.format(shard)]
 
         for metric in TABLE_STATUS_SHARDS_METRICS:
             aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
-
-        for server in servers:
-            tags = [
-                'table:{}'.format(HEROES_TABLE),
-                'database:{}'.format(DATABASE),
-                'shard:{}'.format(shard),
-                'server:{}'.format(server),
-            ]
-
-            for metric in TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS:
-                # Assumption: all replicas in the cluster are ready, i.e. no rebalancing is in progress.
-                value = 1 if metric.endswith('.state.ready') else 0
-                aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, value=value, count=1, tags=tags)
 
 
 def _assert_server_status_metrics(aggregator):
