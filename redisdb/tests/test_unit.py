@@ -2,10 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
-import pytest
 from six import iteritems
-
-pytestmark = pytest.mark.unit
 
 
 def test_init(check):

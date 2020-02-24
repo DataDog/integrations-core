@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import random
 
-import pytest
 import redis
 
 from datadog_checks.redisdb import Redis
@@ -15,7 +14,6 @@ from .common import HOST, PASSWORD, PORT
 TEST_KEY = "testkey"
 
 
-@pytest.mark.integration
 def test_slowlog(aggregator, redis_instance):
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
 
@@ -37,7 +35,6 @@ def test_slowlog(aggregator, redis_instance):
     aggregator.assert_metric('redis.slowlog.micros', tags=expected_tags)
 
 
-@pytest.mark.integration
 def test_custom_slowlog(aggregator, redis_instance):
     redis_instance['slowlog-max-len'] = 1
 
