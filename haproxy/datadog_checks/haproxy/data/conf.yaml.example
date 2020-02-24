@@ -152,7 +152,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param startup_grace_time - integer - optional
+    ## @param startup_grace_seconds - integer - optional
     ## Time to wait on startup or reload of haproxy before sending metrics
     ##
     ## When haproxy reloads, if there is a `grace` period on some proxies, 2
@@ -161,7 +161,7 @@ instances:
     ## refer to one of the multiple instances of haproxy, and will not
     ## accurately reflect the state of the system.
     ## If this parameter is >0, no datapoints will be sent until the uptime of
-    ## haproxy reaches this many seconds
+    ## haproxy reaches this many seconds.
     #
     # startup_grace_seconds: 0
 
