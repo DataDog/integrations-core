@@ -604,7 +604,7 @@ class TestLimits:
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 42
 
-    def test_metric_limit_instance_config_zero(self, aggregator):
+    def test_metric_limit_instance_config_zero_limited(self, aggregator):
         instances = [{"max_returned_metrics": 0}]
         check = LimitedCheck("test", {}, instances)
         assert len(check.get_warnings()) == 1
@@ -613,6 +613,16 @@ class TestLimits:
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
         assert len(aggregator.metrics("metric")) == 10
+
+    def test_metric_limit_instance_config_zero_unlimited(self, aggregator):
+        instances = [{"max_returned_metrics": 0}]
+        check = AgentCheck("test", {}, instances)
+        assert len(check.get_warnings()) == 0
+
+        for _ in range(0, 42):
+            check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 0  # get_warnings resets the array
+        assert len(aggregator.metrics("metric")) == 42
 
     def test_metric_limit_instance_config_string(self, aggregator):
         instances = [{"max_returned_metrics": "4"}]
