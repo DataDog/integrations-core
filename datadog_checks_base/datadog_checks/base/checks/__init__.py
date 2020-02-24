@@ -6,3 +6,4 @@ from .base import AgentCheck
 from .network import EventType, NetworkCheck, Status
 
 __all__ = ['AgentCheck', 'NetworkCheck', 'Status', 'EventType']
+
