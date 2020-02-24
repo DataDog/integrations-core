@@ -25,20 +25,7 @@ def collect_system_jobs(conn):
 
         tags = ['server:{}'.format(server) for server in servers]
 
-        if job['type'] == 'query':
-            client_address = job['info']['client_address']
-            client_port = job['info']['client_port']
-
-            query_tags = tags + ['client_address:{}'.format(client_address), 'client_port:{}'.format(client_port)]
-
-            yield {
-                'type': 'gauge',
-                'name': 'rethinkdb.jobs.query.duration',
-                'value': duration,
-                'tags': query_tags,
-            }
-
-        elif job['type'] == 'index_construction':
+        if job['type'] == 'index_construction':
             database = job['info']['db']
             table = job['info']['table']
             index = job['info']['index']

@@ -121,18 +121,6 @@ ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': Ser
 # System jobs documents.
 # See: https://rethinkdb.com/docs/system-jobs/
 
-QueryInfo = TypedDict('QueryInfo', {'client_address': str, 'client_port': int, 'query': str, 'user': str})
-QueryJob = TypedDict(
-    'QueryJob',
-    {
-        'type': Literal['query'],
-        'id': Tuple[Literal['query'], str],
-        'duration_sec': float,
-        'info': QueryInfo,
-        'servers': List[str],
-    },
-)
-
 IndexConstructionInfo = TypedDict('IndexConstructionInfo', {'db': str, 'table': str, 'index': str, 'progress': int})
 IndexConstructionJob = TypedDict(
     'IndexConstructionJob',
@@ -161,7 +149,7 @@ BackfillJob = TypedDict(
 
 # NOTE: this is a union type tagged by the 'type' key.
 # See: https://mypy.readthedocs.io/en/latest/literal_types.html#intelligent-indexing
-Job = Union[QueryJob, IndexConstructionJob, BackfillJob]
+Job = Union[IndexConstructionJob, BackfillJob]
 
 # ReQL command results.
 # See: https://rethinkdb.com/api/python/

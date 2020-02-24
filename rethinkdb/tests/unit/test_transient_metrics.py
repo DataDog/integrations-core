@@ -10,7 +10,7 @@ import pytest
 from rethinkdb import r
 
 from datadog_checks.rethinkdb._metrics import collect_system_jobs
-from datadog_checks.rethinkdb._types import BackfillJob, IndexConstructionJob, QueryJob
+from datadog_checks.rethinkdb._types import BackfillJob, IndexConstructionJob
 
 from .utils import MockConnection, patch_connection_type
 
@@ -24,19 +24,6 @@ def test_jobs_metrics():
 
     We provide unit tests for these metrics because testing them in a live environment is tricky.
     """
-
-    mock_query_job_row = {
-        'type': 'query',
-        'id': ('query', 'abcd1234'),
-        'duration_sec': 0.21,
-        'info': {
-            'client_address': 'localhost',
-            'client_port': 28015,
-            'query': "r.table('heroes').run(conn)",
-            'user': 'johndoe',
-        },
-        'servers': ['server0'],
-    }  # type: QueryJob
 
     mock_backfill_job_row = {
         # See: https://rethinkdb.com/docs/system-jobs/#backfill
@@ -64,19 +51,13 @@ def test_jobs_metrics():
 
     mock_unknown_job_row = {'type': 'an_unknown_type_that_should_be_ignored', 'duration_sec': 0.42, 'servers': []}
 
-    mock_rows = [mock_query_job_row, mock_backfill_job_row, mock_index_construction_job_row, mock_unknown_job_row]
+    mock_rows = [mock_backfill_job_row, mock_index_construction_job_row, mock_unknown_job_row]
 
     with patch_connection_type(MockConnection):
         conn = r.connect(rows=mock_rows)
         metrics = list(collect_system_jobs(conn))
 
     assert metrics == [
-        {
-            'type': 'gauge',
-            'name': 'rethinkdb.jobs.query.duration',
-            'value': 0.21,
-            'tags': ['server:server0', 'client_address:localhost', 'client_port:28015'],
-        },
         {
             'type': 'gauge',
             'name': 'rethinkdb.jobs.backfill.duration',

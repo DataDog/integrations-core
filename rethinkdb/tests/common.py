@@ -131,8 +131,7 @@ SERVER_STATUS_METRICS = (
     'rethinkdb.server_status.process.time_started',
 )
 
-QUERY_JOBS_METRICS = ('rethinkdb.jobs.query.duration',)
-# NOTE: other jobs metrics are not listed here as they are covered by unit tests instead of integration tests.
+# NOTE: jobs metrics are not listed here as they are covered by unit tests instead of integration tests.
 
 CURRENT_ISSUES_METRICS = (
     'rethinkdb.current_issues.log_write_error.total',
@@ -155,5 +154,4 @@ METRICS = (
     + TABLE_STATUS_SHARDS_METRICS
     + TABLE_STATUS_SHARDS_REPLICA_STATE_METRICS
     + SERVER_STATUS_METRICS
-    + QUERY_JOBS_METRICS
 )

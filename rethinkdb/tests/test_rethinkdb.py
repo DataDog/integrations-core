@@ -20,7 +20,6 @@ from .common import (
     HEROES_TABLE,
     HEROES_TABLE_REPLICAS_BY_SHARD,
     HEROES_TABLE_SERVERS,
-    QUERY_JOBS_METRICS,
     REPLICA_STATISTICS_METRICS,
     SERVER_STATISTICS_METRICS,
     SERVER_STATUS_METRICS,
@@ -43,7 +42,10 @@ def test_check(aggregator, instance):
     _assert_statistics_metrics(aggregator)
     _assert_table_status_metrics(aggregator)
     _assert_server_status_metrics(aggregator)
-    _assert_system_jobs_metrics(aggregator)
+
+    # NOTE: system jobs metrics are not asserted here because they are only emitted when the cluster is
+    # changing (eg. an index is being created, or data is being rebalanced across servers), which is hard to
+    # test without introducing flakiness.
 
     aggregator.assert_all_metrics_covered()
 
@@ -115,18 +117,6 @@ def _assert_server_status_metrics(aggregator):
         for server in SERVERS:
             tags = ['server:{}'.format(server)]
             aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
-
-
-def _assert_system_jobs_metrics(aggregator):
-    # type: (AggregatorStub) -> None
-    for metric in QUERY_JOBS_METRICS:
-        # NOTE: these metrics are emitted because the query issued to collect system jobs metrics is
-        # included in system jobs themselves.
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
-
-    # NOTE: other system jobs metrics are not covered here because they are only emitted when the cluster is
-    # changing (eg. an index is being created, or data is being rebalanced across servers), which is hard to
-    # test without introducing flakiness.
 
 
 @pytest.mark.integration
