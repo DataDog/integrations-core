@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 2.3.1 / 2020-02-24
+
+* [Fixed] Hide internal logging exceptions. See [#5848](https://github.com/DataDog/integrations-core/pull/5848).
+
 ## 2.3.0 / 2020-02-22
 
 * [Added] Update in-toto and its deps. See [#5599](https://github.com/DataDog/integrations-core/pull/5599).
