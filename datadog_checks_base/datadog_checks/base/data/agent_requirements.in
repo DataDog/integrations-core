@@ -61,6 +61,7 @@ redis==3.3.11
 requests==2.22.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
+requests_toolbelt==0.9.1
 rethinkdb==2.4.4
 scandir==1.8
 securesystemslib[crypto,pynacl]==0.14.2
