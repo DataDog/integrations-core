@@ -1,5 +1,9 @@
 # CHANGELOG - windows_service
 
+## 2.5.1 / 2020-02-25
+
+* [Fixed] Bump minimun agent version. See [#5834](https://github.com/DataDog/integrations-core/pull/5834).
+
 ## 2.5.0 / 2020-02-22
 
 * [Deprecated] Deprecate `service` tag. See [#5545](https://github.com/DataDog/integrations-core/pull/5545).
