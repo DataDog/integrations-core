@@ -15,7 +15,7 @@ The MapR check is included in the [Datadog Agent][2] package but requires additi
 #### Prerequisites
 
 - [MapR monitoring][3] is running correctly.
-- You have an available [MapR user][4] (with name, password, UID, and GID) with the 'consume' permission on the `/var/mapr/mapr.monitoring/metricstreams` stream. This may be an already existing user or a newly created user. If you want the user user to be called `dd-agent`, create it before installing the Agent.
+- You have an available [MapR user][4] (with name, password, UID, and GID) with the 'consume' permission on the `/var/mapr/mapr.monitoring/metricstreams` stream. This may be an already existing user or a newly created user. If you want the user to be called `dd-agent`, create it before installing the Agent.
 - You have generated a [service long-lived ticket][5] for this user that is readable by the `dd-agent` user.
 
 Installation steps for each node:
