@@ -5,14 +5,19 @@ from copy import deepcopy
 
 import pytest
 
+from datadog_checks.base.utils.platform import Platform
+from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 
 from .common import COMPOSE_FILE, HOST, INSTANCE, PORT
 
 
-@pytest.fixture
 def init_db():
-    # late import to not require it for e2e
+    # exit if we are not on linux
+    # that's the only platform where the client successfully installs for version 3.10
+    if not Platform.is_linux():
+        return
+
     import aerospike
 
     # sample Aerospike Python Client code
@@ -44,7 +49,8 @@ def init_db():
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
-        COMPOSE_FILE, conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!'])],
+        COMPOSE_FILE,
+        conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
     ):
         yield INSTANCE
 

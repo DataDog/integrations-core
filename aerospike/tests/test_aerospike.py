@@ -7,7 +7,6 @@ import mock
 import pytest
 
 from datadog_checks.aerospike import AerospikeCheck
-from datadog_checks.base.utils.platform import Platform
 
 LAZY_METRICS = [
     'aerospike.namespace.latency.write_over_64ms',
@@ -22,7 +21,6 @@ LAZY_METRICS = [
 ]
 
 
-@pytest.mark.skipif(not Platform.is_linux(), reason='Aerospike client only installs on Linux for version == 3.10')
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check(aggregator, instance):
@@ -35,7 +33,6 @@ def test_check(aggregator, instance):
     _test_check(aggregator)
 
 
-@pytest.mark.skipif(not Platform.is_linux(), reason='Aerospike client only installs on Linux for version == 3.10')
 def test_version_metadata(aggregator, instance, datadog_agent):
 
     check = AerospikeCheck('aerospike', {}, [instance])
@@ -61,7 +58,7 @@ def test_version_metadata(aggregator, instance, datadog_agent):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance, init_db):
+def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
 
     _test_check(aggregator)
