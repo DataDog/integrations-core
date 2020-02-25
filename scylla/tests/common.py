@@ -355,10 +355,32 @@ INSTANCE_DEFAULT_GROUPS = [
 ]
 
 
+INSTANCE_ADDITIONAL_GROUPS = [
+    'scylla.alien',
+    'scylla.batchlog_manager',
+    'scylla.commitlog',
+    'scylla.cql',
+    'scylla.database',
+    'scylla.execution_stages',
+    'scylla.hints',
+    'scylla.httpd',
+    'scylla.io_queue',
+    'scylla.lsa',
+    'scylla.memory',
+    'scylla.memtables',
+    'scylla.query_processor',
+    'scylla.scheduler',
+    'scylla.sstables',
+    'scylla.thrift',
+    'scylla.tracing',
+]
+
+
 # expand the lists into a single list of metrics
-def get_metrics(metric_groups):
+def _get_metrics(metric_groups):
     """Given a list of metric groups, return single consolidated list"""
     return sorted(m for g in metric_groups for m in INSTANCE_METRIC_GROUP_MAP[g])
 
 
-INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)
+INSTANCE_DEFAULT_METRICS = _get_metrics(INSTANCE_DEFAULT_GROUPS)
+INSTANCE_ADDITIONAL_METRICS = _get_metrics(INSTANCE_ADDITIONAL_GROUPS)

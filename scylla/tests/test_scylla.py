@@ -8,7 +8,11 @@ import pytest
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.scylla import ScyllaCheck
 
-from .common import INSTANCE_DEFAULT_GROUPS, INSTANCE_DEFAULT_METRICS, get_metrics
+from .common import (
+    INSTANCE_ADDITIONAL_GROUPS,
+    INSTANCE_ADDITIONAL_METRICS,
+    INSTANCE_DEFAULT_METRICS,
+)
 
 
 @pytest.mark.unit
@@ -25,7 +29,7 @@ def test_instance_default_check(aggregator, db_instance, mock_db_data):
 @pytest.mark.unit
 def test_instance_additional_check(aggregator, db_instance, mock_db_data):
     # add additional metric groups for validation
-    additional_metric_groups = ['scylla.alien', 'scylla.sstables']
+    additional_metric_groups = INSTANCE_ADDITIONAL_GROUPS
 
     instance = deepcopy(db_instance)
     instance['metric_groups'] = additional_metric_groups
@@ -34,7 +38,7 @@ def test_instance_additional_check(aggregator, db_instance, mock_db_data):
 
     c.check(instance)
 
-    metrics_to_check = get_metrics(INSTANCE_DEFAULT_GROUPS + additional_metric_groups)
+    metrics_to_check = INSTANCE_DEFAULT_METRICS + INSTANCE_ADDITIONAL_METRICS
 
     for m in metrics_to_check:
         aggregator.assert_metric(m)
