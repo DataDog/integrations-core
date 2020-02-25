@@ -976,7 +976,7 @@ class MongoDb(AgentCheck):
         except KeyError:
             pass
 
-        dbnames = cli.database_names()
+        dbnames = cli.list_database_names()
         self.gauge('mongodb.dbs', len(dbnames), tags=tags)
 
         for db_n in dbnames:
