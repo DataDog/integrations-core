@@ -421,8 +421,13 @@ class SnmpCheck(AgentCheck):
             if tag.symbol not in results:
                 self.log.debug('Ignoring tag %s', tag.symbol)
                 continue
-            for tag_value in results[tag.symbol].values():
-                extracted_tags.append('{}:{}'.format(tag.name, tag_value))
+            tag_values = list(results[tag.symbol].values())
+            if len(tag_values) > 1:
+                raise CheckException(
+                    'You are trying to use a table column (OID `{}`) as a metric tag. This is not supported as '
+                    '`metric_tags` can only refer to scalar OIDs.'.format(tag.symbol)
+                )
+            extracted_tags.append('{}:{}'.format(tag.name, tag_values[0]))
         return extracted_tags
 
     def report_metrics(
