@@ -1,0 +1,23 @@
+{ 
+  "name": "NGINX Ingress pages with error faced by bots",
+  "type": "logs",
+  "page": "analytics",
+  "query": "source:nginx-ingress-controller @http.useragent_details.browser.family:*bot* @http.status_code:[400 TO 599]",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "service", "host", "status", "@http.status_code", "@http.method", "@http.url_details.path", "@http.useragent_details.browser.family", "@http.useragent_details.device.family", "@http.useragent_details.os.family", "@network.client.ip"],
+  "options": {
+    "group_bys": [
+      { "facet": "@http.useragent_details.browser.family" },
+      { "facet": "@http.status_code" },
+      { "facet": "@http.url_details.path" }
+    ],
+    "aggregations": [
+      { "metric": "count", "type": "count" }
+    ],
+    "limit": "5",
+    "order": "top",
+    "widget": "query_table"
+  }
+}
