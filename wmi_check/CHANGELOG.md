@@ -1,5 +1,9 @@
 # CHANGELOG - wmi_check
 
+## 1.7.2 / 2020-02-25
+
+* [Fixed] Bump minimum base check on wmi checks. See [#5860](https://github.com/DataDog/integrations-core/pull/5860).
+
 ## 1.7.1 / 2020-02-22
 
 * [Fixed] Fix thread leak in WMI sampler. See [#5659](https://github.com/DataDog/integrations-core/pull/5659). Thanks [rlaveycal](https://github.com/rlaveycal).
