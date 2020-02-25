@@ -41,10 +41,12 @@ instances:
     ## Whitelist metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
-    ## For an exhaustive list of all metrics and tags, see:
-    ## https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
     ##
     ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
+    ##
+    ## The example whitelist below will include:
+    ##   - cluster.in.0000.lb_subsets_active
+    ##   - cluster.out.alerting-event-evaluator-test.datadog.svc.cluster.local
     #
     # metric_whitelist:
     #   - cluster\.(in|out)\..*
@@ -53,10 +55,12 @@ instances:
     ## Blacklist metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
-    ## For an exhaustive list of all metrics and tags, see:
-    ## https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
     ##
     ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
+    ##
+    ## The example blacklist below will exclude:
+    ##   - http.admin.downstream_cx_active
+    ##   - http.http.rds.0000.control_plane.rate_limit_enforced
     #
     # metric_blacklist:
     #   - ^http\..*
