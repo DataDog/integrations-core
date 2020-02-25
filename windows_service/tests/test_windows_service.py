@@ -61,11 +61,6 @@ def test_all(aggregator, check, instance_all):
     aggregator.assert_service_check(
         c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:EventSystem', 'windows_service:EventSystem'], count=1
     )
-
-
-def test_warnings(check, instance_all):
-    c = check(instance_all)
-    c.check(instance_all)
     msg = 'xx'
     assert [msg] == check.warnings
 
