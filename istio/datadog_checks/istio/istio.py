@@ -168,6 +168,8 @@ class Istio(OpenMetricsBaseCheck):
                 # Defaults that were set when istio was based on PrometheusCheck
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
+                'exclude_labels': instance.get('exclude_labels', []),
+                'labels_mapper': instance.get('labels_mapper', {}),
             }
         )
 
@@ -223,6 +225,8 @@ class Istio(OpenMetricsBaseCheck):
                 # Defaults that were set when istio was based on PrometheusCheck
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
+                'exclude_labels': instance.get('exclude_labels', []),
+                'labels_mapper': instance.get('labels_mapper', {}),
             }
         )
         process_mixer_instance['metrics'][0].update(self._get_generic_metrics())
@@ -278,6 +282,8 @@ class Istio(OpenMetricsBaseCheck):
                         'pilot_xds_write_timeout': 'xds.write_timeout',
                     }
                 ],
+                'exclude_labels': instance.get('exclude_labels', []),
+                'labels_mapper': instance.get('labels_mapper', {}),
             }
         )
         process_pilot_instance['metrics'][0].update(self._get_generic_metrics())
@@ -329,6 +335,8 @@ class Istio(OpenMetricsBaseCheck):
                     }
                 ],
                 'ignore_metrics': ['galley_mcp_source_message_size_bytes'],
+                'exclude_labels': instance.get('exclude_labels', []),
+                'labels_mapper': instance.get('labels_mapper', {}),
             }
         )
         process_galley_instance['ignore_metrics'].extend(instance.get('ignore_metrics', []))
@@ -369,6 +377,8 @@ class Istio(OpenMetricsBaseCheck):
                         'citadel_server_success_cert_issuance_count': 'server.success_cert_issuance_count',
                     }
                 ],
+                'exclude_labels': instance.get('exclude_labels', []),
+                'labels_mapper': instance.get('labels_mapper', {}),
             }
         )
         process_citadel_instance['metrics'][0].update(self._get_generic_metrics())
