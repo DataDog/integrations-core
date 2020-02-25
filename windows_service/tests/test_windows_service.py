@@ -63,6 +63,13 @@ def test_all(aggregator, check, instance_all):
     )
 
 
+def test_warnings(check, instance_all):
+    c = check(instance_all)
+    c.check(instance_all)
+    msg = 'xx'
+    assert [msg] == check.warnings
+
+
 def test_basic_disable_service_tag(aggregator, check, instance_basic_disable_service_tag):
     c = check(instance_basic_disable_service_tag)
     c.check(instance_basic_disable_service_tag)
