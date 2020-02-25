@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from contextlib import suppress
 
 import click
 from semver import finalize_version, parse_version_info
@@ -21,8 +22,9 @@ from .show import changes
 @click.option('--new', 'initial_release', is_flag=True, help='Ensure versions are at 1.0.0')
 @click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
 @click.option('--sign-only', is_flag=True, help='Only sign release metadata')
+@click.option('--exclude', help='Comma-separated list of checks to skip')
 @click.pass_context
-def make(ctx, checks, version, initial_release, skip_sign, sign_only):
+def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
     """Perform a set of operations needed to release checks:
 
     \b
@@ -60,6 +62,11 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
         checks = sorted(valid_checks)
     else:
         checks = sorted(checks)
+
+    if exclude:
+        for check in exclude.split(','):
+            with suppress(ValueError):
+                checks.remove(check)
 
     if initial_release:
         version = '1.0.0'
