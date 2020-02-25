@@ -2,6 +2,7 @@ import mock
 import pytest
 
 from datadog_checks import aerospike
+from datadog_checks.base.utils.platform import Platform
 
 from . import common
 
@@ -24,6 +25,7 @@ METRICS = [
 ]
 
 
+@pytest.mark.skipif(not Platform.is_linux(), reason='Aerospike client only installs on Linux for version == 3.10')
 def test_datacenter_metrics(aggregator):
     check = aerospike.AerospikeCheck('aerospike', {}, [common.INSTANCE])
     original_get_info = check.get_info

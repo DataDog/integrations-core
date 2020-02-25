@@ -3,16 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-import aerospike
 import pytest
 
-from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 
 from .common import COMPOSE_FILE, HOST, INSTANCE, PORT
 
 
+@pytest.fixture
 def init_db():
+    # late import to not require it for e2e
+    import aerospike
+
     # sample Aerospike Python Client code
     # https://www.aerospike.com/docs/client/python/usage/kvs/write.html
     client = aerospike.client({'hosts': [(HOST, PORT)]}).connect()
@@ -42,8 +44,7 @@ def init_db():
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(
-        COMPOSE_FILE,
-        conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
+        COMPOSE_FILE, conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!'])],
     ):
         yield INSTANCE
 
