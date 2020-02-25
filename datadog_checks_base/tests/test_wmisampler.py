@@ -5,7 +5,10 @@
 import pytest
 from tests.utils import requires_windows
 
-from datadog_checks.base.checks.win.wmi import WMISampler
+try:
+    from datadog_checks.base.checks.win.wmi import WMISampler
+except ImportError:
+    pass
 
 
 @requires_windows
