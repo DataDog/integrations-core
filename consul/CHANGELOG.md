@@ -1,5 +1,9 @@
 # CHANGELOG - consul
 
+## 1.12.2 / 2020-02-25
+
+* [Fixed] Change new added tag. See [#5856](https://github.com/DataDog/integrations-core/pull/5856).
+
 ## 1.12.1 / 2020-02-25
 
 * [Fixed] Bump minimun agent version. See [#5834](https://github.com/DataDog/integrations-core/pull/5834).
