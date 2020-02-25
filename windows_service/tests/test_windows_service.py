@@ -62,7 +62,7 @@ def test_all(aggregator, check, instance_all):
         c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:EventSystem', 'windows_service:EventSystem'], count=1
     )
     msg = 'xx'
-    assert [msg] == check.warnings
+    assert [msg] == c.warnings
 
 
 def test_basic_disable_service_tag(aggregator, check, instance_basic_disable_service_tag):
