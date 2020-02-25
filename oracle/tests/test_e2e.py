@@ -5,6 +5,7 @@
 import pytest
 
 METRICS = [
+    'oracle.tablespace.used',
     # ProcessMetrics
     'oracle.process.pga_used_memory',
     'oracle.process.pga_allocated_memory',
