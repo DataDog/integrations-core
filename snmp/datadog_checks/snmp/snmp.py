@@ -421,8 +421,8 @@ class SnmpCheck(AgentCheck):
             if tag.symbol not in results:
                 self.log.debug('Ignoring tag %s', tag.symbol)
                 continue
-            [(_, tag_value)] = list(results[tag.symbol].items())
-            extracted_tags.append('{}:{}'.format(tag.name, tag_value))
+            for tag_value in results[tag.symbol].values():
+                extracted_tags.append('{}:{}'.format(tag.name, tag_value))
         return extracted_tags
 
     def report_metrics(
