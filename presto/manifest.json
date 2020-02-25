@@ -27,6 +27,13 @@
     "dashboards": {
       "Presto Overview": "assets/dashboards/overview.json"
     },
+    "saved_views": {
+      "4xx_errors": "assets/saved_views/4xx_errors.json",
+      "5xx_errors": "assets/saved_views/5xx_errors.json",
+      "status_code_overview": "assets/saved_views/status_code_overview.json",
+      "error_patterns": "assets/saved_views/error_patterns.json",
+      "response_time_overview": "assets/saved_views/response_time.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
