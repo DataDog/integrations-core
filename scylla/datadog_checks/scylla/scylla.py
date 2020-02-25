@@ -54,7 +54,7 @@ class ScyllaCheck(OpenMetricsBaseCheck):
                 'tags': tags,
                 'metadata_metric_name': 'scylla_scylladb_current_version',
                 'metadata_label_map': {'version': 'version'},
-                'send_histogram_buckets': True,
+                'send_histograms_buckets': True,  # Default, but ensures we collect histograms sent by Scylla.
             }
         )
 

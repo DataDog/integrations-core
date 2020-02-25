@@ -121,6 +121,12 @@ instances:
     # services_exclude:
     #   - ".*"
 
+    ## @param disable_legacy_service_tag - boolean - optional - default: false
+    ## Whether or not to stop submitting the tag `service` that has been renamed
+    ## to `haproxy_service` and disable the associated deprecation warning.
+    #
+    # disable_legacy_service_tag: false
+
     ## @param active_tag - boolean - optional - default: false
     ## Includes the 'active' tag to metrics to denote whether a backend belongs to the
     ## "active" pool of connections normally used for servicing requests.
@@ -152,7 +158,7 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-    ## @param startup_grace_time - integer - optional
+    ## @param startup_grace_seconds - integer - optional
     ## Time to wait on startup or reload of haproxy before sending metrics
     ##
     ## When haproxy reloads, if there is a `grace` period on some proxies, 2
@@ -161,7 +167,7 @@ instances:
     ## refer to one of the multiple instances of haproxy, and will not
     ## accurately reflect the state of the system.
     ## If this parameter is >0, no datapoints will be sent until the uptime of
-    ## haproxy reaches this many seconds
+    ## haproxy reaches this many seconds.
     #
     # startup_grace_seconds: 0
 

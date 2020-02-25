@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 2.2.1 / 2020-02-25
+
+* [Fixed] Update datadog_checks_base dependencies. See [#5846](https://github.com/DataDog/integrations-core/pull/5846).
+
 ## 2.2.0 / 2020-02-22
 
 * [Added] Add `service` option to default configuration. See [#5805](https://github.com/DataDog/integrations-core/pull/5805).

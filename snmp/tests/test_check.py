@@ -869,6 +869,29 @@ def test_metric_tags_misconfiguration():
         common.create_check(instance)
 
 
+def test_metric_tag_multiple(aggregator, caplog):
+    metrics = common.SUPPORTED_METRIC_TYPES
+    instance = common.generate_instance_config(metrics)
+    instance['metric_tags'] = [
+        {'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'},
+        {'MIB': 'IF-MIB', 'symbol': 'ifOutOctets', 'tag': 'out'},
+    ]
+    check = common.create_check(instance)
+
+    with caplog.at_level(logging.WARNING):
+        check.check(instance)
+
+    expected_message = (
+        'You are trying to use a table column (OID `{}`) as a metric tag. This is not supported as '
+        '`metric_tags` can only refer to scalar OIDs.'.format(instance['metric_tags'][1]['symbol'])
+    )
+    for _, level, message in caplog.record_tuples:
+        if level == logging.WARNING and message == expected_message:
+            break
+    else:
+        raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+
 def test_f5(aggregator):
     instance = common.generate_instance_config([])
 
