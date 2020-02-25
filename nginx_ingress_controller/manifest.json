@@ -28,6 +28,12 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
+    "saved_views": {
+      "4xx_errors": "assets/saved_views/4xx_errors.json",
+      "5xx_errors": "assets/saved_views/5xx_errors.json",
+      "status_code_overview": "assets/saved_views/status_code_overview.json",
+      "bot_errors": "assets/saved_views/bot_errors.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
