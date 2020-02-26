@@ -142,6 +142,8 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
+        self.kubernetes_label_selector = instance.get('kubernetes_label_selector')
+
         self._auth_data = self.get_auth_data(instance)
 
         self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)

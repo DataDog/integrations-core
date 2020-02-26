@@ -379,3 +379,26 @@ def test_cache_loading_tags(thread_mock, read_mock):
 
     config = check._config.discovered_instances['192.168.0.2']
     assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check'}
+
+
+def test_kubernetes_dispatch():
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+
+    discovered_instance = instance.copy()
+    discovered_instance['ip_address'] = '192.168.0.1'
+
+    instance['network_address'] = '192.168.0.0/31'
+    instance['kubernetes_label_selector'] = 'label=match'
+
+    check = SnmpCheck('snmp', {}, [instance])
+
+    check._config.discovered_instances['192.168.0.1'] = InstanceConfig(discovered_instance)
+    # Skip discovery start
+    check._thread = object()
+
+    instances = []
+    check._update_k8s_service = lambda x, y: instances.extend(y)
+    check.check(instance)
+
+    assert instances == [discovered_instance]

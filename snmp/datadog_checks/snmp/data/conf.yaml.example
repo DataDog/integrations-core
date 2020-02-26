@@ -248,6 +248,12 @@ instances:
     #
     # profile: <PROFILE_NAME>
 
+    ## @param kubernetes_label_selector - string - optional
+    ## When running discovery in kubernetes, the label selector to filter the
+    ## service holding annotations.
+    #
+    # kubernetes_label_selector: <LABEL_SELECTOR>
+
     ## @param metrics - list of elements - optional
     ## Specify metrics you want to monitor by using MIBS for Counter and Gauge.
     ## metrics set here will override global_metrics set in the init_config section if use_global_metrics is set to false.
