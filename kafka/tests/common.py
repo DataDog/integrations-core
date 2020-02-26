@@ -1,11 +1,16 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import socket
+from datadog_checks.dev import get_here
 
-from datadog_checks.dev import get_docker_hostname, get_here
+CHECK_NAME = 'kafka'
 
 HERE = get_here()
-HOST = get_docker_hostname()
 
-HOST_IP = socket.gethostbyname(HOST)
+
+KAFKA_E2E_METRICS = [
+    "jvm.thread_count",
+    "jvm.heap_memory_max",
+    "kafka.request.fetch_follower.time.99percentile",
+    "kafka.request.metadata.time.avg",
+]
