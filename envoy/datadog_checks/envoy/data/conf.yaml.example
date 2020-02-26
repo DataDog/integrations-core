@@ -41,6 +41,8 @@ instances:
     ## Whitelist metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
+    ## For an exhaustive list of all metrics and tags, see:
+    ## https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
     ##
     ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
     ##
@@ -55,6 +57,8 @@ instances:
     ## Blacklist metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
+    ## For an exhaustive list of all metrics and tags, see:
+    ## https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
     ##
     ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
     ##
