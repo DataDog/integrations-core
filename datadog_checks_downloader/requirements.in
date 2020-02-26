@@ -9,4 +9,4 @@ in-toto==0.4.2
 # both use in common. At the time of writing (Jan 30 2020), this was the latest
 # version of the library.
 #
-securesystemslib[crypto,pynacl]==0.14.0
+securesystemslib[crypto,pynacl]==0.14.2
