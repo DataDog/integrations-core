@@ -8,11 +8,7 @@ import pytest
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.scylla import ScyllaCheck
 
-from .common import (
-    INSTANCE_ADDITIONAL_GROUPS,
-    INSTANCE_ADDITIONAL_METRICS,
-    INSTANCE_DEFAULT_METRICS,
-)
+from .common import INSTANCE_ADDITIONAL_GROUPS, INSTANCE_ADDITIONAL_METRICS, INSTANCE_DEFAULT_METRICS
 
 
 @pytest.mark.unit
