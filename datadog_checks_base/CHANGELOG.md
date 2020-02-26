@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.1.0 / 2020-02-26
+
+* [Added] Bump securesystemslib to 0.14.2. See [#5890](https://github.com/DataDog/integrations-core/pull/5890).
+
 ## 11.0.0 / 2020-02-22
 
 * [Fixed] Pin enum34 to 1.1.6. See [#5829](https://github.com/DataDog/integrations-core/pull/5829).

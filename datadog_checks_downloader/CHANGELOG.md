@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 2.4.0 / 2020-02-26
+
+* [Added] Bump securesystemslib to 0.14.2. See [#5890](https://github.com/DataDog/integrations-core/pull/5890).
+
 ## 2.3.1 / 2020-02-24
 
 * [Fixed] Hide internal logging exceptions. See [#5848](https://github.com/DataDog/integrations-core/pull/5848).
