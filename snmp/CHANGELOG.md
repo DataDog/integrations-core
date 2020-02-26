@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 2.4.1 / 2020-02-25
+
+* [Fixed] Handle case when servers report two values for entries in `metric_tags`. See [#5853](https://github.com/DataDog/integrations-core/pull/5853).
+
 ## 2.4.0 / 2020-02-22
 
 * [Added] Add extension mechanism for SNMP profiles. See [#5821](https://github.com/DataDog/integrations-core/pull/5821).
