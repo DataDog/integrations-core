@@ -377,10 +377,10 @@ INSTANCE_ADDITIONAL_GROUPS = [
 
 
 # expand the lists into a single list of metrics
-def _get_metrics(metric_groups):
+def get_metrics(metric_groups):
     """Given a list of metric groups, return single consolidated list"""
     return sorted(m for g in metric_groups for m in INSTANCE_METRIC_GROUP_MAP[g])
 
 
-INSTANCE_DEFAULT_METRICS = _get_metrics(INSTANCE_DEFAULT_GROUPS)
-INSTANCE_ADDITIONAL_METRICS = _get_metrics(INSTANCE_ADDITIONAL_GROUPS)
+INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)
+INSTANCE_ADDITIONAL_METRICS = _et_metrics(INSTANCE_ADDITIONAL_GROUPS)
