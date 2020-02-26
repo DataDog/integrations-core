@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import fnmatch
+import functools
 import ipaddress
 import json
 import threading
@@ -125,14 +126,9 @@ class SnmpCheck(AgentCheck):
         else:
             return None
 
-    def discover_instances(self):
-        # type: () -> None
+    def discover_instances(self, interval):
+        # type: (int) -> None
         config = self._config
-
-        if config.ip_network is None:
-            raise RuntimeError("Expected config.ip_network to be set to start discovery")
-
-        discovery_interval = config.instance.get('discovery_interval', 3600)
 
         while self._running:
             start_time = time.time()
@@ -167,8 +163,8 @@ class SnmpCheck(AgentCheck):
             write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
 
             time_elapsed = time.time() - start_time
-            if discovery_interval - time_elapsed > 0:
-                time.sleep(discovery_interval - time_elapsed)
+            if interval - time_elapsed > 0:
+                time.sleep(interval - time_elapsed)
 
     def raise_on_error_indication(self, error_indication, ip_address):
         # type: (Any, Optional[str]) -> None
@@ -350,7 +346,14 @@ class SnmpCheck(AgentCheck):
                 host_config = self._build_config(instance)
                 self._config.discovered_instances[host] = host_config
 
-        self._thread = threading.Thread(target=self.discover_instances, name=self.name)
+        try:
+            discovery_interval = int(self._config.instance.get('discovery_interval', 3600))
+        except (ValueError, TypeError):
+            raise ConfigurationError('discovery_interval could not be parsed as an integer')
+
+        self._thread = threading.Thread(
+            target=functools.partial(self.discover_instances, interval=discovery_interval), name=self.name
+        )
         self._thread.daemon = True
         self._thread.start()
 

@@ -212,6 +212,20 @@ def test_removing_host():
     assert warnings == [msg, msg, msg]
 
 
+def test_invalid_discovery_interval():
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+
+    # Trigger autodiscovery.
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.0.0/24'
+
+    instance['discovery_interval'] = 'not_parsable_as_an_int'
+
+    check = SnmpCheck('snmp', {}, [instance])
+    with pytest.raises(ConfigurationError):
+        check.check(instance)
+
+
 @mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
 def test_cache_discovered_host(read_mock):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
