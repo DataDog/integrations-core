@@ -132,7 +132,7 @@ def test_cannot_connect_unknown_host(aggregator, instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_connected_but_check_failed(aggregator, instance):
+def test_connected_but_check_failed_unexpectedly(aggregator, instance):
     # type: (AggregatorStub, Instance) -> None
     class Failure(Exception):
         pass

@@ -17,6 +17,9 @@ from ._config import Config
 from ._types import ConnectionServer, Instance, Metric
 
 
+SC_CONNECT = 'rethinkdb.can_connect'
+
+
 class RethinkDBCheck(AgentCheck):
     """
     Collect metrics from a RethinkDB cluster.
@@ -30,27 +33,29 @@ class RethinkDBCheck(AgentCheck):
         self.config = Config(self.instance)
 
     @contextmanager
-    def connect_submitting_service_check(self, host, port):
+    def connect_submitting_service_checks(self, host, port):
         # type: (str, int) -> Iterator[rethinkdb.net.Connection]
-        tags = []  # type: List[str]
+        try:
+            conn = r.connect(host=host, port=port)
+        except rethinkdb.errors.ReqlDriverError as exc:
+            message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
+            self.log.error(message)
+            self.service_check(SC_CONNECT, self.CRITICAL, message=message)
+            raise
+
+        server = conn.server()  # type: ConnectionServer
+        self.log.debug('connected server=%r', server)
+        tags = ['server:{}'.format(server['name'])]
 
         try:
-            with r.connect(host=host, port=port) as conn:
-                server = conn.server()  # type: ConnectionServer
-                self.log.debug('connected server=%r', server)
-                tags.append('server:{}'.format(server['name']))
-                yield conn
-        except rethinkdb.errors.ReqlDriverError as exc:
-            self.log.error('Could not connect to RethinkDB server: %r', exc)
-            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=tags)
-            raise
+            yield conn
         except Exception as exc:
-            self.log.error('Unexpected error while executing RethinkDB check: %r', exc)
-            self.service_check('rethinkdb.can_connect', self.CRITICAL, tags=tags)
+            message = 'Unexpected error while executing RethinkDB check: {!r}'.format(exc)
+            self.log.error(message)
+            self.service_check(SC_CONNECT, self.CRITICAL, tags=tags, message=message)
             raise
-        else:
-            self.log.debug('service_check OK')
-            self.service_check('rethinkdb.can_connect', self.OK, tags=tags)
+
+        self.service_check(SC_CONNECT, self.OK, tags=tags)
 
     def submit_metric(self, metric):
         # type: (Metric) -> None
@@ -69,7 +74,7 @@ class RethinkDBCheck(AgentCheck):
         host = config.host
         port = config.port
 
-        with self.connect_submitting_service_check(host, port) as conn:
+        with self.connect_submitting_service_checks(host, port) as conn:
             for metric in config.collect_metrics(conn):
                 self.submit_metric(metric)
 
