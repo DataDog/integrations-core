@@ -67,5 +67,5 @@ def _get_cd(config):
     cd.ConnectionName = pymqi.ensure_bytes(config.host_and_port)
     cd.ChannelType = pymqi.CMQC.MQCHT_CLNTCONN
     cd.TransportType = pymqi.CMQC.MQXPT_TCP
-    cd.Version = config.api_version
+    cd.Version = config.mqcd_version
     return cd
