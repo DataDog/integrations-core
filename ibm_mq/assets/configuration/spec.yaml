@@ -20,14 +20,12 @@ files:
           example: 'datadog'
           type: string
       - name: host
-        required: true
         default: localhost
         value:
           example: 'localhost'
           type: string
         description: The host IBM MQ is running on.
       - name: port
-        required: true
         default: 1414
         value:
           example: '1414'
