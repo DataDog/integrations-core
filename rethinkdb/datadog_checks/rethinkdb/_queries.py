@@ -131,9 +131,9 @@ def query_replicas_with_stats(conn):
         # See: https://rethinkdb.com/docs/system-stats/#replica-tableserver-pair
         .merge(
             {
-                'stats': stats.get(['table_server', r.row['table']['id'], r.row['server']['id']]).default({}).pluck(
-                    'query_engine', 'storage_engine'
-                ),
+                'stats': stats.get(['table_server', r.row['table']['id'], r.row['server']['id']])
+                .default({})
+                .pluck('query_engine', 'storage_engine'),
             }
         )
     )

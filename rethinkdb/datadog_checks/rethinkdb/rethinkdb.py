@@ -6,7 +6,7 @@
 from __future__ import absolute_import
 
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator, List
+from typing import Any, Callable, Iterator
 
 import rethinkdb
 from rethinkdb import r
@@ -15,7 +15,6 @@ from datadog_checks.base import AgentCheck
 
 from ._config import Config
 from ._types import ConnectionServer, Instance, Metric
-
 
 SC_CONNECT = 'rethinkdb.can_connect'
 
