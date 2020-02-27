@@ -24,7 +24,6 @@ airflow.pool.open_slots,gauge,,,,Number of open slots in the pool,0,airflow,pool
 airflow.pool.used_slots,gauge,,,,Number of used slots in the pool,0,airflow,pool.used_slots
 airflow.pool.starving_tasks,gauge,,task,,Number of starving tasks in the pool,-1,airflow,pool.starving_tasks
 airflow.dagrun.dependency_check,gauge,,millisecond,,Milliseconds taken to check DAG dependencies,-1,airflow,dagrun.dep_check
-
 airflow.dag.task.duration,gauge,,millisecond,,Milliseconds taken to finish a task,-1,airflow,dag.task.duration
 airflow.dag_processing.last_duration,gauge,,millisecond,,Milliseconds taken to load the given DAG file,-1,airflow,dag_proc.last_duration
 airflow.dagrun.duration.success,gauge,,millisecond,,Milliseconds taken for a DagRun to reach success state,-1,airflow,dagrun.duration.success
