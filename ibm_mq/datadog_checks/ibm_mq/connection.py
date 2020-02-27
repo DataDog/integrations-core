@@ -26,15 +26,22 @@ def get_normal_connection(config):
     """
     Get the connection either with a username and password or without
     """
-    kwargs = {'cd': _get_cd(config)}
+    cd = _get_cd(config)
+    qmgr = pymqi.QueueManager(None)
+
     if config.username and config.password:
         log.debug("connecting with username and password")
-        kwargs['user']: config.username
-        kwargs['password']: config.password
+
+        kwargs = {
+            'user': config.username,
+            'password': config.password,
+            'cd': cd
+        }
+
+        qmgr.connect_with_options(config.queue_manager_name, **kwargs)
     else:
         log.debug("connecting without a username and password")
-    qmgr = pymqi.QueueManager(None)
-    qmgr.connect_with_options(config.queue_manager, **kwargs)
+        qmgr.connect_with_options(config.queue_manager, cd)
     return qmgr
 
 
@@ -56,8 +63,8 @@ def get_ssl_connection(config):
 
 def _get_cd(config):
     cd = pymqi.CD()
-    cd.ChannelName = config.channel
-    cd.ConnectionName = config.host_and_port
+    cd.ChannelName = pymqi.ensure_bytes(config.channel)
+    cd.ConnectionName = pymqi.ensure_bytes(config.host_and_port)
     cd.ChannelType = pymqi.CMQC.MQCHT_CLNTCONN
     cd.TransportType = pymqi.CMQC.MQXPT_TCP
     cd.Version = config.api_version

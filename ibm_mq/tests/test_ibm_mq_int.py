@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+
 import pytest
 from six import iteritems
 
@@ -15,6 +17,9 @@ pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration
 
 
 def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
+    api_version = os.getenv('IBM_MQ_VERSION')
+    instance['api_version'] = api_version
+
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance)
 
@@ -34,6 +39,13 @@ def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
 
     discoverable_tags = tags + ['channel:*']
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1)
+
+
+def test_check_all(aggregator, instance_collect_all, seed_data):
+    check = IbmMqCheck('ibm_mq', {}, {})
+    check.check(instance_collect_all)
+
+    assert_all_metrics(aggregator)
 
 
 @pytest.mark.parametrize(
@@ -59,13 +71,6 @@ def test_check_queue_pattern(aggregator, instance_queue_pattern, seed_data):
 def test_check_queue_regex(aggregator, instance_queue_regex, seed_data):
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance_queue_regex)
-
-    assert_all_metrics(aggregator)
-
-
-def test_check_all(aggregator, instance_collect_all, seed_data):
-    check = IbmMqCheck('ibm_mq', {}, {})
-    check.check(instance_collect_all)
 
     assert_all_metrics(aggregator)
 
