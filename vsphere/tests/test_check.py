@@ -135,6 +135,63 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
         )
 
 
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_collect_metric_instance_values_historical(aggregator, dd_run_check, historical_instance):
+
+    historical_instance.update(
+        {
+            'collect_per_instance_filters': {
+                'datastore': [r'disk\..*'],
+                # datacenter metric group doesn't have any instance tags so this has no effect
+                'datacenter': [r'cpu\.usagemhz\.avg'],
+                'cluster': [r'cpu\.usagemhz\.avg'],
+            }
+        }
+    )
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usagemhz.avg',
+        tags=[
+            'cpu_core:16',
+            'vcenter_server:FAKE',
+            'vsphere_cluster:Cluster2',
+            'vsphere_datacenter:Datacenter2',
+            'vsphere_folder:Datacenters',
+            'vsphere_folder:host',
+            'vsphere_type:cluster',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'vsphere.disk.used.latest',
+        tags=[
+            'device_path:value-aa',
+            'vcenter_server:FAKE',
+            'vsphere_datacenter:Datacenter2',
+            'vsphere_datastore:NFS Share',
+            'vsphere_folder:Datacenters',
+            'vsphere_folder:datastore',
+            'vsphere_type:datastore',
+        ],
+    )
+
+    # Following metrics should NOT match and do NOT have instance value tag
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=[
+            'vcenter_server:FAKE',
+            'vsphere_cluster:Cluster2',
+            'vsphere_datacenter:Datacenter2',
+            'vsphere_folder:Datacenters',
+            'vsphere_folder:host',
+            'vsphere_type:cluster',
+        ],
+    )
+
+
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_collect_tags(aggregator, dd_run_check, realtime_instance):
     realtime_instance.update({'collect_tags': True, 'excluded_host_tags': ['my_cat_name_1', 'my_cat_name_2']})
