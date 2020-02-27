@@ -24,7 +24,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
-LOGS_ONLY_INTEGRATIONS = {'tenable'}
+LOGS_ONLY_INTEGRATIONS = {'tenable', 'flink'}
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
