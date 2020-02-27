@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 def collect_cluster_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+    logger.debug('collect_cluster_statistics')
+
     stats = query_cluster_stats(conn)
     logger.debug('cluster_statistics stats=%r', stats)
 
@@ -51,8 +53,10 @@ def collect_cluster_statistics(conn):
 
 def collect_server_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+    logger.debug('collect_server_statistics')
+
     for server, stats in query_servers_with_stats(conn):
-        logger.debug('server_statistics server=%r, stats=%r', server, stats)
+        logger.debug('server_statistics server=%r stats=%r', server, stats)
 
         name = server['name']
         server_tags = server['tags']
@@ -119,8 +123,10 @@ def collect_server_statistics(conn):
 
 def collect_table_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+    logger.debug('collect_table_statistics')
+
     for table, stats in query_tables_with_stats(conn):
-        logger.debug('table_statistics table=%r, stats=%r', table, stats)
+        logger.debug('table_statistics table=%r stats=%r', table, stats)
 
         name = table['name']
         database = table['db']
@@ -145,6 +151,8 @@ def collect_table_statistics(conn):
 
 def collect_replica_statistics(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+    logger.debug('collect_replica_statistics')
+
     for table, server, replica, stats in query_replicas_with_stats(conn):
         logger.debug('replica_statistics table=%r server=%r replica=%r stats=%r', table, server, replica, stats)
 
