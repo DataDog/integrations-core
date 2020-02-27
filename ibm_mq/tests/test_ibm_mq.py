@@ -9,7 +9,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.ibm_mq import IbmMqCheck
-from datadog_checks.ibm_mq.config import IBMMQConfig
 
 from . import common
 from .common import METRICS, OPTIONAL_METRICS, QUEUE_METRICS
@@ -57,8 +56,6 @@ def test_channel_status_service_check_default_mapping(aggregator, instance):
 
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
-    config = IBMMQConfig(instance)
-
     service_check_map = {
         pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
         pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
@@ -99,8 +96,6 @@ def test_channel_status_service_check_custom_mapping(aggregator, instance):
     }
 
     check = IbmMqCheck('ibm_mq', {}, [instance])
-
-    config = IBMMQConfig(instance)
 
     service_check_map = {
         pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.WARNING,
