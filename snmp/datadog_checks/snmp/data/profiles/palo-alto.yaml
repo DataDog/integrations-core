@@ -12,37 +12,6 @@ sysobjectid: 1.3.6.1.4.1.25461.*
 
 metrics:
   #
-  # General System Information
-  #
-  - MIB: PAN-COMMON-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.25461.2.1.2.1.1
-      name: panSysSwVersion
-  - MIB: PAN-COMMON-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.25461.2.1.2.1.2
-      name: panSysHwVersion
-  - MIB: PAN-COMMON-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.25461.2.1.2.1.3
-      name: panSysSerialNumber
-  - MIB: PAN-COMMON-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.25461.2.1.2.1.11
-      name: panSysHAState
-  - MIB: PAN-COMMON-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.25461.2.1.2.1.13
-      name: panSysHAMode
-
-  #
-  # Chassis Information
-  #
-  - MIB: PAN-COMMON-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.25461.2.1.2.2.1
-      name: panChassisType
-  #
   # Session Utilization Metrics
   #
 
