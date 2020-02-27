@@ -157,7 +157,6 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
             continue
 
         if check in LOGS_ONLY_INTEGRATIONS:
-            # TODO: Validate logs configuration
             continue
 
         file_display_queue = []
