@@ -8,14 +8,14 @@
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
-#
-# logs:
-#  - type: file
-#    path: /opt/nessus/var/nessus/logs/backend.log
-#    service: nessus_backend
-#    source: tenable
-#
-#  - type: file
-#    path: /opt/nessus/var/nessus/logs/www_server.log
-#    service: nessus_webserver
-#    source: tenable
+
+logs:
+  - type: file
+    path: /opt/nessus/var/nessus/logs/backend.log
+    service: nessus_backend
+    source: tenable
+
+  - type: file
+    path: /opt/nessus/var/nessus/logs/www_server.log
+    service: nessus_webserver
+    source: tenable
