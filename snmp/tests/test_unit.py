@@ -333,3 +333,49 @@ def test_profile_extends():
                 ],
                 'metric_tags': [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}],
             }
+
+
+def test_discovery_tags():
+    """When specifying a tag on discovery, it doesn't make tags leaks between instances."""
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+
+    instance['network_address'] = '192.168.0.0/29'
+    instance['discovery_interval'] = 0
+    instance['tags'] = ['test:check']
+
+    check = SnmpCheck('snmp', {}, [instance])
+
+    oids = ['1.3.6.1.4.5', '1.3.6.1.4.5']
+
+    def mock_fetch(cfg):
+        if oids:
+            return oids.pop(0)
+        check._running = False
+        raise RuntimeError("Not snmp")
+
+    check.fetch_sysobject_oid = mock_fetch
+
+    check.discover_instances()
+
+    config = check._config.discovered_instances['192.168.0.2']
+    assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check'}
+
+
+@mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
+@mock.patch("threading.Thread")
+def test_cache_loading_tags(thread_mock, read_mock):
+    """When loading discovered instances from cache, tags don't leak from one to the others."""
+    read_mock.return_value = '["192.168.0.1", "192.168.0.2"]'
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+
+    instance['network_address'] = '192.168.0.0/29'
+    instance['discovery_interval'] = 0
+    instance['tags'] = ['test:check']
+
+    check = SnmpCheck('snmp', {}, [instance])
+    check._start_discovery()
+
+    config = check._config.discovered_instances['192.168.0.2']
+    assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check'}
