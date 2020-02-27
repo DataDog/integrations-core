@@ -39,6 +39,7 @@ HEROES_TABLE_CONFIG = {
     'primary_replica_tag': 'primary',
 }
 HEROES_TABLE_SERVERS = {'server1', 'server2'}
+HEROES_TABLE_PRIMARY_REPLICA = 'server1'
 HEROES_TABLE_REPLICAS_BY_SHARD = {0: HEROES_TABLE_SERVERS}
 HEROES_TABLE_DOCUMENTS = [
     {

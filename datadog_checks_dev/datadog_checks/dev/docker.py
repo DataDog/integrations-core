@@ -250,10 +250,12 @@ def _read_example_logs_config(check_root):
 
 
 @contextmanager
-def temporarily_pause_service(service, compose_file, check=True):
+def temporarily_stop_service(service, compose_file, check=True):
     # type: (str, str, bool) -> Iterator[None]
-    run_command(['docker-compose', '-f', compose_file, 'pause', service], capture=False, check=check)
+    run_command(['docker-compose', '-f', compose_file, 'stop', service], capture=False, check=check)
     try:
         yield
-    finally:
-        run_command(['docker-compose', '-f', compose_file, 'unpause', service], capture=False, check=check)
+    except:
+        raise
+    else:
+        run_command(['docker-compose', '-f', compose_file, 'start', service], capture=False, check=check)

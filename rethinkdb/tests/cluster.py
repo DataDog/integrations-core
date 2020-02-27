@@ -3,12 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from contextlib import contextmanager
+from typing import Iterator
 
 import rethinkdb
 from rethinkdb import r
 
 from datadog_checks.dev.conditions import WaitFor
-from datadog_checks.dev.docker import temporarily_pause_service
+from datadog_checks.dev.docker import temporarily_stop_service
 from datadog_checks.dev.structures import EnvVars
 
 from .common import (
@@ -21,7 +22,6 @@ from .common import (
     HEROES_TABLE_DOCUMENTS,
     HOST,
     PROXY_PORT,
-    SERVERS,
 )
 
 
@@ -81,18 +81,45 @@ def _simulate_client_reads():
 
 @contextmanager
 def temporarily_disconnect_server(server):
+    """
+    Gracefully disconnect a server from the cluster.
+    Ensures that the stable is left in a stable state inside and after exiting the context.
+    """
     service = 'rethinkdb-{}'.format(server)
 
-    def _servers_have_rebalanced(conn):
+    def _server_exists(conn):
         # type: (rethinkdb.net.Connection) -> bool
-        # RethinkDB will rebalance data across tables and remove the server from 'server_status' afterwards.
-        servers = list(r.db('rethinkdb').table('server_status').run(conn))
-        return len(servers) == len(SERVERS) - 1
+        return r.db('rethinkdb').table('server_status').map(r.row['name']).contains(server).run(conn)
 
-    with EnvVars(COMPOSE_ENV_VARS):
-        with temporarily_pause_service(service, compose_file=COMPOSE_FILE):
+    def _leader_election_done(conn):
+        # type: (rethinkdb.net.Connection) -> bool
+        STABLE_REPLICA_STATES = {'ready', 'waiting_for_primary', 'disconnected'}
+
+        replica_states = (
+            r.db('rethinkdb')
+            .table('table_status')
+            .concat_map(r.row['shards'])
+            .concat_map(r.row['replicas'])
+            .map(r.row['state'])
+            .run(conn)
+        )  # type: Iterator[str]
+
+        return all(state in STABLE_REPLICA_STATES for state in replica_states)
+
+    def _server_disconnected(conn):
+        # type: (rethinkdb.net.Connection) -> bool
+        return not _server_exists(conn) and _leader_election_done(conn)
+
+    def _server_reconnected(conn):
+        # type: (rethinkdb.net.Connection) -> bool
+        return _server_exists(conn) and _leader_election_done(conn)
+
+    with temporarily_stop_service(service, compose_file=COMPOSE_FILE):
+        with EnvVars(COMPOSE_ENV_VARS):
             with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
-                wait_until_rebalanced = WaitFor(lambda: _servers_have_rebalanced(conn))
-                wait_until_rebalanced()
+                WaitFor(lambda: _server_disconnected(conn))()
 
             yield
+
+    with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
+        WaitFor(lambda: _server_reconnected(conn))()

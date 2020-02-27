@@ -19,6 +19,7 @@ from .common import (
     CONNECT_SERVER_NAME,
     DATABASE,
     HEROES_TABLE,
+    HEROES_TABLE_PRIMARY_REPLICA,
     HEROES_TABLE_REPLICAS_BY_SHARD,
     HEROES_TABLE_SERVERS,
     REPLICA_STATISTICS_METRICS,
@@ -59,16 +60,16 @@ def test_check(aggregator, instance):
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize('server_with_data', list(HEROES_TABLE_SERVERS))
 @pytest.mark.usefixtures('dd_environment')
-def test_check_with_disconnected_server(aggregator, instance):
-    # type: (AggregatorStub, Instance) -> None
+def test_check_with_disconnected_server(aggregator, instance, server_with_data):
+    # type: (AggregatorStub, Instance, str) -> None
     """
     Verify that the check still runs to completion and sends appropriate service checks if one of the
     servers that holds data is disconnected.
     """
     check = RethinkDBCheck('rethinkdb', {}, [instance])
 
-    server_with_data = 'server2'
     with temporarily_disconnect_server(server_with_data):
         check.check(instance)
 
@@ -108,8 +109,8 @@ def _assert_statistics_metrics(aggregator, disconnected_servers=None):
         aggregator.assert_metric(metric, count=1, tags=[])
 
     for server in SERVERS:
+        tags = ['server:{}'.format(server)] + SERVER_TAGS[server]
         for metric in SERVER_STATISTICS_METRICS:
-            tags = ['server:{}'.format(server)] + SERVER_TAGS[server]
             count = 0 if server in disconnected_servers else 1
             aggregator.assert_metric(metric, count=count, tags=tags)
 
@@ -118,21 +119,21 @@ def _assert_statistics_metrics(aggregator, disconnected_servers=None):
         aggregator.assert_metric(metric, count=1, tags=tags)
 
     for server in HEROES_TABLE_SERVERS:
+        tags = [
+            'table:{}'.format(HEROES_TABLE),
+            'database:{}'.format(DATABASE),
+            'server:{}'.format(server),
+        ] + SERVER_TAGS[server]
+
         for metric in REPLICA_STATISTICS_METRICS:
-            tags = [
-                'table:{}'.format(HEROES_TABLE),
-                'database:{}'.format(DATABASE),
-                'server:{}'.format(server),
-            ]
-            tags.extend(SERVER_TAGS[server])
-
             if server in disconnected_servers:
-                count = 0
-            else:
-                tags.append('state:ready')  # Assumption: cluster is stable (not currently rebalancing).
-                count = 1
+                aggregator.assert_metric(metric, count=0, tags=tags)
+                continue
 
-            aggregator.assert_metric(metric, count=count, tags=tags)
+            # Assumption: cluster is stable (not currently rebalancing), so only these two states can exist.
+            state = 'waiting_for_primary' if HEROES_TABLE_PRIMARY_REPLICA in disconnected_servers else 'ready'
+            state_tag = 'state:{}'.format(state)
+            aggregator.assert_metric(metric, count=1, tags=tags + [state_tag])
 
 
 def _assert_table_status_metrics(aggregator):
