@@ -100,6 +100,7 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            tags:
              dag_id: "$1"
          - match: "airflow.dag.*.*.duration"
+           match_type: "regex"
            name: "airflow.dag.task.duration"
            tags:
              dag_id: "$1"
@@ -109,23 +110,28 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.dag_processing.last_duration"
            tags:
              dag_file: "$1"
-         - match: "airflow.dagrun.duration.success.*"
+         - match: 'airflow\.dagrun\.duration\.success\.(.*)'
+           match_type: "regex"
            name: "airflow.dagrun.duration.success"
            tags:
              dag_id: "$1"
-         - match: "airflow.dagrun.duration.failed.*"
+         - match: 'airflow\.dagrun\.duration\.failed\.(.*)'
+           match_type: "regex"
            name: "airflow.dagrun.duration.failed"
            tags:
              dag_id: "$1"
-         - match: "airflow.dagrun.schedule_delay.*"
+         - match: 'airflow\.dagrun\.schedule_delay\.(.*)'
+           match_type: "regex"
            name: "airflow.dagrun.schedule_delay"
            tags:
              dag_id: "$1"
-         - match: "airflow.task_removed_from_dag.*"
+         - match: 'airflow\.task_removed_from_dag\.(.*)'
+           match_type: "regex"
            name: "airflow.dag.task_removed"
            tags:
              dag_id: "$1"
-         - match: "airflow.task_restored_to_dag.*"
+         - match: 'airflow\.task_restored_to_dag\.(.*)'
+           match_type: "regex"
            name: "airflow.dag.task_restored"
            tags:
              dag_id: "$1"
