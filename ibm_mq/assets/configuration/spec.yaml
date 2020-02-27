@@ -21,22 +21,26 @@ files:
           type: string
       - name: host
         required: true
+        default: localhost
         value:
           example: 'localhost'
           type: string
         description: The host IBM MQ is running on.
       - name: port
         required: true
+        default: 1414
         value:
           example: '1414'
           type: string
         description: The port IBM MQ is listening on.
       - name: username
-        type: string
+        value:
+          type: string
         description: <USERNAME> of the IBMMQ Channel to connect to.
       - name: password
         secret: true
-        type: string
+        value:
+          type: string
         description: <PASSWORD> of the IBMMQ Channel to connect to.
       - name: queues
         items:
@@ -95,11 +99,13 @@ files:
           type: object
           properties: []
       - name: auto_discover_queues
-        type: bool
         default: false
         description: |
           Autodiscover the queues to monitor
           Warning: this will lead to some warnings in your logs
+        value:
+          example: false
+          type: boolean
       - name: ssl_auth
         type: string
         description: Whether or not to use SSL auth while connecting to the channel.
@@ -122,7 +128,8 @@ files:
           type: string
       - name: queue_tag_re
         description: |
-          Instruct the check to apply additional tags to matching queues
+          Instruct the check to apply additional tags to matching
+          queues
 
           Multiple comma-separated tags are supported. You must properly quote the string if the
           pattern contains special characters e.g. colons.

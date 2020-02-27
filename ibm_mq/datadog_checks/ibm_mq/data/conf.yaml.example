@@ -33,13 +33,15 @@ instances:
     #
     port: '1414'
 
+    ## @param username - string - optional
     ## <USERNAME> of the IBMMQ Channel to connect to.
     #
-    # username: {}
+    # username: <USERNAME>
 
+    ## @param password - string - optional
     ## <PASSWORD> of the IBMMQ Channel to connect to.
     #
-    # password: {}
+    # password: <PASSWORD>
 
     ## @param queues - list of strings - optional
     ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
@@ -87,10 +89,11 @@ instances:
     #   paused: warning
     #   initializing: warning
 
+    ## @param auto_discover_queues - boolean - optional - default: false
     ## Autodiscover the queues to monitor
     ## Warning: this will lead to some warnings in your logs
     #
-    # auto_discover_queues: {}
+    # auto_discover_queues: false
 
     ## @param ssl_auth - string - optional - default: no
     ## Whether or not to use SSL auth while connecting to the channel.
@@ -108,7 +111,8 @@ instances:
     # ssl_key_repository_location: /var/mqm/ssl-db/client/KeyringClient
 
     ## @param queue_tag_re - mapping - optional
-    ## Instruct the check to apply additional tags to matching queues
+    ## Instruct the check to apply additional tags to matching
+    ## queues
     ##
     ## Multiple comma-separated tags are supported. You must properly quote the string if the
     ## pattern contains special characters e.g. colons.
