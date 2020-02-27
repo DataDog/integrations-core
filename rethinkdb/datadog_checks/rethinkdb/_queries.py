@@ -10,7 +10,7 @@ Useful reference documentation:
 """
 from __future__ import absolute_import
 
-from typing import Iterator, Tuple
+from typing import Any, Iterator, Mapping, Tuple
 
 import rethinkdb
 from rethinkdb import r
@@ -131,7 +131,7 @@ def query_replicas_with_stats(conn):
         )
     )
 
-    rows = query.run(conn)  # type: Iterator[dict]
+    rows = query.run(conn)  # type: Iterator[Mapping[str, Any]]
 
     for row in rows:
         table = row['table']  # type: Table

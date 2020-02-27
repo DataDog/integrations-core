@@ -4,6 +4,7 @@
 from __future__ import absolute_import
 
 import datetime as dt
+import logging
 import time
 from typing import Iterator
 
@@ -14,6 +15,8 @@ from datadog_checks.base import AgentCheck
 from .._queries import query_server_status, query_table_status
 from .._types import Metric
 
+logger = logging.getLogger(__name__)
+
 
 def collect_table_status(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
@@ -22,7 +25,11 @@ def collect_table_status(conn):
 
     See: https://rethinkdb.com/docs/system-tables/#server_status
     """
+    logger.debug('collect_table_status')
+
     for table_status in query_table_status(conn):
+        logger.debug('table_status %r', table_status)
+
         table = table_status['name']
         database = table_status['db']
 
@@ -88,12 +95,16 @@ def collect_server_status(conn):
 
     See: https://rethinkdb.com/docs/system-tables/#table_status
     """
-    for server in query_server_status(conn):
-        name = server['name']
-        network = server['network']
-        process = server['process']
+    logger.debug('collect_server_status')
 
-        tags = ['server:{}'.format(name)]
+    for server_status in query_server_status(conn):
+        logger.debug('server_status %r', server_status)
+
+        server = server_status['name']
+        network = server_status['network']
+        process = server_status['process']
+
+        tags = ['server:{}'.format(server)]
 
         yield {
             'type': 'gauge',

@@ -3,12 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
 
+import logging
 from typing import Iterator
 
 import rethinkdb
 
 from .._queries import query_system_jobs
 from .._types import Metric
+
+logger = logging.getLogger(__name__)
 
 
 def collect_system_jobs(conn):
@@ -18,7 +21,11 @@ def collect_system_jobs(conn):
 
     See: https://rethinkdb.com/docs/system-jobs/
     """
+    logger.debug('collect_system_jobs')
+
     for job in query_system_jobs(conn):
+        logger.debug('job %r', job)
+
         duration = job['duration_sec']
         servers = job['servers']
 
