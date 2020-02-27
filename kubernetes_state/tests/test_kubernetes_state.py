@@ -588,6 +588,7 @@ def test_experimental_labels(aggregator, instance):
 
 def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
+    instance['experimental_metrics'] = True
 
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
