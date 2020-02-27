@@ -94,7 +94,7 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.pool.starving_tasks"
            tags:
              pool_name: "$1"
-         - match: "airflow\.dagrun\.dependency-check\.(.*)"
+         - match: 'airflow\.dagrun\.dependency-check\.(.*)'
            match_type: "regex"
            name: "airflow.dagrun.dependency_check"
            tags:
