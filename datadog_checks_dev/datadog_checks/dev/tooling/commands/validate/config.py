@@ -141,7 +141,6 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
     config_files = get_config_files(check)
     for config_file in config_files:
         file_counter.append(None)
-        file_display_queue = []
         file_name = basepath(config_file)
         try:
             file_data = read_file(config_file)
@@ -157,31 +156,34 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
             check_display_queue.append(lambda: echo_info(error, indent=FILE_INDENT * 2))
             continue
 
-        if check not in LOGS_ONLY_INTEGRATIONS:
+        if check in LOGS_ONLY_INTEGRATIONS:
             # TODO: Validate logs configuration
-            errors = validate_config(file_data)
-            for err in errors:
-                err_msg = str(err)
-                if err.severity == SEVERITY_ERROR:
-                    file_display_queue.append(lambda x=err_msg: echo_failure(x, indent=FILE_INDENT))
-                    files_failed[config_file] = True
-                elif err.severity == SEVERITY_WARNING:
-                    file_display_queue.append(lambda x=err_msg: echo_warning(x, indent=FILE_INDENT))
-                    files_warned[config_file] = True
-                else:
-                    file_display_queue.append(lambda x=err_msg: echo_info(x, indent=FILE_INDENT))
+            continue
 
-            # Verify there is an `instances` section
-            if 'instances' not in config_data:
+        file_display_queue = []
+        errors = validate_config(file_data)
+        for err in errors:
+            err_msg = str(err)
+            if err.severity == SEVERITY_ERROR:
+                file_display_queue.append(lambda x=err_msg: echo_failure(x, indent=FILE_INDENT))
                 files_failed[config_file] = True
-                file_display_queue.append(lambda: echo_failure('Missing `instances` section', indent=FILE_INDENT))
-
-            # Verify there is a default instance
+            elif err.severity == SEVERITY_WARNING:
+                file_display_queue.append(lambda x=err_msg: echo_warning(x, indent=FILE_INDENT))
+                files_warned[config_file] = True
             else:
-                instances = config_data['instances']
-                if check not in IGNORE_DEFAULT_INSTANCE and not isinstance(instances, list):
-                    files_failed[config_file] = True
-                    file_display_queue.append(lambda: echo_failure('No default instance', indent=FILE_INDENT))
+                file_display_queue.append(lambda x=err_msg: echo_info(x, indent=FILE_INDENT))
+
+        # Verify there is an `instances` section
+        if 'instances' not in config_data:
+            files_failed[config_file] = True
+            file_display_queue.append(lambda: echo_failure('Missing `instances` section', indent=FILE_INDENT))
+
+        # Verify there is a default instance
+        else:
+            instances = config_data['instances']
+            if check not in IGNORE_DEFAULT_INSTANCE and not isinstance(instances, list):
+                files_failed[config_file] = True
+                file_display_queue.append(lambda: echo_failure('No default instance', indent=FILE_INDENT))
 
         if file_display_queue:
             check_display_queue.append(lambda x=file_name: echo_info(f'{x}:', indent=True))
