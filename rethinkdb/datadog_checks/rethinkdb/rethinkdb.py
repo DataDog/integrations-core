@@ -35,26 +35,26 @@ class RethinkDBCheck(AgentCheck):
     def connect_submitting_service_checks(self, host, port):
         # type: (str, int) -> Iterator[rethinkdb.net.Connection]
         try:
-            conn = r.connect(host=host, port=port)
+            with r.connect(host=host, port=port) as conn:
+                server = conn.server()  # type: ConnectionServer
+                self.log.debug('connected server=%r', server)
+                tags = ['server:{}'.format(server['name'])]
+
+                try:
+                    yield conn
+                except Exception as exc:
+                    message = 'Unexpected error while executing RethinkDB check: {!r}'.format(exc)
+                    self.log.error(message)
+                    self.service_check(SC_CONNECT, self.CRITICAL, tags=tags, message=message)
+                    raise
+                else:
+                    self.service_check(SC_CONNECT, self.OK, tags=tags)
+
         except rethinkdb.errors.ReqlDriverError as exc:
             message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
             self.log.error(message)
             self.service_check(SC_CONNECT, self.CRITICAL, message=message)
             raise
-
-        server = conn.server()  # type: ConnectionServer
-        self.log.debug('connected server=%r', server)
-        tags = ['server:{}'.format(server['name'])]
-
-        try:
-            yield conn
-        except Exception as exc:
-            message = 'Unexpected error while executing RethinkDB check: {!r}'.format(exc)
-            self.log.error(message)
-            self.service_check(SC_CONNECT, self.CRITICAL, tags=tags, message=message)
-            raise
-
-        self.service_check(SC_CONNECT, self.OK, tags=tags)
 
     def submit_metric(self, metric):
         # type: (Metric) -> None
