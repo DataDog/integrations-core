@@ -106,6 +106,6 @@ def test_invalid_mqcd_version(instance, mqcd_version):
 def test_set_mqcd_version(instance):
     import pymqi
 
-    instance['api_version'] = 9
+    instance['mqcd_version'] = 9
     config = IBMMQConfig(instance)
-    assert config.api_version == pymqi.CMQC.MQCD_VERSION_9
+    assert config.mqcd_version == pymqi.CMQC.MQCD_VERSION_9
