@@ -25,6 +25,9 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    }
   }
 }

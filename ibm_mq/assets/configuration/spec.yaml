@@ -1,0 +1,144 @@
+name: IBM MQ
+files:
+- name: ibm_mq.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/default
+  - template: instances
+    options:
+      - name: channel
+        required: true
+        value:
+          example: 'DEV.ADMIN.SVRCONN'
+          type: string
+        description: The IBMMQ Channel to connect to.
+      - name: queue_manager
+        required: true
+        description: The name of the queue manager.
+        value:
+          example: 'datadog'
+          type: string
+      - name: host
+        required: true
+        value:
+          example: 'localhost'
+          type: string
+        description: The host IBM MQ is running on.
+      - name: port
+        required: true
+        value:
+          example: '1414'
+          type: string
+        description: The port IBM MQ is listening on.
+      - name: username
+        type: string
+        description: <USERNAME> of the IBMMQ Channel to connect to.
+      - name: password
+        secret: true
+        type: string
+        description: <PASSWORD> of the IBMMQ Channel to connect to.
+      - name: queues
+        items:
+            type: string
+        description: The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
+        value:
+          example: ['<QUEUE_NAME>']
+          type: array
+          items:
+            type: string
+      - name: queue_patterns
+        description: Collect from queues that match a MQ pattern
+        value:
+          example:
+            - 'DEV.*'          # match queues starting with "DEV."
+            - 'SYSTEM.*'       # match queues starting with "SYSTEM."
+          type: array
+          items:
+            type: string
+      - name: queue_regex
+        description: Collect from queues that match a regex
+        value:
+          example:
+            - '^DEV\..*$'          # match queues starting with "DEV."
+            - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
+          type: array
+          items:
+            type: string
+      - name: channels
+        description: Check the status of the following channels
+        value:
+          example: ['<CHANNEL_NAME>']
+          type: array
+          items:
+            type: string
+      - name: channel_status_mapping
+        description: |
+          Custom channel status mapping for service check `ibm_mq.channel.status`.
+
+          The key is the IBM MQ channel status. Valid keys are: `inactive`, `binding`, `starting`, `running`, `stopping`,
+          `retrying`, `stopped`, `requesting`, `paused`, and `initializing`.
+          The value is the Datadog service check level. Valid values are: `ok`, `warning`, `critical`, and `unknown`.
+          If a channel status is not mapped, it is mapped to `unknown`.
+        value:
+          example:
+            inactive: critical
+            binding: warning
+            starting: warning
+            running: ok
+            stopping: critical
+            retrying: warning
+            stopped: critical
+            requesting: warning
+            paused: warning
+            initializing: warning
+          type: object
+          properties: []
+      - name: auto_discover_queues
+        type: bool
+        default: false
+        description: |
+          Autodiscover the queues to monitor
+          Warning: this will lead to some warnings in your logs
+      - name: ssl_auth
+        type: string
+        description: Whether or not to use SSL auth while connecting to the channel.
+        value:
+          example: 'no'
+          type: string
+      - name: ssl_cipher_spec
+        type: string
+        default: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+        description: The ssl cipher to use.
+        value:
+          example: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+          type: string
+      - name: ssl_key_repository_location
+        type: string
+        default: /var/mqm/ssl-db/client/KeyringClient
+        description: The location of the ssl keyring.
+        value:
+          example: '/var/mqm/ssl-db/client/KeyringClient'
+          type: string
+      - name: queue_tag_re
+        description: |
+          Instruct the check to apply additional tags to matching queues
+
+          Multiple comma-separated tags are supported. You must properly quote the string if the
+          pattern contains special characters e.g. colons.
+        value:
+          example:
+            'SYSTEM.*': queue_type:system
+            'DEV.*': role:dev,queue_type:default
+          type: object
+      - template: instances/tags
+      - template: instances/global
+  - template: logs
+    example:
+    - type: file
+      path: /var/mqm/log/<APPNAME>/active/AMQERR01.LOG
+      source: ibm_mq
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: "\\d{2}/\\d{2}/\\d{4}"
