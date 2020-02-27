@@ -26,27 +26,23 @@ def get_normal_connection(config):
     """
     Get the connection either with a username and password or without
     """
+    kwargs = {'cd': _get_cd(config)}
     if config.username and config.password:
         log.debug("connecting with username and password")
-        queue_manager = pymqi.connect(
-            config.queue_manager_name, config.channel, config.host_and_port, config.username, config.password
-        )
+        kwargs['user']: config.username
+        kwargs['password']: config.password
     else:
         log.debug("connecting without a username and password")
-        queue_manager = pymqi.connect(config.queue_manager_name, config.channel, config.host_and_port)
-
-    return queue_manager
+    qmgr = pymqi.QueueManager(None)
+    qmgr.connect_with_options(config.queue_manager, **kwargs)
+    return qmgr
 
 
 def get_ssl_connection(config):
     """
     Get the connection with SSL
     """
-    cd = pymqi.CD()
-    cd.ChannelName = config.channel
-    cd.ConnectionName = config.host_and_port
-    cd.ChannelType = pymqi.CMQC.MQCHT_CLNTCONN
-    cd.TransportType = pymqi.CMQC.MQXPT_TCP
+    cd = _get_cd(config)
     cd.SSLCipherSpec = config.ssl_cipher_spec
 
     sco = pymqi.SCO()
@@ -56,3 +52,13 @@ def get_ssl_connection(config):
     queue_manager.connect_with_options(config.queue_manager_name, cd, sco)
 
     return queue_manager
+
+
+def _get_cd(config):
+    cd = pymqi.CD()
+    cd.ChannelName = config.channel
+    cd.ConnectionName = config.host_and_port
+    cd.ChannelType = pymqi.CMQC.MQCHT_CLNTCONN
+    cd.TransportType = pymqi.CMQC.MQXPT_TCP
+    cd.Version = config.api_version
+    return cd

@@ -99,6 +99,12 @@ class IBMMQConfig:
         self._queue_tag_re = instance.get('queue_tag_re', {})
         self.queue_tag_re = self._compile_tag_re()
 
+        try:
+            api_version = instance.get('api_version', 6)
+            self.api_version = getattr(pymqi.CMQC, 'MQCD_VERSION_{}'.format(int(api_version)))
+        except (ValueError, AttributeError):
+            raise ConfigurationError("api_version must be a number between 1 and 9. {} found.".format(api_version))
+
     def check_properly_configured(self):
         if not self.channel or not self.queue_manager_name or not self.host or not self.port:
             msg = "channel, queue_manager, host and port are all required configurations"
