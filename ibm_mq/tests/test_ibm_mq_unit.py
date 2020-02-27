@@ -94,16 +94,16 @@ def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, 
         check.check(instance)
 
 
-@pytest.mark.parametrize('api_version', [10, 'foo'])
-def test_invalid_api_version(instance, api_version):
-    instance['api_version'] = api_version
+@pytest.mark.parametrize('mqcd_version', [10, 'foo'])
+def test_invalid_mqcd_version(instance, mqcd_version):
+    instance['mqcd_version'] = mqcd_version
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
     with pytest.raises(ConfigurationError):
         check.check(instance)
 
 
-def test_set_api_version(instance):
+def test_set_mqcd_version(instance):
     import pymqi
 
     instance['api_version'] = 9

@@ -17,8 +17,7 @@ pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration
 
 
 def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
-    api_version = os.getenv('IBM_MQ_VERSION')
-    instance['api_version'] = api_version
+    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
 
     check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance)
