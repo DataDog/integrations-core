@@ -1,8 +1,6 @@
-from contextlib import contextmanager
-from typing import Any, Dict, Iterator
+from typing import Any, Dict, Iterator, List, Type
 
-from rethinkdb import r
-from rethinkdb.net import Connection
+import rethinkdb
 
 
 class MockConnectionInstance(object):
@@ -25,7 +23,7 @@ class MockConnectionInstance(object):
         return self._parent.mock_rows()
 
 
-class MockConnection(Connection):
+class MockConnection(rethinkdb.net.Connection):
     """
     A RethinkDB connection type that mocks all queries by sending a deterministic set of rows.
 
@@ -37,7 +35,7 @@ class MockConnection(Connection):
         # type: (*Any, **Any) -> None
         rows = kwargs.pop('rows')
         super(MockConnection, self).__init__(MockConnectionInstance, *args, **kwargs)
-        self.rows = rows
+        self.rows = rows  # type: List[Dict[str, Any]]
 
     def mock_rows(self):
         # type: () -> Iterator[Dict[str, Any]]
@@ -45,12 +43,8 @@ class MockConnection(Connection):
             yield row
 
 
-@contextmanager
-def patch_connection_type(conn_type):
-    # type: (type) -> Iterator[None]
-    initial_conn_type = r.connection_type
-    r.connection_type = conn_type
-    try:
-        yield
-    finally:
-        r.connection_type = initial_conn_type
+class MockRethinkDB(rethinkdb.RethinkDB):
+    def __init__(self, connection_type):
+        # type: (Type[rethinkdb.net.Connection]) -> None
+        super(MockRethinkDB, self).__init__()
+        self.connection_type = connection_type

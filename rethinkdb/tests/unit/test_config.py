@@ -7,27 +7,31 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.rethinkdb._config import Config
+from datadog_checks.rethinkdb._types import Instance
 
 pytestmark = pytest.mark.unit
 
 
 def test_default_config():
     # type: () -> None
-    config = Config(instance={})
+    instance = {}  # type: Instance
+    config = Config(instance)
     assert config.host == 'localhost'
     assert config.port == 28015
 
 
 def test_config():
     # type: () -> None
-    config = Config(instance={'host': '192.168.121.1', 'port': 28016})
+    instance = {'host': '192.168.121.1', 'port': 28016}  # type: Instance
+    config = Config(instance)
     assert config.host == '192.168.121.1'
     assert config.port == 28016
 
 
 def test_config_repr():
     # type: () -> None
-    config = Config(instance={})
+    instance = {}  # type: Instance
+    config = Config(instance)
     assert repr(config) == "Config(host='localhost', port=28015)"
 
 

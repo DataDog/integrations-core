@@ -7,11 +7,12 @@ from typing import Iterator
 
 import rethinkdb
 
+from .._queries import QueryEngine
 from .._types import Metric
 
 
-def collect_current_issues(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+def collect_current_issues(engine, conn):
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect metrics about current system issues.
 

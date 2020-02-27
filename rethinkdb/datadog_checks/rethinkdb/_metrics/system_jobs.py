@@ -8,14 +8,14 @@ from typing import Iterator
 
 import rethinkdb
 
-from .._queries import query_system_jobs
+from .._queries import QueryEngine
 from .._types import Metric
 
 logger = logging.getLogger(__name__)
 
 
-def collect_system_jobs(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+def collect_system_jobs(engine, conn):
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect metrics about system jobs.
 
@@ -23,7 +23,7 @@ def collect_system_jobs(conn):
     """
     logger.debug('collect_system_jobs')
 
-    for job in query_system_jobs(conn):
+    for job in engine.query_system_jobs(conn):
         logger.debug('job %r', job)
 
         duration = job['duration_sec']

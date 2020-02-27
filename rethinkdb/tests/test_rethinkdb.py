@@ -181,13 +181,13 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
     class Failure(Exception):
         pass
 
-    def collect_and_fail(conn):
-        # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+    def collect_and_fail():
+        # type: () -> Iterator[Metric]
         yield {'type': 'gauge', 'name': 'rethinkdb.some.metric', 'value': 42, 'tags': []}
         raise Failure
 
     check = RethinkDBCheck('rethinkdb', {}, [instance])
-    check.config.metric_streams = [collect_and_fail]
+    check.config._collect_funcs = [lambda engine, conn: collect_and_fail()]
 
     with pytest.raises(Failure):
         check.check(instance)

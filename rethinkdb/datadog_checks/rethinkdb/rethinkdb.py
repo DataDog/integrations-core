@@ -9,7 +9,6 @@ from contextlib import contextmanager
 from typing import Any, Callable, Iterator
 
 import rethinkdb
-from rethinkdb import r
 
 from datadog_checks.base import AgentCheck
 
@@ -32,10 +31,10 @@ class RethinkDBCheck(AgentCheck):
         self.config = Config(self.instance)
 
     @contextmanager
-    def connect_submitting_service_checks(self, host, port):
-        # type: (str, int) -> Iterator[rethinkdb.net.Connection]
+    def connect_submitting_service_checks(self, config):
+        # type: (Config) -> Iterator[rethinkdb.net.Connection]
         try:
-            with r.connect(host=host, port=port) as conn:
+            with config.connect() as conn:
                 server = conn.server()  # type: ConnectionServer
                 self.log.debug('connected server=%r', server)
                 tags = ['server:{}'.format(server['name'])]
@@ -70,10 +69,7 @@ class RethinkDBCheck(AgentCheck):
         config = self.config
         self.log.debug('check config=%r', config)
 
-        host = config.host
-        port = config.port
-
-        with self.connect_submitting_service_checks(host, port) as conn:
+        with self.connect_submitting_service_checks(config) as conn:
             for metric in config.collect_metrics(conn):
                 self.submit_metric(metric)
 

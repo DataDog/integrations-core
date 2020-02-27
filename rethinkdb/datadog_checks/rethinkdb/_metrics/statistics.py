@@ -13,17 +13,17 @@ from typing import Iterator
 
 import rethinkdb
 
-from .._queries import query_cluster_stats, query_replicas_with_stats, query_servers_with_stats, query_tables_with_stats
+from .._queries import QueryEngine
 from .._types import Metric
 
 logger = logging.getLogger(__name__)
 
 
-def collect_cluster_statistics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+def collect_cluster_statistics(engine, conn):
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     logger.debug('collect_cluster_statistics')
 
-    stats = query_cluster_stats(conn)
+    stats = engine.query_cluster_stats(conn)
     logger.debug('cluster_statistics stats=%r', stats)
 
     query_engine = stats['query_engine']
@@ -50,11 +50,11 @@ def collect_cluster_statistics(conn):
     }
 
 
-def collect_server_statistics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+def collect_server_statistics(engine, conn):
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     logger.debug('collect_server_statistics')
 
-    for server, stats in query_servers_with_stats(conn):
+    for server, stats in engine.query_servers_with_stats(conn):
         logger.debug('server_statistics server=%r stats=%r', server, stats)
 
         name = server['name']
@@ -120,11 +120,11 @@ def collect_server_statistics(conn):
         }
 
 
-def collect_table_statistics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+def collect_table_statistics(engine, conn):
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     logger.debug('collect_table_statistics')
 
-    for table, stats in query_tables_with_stats(conn):
+    for table, stats in engine.query_tables_with_stats(conn):
         logger.debug('table_statistics table=%r stats=%r', table, stats)
 
         name = table['name']
@@ -148,11 +148,11 @@ def collect_table_statistics(conn):
         }
 
 
-def collect_replica_statistics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+def collect_replica_statistics(engine, conn):
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     logger.debug('collect_replica_statistics')
 
-    for table, server, replica, stats in query_replicas_with_stats(conn):
+    for table, server, replica, stats in engine.query_replicas_with_stats(conn):
         logger.debug('replica_statistics table=%r server=%r replica=%r stats=%r', table, server, replica, stats)
 
         state = replica['state']

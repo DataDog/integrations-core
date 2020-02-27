@@ -9,7 +9,16 @@ import rethinkdb
 
 from datadog_checks.base import ConfigurationError
 
-from ._metrics import collect_default_metrics
+from ._metrics.current_issues import collect_current_issues
+from ._metrics.statistics import (
+    collect_cluster_statistics,
+    collect_replica_statistics,
+    collect_server_statistics,
+    collect_table_statistics,
+)
+from ._metrics.statuses import collect_server_status, collect_table_status
+from ._metrics.system_jobs import collect_system_jobs
+from ._queries import QueryEngine
 from ._types import Instance, Metric
 
 
@@ -34,20 +43,43 @@ class Config:
         if port < 0:
             raise ConfigurationError('port must be positive (got {!r})'.format(port))
 
-        self.host = host  # type: str
-        self.port = port  # type: int
+        self._host = host  # type: str
+        self._port = port  # type: int
+        self._query_engine = QueryEngine(r=rethinkdb.r)
 
-        # NOTE: this attribute exists for encapsulation and testing purposes.
-        self.metric_streams = [
-            collect_default_metrics
-        ]  # type: List[Callable[[rethinkdb.net.Connection], Iterator[Metric]]]
+        self._collect_funcs = [
+            collect_cluster_statistics,
+            collect_server_statistics,
+            collect_table_statistics,
+            collect_replica_statistics,
+            collect_server_status,
+            collect_table_status,
+            collect_system_jobs,
+            collect_current_issues,
+        ]  # type: List[Callable[[QueryEngine, rethinkdb.net.Connection], Iterator[Metric]]]
+
+    @property
+    def host(self):
+        # type: () -> str
+        return self._host
+
+    @property
+    def port(self):
+        # type: () -> int
+        return self._port
+
+    def connect(self):
+        # type: () -> rethinkdb.net.Connection
+        host = self._host
+        port = self._port
+        return self._query_engine.connect(host, port)
 
     def collect_metrics(self, conn):
         # type: (rethinkdb.net.Connection) -> Iterator[Metric]
-        for stream in self.metric_streams:
-            for metric in stream(conn):
+        for collect in self._collect_funcs:
+            for metric in collect(self._query_engine, conn):
                 yield metric
 
     def __repr__(self):
         # type: () -> str
-        return 'Config(host={host!r}, port={port!r})'.format(host=self.host, port=self.port)
+        return 'Config(host={host!r}, port={port!r})'.format(host=self._host, port=self._port)

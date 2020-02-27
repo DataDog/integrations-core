@@ -5,12 +5,12 @@
 Unit tests for metrics that are hard to test using integration tests, eg. because they depend on cluster dynamics.
 """
 import pytest
-from rethinkdb import r
 
-from datadog_checks.rethinkdb._metrics import collect_system_jobs
+from datadog_checks.rethinkdb._metrics.system_jobs import collect_system_jobs
+from datadog_checks.rethinkdb._queries import QueryEngine
 from datadog_checks.rethinkdb._types import BackfillJob, IndexConstructionJob
 
-from .utils import MockConnection, patch_connection_type
+from .utils import MockConnection, MockRethinkDB
 
 pytestmark = pytest.mark.unit
 
@@ -51,9 +51,9 @@ def test_jobs_metrics():
 
     mock_rows = [mock_backfill_job_row, mock_index_construction_job_row, mock_unknown_job_row]
 
-    with patch_connection_type(MockConnection):
-        conn = r.connect(rows=mock_rows)
-        metrics = list(collect_system_jobs(conn))
+    mock_engine = QueryEngine(r=MockRethinkDB(connection_type=MockConnection))
+    conn = mock_engine.connect(host='testserver', port=28015, rows=mock_rows)
+    metrics = list(collect_system_jobs(mock_engine, conn))
 
     assert metrics == [
         {
