@@ -15,7 +15,7 @@ from datadog_checks.base import AgentCheck
 from ._config import Config
 from ._types import ConnectionServer, Instance, Metric
 
-SC_CONNECT = 'rethinkdb.can_connect'
+SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
 
 
 class RethinkDBCheck(AgentCheck):
@@ -44,15 +44,15 @@ class RethinkDBCheck(AgentCheck):
                 except Exception as exc:
                     message = 'Unexpected error while executing RethinkDB check: {!r}'.format(exc)
                     self.log.error(message)
-                    self.service_check(SC_CONNECT, self.CRITICAL, tags=tags, message=message)
+                    self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
                     raise
                 else:
-                    self.service_check(SC_CONNECT, self.OK, tags=tags)
+                    self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=tags)
 
         except rethinkdb.errors.ReqlDriverError as exc:
             message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
             self.log.error(message)
-            self.service_check(SC_CONNECT, self.CRITICAL, message=message)
+            self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, message=message)
             raise
 
     def submit_metric(self, metric):
@@ -74,6 +74,3 @@ class RethinkDBCheck(AgentCheck):
                 self.submit_metric(metric)
 
     # TODO: version metadata.
-    # TODO: custom queries. (Hint: look at `QueryManager`.)
-    # TODO: allow not sending default metrics.
-    # TODO: decide if and how to deal with `identifier_format`: https://rethinkdb.com/api/python/table/#description
