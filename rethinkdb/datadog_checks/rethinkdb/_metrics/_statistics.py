@@ -6,7 +6,6 @@ Collect metrics about system statistics.
 
 See: https://rethinkdb.com/docs/system-stats/
 """
-
 from __future__ import absolute_import
 
 import logging

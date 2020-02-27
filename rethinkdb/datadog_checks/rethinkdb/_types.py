@@ -1,11 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 """
 Declarations used for type checking our code, including our manipulation of JSON documents returned by RethinkDB.
 """
-
 import datetime as dt
 from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 

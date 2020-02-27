@@ -8,7 +8,6 @@ Useful reference documentation:
 - Python ReQL command reference: https://rethinkdb.com/api/python/
 - Usage of `eq_join`: https://rethinkdb.com/api/python/eq_join/
 """
-
 from __future__ import absolute_import
 
 from typing import Iterator, Tuple

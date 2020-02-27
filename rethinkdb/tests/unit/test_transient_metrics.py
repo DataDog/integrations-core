@@ -1,11 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 """
 Unit tests for metrics that are hard to test using integration tests, eg. because they depend on cluster dynamics.
 """
-
 import pytest
 from rethinkdb import r
 
