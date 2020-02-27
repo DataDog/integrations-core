@@ -32,11 +32,7 @@ def get_normal_connection(config):
     if config.username and config.password:
         log.debug("connecting with username and password")
 
-        kwargs = {
-            'user': config.username,
-            'password': config.password,
-            'cd': cd
-        }
+        kwargs = {'user': config.username, 'password': config.password, 'cd': cd}
 
         qmgr.connect_with_options(config.queue_manager_name, **kwargs)
     else:
