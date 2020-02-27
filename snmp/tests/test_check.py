@@ -1492,7 +1492,7 @@ def test_dell_poweredge(aggregator):
         'operatingSystemMemoryTotalVirtualSize',
         'operatingSystemMemoryAvailableVirtualSize',
     ]
-    power_supply_gauges = ['powerSupplyStatus', 'powerSupplyOutputWatts', 'powerSupplyMaximumInputVoltage']
+    power_supply_gauges = ['powerSupplyStatus', 'powerSupplyOutputWatts', 'powerSupplyMaximumInputVoltage', 'powerSupplyCurrentInputVoltage']
 
     temperature_probe_gauges = ['temperatureProbeStatus', 'temperatureProbeReading']
 
