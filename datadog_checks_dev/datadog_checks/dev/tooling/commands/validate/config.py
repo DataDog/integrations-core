@@ -24,7 +24,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 FILE_INDENT = ' ' * 8
 
 IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbouncer', 'process', 'supervisord'}
-LOGS_ONLY_INTEGRATION = {'tenable'}
+LOGS_ONLY_INTEGRATIONS = {'tenable'}
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
@@ -157,7 +157,7 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
             check_display_queue.append(lambda: echo_info(error, indent=FILE_INDENT * 2))
             continue
 
-        if check not in LOGS_ONLY_INTEGRATION:
+        if check not in LOGS_ONLY_INTEGRATIONS:
             # TODO: Validate logs configuration
             errors = validate_config(file_data)
             for err in errors:
