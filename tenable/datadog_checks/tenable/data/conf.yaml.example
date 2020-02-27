@@ -1,16 +1,3 @@
-init_config:
-
-instances:
-  -
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
 ## Log Section (Available for Agent >=6.0)
 ##
 ## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
@@ -21,14 +8,14 @@ instances:
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
-#
-# logs:
-#  - type: file
-#    path: /opt/nessus/var/nessus/logs/backend.log
-#    service: nessus_backend
-#    source: tenable
-#
-#  - type: file
-#    path: /opt/nessus/var/nessus/logs/www_server.log
-#    service: nessus_webserver
-#    source: tenable
+
+logs:
+  - type: file
+    path: /opt/nessus/var/nessus/logs/backend.log
+    service: nessus_backend
+    source: tenable
+
+  - type: file
+    path: /opt/nessus/var/nessus/logs/www_server.log
+    service: nessus_webserver
+    source: tenable
