@@ -16,7 +16,7 @@ To install the Tenable integration configuration on your Agent:
 
 ### Configuration
 
-The agent tails the Tenable nessus `webserver` and `backend` logs to collect data on nessus scans.
+The Agent tails the Tenable Nessus `webserver` and `backend` logs to collect data on Nessus scans.
 
 #### Log collection
 
