@@ -146,3 +146,13 @@ METRICS = (
     + TABLE_STATUS_SHARDS_METRICS
     + SERVER_STATUS_METRICS
 )
+
+
+# Docker Compose configuration.
+
+COMPOSE_FILE = os.path.join(HERE, 'compose', 'docker-compose.yaml')
+COMPOSE_ENV_VARS = env_vars = {
+    'RETHINKDB_IMAGE': IMAGE,
+    'RETHINKDB_CONNECT_SERVER_PORT': str(CONNECT_SERVER_PORT),
+    'RETHINKDB_PROXY_PORT': str(PROXY_PORT),
+}

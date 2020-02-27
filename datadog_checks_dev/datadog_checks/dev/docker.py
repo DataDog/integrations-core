@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import contextmanager
+from typing import Iterator
 
 from six import string_types
 from six.moves.urllib.parse import urlparse
@@ -17,7 +18,7 @@ from .utils import create_file, file_exists, find_check_root
 try:
     from contextlib import ExitStack
 except ImportError:
-    from contextlib2 import ExitStack
+    from contextlib2 import ExitStack  # type: ignore
 
 
 def get_docker_hostname():
@@ -246,3 +247,13 @@ def _read_example_logs_config(check_root):
                 return option['example']
 
     raise ValueError('No logs example found')
+
+
+@contextmanager
+def temporarily_pause_service(service, compose_file, check=True):
+    # type: (str, str, bool) -> Iterator[None]
+    run_command(['docker-compose', '-f', compose_file, 'pause', service], capture=False, check=check)
+    try:
+        yield
+    finally:
+        run_command(['docker-compose', '-f', compose_file, 'unpause', service], capture=False, check=check)

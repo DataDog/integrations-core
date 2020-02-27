@@ -4,7 +4,6 @@
 
 from __future__ import absolute_import
 
-import os
 from typing import Iterator
 
 import pytest
@@ -13,7 +12,7 @@ from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.rethinkdb._types import Instance
 
 from .cluster import setup_cluster
-from .common import CONNECT_SERVER_PORT, HERE, HOST, IMAGE, PROXY_PORT
+from .common import COMPOSE_FILE, CONNECT_SERVER_PORT, HOST, IMAGE, PROXY_PORT
 
 E2E_METADATA = {'start_commands': ['pip install rethinkdb==2.4.4']}
 
@@ -30,8 +29,6 @@ def instance():
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     # type: (Instance) -> Iterator
-    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
-
     env_vars = {
         'RETHINKDB_IMAGE': IMAGE,
         'RETHINKDB_CONNECT_SERVER_PORT': str(CONNECT_SERVER_PORT),
@@ -47,6 +44,6 @@ def dd_environment(instance):
         r'Connected to proxy.*',
     ]
 
-    with docker_run(compose_file, conditions=conditions, env_vars=env_vars, log_patterns=log_patterns):
+    with docker_run(COMPOSE_FILE, conditions=conditions, env_vars=env_vars, log_patterns=log_patterns):
         config = {'instances': [instance]}
         yield config, E2E_METADATA

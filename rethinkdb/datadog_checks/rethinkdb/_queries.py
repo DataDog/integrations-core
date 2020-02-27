@@ -116,24 +116,18 @@ def query_replicas_with_stats(conn):
         # Grab table information for each replica.
         # See: https://rethinkdb.com/docs/system-tables#table_config
         .merge({'table': table_config.get(r.row['table']).pluck('id', 'db', 'name')})
-        # Grab relevant server information for each replica.
+        # Grab server information for each replica.
         # See: https://rethinkdb.com/docs/system-tables#server_config
-        .merge(
-            {
-                'server': (
-                    server_config.get(r.row['replica']['server'])
-                    .default({'id': None})  # Disconnected servers aren't present in the 'server_config' table.
-                    .pluck('id', 'name', 'tags')
-                )
-            }
-        )
+        .merge({'server': server_config.get(r.row['replica']['server'])})
+        .filter(r.row['server'])  # Skip replicas stored on disconnected servers.
+        .merge({'server': r.row['server'].pluck('id', 'name', 'tags')})
         # Grab statistics for each replica.
         # See: https://rethinkdb.com/docs/system-stats/#replica-tableserver-pair
         .merge(
             {
-                'stats': stats.get(['table_server', r.row['table']['id'], r.row['server']['id']])
-                .default({})
-                .pluck('query_engine', 'storage_engine'),
+                'stats': stats.get(['table_server', r.row['table']['id'], r.row['server']['id']]).pluck(
+                    'query_engine', 'storage_engine'
+                ),
             }
         )
     )
