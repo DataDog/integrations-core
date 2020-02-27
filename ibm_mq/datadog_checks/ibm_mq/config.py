@@ -59,6 +59,7 @@ class IBMMQConfig:
     ]
 
     def __init__(self, instance):
+        # type: (Dict[str, Any]) -> IBMMQConfig
         self.channel = instance.get('channel')
         self.queue_manager_name = instance.get('queue_manager', 'default')
 
