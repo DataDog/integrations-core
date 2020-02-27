@@ -1,5 +1,5 @@
 - name: host
-  required: true
+  required: false
   description: |
     The host the Datadog Active Directory check connects to.
     "." means the current host
@@ -49,7 +49,9 @@
     <DATA_TYPE>  : The type of your metric (int or float)
   value:
       example:
-        - [[<METRIC_NAME>, <DATA_TYPE>], [active_directory.dra.inbound.bytes.total,int], [active_directory.ldap.bind_time,float]]
+        - [<METRIC_NAME>, <DATA_TYPE>]
+        - [active_directory.dra.inbound.bytes.total, int]
+        - [active_directory.ldap.bind_time, float]
       type: array
       items:
         type: string

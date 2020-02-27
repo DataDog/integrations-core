@@ -5,6 +5,8 @@ files:
   - template: instances
     options:
     - template: instances/pdh
+      overrides:
+          host.required: true
     - template: instances/tags
     - template: instances/global
   - template: logs
