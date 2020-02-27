@@ -1,5 +1,13 @@
 # CHANGELOG - windows_service
 
+## 2.5.1 / 2020-02-25
+
+* [Fixed] Bump minimun agent version. See [#5834](https://github.com/DataDog/integrations-core/pull/5834).
+
+## 2.5.0 / 2020-02-22
+
+* [Deprecated] Deprecate `service` tag. See [#5545](https://github.com/DataDog/integrations-core/pull/5545).
+
 ## 2.4.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).

@@ -96,7 +96,7 @@ init_config:
   ## @param profiles - object - optional
   ## Specify profiles to be able to reference a set of metrics by name.
   ## One of definition_file or definition needs to be defined.
-  ## definition_file points to a file with a prfile, whereas definition inlines
+  ## definition_file points to a file with a profile, whereas definition inlines
   ## it directly here.
   ## When using a profile present on the profiles directory of the
   ## configuration, you can directly pass the filename.
@@ -118,6 +118,8 @@ init_config:
       definition_file: dell-poweredge.yaml
     hp-ilo4:
       definition_file: hp-ilo4.yaml
+    hpe-proliant:
+      definition_file: hpe-proliant.yaml
 
 instances:
   -

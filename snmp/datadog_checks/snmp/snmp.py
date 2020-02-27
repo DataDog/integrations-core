@@ -22,7 +22,7 @@ from datadog_checks.base.errors import CheckException
 
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
-from .utils import get_profile_definition
+from .utils import get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -87,6 +87,11 @@ class SnmpCheck(AgentCheck):
             except Exception as exc:
                 raise ConfigurationError("Couldn't read profile '{}': {}".format(name, exc))
 
+            try:
+                recursively_expand_base_profiles(definition)
+            except Exception as exc:
+                raise ConfigurationError("Failed to expand base profiles in profile '{}': {}".format(name, exc))
+
             self.profiles[name] = {'definition': definition}
             sys_object_oid = definition.get('sysobjectid')
             if sys_object_oid is not None:
@@ -145,16 +150,14 @@ class SnmpCheck(AgentCheck):
                     continue
 
                 try:
-                    profiles = self._profiles_for_sysobject_oid(sys_object_oid)
+                    profile = self._profile_for_sysobject_oid(sys_object_oid)
                 except ConfigurationError:
                     if not (host_config.all_oids or host_config.bulk_oids):
                         self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
-                    for profile in profiles:
-                        host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
-                    most_specific_profile = profiles[-1]
-                    host_config.add_profile_tag(most_specific_profile)
+                    host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                    host_config.add_profile_tag(profile)
 
                 config.discovered_instances[host] = host_config
 
@@ -292,21 +295,19 @@ class SnmpCheck(AgentCheck):
         self.log.debug('Returned vars: %s', var_binds)
         return var_binds[0][1].prettyPrint()
 
-    def _profiles_for_sysobject_oid(self, sys_object_oid):
-        # type: (str) -> List[str]
+    def _profile_for_sysobject_oid(self, sys_object_oid):
+        # type: (str) -> str
         """
-        Return all profiles that match the given sysObjectID.
-
-        Profiles are sorted from the most generic to the closest match.
+        Return the most specific profile that matches the given sysObjectID.
         """
         profiles = [profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)]
 
         if not profiles:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
 
-        profiles.sort(key=lambda profile: self.profiles[profile]['definition']['sysobjectid'])
-
-        return profiles
+        return max(
+            profiles, key=lambda profile: oid_pattern_specificity(self.profiles[profile]['definition']['sysobjectid'])
+        )
 
     def _consume_binds_iterator(self, binds_iterator, config):
         # type: (Iterator[Any], InstanceConfig) -> Tuple[List[Any], Optional[str]]
@@ -385,11 +386,9 @@ class SnmpCheck(AgentCheck):
         try:
             if not (config.all_oids or config.bulk_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
-                profiles = self._profiles_for_sysobject_oid(sys_object_oid)
-                for profile in profiles:
-                    config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
-                most_specific_profile = profiles[-1]
-                config.add_profile_tag(most_specific_profile)
+                profile = self._profile_for_sysobject_oid(sys_object_oid)
+                config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                config.add_profile_tag(profile)
 
             if config.all_oids or config.bulk_oids:
                 self.log.debug('Querying device %s', config.ip_address)
@@ -419,8 +418,16 @@ class SnmpCheck(AgentCheck):
         # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
         extracted_tags = []
         for tag in metric_tags:
-            [(_, tag_value)] = list(results[tag.symbol].items())
-            extracted_tags.append('{}:{}'.format(tag.name, tag_value))
+            if tag.symbol not in results:
+                self.log.debug('Ignoring tag %s', tag.symbol)
+                continue
+            tag_values = list(results[tag.symbol].values())
+            if len(tag_values) > 1:
+                raise CheckException(
+                    'You are trying to use a table column (OID `{}`) as a metric tag. This is not supported as '
+                    '`metric_tags` can only refer to scalar OIDs.'.format(tag.symbol)
+                )
+            extracted_tags.append('{}:{}'.format(tag.name, tag_values[0]))
         return extracted_tags
 
     def report_metrics(

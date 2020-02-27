@@ -1,5 +1,12 @@
 # CHANGELOG - kafka_consumer
 
+## 2.4.0 / 2020-02-22
+
+* [Added] Re-enable `kafka_client_api_version` option. See [#5726](https://github.com/DataDog/integrations-core/pull/5726).
+* [Added] Use top-level kafka imports to be more future-proof. See [#5702](https://github.com/DataDog/integrations-core/pull/5702).
+* [Added] Upgrade kafka-python to 2.0.0. See [#5696](https://github.com/DataDog/integrations-core/pull/5696).
+* [Fixed] Anticipate potential bug when instantiating the Kafka admin client. See [#5464](https://github.com/DataDog/integrations-core/pull/5464).
+
 ## 2.3.0 / 2020-01-28
 
 * [Added] Update imports for newer versions of kafka-python. See [#5489](https://github.com/DataDog/integrations-core/pull/5489).

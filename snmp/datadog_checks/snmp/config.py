@@ -12,11 +12,7 @@ from pysnmp.smi import builder, view
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .resolver import OIDResolver
-
-
-def to_oid_tuple(oid_string):
-    """Return a OID tuple from a OID string."""
-    return tuple(map(int, oid_string.lstrip('.').split('.')))
+from .utils import to_oid_tuple
 
 
 class ParsedMetric(object):
@@ -169,7 +165,7 @@ class InstanceConfig:
 
     def refresh_with_profile(self, profile, warning, log):
         # type: (Dict[str, Any], Callable[..., None], Callable[..., None]) -> None
-        metrics = profile['definition']['metrics']
+        metrics = profile['definition'].get('metrics', [])
         all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
 
         metric_tags = profile['definition'].get('metric_tags', [])

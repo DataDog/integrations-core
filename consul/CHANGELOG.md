@@ -1,5 +1,18 @@
 # CHANGELOG - consul
 
+## 1.12.2 / 2020-02-25
+
+* [Fixed] Change new added tag. See [#5856](https://github.com/DataDog/integrations-core/pull/5856).
+
+## 1.12.1 / 2020-02-25
+
+* [Fixed] Bump minimun agent version. See [#5834](https://github.com/DataDog/integrations-core/pull/5834).
+
+## 1.12.0 / 2020-02-22
+
+* [Added] Create `consul_service` tag. See [#5519](https://github.com/DataDog/integrations-core/pull/5519). Thanks [nicbono](https://github.com/nicbono).
+* [Deprecated] Deprecate `service` tag. See [#5540](https://github.com/DataDog/integrations-core/pull/5540).
+
 ## 1.11.0 / 2019-12-02
 
 * [Added] Add version metadata. See [#4944](https://github.com/DataDog/integrations-core/pull/4944).

@@ -61,7 +61,7 @@ def mock_proc_sampler():
     property_names = ["ThreadCount", "IOReadBytesPerSec", "VirtualBytes", "PercentProcessorTime"]
     sampler = MockSampler(WMI_Mock, property_names)
 
-    with patch("datadog_checks.wmi_check.WMICheck._get_wmi_sampler", return_value=sampler):
+    with patch("datadog_checks.wmi_check.WMICheck._get_running_wmi_sampler", return_value=sampler):
         yield
 
 
@@ -71,5 +71,5 @@ def mock_disk_sampler():
     property_names = ["AvgDiskBytesPerWrite", "FreeMegabytes"]
     sampler = MockSampler(WMI_Mock, property_names)
 
-    with patch("datadog_checks.wmi_check.WMICheck._get_wmi_sampler", return_value=sampler):
+    with patch("datadog_checks.wmi_check.WMICheck._get_running_wmi_sampler", return_value=sampler):
         yield

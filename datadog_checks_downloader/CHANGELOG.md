@@ -1,5 +1,17 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 2.4.0 / 2020-02-26
+
+* [Added] Bump securesystemslib to 0.14.2. See [#5890](https://github.com/DataDog/integrations-core/pull/5890).
+
+## 2.3.1 / 2020-02-24
+
+* [Fixed] Hide internal logging exceptions. See [#5848](https://github.com/DataDog/integrations-core/pull/5848).
+
+## 2.3.0 / 2020-02-22
+
+* [Added] Update in-toto and its deps. See [#5599](https://github.com/DataDog/integrations-core/pull/5599).
+
 ## 2.2.0 / 2020-01-10
 
 * [Added] Update TUF dependency. See [#5441](https://github.com/DataDog/integrations-core/pull/5441).

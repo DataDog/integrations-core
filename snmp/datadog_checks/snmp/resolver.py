@@ -80,8 +80,8 @@ class OIDResolver(object):
                         new_indexes.append(index_resolver[i][index])
                     else:
                         new_indexes.append(index)
-                indexes = tuple(new_indexes)
-            return resolved, indexes
+                indexes = new_indexes
+            return resolved, tuple(str(index) for index in indexes)
         result_oid = oid
         if not self._enforce_constraints:
             # if enforce_constraints is false, then MIB resolution has not been done yet

@@ -114,14 +114,15 @@ class WinWMICheck(AgentCheck):
         target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
 
         # Create a specific sampler
-        tag_query_sampler = WMISampler(self.log, target_class, [target_property], filters=filters, **sampler.connection)
+        with WMISampler(
+            self.log, target_class, [target_property], filters=filters, **sampler.connection
+        ) as tag_query_sampler:
+            tag_query_sampler.sample()
 
-        tag_query_sampler.sample()
+            # Extract tag
+            self._raise_on_invalid_tag_query_result(tag_query_sampler, wmi_obj, tag_query)
 
-        # Extract tag
-        self._raise_on_invalid_tag_query_result(tag_query_sampler, wmi_obj, tag_query)
-
-        link_value = str(tag_query_sampler[0][target_property]).lower()
+            link_value = str(tag_query_sampler[0][target_property]).lower()
 
         tag = "{tag_name}:{tag_value}".format(tag_name=target_property.lower(), tag_value="_".join(link_value.split()))
 
@@ -235,14 +236,17 @@ class WinWMICheck(AgentCheck):
 
         return "{host}:{namespace}:{wmi_class}".format(host=host, namespace=namespace, wmi_class=wmi_class)
 
-    def _get_wmi_sampler(self, instance_key, wmi_class, properties, tag_by="", **kwargs):
+    def _get_running_wmi_sampler(self, instance_key, wmi_class, properties, tag_by="", **kwargs):
         """
-        Create and cache a WMISampler for the given (class, properties)
+        Return a running WMISampler for the given (class, properties).
+
+        If no matching WMISampler is running yet, start one and cache it.
         """
         properties = list(properties) + [tag_by] if tag_by else list(properties)
 
         if instance_key not in self.wmi_samplers:
             wmi_sampler = WMISampler(self.log, wmi_class, properties, **kwargs)
+            wmi_sampler.start()
             self.wmi_samplers[instance_key] = wmi_sampler
 
         return self.wmi_samplers[instance_key]

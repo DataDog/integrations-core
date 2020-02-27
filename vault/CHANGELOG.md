@@ -1,5 +1,14 @@
 # CHANGELOG - Vault
 
+## 2.2.1 / 2020-02-25
+
+* [Fixed] Update datadog_checks_base dependencies. See [#5846](https://github.com/DataDog/integrations-core/pull/5846).
+
+## 2.2.0 / 2020-02-22
+
+* [Added] Add `service` option to default configuration. See [#5805](https://github.com/DataDog/integrations-core/pull/5805).
+* [Added] Add missing vault summary metric. See [#5670](https://github.com/DataDog/integrations-core/pull/5670).
+
 ## 2.1.2 / 2020-01-24
 
 * [Fixed] Send summary count metrics as a count. See [#5538](https://github.com/DataDog/integrations-core/pull/5538).
