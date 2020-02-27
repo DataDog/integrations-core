@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import fnmatch
 import ipaddress
 import json
@@ -137,7 +138,7 @@ class SnmpCheck(AgentCheck):
         while self._running:
             start_time = time.time()
             for host in config.network_hosts():
-                instance = config.instance.copy()
+                instance = copy.deepcopy(config.instance)
                 instance.pop('network_address')
                 instance['ip_address'] = host
 
@@ -343,7 +344,7 @@ class SnmpCheck(AgentCheck):
                 except ValueError:
                     write_persistent_cache(self.check_id, json.dumps([]))
                     break
-                instance = self.instance.copy()
+                instance = copy.deepcopy(self.instance)
                 instance.pop('network_address')
                 instance['ip_address'] = host
 
