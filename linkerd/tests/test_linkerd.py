@@ -10,6 +10,8 @@ from datadog_checks.linkerd import LinkerdCheck
 
 from .common import EXPECTED_METRICS_V2, EXPECTED_METRICS_V2_E2E, LINKERD_FIXTURE_VALUES, MOCK_INSTANCE
 
+MOCK_HEADERS = {'Content-Type': 'text/plain'}
+
 
 def get_response(filename):
     metrics_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', filename)
@@ -24,7 +26,7 @@ def test_linkerd(aggregator):
     """
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
-        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd.txt'))
+        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd.txt'), headers=MOCK_HEADERS)
         check.check(MOCK_INSTANCE)
 
     for metric in LINKERD_FIXTURE_VALUES:
@@ -42,7 +44,7 @@ def test_linkerd(aggregator):
 def test_linkerd_v2(aggregator):
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with requests_mock.Mocker() as metric_request:
-        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd_v2.txt'))
+        metric_request.get('http://fake.tld/prometheus', text=get_response('linkerd_v2.txt'), headers=MOCK_HEADERS)
         check.check(MOCK_INSTANCE)
 
     for metric_name, metric_type in EXPECTED_METRICS_V2.items():
