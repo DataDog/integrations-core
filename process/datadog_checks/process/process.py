@@ -6,6 +6,7 @@ from __future__ import division
 import os
 import re
 import subprocess
+import threading
 import time
 from collections import defaultdict
 
@@ -18,6 +19,7 @@ from datadog_checks.utils.platform import Platform
 
 DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
+DEFAULT_PROC_LIST_CACHE_DURATION = 120
 
 
 ATTR_TO_METRIC = {
@@ -52,8 +54,52 @@ ATTR_TO_METRIC_RATE = {
     'cmajflt': 'mem.page_faults.children_major_faults',
 }
 
+# taken verbatim from o'reilly python cookbook
+class ReadWriteLock:
+    """ A lock object that allows many simultaneous "read locks", but
+    only one "write lock." """
+
+    def __init__(self):
+        self._read_ready = threading.Condition(threading.Lock(  ))
+        self._readers = 0
+
+    def acquire_read(self):
+        """ Acquire a read lock. Blocks only if a thread has
+        acquired the write lock. """
+        self._read_ready.acquire(  )
+        try:
+            self._readers += 1
+        finally:
+            self._read_ready.release(  )
+
+    def release_read(self):
+        """ Release a read lock. """
+        self._read_ready.acquire(  )
+        try:
+            self._readers -= 1
+            if not self._readers:
+                self._read_ready.notifyAll(  )
+        finally:
+            self._read_ready.release(  )
+
+    def acquire_write(self):
+        """ Acquire a write lock. Blocks until there are no
+        acquired read or write locks. """
+        self._read_ready.acquire(  )
+        while self._readers > 0:
+            self._read_ready.wait(  )
+
+    def release_write(self):
+        """ Release a write lock. """
+        self._read_ready.release(  )
 
 class ProcessCheck(AgentCheck):
+    # process list, shared among all instances
+    process_list = []
+    process_list_lock = ReadWriteLock()
+    last_proc_list_ts = 0
+    proc_list_cache_duration = DEFAULT_PROC_LIST_CACHE_DURATION
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
@@ -87,6 +133,14 @@ class ProcessCheck(AgentCheck):
         # Process cache, indexed by instance
         self.process_cache = defaultdict(dict)
 
+        ProcessCheck.proc_list_cache_duration = int(init_config.get('proc_list_cache_duration', DEFAULT_PROC_LIST_CACHE_DURATION))
+
+
+    def should_refresh_proclist(self):
+        now = time.time()
+        self.log.info("should_refresh_proclist {} - {}".format(ProcessCheck.last_proc_list_ts, now))
+        return now - ProcessCheck.last_proc_list_ts > ProcessCheck.proc_list_cache_duration
+
     def should_refresh_ad_cache(self, name):
         now = time.time()
         return now - self.last_ad_cache_ts.get(name, 0) > self.access_denied_cache_duration
@@ -101,7 +155,9 @@ class ProcessCheck(AgentCheck):
         Search for search_string
         """
         if not self.should_refresh_pid_cache(name):
+            self.log.info("Using pid cache")
             return self.pid_cache[name]
+        self.log.info("refreshing pid cache")
 
         ad_error_logger = self.log.debug
         if not ignore_ad:
@@ -109,63 +165,69 @@ class ProcessCheck(AgentCheck):
 
         refresh_ad_cache = self.should_refresh_ad_cache(name)
 
-        encountered_process_names = set()
         matching_pids = set()
 
-        for proc in psutil.process_iter():
-            # Skip access denied processes
-            if not refresh_ad_cache and proc.pid in self.ad_cache:
-                continue
+        # Acquire the write lock to check whether to refresh because we're
+        # going to keep it to do the refresh, AND, we don't want multiple
+        # threads getting a `yes` result at once
+        ProcessCheck.process_list_lock.acquire_write()
+        if self.should_refresh_proclist():
+            self.log.info("Refreshing process list")
+            ProcessCheck.process_list = [proc for proc in psutil.process_iter(attrs=['pid', 'name'])]
+            ProcessCheck.last_proc_list_ts = time.time()
+            self.log.info("Set last ts to {}".format(ProcessCheck.last_proc_list_ts))
+        else:
+            self.log.info("Using process list cache")
+        ProcessCheck.process_list_lock.release_write()
 
-            found = False
-            for string in search_string:
-                try:
-                    proc_name = proc.name()
-                    encountered_process_names.add(proc_name)
+        ProcessCheck.process_list_lock.acquire_read()
+        try:
+            for proc in ProcessCheck.process_list:
+                # Skip access denied processes
+                if not refresh_ad_cache and proc.pid in self.ad_cache:
+                    continue
 
-                    # FIXME 8.x: All has been deprecated
-                    # from the doc, should be removed
-                    if string == 'All':
-                        found = True
-                    if exact_match:
-                        if os.name == 'nt':
-                            if proc_name.lower() == string.lower():
-                                found = True
+                found = False
+                for string in search_string:
+                    try:
+                        # FIXME 8.x: All has been deprecated
+                        # from the doc, should be removed
+                        if string == 'All':
+                            found = True
+                        if exact_match:
+                            if os.name == 'nt':
+                                if proc.name().lower() == string.lower():
+                                    found = True
+                            else:
+                                if proc.name() == string:
+                                    found = True
+
                         else:
-                            if proc_name == string:
-                                found = True
-
+                            cmdline = proc.cmdline()
+                            if os.name == 'nt':
+                                lstring = string.lower()
+                                if re.search(lstring, ' '.join(cmdline).lower()):
+                                    found = True
+                            else:
+                                if re.search(string, ' '.join(cmdline)):
+                                    found = True
+                    except psutil.NoSuchProcess:
+                        self.log.warning('Process disappeared while scanning')
+                    except psutil.AccessDenied as e:
+                        ad_error_logger('Access denied to process with PID {}'.format(proc.pid))
+                        ad_error_logger('Error: {}'.format(e))
+                        if refresh_ad_cache:
+                            self.ad_cache.add(proc.pid)
+                        if not ignore_ad:
+                            raise
                     else:
-                        cmdline = proc.cmdline()
-                        if os.name == 'nt':
-                            lstring = string.lower()
-                            if re.search(lstring, ' '.join(cmdline).lower()):
-                                found = True
-                        else:
-                            if re.search(string, ' '.join(cmdline)):
-                                found = True
-                except psutil.NoSuchProcess:
-                    self.log.warning('Process disappeared while scanning')
-                except psutil.AccessDenied as e:
-                    ad_error_logger('Access denied to process with PID {}'.format(proc.pid))
-                    ad_error_logger('Error: {}'.format(e))
-                    if refresh_ad_cache:
-                        self.ad_cache.add(proc.pid)
-                    if not ignore_ad:
-                        raise
-                else:
-                    if refresh_ad_cache:
-                        self.ad_cache.discard(proc.pid)
-                    if found:
-                        matching_pids.add(proc.pid)
-                        break
-
-        if not matching_pids:
-            self.log.debug(
-                "Unable to find process named %s among processes: %s",
-                search_string,
-                ', '.join(sorted(encountered_process_names)),
-            )
+                        if refresh_ad_cache:
+                            self.ad_cache.discard(proc.pid)
+                        if found:
+                            matching_pids.add(proc.pid)
+                            break
+        finally:
+            ProcessCheck.process_list_lock.release_read()
 
         self.pid_cache[name] = matching_pids
         self.last_pid_cache_ts[name] = time.time()
@@ -203,11 +265,11 @@ class ProcessCheck(AgentCheck):
                     try:
                         result[acc] = getattr(res, acc)
                     except AttributeError:
-                        self.log.debug("psutil.%s().%s attribute does not exist", method, acc)
+                        self.log.debug("psutil.{}().{} attribute does not exist".format(method, acc))
         except (NotImplementedError, AttributeError):
-            self.log.debug("psutil method %s not implemented", method)
+            self.log.debug("psutil method {} not implemented".format(method))
         except psutil.AccessDenied:
-            self.log.debug("psutil was denied access for method %s", method)
+            self.log.debug("psutil was denied access for method {}".format(method))
             if method == 'num_fds' and Platform.is_unix() and try_sudo:
                 try:
                     # It is up the agent's packager to grant
@@ -218,12 +280,12 @@ class ProcessCheck(AgentCheck):
 
                 except subprocess.CalledProcessError as e:
                     self.log.exception(
-                        "trying to retrieve %s with sudo failed with return code %s", method, e.returncode
+                        "trying to retrieve {} with sudo failed with return code {}".format(method, e.returncode)
                     )
                 except Exception:
-                    self.log.exception("trying to retrieve %s with sudo also failed", method)
+                    self.log.exception("trying to retrieve {} with sudo also failed".format(method))
         except psutil.NoSuchProcess:
-            self.warning("Process %s disappeared while scanning", process.pid)
+            self.warning("Process {} disappeared while scanning".format(process.pid))
 
         return result
 
@@ -245,10 +307,10 @@ class ProcessCheck(AgentCheck):
                 new_process = True
                 try:
                     self.process_cache[name][pid] = psutil.Process(pid)
-                    self.log.debug('New process in cache: %s', pid)
+                    self.log.debug('New process in cache: {}'.format(pid))
                 # Skip processes dead in the meantime
                 except psutil.NoSuchProcess:
-                    self.warning('Process %s disappeared while scanning', pid)
+                    self.warning('Process {} disappeared while scanning'.format(pid))
                     # reset the PID cache now, something changed
                     self.last_pid_cache_ts[name] = 0
                     continue
@@ -285,7 +347,7 @@ class ProcessCheck(AgentCheck):
                 if cpu_count > 0 and cpu_percent is not None:
                     st['cpu_norm'].append(cpu_percent / cpu_count)
                 else:
-                    self.log.debug('could not calculate the normalized cpu pct, cpu_count: %s', cpu_count)
+                    self.log.debug('could not calculate the normalized cpu pct, cpu_count: {}'.format(cpu_count))
             st['open_fd'].append(self.psutil_wrapper(p, 'num_fds', None, try_sudo))
             st['open_handle'].append(self.psutil_wrapper(p, 'num_handles', None, try_sudo))
 
@@ -332,7 +394,9 @@ class ProcessCheck(AgentCheck):
         try:
             data = file_to_string('/{}/{}/stat'.format(psutil.PROCFS_PATH, pid))
         except Exception:
-            self.log.debug('error getting proc stats: file_to_string failed for /%s/%s/stat', psutil.PROCFS_PATH, pid)
+            self.log.debug(
+                'error getting proc stats: file_to_string failed for /{}/{}/stat'.format(psutil.PROCFS_PATH, pid)
+            )
             return None
         return (int(i) for i in data.split()[9:13])
 
@@ -341,7 +405,7 @@ class ProcessCheck(AgentCheck):
         for pid in pids:
             try:
                 children = psutil.Process(pid).children(recursive=True)
-                self.log.debug('%s children were collected for process %s', len(children), pid)
+                self.log.debug('{} children were collected for process {}'.format(len(children), pid))
                 for child in children:
                     children_pids.add(child.pid)
             except psutil.NoSuchProcess:
@@ -365,8 +429,7 @@ class ProcessCheck(AgentCheck):
             self.warning(
                 'The `procfs_path` defined in `process.yaml is different from the one defined in '
                 '`datadog.conf` This is currently not supported by the Agent. Defaulting to the '
-                'value defined in `datadog.conf`: %s',
-                psutil.PROCFS_PATH,
+                'value defined in `datadog.conf`:{}'.format(psutil.PROCFS_PATH)
             )
         elif self._deprecated_init_procfs:
             self.warning(
@@ -401,7 +464,7 @@ class ProcessCheck(AgentCheck):
                     pids = self._get_pid_set(int(pid_line))
             except IOError as e:
                 # pid file doesn't exist, assuming the process is not running
-                self.log.debug('Unable to find pid file: %s', e)
+                self.log.debug('Unable to find pid file: {}'.format(e))
                 pids = set()
         else:
             raise ValueError('The "search_string" or "pid" options are required for process identification')
@@ -417,11 +480,11 @@ class ProcessCheck(AgentCheck):
         # FIXME 8.x remove the `name` tag
         tags.extend(['process_name:{}'.format(name), name])
 
-        self.log.debug('ProcessCheck: process %s analysed', name)
+        self.log.debug('ProcessCheck: process {} analysed'.format(name))
         self.gauge('system.processes.number', len(pids), tags=tags)
 
         if len(pids) == 0:
-            self.warning("No matching process '%s' was found", name)
+            self.warning("No matching process '{}' was found".format(name))
 
         for attr, mname in iteritems(ATTR_TO_METRIC):
             vals = [x for x in proc_state[attr] if x is not None]
@@ -494,10 +557,10 @@ class ProcessCheck(AgentCheck):
             try:
                 proc = psutil.Process(pid)
                 if proc.username() == user:
-                    self.log.debug("Collecting pid %s belonging to %s", pid, user)
+                    self.log.debug("Collecting pid {} belonging to {}".format(pid, user))
                     filtered_pids.add(pid)
                 else:
-                    self.log.debug("Discarding pid %s not belonging to %s", pid, user)
+                    self.log.debug("Discarding pid {} not belonging to {}".format(pid, user))
             except psutil.NoSuchProcess:
                 pass
 
