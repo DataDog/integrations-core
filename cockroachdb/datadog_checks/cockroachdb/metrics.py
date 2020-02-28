@@ -5,7 +5,6 @@ METRIC_MAP = {
     'addsstable_applications': 'addsstable.applications',
     'addsstable_copies': 'addsstable.copies',
     'addsstable_proposals': 'addsstable.proposals',
-    'build_timestamp': 'build.timestamp',
     'capacity': 'capacity.total',
     'capacity_available': 'capacity.available',
     'capacity_reserved': 'capacity.reserved',
