@@ -255,7 +255,7 @@ def temporarily_stop_service(service, compose_file, check=True):
     run_command(['docker-compose', '-f', compose_file, 'stop', service], capture=False, check=check)
     try:
         yield
-    except:
+    except Exception:
         raise
     else:
         run_command(['docker-compose', '-f', compose_file, 'start', service], capture=False, check=check)
