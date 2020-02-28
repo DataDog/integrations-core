@@ -54,6 +54,7 @@ ATTR_TO_METRIC_RATE = {
     'cmajflt': 'mem.page_faults.children_major_faults',
 }
 
+
 # taken verbatim from o'reilly python cookbook
 class ReadWriteLock:
     """ A lock object that allows many simultaneous "read locks", but
@@ -134,9 +135,9 @@ class ProcessCheck(AgentCheck):
         # Process cache, indexed by instance
         self.process_cache = defaultdict(dict)
 
-        ProcessCheck.proc_list_cache_duration = int(init_config.get('proc_list_cache_duration',
-                                                    DEFAULT_PROC_LIST_CACHE_DURATION))
-
+        ProcessCheck.proc_list_cache_duration = int(
+            init_config.get('proc_list_cache_duration', DEFAULT_PROC_LIST_CACHE_DURATION)
+        )
 
     def should_refresh_proclist(self):
         now = time.time()
