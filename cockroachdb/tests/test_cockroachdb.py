@@ -43,7 +43,9 @@ def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
     if COCKROACHDB_VERSION == 'latest':
         m = aggregator._metrics['cockroachdb.build.timestamp'][0]
         # extract version from tags that looks like this: ['tag:v19.2.4', 'go_version:go1.12.12']
-        raw_version = m.tags[0].split(':', 1)[1]
+        version_label = [t for t in m.tags if 'tag' in t]
+        assert len(version_label) == 1
+        raw_version = version_label[0].split(':', 1)[1]
     else:
         raw_version = COCKROACHDB_VERSION
 
