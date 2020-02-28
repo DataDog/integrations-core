@@ -26,22 +26,21 @@ def get_readme_mappings():
 
     start = readme.find('dogstatsd_mapper_profiles:')
     end = readme[start:].find('# dogstatsd_mapper_cache_size')
-    return readme[start:start + end]
+    return readme[start : start + end]
 
 
-def create_tmp_data_mappings(mappings):
-    datadog_extras = "dogstatsd_metrics_stats_enable: true\n" \
-                     "dogstatsd_stats_enable: true\n" \
-                     "{}".format(mappings)
+def create_datadog_config(datadog_config):
     with open(path.join(TMP_DATA_FOLDER, 'datadog.yaml'), 'w') as f:
-        f.write(datadog_extras)
-
-
-create_tmp_data_mappings(get_readme_mappings())
+        f.write(datadog_config)
 
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
+    datadog_config = """
+dogstatsd_metrics_stats_enable: true
+dogstatsd_stats_enable: true
+"""
+    create_datadog_config(datadog_config + get_readme_mappings())
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         conditions=[CheckEndpoints(URL + '/api/experimental/test', attempts=100)],
