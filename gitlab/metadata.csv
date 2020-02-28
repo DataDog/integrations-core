@@ -1,31 +1,31 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-gitlab.banzai_cached_render_real_duration_seconds.count,count,,second,,Count of duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration count
-gitlab.banzai_cached_render_real_duration_seconds.sum,gauge,,second,,Sum of duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration sum
+gitlab.banzai_cached_render_real_duration_seconds_count,count,,second,,Count of duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration count
+gitlab.banzai_cached_render_real_duration_seconds_sum,gauge,,second,,Sum of duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration sum
 
-gitlab.banzai_cacheless_render_real_duration_seconds.count,,count,,second,,Count of duration of rendering Markdown into HTML when cached output does not exist,0,gitlab,cachless render duration count
+gitlab.banzai_cacheless_render_real_duration_seconds_count,,count,,second,,Count of duration of rendering Markdown into HTML when cached output does not exist,0,gitlab,cachless render duration count
 gitlab.banzai_cacheless_render_real_duration_seconds,gauge,,second,,Sum of duration of rendering Markdown into HTML when cached output does not exist,0,gitlab,cachless render duration sum
 
 gitlab.cache_misses_total,count,,second,,Cache read miss count,0,gitlab,cache read miss
-gitlab.cache_operation_duration_seconds.count,,count,,second,,Count of cache access time,0,gitlab,cache access time count
-gitlab.cache_operation_duration_seconds.sum,,gauge,,second,,Sum of cache access time,0,gitlab,cache access time sum
+gitlab.cache_operation_duration_seconds_count,,count,,second,,Count of cache access time,0,gitlab,cache access time count
+gitlab.cache_operation_duration_seconds_sum,,gauge,,second,,Sum of cache access time,0,gitlab,cache access time sum
 
 gitlab.cache_operations_total,count,,,,Count of cache operations by controller/action,0,gitlab,cache operations total
-gitlab.database_transaction_seconds.count,count,,seconds,,Count of cache operations by controller/action,0,gitlab,cache operations total count
-gitlab.database_transaction_seconds.sum,gauge,,seconds,,Sum of cache operations by controller/action,0,gitlab,cache operations total sum
+gitlab.database_transaction_seconds_count,count,,seconds,,Count of cache operations by controller/action,0,gitlab,cache operations total count
+gitlab.database_transaction_seconds_sum,gauge,,seconds,,Sum of cache operations by controller/action,0,gitlab,cache operations total sum
 
-gitlab.method_call_duration_seconds.count,count,,seconds,,Count of method calls real duration,0,gitlab,method call count
-gitlab.method_call_duration_seconds.sum,gauge,,seconds,,Sum of method calls real duration,0,gitlab,method call sum
+gitlab.method_call_duration_seconds_count,count,,seconds,,Count of method calls real duration,0,gitlab,method call count
+gitlab.method_call_duration_seconds_sum,gauge,,seconds,,Sum of method calls real duration,0,gitlab,method call sum
 
 gitlab.page_out_of_bounds,count,,,,Counter for the PageLimiter pagination limit being hit,-1,gitlab,page out of bounds
 
-gitlab.rails_queue_duration_seconds.count,count,,seconds,,Counter for latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration count
-gitlab.rails_queue_duration_seconds.sum,gauge,,seconds,,Sum of latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration sum
+gitlab.rails_queue_duration_seconds_count,count,,seconds,,Counter for latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration count
+gitlab.rails_queue_duration_seconds_sum,gauge,,seconds,,Sum of latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration sum
 
-gitlab.sql_duration_seconds.count,count,,seconds,,Total SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT,0,gitlab,sql duration count
-gitlab.sql_duration_seconds.sum,gauge,,seconds,,Sum of SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT,0,gitlab,sql duration sum
+gitlab.sql_duration_seconds_count,count,,seconds,,Total SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT,0,gitlab,sql duration count
+gitlab.sql_duration_seconds_sum,gauge,,seconds,,Sum of SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT,0,gitlab,sql duration sum
 
-gitlab.transaction_allocated_memory_bytes.count,count,,bytes,,Count of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory count
-gitlab.transaction_allocated_memory_bytes.sum,gauge,,bytes,,Sum of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory sum
+gitlab.transaction_allocated_memory_bytes_count,count,,bytes,,Count of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory count
+gitlab.transaction_allocated_memory_bytes_sum,gauge,,bytes,,Sum of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory sum
 
 gitlab.transaction_cache_count_total,count,,,,Counter for total Rails cache calls (aggregate),0,gitlab,transaction cache calls
 
@@ -34,8 +34,9 @@ gitlab.transaction_cache_duration_total,count,,seconds,,Counter for total time (
 gitlab.transaction_cache_read_hit_count_total,count,,,,Counter for cache hits for Rails cache calls,0,gitlab,transaction cache hits
 
 gitlab.transaction_cache_read_miss_count_total,count,,,,Counter for cache misses for Rails cache calls,0,gitlab,transaction cache misses
-gitlab.transaction_duration_seconds.count,count,,,,Count of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration count
-gitlab.transaction_duration_seconds.sum,gauge,,,,Sum of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration sum
+gitlab.transaction_duration_seconds_count,count,,,,Count of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration count
+gitlab.transaction_duration_seconds_sum,gauge,,,,Sum of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration sum
+
 
 gitlab.transaction_event_build_found_total,count,,,,Counter for build found for API /jobs/request,0,gitlab,build found count
 gitlab.transaction_event_build_invalid_total,count,,,,Counter for build invalid due to concurrency conflict for API /jobs/request,-1,gitlab,build invalid count
@@ -69,10 +70,29 @@ gitlab.transaction_new_redis_connections_total,count,,,,Counter for new Redis co
 gitlab.transaction_queue_duration_total,count,,,,Duration jobs were enqueued before processing,0,gitlab,jobs enqueued processing
 gitlab.transaction_rails_queue_duration_total,count,,,,Measures latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration
 gitlab.transaction_view_duration_total,count,,,,Duration for views,0,gitlab,view duration
-gitlab.transaction_view_duration_total.sum,count,,,,Sum of duration for views,0,gitlab,view duration sum
+gitlab.transaction_view_duration_total_sum,count,,,,Sum of duration for views,0,gitlab,view duration sum
 gitlab.http_requests_total.sum,count,,,,Rack request count,0,gitlab,rack request count
-gitlab.http_request_duration_seconds.sum,count,,,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
-gitlab.http_request_duration_seconds.count,count,,,,Count of HTTP response time from rack middleware,0,gitlab,http request dur sum
+gitlab.http_request_duration_seconds_sum,count,,,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
+gitlab.http_request_duration_seconds_count,count,,,,Count of HTTP response time from rack middleware,0,gitlab,http request dur sum
+
+gitlab.pipelines_created_total,count,,,,Counter of pipelines created,0,gitlab,pipelines created total
+gitlab.rack_uncaught_errors_total,count,,,,Rack connections handling uncaught errors count,-1,gitlab,rack uncaught errors
+gitlab.user_session_logins_total,count,,,,Counter of how many users have logged in,0,gitlab,user logins
+gitlab.upload_file_does_not_exist,count,,,,Number of times an upload record could not find its file,0,no upload file
+gitlab.failed_login_captcha_total,gauge,,,,Counter of failed CAPTCHA attempts during login,-1,failed captchas
+gitlab.successful_login_captcha_total,gauge,,,,Counter of successful CAPTCHA attempts during login,0,successful captchas
+gitlab.auto_devops_pipelines_completed_total,count,,,,"Counter of completed Auto DevOps pipelines, labeled by status",0,completed auto pipelines
+gitlab.sidekiq_jobs_cpu_seconds_count,count,,second,,Count of seconds of cpu time to run Sidekiq job,0,cpu sidekiq count
+gitlab.sidekiq_jobs_cpu_seconds_sum,count,,second,,Sum of seconds of cpu time to run Sidekiq job,0,sidekiq cpu sum
+gitlab.sidekiq_jobs_completion_seconds_count,count,,second,,Count of seconds to complete Sidekiq job,0,sidekiq completion count
+gitlab.sidekiq_jobs_completion_seconds_sum,count,,second,,Sum of seconds to complete Sidekiq job,0,sidekiq completion sum
+gitlab.sidekiq_jobs_queue_duration_seconds_count,count,,second,,Count of duration in seconds that a Sidekiq job was queued before being executed,0,sidekiq queue count
+gitlab.sidekiq_jobs_queue_duration_seconds_sum,count,,second,,Sum of duration in seconds that a Sidekiq job was queued before being executed,0,sidekiq queue sum
+gitlab.sidekiq_jobs_failed_total,count,,job,,Sidekiq jobs failed,-1,sidekiq jobs failed
+gitlab.sidekiq_jobs_retried_total,count,,job,,Sidekiq jobs retired,0,sidekiq jobs retried
+gitlab.sidekiq_running_jobs,gauge,,job,,Number of Sidekiq jobs running,0,sidekiq jobs running
+gitlab.sidekiq_concurrency,gauge,,job,,Maximum number of Sidekiq jobs,0,sidekiq jobs max
+
 
 
 
