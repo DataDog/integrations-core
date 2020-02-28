@@ -2271,3 +2271,21 @@ def test_send_request_with_dynamic_prometheus_url(mocked_openmetrics_check_facto
 
     assert "httpbin.org" in resp.content.decode('utf-8')
     assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+
+def test_http_handler(mocked_openmetrics_check_factory):
+    instance = dict(
+        {
+            'prometheus_url': 'https://www.example.com',
+            'metrics': [{'foo': 'bar'}],
+            'namespace': 'openmetrics',
+            'ssl_verify': False,
+        }
+    )
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    http_handler = check.get_http_handler(scraper_config)
+
+    assert http_handler.options['headers']['accept-encoding'] == 'gzip'
+    assert http_handler.options['headers']['accept'] == 'text/plain'
