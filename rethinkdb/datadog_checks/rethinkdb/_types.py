@@ -5,7 +5,7 @@
 Declarations used for type checking our code, including our manipulation of JSON documents returned by RethinkDB.
 """
 import datetime as dt
-from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
+from typing import Any, List, Literal, Mapping, Tuple, TypedDict, Union
 
 # Lightweight shim to decouple collection functions from the check class.
 Metric = TypedDict(
@@ -32,6 +32,16 @@ ClusterQueryEngine = TypedDict(
 )
 
 ClusterStats = TypedDict('ClusterStats', {'id': Tuple[Literal['cluster']], 'query_engine': ClusterQueryEngine})
+
+ConfigTotals = TypedDict(
+    'ConfigTotals',
+    {
+        'servers': int,
+        'databases': int,
+        'tables_per_database': Mapping[str, int],
+        'secondary_indexes_per_table': Mapping[str, int],
+    },
+)
 
 ServerQueryEngine = TypedDict(
     'ServerQueryEngine',
@@ -108,7 +118,7 @@ TableStatus = TypedDict(
 )
 
 # vvv NOTE: only fields of interest are listed here.
-ServerNetwork = TypedDict('ServerNetwork', {'time_connected': dt.datetime, 'connected_to': Dict[str, bool]})
+ServerNetwork = TypedDict('ServerNetwork', {'time_connected': dt.datetime, 'connected_to': Mapping[str, bool]})
 ServerProcess = TypedDict('ServerProcess', {'time_started': dt.datetime, 'version': str})
 # ^^^
 ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': ServerNetwork, 'process': ServerProcess})

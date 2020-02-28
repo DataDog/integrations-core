@@ -16,6 +16,7 @@ import rethinkdb
 
 from ._types import (
     ClusterStats,
+    ConfigTotals,
     Job,
     JoinRow,
     ReplicaStats,
@@ -34,9 +35,42 @@ class QueryEngine:
         # type: (rethinkdb.RethinkDB) -> None
         self._r = r
 
-    def connect(self, host, port, **kwargs):
+    def connect(self, host='localhost', port=28015, **kwargs):
         # type: (str, int, **Any) -> rethinkdb.net.Connection
         return self._r.connect(host, port, **kwargs)
+
+    def query_config_totals(self, conn):
+        # type: (rethinkdb.net.Connection) -> ConfigTotals
+        r = self._r
+
+        table_config = r.db('rethinkdb').table('table_config')
+        server_config = r.db('rethinkdb').table('server_config')
+        db_config = r.db('rethinkdb').table('db_config')
+
+        # Need to `.run()` these separately because ReQL does not support putting grouped data in raw expressions yet.
+        # See: https://github.com/rethinkdb/rethinkdb/issues/2067
+
+        tables_per_database = table_config.group('db').count().run(conn)  # type: Mapping[str, int]
+
+        secondary_indexes_per_table = (
+            # NOTE: this is an example of a map-reduce query.
+            # See: https://rethinkdb.com/docs/map-reduce/#a-more-complex-example
+            table_config.pluck('name', 'indexes')
+            .concat_map(lambda row: row['indexes'].map(lambda _: {'table': row['name']}))
+            .group('table')
+            .count()
+        ).run(
+            conn
+        )  # type: Mapping[str, int]
+
+        totals = {
+            'servers': server_config.count(),
+            'databases': db_config.count(),
+            'tables_per_database': tables_per_database,
+            'secondary_indexes_per_table': secondary_indexes_per_table,
+        }  # type: ConfigTotals  # Enforce keys to match. (Values are `Any`, so ignored by type checker.)
+
+        return r.expr(totals).run(conn)
 
     def query_cluster_stats(self, conn):
         # type: (rethinkdb.net.Connection) -> ClusterStats

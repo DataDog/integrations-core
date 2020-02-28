@@ -62,6 +62,7 @@ HEROES_TABLE_DOCUMENTS = [
         "appearances_count": 72,
     },
 ]
+HEROES_TABLE_INDEX_FIELD = 'appearances_count'
 
 # Metrics lists.
 

@@ -39,13 +39,7 @@ def test_check(aggregator, instance):
     check = RethinkDBCheck('rethinkdb', {}, [instance])
     check.check(instance)
 
-    _assert_statistics_metrics(aggregator)
-    _assert_table_status_metrics(aggregator)
-    _assert_server_status_metrics(aggregator)
-
-    # NOTE: system jobs metrics are not asserted here because they are only emitted when the cluster is
-    # changing (eg. an index is being created, or data is being rebalanced across servers), which is hard to
-    # test without introducing flakiness.
+    _assert_metrics(aggregator)
 
     aggregator.assert_all_metrics_covered()
 
@@ -73,9 +67,7 @@ def test_check_with_disconnected_server(aggregator, instance, server_with_data):
 
     disconnected_servers = {server_with_data}
 
-    _assert_statistics_metrics(aggregator, disconnected_servers=disconnected_servers)
-    _assert_table_status_metrics(aggregator)
-    _assert_server_status_metrics(aggregator, disconnected_servers=disconnected_servers)
+    _assert_metrics(aggregator, disconnected_servers=disconnected_servers)
 
     aggregator.assert_all_metrics_covered()
 
@@ -98,11 +90,33 @@ def test_check_with_disconnected_server(aggregator, instance, server_with_data):
     )
 
 
-def _assert_statistics_metrics(aggregator, disconnected_servers=None):
+def _assert_metrics(aggregator, disconnected_servers=None):
     # type: (AggregatorStub, Set[str]) -> None
     if disconnected_servers is None:
         disconnected_servers = set()
 
+    _assert_config_totals_metrics(aggregator, disconnected_servers=disconnected_servers)
+    _assert_statistics_metrics(aggregator, disconnected_servers=disconnected_servers)
+    _assert_table_status_metrics(aggregator)
+    _assert_server_status_metrics(aggregator, disconnected_servers=disconnected_servers)
+
+    # NOTE: system jobs metrics are not asserted here because they are only emitted when the cluster is
+    # changing (eg. an index is being created, or data is being rebalanced across servers), which is hard to
+    # test without introducing flakiness.
+
+
+def _assert_config_totals_metrics(aggregator, disconnected_servers):
+    # type: (AggregatorStub, Set[str]) -> None
+    aggregator.assert_metric('rethinkdb.server.total', count=1, value=len(SERVERS) - len(disconnected_servers))
+    aggregator.assert_metric('rethinkdb.database.total', count=1, value=1)
+    aggregator.assert_metric('rethinkdb.database.table.total', count=1, value=1, tags=['database:{}'.format(DATABASE)])
+    aggregator.assert_metric(
+        'rethinkdb.table.secondary_index.total', count=1, value=1, tags=['table:{}'.format(HEROES_TABLE)]
+    )
+
+
+def _assert_statistics_metrics(aggregator, disconnected_servers):
+    # type: (AggregatorStub, Set[str]) -> None
     for metric in CLUSTER_STATISTICS_METRICS:
         aggregator.assert_metric(metric, count=1, tags=[])
 
@@ -147,11 +161,8 @@ def _assert_table_status_metrics(aggregator):
             aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
 
 
-def _assert_server_status_metrics(aggregator, disconnected_servers=None):
+def _assert_server_status_metrics(aggregator, disconnected_servers):
     # type: (AggregatorStub, Set[str]) -> None
-    if disconnected_servers is None:
-        disconnected_servers = set()
-
     for metric in SERVER_STATUS_METRICS:
         for server in SERVERS:
             tags = ['server:{}'.format(server)]

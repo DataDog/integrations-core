@@ -9,6 +9,7 @@ import rethinkdb
 
 from datadog_checks.base import ConfigurationError
 
+from ._metrics.config import collect_config_totals
 from ._metrics.current_issues import collect_current_issues
 from ._metrics.statistics import (
     collect_cluster_statistics,
@@ -48,6 +49,7 @@ class Config:
         self._query_engine = QueryEngine(r=rethinkdb.r)
 
         self._collect_funcs = [
+            collect_config_totals,
             collect_cluster_statistics,
             collect_server_statistics,
             collect_table_statistics,

@@ -19,6 +19,7 @@ from .common import (
     HEROES_TABLE,
     HEROES_TABLE_CONFIG,
     HEROES_TABLE_DOCUMENTS,
+    HEROES_TABLE_INDEX_FIELD,
     HOST,
     PROXY_PORT,
 )
@@ -29,13 +30,23 @@ def setup_cluster():
     """
     Configure the test cluster.
     """
+    _drop_test_database()  # Automatically created by RethinkDB, but we don't use it and it would skew our metrics.
     _create_database()
     _create_test_table()
     _simulate_client_writes()
     _simulate_client_reads()
 
 
+def _drop_test_database():
+    # type: () -> None
+    with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
+        # See: https://rethinkdb.com/api/python/db_drop
+        response = r.db_drop('test').run(conn)
+        assert response['dbs_dropped'] == 1
+
+
 def _create_database():
+    # type: () -> None
     with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
         # See: https://rethinkdb.com/api/python/db_create
         response = r.db_create(DATABASE).run(conn)
@@ -48,6 +59,10 @@ def _create_test_table():
         # See: https://rethinkdb.com/api/python/table_create/
         response = r.db(DATABASE).table_create(HEROES_TABLE, **HEROES_TABLE_CONFIG).run(conn)
         assert response['tables_created'] == 1
+
+        # See: https://rethinkdb.com/api/python/index_create/
+        response = r.db(DATABASE).table(HEROES_TABLE).index_create(HEROES_TABLE_INDEX_FIELD).run(conn)
+        assert response['created'] == 1
 
 
 def _simulate_client_writes():
