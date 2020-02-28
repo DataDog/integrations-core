@@ -359,9 +359,7 @@ class OpenMetricsScraperMixin(object):
         :param response: requests.Response
         :return: core.Metric
         """
-        if response.encoding is None:
-            response.encoding = 'utf-8'
-        input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
+        input_gen = (to_string(line) for line in response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE))
         if scraper_config['_text_filter_blacklist']:
             input_gen = self._text_filter_input(input_gen, scraper_config)
 
