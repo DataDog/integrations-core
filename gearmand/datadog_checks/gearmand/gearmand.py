@@ -115,6 +115,17 @@ class Gearman(AgentCheck):
                 message="Connection to %s:%s succeeded." % (host, port),
                 tags=tags,
             )
+            self._collect_metadata(client)
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=str(e), tags=tags)
             raise
+
+    def _collect_metadata(self, client):
+        resp = client.get_version()
+        if not resp.startswith('OK'):
+            self.log.error('Error retrieving version information from server, response: %s', resp)
+
+        server_version = resp.lstrip('OK ')
+        self.log.debug("Agent version is `%s`", server_version)
+        if server_version:
+            self.set_metadata('version', server_version)
