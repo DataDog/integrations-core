@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 
 GITLAB_TEST_PASSWORD = "testroot"
-GITLAB_TEST_API_TOEKN = 'token'
+GITLAB_TEST_API_TOKEN = 'token'
 GITLAB_LOCAL_PORT = 8086
 GITLAB_LOCAL_PROMETHEUS_PORT = 8088
 
@@ -52,7 +52,7 @@ AUTH_CONFIG = {
             'prometheus_endpoint': PROMETHEUS_ENDPOINT,
             'gitlab_url': GITLAB_URL,
             'disable_ssl_validation': True,
-            'api_token': GITLAB_TEST_API_TOEKN,
+            'api_token': GITLAB_TEST_API_TOKEN,
         }
     ],
 }
