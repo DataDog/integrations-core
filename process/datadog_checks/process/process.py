@@ -225,6 +225,13 @@ class ProcessCheck(AgentCheck):
                         if found:
                             matching_pids.add(proc.pid)
                             break
+
+            if not matching_pids:
+                self.log.debug(
+                    "Unable to find process named %s among processes: %s",
+                    search_string,
+                    ', '.join(sorted(proc.name() for proc in ProcessCheck.process_list)),
+                )
         finally:
             ProcessCheck.process_list_lock.release_read()
 
