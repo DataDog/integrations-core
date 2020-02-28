@@ -25,15 +25,15 @@ PARTITIONS = [0, 1]
 # "kafka.request.produce.failed.rate",
 # "kafka.request.produce.failed_per_second",
 
-#   "kafka.net.bytes_out.rate"
-#   "kafka.net.bytes_in.rate"
 #   "kafka.messages_in.rate"
+#   "kafka.net.bytes_in.rate"
+#   "kafka.net.bytes_out.rate"
 #   "kafka.net.bytes_rejected.rate"
 
 # "kafka.consumer.bytes_in",
+# "kafka.consumer.kafka_commits",
 # "kafka.consumer.messages_in",
 # "kafka.consumer.zookeeper_commits",
-# "kafka.consumer.kafka_commits",
 
 # "kafka.replication.isr_expands.rate",
 # "kafka.replication.isr_shrinks.rate",
@@ -43,12 +43,7 @@ PARTITIONS = [0, 1]
 
 KAFKA_E2E_METRICS = [
     "kafka.net.handler.avg.idle.pct.rate",
-    "kafka.replication.active_controller_count",
-    "kafka.replication.leader_count",
-    "kafka.replication.max_lag",
-    "kafka.replication.offline_partitions_count",
-    "kafka.replication.partition_count",
-    "kafka.replication.under_replicated_partitions",
+    # Request metrics :
     "kafka.request.channel.queue.size",
     "kafka.request.fetch_consumer.time.99percentile",
     "kafka.request.fetch_consumer.time.avg",
@@ -64,12 +59,12 @@ KAFKA_E2E_METRICS = [
     "kafka.request.update_metadata.time.99percentile",
     "kafka.request.update_metadata.time.avg",
     # replication stats:
-    "kafka.replication.under_replicated_partitions",
-    "kafka.replication.offline_partitions_count",
     "kafka.replication.active_controller_count",
-    "kafka.replication.partition_count",
     "kafka.replication.leader_count",
     "kafka.replication.max_lag",
+    "kafka.replication.offline_partitions_count",
+    "kafka.replication.partition_count",
+    "kafka.replication.under_replicated_partitions",
     # At this time JVM metrics cannot be excluded from JMX integrations:
     "jvm.buffer_pool.direct.capacity",
     "jvm.buffer_pool.direct.count",
