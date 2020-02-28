@@ -98,7 +98,7 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.dagrun.dependency_check"
            tags:
              dag_id: "$1"
-         - match: "airflow.dag.*.*.duration"
+         - match: 'airflow\.dag\.(.*)\.([^.]*)\.duration'
            match_type: "regex"
            name: "airflow.dag.task.duration"
            tags:
