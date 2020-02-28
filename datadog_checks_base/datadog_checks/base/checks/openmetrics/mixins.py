@@ -342,6 +342,7 @@ class OpenMetricsScraperMixin(object):
 
         # TODO: Determine if we really need this
         headers.setdefault('accept-encoding', 'gzip')
+        headers.setdefault('accept', 'text/plain')
 
         return http_handler
 
