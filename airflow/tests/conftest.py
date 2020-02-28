@@ -38,7 +38,6 @@ def create_datadog_config(datadog_config):
 def dd_environment(instance):
     datadog_config = """
 dogstatsd_metrics_stats_enable: true
-dogstatsd_stats_enable: true
 """
     create_datadog_config(datadog_config + get_readme_mappings())
     with docker_run(
