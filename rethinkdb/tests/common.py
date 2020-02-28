@@ -159,10 +159,15 @@ METRICS = (
 
 COMPOSE_FILE = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
+DRIVER_TLS_KEY = os.path.join(HERE, 'data', 'tls', 'server.key')
+DRIVER_TLS_CERT = os.path.join(HERE, 'data', 'tls', 'server.pem')
+
 COMPOSE_ENV_VARS = env_vars = {
     'RETHINKDB_IMAGE': IMAGE,
     'RETHINKDB_PORT_SERVER0': str(SERVER_PORTS['server0']),
     'RETHINKDB_PORT_SERVER1': str(SERVER_PORTS['server1']),
     'RETHINKDB_PORT_SERVER2': str(SERVER_PORTS['server2']),
     'RETHINKDB_PORT_PROXY': str(SERVER_PORTS['proxy']),
+    'RETHINKDB_DRIVER_TLS_KEY': DRIVER_TLS_KEY,
+    'RETHINKDB_DRIVER_TLS_CERT': DRIVER_TLS_CERT,
 }

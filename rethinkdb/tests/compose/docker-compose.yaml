@@ -16,13 +16,26 @@ services:
     tty: true
     image: ${RETHINKDB_IMAGE}
     container_name: rethinkdb-server1
-    command: rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server1 --server-tag us --server-tag primary
+    command: |
+      rethinkdb
+      --join rethinkdb-server0:29015
+      --bind all
+      --server-name server1
+      --server-tag us
+      --server-tag primary
+      --http-tls-key /opt/server.key
+      --http-tls-cert /opt/server.pem
+      --driver-tls-key /opt/server.key
+      --driver-tls-cert /opt/server.pem
+    volumes:
+      - ${RETHINKDB_DRIVER_TLS_KEY}:/opt/server.key
+      - ${RETHINKDB_DRIVER_TLS_CERT}:/opt/server.pem
     links:
       - rethinkdb-server0
     depends_on:
       - rethinkdb-server0
     ports:
-      - ${RETHINKDB_PORT_SERVER1}:2015
+      - ${RETHINKDB_PORT_SERVER1}:28015
 
   rethinkdb-server2:
     tty: true

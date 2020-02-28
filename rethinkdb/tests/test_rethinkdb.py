@@ -23,6 +23,7 @@ from .common import (
     HEROES_TABLE_SERVERS,
     REPLICA_STATISTICS_METRICS,
     RETHINKDB_VERSION,
+    SERVER_PORTS,
     SERVER_STATISTICS_METRICS,
     SERVER_STATUS_METRICS,
     SERVER_TAGS,
@@ -51,6 +52,38 @@ def test_check(aggregator, instance):
     for service_check in TABLE_STATUS_SERVICE_CHECKS:
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
         aggregator.assert_service_check(service_check, RethinkDBCheck.OK, count=1, tags=tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_as_admin(aggregator, instance):
+    # type: (AggregatorStub, Instance) -> None
+    instance = instance.copy()
+    instance.pop('user')
+    instance.pop('password')
+
+    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check.check(instance)
+
+    _assert_metrics(aggregator)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1)
+
+
+@pytest.mark.xfail(reason="TODO")
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_check_connect_to_server_with_tls(aggregator, instance):
+    # type: (AggregatorStub, Instance) -> None
+    instance = instance.copy()
+    instance['port'] = SERVER_PORTS['server1']
+
+    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check.check(instance)
+
+    _assert_metrics(aggregator)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1)
 
 
 @pytest.mark.integration
