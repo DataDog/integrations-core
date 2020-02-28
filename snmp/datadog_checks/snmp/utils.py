@@ -104,14 +104,21 @@ class OIDPrinter(object):
     managed, and can be more expensive to use than regular display.
     """
 
-    def __init__(self, oids, with_value):
+    def __init__(self, oids, with_values):
         self.oids = oids
-        self.with_value = with_value
+        self.with_values = with_values
 
     def oid_str(self, oid):
+        """Display an OID object (or MIB symbol), even if the object is not initialized by PySNMP.
+
+        Output:
+            1.3.4.8.3.4
+        """
         try:
             return oid[0].getOid().prettyPrint()
         except SmiError:
+            # PySNMP screams when we try to access the name of an OID
+            # that has no value yet. Fine, let's work around this arbitrary limitation...
             arg = oid._ObjectType__args[0]._ObjectIdentity__args[-1]
             if isinstance(arg, tuple):
                 arg = '.'.join(map(str, arg))
@@ -119,6 +126,11 @@ class OIDPrinter(object):
             return arg
 
     def oid_str_value(self, oid):
+        """Display an OID object and its associated value.
+
+        Output:
+            '1.3.4.5.6': 57
+        """
         if noSuchInstance.isSameTypeWith(oid[1]):
             value = "'NoSuchInstance'"
         elif endOfMibView.isSameTypeWith(oid[1]):
@@ -135,6 +147,13 @@ class OIDPrinter(object):
         return "'{}': {}".format(key.prettyPrint(), value)
 
     def oid_dict(self, key, value):
+        """Display a dictionary of OID results with indexes.
+
+        This is tailored made for the structure we build for results in the check.
+
+        Output:
+            'ifInOctets: {'0': 3123, '1': 728}
+        """
         values = []
         have_indexes = False
         for indexes, data in value.items():
@@ -157,7 +176,7 @@ class OIDPrinter(object):
     def __str__(self):
         if isinstance(self.oids, dict):
             return '{{{}}}'.format(', '.join(self.oid_dict(key, value) for (key, value) in self.oids.items()))
-        if self.with_value:
+        if self.with_values:
             return '{{{}}}'.format(', '.join(self.oid_str_value(oid) for oid in self.oids))
         else:
             return '({})'.format(', '.join("'{}'".format(self.oid_str(oid)) for oid in self.oids))
