@@ -3,10 +3,9 @@
         "agent_version": "5.7.0",
         "integration": "System",
         "groups": [
-            "hostname",
-            "name",
-            "record_type",
-            "resolves_as"
+            "nameserver",
+            "resolved_hostname",
+            "record_type"
         ],
         "check": "dns.can_resolve",
         "statuses": [
