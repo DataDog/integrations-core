@@ -1,6 +1,6 @@
 # Airflow Dev Readme
 
-## Manual resting Airflow StatsD emitter with Agent DogStatsD
+## Manual testing Airflow StatsD emitter with Agent DogStatsD Mapper
 
 /!\ Works only on Linux. Docker `network_mode` only works as expected on Linux.
 
