@@ -25,7 +25,7 @@ def get_readme_mappings():
         readme = f.read()
 
     start = readme.find('dogstatsd_mapper_profiles:')
-    end = readme[start:].find('# dogstatsd_mapper_cache_size')
+    end = readme[start:].find('```')
     return readme[start : start + end]
 
 

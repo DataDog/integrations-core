@@ -46,6 +46,7 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 3. Update the [Datadog Agent main configuration file][10] `datadog.yaml` by adding the following configs:
 
    ```yaml
+   # dogstatsd_mapper_cache_size: 1000  # default to 1000
    dogstatsd_mapper_profiles:
      - name: airflow
        prefix: "airflow."
@@ -138,7 +139,6 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
            name: "airflow.task.instance_created"
            tags:
              task_class: "$1"
-   # dogstatsd_mapper_cache_size: 1000  # default to 1000
    ```
 
 #### Step 3: Restart Datadog Agent and Airflow
