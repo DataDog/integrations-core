@@ -139,7 +139,7 @@ class OIDPrinter(object):
             value = oid[1].prettyPrint()
             try:
                 value = int(value)
-            except ValueError:
+            except (TypeError, ValueError):
                 value = "'{}'".format(value)
         key = oid[0]
         if not isinstance(key, ObjectName):
@@ -159,7 +159,7 @@ class OIDPrinter(object):
         for indexes, data in value.items():
             try:
                 data = int(data)
-            except ValueError:
+            except (TypeError, ValueError):
                 data = "'{}'".format(data)
             if indexes:
                 values.append("'{}': {}".format('.'.join(indexes), data))
