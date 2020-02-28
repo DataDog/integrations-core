@@ -91,7 +91,7 @@ def test_smart_retry(realtime_instance, exception, expected_calls):
         query_perf_counter.side_effect = [exception, 'success']
         try:
             api.get_perf_counter_by_level(None)
-        except:
+        except Exception:
             pass
         assert query_perf_counter.call_count == expected_calls
         assert smart_connect.call_count == expected_calls
