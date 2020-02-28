@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 def collect_table_status(engine, conn):
     # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     """
-    Collect metrics about server statuses.
+    Collect metrics about table statuses.
 
-    See: https://rethinkdb.com/docs/system-tables/#server_status
+    See: https://rethinkdb.com/docs/system-tables/#table_status
     """
     logger.debug('collect_table_status')
 
@@ -91,9 +91,9 @@ def collect_table_status(engine, conn):
 def collect_server_status(engine, conn):
     # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     """
-    Collect metrics about table statuses.
+    Collect metrics about server statuses.
 
-    See: https://rethinkdb.com/docs/system-tables/#table_status
+    See: https://rethinkdb.com/docs/system-tables/#server_status
     """
     logger.debug('collect_server_status')
 
