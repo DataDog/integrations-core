@@ -18,6 +18,8 @@ class CockroachdbCheck(OpenMetricsBaseCheck):
                     'namespace': 'cockroachdb',
                     'metrics': [METRIC_MAP],
                     'send_histograms_buckets': True,
+                    'metadata_metric_name': 'build_timestamp',
+                    'metadata_label_map': {'version': 'tag'},
                 }
             },
             default_namespace='cockroachdb',
