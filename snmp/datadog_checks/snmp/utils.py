@@ -2,6 +2,9 @@ import os
 from typing import Any, Dict, Tuple
 
 import yaml
+from pysnmp.proto.rfc1902 import ObjectName
+from pysnmp.smi.error import SmiError
+from pysnmp.smi.exval import endOfMibView, noSuchInstance
 
 from .compat import get_config
 
@@ -92,3 +95,69 @@ def oid_pattern_specificity(pattern):
         len(parts),  # Shorter OIDs are less specific than longer OIDs, regardless of their contents.
         parts,  # For same-length OIDs, compare their contents (integer parts).
     )
+
+
+class OIDPrinter(object):
+    """Utility class to display OIDs efficiently.
+
+    This is only meant for debugging, as it makes some assumptions on the data
+    managed, and can be more expensive to use than regular display.
+    """
+
+    def __init__(self, oids, with_value):
+        self.oids = oids
+        self.with_value = with_value
+
+    def oid_str(self, oid):
+        try:
+            return oid[0].getOid().prettyPrint()
+        except SmiError:
+            arg = oid._ObjectType__args[0]._ObjectIdentity__args[-1]
+            if isinstance(arg, tuple):
+                arg = '.'.join(map(str, arg))
+
+            return arg
+
+    def oid_str_value(self, oid):
+        if noSuchInstance.isSameTypeWith(oid[1]):
+            value = "'NoSuchInstance'"
+        elif endOfMibView.isSameTypeWith(oid[1]):
+            value = "'EndOfMibView'"
+        else:
+            value = oid[1].prettyPrint()
+            try:
+                value = int(value)
+            except ValueError:
+                value = "'{}'".format(value)
+        key = oid[0]
+        if not isinstance(key, ObjectName):
+            key = key.getOid()
+        return "'{}': {}".format(key.prettyPrint(), value)
+
+    def oid_dict(self, key, value):
+        values = []
+        have_indexes = False
+        for indexes, data in value.items():
+            try:
+                data = int(data)
+            except ValueError:
+                data = "'{}'".format(data)
+            if indexes:
+                values.append("'{}': {}".format('.'.join(indexes), data))
+                have_indexes = True
+            else:
+                values.append(str(data))
+
+        if not have_indexes:
+            displayed = values[0]
+        else:
+            displayed = '{{{}}}'.format(', '.join(values))
+        return "'{}': {}".format(key, displayed)
+
+    def __str__(self):
+        if isinstance(self.oids, dict):
+            return '{{{}}}'.format(', '.join(self.oid_dict(key, value) for (key, value) in self.oids.items()))
+        if self.with_value:
+            return '{{{}}}'.format(', '.join(self.oid_str_value(oid) for oid in self.oids))
+        else:
+            return '({})'.format(', '.join("'{}'".format(self.oid_str(oid)) for oid in self.oids))
