@@ -2,9 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+from copy import deepcopy
 
 import pytest
-from mock import MagicMock
+from mock import ANY, MagicMock, patch
 
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api, SessionWrapper
@@ -75,3 +76,22 @@ def test_recover_from_expired_token(aggregator, case, api_kwargs):
     # Assert cookie to check the session changed
     assert get_calls[0].kwargs['headers']['Cookie'] == 'cookie'
     assert get_calls[1].kwargs['headers']['Cookie'] != 'cookie'
+
+
+@pytest.mark.parametrize(
+    'case, extra_config, expected_http_kwargs',
+    [('new auth config', {}, {'auth': (common.USERNAME, common.PASSWORD)})],
+)
+def test_config(aggregator, case, extra_config, expected_http_kwargs):
+    instance = deepcopy(common.CONFIG_WITH_TAGS)
+    instance.update(extra_config)
+    check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
+
+    with patch('datadog_checks.base.utils.http.requests') as r:
+        r.get.return_value = MagicMock(status_code=200)
+
+        check.check(instance)
+        http_kwargs = dict(auth=ANY, cert=ANY, data=ANY, headers=ANY, proxies=ANY, timeout=ANY, verify=ANY,)
+
+        http_kwargs.update(expected_http_kwargs)
+        r.post.assert_called_with(common.ACI_URL, **http_kwargs)
