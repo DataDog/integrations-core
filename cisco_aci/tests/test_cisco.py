@@ -79,8 +79,7 @@ def test_recover_from_expired_token(aggregator, case, api_kwargs):
 
 
 @pytest.mark.parametrize(
-    'case, extra_config, expected_http_kwargs',
-    [('new auth config', {}, {'auth': (common.USERNAME, common.PASSWORD)})],
+    'case, extra_config, expected_http_kwargs', [('new auth config', {}, {'auth': (common.USERNAME, common.PASSWORD)})],
 )
 def test_config(aggregator, case, extra_config, expected_http_kwargs):
     instance = deepcopy(common.CONFIG_WITH_TAGS)
@@ -91,7 +90,7 @@ def test_config(aggregator, case, extra_config, expected_http_kwargs):
         r.get.return_value = MagicMock(status_code=200)
 
         check.check(instance)
-        http_kwargs = dict(auth=ANY, cert=ANY, data=ANY, headers=ANY, proxies=ANY, timeout=ANY, verify=ANY,)
+        http_kwargs = dict(auth=ANY, cert=ANY, data=ANY, headers=ANY, proxies=ANY, timeout=ANY, verify=ANY)
 
         http_kwargs.update(expected_http_kwargs)
         r.post.assert_called_with(common.ACI_URL, **http_kwargs)
