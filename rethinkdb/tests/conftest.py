@@ -9,7 +9,7 @@ from datadog_checks.dev import docker_run
 from datadog_checks.rethinkdb._types import Instance
 
 from .cluster import setup_cluster
-from .common import AGENT_PASSWORD, AGENT_USER, COMPOSE_FILE, CONNECT_SERVER_PORT, HOST, IMAGE, PROXY_PORT
+from .common import AGENT_PASSWORD, AGENT_USER, COMPOSE_ENV_VARS, COMPOSE_FILE, HOST, SERVER_PORTS
 
 E2E_METADATA = {'start_commands': ['pip install rethinkdb==2.4.4']}
 
@@ -29,7 +29,7 @@ def instance(request):
     user, password = request.param
     return {
         'host': HOST,
-        'port': CONNECT_SERVER_PORT,
+        'port': SERVER_PORTS['server0'],
         'user': user,
         'password': password,
     }
@@ -38,12 +38,6 @@ def instance(request):
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     # type: (Instance) -> Iterator
-    env_vars = {
-        'RETHINKDB_IMAGE': IMAGE,
-        'RETHINKDB_CONNECT_SERVER_PORT': str(CONNECT_SERVER_PORT),
-        'RETHINKDB_PROXY_PORT': str(PROXY_PORT),
-    }
-
     conditions = [setup_cluster]
 
     log_patterns = [
@@ -53,6 +47,6 @@ def dd_environment(instance):
         r'Connected to proxy.*',
     ]
 
-    with docker_run(COMPOSE_FILE, conditions=conditions, env_vars=env_vars, log_patterns=log_patterns):
+    with docker_run(COMPOSE_FILE, conditions=conditions, env_vars=COMPOSE_ENV_VARS, log_patterns=log_patterns):
         config = {'instances': [instance]}
         yield config, E2E_METADATA

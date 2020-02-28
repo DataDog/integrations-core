@@ -18,14 +18,13 @@ from .common import (
     CLIENT_USER,
     COMPOSE_ENV_VARS,
     COMPOSE_FILE,
-    CONNECT_SERVER_PORT,
     DATABASE,
     HEROES_TABLE,
     HEROES_TABLE_CONFIG,
     HEROES_TABLE_DOCUMENTS,
     HEROES_TABLE_INDEX_FIELD,
     HOST,
-    PROXY_PORT,
+    SERVER_PORTS,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ def setup_cluster():
     """
     logger.debug('setup_cluster')
 
-    with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
+    with r.connect(host=HOST, port=SERVER_PORTS['server0']) as conn:
         r.db_drop('test').run(conn)  # Automatically created, but we don't use it and it would skew our metrics.
 
         # Cluster content.
@@ -57,7 +56,7 @@ def setup_cluster():
     # Simulate client activity.
     # NOTE: ensures that 'written_docs_*' and 'read_docs_*' metrics have non-zero values.
 
-    with r.connect(host=HOST, port=PROXY_PORT, user=CLIENT_USER) as conn:
+    with r.connect(host=HOST, port=SERVER_PORTS['proxy'], user=CLIENT_USER) as conn:
         response = r.db(DATABASE).table(HEROES_TABLE).insert(HEROES_TABLE_DOCUMENTS).run(conn)
         assert response['inserted'] == len(HEROES_TABLE_DOCUMENTS)
 
@@ -108,10 +107,10 @@ def temporarily_disconnect_server(server):
 
     with temporarily_stop_service(service, compose_file=COMPOSE_FILE):
         with EnvVars(COMPOSE_ENV_VARS):
-            with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
+            with r.connect(host=HOST, port=SERVER_PORTS['server0']) as conn:
                 WaitFor(lambda: _server_disconnected(conn))()
 
             yield
 
-    with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
+    with r.connect(host=HOST, port=SERVER_PORTS['server0']) as conn:
         WaitFor(lambda: _server_reconnected(conn))()

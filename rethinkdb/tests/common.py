@@ -2,8 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import Dict, List, Set
 
 from datadog_checks.utils.common import get_docker_hostname
+
+from ._types import ServerName
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -23,13 +26,10 @@ SERVER_TAGS = {
     'server0': ['default', 'us'],
     'server1': ['default', 'us', 'primary'],
     'server2': ['default', 'eu'],
-}
-SERVERS = set(SERVER_TAGS)
+}  # type: Dict[ServerName, List[str]]
+SERVERS = {'server0', 'server1', 'server2'}  # type: Set[ServerName]
 
-CONNECT_SERVER_NAME = 'server0'
-CONNECT_SERVER_PORT = 28015
-
-PROXY_PORT = 28018
+SERVER_PORTS = {'server0': 28015, 'server1': 28016, 'server2': 28017, 'proxy': 28018}  # type: Dict[ServerName, int]
 
 AGENT_USER = 'datadog-agent'
 AGENT_PASSWORD = 'r3th1nK'
@@ -43,8 +43,8 @@ HEROES_TABLE_CONFIG = {
     'replicas': {'primary': 1, 'eu': 1},
     'primary_replica_tag': 'primary',
 }
-HEROES_TABLE_SERVERS = {'server1', 'server2'}
-HEROES_TABLE_PRIMARY_REPLICA = 'server1'
+HEROES_TABLE_SERVERS = {'server1', 'server2'}  # type: Set[ServerName]
+HEROES_TABLE_PRIMARY_REPLICA = 'server1'  # type: ServerName
 HEROES_TABLE_REPLICAS_BY_SHARD = {0: HEROES_TABLE_SERVERS}
 HEROES_TABLE_DOCUMENTS = [
     {
@@ -158,8 +158,11 @@ METRICS = (
 # Docker Compose configuration.
 
 COMPOSE_FILE = os.path.join(HERE, 'compose', 'docker-compose.yaml')
+
 COMPOSE_ENV_VARS = env_vars = {
     'RETHINKDB_IMAGE': IMAGE,
-    'RETHINKDB_CONNECT_SERVER_PORT': str(CONNECT_SERVER_PORT),
-    'RETHINKDB_PROXY_PORT': str(PROXY_PORT),
+    'RETHINKDB_PORT_SERVER0': str(SERVER_PORTS['server0']),
+    'RETHINKDB_PORT_SERVER1': str(SERVER_PORTS['server1']),
+    'RETHINKDB_PORT_SERVER2': str(SERVER_PORTS['server2']),
+    'RETHINKDB_PORT_PROXY': str(SERVER_PORTS['proxy']),
 }

@@ -9,7 +9,7 @@ services:
     container_name: rethinkdb-server0
     command: rethinkdb --bind all --server-name server0 --server-tag us
     ports:
-      - ${RETHINKDB_CONNECT_SERVER_PORT}:28015  # Client driver port.
+      - ${RETHINKDB_PORT_SERVER0}:28015  # Client driver port.
       - 8080:8080  # Port for the web UI. Debugging only (not used by tests).
 
   rethinkdb-server1:
@@ -21,6 +21,8 @@ services:
       - rethinkdb-server0
     depends_on:
       - rethinkdb-server0
+    ports:
+      - ${RETHINKDB_PORT_SERVER1}:2015
 
   rethinkdb-server2:
     tty: true
@@ -31,6 +33,8 @@ services:
       - rethinkdb-server0
     depends_on:
       - rethinkdb-server0
+    ports:
+      - ${RETHINKDB_PORT_SERVER2}:28015
 
   rethinkdb-proxy0:
     tty: true
@@ -42,4 +46,4 @@ services:
     depends_on:
       - rethinkdb-server0
     ports:
-      - ${RETHINKDB_PROXY_PORT}:28015
+      - ${RETHINKDB_PORT_PROXY}:28015

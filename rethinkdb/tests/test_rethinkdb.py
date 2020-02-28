@@ -12,10 +12,10 @@ from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
 from datadog_checks.rethinkdb._types import Instance, Metric
 
+from ._types import ServerName
 from .cluster import temporarily_disconnect_server
 from .common import (
     CLUSTER_STATISTICS_METRICS,
-    CONNECT_SERVER_NAME,
     DATABASE,
     HEROES_TABLE,
     HEROES_TABLE_PRIMARY_REPLICA,
@@ -45,7 +45,7 @@ def test_check(aggregator, instance):
 
     aggregator.assert_all_metrics_covered()
 
-    service_check_tags = ['server:{}'.format(CONNECT_SERVER_NAME)]
+    service_check_tags = ['server:server0']
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1, tags=service_check_tags)
 
     for service_check in TABLE_STATUS_SERVICE_CHECKS:
@@ -57,7 +57,7 @@ def test_check(aggregator, instance):
 @pytest.mark.parametrize('server_with_data', list(HEROES_TABLE_SERVERS))
 @pytest.mark.usefixtures('dd_environment')
 def test_check_with_disconnected_server(aggregator, instance, server_with_data):
-    # type: (AggregatorStub, Instance, str) -> None
+    # type: (AggregatorStub, Instance, ServerName) -> None
     """
     Verify that the check still runs to completion and sends appropriate service checks if one of the
     servers that holds data is disconnected.
@@ -73,7 +73,7 @@ def test_check_with_disconnected_server(aggregator, instance, server_with_data):
 
     aggregator.assert_all_metrics_covered()
 
-    service_check_tags = ['server:{}'.format(CONNECT_SERVER_NAME)]
+    service_check_tags = ['server:server0']
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1, tags=service_check_tags)
 
     table_status_tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
@@ -93,7 +93,7 @@ def test_check_with_disconnected_server(aggregator, instance, server_with_data):
 
 
 def _assert_metrics(aggregator, disconnected_servers=None):
-    # type: (AggregatorStub, Set[str]) -> None
+    # type: (AggregatorStub, Set[ServerName]) -> None
     if disconnected_servers is None:
         disconnected_servers = set()
 
@@ -108,7 +108,7 @@ def _assert_metrics(aggregator, disconnected_servers=None):
 
 
 def _assert_config_totals_metrics(aggregator, disconnected_servers):
-    # type: (AggregatorStub, Set[str]) -> None
+    # type: (AggregatorStub, Set[ServerName]) -> None
     aggregator.assert_metric('rethinkdb.server.total', count=1, value=len(SERVERS) - len(disconnected_servers))
     aggregator.assert_metric('rethinkdb.database.total', count=1, value=1)
     aggregator.assert_metric('rethinkdb.database.table.total', count=1, value=1, tags=['database:{}'.format(DATABASE)])
@@ -118,7 +118,7 @@ def _assert_config_totals_metrics(aggregator, disconnected_servers):
 
 
 def _assert_statistics_metrics(aggregator, disconnected_servers):
-    # type: (AggregatorStub, Set[str]) -> None
+    # type: (AggregatorStub, Set[ServerName]) -> None
     for metric in CLUSTER_STATISTICS_METRICS:
         aggregator.assert_metric(metric, count=1, tags=[])
 
@@ -164,7 +164,7 @@ def _assert_table_status_metrics(aggregator):
 
 
 def _assert_server_status_metrics(aggregator, disconnected_servers):
-    # type: (AggregatorStub, Set[str]) -> None
+    # type: (AggregatorStub, Set[ServerName]) -> None
     for metric in SERVER_STATUS_METRICS:
         for server in SERVERS:
             tags = ['server:{}'.format(server)]
@@ -205,7 +205,7 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
     with pytest.raises(Failure):
         check.check(instance)
 
-    service_check_tags = ['server:{}'.format(CONNECT_SERVER_NAME)]
+    service_check_tags = ['server:server0']
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=service_check_tags)
 
 
