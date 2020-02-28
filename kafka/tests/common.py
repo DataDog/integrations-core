@@ -10,36 +10,29 @@ CHECK_NAME = "kafka"
 HERE = get_here()
 HOST = get_docker_hostname()
 HOST_IP = socket.gethostbyname(HOST)
-KAFKA_CONNECT_STR = '{}:9092'.format(HOST_IP)
-ZK_CONNECT_STR = '{}:2181'.format(HOST)
-TOPICS = ['marvel', 'dc']
-PARTITIONS = [0, 1]
 
-# Rate type metrics that do not work in our e2e:
 
-# "kafka.request.fetch.failed.rate",
-# "kafka.request.fetch.failed_per_second",
-# "kafka.request.fetch.time.99percentile",
-# "kafka.request.fetch.time.avg",
-
-# "kafka.request.produce.failed.rate",
-# "kafka.request.produce.failed_per_second",
-
-#   "kafka.messages_in.rate"
-#   "kafka.net.bytes_in.rate"
-#   "kafka.net.bytes_out.rate"
-#   "kafka.net.bytes_rejected.rate"
-
-# "kafka.consumer.bytes_in",
-# "kafka.consumer.kafka_commits",
-# "kafka.consumer.messages_in",
-# "kafka.consumer.zookeeper_commits",
-
-# "kafka.replication.isr_expands.rate",
-# "kafka.replication.isr_shrinks.rate",
-# "kafka.replication.leader_elections.rate",
-# "kafka.replication.unclean_leader_elections.rate",
-
+"""
+Rate type metrics that do not work in our e2e:
+    "kafka.consumer.bytes_in",
+    "kafka.consumer.kafka_commits",
+    "kafka.consumer.messages_in",
+    "kafka.consumer.zookeeper_commits",
+    "kafka.messages_in.rate",
+    "kafka.net.bytes_in.rate",
+    "kafka.net.bytes_out.rate",
+    "kafka.net.bytes_rejected.rate",
+    "kafka.replication.isr_expands.rate",
+    "kafka.replication.isr_shrinks.rate",
+    "kafka.replication.leader_elections.rate",
+    "kafka.replication.unclean_leader_elections.rate",
+    "kafka.request.fetch.failed.rate",
+    "kafka.request.fetch.failed_per_second",
+    "kafka.request.fetch.time.99percentile",
+    "kafka.request.fetch.time.avg",
+    "kafka.request.produce.failed.rate",
+    "kafka.request.produce.failed_per_second",
+"""
 
 KAFKA_E2E_METRICS = [
     "kafka.net.handler.avg.idle.pct.rate",
