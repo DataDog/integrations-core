@@ -79,18 +79,17 @@ def test_recover_from_expired_token(aggregator, case, api_kwargs):
 
 
 @pytest.mark.parametrize(
-    'case, extra_config, expected_http_kwargs', [('new auth config', {}, {'auth': (common.USERNAME, common.PASSWORD)})],
+    'extra_config, expected_http_kwargs',
+    [
+        pytest.param({}, {'auth': (common.USERNAME, common.PASSWORD), 'verify': True}, id='new auth config'),
+        pytest.param({'ssl_verify': True}, {'verify': True}, id='legacy ssl verify config True'),
+        pytest.param({'ssl_verify': False}, {'verify': False}, id='legacy ssl verify config False'),
+    ],
 )
-def test_config(aggregator, case, extra_config, expected_http_kwargs):
+def test_config(aggregator, extra_config, expected_http_kwargs):
     instance = deepcopy(common.CONFIG_WITH_TAGS)
     instance.update(extra_config)
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
 
-    with patch('datadog_checks.base.utils.http.requests') as r:
-        r.get.return_value = MagicMock(status_code=200)
-
-        check.check(instance)
-        http_kwargs = dict(auth=ANY, cert=ANY, data=ANY, headers=ANY, proxies=ANY, timeout=ANY, verify=ANY)
-
-        http_kwargs.update(expected_http_kwargs)
-        r.post.assert_called_with(common.ACI_URL, **http_kwargs)
+    for key in expected_http_kwargs:
+        assert check.http.options[key] == expected_http_kwargs[key]
