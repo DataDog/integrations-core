@@ -13,7 +13,7 @@ Metric = TypedDict(
     {'type': Literal['gauge', 'monotonic_count', 'service_check'], 'name': str, 'value': float, 'tags': List[str]},
 )
 
-Instance = TypedDict('Instance', {'host': str, 'port': int}, total=False)
+Instance = TypedDict('Instance', {'host': str, 'port': int, 'user': str, 'password': str}, total=False)
 
 
 # Configuration documents.

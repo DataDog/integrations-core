@@ -36,9 +36,9 @@ class QueryEngine:
         # type: (rethinkdb.RethinkDB) -> None
         self._r = r
 
-    def connect(self, host='localhost', port=28015, **kwargs):
-        # type: (str, int, **Any) -> rethinkdb.net.Connection
-        return self._r.connect(host, port, **kwargs)
+    def connect(self, host='localhost', port=28015, user=None, password=None, **kwargs):
+        # type: (str, int, str, str, **Any) -> rethinkdb.net.Connection
+        return self._r.connect(host, port, user=user, password=password, **kwargs)
 
     def get_connected_server_version_string(self, conn):
         # type: (rethinkdb.net.Connection) -> str

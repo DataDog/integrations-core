@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
 
-from typing import Callable, Iterator, List
+from typing import Callable, Iterator, List, Optional
 
 import rethinkdb
 
@@ -35,6 +35,8 @@ class Config:
         # type: (Instance) -> None
         host = instance.get('host', 'localhost')
         port = instance.get('port', 28015)
+        user = instance.get('user')
+        password = instance.get('password')
 
         if not isinstance(host, str):
             raise ConfigurationError('host must be a string (got {!r})'.format(type(host)))
@@ -47,6 +49,8 @@ class Config:
 
         self._host = host  # type: str
         self._port = port  # type: int
+        self._user = user  # type: Optional[str]
+        self._password = password  # type: Optional[str]
         self._query_engine = QueryEngine(r=rethinkdb.r)
 
         self._collect_funcs = [
@@ -75,7 +79,10 @@ class Config:
         # type: () -> rethinkdb.net.Connection
         host = self._host
         port = self._port
-        return self._query_engine.connect(host, port)
+        user = self._user
+        password = self._password
+
+        return self._query_engine.connect(host, port, user=user, password=password)
 
     def collect_metrics(self, conn):
         # type: (rethinkdb.net.Connection) -> Iterator[Metric]

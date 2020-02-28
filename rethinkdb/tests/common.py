@@ -31,6 +31,10 @@ CONNECT_SERVER_PORT = 28015
 
 PROXY_PORT = 28018
 
+AGENT_USER = 'datadog-agent'
+AGENT_PASSWORD = 'r3th1nK'
+CLIENT_USER = 'doggo'
+
 DATABASE = 'doghouse'
 
 HEROES_TABLE = 'heroes'

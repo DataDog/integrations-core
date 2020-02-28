@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 from contextlib import contextmanager
-from typing import Iterator
+from typing import Iterator, List
 
 import rethinkdb
 from rethinkdb import r
@@ -12,6 +13,9 @@ from datadog_checks.dev.docker import temporarily_stop_service
 from datadog_checks.dev.structures import EnvVars
 
 from .common import (
+    AGENT_PASSWORD,
+    AGENT_USER,
+    CLIENT_USER,
     COMPOSE_ENV_VARS,
     COMPOSE_FILE,
     CONNECT_SERVER_PORT,
@@ -24,99 +28,73 @@ from .common import (
     PROXY_PORT,
 )
 
+logger = logging.getLogger(__name__)
+
 
 def setup_cluster():
     # type: () -> None
     """
     Configure the test cluster.
     """
-    _drop_test_database()  # Automatically created by RethinkDB, but we don't use it and it would skew our metrics.
-    _create_database()
-    _create_test_table()
-    _simulate_client_writes()
-    _simulate_client_reads()
+    logger.debug('setup_cluster')
 
-
-def _drop_test_database():
-    # type: () -> None
     with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
-        # See: https://rethinkdb.com/api/python/db_drop
-        response = r.db_drop('test').run(conn)
-        assert response['dbs_dropped'] == 1
+        r.db_drop('test').run(conn)  # Automatically created, but we don't use it and it would skew our metrics.
 
+        # Cluster content.
+        r.db_create(DATABASE).run(conn)
+        r.db(DATABASE).table_create(HEROES_TABLE, **HEROES_TABLE_CONFIG).run(conn)
+        r.db(DATABASE).table(HEROES_TABLE).index_create(HEROES_TABLE_INDEX_FIELD).run(conn)
 
-def _create_database():
-    # type: () -> None
-    with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
-        # See: https://rethinkdb.com/api/python/db_create
-        response = r.db_create(DATABASE).run(conn)
-        assert response['dbs_created'] == 1
+        # Users.
+        # See: https://rethinkdb.com/docs/permissions-and-accounts/
+        r.db('rethinkdb').table('users').insert({'id': AGENT_USER, 'password': AGENT_PASSWORD}).run(conn)
+        r.db('rethinkdb').grant(AGENT_USER, {'read': True}).run(conn)
 
+        r.db('rethinkdb').table('users').insert({'id': CLIENT_USER, 'password': False}).run(conn)
+        r.db(DATABASE).grant(CLIENT_USER, {'read': True, 'write': True}).run(conn)
 
-def _create_test_table():
-    # type: () -> None
-    with r.connect(host=HOST, port=CONNECT_SERVER_PORT) as conn:
-        # See: https://rethinkdb.com/api/python/table_create/
-        response = r.db(DATABASE).table_create(HEROES_TABLE, **HEROES_TABLE_CONFIG).run(conn)
-        assert response['tables_created'] == 1
+    # Simulate client activity.
+    # NOTE: ensures that 'written_docs_*' and 'read_docs_*' metrics have non-zero values.
 
-        # See: https://rethinkdb.com/api/python/index_create/
-        response = r.db(DATABASE).table(HEROES_TABLE).index_create(HEROES_TABLE_INDEX_FIELD).run(conn)
-        assert response['created'] == 1
-
-
-def _simulate_client_writes():
-    # type: () -> None
-    """
-    Simulate a client application that inserts rows by connecting via the proxy node.
-
-    Calling this ensures that 'written_docs_*' metrics will have a non-zero value.
-    """
-
-    with r.connect(host=HOST, port=PROXY_PORT) as conn:
-        # See: https://rethinkdb.com/api/python/insert
+    with r.connect(host=HOST, port=PROXY_PORT, user=CLIENT_USER) as conn:
         response = r.db(DATABASE).table(HEROES_TABLE).insert(HEROES_TABLE_DOCUMENTS).run(conn)
-        assert response['errors'] == 0
         assert response['inserted'] == len(HEROES_TABLE_DOCUMENTS)
 
-
-def _simulate_client_reads():
-    # type: () -> None
-    """
-    Simulate a client application that reads rows by connecting via the proxy node.
-
-    Calling this ensures that 'read_docs_*' metrics will have a non-zero value.
-    """
-
-    with r.connect(db=DATABASE, host=HOST, port=PROXY_PORT) as conn:
-        all_heroes = list(r.table(HEROES_TABLE).run(conn))
-        assert len(all_heroes) == len(HEROES_TABLE_DOCUMENTS)
+        documents = list(r.db(DATABASE).table(HEROES_TABLE).run(conn))
+        assert len(documents) == len(HEROES_TABLE_DOCUMENTS)
 
 
 @contextmanager
 def temporarily_disconnect_server(server):
+    # type: (str) -> Iterator[None]
     """
     Gracefully disconnect a server from the cluster.
     Ensures that the stable is left in a stable state inside and after exiting the context.
     """
     service = 'rethinkdb-{}'.format(server)
+    logger.debug('temporarily_disconnect_server server=%r service=%r', server, service)
 
     def _server_exists(conn):
         # type: (rethinkdb.net.Connection) -> bool
-        return r.db('rethinkdb').table('server_status').map(r.row['name']).contains(server).run(conn)
+        servers = r.db('rethinkdb').table('server_status').map(r.row['name']).run(conn)  # type: List[str]
+        logger.debug('server_exists server=%r servers=%r', server, servers)
+        return server in servers
 
     def _leader_election_done(conn):
         # type: (rethinkdb.net.Connection) -> bool
         STABLE_REPLICA_STATES = {'ready', 'waiting_for_primary', 'disconnected'}
 
-        replica_states = (
+        replica_states = list(
             r.db('rethinkdb')
             .table('table_status')
             .concat_map(r.row['shards'])
             .concat_map(r.row['replicas'])
             .map(r.row['state'])
             .run(conn)
-        )  # type: Iterator[str]
+        )  # type: List[str]
+
+        logger.debug('replica_states %r', replica_states)
 
         return all(state in STABLE_REPLICA_STATES for state in replica_states)
 
