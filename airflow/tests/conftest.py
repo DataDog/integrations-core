@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+from os import path
 
 import pytest
 
@@ -12,6 +13,32 @@ from .common import URL
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+TMP_DATA_FOLDER = path.join(HERE, 'compose', 'tmp_data')
+
+E2E_METADATA = {
+    'docker_volumes': ['{}/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(TMP_DATA_FOLDER)],
+}
+
+
+def get_readme_mappings():
+    with open(path.join(HERE, '..', 'README.md'), 'r') as f:
+        readme = f.read()
+
+    start = readme.find('dogstatsd_mapper_profiles:')
+    end = readme[start:].find('# dogstatsd_mapper_cache_size')
+    return readme[start:start + end]
+
+
+def create_tmp_data_mappings(mappings):
+    datadog_extras = "dogstatsd_metrics_stats_enable: true\n" \
+                     "dogstatsd_stats_enable: true\n" \
+                     "{}".format(mappings)
+    with open(path.join(TMP_DATA_FOLDER, 'datadog.yaml'), 'w') as f:
+        f.write(datadog_extras)
+
+
+create_tmp_data_mappings(get_readme_mappings())
+
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
@@ -19,7 +46,7 @@ def dd_environment(instance):
         os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         conditions=[CheckEndpoints(URL + '/api/experimental/test', attempts=100)],
     ):
-        yield instance
+        yield instance, E2E_METADATA
 
 
 @pytest.fixture(scope='session')
