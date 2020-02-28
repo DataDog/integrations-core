@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  cassandra:
+    build: .
+    ports:
+      - '7000:7000'
+      - '7001:7001'
+      - '7199:7199'
+    environment: 
+      - LOCAL_JMX=no
+      - JVM_EXTRA_OPTS=-Djava.rmi.server.hostname=127.0.0.1
