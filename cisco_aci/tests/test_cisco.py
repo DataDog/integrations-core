@@ -5,7 +5,7 @@ import os
 from copy import deepcopy
 
 import pytest
-from mock import ANY, MagicMock, patch
+from mock import MagicMock
 
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api, SessionWrapper
