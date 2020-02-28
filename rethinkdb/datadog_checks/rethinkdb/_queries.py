@@ -17,6 +17,7 @@ import rethinkdb
 from ._types import (
     ClusterStats,
     ConfigTotals,
+    ConnectionServer,
     Job,
     JoinRow,
     ReplicaStats,
@@ -38,6 +39,17 @@ class QueryEngine:
     def connect(self, host='localhost', port=28015, **kwargs):
         # type: (str, int, **Any) -> rethinkdb.net.Connection
         return self._r.connect(host, port, **kwargs)
+
+    def get_connected_server_version_string(self, conn):
+        # type: (rethinkdb.net.Connection) -> str
+        """
+        Return the raw string of the RethinkDB version used by the server at the other end of the connection.
+        """
+        r = self._r
+        # See: https://rethinkdb.com/docs/system-tables/#server_status
+        server = conn.server()  # type: ConnectionServer
+        server_status = r.db('rethinkdb').table('server_status').get(server['id']).run(conn)  # type: ServerStatus
+        return server_status['process']['version']
 
     def query_config_totals(self, conn):
         # type: (rethinkdb.net.Connection) -> ConfigTotals

@@ -8,6 +8,7 @@ import pytest
 import rethinkdb
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
 from datadog_checks.rethinkdb._types import Instance, Metric
 
@@ -21,6 +22,7 @@ from .common import (
     HEROES_TABLE_REPLICAS_BY_SHARD,
     HEROES_TABLE_SERVERS,
     REPLICA_STATISTICS_METRICS,
+    RETHINKDB_VERSION,
     SERVER_STATISTICS_METRICS,
     SERVER_STATUS_METRICS,
     SERVER_TAGS,
@@ -205,3 +207,28 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
 
     service_check_tags = ['server:{}'.format(CONNECT_SERVER_NAME)]
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=service_check_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_version_metadata(aggregator, instance, datadog_agent):
+    # type: (AggregatorStub, Instance, DatadogAgentStub) -> None
+    check_id = 'test'
+
+    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check.check_id = check_id
+
+    check.check(instance)
+
+    raw_version = RETHINKDB_VERSION
+    version, _, build = raw_version.partition('~')
+    major, minor, patch = version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata(check_id, version_metadata)

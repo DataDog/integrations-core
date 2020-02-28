@@ -11,6 +11,7 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 CHECK_NAME = 'rethinkdb'
 
 IMAGE = 'rethinkdb:2.4.0'
+RETHINKDB_VERSION = '2.4.0~0bionic'
 
 HOST = get_docker_hostname()
 

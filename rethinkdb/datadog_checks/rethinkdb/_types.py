@@ -117,10 +117,17 @@ TableStatus = TypedDict(
     'TableStatus', {'id': str, 'name': str, 'db': str, 'status': TableStatusFlags, 'shards': List[Shard]}
 )
 
-# vvv NOTE: only fields of interest are listed here.
-ServerNetwork = TypedDict('ServerNetwork', {'time_connected': dt.datetime, 'connected_to': Mapping[str, bool]})
-ServerProcess = TypedDict('ServerProcess', {'time_started': dt.datetime, 'version': str})
-# ^^^
+ServerNetwork = TypedDict(
+    'ServerNetwork',
+    {
+        # NOTE: only fields of interest are listed here.
+        'time_connected': dt.datetime,
+        'connected_to': Mapping[str, bool],
+    },
+)
+ServerProcess = TypedDict(
+    'ServerProcess', {'argv': List[str], 'cache_size_mb': int, 'pid': int, 'time_started': dt.datetime, 'version': str}
+)
 ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': ServerNetwork, 'process': ServerProcess})
 
 

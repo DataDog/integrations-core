@@ -73,4 +73,5 @@ class RethinkDBCheck(AgentCheck):
             for metric in config.collect_metrics(conn):
                 self.submit_metric(metric)
 
-    # TODO: version metadata.
+            version = config.get_connected_server_version(conn)
+            self.set_metadata('version', version)

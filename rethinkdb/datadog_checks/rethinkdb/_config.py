@@ -21,6 +21,7 @@ from ._metrics.statuses import collect_server_status, collect_table_status
 from ._metrics.system_jobs import collect_system_jobs
 from ._queries import QueryEngine
 from ._types import Instance, Metric
+from ._version import parse_version
 
 
 class Config:
@@ -81,6 +82,19 @@ class Config:
         for collect in self._collect_funcs:
             for metric in collect(self._query_engine, conn):
                 yield metric
+
+    def get_connected_server_version(self, conn):
+        # type: (rethinkdb.net.Connection) -> str
+        """
+        Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
+
+        Example:
+
+        >>> config.get_version(conn)
+        '2.4.0~0bionic'
+        """
+        version_string = self._query_engine.get_connected_server_version_string(conn)
+        return parse_version(version_string)
 
     def __repr__(self):
         # type: () -> str
