@@ -123,7 +123,8 @@ class Gearman(AgentCheck):
     def _collect_metadata(self, client):
         resp = client.get_version()
         if not resp.startswith('OK'):
-            self.log.error('Error retrieving version information from server, response: %s', resp)
+            self.log.info('Error retrieving version information from server, response: %s', resp)
+            return
 
         server_version = resp.lstrip('OK ')
         self.log.debug("Agent version is `%s`", server_version)
