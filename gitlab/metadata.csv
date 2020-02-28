@@ -61,6 +61,18 @@ gitlab.transaction_event_remote_mirrors_finished_total,count,,,,Counter for fini
 gitlab.transaction_event_remote_mirrors_running_total,count,,,,Counter for running remote mirrors,0,gitlab,remote mirrors running
 gitlab.transaction_event_remove_branch_total,count,,,,Counter when a branch is removed for any repository,0,gitlab,branches removed
 gitlab.transaction_event_remove_repository_total,count,,,,Counter when a repository is removed,0,gitlab,repos removed
+gitlab.transaction_event_remove_tag_total,count,,,,Counter when a tag is remove for any repository,0,gitlab,tags removed
+gitlab.transaction_event_sidekiq_exception_total,count,,,,Counter of Sidekiq exceptions,-1,gitlab,sidekiq exceptions
+gitlab.transaction_event_stuck_import_jobs_total,count,,,,Count of stuck import jobs,-1,gitlab,stuck import jobs
+gitlab.transaction_event_update_build_total,count,,,,Counter for update build for API /jobs/request/:id,0,gitlab,update build
+gitlab.transaction_new_redis_connections_total,count,,,,Counter for new Redis connections,0,gitlab,new redis connections
+gitlab.transaction_queue_duration_total,count,,,,Duration jobs were enqueued before processing,0,gitlab,jobs enqueued processing
+gitlab.transaction_rails_queue_duration_total,count,,,,Measures latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration
+gitlab.transaction_view_duration_total,count,,,,Duration for views,0,gitlab,view duration
+gitlab.transaction_view_duration_total.sum,count,,,,Sum of duration for views,0,gitlab,view duration sum
+gitlab.http_requests_total.sum,count,,,,Rack request count,0,gitlab,rack request count
+gitlab.http_request_duration_seconds.sum,count,,,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
+gitlab.http_request_duration_seconds.count,count,,,,Count of HTTP response time from rack middleware,0,gitlab,http request dur sum
 
 
 
