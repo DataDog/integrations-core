@@ -91,6 +91,8 @@ class VSphereAPI(object):
             err_msg = "Connection to {} failed: {}".format(self.config.hostname, e)
             raise APIConnectionError(err_msg)
 
+        if self._conn:
+            connect.Disconnect(self._conn)
         self._conn = conn
 
     @smart_retry
