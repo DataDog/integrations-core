@@ -1,10 +1,47 @@
 name: RethinkDB
+
 files:
-- name: rethinkdb.yaml
-  options:
-  - template: init_config
-    options: []
-  - template: instances
+  - name: rethinkdb.yaml
+
     options:
-    - template: instances/tags
-    - template: instances/global
+      - template: init_config
+        options:
+          - template: init_config/default
+
+      - template: instances
+        options:
+          - template: instances/default
+
+          - name: host
+            required: false
+            description: Host of the RethinkDB server.
+            value:
+              example: localhost
+              type: string
+
+          - name: port
+            required: false
+            description: Driver port of the RethinkDB server.
+            value:
+              example: 28015
+              type: integer
+
+          - name: user
+            required: false
+            description: The user account to connect as.
+            value:
+              type: string
+
+          - name: password
+            required: false
+            description: The password for the user account to connect as.
+            value:
+              type: string
+
+          - name: tls_ca_cert
+            required: false
+            description: |
+              Path to a TLS/SSL client certificate to use when connecting to the RethinkDB server.
+              See also: https://rethinkdb.com/docs/security/#using-tls
+            value:
+              type: string
