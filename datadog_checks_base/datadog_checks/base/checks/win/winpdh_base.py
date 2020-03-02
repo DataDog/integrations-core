@@ -27,6 +27,7 @@ class PDHBaseCheck(AgentCheck):
 
     Windows only.
     """
+
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
         # TODO: Change signature to (self, name, init_config, instances, counter_list) once subclasses have been edited
         AgentCheck.__init__(self, *args, **kwargs)
@@ -94,9 +95,7 @@ class PDHBaseCheck(AgentCheck):
             # get any additional metrics in the instance
             addl_metrics = self.instance.get('additional_metrics')
             if addl_metrics is not None:
-                self._make_counters(
-                    (addl_metrics, (datatypes, remote_machine, True, 'additional metric entry'))
-                )
+                self._make_counters((addl_metrics, (datatypes, remote_machine, True, 'additional metric entry')))
 
         except Exception as e:
             self.log.debug("Exception in PDH init: %s", str(e))
