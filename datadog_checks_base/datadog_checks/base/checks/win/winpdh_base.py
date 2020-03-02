@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import List
+
 import win32wnet
 from six import iteritems
 
@@ -31,13 +33,12 @@ class PDHBaseCheck(AgentCheck):
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
         # TODO: Change signature to (self, name, init_config, instances, counter_list) once subclasses have been edited
         AgentCheck.__init__(self, *args, **kwargs)
-        self._missing_counters = []
-        self._metrics = []
-        self._tags = []
-        self._metrics = []
-        self.refresh_counters = is_affirmative(self.instance.get('refresh_counters', True))
+        self._missing_counters = []  # type: List[tuple]
+        self._metrics = []  # type: List[List]
+        self._tags = []  # type: List[str]
+        self.refresh_counters = is_affirmative(self.instance.get('refresh_counters', True))  # type: bool
         # TODO Remove once signature is restored to (self, name, init_config, instances, counter_list)
-        counter_list = kwargs.get('counter_list', args[-1])
+        counter_list = kwargs.get('counter_list', args[-1])  # type: List[List[str]]
 
         try:
             cfg_tags = self.instance.get('tags')
