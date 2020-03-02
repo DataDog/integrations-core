@@ -1,5 +1,14 @@
 # CHANGELOG - vsphere
 
+## 5.0.2 / 2020-02-29
+
+* [Fixed] Disconnect vSphere connection to the server on refresh. See [#5929](https://github.com/DataDog/integrations-core/pull/5929).
+
+## 5.0.1 / 2020-02-28
+
+* [Fixed] Remove some unnecessary warnings. See [#5916](https://github.com/DataDog/integrations-core/pull/5916).
+* [Fixed] Add tags section in conf.yaml. See [#5911](https://github.com/DataDog/integrations-core/pull/5911).
+
 ## 5.0.0 / 2020-02-22
 
 * [Added] Add `tls_ignore_warning` option. See [#5777](https://github.com/DataDog/integrations-core/pull/5777).

@@ -425,8 +425,9 @@ DATACENTER_METRICS = {
 
 # All metrics that can be collected from Clusters.
 CLUSTER_METRICS = {
-    # clusterServices are only available for DRS and HA clusters, and are causing errors. Let's deactivate for now
-    # but they were collected before so investigate why
+    # clusterServices are only available for DRS and HA clusters, and can cause errors that are caught down
+    # the line by the integration. That means some API calls are unnecessary.
+    # TODO: Look if we can prevent those unnecessary API calls
     'clusterServices.cpufairness.latest',
     'clusterServices.effectivecpu.avg',
     'clusterServices.effectivemem.avg',

@@ -8,7 +8,7 @@ Red Hat OpenShift is an open source container application platform based on the 
 
 ### Installation
 
-To install the Agent, refer to the [Agent installation instructions][1] for kubernetes. The default configuration targets OpenShift 3.7.0+ and OpenShift 4.0+, as it relies on features and endpoints introduced in this version.
+To install the Agent, refer to the [Agent installation instructions][2] for kubernetes. The default configuration targets OpenShift 3.7.0+ and OpenShift 4.0+, as it relies on features and endpoints introduced in this version.
 
 ### Configuration
 

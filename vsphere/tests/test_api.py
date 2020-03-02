@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 from mock import ANY, MagicMock, patch
-from pyVmomi import vim
+from pyVmomi import vim, vmodl
 
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.config import VSphereConfig
@@ -72,17 +72,31 @@ def test_get_infrastructure(realtime_instance):
         container_view.Destroy.assert_called_once()
 
 
-def test_smart_retry(realtime_instance):
+@pytest.mark.parametrize(
+    'exception, expected_calls',
+    [
+        (Exception('error'), 2,),
+        (vmodl.fault.InvalidArgument(), 1,),
+        (vim.fault.InvalidName(), 1,),
+        (vim.fault.RestrictedByAdministrator(), 1,),
+    ],
+)
+def test_smart_retry(realtime_instance, exception, expected_calls):
     with patch('datadog_checks.vsphere.api.connect') as connect:
         config = VSphereConfig(realtime_instance, MagicMock())
         api = VSphereAPI(config, MagicMock())
 
         smart_connect = connect.SmartConnect
+        disconnect = connect.Disconnect
         query_perf_counter = api._conn.content.perfManager.QueryPerfCounterByLevel
-        query_perf_counter.side_effect = [Exception('error'), 'success']
-        api.get_perf_counter_by_level(None)
-        assert query_perf_counter.call_count == 2
-        assert smart_connect.call_count == 2
+        query_perf_counter.side_effect = [exception, 'success']
+        try:
+            api.get_perf_counter_by_level(None)
+        except Exception:
+            pass
+        assert query_perf_counter.call_count == expected_calls
+        assert smart_connect.call_count == expected_calls
+        assert disconnect.call_count == expected_calls - 1
 
 
 def test_get_max_query_metrics(realtime_instance):
