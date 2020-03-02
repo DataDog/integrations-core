@@ -28,6 +28,7 @@ class PDHBaseCheck(AgentCheck):
     Windows only.
     """
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
+        # TODO: Change signature to (self, name, init_config, instances, counter_list) once subclasses have been edited
         AgentCheck.__init__(self, *args, **kwargs)
         self._missing_counters = {}
         self._metrics = {}
@@ -35,6 +36,8 @@ class PDHBaseCheck(AgentCheck):
         self.refresh_counters = is_affirmative(self.instance.get('refresh_counters', True))
         self.key = hash_mutable(self.instance)
         self._metrics = []
+        # TODO Remove once signature is restored to (self, name, init_config, instances, counter_list)
+        counter_list = kwargs.get('counter_list', args[-1])
 
         try:
             cfg_tags = self.instance.get('tags')
