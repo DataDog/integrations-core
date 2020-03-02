@@ -21,6 +21,7 @@ sudo apt-get install -y --no-install-recommends \
   debianutils \
   findutils \
   gawk \
+  gcc \
   grep \
   libc-bin \
   mount \
