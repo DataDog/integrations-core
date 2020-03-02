@@ -61,6 +61,8 @@ def test_all(aggregator, check, instance_all):
     aggregator.assert_service_check(
         c.SERVICE_CHECK_NAME, status=c.OK, tags=['service:EventSystem', 'windows_service:EventSystem'], count=1
     )
+    msg = 'The `service` tag is deprecated and has been renamed to `windows_service`'
+    assert msg in c.warnings[0]
 
 
 def test_basic_disable_service_tag(aggregator, check, instance_basic_disable_service_tag):
