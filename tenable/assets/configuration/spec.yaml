@@ -1,0 +1,15 @@
+name: Tenable
+files:
+- name: tenable.yaml
+  options:
+  - template: logs
+    required: true
+    example:
+    - type: file
+      path: /opt/nessus/var/nessus/logs/backend.log
+      service: nessus_backend
+      source: tenable
+    - type: file
+      path: /opt/nessus/var/nessus/logs/www_server.log
+      service: nessus_webserver
+      source: tenable
