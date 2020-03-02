@@ -14,7 +14,10 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "postgresql.",
-  "metric_to_check": "postgresql.connections",
+  "metric_to_check": [
+    "postgresql.connections",
+    "postgresql.max_connections"
+  ],
   "name": "postgres",
   "process_signatures": [
     "postgres -D",
