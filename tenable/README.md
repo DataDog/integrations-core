@@ -33,21 +33,21 @@ _Available for Agent versions >6.0_
    See the [sample tenable.d/conf.yaml][3] for available configuration options.
 
    ```yaml
-   logs:
-    - type: file
-      path: /opt/nessus/var/nessus/logs/backend.log
-      service: nessus_backend
-      source: tenable
+      logs:
+       - type: file
+         path: /opt/nessus/var/nessus/logs/backend.log
+         service: nessus_backend
+         source: tenable
 
-    - type: file
-      path: /opt/nessus/var/nessus/logs/www_server.log
-      service: nessus_webserver
-      source: tenable
+       - type: file
+         path: /opt/nessus/var/nessus/logs/www_server.log
+         service: nessus_webserver
+         source: tenable
    ```
 
     Customize the `path` and `service` parameter values if necessary for your environment.
 
-3. [Restart the Agent][7].
+3. [Restart the Agent][4].
 
 
 ### Metrics
