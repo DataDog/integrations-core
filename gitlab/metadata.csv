@@ -87,17 +87,40 @@ gitlab.ruby_process_cpu_seconds_total,gauge,,second,,Total amount of CPU time pe
 gitlab.ruby_process_max_fds,gauge,,,,Maximum number of open file descriptors per process,0,ruby max fds
 gitlab.ruby_process_resident_memory_bytes,gauge,,byte,,Memory usage by process,0,ruby memory
 gitlab.ruby_process_start_time_seconds,gauge,,second,,UNIX timestamp of process start time,0,ruby start
-
-##TODO: ALL ruby_gc_stat_...
-
 gitlab.ruby_gc_stat_count,gauge,,,,Number of ruby garbage collectors,0,ruby gc count
-gitlab.ruby_gc_stat_heap_allocated_pages,gauge,,,,Number of currently allocated heap pages,0,ruby gc allocated pages
+gitlab.ruby_gc_stat_heap_allocated_pages,gauge,,page,,Number of currently allocated heap pages,0,ruby gc allocated pages
 gitlab.ruby_gc_stat_heap_sorted_length,gauge,,,,Length of the heap in memory,0,ruby gc heap length
-gitlab.ruby_gc_stat_heap_allocatable_pages,gauge,,,,Number malloced pages that can be used,0,ruby gc heap allocatable
+gitlab.ruby_gc_stat_heap_allocatable_pages,gauge,,page,,Number malloced pages that can be used,0,ruby gc heap allocatable
 gitlab.ruby_gc_stat_heap_available_slots,gauge,,,,Number of slots in heap pages,0,ruby gc heap slots
 gitlab.ruby_gc_stat_heap_live_slots,gauge,,,,Number of live slots in heap,0,ruby gc heap live slots
 gitlab.ruby_gc_stat_heap_free_slots,gauge,,,,Number of empty slots in heap,0,ruby gc heap live slots
 gitlab.ruby_gc_stat_heap_final_slots,gauge,,,,Number of slots in heap with finalizers,0,ruby gc heap final slots
+gitlab.ruby_gc_stat_heap_marked_slots,gauge,,page,,Number of slots that are marked, or old,0,ruby gc heap marked slots
+gitlab.ruby_gc_stat_heap_eden_pages,gauge,,page,,Number of heap pages that contain a live object,0,ruby gc heap eden pages
+gitlab.ruby_gc_stat_heap_tomb_pages,gauge,,page,,Number of heap pages that do not contain a live object,0,ruby gc heap tomb pages
+gitlab.ruby_gc_stat_total_allocated_pages,gauge,,page,,Number of pages allocated,0,ruby gc heap allocated pages
+gitlab.ruby_gc_stat_total_freed_pages,gauge,,page,,Number of pages freed,0,ruby gc heap freed pages
+gitlab.ruby_gc_stat_total_allocated_objects,gauge,,,,Number of allocated objects,0,ruby gc allocated objects
+gitlab.ruby_gc_stat_total_freed_objects,gauge,,,,Number of freed objects,0,ruby gc freed objects
+gitlab.ruby_gc_stat_malloc_increase_bytes,gauge,,byte,,Number of bytes allocated outside of the heap,0,ruby gc malloc increase
+gitlab.ruby_gc_stat_malloc_increase_bytes_limit,gauge,,byte,,The limit to how many bytes can be allocated outside of the heap,0,ruby gc malloc increase lim
+gitlab.ruby_gc_stat_minor_gc_count,gauge,,garbage collection,,Number of minor garbage collectors,0,ruby gc minor
+gitlab.ruby_gc_stat_major_gc_count,gauge,,garbage collection,,Number of major garbage collectors,0,ruby gc major
+gitlab.ruby_gc_stat_remembered_wb_unprotected_objects,gauge,,,,Number of old objects that reference new objects,0,ruby gc wb objects
+gitlab.ruby_gc_stat_remembered_wb_unprotected_objects_limit,gauge,,,,The limit of wb ubprotected objects,0,ruby gc wb objects lim
+gitlab.ruby_gc_stat_old_objects,gauge,,,,The number of old objects,0,ruby gc old objects
+gitlab.ruby_gc_stat_old_objects_limit,gauge,,,,The limit of number of old objects,0,ruby gc old objects lim
+gitlab.ruby_gc_stat_oldmalloc_increase_bytes,gauge,,byte,,Number of bytes allocated outside of the heap for old objects,0,ruby gc old increase
+gitlab.ruby_gc_stat_oldmalloc_increase_bytes_limit,gauge,,byte,,The limit of how many bytes can be allocated outside of the heap for old objects,0,ruby gc old increase lim
+gitlab.geo_db_replication_lag_seconds,gauge,,second,,Database replication lag (seconds),-1,db replication lag
+gitlab.geo_repositories,gauge,,,,Total number of repositories available on primary,0,db repos
+gitlab.geo_repositories_synced,gauge,,,,Number of repositories synced on secondary,0,db repos synced
+gitlab.geo_repositories_failed,gauge,,,,Number of repositories failed to sync on secondary,-1,db repos failed
+gitlab.geo_lfs_objects,gauge,,,,Total number of LFS objects available on primary,0,db lfs objects
+gitlab.geo_lfs_objects_synced,gauge,,,,Number of LFS objects synced on secondary,0,db lfs objects synced
+gitlab.geo_lfs_objects_failed,gauge,,,,Number of LFS objects failed to sync on secondary,0,db lfs objects failed
+gitlab.geo_attachments,gauge,,,,Total number of file attachments available on primary,0,db attachments
+gitlab.geo_attachments_synced,gauge,,,,Number of attachments synced on secondary,0,db attachments synced
 
 
 gitlab.go_gc_duration_seconds,gauge,,request,second,A summary of the GC invocation durations,0,gitlab,gc duration
