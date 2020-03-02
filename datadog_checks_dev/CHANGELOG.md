@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.1.0 / 2020-03-02
+
+* [Added] Handle logs only integrations for legacy config validator. See [#5900](https://github.com/DataDog/integrations-core/pull/5900).
+* [Fixed] Pin virtualenv to 20.0.5. See [#5891](https://github.com/DataDog/integrations-core/pull/5891).
+* [Added] Allow excluding specific checks when performing bulk releases. See [#5878](https://github.com/DataDog/integrations-core/pull/5878).
+* [Fixed] Fix E2E parsing of JMX collector output. See [#5849](https://github.com/DataDog/integrations-core/pull/5849).
+
 ## 3.0.0 / 2020-02-22
 
 * [Fixed] Fix error when scrubbing non-org secrets. See [#5827](https://github.com/DataDog/integrations-core/pull/5827).
