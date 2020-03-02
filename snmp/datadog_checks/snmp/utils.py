@@ -1,7 +1,11 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
 import os
 from typing import Any, Dict, Tuple
 
 import yaml
+from pysnmp import hlapi
 from pysnmp.proto.rfc1902 import ObjectName
 from pysnmp.smi.error import SmiError
 from pysnmp.smi.exval import endOfMibView, noSuchInstance
@@ -109,6 +113,7 @@ class OIDPrinter(object):
         self.with_values = with_values
 
     def oid_str(self, oid):
+        # type: (hlapi.ObjectType) -> str
         """Display an OID object (or MIB symbol), even if the object is not initialized by PySNMP.
 
         Output:
@@ -126,6 +131,7 @@ class OIDPrinter(object):
             return arg
 
     def oid_str_value(self, oid):
+        # type: (hlapi.ObjectType) -> str
         """Display an OID object and its associated value.
 
         Output:
@@ -138,7 +144,7 @@ class OIDPrinter(object):
         else:
             value = oid[1].prettyPrint()
             try:
-                value = int(value)
+                value = str(int(value))
             except (TypeError, ValueError):
                 value = "'{}'".format(value)
         key = oid[0]
@@ -147,6 +153,7 @@ class OIDPrinter(object):
         return "'{}': {}".format(key.prettyPrint(), value)
 
     def oid_dict(self, key, value):
+        # type: (str, Dict[Any, Any]) -> str
         """Display a dictionary of OID results with indexes.
 
         This is tailored made for the structure we build for results in the check.
