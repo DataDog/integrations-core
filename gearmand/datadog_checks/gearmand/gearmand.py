@@ -128,10 +128,11 @@ class Gearman(AgentCheck):
             self.log.warning('Error retrieving version information: %s', e)
             return
 
-        if not resp.startswith('OK'):
+        if not resp.startswith('OK '):
             self.log.warning('Error retrieving version information from server, response: %s', resp)
             return
 
-        server_version = resp.lstrip('OK ')
+        # strip off the 'OK ' text
+        server_version = resp[3:]
         if server_version:
             self.set_metadata('version', server_version)
