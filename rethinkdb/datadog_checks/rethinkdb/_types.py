@@ -7,7 +7,6 @@ Declarations used for type checking our code (e.g. manipulation of JSON document
 import datetime as dt
 from typing import Any, List, Literal, Mapping, Tuple, TypedDict, Union
 
-
 # Check interfaces.
 
 # A lightweight shim to decouple metric collection from metric submission.
