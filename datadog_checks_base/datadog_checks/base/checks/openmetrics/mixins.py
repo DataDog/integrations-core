@@ -7,6 +7,7 @@ from fnmatch import translate
 from math import isinf, isnan
 from os.path import isfile
 from re import compile
+from copy import deepcopy
 
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
@@ -204,6 +205,19 @@ class OpenMetricsScraperMixin(object):
                 default_instance.get('send_distribution_counts_as_monotonic', False),
             )
         )
+
+        config['send_cumulative_buckets_and_distributions'] = is_affirmative(
+            instance.get(
+                'send_cumulative_buckets_and_distributions',
+                default_instance.get('send_cumulative_buckets_and_distributions', False),
+            )
+        )
+
+        if config['send_cumulative_buckets_and_distributions'] is True:
+            config['send_distribution_buckets'] = True
+            config['send_distribution_counts_as_monotonic'] = True
+            config['non_cumulative_buckets'] = True
+            config['send_histograms_buckets'] = True
 
         # If the `labels_mapper` dictionary is provided, the metrics labels names
         # in the `labels_mapper` will use the corresponding value as tag name
@@ -734,8 +748,15 @@ class OpenMetricsScraperMixin(object):
         """
         Extracts metrics from a prometheus histogram and sends them as gauges
         """
+
+        cumulative_metric = None
         if scraper_config['non_cumulative_buckets']:
+            if scraper_config['send_cumulative_buckets_and_distributions']:
+                # make a cumlative copy of the original metric so that we can send cumlative bucket counters after we
+                # send the distributions
+                cumulative_metric = deepcopy(metric)
             self._decumulate_histogram_buckets(metric)
+
         for sample in metric.samples:
             val = sample[self.SAMPLE_VALUE]
             if not self._is_value_valid(val):
@@ -765,6 +786,45 @@ class OpenMetricsScraperMixin(object):
                 if scraper_config['send_distribution_buckets']:
                     self._submit_sample_histogram_buckets(metric_name, sample, scraper_config, hostname)
                 elif "Inf" not in sample[self.SAMPLE_LABELS]["le"] or scraper_config['non_cumulative_buckets']:
+                    sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
+                    tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
+                    self._submit_distribution_count(
+                        scraper_config['send_distribution_counts_as_monotonic'],
+                        "{}.{}.count".format(scraper_config['namespace'], metric_name),
+                        val,
+                        tags=tags,
+                        hostname=custom_hostname,
+                    )
+
+        # in addition to sending distribution buckets, we might also want to send the cumlative bucket counters
+        # here we know `send_cumulative_buckets_and_distributions` var is True, and therefore all the other vars
+        # so we can reduce all the checks we need to do
+        if cumulative_metric is not None:
+            for sample in cumulative_metric.samples:
+                val = sample[self.SAMPLE_VALUE]
+                if not self._is_value_valid(val):
+                    self.log.debug("Metric value is not supported for metric %s", sample[self.SAMPLE_NAME])
+                    continue
+                custom_hostname = self._get_hostname(hostname, sample, scraper_config)
+                if sample[self.SAMPLE_NAME].endswith("_sum"):
+                    tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
+                    self.gauge(
+                        "{}.{}.sum".format(scraper_config['namespace'], metric_name),
+                        val,
+                        tags=tags,
+                        hostname=custom_hostname,
+                    )
+                elif sample[self.SAMPLE_NAME].endswith("_count"):
+                    tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
+                    tags.append("upper_bound:none")
+                    self._submit_distribution_count(
+                        scraper_config['send_distribution_counts_as_monotonic'],
+                        "{}.{}.count".format(scraper_config['namespace'], metric_name),
+                        val,
+                        tags=tags,
+                        hostname=custom_hostname,
+                    )
+                elif scraper_config['send_histograms_buckets'] and sample[self.SAMPLE_NAME].endswith("_bucket"):
                     sample[self.SAMPLE_LABELS]["le"] = str(float(sample[self.SAMPLE_LABELS]["le"]))
                     tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
                     self._submit_distribution_count(

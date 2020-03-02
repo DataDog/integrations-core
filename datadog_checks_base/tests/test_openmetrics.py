@@ -543,6 +543,95 @@ def test_submit_buckets_as_distribution(aggregator, mocked_prometheus_check, moc
     )
 
 
+def test_submit_histogram_as_cumulative_buckets_and_distributions(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
+):
+    _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
+    _histo.add_metric([], buckets=[("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337)
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['send_cumulative_buckets_and_distributions'] = True
+    mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic'] = True
+    mocked_prometheus_scraper_config['send_distribution_buckets'] = True
+    mocked_prometheus_scraper_config['non_cumulative_buckets'] = True
+    check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
+    # assert counters
+    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        4,
+        tags=['upper_bound:none'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        1,
+        tags=['upper_bound:1.0'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        2,
+        tags=['upper_bound:31104000.0'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_metric(
+        'prometheus.custom.histogram.count',
+        3,
+        tags=['upper_bound:432400000.0'],
+        count=1,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
+    aggregator.assert_all_metrics_covered()
+    # assert buckets
+    aggregator.assert_histogram_bucket(
+        'prometheus.custom.histogram',
+        1,
+        0.0,
+        1.0,
+        True,
+        "",
+        tags=['lower_bound:0.0', 'upper_bound:1.0'],
+        count=None,
+        at_least=1,
+    )
+    aggregator.assert_histogram_bucket(
+        'prometheus.custom.histogram',
+        1,
+        1.0,
+        31104000.0,
+        True,
+        "",
+        tags=['lower_bound:1.0', 'upper_bound:31104000.0'],
+        count=None,
+        at_least=1,
+    )
+    aggregator.assert_histogram_bucket(
+        'prometheus.custom.histogram',
+        1,
+        31104000.0,
+        432400000.0,
+        True,
+        "",
+        tags=['lower_bound:31104000.0', 'upper_bound:432400000.0'],
+        count=None,
+        at_least=1,
+    )
+    aggregator.assert_histogram_bucket(
+        'prometheus.custom.histogram',
+        1,
+        432400000.0,
+        float('inf'),
+        True,
+        "",
+        tags=['lower_bound:432400000.0', 'upper_bound:inf'],
+        count=None,
+        at_least=1,
+    )
+
+
 def test_submit_rate(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
     _rate = GaugeMetricFamily('my_rate', 'Random rate')
     _rate.add_metric([], 42)
