@@ -1,9 +1,13 @@
 #!/bin/bash
 
+# This script installs IBM MQ development version on the CI machines to be able to
+# * Compile pymqi image
+# * Run integration tests on the machine
+
 set -ex
 
 TMP_DIR=/tmp/mq
-MQ_URL=https://s3.amazonaws.com/dd-agent-tarball-mirror/mqadv_dev90_linux_x86-64.tar.gz
+MQ_URL=https://ddintegrations.blob.core.windows.net/ibm-mq/mqadv_dev90_linux_x86-64.tar.gz
 MQ_PACKAGES="MQSeriesRuntime-*.rpm MQSeriesServer-*.rpm MQSeriesMsg*.rpm MQSeriesJava*.rpm MQSeriesJRE*.rpm MQSeriesGSKit*.rpm"
 
 if [ -e /opt/mqm/inc/cmqc.h ]; then
