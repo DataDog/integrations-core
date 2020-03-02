@@ -78,8 +78,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
 ##### Log collection
 
-**Available for Agent v6.5+**
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
 
 | Parameter      | Value                                     |
