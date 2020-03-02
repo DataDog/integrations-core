@@ -121,6 +121,28 @@ gitlab.geo_lfs_objects_synced,gauge,,,,Number of LFS objects synced on secondary
 gitlab.geo_lfs_objects_failed,gauge,,,,Number of LFS objects failed to sync on secondary,0,db lfs objects failed
 gitlab.geo_attachments,gauge,,,,Total number of file attachments available on primary,0,db attachments
 gitlab.geo_attachments_synced,gauge,,,,Number of attachments synced on secondary,0,db attachments synced
+gitlab.geo_attachments_failed,gauge,,,,Number of attachments failed to sync on secondary,0,db attachments failed
+gitlab.geo_last_event_id,gauge,,,,Database ID of the latest event log entry on the primary,0,db last id
+gitlab.geo_last_event_timestamp,gauge,,,,UNIX timestamp of the latest event log entry on the primary,0,db last timestamp
+gitlab.geo_cursor_last_event_id,gauge,,,,Last database ID of the event log processed by the secondary,0,db last curser id
+gitlab.geo_cursor_last_event_timestamp,gauge,,,,Last UNIX timestamp of the event log processed by the secondary,0,db last curser timestamp
+gitlab.geo_status_failed_total,count,,,,Number of times retrieving the status from the Geo Node failed,-1,db fail status
+gitlab.geo_last_successful_status_check_timestamp,gauge,,,,Last timestamp when the status was successfully updated,0,db success last timestamp
+gitlab.geo_lfs_objects_synced_missing_on_primary,gauge,,,,Number of LFS objects marked as synced due to the file missing on the primary,-1,db lfs object missing
+gitlab.geo_job_artifacts_synced_missing_on_primary,gauge,,,,Number of job artifacts marked as synced due to the file missing on the primary,-1,db lfs artifact missing
+gitlab.geo_attachments_synced_missing_on_primary,gauge,,,,Number of attachments marked as synced due to the file missing on the primary,-1,db lfs attachment missing
+gitlab.geo_repositories_checksummed_count,gauge,,,,Number of repositories checksummed on primary,0,db repos checksummed
+gitlab.geo_repositories_checksum_failed_count,gauge,,,,Number of repositories failed to calculate the checksum on primary,0,db repos checksum failed
+gitlab.geo_wikis_checksummed_count,gauge,,,,Number of wikis checksummed on primary,0,db wikis checksummed
+gitlab.geo_wikis_checksum_failed_count,gauge,,,,Number of wikis failed to calculate the checksum on primary,0,db wikis checksum failed
+gitlab.geo_repositories_verified_count,gauge,,,,Number of repositories verified on secondary,0,db repos verified
+gitlab.geo_repositories_verification_failed_count,gauge,,,,Number of repositories failed to verify on secondary,0,db repos failed
+gitlab.geo_repositories_checksum_mismatch_count,gauge,,,,Number of repositories that checksum mismatch on secondary,0,db repos checksum mismatch
+gitlab.geo_wikis_verified_count,gauge,,,,Number of wikis verified on secondary,0,db wikis verified
+gitlab.geo_wikis_verification_failed_count,gauge,,,,Number of wikis failed to verify on secondary,-1,db wikis verified failed
+gitlab.geo_wikis_checksum_mismatch_count,gauge,,,,Number of wikis that checksum mismatch on secondary,-1,db wikis checksum mismatch
+gitlab.geo_repositories_checked_count,gauge,,,,Number of repositories that have been checked via git fsck,-1,db repos checked
+gitlab.geo_repositories_checked_failed_count,gauge,,,,Number of repositories that have been checked via git fsck,-1,db repos checked
 
 
 gitlab.go_gc_duration_seconds,gauge,,request,second,A summary of the GC invocation durations,0,gitlab,gc duration
