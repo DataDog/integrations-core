@@ -27,6 +27,8 @@ from .common import (
     SERVER_STATISTICS_METRICS,
     SERVER_STATUS_METRICS,
     SERVER_TAGS,
+    TLS_SERVER,
+    TLS_CLIENT_CERT,
     SERVERS,
     TABLE_STATISTICS_METRICS,
     TABLE_STATUS_METRICS,
@@ -70,13 +72,13 @@ def test_check_as_admin(aggregator, instance):
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1)
 
 
-@pytest.mark.xfail(reason="TODO")
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_connect_to_server_with_tls(aggregator, instance):
     # type: (AggregatorStub, Instance) -> None
     instance = instance.copy()
-    instance['port'] = SERVER_PORTS['server1']
+    instance['port'] = SERVER_PORTS[TLS_SERVER]
+    instance['tls_ca_cert'] = TLS_CLIENT_CERT
 
     check = RethinkDBCheck('rethinkdb', {}, [instance])
     check.check(instance)

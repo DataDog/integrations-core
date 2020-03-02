@@ -19,8 +19,8 @@ RETHINKDB_VERSION = '2.4.0~0bionic'
 HOST = get_docker_hostname()
 
 
-# Cluster configuration.
-# NOTE: server information used below is tightly coupled to the Docker Compose setup.
+# Servers.
+# NOTE: server information is tightly coupled to the Docker Compose setup.
 
 SERVER_TAGS = {
     'server0': ['default', 'us'],
@@ -31,9 +31,20 @@ SERVERS = {'server0', 'server1', 'server2'}  # type: Set[ServerName]
 
 SERVER_PORTS = {'server0': 28015, 'server1': 28016, 'server2': 28017, 'proxy': 28018}  # type: Dict[ServerName, int]
 
+# Users.
+
 AGENT_USER = 'datadog-agent'
 AGENT_PASSWORD = 'r3th1nK'
 CLIENT_USER = 'doggo'
+
+# TLS.
+
+TLS_SERVER = 'server1'  # type: ServerName
+TLS_DRIVER_KEY = os.path.join(HERE, 'data', 'tls', 'server.key')
+TLS_DRIVER_CERT = os.path.join(HERE, 'data', 'tls', 'server.pem')
+TLS_CLIENT_CERT = os.path.join(HERE, 'data', 'tls', 'client.pem')
+
+# Database content.
 
 DATABASE = 'doghouse'
 
@@ -159,15 +170,12 @@ METRICS = (
 
 COMPOSE_FILE = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
-DRIVER_TLS_KEY = os.path.join(HERE, 'data', 'tls', 'server.key')
-DRIVER_TLS_CERT = os.path.join(HERE, 'data', 'tls', 'server.pem')
-
 COMPOSE_ENV_VARS = env_vars = {
     'RETHINKDB_IMAGE': IMAGE,
     'RETHINKDB_PORT_SERVER0': str(SERVER_PORTS['server0']),
     'RETHINKDB_PORT_SERVER1': str(SERVER_PORTS['server1']),
     'RETHINKDB_PORT_SERVER2': str(SERVER_PORTS['server2']),
     'RETHINKDB_PORT_PROXY': str(SERVER_PORTS['proxy']),
-    'RETHINKDB_DRIVER_TLS_KEY': DRIVER_TLS_KEY,
-    'RETHINKDB_DRIVER_TLS_CERT': DRIVER_TLS_CERT,
+    'RETHINKDB_TLS_DRIVER_KEY': TLS_DRIVER_KEY,
+    'RETHINKDB_TLS_DRIVER_CERT': TLS_DRIVER_CERT,
 }

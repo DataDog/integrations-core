@@ -28,8 +28,8 @@ services:
       --driver-tls-key /opt/server.key
       --driver-tls-cert /opt/server.pem
     volumes:
-      - ${RETHINKDB_DRIVER_TLS_KEY}:/opt/server.key
-      - ${RETHINKDB_DRIVER_TLS_CERT}:/opt/server.pem
+      - ${RETHINKDB_TLS_DRIVER_KEY}:/opt/server.key
+      - ${RETHINKDB_TLS_DRIVER_CERT}:/opt/server.pem
     links:
       - rethinkdb-server0
     depends_on:

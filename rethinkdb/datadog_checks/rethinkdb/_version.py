@@ -13,7 +13,8 @@ def parse_version(rethinkdb_version_string):
     Given a RethinkDB version string, extract the SemVer version.
     https://github.com/rethinkdb/rethinkdb/blob/95cfed8a62f08e3198ac25417c9b6900be8b6877/src/utils.hpp#L117
 
-    Example:
+    Example
+    -------
     >>> parse_version('rethinkdb 2.4.0~0bionic (CLANG 6.0.0 (tags/RELEASE_600/final))')
     '2.4.0~0bionic'
     """

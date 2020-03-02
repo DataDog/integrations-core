@@ -36,9 +36,16 @@ class QueryEngine:
         # type: (rethinkdb.RethinkDB) -> None
         self._r = r
 
-    def connect(self, host='localhost', port=28015, user=None, password=None, **kwargs):
-        # type: (str, int, str, str, **Any) -> rethinkdb.net.Connection
-        return self._r.connect(host, port, user=user, password=password, **kwargs)
+    def connect(self, host='localhost', port=28015, user=None, password=None, tls_ca_cert=None, **kwargs):
+        # type: (str, int, str, str, str, **Any) -> rethinkdb.net.Connection
+        """
+        Establish a connection to a RethinkDB server.
+        """
+        ssl = (
+            {'ca_certs': tls_ca_cert} if tls_ca_cert is not None else None
+        )  # See: https://rethinkdb.com/docs/security/#telling-rethinkdb-to-use-your-certificate
+
+        return self._r.connect(host, port, user=user, password=password, ssl=ssl, **kwargs)
 
     def get_connected_server_version_string(self, conn):
         # type: (rethinkdb.net.Connection) -> str

@@ -37,6 +37,7 @@ class Config:
         port = instance.get('port', 28015)
         user = instance.get('user')
         password = instance.get('password')
+        tls_ca_cert = instance.get('tls_ca_cert')
 
         if not isinstance(host, str):
             raise ConfigurationError('host must be a string (got {!r})'.format(type(host)))
@@ -51,6 +52,8 @@ class Config:
         self._port = port  # type: int
         self._user = user  # type: Optional[str]
         self._password = password  # type: Optional[str]
+        self._tls_ca_cert = tls_ca_cert  # type: Optional[str]
+
         self._query_engine = QueryEngine(r=rethinkdb.r)
 
         self._collect_funcs = [
@@ -81,8 +84,9 @@ class Config:
         port = self._port
         user = self._user
         password = self._password
+        tls_ca_cert = self._tls_ca_cert
 
-        return self._query_engine.connect(host, port, user=user, password=password)
+        return self._query_engine.connect(host, port, user=user, password=password, tls_ca_cert=tls_ca_cert)
 
     def collect_metrics(self, conn):
         # type: (rethinkdb.net.Connection) -> Iterator[Metric]
