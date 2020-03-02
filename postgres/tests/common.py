@@ -11,6 +11,7 @@ USER = 'datadog'
 PASSWORD = 'datadog'
 DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
+SCHEMA_NAME = 'schemaname'
 
 COMMON_METRICS = [
     'postgresql.before_xid_wraparound',

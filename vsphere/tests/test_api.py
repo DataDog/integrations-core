@@ -87,6 +87,7 @@ def test_smart_retry(realtime_instance, exception, expected_calls):
         api = VSphereAPI(config, MagicMock())
 
         smart_connect = connect.SmartConnect
+        disconnect = connect.Disconnect
         query_perf_counter = api._conn.content.perfManager.QueryPerfCounterByLevel
         query_perf_counter.side_effect = [exception, 'success']
         try:
@@ -95,6 +96,7 @@ def test_smart_retry(realtime_instance, exception, expected_calls):
             pass
         assert query_perf_counter.call_count == expected_calls
         assert smart_connect.call_count == expected_calls
+        assert disconnect.call_count == expected_calls - 1
 
 
 def test_get_max_query_metrics(realtime_instance):

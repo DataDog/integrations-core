@@ -166,7 +166,8 @@ def write_option(option, writer, indent='', start_list=False):
 
             example_indent = '  ' if type(example) is list and example else ''
             for i, line in enumerate(option_yaml.splitlines()):
-                writer.write(indent, '# ')
+                if not option['required']:
+                    writer.write(indent, '# ')
 
                 if i > 0:
                     writer.write(example_indent)
