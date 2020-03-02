@@ -114,7 +114,7 @@ instances:
     ## the corresponding ones expressed in days.
     ##
     ## The SSL certificate will always be validated for this additional
-    ## service check regardless of the value of disable_ssl_validation.
+    ## service check regardless of the value of `tls_verify`.
     ## By default, for the expiration check, the Agent validates the SSL certificate
     ## hostname against the host of the provided url.
     #
