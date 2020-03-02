@@ -24,16 +24,16 @@ def test_cisco(aggregator):
 
 
 @pytest.mark.parametrize(
-    'case, api_kwargs',
+    ' api_kwargs',
     [
-        ('login with password', {'password': common.PASSWORD}),
-        (
-            'login with cert',
+        pytest.param({'password': common.PASSWORD}, id='login with password'),
+        pytest.param(
             {'cert_name': 'foo', 'cert_key': open(os.path.join(common.CERTIFICATE_DIR, 'cert.pem'), 'rb').read()},
+            id= 'login with cert',
         ),
     ],
 )
-def test_recover_from_expired_token(aggregator, case, api_kwargs):
+def test_recover_from_expired_token(aggregator, api_kwargs):
     # First api answers with 403 to force the check to re-authenticate
     unauthentified_response = MagicMock(status_code=403)
     # Api answer when a request is being made to the login endpoint
