@@ -7,19 +7,22 @@ parameters:
 
 steps:
 - ${{ if eq(parameters.test, 'true') }}:
-  - script: ddev --${{ parameters.repo }} test --cov --junit ${{ parameters.check }}
+  - script: ddev test --cov --junit ${{ parameters.check }}
     displayName: 'Run Unit/Integration tests'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
-  - script: ddev --${{ parameters.repo }} env test --base --new-env --junit ${{ parameters.check }}
+  - ${{ if eq(parameters.repo, 'core') }}
+    - script: ddev env test --base --new-env --junit ${{ parameters.check }}
+  - ${{ if neq(parameters.repo, 'core') }}
+      - script: ddev --${{ parameters.repo }} env test --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
 
 - ${{ if eq(parameters.benchmark, 'true') }}:
-  - script: ddev --${{ parameters.repo }} test --bench --junit ${{ parameters.check }}
+  - script: ddev test --bench --junit ${{ parameters.check }}
     displayName: 'Run benchmarks'
 
 - task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
