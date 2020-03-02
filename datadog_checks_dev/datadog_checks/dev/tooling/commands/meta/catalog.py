@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 
 import csv
-import os
 import io
+import os
 import tempfile
 
 import click
