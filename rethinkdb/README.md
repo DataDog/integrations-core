@@ -53,10 +53,10 @@ See [metadata.csv][9] for a list of metrics provided by this check.
 ### Service Checks
 
 - `rethinkdb.can_connect`: Returns `CRITICAL` if the Agent cannot reach the configured RethinkDB server, `OK` otherwise.
-- `rethinkdb.table_status.ready_for_outdated_reads`: Returns `OK` if all shards of a table are ready to accept outdated read queries, `WARNING` if some are not ready yet.
-- `rethinkdb.table_status.ready_for_reads`: Returns `OK` if all shards of a table are ready to accept read queries, `WARNING` if some are not ready yet.
-- `rethinkdb.table_status.ready_for_writes`: Returns `OK` if all shards of a table are ready to accept write queries, `WARNING` if some are not ready yet.
-- `rethinkdb.table_status.all_replicas_ready`: Returns `WARNING` if some replicas aren't ready for reads of writes (e.g. if backfills are in progress), `OK` otherwise.
+- `rethinkdb.table_status.ready_for_outdated_reads`: Returns `OK` if all shards of a table are ready to accept outdated read queries, `WARNING` otherwise.
+- `rethinkdb.table_status.ready_for_reads`: Returns `OK` if all shards of a table are ready to accept read queries, `WARNING` otherwise.
+- `rethinkdb.table_status.ready_for_writes`: Returns `OK` if all shards of a table are ready to accept write queries, `WARNING` otherwise.
+- `rethinkdb.table_status.all_replicas_ready`: Returns `WARNING` if some replicas aren't ready for reads of writes yet (e.g. if backfills are in progress), `OK` otherwise.
 
 ### Events
 
