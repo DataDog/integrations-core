@@ -86,6 +86,8 @@ INSTANCE_QUEUE_REGEX_TAG = {
 
 E2E_METADATA = {
     'start_commands': [
+        'apt-get update',
+        'apt-get install gcc -y',  # Needed when bumping pymqi to be able to build it on the E2E
         'mkdir /opt/mqm',
         'curl -o /opt/mqm/mq-client.tar.gz '
         'https://dd-agent-tarball-mirror.s3.amazonaws.com/9.0.0.6-IBM-MQC-Redist-LinuxX64.tar.gz',
