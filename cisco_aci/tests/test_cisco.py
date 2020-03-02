@@ -91,5 +91,5 @@ def test_config(aggregator, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
 
-    for key in expected_http_kwargs:
-        assert check.http.options[key] == expected_http_kwargs[key]
+    actual_options = {k:v for k,v in check.http.options if k in expected_http_kwargs}
+    assert expected_http_kwargs == actual_options
