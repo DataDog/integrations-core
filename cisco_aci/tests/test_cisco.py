@@ -81,7 +81,7 @@ def test_recover_from_expired_token(aggregator, case, api_kwargs):
 @pytest.mark.parametrize(
     'extra_config, expected_http_kwargs',
     [
-        pytest.param({}, {'auth': (common.USERNAME, common.PASSWORD), 'verify': True}, id='new auth config'),
+        pytest.param({'pwd': 'foobar'}, {'auth': (common.USERNAME, 'foobar'), 'verify': True}, id='new auth config'),
         pytest.param({'ssl_verify': True}, {'verify': True}, id='legacy ssl verify config True'),
         pytest.param({'ssl_verify': False}, {'verify': False}, id='legacy ssl verify config False'),
     ],
@@ -91,5 +91,5 @@ def test_config(aggregator, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
 
-    actual_options = {k:v for k,v in check.http.options if k in expected_http_kwargs}
+    actual_options = {k:v for k,v in check.http.options.items() if k in expected_http_kwargs}
     assert expected_http_kwargs == actual_options
