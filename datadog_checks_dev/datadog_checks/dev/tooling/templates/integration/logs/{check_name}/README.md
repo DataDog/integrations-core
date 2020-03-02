@@ -24,6 +24,8 @@ This check monitors [{integration_name}][1].
 
 {integration_name} does not include any metrics.
 
+### Log Collection
+
 ### Service Checks
 
 {integration_name} does not include any service checks.
