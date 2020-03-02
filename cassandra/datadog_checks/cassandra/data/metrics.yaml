@@ -420,6 +420,12 @@ jmx_metrics:
         - system_schema
         - system_traces
   - include:
+      domain: org.apache.cassandra.net
+      type: FailureDetector
+      attribute:
+        - DownEndpointCount
+        - UpEndpointCount
+  - include:
       domain: org.apache.cassandra.db
       type: ColumnFamilies
       attribute:
