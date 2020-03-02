@@ -93,10 +93,7 @@ E2E_METADATA = {
         'https://dd-agent-tarball-mirror.s3.amazonaws.com/9.0.0.6-IBM-MQC-Redist-LinuxX64.tar.gz',
         'tar -C /opt/mqm -xf /opt/mqm/mq-client.tar.gz',
     ],
-    'env_vars': {
-        'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib',
-        'C_INCLUDE_PATH': '/opt/mqm/inc'
-    },
+    'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
 
 QUEUE_METRICS = [
