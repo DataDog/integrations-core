@@ -10,6 +10,8 @@ from six import iteritems
 
 from datadog_checks.postgres import util
 
+from .common import SCHEMA_NAME
+
 pytestmark = pytest.mark.unit
 
 
@@ -195,3 +197,21 @@ def test_version_metadata(check, test_case, params):
             m.assert_any_call('test:123', name, value)
         m.assert_any_call('test:123', 'version.scheme', 'semver')
         m.assert_any_call('test:123', 'version.raw', test_case)
+
+
+def test_relation_filter():
+    relations_config = {'breed': {'relation_name': 'breed', 'schemas': ['public']}}
+    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
+    assert query_filter == "( relname = 'breed' AND schemaname = ANY(array['public']::text[]) )"
+
+
+def test_relation_filter_no_schemas():
+    relations_config = {'persons': {'relation_name': 'persons', 'schemas': [util.ALL_SCHEMAS]}}
+    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
+    assert query_filter == "( relname = 'persons' )"
+
+
+def test_relation_filter_regex():
+    relations_config = {'persons': {'relation_regex': 'b.*', 'schemas': [util.ALL_SCHEMAS]}}
+    query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
+    assert query_filter == "( relname ~ 'b.*' )"
