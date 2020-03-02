@@ -144,15 +144,38 @@ SERVER_STATUS_METRICS = (
 # NOTE: jobs metrics are not listed here as they are covered by unit tests instead of integration tests.
 
 CURRENT_ISSUES_METRICS = (
+    'rethinkdb.current_issues.total',
+    'rethinkdb.current_issues.critical.total',
     'rethinkdb.current_issues.log_write_error.total',
+    'rethinkdb.current_issues.log_write_error.critical.total',
     'rethinkdb.current_issues.server_name_collision.total',
+    'rethinkdb.current_issues.server_name_collision.critical.total',
     'rethinkdb.current_issues.db_name_collision.total',
+    'rethinkdb.current_issues.db_name_collision.critical.total',
     'rethinkdb.current_issues.table_name_collision.total',
+    'rethinkdb.current_issues.table_name_collision.critical.total',
     'rethinkdb.current_issues.outdated_index.total',
+    'rethinkdb.current_issues.outdated_index.critical.total',
     'rethinkdb.current_issues.table_availability.total',
+    'rethinkdb.current_issues.table_availability.critical.total',
     'rethinkdb.current_issues.memory_error.total',
+    'rethinkdb.current_issues.memory_error.critical.total',
     'rethinkdb.current_issues.non_transitive_error.total',
+    'rethinkdb.current_issues.non_transitive_error.critical.total',
 )
+
+CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS = (
+    'rethinkdb.current_issues.total',
+    'rethinkdb.current_issues.critical.total',
+)
+
+CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS = (
+    'rethinkdb.current_issues.table_availability.total',
+    'rethinkdb.current_issues.table_availability.critical.total',
+)
+
+assert set(CURRENT_ISSUES_METRICS).issuperset(CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS)
+assert set(CURRENT_ISSUES_METRICS).issuperset(CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS)
 
 
 METRICS = (

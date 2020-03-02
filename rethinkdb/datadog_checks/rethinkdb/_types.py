@@ -162,6 +162,18 @@ BackfillJob = TypedDict(
     },
 )
 
+# System current issues.
+
+CurrentIssuesTotals = TypedDict(
+    'CurrentIssuesTotals',
+    {
+        'issues': int,
+        'critical_issues': int,
+        'issues_by_type': Mapping[str, int],
+        'critical_issues_by_type': Mapping[str, int],
+    },
+)
+
 # NOTE: this is a union type tagged by the 'type' key.
 # See: https://mypy.readthedocs.io/en/latest/literal_types.html#intelligent-indexing
 Job = Union[IndexConstructionJob, BackfillJob]

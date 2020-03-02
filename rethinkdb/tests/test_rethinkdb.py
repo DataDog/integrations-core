@@ -16,6 +16,9 @@ from ._types import ServerName
 from .cluster import temporarily_disconnect_server
 from .common import (
     CLUSTER_STATISTICS_METRICS,
+    CURRENT_ISSUES_METRICS,
+    CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS,
+    CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS,
     DATABASE,
     HEROES_TABLE,
     HEROES_TABLE_PRIMARY_REPLICA,
@@ -136,6 +139,7 @@ def _assert_metrics(aggregator, disconnected_servers=None):
     _assert_statistics_metrics(aggregator, disconnected_servers=disconnected_servers)
     _assert_table_status_metrics(aggregator)
     _assert_server_status_metrics(aggregator, disconnected_servers=disconnected_servers)
+    _assert_current_issues_metrics(aggregator, disconnected_servers=disconnected_servers)
 
     # NOTE: system jobs metrics are not asserted here because they are only emitted when the cluster is
     # changing (eg. an index is being created, or data is being rebalanced across servers), which is hard to
@@ -205,6 +209,19 @@ def _assert_server_status_metrics(aggregator, disconnected_servers):
             tags = ['server:{}'.format(server)]
             count = 0 if server in disconnected_servers else 1
             aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=count, tags=tags)
+
+
+def _assert_current_issues_metrics(aggregator, disconnected_servers):
+    # type: (AggregatorStub, Set[ServerName]) -> None
+    for metric in CURRENT_ISSUES_METRICS:
+        if metric in CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS:
+            count = 1
+        elif disconnected_servers and metric in CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS:
+            count = 1
+        else:
+            count = 0
+
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=count, tags=[])
 
 
 @pytest.mark.integration

@@ -15,4 +15,34 @@ def collect_current_issues(engine, conn):
 
     See: https://rethinkdb.com/docs/system-issues/
     """
-    return iter(())  # TODO
+    totals = engine.query_current_issues_totals(conn)
+
+    yield {
+        'type': 'gauge',
+        'name': 'rethinkdb.current_issues.total',
+        'value': totals['issues'],
+        'tags': [],
+    }
+
+    yield {
+        'type': 'gauge',
+        'name': 'rethinkdb.current_issues.critical.total',
+        'value': totals['critical_issues'],
+        'tags': [],
+    }
+
+    for issue_type, total in totals['issues_by_type'].items():
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.current_issues.{issue_type}.total'.format(issue_type=issue_type),
+            'value': total,
+            'tags': [],
+        }
+
+    for issue_type, total in totals['critical_issues_by_type'].items():
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.current_issues.{issue_type}.critical.total'.format(issue_type=issue_type),
+            'value': total,
+            'tags': [],
+        }
