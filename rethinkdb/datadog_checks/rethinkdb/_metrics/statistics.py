@@ -1,11 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""
-Collect metrics about system statistics.
-
-See: https://rethinkdb.com/docs/system-stats/
-"""
 import logging
 from typing import Iterator
 
@@ -18,6 +13,11 @@ logger = logging.getLogger(__name__)
 
 def collect_cluster_statistics(engine, conn):
     # type: (QueryEngine, Connection) -> Iterator[Metric]
+    """
+    Collect metrics about cluster statistics.
+
+    See: https://rethinkdb.com/docs/system-stats#cluster
+    """
     logger.debug('collect_cluster_statistics')
 
     stats = engine.query_cluster_stats(conn)
@@ -49,6 +49,11 @@ def collect_cluster_statistics(engine, conn):
 
 def collect_server_statistics(engine, conn):
     # type: (QueryEngine, Connection) -> Iterator[Metric]
+    """
+    Collect metrics about server statistics.
+
+    See: https://rethinkdb.com/docs/system-stats#server
+    """
     logger.debug('collect_server_statistics')
 
     for server, stats in engine.query_servers_with_stats(conn):
@@ -119,6 +124,11 @@ def collect_server_statistics(engine, conn):
 
 def collect_table_statistics(engine, conn):
     # type: (QueryEngine, Connection) -> Iterator[Metric]
+    """
+    Collect metrics about table statistics.
+
+    See: https://rethinkdb.com/docs/system-stats#table
+    """
     logger.debug('collect_table_statistics')
 
     for table, stats in engine.query_tables_with_stats(conn):
@@ -147,6 +157,11 @@ def collect_table_statistics(engine, conn):
 
 def collect_replica_statistics(engine, conn):
     # type: (QueryEngine, Connection) -> Iterator[Metric]
+    """
+    Collect metrics about replicas (table/server pairs) statistics.
+
+    See: https://rethinkdb.com/docs/system-stats#replica
+    """
     logger.debug('collect_replica_statistics')
 
     for table, server, replica, stats in engine.query_replicas_with_stats(conn):

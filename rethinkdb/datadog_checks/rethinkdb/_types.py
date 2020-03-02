@@ -2,12 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """
-Declarations used for type checking our code, including our manipulation of JSON documents returned by RethinkDB.
+Declarations used for type checking our code (e.g. manipulation of JSON documents returned by RethinkDB).
 """
 import datetime as dt
 from typing import Any, List, Literal, Mapping, Tuple, TypedDict, Union
 
-# Lightweight shim to decouple collection functions from the check class.
+
+# Check interfaces.
+
+# A lightweight shim to decouple metric collection from metric submission.
 Metric = TypedDict(
     'Metric',
     {'type': Literal['gauge', 'monotonic_count', 'service_check'], 'name': str, 'value': float, 'tags': List[str]},
@@ -23,17 +26,7 @@ Instance = TypedDict(
 
 Server = TypedDict('Server', {'id': str, 'name': str, 'cache_size_mb': str, 'tags': List[str]})
 
-Table = TypedDict('Table', {'id': str, 'name': str, 'db': str})  # TODO: more fields
-
-
-# System statistics documents.
-# See: https://rethinkdb.com/docs/system-stats/
-
-ClusterQueryEngine = TypedDict(
-    'ClusterQueryEngine', {'queries_per_sec': int, 'read_docs_per_sec': int, 'written_docs_per_sec': int},
-)
-
-ClusterStats = TypedDict('ClusterStats', {'id': Tuple[Literal['cluster']], 'query_engine': ClusterQueryEngine})
+Table = TypedDict('Table', {'id': str, 'name': str, 'db': str})
 
 ConfigTotals = TypedDict(
     'ConfigTotals',
@@ -44,6 +37,16 @@ ConfigTotals = TypedDict(
         'secondary_indexes_per_table': Mapping[str, int],
     },
 )
+
+
+# System statistics documents.
+# See: https://rethinkdb.com/docs/system-stats/
+
+ClusterQueryEngine = TypedDict(
+    'ClusterQueryEngine', {'queries_per_sec': int, 'read_docs_per_sec': int, 'written_docs_per_sec': int},
+)
+
+ClusterStats = TypedDict('ClusterStats', {'id': Tuple[Literal['cluster']], 'query_engine': ClusterQueryEngine})
 
 ServerQueryEngine = TypedDict(
     'ServerQueryEngine',
@@ -110,11 +113,14 @@ ReplicaStats = TypedDict(
 # See: https://rethinkdb.com/docs/system-tables/#status-tables
 
 ShardReplica = TypedDict('ShardReplica', {'server': str, 'state': str})
+
 Shard = TypedDict('Shard', {'primary_replicas': List[str], 'replicas': List[ShardReplica]})
+
 TableStatusFlags = TypedDict(
     'TableStatusFlags',
     {'ready_for_outdated_reads': bool, 'ready_for_reads': bool, 'ready_for_writes': bool, 'all_replicas_ready': bool},
 )
+
 TableStatus = TypedDict(
     'TableStatus', {'id': str, 'name': str, 'db': str, 'status': TableStatusFlags, 'shards': List[Shard]}
 )
@@ -127,9 +133,11 @@ ServerNetwork = TypedDict(
         'connected_to': Mapping[str, bool],
     },
 )
+
 ServerProcess = TypedDict(
     'ServerProcess', {'argv': List[str], 'cache_size_mb': int, 'pid': int, 'time_started': dt.datetime, 'version': str}
 )
+
 ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': ServerNetwork, 'process': ServerProcess})
 
 
@@ -137,6 +145,7 @@ ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': Ser
 # See: https://rethinkdb.com/docs/system-jobs/
 
 IndexConstructionInfo = TypedDict('IndexConstructionInfo', {'db': str, 'table': str, 'index': str, 'progress': int})
+
 IndexConstructionJob = TypedDict(
     'IndexConstructionJob',
     {
@@ -151,6 +160,7 @@ IndexConstructionJob = TypedDict(
 BackfillInfo = TypedDict(
     'BackfillInfo', {'db': str, 'destination_server': str, 'source_server': str, 'table': str, 'progress': int}
 )
+
 BackfillJob = TypedDict(
     'BackfillJob',
     {
@@ -161,6 +171,9 @@ BackfillJob = TypedDict(
         'servers': List[str],
     },
 )
+
+Job = Union[IndexConstructionJob, BackfillJob]
+
 
 # System current issues.
 
@@ -174,9 +187,6 @@ CurrentIssuesTotals = TypedDict(
     },
 )
 
-# NOTE: this is a union type tagged by the 'type' key.
-# See: https://mypy.readthedocs.io/en/latest/literal_types.html#intelligent-indexing
-Job = Union[IndexConstructionJob, BackfillJob]
 
 # ReQL command results.
 # See: https://rethinkdb.com/api/python/

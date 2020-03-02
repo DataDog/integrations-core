@@ -1,13 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""
-Definition of RethinkDB queries used by the RethinkDB integration.
-
-Useful reference documentation:
-- Python ReQL command reference: https://rethinkdb.com/api/python/
-- Usage of `eq_join`: https://rethinkdb.com/api/python/eq_join/
-"""
 from __future__ import absolute_import
 
 from typing import Any, Iterator, Mapping, Tuple
@@ -33,12 +26,15 @@ from ._types import (
 
 
 class QueryEngine:
+    """
+    Definition of RethinkDB queries used by the RethinkDB check.
+
+    Python ReQL reference documentation: https://rethinkdb.com/api/python/
+    """
+
     def __init__(self, r=None):
         # type: (rethinkdb.RethinkDB) -> None
-        if r is None:
-            r = rethinkdb.r
-
-        self._r = r
+        self._r = rethinkdb.r if r is None else r
 
     def get_connected_server_version_string(self, conn):
         # type: (Connection) -> str
@@ -138,9 +134,9 @@ class QueryEngine:
         """
         r = self._r
 
-        # NOTE: To reduce bandwidth usage, we make heavy use of the `.pluck()` operation (i.e. ask RethinkDB
+        # NOTE: To reduce bandwidth usage, we make heavy use of the `.pluck()` operation, i.e. ask RethinkDB
         # for a specific set of fields, instead of sending entire objects, which can be expensive when joining
-        # data as we do here.)
+        # data as we do here.
         # See: https://rethinkdb.com/api/python/pluck/
 
         stats = r.db('rethinkdb').table('stats')
@@ -148,8 +144,7 @@ class QueryEngine:
         table_config = r.db('rethinkdb').table('table_config')
         table_status = r.db('rethinkdb').table(
             'table_status',
-            # Required so that 'server' fields in 'replicas' entries refer contain UUIDs instead of names.
-            # This way, we can join server information more efficiently, as we don't have to lookup UUIDs from names.
+            # Required so that we can join on 'server_config' below without having to look up UUIDs from names.
             # See: https://rethinkdb.com/api/python/table/#description
             identifier_format='uuid',
         )

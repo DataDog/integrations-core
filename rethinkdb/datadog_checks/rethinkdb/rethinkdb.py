@@ -6,7 +6,7 @@
 from __future__ import absolute_import
 
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, List
 
 from datadog_checks.base import AgentCheck
 
@@ -21,8 +21,6 @@ SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
 class RethinkDBCheck(AgentCheck):
     """
     Collect metrics from a RethinkDB cluster.
-
-    A set of default metrics is collected from system tables.
     """
 
     def __init__(self, *args, **kwargs):
@@ -33,31 +31,31 @@ class RethinkDBCheck(AgentCheck):
     @contextmanager
     def connect_submitting_service_checks(self, config):
         # type: (Config) -> Iterator[Connection]
+        tags = []  # type: List[str]
+
         try:
             with config.connect() as conn:
                 server = conn.server()  # type: ConnectionServer
                 self.log.debug('connected server=%r', server)
-                tags = ['server:{}'.format(server['name'])]
-
-                try:
-                    yield conn
-                except Exception as exc:
-                    message = 'Unexpected error while executing RethinkDB check: {!r}'.format(exc)
-                    self.log.error(message)
-                    self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
-                    raise
-                else:
-                    self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=tags)
-
+                tags.append('server:{}'.format(server['name']))
+                yield conn
         except CouldNotConnect as exc:
             message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
             self.log.error(message)
-            self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, message=message)
+            self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
             raise
+        except Exception as exc:
+            message = 'Unexpected error while executing RethinkDB check: {!r}'.format(exc)
+            self.log.error(message)
+            self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
+            raise
+        else:
+            self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=tags)
 
     def submit_metric(self, metric):
         # type: (Metric) -> None
         self.log.debug('submit_metric metric=%r', metric)
+
         if metric['type'] == 'service_check':
             self.service_check(metric['name'], metric['value'], tags=metric['tags'])
         else:
