@@ -158,6 +158,8 @@ class RabbitMQ(AgentCheck):
             raise Exception('Missing "rabbitmq_api_url" in RabbitMQ config.')
         if not base_url.endswith('/'):
             base_url += '/'
+
+        collect_nodes = is_affirmative(instance.get('collect_node_metrics', True))
         custom_tags = instance.get('tags', [])
         parsed_url = urlparse(base_url)
         if not parsed_url.scheme or "://" not in parsed_url.geturl():
@@ -198,7 +200,7 @@ class RabbitMQ(AgentCheck):
                 if type(filter_objects) != list:
                     raise TypeError("{0} / {0}_regexes parameter must be a list".format(object_type))
 
-        return base_url, max_detailed, specified, custom_tags, suppress_warning
+        return base_url, max_detailed, specified, custom_tags, suppress_warning, collect_nodes
 
     def _collect_metadata(self, base_url):
         # Rabbit versions follow semantic versioning https://www.rabbitmq.com/changelog.html
@@ -226,7 +228,9 @@ class RabbitMQ(AgentCheck):
         return vhosts
 
     def check(self, instance):
-        base_url, max_detailed, specified, custom_tags, suppress_warning = self._get_config(instance)
+        base_url, max_detailed, specified, custom_tags, suppress_warning, collect_node_metrics = self._get_config(
+            instance
+        )
         try:
             with warnings.catch_warnings():
                 vhosts = self._get_vhosts(instance, base_url)
@@ -260,15 +264,16 @@ class RabbitMQ(AgentCheck):
                     limit_vhosts,
                     custom_tags,
                 )
-                self.get_stats(
-                    instance,
-                    base_url,
-                    NODE_TYPE,
-                    max_detailed[NODE_TYPE],
-                    specified[NODE_TYPE],
-                    limit_vhosts,
-                    custom_tags,
-                )
+                if collect_node_metrics:
+                    self.get_stats(
+                        instance,
+                        base_url,
+                        NODE_TYPE,
+                        max_detailed[NODE_TYPE],
+                        specified[NODE_TYPE],
+                        limit_vhosts,
+                        custom_tags,
+                    )
                 self.get_overview_stats(base_url, custom_tags)
 
                 self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags)

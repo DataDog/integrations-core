@@ -21,8 +21,7 @@ SECRET_KEYS = {
     'orgs.*.app_key',
     'github.token',
     'pypi.pass',
-    'trello.key',
-    'trello.token',
+    'jira.token',
 }
 
 DEFAULT_CONFIG = {
@@ -38,7 +37,7 @@ DEFAULT_CONFIG = {
     'agent5': {'docker': 'datadog/dev-dd-agent:master', 'local': 'latest'},
     'github': {'user': '', 'token': ''},
     'pypi': {'user': '', 'pass': ''},
-    'trello': {'key': '', 'token': ''},
+    'jira': {'user': '', 'token': ''},
     'orgs': {
         'default': {
             'api_key': os.getenv('DD_API_KEY'),
@@ -124,7 +123,7 @@ def scrub_secrets(config):
             else:
                 break
 
-    for data in config['orgs'].values():
+    for data in config.get('orgs', {}).values():
         api_key = data.get('api_key')
         if api_key:
             data['api_key'] = '*' * len(api_key)

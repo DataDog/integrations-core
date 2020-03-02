@@ -22,6 +22,21 @@ def smart_retry(f):
     def wrapper(api_instance, *args, **kwargs):
         try:
             return f(api_instance, *args, **kwargs)
+        except vmodl.fault.InvalidArgument:
+            # This error is raised when the api call request is invalid. This error also appear when
+            # requesting non existing metrics. Retrying won't help
+            # https://code.vmware.com/apis/704/vsphere/vmodl.fault.InvalidArgument.html
+            raise
+        except vim.fault.InvalidName:
+            # For the scope of this integration, this is raised when fetching a config value from vCenter
+            # that doesn't exist (especially maxQueryMetrics). Retrying won't help
+            # https://code.vmware.com/apis/704/vsphere/vim.fault.InvalidName.html
+            raise
+        except vim.fault.RestrictedByAdministrator:
+            # The operation cannot complete because of some restriction set by the server administrator.
+            # Retrying won't help
+            # https://code.vmware.com/apis/704/vsphere/vim.fault.RestrictedByAdministrator.html
+            raise
         except Exception as e:
             api_instance.log.debug(
                 "An exception occurred when executing %s: %s. Refreshing the connection to vCenter and retrying",
@@ -35,6 +50,10 @@ def smart_retry(f):
 
 
 class APIConnectionError(Exception):
+    pass
+
+
+class APIResponseError(Exception):
     pass
 
 
@@ -72,6 +91,8 @@ class VSphereAPI(object):
             err_msg = "Connection to {} failed: {}".format(self.config.hostname, e)
             raise APIConnectionError(err_msg)
 
+        if self._conn:
+            connect.Disconnect(self._conn)
         self._conn = conn
 
     @smart_retry

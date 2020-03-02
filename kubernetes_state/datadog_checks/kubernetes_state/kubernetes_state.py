@@ -228,6 +228,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'kube_pod_container_resource_limits_nvidia_gpu_devices': 'container.gpu.limit',
                         'kube_pod_status_ready': 'pod.ready',
                         'kube_pod_status_scheduled': 'pod.scheduled',
+                        'kube_pod_status_unschedulable': 'pod.unschedulable',
                         'kube_poddisruptionbudget_status_current_healthy': 'pdb.pods_healthy',
                         'kube_poddisruptionbudget_status_desired_healthy': 'pdb.pods_desired',
                         'kube_poddisruptionbudget_status_pod_disruptions_allowed': 'pdb.disruptions_allowed',
@@ -341,6 +342,21 @@ class KubernetesState(OpenMetricsBaseCheck):
                 'health_service_check': ksm_instance.get('health_service_check', False),
             }
         )
+
+        experimental_metrics_mapping = {
+            'kube_hpa_spec_target_metric': 'hpa.spec_target_metric',
+            'kube_verticalpodautoscaler_spec_resourcepolicy_container_policies_minallowed': (
+                'vpa.spec_container_minallowed'
+            ),
+            'kube_verticalpodautoscaler_spec_resourcepolicy_container_policies_maxallowed': (
+                'vpa.spec_container_maxallowed'
+            ),
+        }
+        experimental_metrics = is_affirmative(ksm_instance.get('experimental_metrics', False))
+        if experimental_metrics:
+            ksm_instance['metrics'].append(experimental_metrics_mapping)
+        else:
+            ksm_instance['ignore_metrics'].extend(experimental_metrics_mapping.keys())
 
         ksm_instance['prometheus_url'] = endpoint
         ksm_instance['label_joins'].update(extra_labels)

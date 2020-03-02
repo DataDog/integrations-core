@@ -20,6 +20,7 @@ def test_e2e(dd_agent_check):
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
         aggregator.assert_metric(metric_name, tags=tags)
+    aggregator.assert_metric('snmp.sysUpTimeInstance')
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)

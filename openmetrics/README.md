@@ -21,7 +21,7 @@ Edit the `openmetrics.d/conf.yaml` file at the root of your [Agent's configurati
 For each instance the following parameters are required:
 
 | Parameter        | Description                                                                                                                                                                                                                                                              |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `prometheus_url` | The URL where your application metrics are exposed by Prometheus (must be unique).                                                                                                                                                                                       |
 | `namespace`      | The namespace to prepend to all metrics.                                                                                                                                                                                                                                 |
 | `metrics`        | A list of metrics to retrieve as custom metrics. Add each metric to the list as `metric_name` or `metric_name: renamed` to rename it. Use `*` as a wildcard (`metric*`) to fetch all matching metrics. **Note**: Wildcards can potentially send a lot of custom metrics. |
@@ -33,6 +33,7 @@ For more configurations, see [Prometheus and OpenMetrics Metrics Collection][10]
 [Run the Agent's status subcommand][6] and look for `openmetrics` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 All metrics collected by the OpenMetrics check are forwarded to Datadog as custom metrics.
@@ -51,8 +52,8 @@ Need help? Contact [Datadog support][7].
 
 ## Further Reading
 
-* [Configuring a OpenMetrics Check][8]
-* [Writing a custom OpenMetrics Check][9]
+- [Configuring a OpenMetrics Check][8]
+- [Writing a custom OpenMetrics Check][9]
 
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [3]: https://docs.datadoghq.com/getting_started/integrations/prometheus/?tab=docker#configuration

@@ -9,6 +9,7 @@ import pytest
 from semver import VersionInfo
 
 from datadog_checks.postgres import PostgreSql
+from datadog_checks.postgres.util import PartialFormatter, fmt
 
 from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
@@ -43,6 +44,36 @@ def test_common_metrics_without_size(aggregator, integration_check, pg_instance)
     check = integration_check(pg_instance)
     check.check(pg_instance)
     assert 'postgresql.database_size' not in aggregator.metric_names
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_unsupported_replication(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+
+    unpatched_fmt = PartialFormatter()
+
+    called = []
+
+    def format_with_error(value, **kwargs):
+        if 'pg_is_in_recovery' in value:
+            called.append(True)
+            raise psycopg2.errors.FeatureNotSupported("Not available")
+        return unpatched_fmt.format(value, **kwargs)
+
+    # This simulate an error in the fmt function, as it's a bit hard to mock psycopg
+    with mock.patch.object(fmt, 'format', passthrough=True) as mock_fmt:
+        mock_fmt.side_effect = format_with_error
+        check.check(pg_instance)
+
+    # Verify our mocking was called
+    assert called == [True]
+
+    expected_tags = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT)]
+    check_bgw_metrics(aggregator, expected_tags)
+
+    expected_tags += ['db:{}'.format(DB_NAME)]
+    check_common_metrics(aggregator, expected_tags=expected_tags)
 
 
 @pytest.mark.integration
@@ -93,7 +124,7 @@ def test_connections_metrics(aggregator, integration_check, pg_instance):
 @pytest.mark.usefixtures('dd_environment')
 def test_locks_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
-    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres") as conn:
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('LOCK persons')
             check.check(pg_instance)

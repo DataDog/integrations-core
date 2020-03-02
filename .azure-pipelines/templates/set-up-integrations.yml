@@ -2,9 +2,10 @@ parameters:
   check: ''
 
 steps:
-# Need unbuffered IO, see: https://github.com/Microsoft/azure-pipelines-yaml/issues/106
-- script: python -u .azure-pipelines/scripts/run.py ${{ parameters.check }}
+- script: ddev ci setup ${{ parameters.check }}
   displayName: 'Set up integration requirements'
   env:
+    # Need unbuffered IO, see: https://github.com/Microsoft/azure-pipelines-yaml/issues/106
+    PYTHONUNBUFFERED: 1
     DOCKER_PASSWORD: $(DOCKER_PASSWORD)
     ORACLE_DOCKER_PASSWORD: $(ORACLE_DOCKER_PASSWORD)

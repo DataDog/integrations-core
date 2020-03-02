@@ -1,5 +1,14 @@
 # CHANGELOG - haproxy
 
+## 2.7.1 / 2020-02-25
+
+* [Fixed] Document disable_legacy_service_tag and bump checks_base requirement. See [#5835](https://github.com/DataDog/integrations-core/pull/5835).
+
+## 2.7.0 / 2020-02-22
+
+* [Added] Add an option to skip reporting during restarts. See [#5571](https://github.com/DataDog/integrations-core/pull/5571). Thanks [dd-adn](https://github.com/dd-adn).
+* [Deprecated] Deprecate `service` tag. See [#5550](https://github.com/DataDog/integrations-core/pull/5550).
+
 ## 2.6.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

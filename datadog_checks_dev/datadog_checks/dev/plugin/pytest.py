@@ -13,6 +13,7 @@ from .._env import (
     AGENT_COLLECTOR_SEPARATOR,
     E2E_FIXTURE_NAME,
     E2E_PARENT_PYTHON,
+    SKIP_ENVIRONMENT,
     TESTING_PLUGIN,
     e2e_active,
     e2e_testing,
@@ -61,14 +62,17 @@ def datadog_agent():
 
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment_runner(request):
+    # Skip the runner if the skip environment variable is specified
+    do_skip = os.getenv(SKIP_ENVIRONMENT) == 'true'
+
     testing_plugin = os.getenv(TESTING_PLUGIN) == 'true'
 
     # Do nothing if no e2e action is triggered and continue with tests
-    if not testing_plugin and not e2e_active():  # no cov
+    if not testing_plugin and not e2e_active() and not do_skip:  # no cov
         return
     # If e2e tests are being run it means the environment has
     # already been spun up so we prevent another invocation
-    elif e2e_testing():  # no cov
+    elif e2e_testing() or do_skip:  # no cov
         # Since the scope is `session` there should only ever be one definition
         fixture_def = request._fixturemanager._arg2fixturedefs[E2E_FIXTURE_NAME][0]
 
@@ -184,8 +188,11 @@ def dd_agent_check(request, aggregator):
         collector_output = collector_output.strip()
         if not collector_output.endswith(']'):
             # JMX needs some additional cleanup
-            collector_output = collector_output[: collector_output.rfind(']') + 1]
-        collector = json.loads(collector_output)
+            collector_output = collector_output[: collector_output.rfind('} ]\n') + 3]
+        try:
+            collector = json.loads(collector_output)
+        except json.decoder.JSONDecodeError as e:
+            raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, collector_output))
 
         replay_check_run(collector, aggregator)
 

@@ -4,8 +4,8 @@
 
 Get metrics from Aerospike Database in real time to:
 
-* Visualize and monitor Aerospike states
-* Be notified about Aerospike failovers and events.
+- Visualize and monitor Aerospike states.
+- Be notified about Aerospike failovers and events.
 
 ## Setup
 
@@ -28,12 +28,10 @@ Follow the instructions below to install and configure this check for an Agent r
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
-##### Metric collection
-
-| Parameter            | Value                                                                               |
-|----------------------|-------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `aerospike`                                                                         |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                       |
+| Parameter            | Value                                |
+| -------------------- | ------------------------------------ |
+| `<INTEGRATION_NAME>` | `aerospike`                          |
+| `<INIT_CONFIG>`      | blank or `{}`                        |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"3000"}` |
 
 ### Validation

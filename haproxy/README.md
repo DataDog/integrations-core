@@ -6,9 +6,9 @@
 
 Capture HAProxy activity in Datadog to:
 
-* Visualize HAProxy load-balancing performance.
-* Know when a server goes down.
-* Correlate the performance of HAProxy with the rest of your applications.
+- Visualize HAProxy load-balancing performance.
+- Know when a server goes down.
+- Correlate the performance of HAProxy with the rest of your applications.
 
 ## Setup
 
@@ -22,20 +22,21 @@ The Agent collects metrics via a stats endpoint:
 
 1. Configure one in your `haproxy.conf`:
 
-    ```conf
-      listen stats # Define a listen section called "stats"
-      bind :9000 # Listen on localhost:9000
-      mode http
-      stats enable  # Enable stats page
-      stats hide-version  # Hide HAProxy version
-      stats realm Haproxy\ Statistics  # Title text for popup window
-      stats uri /haproxy_stats  # Stats URI
-      stats auth Username:Password  # Authentication credentials
-    ```
+   ```conf
+     listen stats # Define a listen section called "stats"
+     bind :9000 # Listen on localhost:9000
+     mode http
+     stats enable  # Enable stats page
+     stats hide-version  # Hide HAProxy version
+     stats realm Haproxy\ Statistics  # Title text for popup window
+     stats uri /haproxy_stats  # Stats URI
+     stats auth Username:Password  # Authentication credentials
+   ```
 
 2. [Restart HAProxy to enable the stats endpoint][3].
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -46,45 +47,65 @@ Edit the `haproxy.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 1. Add this configuration block to your `haproxy.d/conf.yaml` file to start gathering your [Haproxy Metrics](#metrics):
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-
-          ## @param url - string - required
-          ## Haproxy URL to connect to gather metrics.
-          ## Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
-          ## or admin socket: unix:///var/run/haproxy.sock
-          #
-        - url: http://localhost/admin?stats
-    ```
+   instances:
+     ## @param url - string - required
+     ## Haproxy URL to connect to gather metrics.
+     ## Set the according <USERNAME> and <PASSWORD> or use directly a unix stats
+     ## or admin socket: unix:///var/run/haproxy.sock
+     #
+     - url: http://localhost/admin?stats
+   ```
 
 2. [Restart the Agent][6].
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
+
+By default Haproxy sends logs over UDP to port 514. The Agent can listen for these logs on this port, however, binding to a port number under 1024 requires elevated permissions. Follow the instructions below to set this up. Alternatively, you can use a different port and skip step 3.
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Add this configuration block to your `haproxy.d/conf.yaml` file to start collecting your Haproxy Logs:
 
-    ```yaml
-      logs:
-          - type: udp
-            port: 514
-            service: haproxy
-            source: haproxy
-            sourcecategory: http_web_access
-    ```
+   ```yaml
+   logs:
+     - type: udp
+       port: 514
+       service: haproxy
+       source: haproxy
+       sourcecategory: http_web_access
+   ```
 
     Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml][5] for all available configuration options.
 
-3. [Restart the Agent][6].
+3. Grant access to port 514 using the `setcap` command:
+
+    ```bash
+    sudo setcap CAP_NET_BIND_SERVICE=+ep /opt/datadog-agent/bin/agent/agent
+    ```
+    
+    Verify the setup is correct by running the `getcap` command:
+    
+    ```bash
+    sudo getcap /opt/datadog-agent/bin/agent/agent
+    ```
+    
+    With the expected output:
+    ```bash
+    /opt/datadog-agent/bin/agent/agent = cap_net_bind_service+ep
+    ```
+    
+    **Note:** Re-run this `setcap` command every time you upgrade the Agent.
+    
+4. [Restart the Agent][6].
 
 #### Containerized
 
@@ -93,19 +114,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 ##### Metric collection
 
 | Parameter            | Value                                     |
-|----------------------|-------------------------------------------|
+| -------------------- | ----------------------------------------- |
 | `<INTEGRATION_NAME>` | `haproxy`                                 |
 | `<INIT_CONFIG>`      | blank or `{}`                             |
 | `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%/admin?stats"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][8].
 
 | Parameter      | Value                                                |
-|----------------|------------------------------------------------------|
+| -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "haproxy", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
@@ -135,11 +156,11 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-* [Monitoring HAProxy performance metrics][12]
-* [How to collect HAProxy metrics][13]
-* [Monitor HAProxy with Datadog][14]
-* [HA Proxy Multi Process Configuration][15]
-* [How to collect HAProxy metrics][13]
+- [Monitoring HAProxy performance metrics][12]
+- [How to collect HAProxy metrics][13]
+- [Monitor HAProxy with Datadog][14]
+- [HA Proxy Multi Process Configuration][15]
+- [How to collect HAProxy metrics][13]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent

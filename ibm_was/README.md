@@ -33,6 +33,7 @@ From the Websphere Administration Console, you can find this setting in `Applica
 Once you've made this change, click "Apply" to save the configuration and restart your application server. Additional JDBC, JVM, and servlet metrics should appear in Datadog shortly after this change.
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -45,23 +46,23 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Next, edit `ibm_was.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your WAS log files.
 
-    ```yaml
-      logs:
-        - type: file
-          path: /opt/IBM/WebSphere/AppServer/profiles/InfoSphere/logs/server1/*.log
-          source: ibm_was
-          service: websphere
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /opt/IBM/WebSphere/AppServer/profiles/InfoSphere/logs/server1/*.log
+       source: ibm_was
+       service: websphere
+   ```
 
 3. [Restart the Agent][5].
 
@@ -72,19 +73,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 ##### Metric collection
 
 | Parameter            | Value                                                                         |
-|----------------------|-------------------------------------------------------------------------------|
+| -------------------- | ----------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `ibm_was`                                                                     |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                 |
 | `<INSTANCE_CONFIG>`  | `{"servlet_url": "http://%%host%%:%%port%%/wasPerfTool/servlet/perfservlet"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][6].
 
 | Parameter      | Value                                                |
-|----------------|------------------------------------------------------|
+| -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "ibm_was", "service": "<SERVICE_NAME>"}` |
 
 ### Validation

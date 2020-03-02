@@ -2,10 +2,10 @@
 
 ## Overview
 
-Get metrics from ActiveMQ XML service in real time to:
+Get metrics from ActiveMQ XML in real time to:
 
-* Visualize and monitor ActiveMQ XML states
-* Be notified about ActiveMQ XML failovers and events.
+- Visualize and monitor ActiveMQ XML states.
+- Be notified about ActiveMQ XML failovers and events.
 
 ## Setup
 
@@ -21,7 +21,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit `activemq_xml.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][112] with your stats `url`. See the [sample activemq_xml.d/conf.yaml][113] for all available configuration options.
 
-    **Note**: The ActiveMQ XML integration can potentially emit [custom metrics][114], which may impact your [billing][115]. By default, there is a limit of 350 metrics. If you require additional metrics, contact [Datadog support][116].
+   **Note**: The ActiveMQ XML integration can potentially emit [custom metrics][114], which may impact your [billing][115]. By default, there is a limit of 350 metrics. If you require additional metrics, contact [Datadog support][116].
 
 2. [Restart the Agent][117].
 
@@ -34,21 +34,26 @@ For containerized environments, see the [Autodiscovery with JMX][118] guide.
 [Run the Agent's status subcommand][119] and look for `activemq_xml` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][1110] for a list of metrics provided by this integration.
 
 ### Events
+
 The ActiveMQ XML check does not include any events.
 
 ### Service Checks
+
 The ActiveMQ XML check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][116].
 
 ## Further Reading
 
-* [Monitor ActiveMQ metrics and performance][1111]
+- [Monitor ActiveMQ metrics and performance][1111]
 
 [111]: https://app.datadoghq.com/account/settings#agent
 [112]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

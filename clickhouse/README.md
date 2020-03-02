@@ -10,8 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The ClickHouse check is included in the [Datadog Agent][3] package.
-No additional installation is needed on your server.
+The ClickHouse check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
 
 ### Configuration
 

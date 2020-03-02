@@ -6,12 +6,29 @@ import re
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
 from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_EXTENSIONS, get_root
+from .e2e import get_active_checks, get_configured_envs
 from .git import files_changed
-from .utils import get_testable_checks
+from .utils import complete_set_root, get_testable_checks
 
 STYLE_CHECK_ENVS = {'flake8', 'style'}
 STYLE_ENVS = {'flake8', 'style', 'format_style'}
 PYTHON_MAJOR_PATTERN = r'py(\d)'
+
+
+def complete_envs(ctx, args, incomplete):
+    complete_set_root(args)
+    return sorted(e for e in get_available_tox_envs(args[-1], e2e_only=True) if e.startswith(incomplete))
+
+
+# this test makes more sense under tooling/utils, but that causes circular import
+def complete_active_checks(ctx, args, incomplete):
+    complete_set_root(args)
+    return [k for k in get_active_checks() if k.startswith(incomplete)]
+
+
+def complete_configured_envs(ctx, args, incomplete):
+    complete_set_root(args)
+    return [e for e in get_configured_envs(args[-1]) if e.startswith(incomplete)]
 
 
 def get_tox_envs(

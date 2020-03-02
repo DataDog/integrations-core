@@ -12,19 +12,18 @@ instances:
     #
     # metric_groups:
     #   - scylla.alien
-    #   - scylla.batchlog
+    #   - scylla.batchlog_manager
     #   - scylla.commitlog
-    #   - scylla.compaction
     #   - scylla.cql
     #   - scylla.database
-    #   - scylla.execution
+    #   - scylla.execution_stages
     #   - scylla.hints
     #   - scylla.httpd
-    #   - scylla.io
+    #   - scylla.io_queue
     #   - scylla.lsa
     #   - scylla.memory
     #   - scylla.memtables
-    #   - scylla.query
+    #   - scylla.query_processor
     #   - scylla.scheduler
     #   - scylla.sstables
     #   - scylla.thrift

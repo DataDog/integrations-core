@@ -103,14 +103,15 @@ def info(endpoint):
 
 
 @prom.command(
-    context_settings=CONTEXT_SETTINGS, short_help='Interactively parse metric info from a Prometheus endpoint'
+    context_settings=CONTEXT_SETTINGS,
+    short_help='Interactively parse metric info from a Prometheus endpoint and write to metadata.csv',
 )
 @click.argument('endpoint')
 @click.argument('check')
 @click.option('--here', '-x', is_flag=True, help='Output to the current location')
 @click.pass_context
 def parse(ctx, endpoint, check, here):
-    """Interactively parse metric info from a Prometheus endpoint."""
+    """Interactively parse metric info from a Prometheus endpoint and write it to metadata.csv."""
     if here:
         output_dir = os.getcwd()
     else:

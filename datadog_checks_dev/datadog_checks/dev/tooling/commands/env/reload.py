@@ -4,12 +4,13 @@
 import click
 
 from ...e2e import create_interface, get_configured_envs
+from ...testing import complete_active_checks, complete_configured_envs
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 
 @click.command('reload', context_settings=CONTEXT_SETTINGS, short_help='Restart an Agent to detect environment changes')
-@click.argument('check')
-@click.argument('env', required=False)
+@click.argument('check', autocompletion=complete_active_checks)
+@click.argument('env', autocompletion=complete_configured_envs, required=False)
 def reload_env(check, env):
     """Restart an Agent to detect environment changes."""
     envs = get_configured_envs(check)

@@ -7,16 +7,16 @@ from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from itertools import chain
 
-from pyVmomi import vim
+from pyVmomi import vim, vmodl
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.stubs import datadog_agent
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
-from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
+from datadog_checks.vsphere.api_rest import VSphereRestAPI
+from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
@@ -62,7 +62,9 @@ class VSphereCheck(AgentCheck):
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
         )
+        self.tags_cache = TagsCache(interval_sec=self.config.refresh_tags_cache_interval)
         self.api = None
+        self.api_rest = None
         # Do not override `AgentCheck.hostname`
         self._hostname = None
         self.thread_pool = ThreadPoolExecutor(max_workers=self.config.threads_count)
@@ -79,6 +81,12 @@ class VSphereCheck(AgentCheck):
             self.log.error("Cannot authenticate to vCenter API. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
             raise
+
+        if self.config.should_collect_tags:
+            try:
+                self.api_rest = VSphereRestAPI(self.config, self.log)
+            except Exception as e:
+                self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
 
     def refresh_metrics_metadata_cache(self):
         """Request the list of counters (metrics) from vSphere and store them in a cache."""
@@ -111,6 +119,21 @@ class VSphereCheck(AgentCheck):
         # TODO: Later - Understand how much data actually changes between check runs
         # Apparently only when the server restarts?
         # https://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.wssdk.pg.doc_50%2FPG_Ch16_Performance.18.5.html
+
+    def refresh_tags_cache(self):
+        """
+        Fetch the all tags, build tags for each monitored resources and store all of that into the tags_cache.
+        """
+        if not self.api_rest:
+            return
+        t0 = Timer()
+        try:
+            mor_tags = self.api_rest.get_resource_tags()
+        except Exception as e:
+            self.log.error("Failed to collect tags: %s", e)
+            return
+        self.gauge('datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True)
+        self.tags_cache.set_all_tags(mor_tags)
 
     def refresh_infrastructure_cache(self):
         """Fetch the complete infrastructure, generate tags for each monitored resources and store all of that
@@ -168,6 +191,7 @@ class VSphereCheck(AgentCheck):
             tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
             tags.append('vsphere_type:{}'.format(mor_type_str))
             mor_payload = {"tags": tags}
+
             if hostname:
                 mor_payload['hostname'] = hostname
 
@@ -240,17 +264,18 @@ class VSphereCheck(AgentCheck):
                     instance_tag_key = get_mapped_instance_tag(metric_name)
                     tags.append('{}:{}'.format(instance_tag_key, instance_value))
 
+                vsphere_tags = self.tags_cache.get_mor_tags(results_per_mor.entity)
+                mor_tags = mor_props['tags'] + vsphere_tags
+
                 if resource_type in HISTORICAL_RESOURCES:
                     # Tags are attached to the metrics
-                    tags.extend(mor_props['tags'])
+                    tags.extend(mor_tags)
                     hostname = None
                 else:
                     # Tags are (mostly) submitted as external host tags.
                     hostname = to_string(mor_props.get('hostname'))
                     if self.config.excluded_host_tags:
-                        tags.extend(
-                            [t for t in mor_props['tags'] if t.split(":", 1)[0] in self.config.excluded_host_tags]
-                        )
+                        tags.extend([t for t in mor_tags if t.split(":", 1)[0] in self.config.excluded_host_tags])
 
                 tags.extend(self.config.base_tags)
 
@@ -323,9 +348,13 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Queued all %d tasks, waiting for completion.", len(tasks))
             for future in as_completed(tasks):
                 e = future.exception()
-                if e is not None:
+                if isinstance(e, vmodl.fault.InvalidArgument):
+                    # The query was invalid or the resource does not have values for this metric.
+                    continue
+                elif e is not None:
                     self.log.warning("A metric collection API call failed with the following error: %s", e)
                     continue
+
                 results = future.result()
                 if not results:
                     self.log.debug("A metric collection API call did not return data.")
@@ -382,19 +411,19 @@ class VSphereCheck(AgentCheck):
         """Send external host tags to the Datadog backend. This is only useful for a REALTIME instance because
         only VMs and Hosts appear as 'datadog hosts'."""
         external_host_tags = []
-        hosts = self.infrastructure_cache.get_mors(vim.HostSystem)
-        vms = self.infrastructure_cache.get_mors(vim.VirtualMachine)
 
-        for mor in chain(hosts, vms):
-            # Safeguard if some mors have a None hostname
-            mor_props = self.infrastructure_cache.get_mor_props(mor)
-            hostname = mor_props.get('hostname')
-            if not hostname:
-                continue
+        for resource_type in REALTIME_RESOURCES:
+            for mor in self.infrastructure_cache.get_mors(resource_type):
+                mor_props = self.infrastructure_cache.get_mor_props(mor)
+                hostname = mor_props.get('hostname')
+                # Safeguard if some mors have a None hostname
+                if not hostname:
+                    continue
 
-            tags = [t for t in mor_props['tags'] if t.split(':')[0] not in self.config.excluded_host_tags]
-            tags.extend(self.config.base_tags)
-            external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
+                mor_tags = mor_props['tags'] + self.tags_cache.get_mor_tags(mor)
+                tags = [t for t in mor_tags if t.split(':')[0] not in self.config.excluded_host_tags]
+                tags.extend(self.config.base_tags)
+                external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
 
         if external_host_tags:
             self.set_external_tags(external_host_tags)
@@ -462,6 +491,11 @@ class VSphereCheck(AgentCheck):
                 )
                 pass
 
+        # Refresh the tags cache
+        if self.api_rest and self.tags_cache.is_expired():
+            with self.tags_cache.update():
+                self.refresh_tags_cache()
+
         # Refresh the metrics metadata cache
         if self.metrics_metadata_cache.is_expired():
             with self.metrics_metadata_cache.update():
@@ -479,15 +513,17 @@ class VSphereCheck(AgentCheck):
             self.collect_events()
 
         # Submit the number of VMs that are monitored
-        for resource in self.config.collected_resource_types:
-            # Explicitly do not attach any host to those metrics.
-            resource_count = len(self.infrastructure_cache.get_mors(resource))
-            self.gauge(
-                '{}.count'.format(MOR_TYPE_AS_STRING[resource]),
-                resource_count,
-                tags=self.config.base_tags,
-                hostname=None,
-            )
+        for resource_type in self.config.collected_resource_types:
+            for mor in self.infrastructure_cache.get_mors(resource_type):
+                mor_props = self.infrastructure_cache.get_mor_props(mor)
+                # Explicitly do not attach any host to those metrics.
+                resource_tags = mor_props.get('tags', [])
+                self.count(
+                    '{}.count'.format(MOR_TYPE_AS_STRING[resource_type]),
+                    1,
+                    tags=self.config.base_tags + resource_tags,
+                    hostname=None,
+                )
 
         # Creating a thread pool and starting metric collection
         self.log.debug("Starting metric collection in %d threads.", self.config.threads_count)
