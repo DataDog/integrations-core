@@ -40,3 +40,4 @@ jobs:
       test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
       benchmark: ${{ parameters.benchmark }}
+      repo: ${{ parameters.repo }}
